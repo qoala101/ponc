@@ -1,0 +1,7 @@
+---
+Checks: "*, -fuchsia-trailing-return, -fuchsia-default-arguments-declarations, -readability-identifier-length, -llvmlibc-restrict-system-libc-headers, -llvmlibc-implementation-in-namespace, -llvmlibc-callee-namespace, -fuchsia-default-arguments-calls, -altera-unroll-loops, -fuchsia-overloaded-operator, -altera-id-dependent-backward-branch, -altera-struct-pack-align"
+CheckOptions:
+  - {
+      key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic,
+      value: true,
+    }
