@@ -15,9 +15,11 @@
 #include <utility>
 #include <vector>
 
-static ne::EditorContext* m_Editor = nullptr;
-
 namespace {
+auto* kEditor = static_cast<ne::EditorContext*>(nullptr);
+const auto kPinIconSize = 24;
+const auto kTouchTime = 1.0F;
+
 auto ImGui_GetItemRect() -> ImRect {
   return ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
 }
@@ -153,18 +155,10 @@ void ShowStyleEditor(bool* show) {
 
   ImGui::End();
 }
-}  // namespace
 
-namespace ne = ax::NodeEditor;
-namespace util = ax::NodeEditor::Utilities;
-
-using namespace ax;
-
-using ax::Widgets::IconType;
-
-static auto Splitter(bool split_vertically, float thickness, float* size1,
-                     float* size2, float min_size1, float min_size2,
-                     float splitter_long_axis_size = -1.0f) -> bool {
+auto Splitter(bool split_vertically, float thickness, float* size1,
+              float* size2, float min_size1, float min_size2,
+              float splitter_long_axis_size = -1.0f) -> bool {
   using namespace ImGui;
   ImGuiContext& g = *GImGui;
   ImGuiWindow* window = g.CurrentWindow;
@@ -180,37 +174,48 @@ static auto Splitter(bool split_vertically, float thickness, float* size1,
   return SplitterBehavior(bb, id, split_vertically ? ImGuiAxis_X : ImGuiAxis_Y,
                           size1, size2, min_size1, min_size2, 0.0f);
 }
+}  // namespace
 
-auto Example::GetNextId() -> int { return m_NextId++; }
+namespace ne = ax::NodeEditor;
+namespace util = ax::NodeEditor::Utilities;
+
+using namespace ax;
+
+using ax::Widgets::IconType;
+
+Example::Example(const char* name, int argc, char** argv)
+    : Application{name, argc, argv}, next_id_{1} {}
+
+auto Example::GetNextId() -> int { return next_id_++; }
 
 auto Example::GetNextLinkId() -> ne::LinkId { return ne::LinkId(GetNextId()); }
 
-void Example::TouchNode(ne::NodeId id) { m_NodeTouchTime[id] = m_TouchTime; }
+void Example::TouchNode(ne::NodeId id) { node_touch_time_[id] = kTouchTime; }
 
 auto Example::GetTouchProgress(ne::NodeId id) -> float {
-  auto it = m_NodeTouchTime.find(id);
-  if (it != m_NodeTouchTime.end() && it->second > 0.0f)
-    return (m_TouchTime - it->second) / m_TouchTime;
+  auto it = node_touch_time_.find(id);
+  if (it != node_touch_time_.end() && it->second > 0.0f)
+    return (kTouchTime - it->second) / kTouchTime;
   else
     return 0.0f;
 }
 
 void Example::UpdateTouch() {
   const auto deltaTime = ImGui::GetIO().DeltaTime;
-  for (auto& entry : m_NodeTouchTime) {
+  for (auto& entry : node_touch_time_) {
     if (entry.second > 0.0f) entry.second -= deltaTime;
   }
 }
 
 auto Example::FindNode(ne::NodeId id) -> Node* {
-  for (auto& node : m_Nodes)
+  for (auto& node : nodes_)
     if (node.ID == id) return &node;
 
   return nullptr;
 }
 
 auto Example::FindLink(ne::LinkId id) -> Link* {
-  for (auto& link : m_Links)
+  for (auto& link : links_)
     if (link.ID == id) return &link;
 
   return nullptr;
@@ -219,7 +224,7 @@ auto Example::FindLink(ne::LinkId id) -> Link* {
 auto Example::FindPin(ne::PinId id) -> Pin* {
   if (!id) return nullptr;
 
-  for (auto& node : m_Nodes) {
+  for (auto& node : nodes_) {
     for (auto& pin : node.Inputs)
       if (pin.ID == id) return &pin;
 
@@ -233,208 +238,208 @@ auto Example::FindPin(ne::PinId id) -> Pin* {
 auto Example::IsPinLinked(ne::PinId id) -> bool {
   if (!id) return false;
 
-  for (auto& link : m_Links)
+  for (auto& link : links_)
     if (link.StartPinID == id || link.EndPinID == id) return true;
 
   return false;
 }
 
 auto Example::SpawnInputActionNode() -> Node* {
-  m_Nodes.emplace_back(GetNextId(), "InputAction Fire", ImColor(255, 128, 128));
-  m_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Delegate);
-  m_Nodes.back().Outputs.emplace_back(GetNextId(), "Pressed", PinType::Flow);
-  m_Nodes.back().Outputs.emplace_back(GetNextId(), "Released", PinType::Flow);
+  nodes_.emplace_back(GetNextId(), "InputAction Fire", ImColor(255, 128, 128));
+  nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Delegate);
+  nodes_.back().Outputs.emplace_back(GetNextId(), "Pressed", PinType::Flow);
+  nodes_.back().Outputs.emplace_back(GetNextId(), "Released", PinType::Flow);
 
-  BuildNode(&m_Nodes.back());
+  BuildNode(&nodes_.back());
 
-  return &m_Nodes.back();
+  return &nodes_.back();
 }
 
 auto Example::SpawnBranchNode() -> Node* {
-  m_Nodes.emplace_back(GetNextId(), "Branch");
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "Condition", PinType::Bool);
-  m_Nodes.back().Outputs.emplace_back(GetNextId(), "True", PinType::Flow);
-  m_Nodes.back().Outputs.emplace_back(GetNextId(), "False", PinType::Flow);
+  nodes_.emplace_back(GetNextId(), "Branch");
+  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+  nodes_.back().Inputs.emplace_back(GetNextId(), "Condition", PinType::Bool);
+  nodes_.back().Outputs.emplace_back(GetNextId(), "True", PinType::Flow);
+  nodes_.back().Outputs.emplace_back(GetNextId(), "False", PinType::Flow);
 
-  BuildNode(&m_Nodes.back());
+  BuildNode(&nodes_.back());
 
-  return &m_Nodes.back();
+  return &nodes_.back();
 }
 
 auto Example::SpawnDoNNode() -> Node* {
-  m_Nodes.emplace_back(GetNextId(), "Do N");
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "Enter", PinType::Flow);
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "N", PinType::Int);
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "Reset", PinType::Flow);
-  m_Nodes.back().Outputs.emplace_back(GetNextId(), "Exit", PinType::Flow);
-  m_Nodes.back().Outputs.emplace_back(GetNextId(), "Counter", PinType::Int);
+  nodes_.emplace_back(GetNextId(), "Do N");
+  nodes_.back().Inputs.emplace_back(GetNextId(), "Enter", PinType::Flow);
+  nodes_.back().Inputs.emplace_back(GetNextId(), "N", PinType::Int);
+  nodes_.back().Inputs.emplace_back(GetNextId(), "Reset", PinType::Flow);
+  nodes_.back().Outputs.emplace_back(GetNextId(), "Exit", PinType::Flow);
+  nodes_.back().Outputs.emplace_back(GetNextId(), "Counter", PinType::Int);
 
-  BuildNode(&m_Nodes.back());
+  BuildNode(&nodes_.back());
 
-  return &m_Nodes.back();
+  return &nodes_.back();
 }
 
 auto Example::SpawnOutputActionNode() -> Node* {
-  m_Nodes.emplace_back(GetNextId(), "OutputAction");
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "Sample", PinType::Float);
-  m_Nodes.back().Outputs.emplace_back(GetNextId(), "Condition", PinType::Bool);
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "Event", PinType::Delegate);
+  nodes_.emplace_back(GetNextId(), "OutputAction");
+  nodes_.back().Inputs.emplace_back(GetNextId(), "Sample", PinType::Float);
+  nodes_.back().Outputs.emplace_back(GetNextId(), "Condition", PinType::Bool);
+  nodes_.back().Inputs.emplace_back(GetNextId(), "Event", PinType::Delegate);
 
-  BuildNode(&m_Nodes.back());
+  BuildNode(&nodes_.back());
 
-  return &m_Nodes.back();
+  return &nodes_.back();
 }
 
 auto Example::SpawnPrintStringNode() -> Node* {
-  m_Nodes.emplace_back(GetNextId(), "Print String");
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "In String", PinType::String);
-  m_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+  nodes_.emplace_back(GetNextId(), "Print String");
+  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+  nodes_.back().Inputs.emplace_back(GetNextId(), "In String", PinType::String);
+  nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
 
-  BuildNode(&m_Nodes.back());
+  BuildNode(&nodes_.back());
 
-  return &m_Nodes.back();
+  return &nodes_.back();
 }
 
 auto Example::SpawnMessageNode() -> Node* {
-  m_Nodes.emplace_back(GetNextId(), "", ImColor(128, 195, 248));
-  m_Nodes.back().Type = NodeType::Simple;
-  m_Nodes.back().Outputs.emplace_back(GetNextId(), "Message", PinType::String);
+  nodes_.emplace_back(GetNextId(), "", ImColor(128, 195, 248));
+  nodes_.back().Type = NodeType::Simple;
+  nodes_.back().Outputs.emplace_back(GetNextId(), "Message", PinType::String);
 
-  BuildNode(&m_Nodes.back());
+  BuildNode(&nodes_.back());
 
-  return &m_Nodes.back();
+  return &nodes_.back();
 }
 
 auto Example::SpawnSetTimerNode() -> Node* {
-  m_Nodes.emplace_back(GetNextId(), "Set Timer", ImColor(128, 195, 248));
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "Object", PinType::Object);
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "Function Name",
-                                     PinType::Function);
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "Time", PinType::Float);
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "Looping", PinType::Bool);
-  m_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+  nodes_.emplace_back(GetNextId(), "Set Timer", ImColor(128, 195, 248));
+  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+  nodes_.back().Inputs.emplace_back(GetNextId(), "Object", PinType::Object);
+  nodes_.back().Inputs.emplace_back(GetNextId(), "Function Name",
+                                    PinType::Function);
+  nodes_.back().Inputs.emplace_back(GetNextId(), "Time", PinType::Float);
+  nodes_.back().Inputs.emplace_back(GetNextId(), "Looping", PinType::Bool);
+  nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
 
-  BuildNode(&m_Nodes.back());
+  BuildNode(&nodes_.back());
 
-  return &m_Nodes.back();
+  return &nodes_.back();
 }
 
 auto Example::SpawnLessNode() -> Node* {
-  m_Nodes.emplace_back(GetNextId(), "<", ImColor(128, 195, 248));
-  m_Nodes.back().Type = NodeType::Simple;
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
-  m_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Float);
+  nodes_.emplace_back(GetNextId(), "<", ImColor(128, 195, 248));
+  nodes_.back().Type = NodeType::Simple;
+  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
+  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
+  nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Float);
 
-  BuildNode(&m_Nodes.back());
+  BuildNode(&nodes_.back());
 
-  return &m_Nodes.back();
+  return &nodes_.back();
 }
 
 auto Example::SpawnWeirdNode() -> Node* {
-  m_Nodes.emplace_back(GetNextId(), "o.O", ImColor(128, 195, 248));
-  m_Nodes.back().Type = NodeType::Simple;
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
-  m_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Float);
-  m_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Float);
+  nodes_.emplace_back(GetNextId(), "o.O", ImColor(128, 195, 248));
+  nodes_.back().Type = NodeType::Simple;
+  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
+  nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Float);
+  nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Float);
 
-  BuildNode(&m_Nodes.back());
+  BuildNode(&nodes_.back());
 
-  return &m_Nodes.back();
+  return &nodes_.back();
 }
 
 auto Example::SpawnTraceByChannelNode() -> Node* {
-  m_Nodes.emplace_back(GetNextId(), "Single Line Trace by Channel",
-                       ImColor(255, 128, 64));
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "Start", PinType::Flow);
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "End", PinType::Int);
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "Trace Channel",
-                                     PinType::Float);
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "Trace Complex",
+  nodes_.emplace_back(GetNextId(), "Single Line Trace by Channel",
+                      ImColor(255, 128, 64));
+  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+  nodes_.back().Inputs.emplace_back(GetNextId(), "Start", PinType::Flow);
+  nodes_.back().Inputs.emplace_back(GetNextId(), "End", PinType::Int);
+  nodes_.back().Inputs.emplace_back(GetNextId(), "Trace Channel",
+                                    PinType::Float);
+  nodes_.back().Inputs.emplace_back(GetNextId(), "Trace Complex",
+                                    PinType::Bool);
+  nodes_.back().Inputs.emplace_back(GetNextId(), "Actors to Ignore",
+                                    PinType::Int);
+  nodes_.back().Inputs.emplace_back(GetNextId(), "Draw Debug Type",
+                                    PinType::Bool);
+  nodes_.back().Inputs.emplace_back(GetNextId(), "Ignore Self", PinType::Bool);
+  nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+  nodes_.back().Outputs.emplace_back(GetNextId(), "Out Hit", PinType::Float);
+  nodes_.back().Outputs.emplace_back(GetNextId(), "Return Value",
                                      PinType::Bool);
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "Actors to Ignore",
-                                     PinType::Int);
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "Draw Debug Type",
-                                     PinType::Bool);
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "Ignore Self", PinType::Bool);
-  m_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
-  m_Nodes.back().Outputs.emplace_back(GetNextId(), "Out Hit", PinType::Float);
-  m_Nodes.back().Outputs.emplace_back(GetNextId(), "Return Value",
-                                      PinType::Bool);
 
-  BuildNode(&m_Nodes.back());
+  BuildNode(&nodes_.back());
 
-  return &m_Nodes.back();
+  return &nodes_.back();
 }
 
 auto Example::SpawnTreeSequenceNode() -> Node* {
-  m_Nodes.emplace_back(GetNextId(), "Sequence");
-  m_Nodes.back().Type = NodeType::Tree;
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
-  m_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+  nodes_.emplace_back(GetNextId(), "Sequence");
+  nodes_.back().Type = NodeType::Tree;
+  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+  nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
 
-  BuildNode(&m_Nodes.back());
+  BuildNode(&nodes_.back());
 
-  return &m_Nodes.back();
+  return &nodes_.back();
 }
 
 auto Example::SpawnTreeTaskNode() -> Node* {
-  m_Nodes.emplace_back(GetNextId(), "Move To");
-  m_Nodes.back().Type = NodeType::Tree;
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+  nodes_.emplace_back(GetNextId(), "Move To");
+  nodes_.back().Type = NodeType::Tree;
+  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
 
-  BuildNode(&m_Nodes.back());
+  BuildNode(&nodes_.back());
 
-  return &m_Nodes.back();
+  return &nodes_.back();
 }
 
 auto Example::SpawnTreeTask2Node() -> Node* {
-  m_Nodes.emplace_back(GetNextId(), "Random Wait");
-  m_Nodes.back().Type = NodeType::Tree;
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+  nodes_.emplace_back(GetNextId(), "Random Wait");
+  nodes_.back().Type = NodeType::Tree;
+  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
 
-  BuildNode(&m_Nodes.back());
+  BuildNode(&nodes_.back());
 
-  return &m_Nodes.back();
+  return &nodes_.back();
 }
 
 auto Example::SpawnComment() -> Node* {
-  m_Nodes.emplace_back(GetNextId(), "Test Comment");
-  m_Nodes.back().Type = NodeType::Comment;
-  m_Nodes.back().Size = ImVec2(300, 200);
+  nodes_.emplace_back(GetNextId(), "Test Comment");
+  nodes_.back().Type = NodeType::Comment;
+  nodes_.back().Size = ImVec2(300, 200);
 
-  return &m_Nodes.back();
+  return &nodes_.back();
 }
 
 auto Example::SpawnHoudiniTransformNode() -> Node* {
-  m_Nodes.emplace_back(GetNextId(), "Transform");
-  m_Nodes.back().Type = NodeType::Houdini;
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
-  m_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+  nodes_.emplace_back(GetNextId(), "Transform");
+  nodes_.back().Type = NodeType::Houdini;
+  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+  nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
 
-  BuildNode(&m_Nodes.back());
+  BuildNode(&nodes_.back());
 
-  return &m_Nodes.back();
+  return &nodes_.back();
 }
 
 auto Example::SpawnHoudiniGroupNode() -> Node* {
-  m_Nodes.emplace_back(GetNextId(), "Group");
-  m_Nodes.back().Type = NodeType::Houdini;
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
-  m_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
-  m_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+  nodes_.emplace_back(GetNextId(), "Group");
+  nodes_.back().Type = NodeType::Houdini;
+  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+  nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
 
-  BuildNode(&m_Nodes.back());
+  BuildNode(&nodes_.back());
 
-  return &m_Nodes.back();
+  return &nodes_.back();
 }
 
 void Example::BuildNodes() {
-  for (auto& node : m_Nodes) {
+  for (auto& node : nodes_) {
     BuildNode(&node);
   }
 }
@@ -472,8 +477,8 @@ void Example::OnStart() {
     return true;
   };
 
-  m_Editor = ne::CreateEditor(&config);
-  ne::SetCurrentEditor(m_Editor);
+  kEditor = ne::CreateEditor(&config);
+  ne::SetCurrentEditor(kEditor);
 
   Node* node;
   node = SpawnInputActionNode();
@@ -519,17 +524,17 @@ void Example::OnStart() {
 
   BuildNodes();
 
-  m_Links.push_back(
-      Link(GetNextLinkId(), m_Nodes[5].Outputs[0].ID, m_Nodes[6].Inputs[0].ID));
-  m_Links.push_back(
-      Link(GetNextLinkId(), m_Nodes[5].Outputs[0].ID, m_Nodes[7].Inputs[0].ID));
+  links_.push_back(
+      Link(GetNextLinkId(), nodes_[5].Outputs[0].ID, nodes_[6].Inputs[0].ID));
+  links_.push_back(
+      Link(GetNextLinkId(), nodes_[5].Outputs[0].ID, nodes_[7].Inputs[0].ID));
 
-  m_Links.push_back(Link(GetNextLinkId(), m_Nodes[14].Outputs[0].ID,
-                         m_Nodes[15].Inputs[0].ID));
+  links_.push_back(
+      Link(GetNextLinkId(), nodes_[14].Outputs[0].ID, nodes_[15].Inputs[0].ID));
 
-  m_HeaderBackground = LoadTexture("data/BlueprintBackground.png");
-  m_SaveIcon = LoadTexture("data/ic_save_white_24dp.png");
-  m_RestoreIcon = LoadTexture("data/ic_restore_white_24dp.png");
+  header_background_ = LoadTexture("data/BlueprintBackground.png");
+  save_icon_ = LoadTexture("data/ic_save_white_24dp.png");
+  restore_icon_ = LoadTexture("data/ic_restore_white_24dp.png");
 
   // auto& io = ImGui::GetIO();
 }
@@ -542,13 +547,13 @@ void Example::OnStop() {
     }
   };
 
-  releaseTexture(m_RestoreIcon);
-  releaseTexture(m_SaveIcon);
-  releaseTexture(m_HeaderBackground);
+  releaseTexture(restore_icon_);
+  releaseTexture(save_icon_);
+  releaseTexture(header_background_);
 
-  if (m_Editor) {
-    ne::DestroyEditor(m_Editor);
-    m_Editor = nullptr;
+  if (kEditor) {
+    ne::DestroyEditor(kEditor);
+    kEditor = nullptr;
   }
 }
 
@@ -585,8 +590,8 @@ void Example::DrawPinIcon(const Pin& pin, bool connected, int alpha) const {
       return;
   }
 
-  ax::Widgets::Icon(ImVec2(static_cast<float>(m_PinIconSize),
-                           static_cast<float>(m_PinIconSize)),
+  ax::Widgets::Icon(ImVec2(static_cast<float>(kPinIconSize),
+                           static_cast<float>(kPinIconSize)),
                     iconType, connected, color, ImColor(32, 32, 32, alpha));
 }
 
@@ -603,12 +608,12 @@ void Example::ShowLeftPane(float paneWidth) {
   if (ImGui::Button("Zoom to Content")) ne::NavigateToContent();
   ImGui::Spring(0.0f);
   if (ImGui::Button("Show Flow")) {
-    for (auto& link : m_Links) ne::Flow(link.ID);
+    for (auto& link : links_) ne::Flow(link.ID);
   }
   ImGui::Spring();
   if (ImGui::Button("Edit Style")) showStyleEditor = true;
   ImGui::EndHorizontal();
-  ImGui::Checkbox("Show Ordinals", &m_ShowOrdinals);
+  ImGui::Checkbox("Show Ordinals", &show_ordinals_);
 
   if (showStyleEditor) ShowStyleEditor(&showStyleEditor);
 
@@ -625,10 +630,10 @@ void Example::ShowLeftPane(float paneWidth) {
   selectedNodes.resize(nodeCount);
   selectedLinks.resize(linkCount);
 
-  int saveIconWidth = GetTextureWidth(m_SaveIcon);
-  int saveIconHeight = GetTextureWidth(m_SaveIcon);
-  int restoreIconWidth = GetTextureWidth(m_RestoreIcon);
-  int restoreIconHeight = GetTextureWidth(m_RestoreIcon);
+  int saveIconWidth = GetTextureWidth(save_icon_);
+  int saveIconHeight = GetTextureWidth(save_icon_);
+  int restoreIconWidth = GetTextureWidth(restore_icon_);
+  int restoreIconHeight = GetTextureWidth(restore_icon_);
 
   ImGui::GetWindowDrawList()->AddRectFilled(
       ImGui::GetCursorScreenPos(),
@@ -640,7 +645,7 @@ void Example::ShowLeftPane(float paneWidth) {
   ImGui::SameLine();
   ImGui::TextUnformatted("Nodes");
   ImGui::Indent();
-  for (auto& node : m_Nodes) {
+  for (auto& node : nodes_) {
     ImGui::PushID(node.ID.AsPointer());
     auto start = ImGui::GetCursorScreenPos();
 
@@ -695,20 +700,20 @@ void Example::ShowLeftPane(float paneWidth) {
         node.SavedState = node.State;
 
       if (ImGui::IsItemActive())
-        drawList->AddImage(m_SaveIcon, ImGui::GetItemRectMin(),
+        drawList->AddImage(save_icon_, ImGui::GetItemRectMin(),
                            ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                            IM_COL32(255, 255, 255, 96));
       else if (ImGui::IsItemHovered())
-        drawList->AddImage(m_SaveIcon, ImGui::GetItemRectMin(),
+        drawList->AddImage(save_icon_, ImGui::GetItemRectMin(),
                            ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                            IM_COL32(255, 255, 255, 255));
       else
-        drawList->AddImage(m_SaveIcon, ImGui::GetItemRectMin(),
+        drawList->AddImage(save_icon_, ImGui::GetItemRectMin(),
                            ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                            IM_COL32(255, 255, 255, 160));
     } else {
       ImGui::Dummy(ImVec2((float)saveIconWidth, (float)saveIconHeight));
-      drawList->AddImage(m_SaveIcon, ImGui::GetItemRectMin(),
+      drawList->AddImage(save_icon_, ImGui::GetItemRectMin(),
                          ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                          IM_COL32(255, 255, 255, 32));
     }
@@ -724,20 +729,20 @@ void Example::ShowLeftPane(float paneWidth) {
       }
 
       if (ImGui::IsItemActive())
-        drawList->AddImage(m_RestoreIcon, ImGui::GetItemRectMin(),
+        drawList->AddImage(restore_icon_, ImGui::GetItemRectMin(),
                            ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                            IM_COL32(255, 255, 255, 96));
       else if (ImGui::IsItemHovered())
-        drawList->AddImage(m_RestoreIcon, ImGui::GetItemRectMin(),
+        drawList->AddImage(restore_icon_, ImGui::GetItemRectMin(),
                            ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                            IM_COL32(255, 255, 255, 255));
       else
-        drawList->AddImage(m_RestoreIcon, ImGui::GetItemRectMin(),
+        drawList->AddImage(restore_icon_, ImGui::GetItemRectMin(),
                            ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                            IM_COL32(255, 255, 255, 160));
     } else {
       ImGui::Dummy(ImVec2((float)restoreIconWidth, (float)restoreIconHeight));
-      drawList->AddImage(m_RestoreIcon, ImGui::GetItemRectMin(),
+      drawList->AddImage(restore_icon_, ImGui::GetItemRectMin(),
                          ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                          IM_COL32(255, 255, 255, 32));
     }
@@ -775,7 +780,7 @@ void Example::ShowLeftPane(float paneWidth) {
   ImGui::Unindent();
 
   if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)))
-    for (auto& link : m_Links) ne::Flow(link.ID);
+    for (auto& link : links_) ne::Flow(link.ID);
 
   if (ne::HasSelectionChanged()) ++changeCount;
 
@@ -790,7 +795,7 @@ void Example::OnFrame(float deltaTime) {
   ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate,
               io.Framerate ? 1000.0f / io.Framerate : 0.0f);
 
-  ne::SetCurrentEditor(m_Editor);
+  ne::SetCurrentEditor(kEditor);
 
   // auto& style = ImGui::GetStyle();
 
@@ -822,11 +827,11 @@ void Example::OnFrame(float deltaTime) {
   {
     auto cursorTopLeft = ImGui::GetCursorScreenPos();
 
-    util::BlueprintNodeBuilder builder(m_HeaderBackground,
-                                       GetTextureWidth(m_HeaderBackground),
-                                       GetTextureHeight(m_HeaderBackground));
+    util::BlueprintNodeBuilder builder(header_background_,
+                                       GetTextureWidth(header_background_),
+                                       GetTextureHeight(header_background_));
 
-    for (auto& node : m_Nodes) {
+    for (auto& node : nodes_) {
       if (node.Type != NodeType::Blueprint && node.Type != NodeType::Simple)
         continue;
 
@@ -948,7 +953,7 @@ void Example::OnFrame(float deltaTime) {
       builder.End();
     }
 
-    for (auto& node : m_Nodes) {
+    for (auto& node : nodes_) {
       if (node.Type != NodeType::Tree) continue;
 
       const float rounding = 5.0f;
@@ -1102,7 +1107,7 @@ void Example::OnFrame(float deltaTime) {
       // ImGui::PopStyleVar();
     }
 
-    for (auto& node : m_Nodes) {
+    for (auto& node : nodes_) {
       if (node.Type != NodeType::Houdini) continue;
 
       const float rounding = 10.0f;
@@ -1292,7 +1297,7 @@ void Example::OnFrame(float deltaTime) {
       // ImGui::PopStyleVar();
     }
 
-    for (auto& node : m_Nodes) {
+    for (auto& node : nodes_) {
       if (node.Type != NodeType::Comment) continue;
 
       const float commentAlpha = 0.75f;
@@ -1349,7 +1354,7 @@ void Example::OnFrame(float deltaTime) {
       ne::EndGroupHint();
     }
 
-    for (auto& link : m_Links)
+    for (auto& link : links_)
       ne::Link(link.ID, link.StartPinID, link.EndPinID, link.Color, 2.0f);
 
     if (!createNewNode) {
@@ -1403,8 +1408,8 @@ void Example::OnFrame(float deltaTime) {
             } else {
               showLabel("+ Create Link", ImColor(32, 45, 32, 180));
               if (ne::AcceptNewItem(ImColor(128, 255, 128), 4.0f)) {
-                m_Links.emplace_back(Link(GetNextId(), startPinId, endPinId));
-                m_Links.back().Color = GetIconColor(startPin->Type);
+                links_.emplace_back(Link(GetNextId(), startPinId, endPinId));
+                links_.back().Color = GetIconColor(startPin->Type);
               }
             }
           }
@@ -1434,9 +1439,9 @@ void Example::OnFrame(float deltaTime) {
         while (ne::QueryDeletedLink(&linkId)) {
           if (ne::AcceptDeletedItem()) {
             auto id = std::find_if(
-                m_Links.begin(), m_Links.end(),
+                links_.begin(), links_.end(),
                 [linkId](auto& link) { return link.ID == linkId; });
-            if (id != m_Links.end()) m_Links.erase(id);
+            if (id != links_.end()) links_.erase(id);
           }
         }
 
@@ -1444,9 +1449,9 @@ void Example::OnFrame(float deltaTime) {
         while (ne::QueryDeletedNode(&nodeId)) {
           if (ne::AcceptDeletedItem()) {
             auto id = std::find_if(
-                m_Nodes.begin(), m_Nodes.end(),
+                nodes_.begin(), nodes_.end(),
                 [nodeId](auto& node) { return node.ID == nodeId; });
-            if (id != m_Nodes.end()) m_Nodes.erase(id);
+            if (id != nodes_.end()) nodes_.erase(id);
           }
         }
       }
@@ -1571,8 +1576,8 @@ void Example::OnFrame(float deltaTime) {
             auto endPin = &pin;
             if (startPin->Kind == PinKind::Input) std::swap(startPin, endPin);
 
-            m_Links.emplace_back(Link(GetNextId(), startPin->ID, endPin->ID));
-            m_Links.back().Color = GetIconColor(startPin->Type);
+            links_.emplace_back(Link(GetNextId(), startPin->ID, endPin->ID));
+            links_.back().Color = GetIconColor(startPin->Type);
 
             break;
           }
@@ -1618,7 +1623,7 @@ void Example::OnFrame(float deltaTime) {
   auto editorMin = ImGui::GetItemRectMin();
   auto editorMax = ImGui::GetItemRectMax();
 
-  if (m_ShowOrdinals) {
+  if (show_ordinals_) {
     int nodeCount = ne::GetNodeCount();
     std::vector<ne::NodeId> orderedNodeIds;
     orderedNodeIds.resize(static_cast<size_t>(nodeCount));

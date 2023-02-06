@@ -19,7 +19,7 @@ namespace ne = ax::NodeEditor;
 
 class Example : public Application {
  public:
-  using Application::Application;
+  Example(const char* name, int argc, char** argv);
 
   Example(const Example&) = delete;
   Example(Example&&) noexcept = delete;
@@ -70,16 +70,14 @@ class Example : public Application {
 
   void ShowLeftPane(float paneWidth);
 
-  int m_NextId = 1;
-  const int m_PinIconSize = 24;
-  std::vector<Node> m_Nodes;
-  std::vector<Link> m_Links;
-  ImTextureID m_HeaderBackground = nullptr;
-  ImTextureID m_SaveIcon = nullptr;
-  ImTextureID m_RestoreIcon = nullptr;
-  const float m_TouchTime = 1.0F;
-  std::map<ne::NodeId, float, NodeIdLess> m_NodeTouchTime;
-  bool m_ShowOrdinals = false;
+  int next_id_{};
+  std::vector<Node> nodes_{};
+  std::vector<Link> links_{};
+  ImTextureID header_background_{};
+  ImTextureID save_icon_{};
+  ImTextureID restore_icon_{};
+  std::map<ne::NodeId, float, NodeIdLess> node_touch_time_{};
+  bool show_ordinals_{};
 };
 
 #endif  // VH_ESC_EXAMPLE_H_
