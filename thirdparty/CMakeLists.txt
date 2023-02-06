@@ -1,1 +1,1 @@
-add_subdirectory(imgui_node_editor)
+add_subdirectory(imgui-node-editor)
