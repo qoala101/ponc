@@ -15,7 +15,7 @@
 
 #include "esc_types.h"
 
-namespace ed = ax::NodeEditor;
+namespace ne = ax::NodeEditor;
 
 class Example : public Application {
  public:
@@ -29,77 +29,47 @@ class Example : public Application {
 
   virtual ~Example() = default;
 
+ private:
   auto GetNextId() -> int;
+  auto GetNextLinkId() -> ne::LinkId;
 
-  auto GetNextLinkId() -> ed::LinkId;
-
-  void TouchNode(ed::NodeId id);
-
-  auto GetTouchProgress(ed::NodeId id) -> float;
-
+  void TouchNode(ne::NodeId id);
+  auto GetTouchProgress(ne::NodeId id) -> float;
   void UpdateTouch();
 
-  auto FindNode(ed::NodeId id) -> Node*;
+  auto FindNode(ne::NodeId id) -> Node*;
+  auto FindLink(ne::LinkId id) -> Link*;
+  auto FindPin(ne::PinId id) -> Pin*;
 
-  auto FindLink(ed::LinkId id) -> Link*;
-
-  auto FindPin(ed::PinId id) -> Pin*;
-
-  auto IsPinLinked(ed::PinId id) -> bool;
-
-  auto CanCreateLink(Pin* a, Pin* b) -> bool;
-
-  void BuildNode(Node* node);
-
-  auto SpawnInputActionNode() -> Node*;
-
-  auto SpawnBranchNode() -> Node*;
-
-  auto SpawnDoNNode() -> Node*;
-
-  auto SpawnOutputActionNode() -> Node*;
-
-  auto SpawnPrintStringNode() -> Node*;
-
-  auto SpawnMessageNode() -> Node*;
-
-  auto SpawnSetTimerNode() -> Node*;
-
-  auto SpawnLessNode() -> Node*;
-
-  auto SpawnWeirdNode() -> Node*;
-
-  auto SpawnTraceByChannelNode() -> Node*;
-
-  auto SpawnTreeSequenceNode() -> Node*;
-
-  auto SpawnTreeTaskNode() -> Node*;
-
-  auto SpawnTreeTask2Node() -> Node*;
-
-  auto SpawnComment() -> Node*;
-
-  auto SpawnHoudiniTransformNode() -> Node*;
-
-  auto SpawnHoudiniGroupNode() -> Node*;
+  auto IsPinLinked(ne::PinId id) -> bool;
 
   void BuildNodes();
 
+  auto SpawnInputActionNode() -> Node*;
+  auto SpawnBranchNode() -> Node*;
+  auto SpawnDoNNode() -> Node*;
+  auto SpawnOutputActionNode() -> Node*;
+  auto SpawnPrintStringNode() -> Node*;
+  auto SpawnMessageNode() -> Node*;
+  auto SpawnSetTimerNode() -> Node*;
+  auto SpawnLessNode() -> Node*;
+  auto SpawnWeirdNode() -> Node*;
+  auto SpawnTraceByChannelNode() -> Node*;
+  auto SpawnTreeSequenceNode() -> Node*;
+  auto SpawnTreeTaskNode() -> Node*;
+  auto SpawnTreeTask2Node() -> Node*;
+  auto SpawnComment() -> Node*;
+  auto SpawnHoudiniTransformNode() -> Node*;
+  auto SpawnHoudiniGroupNode() -> Node*;
+
   void OnStart() override;
-
   void OnStop() override;
+  void OnFrame(float deltaTime) override;
 
-  auto GetIconColor(PinType type) -> ImColor;
-
-  void DrawPinIcon(const Pin& pin, bool connected, int alpha);
-
-  void ShowStyleEditor(bool* show = nullptr);
+  void DrawPinIcon(const Pin& pin, bool connected, int alpha) const;
 
   void ShowLeftPane(float paneWidth);
 
-  void OnFrame(float deltaTime) override;
-
-private:
   int m_NextId = 1;
   const int m_PinIconSize = 24;
   std::vector<Node> m_Nodes;
@@ -108,7 +78,7 @@ private:
   ImTextureID m_SaveIcon = nullptr;
   ImTextureID m_RestoreIcon = nullptr;
   const float m_TouchTime = 1.0F;
-  std::map<ed::NodeId, float, NodeIdLess> m_NodeTouchTime;
+  std::map<ne::NodeId, float, NodeIdLess> m_NodeTouchTime;
   bool m_ShowOrdinals = false;
 };
 

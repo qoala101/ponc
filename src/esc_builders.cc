@@ -12,7 +12,7 @@
 #include <imgui_internal.h>
 
 //------------------------------------------------------------------------------
-namespace ed = ax::NodeEditor;
+namespace ne = ax::NodeEditor;
 namespace util = ax::NodeEditor::Utilities;
 
 util::BlueprintNodeBuilder::BlueprintNodeBuilder(ImTextureID texture,
@@ -25,13 +25,13 @@ util::BlueprintNodeBuilder::BlueprintNodeBuilder(ImTextureID texture,
       CurrentStage(Stage::Invalid),
       HasHeader(false) {}
 
-void util::BlueprintNodeBuilder::Begin(ed::NodeId id) {
+void util::BlueprintNodeBuilder::Begin(ne::NodeId id) {
   HasHeader = false;
   HeaderMin = HeaderMax = ImVec2();
 
-  ed::PushStyleVar(StyleVar_NodePadding, ImVec4(8, 4, 8, 8));
+  ne::PushStyleVar(StyleVar_NodePadding, ImVec4(8, 4, 8, 8));
 
-  ed::BeginNode(id);
+  ne::BeginNode(id);
 
   ImGui::PushID(id.AsPointer());
   CurrentNodeId = id;
@@ -42,14 +42,14 @@ void util::BlueprintNodeBuilder::Begin(ed::NodeId id) {
 void util::BlueprintNodeBuilder::End() {
   SetStage(Stage::End);
 
-  ed::EndNode();
+  ne::EndNode();
 
   if (ImGui::IsItemVisible()) {
     auto alpha = static_cast<int>(255 * ImGui::GetStyle().Alpha);
 
-    auto drawList = ed::GetNodeBackgroundDrawList(CurrentNodeId);
+    auto drawList = ne::GetNodeBackgroundDrawList(CurrentNodeId);
 
-    const auto halfBorderWidth = ed::GetStyle().NodeBorderWidth * 0.5f;
+    const auto halfBorderWidth = ne::GetStyle().NodeBorderWidth * 0.5f;
 
     auto headerColor =
         IM_COL32(0, 0, 0, alpha) | (HeaderColor & IM_COL32(255, 255, 255, 0));
@@ -84,7 +84,7 @@ void util::BlueprintNodeBuilder::End() {
 
   ImGui::PopID();
 
-  ed::PopStyleVar();
+  ne::PopStyleVar();
 
   SetStage(Stage::Invalid);
 }
@@ -96,7 +96,7 @@ void util::BlueprintNodeBuilder::Header(const ImVec4& color) {
 
 void util::BlueprintNodeBuilder::EndHeader() { SetStage(Stage::Content); }
 
-void util::BlueprintNodeBuilder::Input(ed::PinId id) {
+void util::BlueprintNodeBuilder::Input(ne::PinId id) {
   if (CurrentStage == Stage::Begin) SetStage(Stage::Content);
 
   const auto applyPadding = (CurrentStage == Stage::Input);
@@ -122,7 +122,7 @@ void util::BlueprintNodeBuilder::Middle() {
   SetStage(Stage::Middle);
 }
 
-void util::BlueprintNodeBuilder::Output(ed::PinId id) {
+void util::BlueprintNodeBuilder::Output(ne::PinId id) {
   if (CurrentStage == Stage::Begin) SetStage(Stage::Content);
 
   const auto applyPadding = (CurrentStage == Stage::Output);
@@ -167,7 +167,7 @@ bool util::BlueprintNodeBuilder::SetStage(Stage stage) {
       break;
 
     case Stage::Input:
-      ed::PopStyleVar(2);
+      ne::PopStyleVar(2);
 
       ImGui::Spring(1, 0);
       ImGui::EndVertical();
@@ -190,7 +190,7 @@ bool util::BlueprintNodeBuilder::SetStage(Stage stage) {
       break;
 
     case Stage::Output:
-      ed::PopStyleVar(2);
+      ne::PopStyleVar(2);
 
       ImGui::Spring(1, 0);
       ImGui::EndVertical();
@@ -230,8 +230,8 @@ bool util::BlueprintNodeBuilder::SetStage(Stage stage) {
     case Stage::Input:
       ImGui::BeginVertical("inputs", ImVec2(0, 0), 0.0f);
 
-      ed::PushStyleVar(ed::StyleVar_PivotAlignment, ImVec2(0, 0.5f));
-      ed::PushStyleVar(ed::StyleVar_PivotSize, ImVec2(0, 0));
+      ne::PushStyleVar(ne::StyleVar_PivotAlignment, ImVec2(0, 0.5f));
+      ne::PushStyleVar(ne::StyleVar_PivotSize, ImVec2(0, 0));
 
       if (!HasHeader) ImGui::Spring(1, 0);
       break;
@@ -248,8 +248,8 @@ bool util::BlueprintNodeBuilder::SetStage(Stage stage) {
         ImGui::Spring(1, 0);
       ImGui::BeginVertical("outputs", ImVec2(0, 0), 1.0f);
 
-      ed::PushStyleVar(ed::StyleVar_PivotAlignment, ImVec2(1.0f, 0.5f));
-      ed::PushStyleVar(ed::StyleVar_PivotSize, ImVec2(0, 0));
+      ne::PushStyleVar(ne::StyleVar_PivotAlignment, ImVec2(1.0f, 0.5f));
+      ne::PushStyleVar(ne::StyleVar_PivotSize, ImVec2(0, 0));
 
       if (!HasHeader) ImGui::Spring(1, 0);
       break;
@@ -273,12 +273,12 @@ bool util::BlueprintNodeBuilder::SetStage(Stage stage) {
   return true;
 }
 
-void util::BlueprintNodeBuilder::Pin(ed::PinId id, ed::PinKind kind) {
-  ed::BeginPin(id, kind);
+void util::BlueprintNodeBuilder::Pin(ne::PinId id, ne::PinKind kind) {
+  ne::BeginPin(id, kind);
 }
 
 void util::BlueprintNodeBuilder::EndPin() {
-  ed::EndPin();
+  ne::EndPin();
 
   // #debug
   // ImGui::GetWindowDrawList()->AddRectFilled(

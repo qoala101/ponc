@@ -15,14 +15,14 @@
 
 #include "esc_enums.h"
 
-namespace ed = ax::NodeEditor;
+namespace ne = ax::NodeEditor;
 
 struct Node;
 
 struct Pin {
   Pin(int id, const char* name, PinType type);
 
-  ed::PinId ID;
+  ne::PinId ID;
   ::Node* Node;
   std::string Name;
   PinType Type;
@@ -32,7 +32,7 @@ struct Pin {
 struct Node {
   Node(int id, const char* name, ImColor color = ImColor{255, 255, 255});
 
-  ed::NodeId ID;
+  ne::NodeId ID;
   std::string Name;
   std::vector<Pin> Inputs;
   std::vector<Pin> Outputs;
@@ -44,16 +44,16 @@ struct Node {
 };
 
 struct Link {
-  Link(ed::LinkId id, ed::PinId startPinId, ed::PinId endPinId);
+  Link(ne::LinkId id, ne::PinId startPinId, ne::PinId endPinId);
 
-  ed::LinkId ID;
-  ed::PinId StartPinID;
-  ed::PinId EndPinID;
+  ne::LinkId ID;
+  ne::PinId StartPinID;
+  ne::PinId EndPinID;
   ImColor Color;
 };
 
 struct NodeIdLess {
-  auto operator()(const ed::NodeId& lhs, const ed::NodeId& rhs) const -> bool;
+  auto operator()(const ne::NodeId& lhs, const ne::NodeId& rhs) const -> bool;
 };
 
 #endif  // VH_ESC_TYPES_H_

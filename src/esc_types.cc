@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace ed = ax::NodeEditor;
+namespace ne = ax::NodeEditor;
 
 Pin::Pin(int id, const char* name, PinType type)
     : ID{static_cast<uint64_t>(id)},
@@ -18,13 +18,13 @@ Node::Node(int id, const char* name, ImColor color)
       Type{NodeType::Blueprint},
       Size{0, 0} {}
 
-Link::Link(ed::LinkId id, ed::PinId startPinId, ed::PinId endPinId)
+Link::Link(ne::LinkId id, ne::PinId startPinId, ne::PinId endPinId)
     : ID{id},
       StartPinID{startPinId},
       EndPinID{endPinId},
       Color{255, 255, 255} {}
 
-auto NodeIdLess::operator()(const ed::NodeId& lhs, const ed::NodeId& rhs) const
+auto NodeIdLess::operator()(const ne::NodeId& lhs, const ne::NodeId& rhs) const
     -> bool {
   return lhs.AsPointer() < rhs.AsPointer();
 }
