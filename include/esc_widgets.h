@@ -1,5 +1,5 @@
-#ifndef VH_WIDGETS_H_
-#define VH_WIDGETS_H_
+#ifndef VH_ESC_WIDGETS_H_
+#define VH_ESC_WIDGETS_H_
 
 #include <imgui.h>
 
@@ -15,4 +15,4 @@ void Icon(const ImVec2& size, IconType type, bool filled,
 
 }  // namespace ax::Widgets
 
-#endif  // VH_WIDGETS_H_
+#endif  // VH_ESC_WIDGETS_H_

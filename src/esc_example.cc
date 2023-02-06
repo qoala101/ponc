@@ -4,7 +4,7 @@
 #include <imgui_node_editor.h>
 
 #include "esc_builders.h"
-#include "widgets.h"
+#include "esc_widgets.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>

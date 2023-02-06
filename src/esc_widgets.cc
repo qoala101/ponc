@@ -1,6 +1,6 @@
-#include "widgets.h"
+#include "esc_widgets.h"
 
-#include "drawing.h"
+#include "esc_drawing.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
 

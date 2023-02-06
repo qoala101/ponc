@@ -1,5 +1,5 @@
-#ifndef VH_DRAWING_H_
-#define VH_DRAWING_H_
+#ifndef VH_ESC_DRAWING_H_
+#define VH_ESC_DRAWING_H_
 
 #include <imgui.h>
 
@@ -11,4 +11,4 @@ void DrawIcon(ImDrawList* drawList, const ImVec2& a, const ImVec2& b,
 
 }  // namespace ax::Drawing
 
-#endif  // VH_DRAWING_H_
+#endif  // VH_ESC_DRAWING_H_

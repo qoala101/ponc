@@ -1,10 +1,10 @@
 add_executable(esc
-  drawing.cpp
   esc_builders.cc
+  esc_drawing.cc
   esc_example.cc
   esc_types.cc
+  esc_widgets.cc
   main.cc
-  widgets.cpp
 )
 
 target_include_directories(esc

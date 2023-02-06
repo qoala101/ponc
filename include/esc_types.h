@@ -13,33 +13,9 @@
 #include <utility>
 #include <vector>
 
+#include "esc_enums.h"
+
 namespace ed = ax::NodeEditor;
-
-enum class PinType {
-  Flow,
-  Bool,
-  Int,
-  Float,
-  String,
-  Object,
-  Function,
-  Delegate,
-};
-
-enum class PinKind { Output, Input };
-
-enum class NodeType { Blueprint, Simple, Tree, Comment, Houdini };
-
-namespace ax::Drawing {
-enum class IconType : ImU32 {
-  Flow,
-  Circle,
-  Square,
-  Grid,
-  RoundSquare,
-  Diamond
-};
-}  // namespace ax::Drawing
 
 struct Node;
 
