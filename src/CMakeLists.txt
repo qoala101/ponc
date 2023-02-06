@@ -1,6 +1,7 @@
 add_executable(esc
   builders.cpp
   drawing.cpp
+  example.cc
   main.cc
   widgets.cpp
 )
