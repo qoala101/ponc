@@ -1,7 +1,8 @@
 add_executable(esc
   builders.cpp
   drawing.cpp
-  example.cc
+  esc_example.cc
+  esc_types.cc
   main.cc
   widgets.cpp
 )
