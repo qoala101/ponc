@@ -903,15 +903,14 @@ struct Example : public Application {
 
     // auto& style = ImGui::GetStyle();
 
-#if 0
-        {
-            for (auto x = -io.DisplaySize.y; x < io.DisplaySize.x; x += 10.0f)
-            {
-                ImGui::GetWindowDrawList()->AddLine(ImVec2(x, 0), ImVec2(x + io.DisplaySize.y, io.DisplaySize.y),
-                    IM_COL32(255, 255, 0, 255));
-            }
-        }
-#endif
+    // {
+    //     for (auto x = -io.DisplaySize.y; x < io.DisplaySize.x; x += 10.0f)
+    //     {
+    //         ImGui::GetWindowDrawList()->AddLine(ImVec2(x, 0), ImVec2(x +
+    //         io.DisplaySize.y, io.DisplaySize.y),
+    //             IM_COL32(255, 255, 0, 255));
+    //     }
+    // }
 
     static ed::NodeId contextNodeId = 0;
     static ed::LinkId contextLinkId = 0;
@@ -1095,12 +1094,10 @@ struct Example : public Application {
 
           ed::PushStyleVar(ed::StyleVar_PinArrowSize, 10.0f);
           ed::PushStyleVar(ed::StyleVar_PinArrowWidth, 10.0f);
-#if IMGUI_VERSION_NUM > 18101
+
           ed::PushStyleVar(ed::StyleVar_PinCorners,
                            ImDrawFlags_RoundCornersBottom);
-#else
-          ed::PushStyleVar(ed::StyleVar_PinCorners, 12);
-#endif
+
           ed::BeginPin(pin.ID, ed::PinKind::Input);
           ed::PinPivotRect(inputsRect.GetTL(), inputsRect.GetBR());
           ed::PinRect(inputsRect.GetTL(), inputsRect.GetBR());
@@ -1142,12 +1139,9 @@ struct Example : public Application {
           ImGui::Spring(1, 0);
           outputsRect = ImGui_GetItemRect();
 
-#if IMGUI_VERSION_NUM > 18101
           ed::PushStyleVar(ed::StyleVar_PinCorners,
                            ImDrawFlags_RoundCornersTop);
-#else
-          ed::PushStyleVar(ed::StyleVar_PinCorners, 3);
-#endif
+
           ed::BeginPin(pin.ID, ed::PinKind::Output);
           ed::PinPivotRect(outputsRect.GetTL(), outputsRect.GetBR());
           ed::PinRect(outputsRect.GetTL(), outputsRect.GetBR());
@@ -1185,13 +1179,8 @@ struct Example : public Application {
         //     drawList->PathStroke(col, true, thickness);
         // };
 
-#if IMGUI_VERSION_NUM > 18101
         const auto topRoundCornersFlags = ImDrawFlags_RoundCornersTop;
         const auto bottomRoundCornersFlags = ImDrawFlags_RoundCornersBottom;
-#else
-        const auto topRoundCornersFlags = 1 | 2;
-        const auto bottomRoundCornersFlags = 4 | 8;
-#endif
 
         drawList->AddRectFilled(
             inputsRect.GetTL() + ImVec2(0, 1), inputsRect.GetBR(),
@@ -1263,11 +1252,8 @@ struct Example : public Application {
             inputsRect.Min.y -= padding;
             inputsRect.Max.y -= padding;
 
-#if IMGUI_VERSION_NUM > 18101
             const auto allRoundCornersFlags = ImDrawFlags_RoundCornersAll;
-#else
-            const auto allRoundCornersFlags = 15;
-#endif
+
             // ed::PushStyleVar(ed::StyleVar_PinArrowSize, 10.0f);
             // ed::PushStyleVar(ed::StyleVar_PinArrowWidth, 10.0f);
             ed::PushStyleVar(ed::StyleVar_PinCorners, allRoundCornersFlags);
@@ -1332,13 +1318,8 @@ struct Example : public Application {
             outputsRect.Min.y += padding;
             outputsRect.Max.y += padding;
 
-#if IMGUI_VERSION_NUM > 18101
             const auto allRoundCornersFlags = ImDrawFlags_RoundCornersAll;
             const auto topRoundCornersFlags = ImDrawFlags_RoundCornersTop;
-#else
-            const auto allRoundCornersFlags = 15;
-            const auto topRoundCornersFlags = 3;
-#endif
 
             ed::PushStyleVar(ed::StyleVar_PinCorners, topRoundCornersFlags);
             ed::BeginPin(pin.ID, ed::PinKind::Output);
@@ -1591,7 +1572,6 @@ struct Example : public Application {
       ImGui::SetCursorScreenPos(cursorTopLeft);
     }
 
-#if 1
     auto openPopupPosition = ImGui::GetMousePos();
     ed::Suspend();
     if (ed::ShowNodeContextMenu(&contextNodeId))
@@ -1721,7 +1701,6 @@ struct Example : public Application {
       createNewNode = false;
     ImGui::PopStyleVar();
     ed::Resume();
-#endif
 
     /*
         cubic_bezier_t c;
