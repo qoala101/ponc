@@ -30,19 +30,32 @@ enum class PinKind { Output, Input };
 
 enum class NodeType { Blueprint, Simple, Tree, Comment, Houdini };
 
+namespace ax::Drawing {
+enum class IconType : ImU32 {
+  Flow,
+  Circle,
+  Square,
+  Grid,
+  RoundSquare,
+  Diamond
+};
+}  // namespace ax::Drawing
+
 struct Node;
 
 struct Pin {
+  Pin(int id, const char* name, PinType type);
+
   ed::PinId ID;
   ::Node* Node;
   std::string Name;
   PinType Type;
   PinKind Kind;
-
-  Pin(int id, const char* name, PinType type);
 };
 
 struct Node {
+  Node(int id, const char* name, ImColor color = ImColor{255, 255, 255});
+
   ed::NodeId ID;
   std::string Name;
   std::vector<Pin> Inputs;
@@ -50,22 +63,17 @@ struct Node {
   ImColor Color;
   NodeType Type;
   ImVec2 Size;
-
   std::string State;
   std::string SavedState;
-
-  Node(int id, const char* name, ImColor color = ImColor(255, 255, 255));
 };
 
 struct Link {
-  ed::LinkId ID;
+  Link(ed::LinkId id, ed::PinId startPinId, ed::PinId endPinId);
 
+  ed::LinkId ID;
   ed::PinId StartPinID;
   ed::PinId EndPinID;
-
   ImColor Color;
-
-  Link(ed::LinkId id, ed::PinId startPinId, ed::PinId endPinId);
 };
 
 struct NodeIdLess {

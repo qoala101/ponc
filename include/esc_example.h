@@ -17,20 +17,6 @@
 
 namespace ed = ax::NodeEditor;
 
-using namespace ax;
-
-// extern "C" __declspec(dllimport) short __stdcall GetAsyncKeyState(int vkey);
-// extern "C" bool Debug_KeyPress(int vkey)
-//{
-//     static std::map<int, bool> state;
-//     auto lastState = state[vkey];
-//     state[vkey] = (GetAsyncKeyState(vkey) & 0x8000) != 0;
-//     if (state[vkey] && !lastState)
-//         return true;
-//     else
-//         return false;
-// }
-
 class Example : public Application {
  public:
   using Application::Application;
@@ -44,11 +30,6 @@ class Example : public Application {
   virtual ~Example() = default;
 
   auto GetNextId() -> int;
-
-  // ed::NodeId GetNextNodeId()
-  //{
-  //     return ed::NodeId(GetNextId());
-  // }
 
   auto GetNextLinkId() -> ed::LinkId;
 
@@ -67,23 +48,6 @@ class Example : public Application {
   auto IsPinLinked(ed::PinId id) -> bool;
 
   auto CanCreateLink(Pin* a, Pin* b) -> bool;
-
-  // void DrawItemRect(ImColor color, float expand = 0.0f)
-  //{
-  //     ImGui::GetWindowDrawList()->AddRect(
-  //         ImGui::GetItemRectMin() - ImVec2(expand, expand),
-  //         ImGui::GetItemRectMax() + ImVec2(expand, expand),
-  //         color);
-  // };
-
-  // void FillItemRect(ImColor color, float expand = 0.0f, float rounding =
-  // 0.0f)
-  //{
-  //     ImGui::GetWindowDrawList()->AddRectFilled(
-  //         ImGui::GetItemRectMin() - ImVec2(expand, expand),
-  //         ImGui::GetItemRectMax() + ImVec2(expand, expand),
-  //         color, rounding);
-  // };
 
   void BuildNode(Node* node);
 
@@ -135,6 +99,7 @@ class Example : public Application {
 
   void OnFrame(float deltaTime) override;
 
+private:
   int m_NextId = 1;
   const int m_PinIconSize = 24;
   std::vector<Node> m_Nodes;
