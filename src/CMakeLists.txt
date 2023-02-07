@@ -106,6 +106,7 @@ endmacro()
 
 add_example_executable(esc
   esc_app.cc
+  esc_auto_incrementable.cc
   esc_builders.cc
   esc_cpp.cc
   esc_drawing.cc

@@ -4,6 +4,9 @@
 #include <imgui_node_editor.h>
 #include <sys/types.h>
 
+#include <memory>
+
+#include "esc_auto_incrementable.h"
 #include "esc_builders.h"
 #include "esc_cpp.h"
 #include "esc_widgets.h"
@@ -213,13 +216,11 @@ void DrawPinIcon(const Pin& pin, bool connected, int alpha) {
 // vh: norm
 App::App(const char* name, int argc, char** argv)
     : Application{name, argc, argv},
-      next_object_id_{1},
-      nodes_and_links_{[this]() { return GetNextObjectId(); }} {}
-// vh: norm
-auto App::GetNextObjectId() -> int { return next_object_id_++; }
+      auto_incrementable_object_id_{std::make_shared<esc::AutoIncrementable>(1)},
+      nodes_and_links_{auto_incrementable_object_id_} {}
 // vh: norm
 auto App::GetNextLinkId() -> ne::LinkId {
-  return {static_cast<uintptr_t>(GetNextObjectId())};
+  return {static_cast<uintptr_t>(auto_incrementable_object_id_->GetNext())};
 }
 
 auto App::CreateEditorConfig() -> ne::Config {
@@ -268,13 +269,12 @@ void App::OnStart() {
 
   const auto editor_config = CreateEditorConfig();
   editor_context_.emplace(editor_config);
+  textures_.emplace(shared_from_this());
 
   AddInitialNodes();
-  ne::NavigateToContent();
-  nodes_and_links_.BuildNodes();
   AddInitialLinks();
 
-  textures_.emplace([app = this]() -> auto& { return *app; });
+  ne::NavigateToContent();
 
   cpp::Ensures(editor_context_.has_value());
   cpp::Ensures(textures_.has_value());
@@ -321,6 +321,8 @@ void App::AddInitialNodes() {
   ne::SetNodePosition(node->ID, ImVec2(500, -70));
   node = nodes_and_links_.SpawnHoudiniGroupNode();
   ne::SetNodePosition(node->ID, ImVec2(500, 42));
+
+  nodes_and_links_.BuildNodes();
 }
 
 void App::AddInitialLinks() {
@@ -343,7 +345,9 @@ void App::OnStop() {
   cpp::Ensures(!editor_context_.has_value());
 }
 
-void App::ShowLeftPane(float paneWidth) {
+void App::OnFrame(float /*unused*/) { DrawFrame(); }
+
+void App::DrawLeftPane(float paneWidth) {
   cpp::Expects(textures_.has_value());
 
   auto& io = ImGui::GetIO();
@@ -533,7 +537,7 @@ void App::ShowLeftPane(float paneWidth) {
   ImGui::EndChild();
 }
 
-void App::OnFrame(float /*unused*/) {
+void App::DrawFrame() {
   cpp::Expects(textures_.has_value());
 
   auto& io = ImGui::GetIO();
@@ -563,7 +567,7 @@ void App::OnFrame(float /*unused*/) {
   static float rightPaneWidth = 800.0f;
   Splitter(true, 4.0f, &leftPaneWidth, &rightPaneWidth, 50.0f, 50.0f);
 
-  ShowLeftPane(leftPaneWidth - 4.0f);
+  DrawLeftPane(leftPaneWidth - 4.0f);
 
   ImGui::SameLine(0.0f, 12.0f);
 
@@ -1158,7 +1162,7 @@ void App::OnFrame(float /*unused*/) {
             } else {
               showLabel("+ Create Link", ImColor(32, 45, 32, 180));
               if (ne::AcceptNewItem(ImColor(128, 255, 128), 4.0f)) {
-                auto link = Link{GetNextObjectId(), startPinId, endPinId};
+                auto link = Link{GetNextLinkId(), startPinId, endPinId};
                 link.Color = GetIconColor(startPin->Type);
                 nodes_and_links_.SpawnLink(link);
               }
@@ -1335,7 +1339,7 @@ void App::OnFrame(float /*unused*/) {
             auto endPin = &pin;
             if (startPin->Kind == PinKind::Input) std::swap(startPin, endPin);
 
-            auto link = Link{GetNextObjectId(), startPin->ID, endPin->ID};
+            auto link = Link{GetNextLinkId(), startPin->ID, endPin->ID};
             link.Color = GetIconColor(startPin->Type);
 
             nodes_and_links_.SpawnLink(link);

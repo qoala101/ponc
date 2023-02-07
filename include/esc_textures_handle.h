@@ -5,6 +5,7 @@
 #include <imgui.h>
 
 #include <functional>
+#include <memory>
 
 namespace esc {
 class TexturesHandle {
@@ -15,7 +16,7 @@ class TexturesHandle {
     ImTextureID restore_icon{};
   };
 
-  explicit TexturesHandle(std::function<Application&()> app_provider);
+  explicit TexturesHandle(std::shared_ptr<Application> app);
 
   TexturesHandle(const TexturesHandle&) = delete;
   TexturesHandle(TexturesHandle&&) noexcept = delete;
@@ -31,7 +32,7 @@ class TexturesHandle {
   auto GetTextureIdsAsArray [[nodiscard]] ();
   auto AreTexturesLoaded [[nodiscard]] ();
 
-  std::function<Application&()> app_provider_{};
+  std::shared_ptr<Application> app_{};
   TextureIds texture_ids_{};
 };
 }  // namespace esc

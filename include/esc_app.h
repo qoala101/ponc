@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "esc_auto_incrementable.h"
 #include "esc_nodes_and_links.h"
 #include "esc_textures_handle.h"
 
@@ -23,7 +24,8 @@
 
 namespace ne = ax::NodeEditor;
 
-class App : public Application {
+// NOLINTNEXTLINE(*-multiple-inheritance)
+class App : public Application, public std::enable_shared_from_this<App> {
  public:
   App(const char* name, int argc, char** argv);
 
@@ -36,14 +38,14 @@ class App : public Application {
   virtual ~App() = default;
 
  private:
-  auto GetNextObjectId() -> int;
   auto GetNextLinkId() -> ne::LinkId;
 
   void OnStart() override;
   void OnStop() override;
   void OnFrame(float deltaTime) override;
 
-  void ShowLeftPane(float paneWidth);
+  void DrawLeftPane(float paneWidth);
+  void DrawFrame();
 
   //
 
@@ -55,7 +57,7 @@ class App : public Application {
   std::optional<esc::EditorContextHandle> editor_context_{};
   std::optional<esc::TexturesHandle> textures_{};
 
-  int next_object_id_{};
+  std::shared_ptr<esc::AutoIncrementable> auto_incrementable_object_id_{};
 
   esc::NodesAndLinks nodes_and_links_;
 
