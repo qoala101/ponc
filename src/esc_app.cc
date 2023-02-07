@@ -2,6 +2,7 @@
 
 #include <application.h>
 #include <imgui_node_editor.h>
+#include <sys/types.h>
 
 #include "esc_builders.h"
 #include "esc_cpp.h"
@@ -16,6 +17,13 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+namespace ne = ax::NodeEditor;
+namespace util = ax::NodeEditor::Utilities;
+
+using namespace ax;
+
+using ax::Widgets::IconType;
 
 namespace {
 const auto kPinIconSize = 24;
@@ -40,18 +48,6 @@ auto CanCreateLink(Pin* a, Pin* b) -> bool {
     return false;
 
   return true;
-}
-
-void BuildNode(Node* node) {
-  for (auto& input : node->Inputs) {
-    input.Node = node;
-    input.Kind = PinKind::Input;
-  }
-
-  for (auto& output : node->Outputs) {
-    output.Node = node;
-    output.Kind = PinKind::Output;
-  }
 }
 
 auto GetIconColor(PinType type) -> ImColor {
@@ -175,396 +171,8 @@ auto Splitter(bool split_vertically, float thickness, float* size1,
   return SplitterBehavior(bb, id, split_vertically ? ImGuiAxis_X : ImGuiAxis_Y,
                           size1, size2, min_size1, min_size2, 0.0f);
 }
-}  // namespace
 
-namespace ne = ax::NodeEditor;
-namespace util = ax::NodeEditor::Utilities;
-
-using namespace ax;
-
-using ax::Widgets::IconType;
-
-App::App(const char* name, int argc, char** argv)
-    : Application{name, argc, argv}, next_id_{1} {}
-
-auto App::GetNextId() -> int { return next_id_++; }
-
-auto App::GetNextLinkId() -> ne::LinkId { return ne::LinkId(GetNextId()); }
-
-void App::TouchNode(ne::NodeId id) { node_touch_time_[id] = kTouchTime; }
-
-auto App::GetTouchProgress(ne::NodeId id) -> float {
-  auto it = node_touch_time_.find(id);
-  if (it != node_touch_time_.end() && it->second > 0.0f)
-    return (kTouchTime - it->second) / kTouchTime;
-  else
-    return 0.0f;
-}
-
-void App::UpdateTouch() {
-  const auto deltaTime = ImGui::GetIO().DeltaTime;
-  for (auto& entry : node_touch_time_) {
-    if (entry.second > 0.0f) entry.second -= deltaTime;
-  }
-}
-
-auto App::FindNode(ne::NodeId id) -> Node* {
-  for (auto& node : nodes_)
-    if (node.ID == id) return &node;
-
-  return nullptr;
-}
-
-auto App::FindLink(ne::LinkId id) -> Link* {
-  for (auto& link : links_)
-    if (link.ID == id) return &link;
-
-  return nullptr;
-}
-
-auto App::FindPin(ne::PinId id) -> Pin* {
-  if (!id) return nullptr;
-
-  for (auto& node : nodes_) {
-    for (auto& pin : node.Inputs)
-      if (pin.ID == id) return &pin;
-
-    for (auto& pin : node.Outputs)
-      if (pin.ID == id) return &pin;
-  }
-
-  return nullptr;
-}
-
-auto App::IsPinLinked(ne::PinId id) -> bool {
-  if (!id) return false;
-
-  for (auto& link : links_)
-    if (link.StartPinID == id || link.EndPinID == id) return true;
-
-  return false;
-}
-
-auto App::SpawnInputActionNode() -> Node* {
-  nodes_.emplace_back(GetNextId(), "InputAction Fire", ImColor(255, 128, 128));
-  nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Delegate);
-  nodes_.back().Outputs.emplace_back(GetNextId(), "Pressed", PinType::Flow);
-  nodes_.back().Outputs.emplace_back(GetNextId(), "Released", PinType::Flow);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto App::SpawnBranchNode() -> Node* {
-  nodes_.emplace_back(GetNextId(), "Branch");
-  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
-  nodes_.back().Inputs.emplace_back(GetNextId(), "Condition", PinType::Bool);
-  nodes_.back().Outputs.emplace_back(GetNextId(), "True", PinType::Flow);
-  nodes_.back().Outputs.emplace_back(GetNextId(), "False", PinType::Flow);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto App::SpawnDoNNode() -> Node* {
-  nodes_.emplace_back(GetNextId(), "Do N");
-  nodes_.back().Inputs.emplace_back(GetNextId(), "Enter", PinType::Flow);
-  nodes_.back().Inputs.emplace_back(GetNextId(), "N", PinType::Int);
-  nodes_.back().Inputs.emplace_back(GetNextId(), "Reset", PinType::Flow);
-  nodes_.back().Outputs.emplace_back(GetNextId(), "Exit", PinType::Flow);
-  nodes_.back().Outputs.emplace_back(GetNextId(), "Counter", PinType::Int);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto App::SpawnOutputActionNode() -> Node* {
-  nodes_.emplace_back(GetNextId(), "OutputAction");
-  nodes_.back().Inputs.emplace_back(GetNextId(), "Sample", PinType::Float);
-  nodes_.back().Outputs.emplace_back(GetNextId(), "Condition", PinType::Bool);
-  nodes_.back().Inputs.emplace_back(GetNextId(), "Event", PinType::Delegate);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto App::SpawnPrintStringNode() -> Node* {
-  nodes_.emplace_back(GetNextId(), "Print String");
-  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
-  nodes_.back().Inputs.emplace_back(GetNextId(), "In String", PinType::String);
-  nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto App::SpawnMessageNode() -> Node* {
-  nodes_.emplace_back(GetNextId(), "", ImColor(128, 195, 248));
-  nodes_.back().Type = NodeType::Simple;
-  nodes_.back().Outputs.emplace_back(GetNextId(), "Message", PinType::String);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto App::SpawnSetTimerNode() -> Node* {
-  nodes_.emplace_back(GetNextId(), "Set Timer", ImColor(128, 195, 248));
-  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
-  nodes_.back().Inputs.emplace_back(GetNextId(), "Object", PinType::Object);
-  nodes_.back().Inputs.emplace_back(GetNextId(), "Function Name",
-                                    PinType::Function);
-  nodes_.back().Inputs.emplace_back(GetNextId(), "Time", PinType::Float);
-  nodes_.back().Inputs.emplace_back(GetNextId(), "Looping", PinType::Bool);
-  nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto App::SpawnLessNode() -> Node* {
-  nodes_.emplace_back(GetNextId(), "<", ImColor(128, 195, 248));
-  nodes_.back().Type = NodeType::Simple;
-  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
-  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
-  nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Float);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto App::SpawnWeirdNode() -> Node* {
-  nodes_.emplace_back(GetNextId(), "o.O", ImColor(128, 195, 248));
-  nodes_.back().Type = NodeType::Simple;
-  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
-  nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Float);
-  nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Float);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto App::SpawnTraceByChannelNode() -> Node* {
-  nodes_.emplace_back(GetNextId(), "Single Line Trace by Channel",
-                      ImColor(255, 128, 64));
-  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
-  nodes_.back().Inputs.emplace_back(GetNextId(), "Start", PinType::Flow);
-  nodes_.back().Inputs.emplace_back(GetNextId(), "End", PinType::Int);
-  nodes_.back().Inputs.emplace_back(GetNextId(), "Trace Channel",
-                                    PinType::Float);
-  nodes_.back().Inputs.emplace_back(GetNextId(), "Trace Complex",
-                                    PinType::Bool);
-  nodes_.back().Inputs.emplace_back(GetNextId(), "Actors to Ignore",
-                                    PinType::Int);
-  nodes_.back().Inputs.emplace_back(GetNextId(), "Draw Debug Type",
-                                    PinType::Bool);
-  nodes_.back().Inputs.emplace_back(GetNextId(), "Ignore Self", PinType::Bool);
-  nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
-  nodes_.back().Outputs.emplace_back(GetNextId(), "Out Hit", PinType::Float);
-  nodes_.back().Outputs.emplace_back(GetNextId(), "Return Value",
-                                     PinType::Bool);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto App::SpawnTreeSequenceNode() -> Node* {
-  nodes_.emplace_back(GetNextId(), "Sequence");
-  nodes_.back().Type = NodeType::Tree;
-  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
-  nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto App::SpawnTreeTaskNode() -> Node* {
-  nodes_.emplace_back(GetNextId(), "Move To");
-  nodes_.back().Type = NodeType::Tree;
-  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto App::SpawnTreeTask2Node() -> Node* {
-  nodes_.emplace_back(GetNextId(), "Random Wait");
-  nodes_.back().Type = NodeType::Tree;
-  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto App::SpawnComment() -> Node* {
-  nodes_.emplace_back(GetNextId(), "Test Comment");
-  nodes_.back().Type = NodeType::Comment;
-  nodes_.back().Size = ImVec2(300, 200);
-
-  return &nodes_.back();
-}
-
-auto App::SpawnHoudiniTransformNode() -> Node* {
-  nodes_.emplace_back(GetNextId(), "Transform");
-  nodes_.back().Type = NodeType::Houdini;
-  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
-  nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto App::SpawnHoudiniGroupNode() -> Node* {
-  nodes_.emplace_back(GetNextId(), "Group");
-  nodes_.back().Type = NodeType::Houdini;
-  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
-  nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
-  nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-void App::BuildNodes() {
-  for (auto& node : nodes_) {
-    BuildNode(&node);
-  }
-}
-
-auto App::CreateEditorConfig() -> ne::Config {
-  auto config = ne::Config{};
-
-  config.SettingsFile = "Blueprints.json";
-  config.UserPointer = this;
-
-  config.LoadNodeSettings = [](const auto node_id, auto* data,
-                               auto* user_pointer) -> size_t {
-    auto* self = static_cast<App*>(user_pointer);
-    const auto* node = self->FindNode(node_id);
-
-    if (node == nullptr) {
-      return 0;
-    }
-
-    if (data != nullptr) {
-      strcpy(data, node->State.data());
-    }
-
-    return node->State.size();
-  };
-
-  config.SaveNodeSettings = [](const auto node_id, const auto* data,
-                               const auto size, const auto,
-                               auto* user_pointer) -> bool {
-    auto* self = static_cast<App*>(user_pointer);
-    auto* node = self->FindNode(node_id);
-
-    if (node == nullptr) {
-      return false;
-    }
-
-    node->State.assign(data, size);
-    self->TouchNode(node_id);
-
-    return true;
-  };
-
-  return config;
-}
-
-void App::OnStart() {
-  cpp::Expects(!editor_context_.has_value());
-  cpp::Expects(!textures_.has_value());
-
-  const auto editor_config = CreateEditorConfig();
-  editor_context_.emplace(editor_config);
-
-  AddInitialNodes();
-  ne::NavigateToContent();
-  BuildNodes();
-  AddInitialLinks();
-
-  textures_.emplace([app = this]() -> auto& { return *app; });
-
-  cpp::Ensures(editor_context_.has_value());
-  cpp::Ensures(textures_.has_value());
-}
-
-void App::AddInitialNodes() {
-  auto* node = static_cast<Node*>(nullptr);
-
-  node = SpawnInputActionNode();
-  ne::SetNodePosition(node->ID, ImVec2(-252, 220));
-  node = SpawnBranchNode();
-  ne::SetNodePosition(node->ID, ImVec2(-300, 351));
-  node = SpawnDoNNode();
-  ne::SetNodePosition(node->ID, ImVec2(-238, 504));
-  node = SpawnOutputActionNode();
-  ne::SetNodePosition(node->ID, ImVec2(71, 80));
-  node = SpawnSetTimerNode();
-  ne::SetNodePosition(node->ID, ImVec2(168, 316));
-
-  node = SpawnTreeSequenceNode();
-  ne::SetNodePosition(node->ID, ImVec2(1028, 329));
-  node = SpawnTreeTaskNode();
-  ne::SetNodePosition(node->ID, ImVec2(1204, 458));
-  node = SpawnTreeTask2Node();
-  ne::SetNodePosition(node->ID, ImVec2(868, 538));
-
-  node = SpawnComment();
-  ne::SetNodePosition(node->ID, ImVec2(112, 576));
-  ne::SetGroupSize(node->ID, ImVec2(384, 154));
-  node = SpawnComment();
-  ne::SetNodePosition(node->ID, ImVec2(800, 224));
-  ne::SetGroupSize(node->ID, ImVec2(640, 400));
-
-  node = SpawnLessNode();
-  ne::SetNodePosition(node->ID, ImVec2(366, 652));
-  node = SpawnWeirdNode();
-  ne::SetNodePosition(node->ID, ImVec2(144, 652));
-  node = SpawnMessageNode();
-  ne::SetNodePosition(node->ID, ImVec2(-348, 698));
-  node = SpawnPrintStringNode();
-  ne::SetNodePosition(node->ID, ImVec2(-69, 652));
-
-  node = SpawnHoudiniTransformNode();
-  ne::SetNodePosition(node->ID, ImVec2(500, -70));
-  node = SpawnHoudiniGroupNode();
-  ne::SetNodePosition(node->ID, ImVec2(500, 42));
-}
-
-void App::AddInitialLinks() {
-  links_.emplace_back(GetNextLinkId(), nodes_[5].Outputs[0].ID,
-                      nodes_[6].Inputs[0].ID);
-  links_.emplace_back(GetNextLinkId(), nodes_[5].Outputs[0].ID,
-                      nodes_[7].Inputs[0].ID);
-  links_.emplace_back(GetNextLinkId(), nodes_[14].Outputs[0].ID,
-                      nodes_[15].Inputs[0].ID);
-}
-
-void App::OnStop() {
-  textures_.reset();
-  editor_context_.reset();
-
-  cpp::Ensures(!textures_.has_value());
-  cpp::Ensures(!editor_context_.has_value());
-}
-
-void App::DrawPinIcon(const Pin& pin, bool connected, int alpha) const {
+void DrawPinIcon(const Pin& pin, bool connected, int alpha) {
   IconType iconType;
   ImColor color = GetIconColor(pin.Type);
   color.Value.w = alpha / 255.0f;
@@ -601,6 +209,155 @@ void App::DrawPinIcon(const Pin& pin, bool connected, int alpha) const {
                            static_cast<float>(kPinIconSize)),
                     iconType, connected, color, ImColor(32, 32, 32, alpha));
 }
+}  // namespace
+
+// vh: norm
+App::App(const char* name, int argc, char** argv)
+    : Application{name, argc, argv}, next_object_id_{1}, nodes_and_links_{[this]() {
+        return GetNextObjectId();
+      }} {}
+// vh: norm
+auto App::GetNextObjectId() -> int { return next_object_id_++; }
+// vh: norm
+auto App::GetNextLinkId() -> ne::LinkId {
+  return {static_cast<uintptr_t>(GetNextObjectId())};
+}
+
+void App::TouchNode(ne::NodeId id) { node_touch_time_[id] = kTouchTime; }
+
+auto App::GetTouchProgress(ne::NodeId id) -> float {
+  auto it = node_touch_time_.find(id);
+  if (it != node_touch_time_.end() && it->second > 0.0f)
+    return (kTouchTime - it->second) / kTouchTime;
+  else
+    return 0.0f;
+}
+
+void App::UpdateTouch() {
+  const auto deltaTime = ImGui::GetIO().DeltaTime;
+  for (auto& entry : node_touch_time_) {
+    if (entry.second > 0.0f) entry.second -= deltaTime;
+  }
+}
+
+auto App::CreateEditorConfig() -> ne::Config {
+  auto config = ne::Config{};
+
+  config.SettingsFile = "Blueprints.json";
+  config.UserPointer = this;
+
+  config.LoadNodeSettings = [](const auto node_id, auto* data,
+                               auto* user_pointer) -> size_t {
+    auto* self = static_cast<App*>(user_pointer);
+    const auto* node = self->nodes_and_links_.FindNode(node_id);
+
+    if (node == nullptr) {
+      return 0;
+    }
+
+    if (data != nullptr) {
+      strcpy(data, node->State.data());
+    }
+
+    return node->State.size();
+  };
+
+  config.SaveNodeSettings = [](const auto node_id, const auto* data,
+                               const auto size, const auto,
+                               auto* user_pointer) -> bool {
+    auto* self = static_cast<App*>(user_pointer);
+    auto* node = self->nodes_and_links_.FindNode(node_id);
+
+    if (node == nullptr) {
+      return false;
+    }
+
+    node->State.assign(data, size);
+    self->TouchNode(node_id);
+
+    return true;
+  };
+
+  return config;
+}
+
+void App::OnStart() {
+  cpp::Expects(!editor_context_.has_value());
+  cpp::Expects(!textures_.has_value());
+
+  const auto editor_config = CreateEditorConfig();
+  editor_context_.emplace(editor_config);
+
+  AddInitialNodes();
+  ne::NavigateToContent();
+  nodes_and_links_.BuildNodes();
+  AddInitialLinks();
+
+  textures_.emplace([app = this]() -> auto& { return *app; });
+
+  cpp::Ensures(editor_context_.has_value());
+  cpp::Ensures(textures_.has_value());
+}
+
+void App::AddInitialNodes() {
+  auto* node = static_cast<Node*>(nullptr);
+
+  node = nodes_and_links_.SpawnInputActionNode();
+  ne::SetNodePosition(node->ID, ImVec2(-252, 220));
+  node = nodes_and_links_.SpawnBranchNode();
+  ne::SetNodePosition(node->ID, ImVec2(-300, 351));
+  node = nodes_and_links_.SpawnDoNNode();
+  ne::SetNodePosition(node->ID, ImVec2(-238, 504));
+  node = nodes_and_links_.SpawnOutputActionNode();
+  ne::SetNodePosition(node->ID, ImVec2(71, 80));
+  node = nodes_and_links_.SpawnSetTimerNode();
+  ne::SetNodePosition(node->ID, ImVec2(168, 316));
+
+  node = nodes_and_links_.SpawnTreeSequenceNode();
+  ne::SetNodePosition(node->ID, ImVec2(1028, 329));
+  node = nodes_and_links_.SpawnTreeTaskNode();
+  ne::SetNodePosition(node->ID, ImVec2(1204, 458));
+  node = nodes_and_links_.SpawnTreeTask2Node();
+  ne::SetNodePosition(node->ID, ImVec2(868, 538));
+
+  node = nodes_and_links_.SpawnComment();
+  ne::SetNodePosition(node->ID, ImVec2(112, 576));
+  ne::SetGroupSize(node->ID, ImVec2(384, 154));
+  node = nodes_and_links_.SpawnComment();
+  ne::SetNodePosition(node->ID, ImVec2(800, 224));
+  ne::SetGroupSize(node->ID, ImVec2(640, 400));
+
+  node = nodes_and_links_.SpawnLessNode();
+  ne::SetNodePosition(node->ID, ImVec2(366, 652));
+  node = nodes_and_links_.SpawnWeirdNode();
+  ne::SetNodePosition(node->ID, ImVec2(144, 652));
+  node = nodes_and_links_.SpawnMessageNode();
+  ne::SetNodePosition(node->ID, ImVec2(-348, 698));
+  node = nodes_and_links_.SpawnPrintStringNode();
+  ne::SetNodePosition(node->ID, ImVec2(-69, 652));
+
+  node = nodes_and_links_.SpawnHoudiniTransformNode();
+  ne::SetNodePosition(node->ID, ImVec2(500, -70));
+  node = nodes_and_links_.SpawnHoudiniGroupNode();
+  ne::SetNodePosition(node->ID, ImVec2(500, 42));
+}
+
+void App::AddInitialLinks() {
+  nodes_and_links_.SpawnLink({GetNextLinkId(), nodes_and_links_.GetNodes()[5].Outputs[0].ID,
+                    nodes_and_links_.GetNodes()[6].Inputs[0].ID});
+  nodes_and_links_.SpawnLink({GetNextLinkId(), nodes_and_links_.GetNodes()[5].Outputs[0].ID,
+                    nodes_and_links_.GetNodes()[7].Inputs[0].ID});
+  nodes_and_links_.SpawnLink({GetNextLinkId(), nodes_and_links_.GetNodes()[14].Outputs[0].ID,
+                    nodes_and_links_.GetNodes()[15].Inputs[0].ID});
+}
+
+void App::OnStop() {
+  textures_.reset();
+  editor_context_.reset();
+
+  cpp::Ensures(!textures_.has_value());
+  cpp::Ensures(!editor_context_.has_value());
+}
 
 void App::ShowLeftPane(float paneWidth) {
   cpp::Expects(textures_.has_value());
@@ -617,7 +374,7 @@ void App::ShowLeftPane(float paneWidth) {
   if (ImGui::Button("Zoom to Content")) ne::NavigateToContent();
   ImGui::Spring(0.0f);
   if (ImGui::Button("Show Flow")) {
-    for (auto& link : links_) ne::Flow(link.ID);
+    for (auto& link : nodes_and_links_.GetLinks()) ne::Flow(link.ID);
   }
   ImGui::Spring();
   if (ImGui::Button("Edit Style")) showStyleEditor = true;
@@ -656,7 +413,8 @@ void App::ShowLeftPane(float paneWidth) {
   ImGui::SameLine();
   ImGui::TextUnformatted("Nodes");
   ImGui::Indent();
-  for (auto& node : nodes_) {
+
+  for (auto& node : nodes_and_links_.GetNodes()) {
     ImGui::PushID(node.ID.AsPointer());
     auto start = ImGui::GetCursorScreenPos();
 
@@ -791,14 +549,14 @@ void App::ShowLeftPane(float paneWidth) {
   ImGui::Unindent();
 
   if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)))
-    for (auto& link : links_) ne::Flow(link.ID);
+    for (auto& link : nodes_and_links_.GetLinks()) ne::Flow(link.ID);
 
   if (ne::HasSelectionChanged()) ++changeCount;
 
   ImGui::EndChild();
 }
 
-void App::OnFrame(float deltaTime) {
+void App::OnFrame(float /*unused*/) {
   cpp::Expects(textures_.has_value());
 
   UpdateTouch();
@@ -845,7 +603,7 @@ void App::OnFrame(float deltaTime) {
         GetTextureWidth(texture_ids.header_background),
         GetTextureHeight(texture_ids.header_background));
 
-    for (auto& node : nodes_) {
+    for (auto& node : nodes_and_links_.GetNodes()) {
       if (node.Type != NodeType::Blueprint && node.Type != NodeType::Simple)
         continue;
 
@@ -882,7 +640,8 @@ void App::OnFrame(float deltaTime) {
               ImGui::TextUnformatted(output.Name.c_str());
               ImGui::Spring(0);
             }
-            DrawPinIcon(output, IsPinLinked(output.ID), (int)(alpha * 255));
+            DrawPinIcon(output, nodes_and_links_.IsPinLinked(output.ID),
+                        (int)(alpha * 255));
             ImGui::Spring(0, ImGui::GetStyle().ItemSpacing.x / 2);
             ImGui::EndHorizontal();
             ImGui::PopStyleVar();
@@ -906,7 +665,7 @@ void App::OnFrame(float deltaTime) {
 
         builder.Input(input.ID);
         ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
-        DrawPinIcon(input, IsPinLinked(input.ID), (int)(alpha * 255));
+        DrawPinIcon(input, nodes_and_links_.IsPinLinked(input.ID), (int)(alpha * 255));
         ImGui::Spring(0);
         if (!input.Name.empty()) {
           ImGui::TextUnformatted(input.Name.c_str());
@@ -959,7 +718,7 @@ void App::OnFrame(float deltaTime) {
           ImGui::TextUnformatted(output.Name.c_str());
         }
         ImGui::Spring(0);
-        DrawPinIcon(output, IsPinLinked(output.ID), (int)(alpha * 255));
+        DrawPinIcon(output, nodes_and_links_.IsPinLinked(output.ID), (int)(alpha * 255));
         ImGui::PopStyleVar();
         builder.EndOutput();
       }
@@ -967,7 +726,7 @@ void App::OnFrame(float deltaTime) {
       builder.End();
     }
 
-    for (auto& node : nodes_) {
+    for (auto& node : nodes_and_links_.GetNodes()) {
       if (node.Type != NodeType::Tree) continue;
 
       const float rounding = 5.0f;
@@ -1121,7 +880,7 @@ void App::OnFrame(float deltaTime) {
       // ImGui::PopStyleVar();
     }
 
-    for (auto& node : nodes_) {
+    for (auto& node : nodes_and_links_.GetNodes()) {
       if (node.Type != NodeType::Houdini) continue;
 
       const float rounding = 10.0f;
@@ -1311,7 +1070,7 @@ void App::OnFrame(float deltaTime) {
       // ImGui::PopStyleVar();
     }
 
-    for (auto& node : nodes_) {
+    for (auto& node : nodes_and_links_.GetNodes()) {
       if (node.Type != NodeType::Comment) continue;
 
       const float commentAlpha = 0.75f;
@@ -1368,7 +1127,7 @@ void App::OnFrame(float deltaTime) {
       ne::EndGroupHint();
     }
 
-    for (auto& link : links_)
+    for (auto& link : nodes_and_links_.GetLinks())
       ne::Link(link.ID, link.StartPinID, link.EndPinID, link.Color, 2.0f);
 
     if (!createNewNode) {
@@ -1394,8 +1153,8 @@ void App::OnFrame(float deltaTime) {
 
         ne::PinId startPinId = 0, endPinId = 0;
         if (ne::QueryNewLink(&startPinId, &endPinId)) {
-          auto startPin = FindPin(startPinId);
-          auto endPin = FindPin(endPinId);
+          auto startPin = nodes_and_links_.FindPin(startPinId);
+          auto endPin = nodes_and_links_.FindPin(endPinId);
 
           newLinkPin = startPin ? startPin : endPin;
 
@@ -1422,8 +1181,9 @@ void App::OnFrame(float deltaTime) {
             } else {
               showLabel("+ Create Link", ImColor(32, 45, 32, 180));
               if (ne::AcceptNewItem(ImColor(128, 255, 128), 4.0f)) {
-                links_.emplace_back(Link(GetNextId(), startPinId, endPinId));
-                links_.back().Color = GetIconColor(startPin->Type);
+                auto link = Link{GetNextObjectId(), startPinId, endPinId};
+                link.Color = GetIconColor(startPin->Type);
+                nodes_and_links_.SpawnLink(link);
               }
             }
           }
@@ -1431,12 +1191,12 @@ void App::OnFrame(float deltaTime) {
 
         ne::PinId pinId = 0;
         if (ne::QueryNewNode(&pinId)) {
-          newLinkPin = FindPin(pinId);
+          newLinkPin = nodes_and_links_.FindPin(pinId);
           if (newLinkPin) showLabel("+ Create Node", ImColor(32, 45, 32, 180));
 
           if (ne::AcceptNewItem()) {
             createNewNode = true;
-            newNodeLinkPin = FindPin(pinId);
+            newNodeLinkPin = nodes_and_links_.FindPin(pinId);
             newLinkPin = nullptr;
             ne::Suspend();
             ImGui::OpenPopup("Create New Node");
@@ -1452,10 +1212,7 @@ void App::OnFrame(float deltaTime) {
         ne::LinkId linkId = 0;
         while (ne::QueryDeletedLink(&linkId)) {
           if (ne::AcceptDeletedItem()) {
-            auto id = std::find_if(
-                links_.begin(), links_.end(),
-                [linkId](auto& link) { return link.ID == linkId; });
-            if (id != links_.end()) links_.erase(id);
+            nodes_and_links_.EraseLinkWithId(linkId);
           }
         }
 
@@ -1463,9 +1220,9 @@ void App::OnFrame(float deltaTime) {
         while (ne::QueryDeletedNode(&nodeId)) {
           if (ne::AcceptDeletedItem()) {
             auto id = std::find_if(
-                nodes_.begin(), nodes_.end(),
+                nodes_and_links_.GetNodes().begin(), nodes_and_links_.GetNodes().end(),
                 [nodeId](auto& node) { return node.ID == nodeId; });
-            if (id != nodes_.end()) nodes_.erase(id);
+            if (id != nodes_and_links_.GetNodes().end()) nodes_and_links_.GetNodes().erase(id);
           }
         }
       }
@@ -1492,7 +1249,7 @@ void App::OnFrame(float deltaTime) {
   ne::Suspend();
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
   if (ImGui::BeginPopup("Node Context Menu")) {
-    auto node = FindNode(contextNodeId);
+    auto node = nodes_and_links_.FindNode(contextNodeId);
 
     ImGui::TextUnformatted("Node Context Menu");
     ImGui::Separator();
@@ -1512,7 +1269,7 @@ void App::OnFrame(float deltaTime) {
   }
 
   if (ImGui::BeginPopup("Pin Context Menu")) {
-    auto pin = FindPin(contextPinId);
+    auto pin = nodes_and_links_.FindPin(contextPinId);
 
     ImGui::TextUnformatted("Pin Context Menu");
     ImGui::Separator();
@@ -1529,7 +1286,7 @@ void App::OnFrame(float deltaTime) {
   }
 
   if (ImGui::BeginPopup("Link Context Menu")) {
-    auto link = FindLink(contextLinkId);
+    auto link = nodes_and_links_.FindLink(contextLinkId);
 
     ImGui::TextUnformatted("Link Context Menu");
     ImGui::Separator();
@@ -1553,29 +1310,30 @@ void App::OnFrame(float deltaTime) {
     // 0xFFFF00FF);
 
     Node* node = nullptr;
-    if (ImGui::MenuItem("Input Action")) node = SpawnInputActionNode();
-    if (ImGui::MenuItem("Output Action")) node = SpawnOutputActionNode();
-    if (ImGui::MenuItem("Branch")) node = SpawnBranchNode();
-    if (ImGui::MenuItem("Do N")) node = SpawnDoNNode();
-    if (ImGui::MenuItem("Set Timer")) node = SpawnSetTimerNode();
-    if (ImGui::MenuItem("Less")) node = SpawnLessNode();
-    if (ImGui::MenuItem("Weird")) node = SpawnWeirdNode();
-    if (ImGui::MenuItem("Trace by Channel")) node = SpawnTraceByChannelNode();
-    if (ImGui::MenuItem("Print String")) node = SpawnPrintStringNode();
+    if (ImGui::MenuItem("Input Action")) node = nodes_and_links_.SpawnInputActionNode();
+    if (ImGui::MenuItem("Output Action")) node = nodes_and_links_.SpawnOutputActionNode();
+    if (ImGui::MenuItem("Branch")) node = nodes_and_links_.SpawnBranchNode();
+    if (ImGui::MenuItem("Do N")) node = nodes_and_links_.SpawnDoNNode();
+    if (ImGui::MenuItem("Set Timer")) node = nodes_and_links_.SpawnSetTimerNode();
+    if (ImGui::MenuItem("Less")) node = nodes_and_links_.SpawnLessNode();
+    if (ImGui::MenuItem("Weird")) node = nodes_and_links_.SpawnWeirdNode();
+    if (ImGui::MenuItem("Trace by Channel"))
+      node = nodes_and_links_.SpawnTraceByChannelNode();
+    if (ImGui::MenuItem("Print String")) node = nodes_and_links_.SpawnPrintStringNode();
     ImGui::Separator();
-    if (ImGui::MenuItem("Comment")) node = SpawnComment();
+    if (ImGui::MenuItem("Comment")) node = nodes_and_links_.SpawnComment();
     ImGui::Separator();
-    if (ImGui::MenuItem("Sequence")) node = SpawnTreeSequenceNode();
-    if (ImGui::MenuItem("Move To")) node = SpawnTreeTaskNode();
-    if (ImGui::MenuItem("Random Wait")) node = SpawnTreeTask2Node();
+    if (ImGui::MenuItem("Sequence")) node = nodes_and_links_.SpawnTreeSequenceNode();
+    if (ImGui::MenuItem("Move To")) node = nodes_and_links_.SpawnTreeTaskNode();
+    if (ImGui::MenuItem("Random Wait")) node = nodes_and_links_.SpawnTreeTask2Node();
     ImGui::Separator();
-    if (ImGui::MenuItem("Message")) node = SpawnMessageNode();
+    if (ImGui::MenuItem("Message")) node = nodes_and_links_.SpawnMessageNode();
     ImGui::Separator();
-    if (ImGui::MenuItem("Transform")) node = SpawnHoudiniTransformNode();
-    if (ImGui::MenuItem("Group")) node = SpawnHoudiniGroupNode();
+    if (ImGui::MenuItem("Transform")) node = nodes_and_links_.SpawnHoudiniTransformNode();
+    if (ImGui::MenuItem("Group")) node = nodes_and_links_.SpawnHoudiniGroupNode();
 
     if (node) {
-      BuildNodes();
+      nodes_and_links_.BuildNodes();
 
       createNewNode = false;
 
@@ -1590,8 +1348,10 @@ void App::OnFrame(float deltaTime) {
             auto endPin = &pin;
             if (startPin->Kind == PinKind::Input) std::swap(startPin, endPin);
 
-            links_.emplace_back(Link(GetNextId(), startPin->ID, endPin->ID));
-            links_.back().Color = GetIconColor(startPin->Type);
+            auto link = Link{GetNextObjectId(), startPin->ID, endPin->ID};
+            link.Color = GetIconColor(startPin->Type);
+
+            nodes_and_links_.SpawnLink(link);
 
             break;
           }
@@ -1675,6 +1435,6 @@ void App::OnFrame(float deltaTime) {
     drawList->PopClipRect();
   }
 
-  // ImGui::ShowTestWindow();
-  // ImGui::ShowMetricsWindow();
+  ImGui::ShowDemoWindow();
+  ImGui::ShowMetricsWindow();
 }

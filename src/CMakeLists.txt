@@ -110,6 +110,7 @@ add_example_executable(esc
   esc_cpp.cc
   esc_drawing.cc
   esc_editor_context_handle.cc
+  esc_nodes_and_links.cc
   esc_textures_handle.cc
   esc_types.cc
   esc_widgets.cc

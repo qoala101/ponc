@@ -5,6 +5,7 @@
 #include <imgui_node_editor.h>
 
 #include <memory>
+#include "esc_nodes_and_links.h"
 #include "esc_textures_handle.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -34,43 +35,17 @@ class App : public Application {
   virtual ~App() = default;
 
  private:
-  auto GetNextId() -> int;
+  auto GetNextObjectId() -> int;
   auto GetNextLinkId() -> ne::LinkId;
 
   void TouchNode(ne::NodeId id);
   auto GetTouchProgress(ne::NodeId id) -> float;
   void UpdateTouch();
 
-  auto FindNode(ne::NodeId id) -> Node*;
-  auto FindLink(ne::LinkId id) -> Link*;
-  auto FindPin(ne::PinId id) -> Pin*;
-
-  auto IsPinLinked(ne::PinId id) -> bool;
-
-  void BuildNodes();
-
-  auto SpawnInputActionNode() -> Node*;
-  auto SpawnBranchNode() -> Node*;
-  auto SpawnDoNNode() -> Node*;
-  auto SpawnOutputActionNode() -> Node*;
-  auto SpawnPrintStringNode() -> Node*;
-  auto SpawnMessageNode() -> Node*;
-  auto SpawnSetTimerNode() -> Node*;
-  auto SpawnLessNode() -> Node*;
-  auto SpawnWeirdNode() -> Node*;
-  auto SpawnTraceByChannelNode() -> Node*;
-  auto SpawnTreeSequenceNode() -> Node*;
-  auto SpawnTreeTaskNode() -> Node*;
-  auto SpawnTreeTask2Node() -> Node*;
-  auto SpawnComment() -> Node*;
-  auto SpawnHoudiniTransformNode() -> Node*;
-  auto SpawnHoudiniGroupNode() -> Node*;
 
   void OnStart() override;
   void OnStop() override;
   void OnFrame(float deltaTime) override;
-
-  void DrawPinIcon(const Pin& pin, bool connected, int alpha) const;
 
   void ShowLeftPane(float paneWidth);
 
@@ -84,10 +59,9 @@ class App : public Application {
   std::optional<esc::EditorContextHandle> editor_context_{};
   std::optional<esc::TexturesHandle> textures_{};
 
-  int next_id_{};
+  int next_object_id_{};
 
-  std::vector<Node> nodes_{};
-  std::vector<Link> links_{};
+  esc::NodesAndLinks nodes_and_links_;
 
   std::map<ne::NodeId, float, NodeIdLess> node_touch_time_{};
   bool show_ordinals_{};
