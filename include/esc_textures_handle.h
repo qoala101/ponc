@@ -19,10 +19,10 @@ class TexturesHandle {
   explicit TexturesHandle(std::shared_ptr<Application> app);
 
   TexturesHandle(const TexturesHandle&) = delete;
-  TexturesHandle(TexturesHandle&&) noexcept = delete;
+  TexturesHandle(TexturesHandle&&) noexcept = default;
 
   auto operator=(const TexturesHandle&) noexcept -> TexturesHandle& = delete;
-  auto operator=(TexturesHandle&&) noexcept -> TexturesHandle& = delete;
+  auto operator=(TexturesHandle&&) noexcept -> TexturesHandle& = default;
 
   ~TexturesHandle();
 

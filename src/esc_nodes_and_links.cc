@@ -1,7 +1,9 @@
 #include "esc_nodes_and_links.h"
 
+#include <imgui_node_editor.h>
+
+#include "esc_app.h"
 #include "esc_cpp.h"
-#include "imgui_node_editor.h"
 
 namespace esc {
 namespace {
@@ -18,20 +20,19 @@ void BuildNode(Node* node) {
 }
 }  // namespace
 
-NodesAndLinks::NodesAndLinks(std::shared_ptr<AutoIncrementable> auto_object_id)
-    : auto_object_id_{(cpp::Expects(auto_object_id != nullptr),
-                       std::move(auto_object_id))} {
-  cpp::Ensures(auto_object_id_ != nullptr);
+NodesAndLinks::NodesAndLinks(std::shared_ptr<App> app)
+    : app_{(cpp::Expects(app != nullptr), std::move(app))} {
+  cpp::Ensures(app_ != nullptr);
 }
 
 auto NodesAndLinks::SpawnInputActionNode() -> Node* {
-  nodes_.emplace_back(auto_object_id_->GetNext(), "InputAction Fire",
+  nodes_.emplace_back(app_->GetNextObjectId(), "InputAction Fire",
                       ImColor(255, 128, 128));
-  nodes_.back().Outputs.emplace_back(auto_object_id_->GetNext(), "",
+  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "",
                                      PinType::Delegate);
-  nodes_.back().Outputs.emplace_back(auto_object_id_->GetNext(), "Pressed",
+  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "Pressed",
                                      PinType::Flow);
-  nodes_.back().Outputs.emplace_back(auto_object_id_->GetNext(), "Released",
+  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "Released",
                                      PinType::Flow);
 
   BuildNode(&nodes_.back());
@@ -40,14 +41,13 @@ auto NodesAndLinks::SpawnInputActionNode() -> Node* {
 }
 
 auto NodesAndLinks::SpawnBranchNode() -> Node* {
-  nodes_.emplace_back(auto_object_id_->GetNext(), "Branch");
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "",
-                                    PinType::Flow);
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "Condition",
+  nodes_.emplace_back(app_->GetNextObjectId(), "Branch");
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Condition",
                                     PinType::Bool);
-  nodes_.back().Outputs.emplace_back(auto_object_id_->GetNext(), "True",
+  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "True",
                                      PinType::Flow);
-  nodes_.back().Outputs.emplace_back(auto_object_id_->GetNext(), "False",
+  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "False",
                                      PinType::Flow);
 
   BuildNode(&nodes_.back());
@@ -56,16 +56,15 @@ auto NodesAndLinks::SpawnBranchNode() -> Node* {
 }
 
 auto NodesAndLinks::SpawnDoNNode() -> Node* {
-  nodes_.emplace_back(auto_object_id_->GetNext(), "Do N");
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "Enter",
+  nodes_.emplace_back(app_->GetNextObjectId(), "Do N");
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Enter",
                                     PinType::Flow);
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "N",
-                                    PinType::Int);
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "Reset",
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "N", PinType::Int);
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Reset",
                                     PinType::Flow);
-  nodes_.back().Outputs.emplace_back(auto_object_id_->GetNext(), "Exit",
+  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "Exit",
                                      PinType::Flow);
-  nodes_.back().Outputs.emplace_back(auto_object_id_->GetNext(), "Counter",
+  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "Counter",
                                      PinType::Int);
 
   BuildNode(&nodes_.back());
@@ -74,12 +73,12 @@ auto NodesAndLinks::SpawnDoNNode() -> Node* {
 }
 
 auto NodesAndLinks::SpawnOutputActionNode() -> Node* {
-  nodes_.emplace_back(auto_object_id_->GetNext(), "OutputAction");
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "Sample",
+  nodes_.emplace_back(app_->GetNextObjectId(), "OutputAction");
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Sample",
                                     PinType::Float);
-  nodes_.back().Outputs.emplace_back(auto_object_id_->GetNext(), "Condition",
+  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "Condition",
                                      PinType::Bool);
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "Event",
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Event",
                                     PinType::Delegate);
 
   BuildNode(&nodes_.back());
@@ -88,13 +87,11 @@ auto NodesAndLinks::SpawnOutputActionNode() -> Node* {
 }
 
 auto NodesAndLinks::SpawnPrintStringNode() -> Node* {
-  nodes_.emplace_back(auto_object_id_->GetNext(), "Print String");
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "",
-                                    PinType::Flow);
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "In String",
+  nodes_.emplace_back(app_->GetNextObjectId(), "Print String");
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "In String",
                                     PinType::String);
-  nodes_.back().Outputs.emplace_back(auto_object_id_->GetNext(), "",
-                                     PinType::Flow);
+  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
 
   BuildNode(&nodes_.back());
 
@@ -102,9 +99,9 @@ auto NodesAndLinks::SpawnPrintStringNode() -> Node* {
 }
 
 auto NodesAndLinks::SpawnMessageNode() -> Node* {
-  nodes_.emplace_back(auto_object_id_->GetNext(), "", ImColor(128, 195, 248));
+  nodes_.emplace_back(app_->GetNextObjectId(), "", ImColor(128, 195, 248));
   nodes_.back().Type = NodeType::Simple;
-  nodes_.back().Outputs.emplace_back(auto_object_id_->GetNext(), "Message",
+  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "Message",
                                      PinType::String);
 
   BuildNode(&nodes_.back());
@@ -113,20 +110,18 @@ auto NodesAndLinks::SpawnMessageNode() -> Node* {
 }
 
 auto NodesAndLinks::SpawnSetTimerNode() -> Node* {
-  nodes_.emplace_back(auto_object_id_->GetNext(), "Set Timer",
+  nodes_.emplace_back(app_->GetNextObjectId(), "Set Timer",
                       ImColor(128, 195, 248));
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "",
-                                    PinType::Flow);
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "Object",
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Object",
                                     PinType::Object);
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "Function Name",
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Function Name",
                                     PinType::Function);
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "Time",
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Time",
                                     PinType::Float);
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "Looping",
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Looping",
                                     PinType::Bool);
-  nodes_.back().Outputs.emplace_back(auto_object_id_->GetNext(), "",
-                                     PinType::Flow);
+  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
 
   BuildNode(&nodes_.back());
 
@@ -134,13 +129,11 @@ auto NodesAndLinks::SpawnSetTimerNode() -> Node* {
 }
 
 auto NodesAndLinks::SpawnLessNode() -> Node* {
-  nodes_.emplace_back(auto_object_id_->GetNext(), "<", ImColor(128, 195, 248));
+  nodes_.emplace_back(app_->GetNextObjectId(), "<", ImColor(128, 195, 248));
   nodes_.back().Type = NodeType::Simple;
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "",
-                                    PinType::Float);
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "",
-                                    PinType::Float);
-  nodes_.back().Outputs.emplace_back(auto_object_id_->GetNext(), "",
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Float);
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Float);
+  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "",
                                      PinType::Float);
 
   BuildNode(&nodes_.back());
@@ -149,14 +142,12 @@ auto NodesAndLinks::SpawnLessNode() -> Node* {
 }
 
 auto NodesAndLinks::SpawnWeirdNode() -> Node* {
-  nodes_.emplace_back(auto_object_id_->GetNext(), "o.O",
-                      ImColor(128, 195, 248));
+  nodes_.emplace_back(app_->GetNextObjectId(), "o.O", ImColor(128, 195, 248));
   nodes_.back().Type = NodeType::Simple;
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "",
-                                    PinType::Float);
-  nodes_.back().Outputs.emplace_back(auto_object_id_->GetNext(), "",
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Float);
+  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "",
                                      PinType::Float);
-  nodes_.back().Outputs.emplace_back(auto_object_id_->GetNext(), "",
+  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "",
                                      PinType::Float);
 
   BuildNode(&nodes_.back());
@@ -165,29 +156,27 @@ auto NodesAndLinks::SpawnWeirdNode() -> Node* {
 }
 
 auto NodesAndLinks::SpawnTraceByChannelNode() -> Node* {
-  nodes_.emplace_back(auto_object_id_->GetNext(),
-                      "Single Line Trace by Channel", ImColor(255, 128, 64));
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "",
+  nodes_.emplace_back(app_->GetNextObjectId(), "Single Line Trace by Channel",
+                      ImColor(255, 128, 64));
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Start",
                                     PinType::Flow);
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "Start",
-                                    PinType::Flow);
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "End",
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "End",
                                     PinType::Int);
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "Trace Channel",
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Trace Channel",
                                     PinType::Float);
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "Trace Complex",
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Trace Complex",
                                     PinType::Bool);
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(),
-                                    "Actors to Ignore", PinType::Int);
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(),
-                                    "Draw Debug Type", PinType::Bool);
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "Ignore Self",
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Actors to Ignore",
+                                    PinType::Int);
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Draw Debug Type",
                                     PinType::Bool);
-  nodes_.back().Outputs.emplace_back(auto_object_id_->GetNext(), "",
-                                     PinType::Flow);
-  nodes_.back().Outputs.emplace_back(auto_object_id_->GetNext(), "Out Hit",
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Ignore Self",
+                                    PinType::Bool);
+  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
+  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "Out Hit",
                                      PinType::Float);
-  nodes_.back().Outputs.emplace_back(auto_object_id_->GetNext(), "Return Value",
+  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "Return Value",
                                      PinType::Bool);
 
   BuildNode(&nodes_.back());
@@ -196,12 +185,10 @@ auto NodesAndLinks::SpawnTraceByChannelNode() -> Node* {
 }
 
 auto NodesAndLinks::SpawnTreeSequenceNode() -> Node* {
-  nodes_.emplace_back(auto_object_id_->GetNext(), "Sequence");
+  nodes_.emplace_back(app_->GetNextObjectId(), "Sequence");
   nodes_.back().Type = NodeType::Tree;
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "",
-                                    PinType::Flow);
-  nodes_.back().Outputs.emplace_back(auto_object_id_->GetNext(), "",
-                                     PinType::Flow);
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
+  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
 
   BuildNode(&nodes_.back());
 
@@ -209,10 +196,9 @@ auto NodesAndLinks::SpawnTreeSequenceNode() -> Node* {
 }
 
 auto NodesAndLinks::SpawnTreeTaskNode() -> Node* {
-  nodes_.emplace_back(auto_object_id_->GetNext(), "Move To");
+  nodes_.emplace_back(app_->GetNextObjectId(), "Move To");
   nodes_.back().Type = NodeType::Tree;
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "",
-                                    PinType::Flow);
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
 
   BuildNode(&nodes_.back());
 
@@ -220,10 +206,9 @@ auto NodesAndLinks::SpawnTreeTaskNode() -> Node* {
 }
 
 auto NodesAndLinks::SpawnTreeTask2Node() -> Node* {
-  nodes_.emplace_back(auto_object_id_->GetNext(), "Random Wait");
+  nodes_.emplace_back(app_->GetNextObjectId(), "Random Wait");
   nodes_.back().Type = NodeType::Tree;
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "",
-                                    PinType::Flow);
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
 
   BuildNode(&nodes_.back());
 
@@ -231,7 +216,7 @@ auto NodesAndLinks::SpawnTreeTask2Node() -> Node* {
 }
 
 auto NodesAndLinks::SpawnComment() -> Node* {
-  nodes_.emplace_back(auto_object_id_->GetNext(), "Test Comment");
+  nodes_.emplace_back(app_->GetNextObjectId(), "Test Comment");
   nodes_.back().Type = NodeType::Comment;
   nodes_.back().Size = ImVec2(300, 200);
 
@@ -239,12 +224,10 @@ auto NodesAndLinks::SpawnComment() -> Node* {
 }
 
 auto NodesAndLinks::SpawnHoudiniTransformNode() -> Node* {
-  nodes_.emplace_back(auto_object_id_->GetNext(), "Transform");
+  nodes_.emplace_back(app_->GetNextObjectId(), "Transform");
   nodes_.back().Type = NodeType::Houdini;
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "",
-                                    PinType::Flow);
-  nodes_.back().Outputs.emplace_back(auto_object_id_->GetNext(), "",
-                                     PinType::Flow);
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
+  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
 
   BuildNode(&nodes_.back());
 
@@ -252,14 +235,11 @@ auto NodesAndLinks::SpawnHoudiniTransformNode() -> Node* {
 }
 
 auto NodesAndLinks::SpawnHoudiniGroupNode() -> Node* {
-  nodes_.emplace_back(auto_object_id_->GetNext(), "Group");
+  nodes_.emplace_back(app_->GetNextObjectId(), "Group");
   nodes_.back().Type = NodeType::Houdini;
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "",
-                                    PinType::Flow);
-  nodes_.back().Inputs.emplace_back(auto_object_id_->GetNext(), "",
-                                    PinType::Flow);
-  nodes_.back().Outputs.emplace_back(auto_object_id_->GetNext(), "",
-                                     PinType::Flow);
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
+  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
+  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
 
   BuildNode(&nodes_.back());
 

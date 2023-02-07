@@ -6,12 +6,11 @@
 
 #include <memory>
 
-#include "esc_auto_incrementable.h"
+#include "esc_left_panel.h"
 #include "esc_nodes_and_links.h"
 #include "esc_textures_handle.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include <imfilebrowser.h>
 #include <imgui_internal.h>
 
 #include <algorithm>
@@ -35,14 +34,18 @@ class App : public Application, public std::enable_shared_from_this<App> {
 
   virtual ~App() = default;
 
+  auto GetNextObjectId() -> int;
+  auto GetTextures() -> esc::TexturesHandle&;
+  auto GetNodesAndLinks() -> esc::NodesAndLinks&;
+
+  void ShowFlow();
+
  private:
   auto GetNextLinkId();
 
   void OnStart() override;
   void OnStop() override;
   void OnFrame(float deltaTime) override;
-
-  void ShowFlow();
 
   //
 
@@ -51,16 +54,14 @@ class App : public Application, public std::enable_shared_from_this<App> {
   void AddInitialNodes();
   void AddInitialLinks();
 
-  void DrawLeftPane(float paneWidth);
   void DrawFrame();
-
+  
+  std::optional<esc::NodesAndLinks> nodes_and_links_;
   std::optional<esc::EditorContextHandle> editor_context_{};
   std::optional<esc::TexturesHandle> textures_{};
-  ImGui::FileBrowser file_browser_{};
+  std::optional<esc::LeftPanel> left_panel_;
 
-  std::shared_ptr<esc::AutoIncrementable> auto_object_id_{};
-
-  esc::NodesAndLinks nodes_and_links_;
+  int next_object_id_{};
 };
 
 #endif  // VH_ESC_APP_H_

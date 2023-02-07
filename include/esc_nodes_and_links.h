@@ -3,14 +3,15 @@
 
 #include <vector>
 
-#include "esc_auto_incrementable.h"
 #include "esc_types.h"
 #include "imgui_node_editor.h"
+
+class App;
 
 namespace esc {
 class NodesAndLinks {
  public:
-  explicit NodesAndLinks(std::shared_ptr<AutoIncrementable> auto_object_id);
+  explicit NodesAndLinks(std::shared_ptr<App> app);
 
   static auto GetSelectedNodeIds [[nodiscard]] () -> std::vector<ne::NodeId>;
   static auto GetSelectedLinkIds [[nodiscard]] () -> std::vector<ne::LinkId>;
@@ -47,7 +48,7 @@ class NodesAndLinks {
   void EraseLinkWithId(ne::LinkId id);
 
  private:
-  std::shared_ptr<esc::AutoIncrementable> auto_object_id_{};
+  std::shared_ptr<App> app_{};
   std::vector<Node> nodes_{};
   std::vector<Link> links_{};
 };

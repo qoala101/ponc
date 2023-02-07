@@ -6,7 +6,6 @@
 
 #include <memory>
 
-#include "esc_auto_incrementable.h"
 #include "esc_builders.h"
 #include "esc_cpp.h"
 #include "esc_enums.h"
@@ -287,36 +286,30 @@ void DrawPinIcon(const Pin& pin, bool connected, float alpha) {
   Icon(size, type, connected, color,
        ImColor{32, 32, 32, static_cast<int>(alpha * 255)});
 }
-// vh: norm
-void AddImage(ImTextureID texture_id, int alpha) {
-  const auto p_min = ImGui::GetItemRectMin();
-  const auto p_max = ImGui::GetItemRectMax();
-  const auto uv_min = ImVec2{0, 0};
-  const auto uv_max = ImVec2{1, 1};
-  const auto col = IM_COL32(255, 255, 255, 96);
-
-  ImGui::GetWindowDrawList()->AddImage(texture_id, p_min, p_max, uv_min, uv_max,
-                                       col);
-}
 }  // namespace
-
 // vh: norm
 App::App(const char* name, int argc, char** argv)
-    : Application{name, argc, argv},
-      file_browser_{[]() {
-        auto file_browser_ = ImGui::FileBrowser{};
-        file_browser_.SetTitle("Select");
-        file_browser_.SetTypeFilters({".h", ".cpp"});
-        return file_browser_;
-      }()},
-      auto_object_id_{std::make_shared<esc::AutoIncrementable>(1)},
-      nodes_and_links_{auto_object_id_} {}
+    : Application{name, argc, argv}, next_object_id_{1} {}
+// vh: ok
+auto App::GetNextObjectId() -> int { return next_object_id_++; }
+// vh: ok
+auto App::GetTextures() -> esc::TexturesHandle& {
+  cpp::Expects(textures_.has_value());
+  return *textures_;
+}
+// vh: ok
+auto App::GetNodesAndLinks() -> esc::NodesAndLinks& {
+  cpp::Expects(nodes_and_links_.has_value());
+  return *nodes_and_links_;
+}
 // vh: norm
 auto App::GetNextLinkId() {
-  return ne::LinkId{static_cast<uintptr_t>(auto_object_id_->GetNext())};
+  return ne::LinkId{static_cast<uintptr_t>(GetNextObjectId())};
 }
 // vh: norm
 auto App::CreateEditorConfig() {
+  cpp::Expects(nodes_and_links_.has_value());
+
   auto config = ne::Config{};
 
   config.SettingsFile = "Blueprints.json";
@@ -325,7 +318,7 @@ auto App::CreateEditorConfig() {
   config.LoadNodeSettings = [](const auto node_id, auto* data,
                                auto* user_pointer) -> size_t {
     auto* self = static_cast<App*>(user_pointer);
-    const auto* node = self->nodes_and_links_.FindNode(node_id);
+    const auto* node = self->nodes_and_links_->FindNode(node_id);
 
     if (node == nullptr) {
       return 0;
@@ -342,7 +335,7 @@ auto App::CreateEditorConfig() {
                                const auto size, const auto,
                                auto* user_pointer) -> bool {
     auto* self = static_cast<App*>(user_pointer);
-    auto* node = self->nodes_and_links_.FindNode(node_id);
+    auto* node = self->nodes_and_links_->FindNode(node_id);
 
     if (node == nullptr) {
       return false;
@@ -359,244 +352,115 @@ auto App::CreateEditorConfig() {
 void App::OnStart() {
   cpp::Expects(!editor_context_.has_value());
   cpp::Expects(!textures_.has_value());
+  cpp::Expects(!left_panel_.has_value());
+  cpp::Expects(!nodes_and_links_.has_value());
 
-  const auto editor_config = CreateEditorConfig();
-  editor_context_.emplace(editor_config);
+  nodes_and_links_.emplace(shared_from_this());
+  editor_context_.emplace(CreateEditorConfig());
   textures_.emplace(shared_from_this());
+  left_panel_.emplace(shared_from_this());
 
   AddInitialNodes();
   AddInitialLinks();
 
   cpp::Ensures(editor_context_.has_value());
   cpp::Ensures(textures_.has_value());
+  cpp::Ensures(left_panel_.has_value());
+  cpp::Ensures(nodes_and_links_.has_value());
 }
 // vh: norm
 void App::AddInitialNodes() {
+  cpp::Expects(nodes_and_links_.has_value());
+
   auto* node = static_cast<Node*>(nullptr);
 
-  node = nodes_and_links_.SpawnInputActionNode();
+  node = nodes_and_links_->SpawnInputActionNode();
   ne::SetNodePosition(node->ID, ImVec2(-252, 220));
-  node = nodes_and_links_.SpawnBranchNode();
+  node = nodes_and_links_->SpawnBranchNode();
   ne::SetNodePosition(node->ID, ImVec2(-300, 351));
-  node = nodes_and_links_.SpawnDoNNode();
+  node = nodes_and_links_->SpawnDoNNode();
   ne::SetNodePosition(node->ID, ImVec2(-238, 504));
-  node = nodes_and_links_.SpawnOutputActionNode();
+  node = nodes_and_links_->SpawnOutputActionNode();
   ne::SetNodePosition(node->ID, ImVec2(71, 80));
-  node = nodes_and_links_.SpawnSetTimerNode();
+  node = nodes_and_links_->SpawnSetTimerNode();
   ne::SetNodePosition(node->ID, ImVec2(168, 316));
 
-  node = nodes_and_links_.SpawnTreeSequenceNode();
+  node = nodes_and_links_->SpawnTreeSequenceNode();
   ne::SetNodePosition(node->ID, ImVec2(1028, 329));
-  node = nodes_and_links_.SpawnTreeTaskNode();
+  node = nodes_and_links_->SpawnTreeTaskNode();
   ne::SetNodePosition(node->ID, ImVec2(1204, 458));
-  node = nodes_and_links_.SpawnTreeTask2Node();
+  node = nodes_and_links_->SpawnTreeTask2Node();
   ne::SetNodePosition(node->ID, ImVec2(868, 538));
 
-  node = nodes_and_links_.SpawnComment();
+  node = nodes_and_links_->SpawnComment();
   ne::SetNodePosition(node->ID, ImVec2(112, 576));
   ne::SetGroupSize(node->ID, ImVec2(384, 154));
-  node = nodes_and_links_.SpawnComment();
+  node = nodes_and_links_->SpawnComment();
   ne::SetNodePosition(node->ID, ImVec2(800, 224));
   ne::SetGroupSize(node->ID, ImVec2(640, 400));
 
-  node = nodes_and_links_.SpawnLessNode();
+  node = nodes_and_links_->SpawnLessNode();
   ne::SetNodePosition(node->ID, ImVec2(366, 652));
-  node = nodes_and_links_.SpawnWeirdNode();
+  node = nodes_and_links_->SpawnWeirdNode();
   ne::SetNodePosition(node->ID, ImVec2(144, 652));
-  node = nodes_and_links_.SpawnMessageNode();
+  node = nodes_and_links_->SpawnMessageNode();
   ne::SetNodePosition(node->ID, ImVec2(-348, 698));
-  node = nodes_and_links_.SpawnPrintStringNode();
+  node = nodes_and_links_->SpawnPrintStringNode();
   ne::SetNodePosition(node->ID, ImVec2(-69, 652));
 
-  node = nodes_and_links_.SpawnHoudiniTransformNode();
+  node = nodes_and_links_->SpawnHoudiniTransformNode();
   ne::SetNodePosition(node->ID, ImVec2(500, -70));
-  node = nodes_and_links_.SpawnHoudiniGroupNode();
+  node = nodes_and_links_->SpawnHoudiniGroupNode();
   ne::SetNodePosition(node->ID, ImVec2(500, 42));
 
-  nodes_and_links_.BuildNodes();
+  nodes_and_links_->BuildNodes();
 }
 // vh: norm
 void App::AddInitialLinks() {
-  nodes_and_links_.SpawnLink({GetNextLinkId(),
-                              nodes_and_links_.GetNodes()[5].Outputs[0].ID,
-                              nodes_and_links_.GetNodes()[6].Inputs[0].ID});
-  nodes_and_links_.SpawnLink({GetNextLinkId(),
-                              nodes_and_links_.GetNodes()[5].Outputs[0].ID,
-                              nodes_and_links_.GetNodes()[7].Inputs[0].ID});
-  nodes_and_links_.SpawnLink({GetNextLinkId(),
-                              nodes_and_links_.GetNodes()[14].Outputs[0].ID,
-                              nodes_and_links_.GetNodes()[15].Inputs[0].ID});
+  cpp::Expects(nodes_and_links_.has_value());
+
+  nodes_and_links_->SpawnLink({GetNextLinkId(),
+                               nodes_and_links_->GetNodes()[5].Outputs[0].ID,
+                               nodes_and_links_->GetNodes()[6].Inputs[0].ID});
+  nodes_and_links_->SpawnLink({GetNextLinkId(),
+                               nodes_and_links_->GetNodes()[5].Outputs[0].ID,
+                               nodes_and_links_->GetNodes()[7].Inputs[0].ID});
+  nodes_and_links_->SpawnLink({GetNextLinkId(),
+                               nodes_and_links_->GetNodes()[14].Outputs[0].ID,
+                               nodes_and_links_->GetNodes()[15].Inputs[0].ID});
 }
 // vh: norm
 void App::OnStop() {
+  cpp::Expects(left_panel_.has_value());
+  cpp::Expects(textures_.has_value());
+  cpp::Expects(editor_context_.has_value());
+  cpp::Expects(nodes_and_links_.has_value());
+
+  left_panel_.reset();
   textures_.reset();
   editor_context_.reset();
+  nodes_and_links_.reset();
 
+  cpp::Ensures(!left_panel_.has_value());
   cpp::Ensures(!textures_.has_value());
   cpp::Ensures(!editor_context_.has_value());
+  cpp::Ensures(!nodes_and_links_.has_value());
 }
 // vh: ok
 void App::OnFrame(float /*unused*/) { DrawFrame(); }
 // vh: ok
 void App::ShowFlow() {
-  for (const auto& link : nodes_and_links_.GetLinks()) {
+  cpp::Expects(nodes_and_links_.has_value());
+
+  for (const auto& link : nodes_and_links_->GetLinks()) {
     ne::Flow(link.ID);
   }
 }
 
-void App::DrawLeftPane(float pane_width) {
-  cpp::Expects(textures_.has_value());
-
-  {
-    const auto child_scope =
-        cpp::Scope{[pane_width]() {
-                     ImGui::BeginChild("Selection", ImVec2{pane_width, 0});
-                   },
-                   []() { ImGui::EndChild(); }};
-
-    pane_width = ImGui::GetContentRegionAvail().x;
-
-    {
-      const auto horizontal_scope = cpp::Scope{
-          [pane_width]() {
-            ImGui::BeginHorizontal("Style Editor", ImVec2{pane_width, 0});
-          },
-          []() { ImGui::EndHorizontal(); }};
-
-      if (ImGui::Button("Open...")) {
-        file_browser_.Open();
-      }
-
-      if (ImGui::Button("Save As...")) {
-        file_browser_.Open();
-      }
-
-      if (ImGui::Button("Zoom to Content")) {
-        ne::NavigateToContent();
-      }
-
-      if (ImGui::Button("Show Flow")) {
-        ShowFlow();
-      }
-    }
-
-    const auto selected_node_ids = esc::NodesAndLinks::GetSelectedNodeIds();
-    const auto selected_link_ids = esc::NodesAndLinks::GetSelectedLinkIds();
-
-    const auto texture_ids = textures_->GetTextureIds();
-
-    {
-      const auto indent_scope =
-          cpp::Scope{[]() { ImGui::Indent(); }, []() { ImGui::Unindent(); }};
-
-      const auto& io = ImGui::GetIO();
-
-      const auto save_icon_width =
-          static_cast<float>(GetTextureWidth(texture_ids.save_icon));
-      const auto save_icon_height =
-          static_cast<float>(GetTextureHeight(texture_ids.save_icon));
-      const auto restore_icon_width =
-          static_cast<float>(GetTextureWidth(texture_ids.restore_icon));
-      const auto restore_icon_height =
-          static_cast<float>(GetTextureHeight(texture_ids.restore_icon));
-
-      for (auto& node : nodes_and_links_.GetNodes()) {
-        {
-          const auto id_scope =
-              cpp::Scope{[&node]() { ImGui::PushID(node.ID.AsPointer()); },
-                         []() { ImGui::PopID(); }};
-
-          const auto cursor_pos = ImGui::GetCursorScreenPos();
-          const auto node_label =
-              node.Name + "##" +
-              std::to_string(reinterpret_cast<uintptr_t>(node.ID.AsPointer()));
-          auto is_node_selected =
-              std::find(selected_node_ids.begin(), selected_node_ids.end(),
-                        node.ID) != selected_node_ids.end();
-
-          if (ImGui::Selectable(node_label.c_str(), &is_node_selected)) {
-            if (io.KeyCtrl) {
-              if (is_node_selected) {
-                ne::SelectNode(node.ID, true);
-              } else {
-                ne::DeselectNode(node.ID);
-              }
-            } else {
-              ne::SelectNode(node.ID, false);
-            }
-
-            ne::NavigateToSelection();
-          }
-
-          if (ImGui::IsItemHovered() && !node.State.empty()) {
-            ImGui::SetTooltip("State: %s", node.State.c_str());
-          }
-
-          const auto& style = ImGui::GetStyle();
-          const auto icon_panel_pos =
-              cursor_pos +
-              ImVec2{pane_width - style.FramePadding.x - style.IndentSpacing -
-                         save_icon_width - restore_icon_width -
-                         style.ItemInnerSpacing.x,
-                     (ImGui::GetTextLineHeight() - save_icon_height) / 2};
-
-          ImGui::SetCursorScreenPos(icon_panel_pos);
-          ImGui::SetItemAllowOverlap();
-
-          if (node.SavedState.empty()) {
-            if (ImGui::InvisibleButton(
-                    "save", ImVec2{save_icon_width, save_icon_height})) {
-              node.SavedState = node.State;
-            }
-
-            if (ImGui::IsItemActive()) {
-              AddImage(texture_ids.save_icon, 96);
-            } else if (ImGui::IsItemHovered()) {
-              AddImage(texture_ids.save_icon, 255);
-            } else {
-              AddImage(texture_ids.save_icon, 160);
-            }
-          } else {
-            ImGui::Dummy(ImVec2{save_icon_width, save_icon_height});
-            AddImage(texture_ids.save_icon, 32);
-          }
-
-          ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
-          ImGui::SetItemAllowOverlap();
-
-          if (!node.SavedState.empty()) {
-            if (ImGui::InvisibleButton(
-                    "restore",
-                    ImVec2{restore_icon_width, restore_icon_height})) {
-              node.State = node.SavedState;
-              ne::RestoreNodeState(node.ID);
-              node.SavedState.clear();
-            }
-
-            if (ImGui::IsItemActive()) {
-              AddImage(texture_ids.restore_icon, 96);
-            } else if (ImGui::IsItemHovered()) {
-              AddImage(texture_ids.restore_icon, 255);
-            } else {
-              AddImage(texture_ids.restore_icon, 160);
-            }
-          } else {
-            ImGui::Dummy(ImVec2{restore_icon_width, restore_icon_height});
-            AddImage(texture_ids.restore_icon, 32);
-          }
-
-          ImGui::SameLine(0, 0);
-          ImGui::SetItemAllowOverlap();
-
-          ImGui::Dummy(ImVec2{0, restore_icon_height});
-        }
-      }
-    }
-  }
-}
-
 void App::DrawFrame() {
+  cpp::Expects(left_panel_.has_value());
   cpp::Expects(textures_.has_value());
+  cpp::Expects(nodes_and_links_.has_value());
 
   static ne::NodeId contextNodeId = 0;
   static ne::LinkId contextLinkId = 0;
@@ -609,7 +473,7 @@ void App::DrawFrame() {
   static float rightPaneWidth = 800.0f;
   DrawSplitter(4.0F, &leftPaneWidth, &rightPaneWidth, 50.0F, 50.0F);
 
-  DrawLeftPane(leftPaneWidth - 4.0f);
+  left_panel_->Draw(leftPaneWidth - 4.0f);
 
   ImGui::SameLine(0.0f, 12.0f);
 
@@ -624,7 +488,7 @@ void App::DrawFrame() {
         GetTextureWidth(texture_ids.header_background),
         GetTextureHeight(texture_ids.header_background));
 
-    for (auto& node : nodes_and_links_.GetNodes()) {
+    for (auto& node : nodes_and_links_->GetNodes()) {
       if (node.Type != NodeType::Blueprint && node.Type != NodeType::Simple)
         continue;
 
@@ -661,7 +525,8 @@ void App::DrawFrame() {
               ImGui::TextUnformatted(output.Name.c_str());
               ImGui::Spring(0);
             }
-            DrawPinIcon(output, nodes_and_links_.IsPinLinked(output.ID), alpha);
+            DrawPinIcon(output, nodes_and_links_->IsPinLinked(output.ID),
+                        alpha);
             ImGui::Spring(0, ImGui::GetStyle().ItemSpacing.x / 2);
             ImGui::EndHorizontal();
             ImGui::PopStyleVar();
@@ -685,7 +550,7 @@ void App::DrawFrame() {
 
         builder.Input(input.ID);
         ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
-        DrawPinIcon(input, nodes_and_links_.IsPinLinked(input.ID), alpha);
+        DrawPinIcon(input, nodes_and_links_->IsPinLinked(input.ID), alpha);
         ImGui::Spring(0);
         if (!input.Name.empty()) {
           ImGui::TextUnformatted(input.Name.c_str());
@@ -738,7 +603,7 @@ void App::DrawFrame() {
           ImGui::TextUnformatted(output.Name.c_str());
         }
         ImGui::Spring(0);
-        DrawPinIcon(output, nodes_and_links_.IsPinLinked(output.ID), alpha);
+        DrawPinIcon(output, nodes_and_links_->IsPinLinked(output.ID), alpha);
         ImGui::PopStyleVar();
         builder.EndOutput();
       }
@@ -746,7 +611,7 @@ void App::DrawFrame() {
       builder.End();
     }
 
-    for (auto& node : nodes_and_links_.GetNodes()) {
+    for (auto& node : nodes_and_links_->GetNodes()) {
       if (node.Type != NodeType::Tree) continue;
 
       const float rounding = 5.0f;
@@ -900,7 +765,7 @@ void App::DrawFrame() {
       // ImGui::PopStyleVar();
     }
 
-    for (auto& node : nodes_and_links_.GetNodes()) {
+    for (auto& node : nodes_and_links_->GetNodes()) {
       if (node.Type != NodeType::Houdini) continue;
 
       const float rounding = 10.0f;
@@ -1042,7 +907,7 @@ void App::DrawFrame() {
       ne::PopStyleColor(4);
     }
 
-    for (auto& node : nodes_and_links_.GetNodes()) {
+    for (auto& node : nodes_and_links_->GetNodes()) {
       if (node.Type != NodeType::Comment) continue;
 
       const float commentAlpha = 0.75f;
@@ -1099,7 +964,7 @@ void App::DrawFrame() {
       ne::EndGroupHint();
     }
 
-    for (auto& link : nodes_and_links_.GetLinks())
+    for (auto& link : nodes_and_links_->GetLinks())
       ne::Link(link.ID, link.StartPinID, link.EndPinID, link.Color, 2.0f);
 
     if (!createNewNode) {
@@ -1125,8 +990,8 @@ void App::DrawFrame() {
 
         ne::PinId startPinId = 0, endPinId = 0;
         if (ne::QueryNewLink(&startPinId, &endPinId)) {
-          auto startPin = nodes_and_links_.FindPin(startPinId);
-          auto endPin = nodes_and_links_.FindPin(endPinId);
+          auto startPin = nodes_and_links_->FindPin(startPinId);
+          auto endPin = nodes_and_links_->FindPin(endPinId);
 
           newLinkPin = startPin ? startPin : endPin;
 
@@ -1155,7 +1020,7 @@ void App::DrawFrame() {
               if (ne::AcceptNewItem(ImColor(128, 255, 128), 4.0f)) {
                 auto link = Link{GetNextLinkId(), startPinId, endPinId};
                 link.Color = GetIconColor(startPin->Type);
-                nodes_and_links_.SpawnLink(link);
+                nodes_and_links_->SpawnLink(link);
               }
             }
           }
@@ -1163,12 +1028,12 @@ void App::DrawFrame() {
 
         ne::PinId pinId = 0;
         if (ne::QueryNewNode(&pinId)) {
-          newLinkPin = nodes_and_links_.FindPin(pinId);
+          newLinkPin = nodes_and_links_->FindPin(pinId);
           if (newLinkPin) showLabel("+ Create Node", ImColor(32, 45, 32, 180));
 
           if (ne::AcceptNewItem()) {
             createNewNode = true;
-            newNodeLinkPin = nodes_and_links_.FindPin(pinId);
+            newNodeLinkPin = nodes_and_links_->FindPin(pinId);
             newLinkPin = nullptr;
             ne::Suspend();
             ImGui::OpenPopup("Create New Node");
@@ -1184,7 +1049,7 @@ void App::DrawFrame() {
         ne::LinkId linkId = 0;
         while (ne::QueryDeletedLink(&linkId)) {
           if (ne::AcceptDeletedItem()) {
-            nodes_and_links_.EraseLinkWithId(linkId);
+            nodes_and_links_->EraseLinkWithId(linkId);
           }
         }
 
@@ -1192,11 +1057,11 @@ void App::DrawFrame() {
         while (ne::QueryDeletedNode(&nodeId)) {
           if (ne::AcceptDeletedItem()) {
             auto id = std::find_if(
-                nodes_and_links_.GetNodes().begin(),
-                nodes_and_links_.GetNodes().end(),
+                nodes_and_links_->GetNodes().begin(),
+                nodes_and_links_->GetNodes().end(),
                 [nodeId](auto& node) { return node.ID == nodeId; });
-            if (id != nodes_and_links_.GetNodes().end())
-              nodes_and_links_.GetNodes().erase(id);
+            if (id != nodes_and_links_->GetNodes().end())
+              nodes_and_links_->GetNodes().erase(id);
           }
         }
       }
@@ -1223,7 +1088,7 @@ void App::DrawFrame() {
   ne::Suspend();
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
   if (ImGui::BeginPopup("Node Context Menu")) {
-    auto node = nodes_and_links_.FindNode(contextNodeId);
+    auto node = nodes_and_links_->FindNode(contextNodeId);
 
     ImGui::TextUnformatted("Node Context Menu");
     ImGui::Separator();
@@ -1243,7 +1108,7 @@ void App::DrawFrame() {
   }
 
   if (ImGui::BeginPopup("Pin Context Menu")) {
-    auto pin = nodes_and_links_.FindPin(contextPinId);
+    auto pin = nodes_and_links_->FindPin(contextPinId);
 
     ImGui::TextUnformatted("Pin Context Menu");
     ImGui::Separator();
@@ -1260,7 +1125,7 @@ void App::DrawFrame() {
   }
 
   if (ImGui::BeginPopup("Link Context Menu")) {
-    auto link = nodes_and_links_.FindLink(contextLinkId);
+    auto link = nodes_and_links_->FindLink(contextLinkId);
 
     ImGui::TextUnformatted("Link Context Menu");
     ImGui::Separator();
@@ -1285,37 +1150,38 @@ void App::DrawFrame() {
 
     Node* node = nullptr;
     if (ImGui::MenuItem("Input Action"))
-      node = nodes_and_links_.SpawnInputActionNode();
+      node = nodes_and_links_->SpawnInputActionNode();
     if (ImGui::MenuItem("Output Action"))
-      node = nodes_and_links_.SpawnOutputActionNode();
-    if (ImGui::MenuItem("Branch")) node = nodes_and_links_.SpawnBranchNode();
-    if (ImGui::MenuItem("Do N")) node = nodes_and_links_.SpawnDoNNode();
+      node = nodes_and_links_->SpawnOutputActionNode();
+    if (ImGui::MenuItem("Branch")) node = nodes_and_links_->SpawnBranchNode();
+    if (ImGui::MenuItem("Do N")) node = nodes_and_links_->SpawnDoNNode();
     if (ImGui::MenuItem("Set Timer"))
-      node = nodes_and_links_.SpawnSetTimerNode();
-    if (ImGui::MenuItem("Less")) node = nodes_and_links_.SpawnLessNode();
-    if (ImGui::MenuItem("Weird")) node = nodes_and_links_.SpawnWeirdNode();
+      node = nodes_and_links_->SpawnSetTimerNode();
+    if (ImGui::MenuItem("Less")) node = nodes_and_links_->SpawnLessNode();
+    if (ImGui::MenuItem("Weird")) node = nodes_and_links_->SpawnWeirdNode();
     if (ImGui::MenuItem("Trace by Channel"))
-      node = nodes_and_links_.SpawnTraceByChannelNode();
+      node = nodes_and_links_->SpawnTraceByChannelNode();
     if (ImGui::MenuItem("Print String"))
-      node = nodes_and_links_.SpawnPrintStringNode();
+      node = nodes_and_links_->SpawnPrintStringNode();
     ImGui::Separator();
-    if (ImGui::MenuItem("Comment")) node = nodes_and_links_.SpawnComment();
+    if (ImGui::MenuItem("Comment")) node = nodes_and_links_->SpawnComment();
     ImGui::Separator();
     if (ImGui::MenuItem("Sequence"))
-      node = nodes_and_links_.SpawnTreeSequenceNode();
-    if (ImGui::MenuItem("Move To")) node = nodes_and_links_.SpawnTreeTaskNode();
+      node = nodes_and_links_->SpawnTreeSequenceNode();
+    if (ImGui::MenuItem("Move To"))
+      node = nodes_and_links_->SpawnTreeTaskNode();
     if (ImGui::MenuItem("Random Wait"))
-      node = nodes_and_links_.SpawnTreeTask2Node();
+      node = nodes_and_links_->SpawnTreeTask2Node();
     ImGui::Separator();
-    if (ImGui::MenuItem("Message")) node = nodes_and_links_.SpawnMessageNode();
+    if (ImGui::MenuItem("Message")) node = nodes_and_links_->SpawnMessageNode();
     ImGui::Separator();
     if (ImGui::MenuItem("Transform"))
-      node = nodes_and_links_.SpawnHoudiniTransformNode();
+      node = nodes_and_links_->SpawnHoudiniTransformNode();
     if (ImGui::MenuItem("Group"))
-      node = nodes_and_links_.SpawnHoudiniGroupNode();
+      node = nodes_and_links_->SpawnHoudiniGroupNode();
 
     if (node) {
-      nodes_and_links_.BuildNodes();
+      nodes_and_links_->BuildNodes();
 
       createNewNode = false;
 
@@ -1333,7 +1199,7 @@ void App::DrawFrame() {
             auto link = Link{GetNextLinkId(), startPin->ID, endPin->ID};
             link.Color = GetIconColor(startPin->Type);
 
-            nodes_and_links_.SpawnLink(link);
+            nodes_and_links_->SpawnLink(link);
 
             break;
           }
@@ -1354,12 +1220,4 @@ void App::DrawFrame() {
 
   ImGui::ShowDemoWindow();
   ImGui::ShowMetricsWindow();
-
-  file_browser_.Display();
-
-  if (file_browser_.HasSelected()) {
-    const auto selected_file_path = file_browser_.GetSelected().string();
-
-    file_browser_.ClearSelected();
-  }
 }
