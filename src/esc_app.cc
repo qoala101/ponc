@@ -287,6 +287,17 @@ void DrawPinIcon(const Pin& pin, bool connected, float alpha) {
   Icon(size, type, connected, color,
        ImColor{32, 32, 32, static_cast<int>(alpha * 255)});
 }
+// vh: norm
+void AddImage(ImTextureID texture_id, int alpha) {
+  const auto p_min = ImGui::GetItemRectMin();
+  const auto p_max = ImGui::GetItemRectMax();
+  const auto uv_min = ImVec2{0, 0};
+  const auto uv_max = ImVec2{1, 1};
+  const auto col = IM_COL32(255, 255, 255, 96);
+
+  ImGui::GetWindowDrawList()->AddImage(texture_id, p_min, p_max, uv_min, uv_max,
+                                       col);
+}
 }  // namespace
 
 // vh: norm
@@ -480,11 +491,14 @@ void App::DrawLeftPane(float pane_width) {
 
       const auto& io = ImGui::GetIO();
 
-      const auto save_icon_width = GetTextureWidth(texture_ids.save_icon);
-      const auto save_icon_height = GetTextureHeight(texture_ids.save_icon);
-      const auto restore_icon_width = GetTextureWidth(texture_ids.restore_icon);
+      const auto save_icon_width =
+          static_cast<float>(GetTextureWidth(texture_ids.save_icon));
+      const auto save_icon_height =
+          static_cast<float>(GetTextureHeight(texture_ids.save_icon));
+      const auto restore_icon_width =
+          static_cast<float>(GetTextureWidth(texture_ids.restore_icon));
       const auto restore_icon_height =
-          GetTextureHeight(texture_ids.restore_icon);
+          static_cast<float>(GetTextureHeight(texture_ids.restore_icon));
 
       for (auto& node : nodes_and_links_.GetNodes()) {
         {
@@ -518,90 +532,63 @@ void App::DrawLeftPane(float pane_width) {
             ImGui::SetTooltip("State: %s", node.State.c_str());
           }
 
-          auto id =
-              std::string("(") +
-              std::to_string(reinterpret_cast<uintptr_t>(node.ID.AsPointer())) +
-              ")";
-          auto textSize = ImGui::CalcTextSize(id.c_str(), nullptr);
-          auto iconPanelPos =
+          const auto& style = ImGui::GetStyle();
+          const auto icon_panel_pos =
               cursor_pos +
-              ImVec2(pane_width - ImGui::GetStyle().FramePadding.x -
-                         ImGui::GetStyle().IndentSpacing - save_icon_width -
-                         restore_icon_width -
-                         ImGui::GetStyle().ItemInnerSpacing.x * 1,
-                     (ImGui::GetTextLineHeight() - save_icon_height) / 2);
-          ImGui::GetWindowDrawList()->AddText(
-              ImVec2(iconPanelPos.x - textSize.x -
-                         ImGui::GetStyle().ItemInnerSpacing.x,
-                     cursor_pos.y),
-              IM_COL32(255, 255, 255, 255), id.c_str(), nullptr);
+              ImVec2{pane_width - style.FramePadding.x - style.IndentSpacing -
+                         save_icon_width - restore_icon_width -
+                         style.ItemInnerSpacing.x,
+                     (ImGui::GetTextLineHeight() - save_icon_height) / 2};
 
-          auto drawList = ImGui::GetWindowDrawList();
-          ImGui::SetCursorScreenPos(iconPanelPos);
+          ImGui::SetCursorScreenPos(icon_panel_pos);
           ImGui::SetItemAllowOverlap();
-          if (node.SavedState.empty()) {
-            if (ImGui::InvisibleButton("save", ImVec2((float)save_icon_width,
-                                                      (float)save_icon_height)))
-              node.SavedState = node.State;
 
-            if (ImGui::IsItemActive())
-              drawList->AddImage(texture_ids.save_icon, ImGui::GetItemRectMin(),
-                                 ImGui::GetItemRectMax(), ImVec2(0, 0),
-                                 ImVec2(1, 1), IM_COL32(255, 255, 255, 96));
-            else if (ImGui::IsItemHovered())
-              drawList->AddImage(texture_ids.save_icon, ImGui::GetItemRectMin(),
-                                 ImGui::GetItemRectMax(), ImVec2(0, 0),
-                                 ImVec2(1, 1), IM_COL32(255, 255, 255, 255));
-            else
-              drawList->AddImage(texture_ids.save_icon, ImGui::GetItemRectMin(),
-                                 ImGui::GetItemRectMax(), ImVec2(0, 0),
-                                 ImVec2(1, 1), IM_COL32(255, 255, 255, 160));
+          if (node.SavedState.empty()) {
+            if (ImGui::InvisibleButton(
+                    "save", ImVec2{save_icon_width, save_icon_height})) {
+              node.SavedState = node.State;
+            }
+
+            if (ImGui::IsItemActive()) {
+              AddImage(texture_ids.save_icon, 96);
+            } else if (ImGui::IsItemHovered()) {
+              AddImage(texture_ids.save_icon, 255);
+            } else {
+              AddImage(texture_ids.save_icon, 160);
+            }
           } else {
-            ImGui::Dummy(
-                ImVec2((float)save_icon_width, (float)save_icon_height));
-            drawList->AddImage(texture_ids.save_icon, ImGui::GetItemRectMin(),
-                               ImGui::GetItemRectMax(), ImVec2(0, 0),
-                               ImVec2(1, 1), IM_COL32(255, 255, 255, 32));
+            ImGui::Dummy(ImVec2{save_icon_width, save_icon_height});
+            AddImage(texture_ids.save_icon, 32);
           }
 
           ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
           ImGui::SetItemAllowOverlap();
+
           if (!node.SavedState.empty()) {
-            if (ImGui::InvisibleButton("restore",
-                                       ImVec2((float)restore_icon_width,
-                                              (float)restore_icon_height))) {
+            if (ImGui::InvisibleButton(
+                    "restore",
+                    ImVec2{restore_icon_width, restore_icon_height})) {
               node.State = node.SavedState;
               ne::RestoreNodeState(node.ID);
               node.SavedState.clear();
             }
 
-            if (ImGui::IsItemActive())
-              drawList->AddImage(texture_ids.restore_icon,
-                                 ImGui::GetItemRectMin(),
-                                 ImGui::GetItemRectMax(), ImVec2(0, 0),
-                                 ImVec2(1, 1), IM_COL32(255, 255, 255, 96));
-            else if (ImGui::IsItemHovered())
-              drawList->AddImage(texture_ids.restore_icon,
-                                 ImGui::GetItemRectMin(),
-                                 ImGui::GetItemRectMax(), ImVec2(0, 0),
-                                 ImVec2(1, 1), IM_COL32(255, 255, 255, 255));
-            else
-              drawList->AddImage(texture_ids.restore_icon,
-                                 ImGui::GetItemRectMin(),
-                                 ImGui::GetItemRectMax(), ImVec2(0, 0),
-                                 ImVec2(1, 1), IM_COL32(255, 255, 255, 160));
+            if (ImGui::IsItemActive()) {
+              AddImage(texture_ids.restore_icon, 96);
+            } else if (ImGui::IsItemHovered()) {
+              AddImage(texture_ids.restore_icon, 255);
+            } else {
+              AddImage(texture_ids.restore_icon, 160);
+            }
           } else {
-            ImGui::Dummy(
-                ImVec2((float)restore_icon_width, (float)restore_icon_height));
-            drawList->AddImage(texture_ids.restore_icon,
-                               ImGui::GetItemRectMin(), ImGui::GetItemRectMax(),
-                               ImVec2(0, 0), ImVec2(1, 1),
-                               IM_COL32(255, 255, 255, 32));
+            ImGui::Dummy(ImVec2{restore_icon_width, restore_icon_height});
+            AddImage(texture_ids.restore_icon, 32);
           }
 
           ImGui::SameLine(0, 0);
           ImGui::SetItemAllowOverlap();
-          ImGui::Dummy(ImVec2(0, (float)restore_icon_height));
+
+          ImGui::Dummy(ImVec2{0, restore_icon_height});
         }
       }
     }
@@ -1053,54 +1040,6 @@ void App::DrawFrame() {
       ne::EndNode();
       ne::PopStyleVar(7);
       ne::PopStyleColor(4);
-
-      // auto drawList = ed::GetNodeBackgroundDrawList(node.ID);
-
-      // const auto fringeScale = ImGui::GetStyle().AntiAliasFringeScale;
-      // const auto unitSize    = 1.0f / fringeScale;
-
-      // const auto ImDrawList_AddRect = [](ImDrawList* drawList, const
-      // ImVec2& a, const ImVec2& b, ImU32 col, float rounding, int
-      // rounding_corners, float thickness)
-      //{
-      //     if ((col >> 24) == 0)
-      //         return;
-      //     drawList->PathRect(a, b, rounding, rounding_corners);
-      //     drawList->PathStroke(col, true, thickness);
-      // };
-
-      // drawList->AddRectFilled(inputsRect.GetTL() + ImVec2(0, 1),
-      // inputsRect.GetBR(),
-      //     IM_COL32((int)(255 * pinBackground.x), (int)(255 *
-      //     pinBackground.y), (int)(255 * pinBackground.z),
-      //     inputAlpha), 4.0f, 12);
-      // ImGui::PushStyleVar(ImGuiStyleVar_AntiAliasFringeScale, 1.0f);
-      // drawList->AddRect(inputsRect.GetTL() + ImVec2(0, 1),
-      // inputsRect.GetBR(),
-      //     IM_COL32((int)(255 * pinBackground.x), (int)(255 *
-      //     pinBackground.y), (int)(255 * pinBackground.z),
-      //     inputAlpha), 4.0f, 12);
-      // ImGui::PopStyleVar();
-      // drawList->AddRectFilled(outputsRect.GetTL(), outputsRect.GetBR() -
-      // ImVec2(0, 1),
-      //     IM_COL32((int)(255 * pinBackground.x), (int)(255 *
-      //     pinBackground.y), (int)(255 * pinBackground.z),
-      //     outputAlpha), 4.0f, 3);
-      ////ImGui::PushStyleVar(ImGuiStyleVar_AntiAliasFringeScale, 1.0f);
-      // drawList->AddRect(outputsRect.GetTL(), outputsRect.GetBR() -
-      // ImVec2(0, 1),
-      //     IM_COL32((int)(255 * pinBackground.x), (int)(255 *
-      //     pinBackground.y), (int)(255 * pinBackground.z),
-      //     outputAlpha), 4.0f, 3);
-      ////ImGui::PopStyleVar();
-      // drawList->AddRectFilled(contentRect.GetTL(), contentRect.GetBR(),
-      // IM_COL32(24, 64, 128, 200), 0.0f);
-      // ImGui::PushStyleVar(ImGuiStyleVar_AntiAliasFringeScale, 1.0f);
-      // drawList->AddRect(
-      //     contentRect.GetTL(),
-      //     contentRect.GetBR(),
-      //     IM_COL32(48, 128, 255, 100), 0.0f);
-      // ImGui::PopStyleVar();
     }
 
     for (auto& node : nodes_and_links_.GetNodes()) {
@@ -1407,33 +1346,6 @@ void App::DrawFrame() {
     createNewNode = false;
   ImGui::PopStyleVar();
   ne::Resume();
-
-  /*
-      cubic_bezier_t c;
-      c.p0 = pointf(100, 600);
-      c.p1 = pointf(300, 1200);
-      c.p2 = pointf(500, 100);
-      c.p3 = pointf(900, 600);
-
-      auto drawList = ImGui::GetWindowDrawList();
-      auto offset_radius = 15.0f;
-      auto acceptPoint = [drawList, offset_radius](const
-     bezier_subdivide_result_t& r)
-      {
-          drawList->AddCircle(to_imvec(r.point), 4.0f, IM_COL32(255, 0, 255,
-     255));
-
-          auto nt = r.tangent.normalized();
-          nt = pointf(-nt.y, nt.x);
-
-          drawList->AddLine(to_imvec(r.point), to_imvec(r.point + nt *
-     offset_radius), IM_COL32(255, 0, 0, 255), 1.0f);
-      };
-
-      drawList->AddBezierCurve(to_imvec(c.p0), to_imvec(c.p1), to_imvec(c.p2),
-     to_imvec(c.p3), IM_COL32(255, 255, 255, 255), 1.0f);
-      cubic_bezier_subdivide(acceptPoint, c);
-  */
 
   ne::End();
 
