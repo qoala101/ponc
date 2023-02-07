@@ -1,7 +1,7 @@
-﻿#include "esc_example.h"
+﻿#include "esc_app.h"
 
 auto Main(int argc, char **argv) -> int {
-  auto example = Example{"Blueprints", argc, argv};
+  auto example = App{"Blueprints", argc, argv};
 
   if (!example.Create()) {
     return 0;

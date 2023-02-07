@@ -1,10 +1,11 @@
-#ifndef VH_ESC_EXAMPLE_H_
-#define VH_ESC_EXAMPLE_H_
+#ifndef VH_ESC_APP_H_
+#define VH_ESC_APP_H_
 
 #include <application.h>
 #include <imgui_node_editor.h>
 
 #include <memory>
+#include "esc_textures_handle.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
@@ -20,17 +21,17 @@
 
 namespace ne = ax::NodeEditor;
 
-class Example : public Application {
+class App : public Application {
  public:
-  Example(const char* name, int argc, char** argv);
+  App(const char* name, int argc, char** argv);
 
-  Example(const Example&) = delete;
-  Example(Example&&) noexcept = delete;
+  App(const App&) = delete;
+  App(App&&) noexcept = delete;
 
-  auto operator=(const Example&) noexcept -> Example& = delete;
-  auto operator=(Example&&) noexcept -> Example& = delete;
+  auto operator=(const App&) noexcept -> App& = delete;
+  auto operator=(App&&) noexcept -> App& = delete;
 
-  virtual ~Example() = default;
+  virtual ~App() = default;
 
  private:
   auto GetNextId() -> int;
@@ -80,24 +81,16 @@ class Example : public Application {
   void AddInitialNodes();
   void AddInitialLinks();
 
-  void LoadTextures();
-  void DestroyTextures();
-
   std::optional<esc::EditorContextHandle> editor_context_{};
+  std::optional<esc::TexturesHandle> textures_{};
 
   int next_id_{};
 
   std::vector<Node> nodes_{};
   std::vector<Link> links_{};
 
-  struct TextureIds {
-    ImTextureID header_background{};
-    ImTextureID save_icon{};
-    ImTextureID restore_icon{};
-  } texture_ids_{};
-
   std::map<ne::NodeId, float, NodeIdLess> node_touch_time_{};
   bool show_ordinals_{};
 };
 
-#endif  // VH_ESC_EXAMPLE_H_
+#endif  // VH_ESC_APP_H_

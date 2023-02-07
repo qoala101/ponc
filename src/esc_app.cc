@@ -1,4 +1,4 @@
-#include "esc_example.h"
+#include "esc_app.h"
 
 #include <application.h>
 #include <imgui_node_editor.h>
@@ -184,16 +184,16 @@ using namespace ax;
 
 using ax::Widgets::IconType;
 
-Example::Example(const char* name, int argc, char** argv)
+App::App(const char* name, int argc, char** argv)
     : Application{name, argc, argv}, next_id_{1} {}
 
-auto Example::GetNextId() -> int { return next_id_++; }
+auto App::GetNextId() -> int { return next_id_++; }
 
-auto Example::GetNextLinkId() -> ne::LinkId { return ne::LinkId(GetNextId()); }
+auto App::GetNextLinkId() -> ne::LinkId { return ne::LinkId(GetNextId()); }
 
-void Example::TouchNode(ne::NodeId id) { node_touch_time_[id] = kTouchTime; }
+void App::TouchNode(ne::NodeId id) { node_touch_time_[id] = kTouchTime; }
 
-auto Example::GetTouchProgress(ne::NodeId id) -> float {
+auto App::GetTouchProgress(ne::NodeId id) -> float {
   auto it = node_touch_time_.find(id);
   if (it != node_touch_time_.end() && it->second > 0.0f)
     return (kTouchTime - it->second) / kTouchTime;
@@ -201,28 +201,28 @@ auto Example::GetTouchProgress(ne::NodeId id) -> float {
     return 0.0f;
 }
 
-void Example::UpdateTouch() {
+void App::UpdateTouch() {
   const auto deltaTime = ImGui::GetIO().DeltaTime;
   for (auto& entry : node_touch_time_) {
     if (entry.second > 0.0f) entry.second -= deltaTime;
   }
 }
 
-auto Example::FindNode(ne::NodeId id) -> Node* {
+auto App::FindNode(ne::NodeId id) -> Node* {
   for (auto& node : nodes_)
     if (node.ID == id) return &node;
 
   return nullptr;
 }
 
-auto Example::FindLink(ne::LinkId id) -> Link* {
+auto App::FindLink(ne::LinkId id) -> Link* {
   for (auto& link : links_)
     if (link.ID == id) return &link;
 
   return nullptr;
 }
 
-auto Example::FindPin(ne::PinId id) -> Pin* {
+auto App::FindPin(ne::PinId id) -> Pin* {
   if (!id) return nullptr;
 
   for (auto& node : nodes_) {
@@ -236,7 +236,7 @@ auto Example::FindPin(ne::PinId id) -> Pin* {
   return nullptr;
 }
 
-auto Example::IsPinLinked(ne::PinId id) -> bool {
+auto App::IsPinLinked(ne::PinId id) -> bool {
   if (!id) return false;
 
   for (auto& link : links_)
@@ -245,7 +245,7 @@ auto Example::IsPinLinked(ne::PinId id) -> bool {
   return false;
 }
 
-auto Example::SpawnInputActionNode() -> Node* {
+auto App::SpawnInputActionNode() -> Node* {
   nodes_.emplace_back(GetNextId(), "InputAction Fire", ImColor(255, 128, 128));
   nodes_.back().Outputs.emplace_back(GetNextId(), "", PinType::Delegate);
   nodes_.back().Outputs.emplace_back(GetNextId(), "Pressed", PinType::Flow);
@@ -256,7 +256,7 @@ auto Example::SpawnInputActionNode() -> Node* {
   return &nodes_.back();
 }
 
-auto Example::SpawnBranchNode() -> Node* {
+auto App::SpawnBranchNode() -> Node* {
   nodes_.emplace_back(GetNextId(), "Branch");
   nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
   nodes_.back().Inputs.emplace_back(GetNextId(), "Condition", PinType::Bool);
@@ -268,7 +268,7 @@ auto Example::SpawnBranchNode() -> Node* {
   return &nodes_.back();
 }
 
-auto Example::SpawnDoNNode() -> Node* {
+auto App::SpawnDoNNode() -> Node* {
   nodes_.emplace_back(GetNextId(), "Do N");
   nodes_.back().Inputs.emplace_back(GetNextId(), "Enter", PinType::Flow);
   nodes_.back().Inputs.emplace_back(GetNextId(), "N", PinType::Int);
@@ -281,7 +281,7 @@ auto Example::SpawnDoNNode() -> Node* {
   return &nodes_.back();
 }
 
-auto Example::SpawnOutputActionNode() -> Node* {
+auto App::SpawnOutputActionNode() -> Node* {
   nodes_.emplace_back(GetNextId(), "OutputAction");
   nodes_.back().Inputs.emplace_back(GetNextId(), "Sample", PinType::Float);
   nodes_.back().Outputs.emplace_back(GetNextId(), "Condition", PinType::Bool);
@@ -292,7 +292,7 @@ auto Example::SpawnOutputActionNode() -> Node* {
   return &nodes_.back();
 }
 
-auto Example::SpawnPrintStringNode() -> Node* {
+auto App::SpawnPrintStringNode() -> Node* {
   nodes_.emplace_back(GetNextId(), "Print String");
   nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
   nodes_.back().Inputs.emplace_back(GetNextId(), "In String", PinType::String);
@@ -303,7 +303,7 @@ auto Example::SpawnPrintStringNode() -> Node* {
   return &nodes_.back();
 }
 
-auto Example::SpawnMessageNode() -> Node* {
+auto App::SpawnMessageNode() -> Node* {
   nodes_.emplace_back(GetNextId(), "", ImColor(128, 195, 248));
   nodes_.back().Type = NodeType::Simple;
   nodes_.back().Outputs.emplace_back(GetNextId(), "Message", PinType::String);
@@ -313,7 +313,7 @@ auto Example::SpawnMessageNode() -> Node* {
   return &nodes_.back();
 }
 
-auto Example::SpawnSetTimerNode() -> Node* {
+auto App::SpawnSetTimerNode() -> Node* {
   nodes_.emplace_back(GetNextId(), "Set Timer", ImColor(128, 195, 248));
   nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
   nodes_.back().Inputs.emplace_back(GetNextId(), "Object", PinType::Object);
@@ -328,7 +328,7 @@ auto Example::SpawnSetTimerNode() -> Node* {
   return &nodes_.back();
 }
 
-auto Example::SpawnLessNode() -> Node* {
+auto App::SpawnLessNode() -> Node* {
   nodes_.emplace_back(GetNextId(), "<", ImColor(128, 195, 248));
   nodes_.back().Type = NodeType::Simple;
   nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
@@ -340,7 +340,7 @@ auto Example::SpawnLessNode() -> Node* {
   return &nodes_.back();
 }
 
-auto Example::SpawnWeirdNode() -> Node* {
+auto App::SpawnWeirdNode() -> Node* {
   nodes_.emplace_back(GetNextId(), "o.O", ImColor(128, 195, 248));
   nodes_.back().Type = NodeType::Simple;
   nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
@@ -352,7 +352,7 @@ auto Example::SpawnWeirdNode() -> Node* {
   return &nodes_.back();
 }
 
-auto Example::SpawnTraceByChannelNode() -> Node* {
+auto App::SpawnTraceByChannelNode() -> Node* {
   nodes_.emplace_back(GetNextId(), "Single Line Trace by Channel",
                       ImColor(255, 128, 64));
   nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
@@ -377,7 +377,7 @@ auto Example::SpawnTraceByChannelNode() -> Node* {
   return &nodes_.back();
 }
 
-auto Example::SpawnTreeSequenceNode() -> Node* {
+auto App::SpawnTreeSequenceNode() -> Node* {
   nodes_.emplace_back(GetNextId(), "Sequence");
   nodes_.back().Type = NodeType::Tree;
   nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
@@ -388,7 +388,7 @@ auto Example::SpawnTreeSequenceNode() -> Node* {
   return &nodes_.back();
 }
 
-auto Example::SpawnTreeTaskNode() -> Node* {
+auto App::SpawnTreeTaskNode() -> Node* {
   nodes_.emplace_back(GetNextId(), "Move To");
   nodes_.back().Type = NodeType::Tree;
   nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
@@ -398,7 +398,7 @@ auto Example::SpawnTreeTaskNode() -> Node* {
   return &nodes_.back();
 }
 
-auto Example::SpawnTreeTask2Node() -> Node* {
+auto App::SpawnTreeTask2Node() -> Node* {
   nodes_.emplace_back(GetNextId(), "Random Wait");
   nodes_.back().Type = NodeType::Tree;
   nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
@@ -408,7 +408,7 @@ auto Example::SpawnTreeTask2Node() -> Node* {
   return &nodes_.back();
 }
 
-auto Example::SpawnComment() -> Node* {
+auto App::SpawnComment() -> Node* {
   nodes_.emplace_back(GetNextId(), "Test Comment");
   nodes_.back().Type = NodeType::Comment;
   nodes_.back().Size = ImVec2(300, 200);
@@ -416,7 +416,7 @@ auto Example::SpawnComment() -> Node* {
   return &nodes_.back();
 }
 
-auto Example::SpawnHoudiniTransformNode() -> Node* {
+auto App::SpawnHoudiniTransformNode() -> Node* {
   nodes_.emplace_back(GetNextId(), "Transform");
   nodes_.back().Type = NodeType::Houdini;
   nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
@@ -427,7 +427,7 @@ auto Example::SpawnHoudiniTransformNode() -> Node* {
   return &nodes_.back();
 }
 
-auto Example::SpawnHoudiniGroupNode() -> Node* {
+auto App::SpawnHoudiniGroupNode() -> Node* {
   nodes_.emplace_back(GetNextId(), "Group");
   nodes_.back().Type = NodeType::Houdini;
   nodes_.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
@@ -439,13 +439,13 @@ auto Example::SpawnHoudiniGroupNode() -> Node* {
   return &nodes_.back();
 }
 
-void Example::BuildNodes() {
+void App::BuildNodes() {
   for (auto& node : nodes_) {
     BuildNode(&node);
   }
 }
 
-auto Example::CreateEditorConfig() -> ne::Config {
+auto App::CreateEditorConfig() -> ne::Config {
   auto config = ne::Config{};
 
   config.SettingsFile = "Blueprints.json";
@@ -453,7 +453,7 @@ auto Example::CreateEditorConfig() -> ne::Config {
 
   config.LoadNodeSettings = [](const auto node_id, auto* data,
                                auto* user_pointer) -> size_t {
-    auto* self = static_cast<Example*>(user_pointer);
+    auto* self = static_cast<App*>(user_pointer);
     const auto* node = self->FindNode(node_id);
 
     if (node == nullptr) {
@@ -470,7 +470,7 @@ auto Example::CreateEditorConfig() -> ne::Config {
   config.SaveNodeSettings = [](const auto node_id, const auto* data,
                                const auto size, const auto,
                                auto* user_pointer) -> bool {
-    auto* self = static_cast<Example*>(user_pointer);
+    auto* self = static_cast<App*>(user_pointer);
     auto* node = self->FindNode(node_id);
 
     if (node == nullptr) {
@@ -486,8 +486,9 @@ auto Example::CreateEditorConfig() -> ne::Config {
   return config;
 }
 
-void Example::OnStart() {
+void App::OnStart() {
   cpp::Expects(!editor_context_.has_value());
+  cpp::Expects(!textures_.has_value());
 
   const auto editor_config = CreateEditorConfig();
   editor_context_.emplace(editor_config);
@@ -496,12 +497,14 @@ void Example::OnStart() {
   ne::NavigateToContent();
   BuildNodes();
   AddInitialLinks();
-  LoadTextures();
+
+  textures_.emplace([app = this]() -> auto& { return *app; });
 
   cpp::Ensures(editor_context_.has_value());
+  cpp::Ensures(textures_.has_value());
 }
 
-void Example::AddInitialNodes() {
+void App::AddInitialNodes() {
   auto* node = static_cast<Node*>(nullptr);
 
   node = SpawnInputActionNode();
@@ -544,7 +547,7 @@ void Example::AddInitialNodes() {
   ne::SetNodePosition(node->ID, ImVec2(500, 42));
 }
 
-void Example::AddInitialLinks() {
+void App::AddInitialLinks() {
   links_.emplace_back(GetNextLinkId(), nodes_[5].Outputs[0].ID,
                       nodes_[6].Inputs[0].ID);
   links_.emplace_back(GetNextLinkId(), nodes_[5].Outputs[0].ID,
@@ -553,44 +556,15 @@ void Example::AddInitialLinks() {
                       nodes_[15].Inputs[0].ID);
 }
 
-void Example::LoadTextures() {
-  cpp::Expects(texture_ids_.header_background == nullptr);
-  cpp::Expects(texture_ids_.save_icon == nullptr);
-  cpp::Expects(texture_ids_.restore_icon == nullptr);
-
-  texture_ids_.header_background = LoadTexture("data/BlueprintBackground.png");
-  texture_ids_.save_icon = LoadTexture("data/ic_save_white_24dp.png");
-  texture_ids_.restore_icon = LoadTexture("data/ic_restore_white_24dp.png");
-
-  cpp::Ensures(texture_ids_.header_background != nullptr);
-  cpp::Ensures(texture_ids_.save_icon != nullptr);
-  cpp::Ensures(texture_ids_.restore_icon != nullptr);
-}
-
-void Example::DestroyTextures() {
-  cpp::Expects(texture_ids_.header_background != nullptr);
-  cpp::Expects(texture_ids_.save_icon != nullptr);
-  cpp::Expects(texture_ids_.restore_icon != nullptr);
-
-  for (auto* texture : {&texture_ids_.restore_icon, &texture_ids_.save_icon,
-                        &texture_ids_.header_background}) {
-    DestroyTexture(texture);
-    *texture = nullptr;
-  }
-
-  cpp::Ensures(texture_ids_.header_background == nullptr);
-  cpp::Ensures(texture_ids_.save_icon == nullptr);
-  cpp::Ensures(texture_ids_.restore_icon == nullptr);
-}
-
-void Example::OnStop() {
-  DestroyTextures();
-
+void App::OnStop() {
+  textures_.reset();
   editor_context_.reset();
+
+  cpp::Ensures(!textures_.has_value());
   cpp::Ensures(!editor_context_.has_value());
 }
 
-void Example::DrawPinIcon(const Pin& pin, bool connected, int alpha) const {
+void App::DrawPinIcon(const Pin& pin, bool connected, int alpha) const {
   IconType iconType;
   ImColor color = GetIconColor(pin.Type);
   color.Value.w = alpha / 255.0f;
@@ -628,7 +602,9 @@ void Example::DrawPinIcon(const Pin& pin, bool connected, int alpha) const {
                     iconType, connected, color, ImColor(32, 32, 32, alpha));
 }
 
-void Example::ShowLeftPane(float paneWidth) {
+void App::ShowLeftPane(float paneWidth) {
+  cpp::Expects(textures_.has_value());
+
   auto& io = ImGui::GetIO();
 
   ImGui::BeginChild("Selection", ImVec2(paneWidth, 0));
@@ -663,10 +639,12 @@ void Example::ShowLeftPane(float paneWidth) {
   selectedNodes.resize(nodeCount);
   selectedLinks.resize(linkCount);
 
-  int saveIconWidth = GetTextureWidth(texture_ids_.save_icon);
-  int saveIconHeight = GetTextureWidth(texture_ids_.save_icon);
-  int restoreIconWidth = GetTextureWidth(texture_ids_.restore_icon);
-  int restoreIconHeight = GetTextureWidth(texture_ids_.restore_icon);
+  const auto texture_ids = textures_->GetTextureIds();
+
+  int saveIconWidth = GetTextureWidth(texture_ids.save_icon);
+  int saveIconHeight = GetTextureWidth(texture_ids.save_icon);
+  int restoreIconWidth = GetTextureWidth(texture_ids.restore_icon);
+  int restoreIconHeight = GetTextureWidth(texture_ids.restore_icon);
 
   ImGui::GetWindowDrawList()->AddRectFilled(
       ImGui::GetCursorScreenPos(),
@@ -733,20 +711,20 @@ void Example::ShowLeftPane(float paneWidth) {
         node.SavedState = node.State;
 
       if (ImGui::IsItemActive())
-        drawList->AddImage(texture_ids_.save_icon, ImGui::GetItemRectMin(),
+        drawList->AddImage(texture_ids.save_icon, ImGui::GetItemRectMin(),
                            ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                            IM_COL32(255, 255, 255, 96));
       else if (ImGui::IsItemHovered())
-        drawList->AddImage(texture_ids_.save_icon, ImGui::GetItemRectMin(),
+        drawList->AddImage(texture_ids.save_icon, ImGui::GetItemRectMin(),
                            ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                            IM_COL32(255, 255, 255, 255));
       else
-        drawList->AddImage(texture_ids_.save_icon, ImGui::GetItemRectMin(),
+        drawList->AddImage(texture_ids.save_icon, ImGui::GetItemRectMin(),
                            ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                            IM_COL32(255, 255, 255, 160));
     } else {
       ImGui::Dummy(ImVec2((float)saveIconWidth, (float)saveIconHeight));
-      drawList->AddImage(texture_ids_.save_icon, ImGui::GetItemRectMin(),
+      drawList->AddImage(texture_ids.save_icon, ImGui::GetItemRectMin(),
                          ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                          IM_COL32(255, 255, 255, 32));
     }
@@ -762,20 +740,20 @@ void Example::ShowLeftPane(float paneWidth) {
       }
 
       if (ImGui::IsItemActive())
-        drawList->AddImage(texture_ids_.restore_icon, ImGui::GetItemRectMin(),
+        drawList->AddImage(texture_ids.restore_icon, ImGui::GetItemRectMin(),
                            ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                            IM_COL32(255, 255, 255, 96));
       else if (ImGui::IsItemHovered())
-        drawList->AddImage(texture_ids_.restore_icon, ImGui::GetItemRectMin(),
+        drawList->AddImage(texture_ids.restore_icon, ImGui::GetItemRectMin(),
                            ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                            IM_COL32(255, 255, 255, 255));
       else
-        drawList->AddImage(texture_ids_.restore_icon, ImGui::GetItemRectMin(),
+        drawList->AddImage(texture_ids.restore_icon, ImGui::GetItemRectMin(),
                            ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                            IM_COL32(255, 255, 255, 160));
     } else {
       ImGui::Dummy(ImVec2((float)restoreIconWidth, (float)restoreIconHeight));
-      drawList->AddImage(texture_ids_.restore_icon, ImGui::GetItemRectMin(),
+      drawList->AddImage(texture_ids.restore_icon, ImGui::GetItemRectMin(),
                          ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                          IM_COL32(255, 255, 255, 32));
     }
@@ -820,7 +798,9 @@ void Example::ShowLeftPane(float paneWidth) {
   ImGui::EndChild();
 }
 
-void Example::OnFrame(float deltaTime) {
+void App::OnFrame(float deltaTime) {
+  cpp::Expects(textures_.has_value());
+
   UpdateTouch();
 
   auto& io = ImGui::GetIO();
@@ -858,10 +838,12 @@ void Example::OnFrame(float deltaTime) {
   {
     auto cursorTopLeft = ImGui::GetCursorScreenPos();
 
+    const auto texture_ids = textures_->GetTextureIds();
+
     util::BlueprintNodeBuilder builder(
-        texture_ids_.header_background,
-        GetTextureWidth(texture_ids_.header_background),
-        GetTextureHeight(texture_ids_.header_background));
+        texture_ids.header_background,
+        GetTextureWidth(texture_ids.header_background),
+        GetTextureHeight(texture_ids.header_background));
 
     for (auto& node : nodes_) {
       if (node.Type != NodeType::Blueprint && node.Type != NodeType::Simple)
