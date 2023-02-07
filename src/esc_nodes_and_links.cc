@@ -1,6 +1,7 @@
 #include "esc_nodes_and_links.h"
 
 #include "esc_cpp.h"
+#include "imgui_node_editor.h"
 
 namespace esc {
 namespace {
@@ -320,5 +321,31 @@ void NodesAndLinks::EraseLinkWithId(ne::LinkId linkId) {
   auto id = std::find_if(links_.begin(), links_.end(),
                          [linkId](auto& link) { return link.ID == linkId; });
   if (id != links_.end()) links_.erase(id);
+}
+
+auto NodesAndLinks::GetSelectedNodeIds() -> std::vector<ne::NodeId> {
+  const auto num_selected_objects = ne::GetSelectedObjectCount();
+
+  auto selected_ids = std::vector<ne::NodeId>{};
+  selected_ids.resize(num_selected_objects);
+
+  const auto num_selected_nodes = ne::GetSelectedNodes(
+      selected_ids.data(), static_cast<int>(selected_ids.size()));
+  selected_ids.resize(num_selected_nodes);
+
+  return selected_ids;
+}
+
+auto NodesAndLinks::GetSelectedLinkIds() -> std::vector<ne::LinkId> {
+  const auto num_selected_objects = ne::GetSelectedObjectCount();
+
+  auto selected_ids = std::vector<ne::LinkId>{};
+  selected_ids.resize(num_selected_objects);
+
+  const auto num_selected_links = ne::GetSelectedLinks(
+      selected_ids.data(), static_cast<int>(selected_ids.size()));
+  selected_ids.resize(num_selected_links);
+
+  return selected_ids;
 }
 }  // namespace esc

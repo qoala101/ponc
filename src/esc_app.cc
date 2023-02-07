@@ -10,6 +10,7 @@
 #include "esc_builders.h"
 #include "esc_cpp.h"
 #include "esc_enums.h"
+#include "esc_nodes_and_links.h"
 #include "imgui.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -17,6 +18,7 @@
 #include <imgui_internal.h>
 
 #include <algorithm>
+#include <iostream>
 #include <map>
 #include <string>
 #include <utility>
@@ -290,6 +292,12 @@ void DrawPinIcon(const Pin& pin, bool connected, float alpha) {
 // vh: norm
 App::App(const char* name, int argc, char** argv)
     : Application{name, argc, argv},
+      file_browser_{[]() {
+        auto file_browser_ = ImGui::FileBrowser{};
+        file_browser_.SetTitle("Select");
+        file_browser_.SetTypeFilters({".h", ".cpp"});
+        return file_browser_;
+      }()},
       auto_object_id_{std::make_shared<esc::AutoIncrementable>(1)},
       nodes_and_links_{auto_object_id_} {}
 // vh: norm
@@ -418,325 +426,190 @@ void App::OnStop() {
 }
 // vh: ok
 void App::OnFrame(float /*unused*/) { DrawFrame(); }
+// vh: ok
+void App::ShowFlow() {
+  for (const auto& link : nodes_and_links_.GetLinks()) {
+    ne::Flow(link.ID);
+  }
+}
 
-void App::DrawLeftPane(float paneWidth) {
+void App::DrawLeftPane(float pane_width) {
   cpp::Expects(textures_.has_value());
 
-  auto& io = ImGui::GetIO();
+  {
+    const auto child_scope =
+        cpp::Scope{[pane_width]() {
+                     ImGui::BeginChild("Selection", ImVec2{pane_width, 0});
+                   },
+                   []() { ImGui::EndChild(); }};
 
-  ImGui::BeginChild("Selection", ImVec2(paneWidth, 0));
+    pane_width = ImGui::GetContentRegionAvail().x;
 
-  paneWidth = ImGui::GetContentRegionAvail().x;
+    {
+      const auto horizontal_scope = cpp::Scope{
+          [pane_width]() {
+            ImGui::BeginHorizontal("Style Editor", ImVec2{pane_width, 0});
+          },
+          []() { ImGui::EndHorizontal(); }};
 
-  ImGui::BeginHorizontal("Style Editor", ImVec2(paneWidth, 0));
-  ImGui::Spring(0.0f, 0.0f);
-  if (ImGui::Button("Zoom to Content")) ne::NavigateToContent();
-  ImGui::Spring(0.0f);
-  if (ImGui::Button("Show Flow")) {
-    for (auto& link : nodes_and_links_.GetLinks()) ne::Flow(link.ID);
-  }
-  ImGui::EndHorizontal();
-  ImGui::Checkbox("Show Ordinals", &show_ordinals_);
+      if (ImGui::Button("Open...")) {
+        file_browser_.Open();
+      }
 
-  std::vector<ne::NodeId> selectedNodes;
-  std::vector<ne::LinkId> selectedLinks;
-  selectedNodes.resize(ne::GetSelectedObjectCount());
-  selectedLinks.resize(ne::GetSelectedObjectCount());
+      if (ImGui::Button("Save As...")) {
+        file_browser_.Open();
+      }
 
-  int nodeCount = ne::GetSelectedNodes(selectedNodes.data(),
-                                       static_cast<int>(selectedNodes.size()));
-  int linkCount = ne::GetSelectedLinks(selectedLinks.data(),
-                                       static_cast<int>(selectedLinks.size()));
+      if (ImGui::Button("Zoom to Content")) {
+        ne::NavigateToContent();
+      }
 
-  selectedNodes.resize(nodeCount);
-  selectedLinks.resize(linkCount);
-
-  const auto texture_ids = textures_->GetTextureIds();
-
-  int saveIconWidth = GetTextureWidth(texture_ids.save_icon);
-  int saveIconHeight = GetTextureWidth(texture_ids.save_icon);
-  int restoreIconWidth = GetTextureWidth(texture_ids.restore_icon);
-  int restoreIconHeight = GetTextureWidth(texture_ids.restore_icon);
-
-  ImGui::GetWindowDrawList()->AddRectFilled(
-      ImGui::GetCursorScreenPos(),
-      ImGui::GetCursorScreenPos() +
-          ImVec2(paneWidth, ImGui::GetTextLineHeight()),
-      ImColor(ImGui::GetStyle().Colors[ImGuiCol_HeaderActive]),
-      ImGui::GetTextLineHeight() * 0.25f);
-  ImGui::Spacing();
-  ImGui::SameLine();
-  ImGui::TextUnformatted("Nodes");
-  ImGui::Indent();
-
-  for (auto& node : nodes_and_links_.GetNodes()) {
-    ImGui::PushID(node.ID.AsPointer());
-    auto start = ImGui::GetCursorScreenPos();
-    bool isSelected = std::find(selectedNodes.begin(), selectedNodes.end(),
-                                node.ID) != selectedNodes.end();
-    if (ImGui::Selectable(
-            (node.Name + "##" +
-             std::to_string(reinterpret_cast<uintptr_t>(node.ID.AsPointer())))
-                .c_str(),
-            &isSelected)) {
-      if (io.KeyCtrl) {
-        if (isSelected)
-          ne::SelectNode(node.ID, true);
-        else
-          ne::DeselectNode(node.ID);
-      } else
-        ne::SelectNode(node.ID, false);
-
-      ne::NavigateToSelection();
+      if (ImGui::Button("Show Flow")) {
+        ShowFlow();
+      }
     }
-    if (ImGui::IsItemHovered() && !node.State.empty())
-      ImGui::SetTooltip("State: %s", node.State.c_str());
 
-    auto id = std::string("(") +
+    const auto selected_node_ids = esc::NodesAndLinks::GetSelectedNodeIds();
+    const auto selected_link_ids = esc::NodesAndLinks::GetSelectedLinkIds();
+
+    const auto texture_ids = textures_->GetTextureIds();
+
+    {
+      const auto indent_scope =
+          cpp::Scope{[]() { ImGui::Indent(); }, []() { ImGui::Unindent(); }};
+
+      const auto& io = ImGui::GetIO();
+
+      const auto save_icon_width = GetTextureWidth(texture_ids.save_icon);
+      const auto save_icon_height = GetTextureHeight(texture_ids.save_icon);
+      const auto restore_icon_width = GetTextureWidth(texture_ids.restore_icon);
+      const auto restore_icon_height =
+          GetTextureHeight(texture_ids.restore_icon);
+
+      for (auto& node : nodes_and_links_.GetNodes()) {
+        {
+          const auto id_scope =
+              cpp::Scope{[&node]() { ImGui::PushID(node.ID.AsPointer()); },
+                         []() { ImGui::PopID(); }};
+
+          const auto cursor_pos = ImGui::GetCursorScreenPos();
+          const auto node_label =
+              node.Name + "##" +
+              std::to_string(reinterpret_cast<uintptr_t>(node.ID.AsPointer()));
+          auto is_node_selected =
+              std::find(selected_node_ids.begin(), selected_node_ids.end(),
+                        node.ID) != selected_node_ids.end();
+
+          if (ImGui::Selectable(node_label.c_str(), &is_node_selected)) {
+            if (io.KeyCtrl) {
+              if (is_node_selected) {
+                ne::SelectNode(node.ID, true);
+              } else {
+                ne::DeselectNode(node.ID);
+              }
+            } else {
+              ne::SelectNode(node.ID, false);
+            }
+
+            ne::NavigateToSelection();
+          }
+
+          if (ImGui::IsItemHovered() && !node.State.empty()) {
+            ImGui::SetTooltip("State: %s", node.State.c_str());
+          }
+
+          auto id =
+              std::string("(") +
               std::to_string(reinterpret_cast<uintptr_t>(node.ID.AsPointer())) +
               ")";
-    auto textSize = ImGui::CalcTextSize(id.c_str(), nullptr);
-    auto iconPanelPos =
-        start +
-        ImVec2(paneWidth - ImGui::GetStyle().FramePadding.x -
-                   ImGui::GetStyle().IndentSpacing - saveIconWidth -
-                   restoreIconWidth - ImGui::GetStyle().ItemInnerSpacing.x * 1,
-               (ImGui::GetTextLineHeight() - saveIconHeight) / 2);
-    ImGui::GetWindowDrawList()->AddText(
-        ImVec2(
-            iconPanelPos.x - textSize.x - ImGui::GetStyle().ItemInnerSpacing.x,
-            start.y),
-        IM_COL32(255, 255, 255, 255), id.c_str(), nullptr);
+          auto textSize = ImGui::CalcTextSize(id.c_str(), nullptr);
+          auto iconPanelPos =
+              cursor_pos +
+              ImVec2(pane_width - ImGui::GetStyle().FramePadding.x -
+                         ImGui::GetStyle().IndentSpacing - save_icon_width -
+                         restore_icon_width -
+                         ImGui::GetStyle().ItemInnerSpacing.x * 1,
+                     (ImGui::GetTextLineHeight() - save_icon_height) / 2);
+          ImGui::GetWindowDrawList()->AddText(
+              ImVec2(iconPanelPos.x - textSize.x -
+                         ImGui::GetStyle().ItemInnerSpacing.x,
+                     cursor_pos.y),
+              IM_COL32(255, 255, 255, 255), id.c_str(), nullptr);
 
-    auto drawList = ImGui::GetWindowDrawList();
-    ImGui::SetCursorScreenPos(iconPanelPos);
-    ImGui::SetItemAllowOverlap();
-    if (node.SavedState.empty()) {
-      if (ImGui::InvisibleButton(
-              "save", ImVec2((float)saveIconWidth, (float)saveIconHeight)))
-        node.SavedState = node.State;
+          auto drawList = ImGui::GetWindowDrawList();
+          ImGui::SetCursorScreenPos(iconPanelPos);
+          ImGui::SetItemAllowOverlap();
+          if (node.SavedState.empty()) {
+            if (ImGui::InvisibleButton("save", ImVec2((float)save_icon_width,
+                                                      (float)save_icon_height)))
+              node.SavedState = node.State;
 
-      if (ImGui::IsItemActive())
-        drawList->AddImage(texture_ids.save_icon, ImGui::GetItemRectMin(),
-                           ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
-                           IM_COL32(255, 255, 255, 96));
-      else if (ImGui::IsItemHovered())
-        drawList->AddImage(texture_ids.save_icon, ImGui::GetItemRectMin(),
-                           ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
-                           IM_COL32(255, 255, 255, 255));
-      else
-        drawList->AddImage(texture_ids.save_icon, ImGui::GetItemRectMin(),
-                           ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
-                           IM_COL32(255, 255, 255, 160));
-    } else {
-      ImGui::Dummy(ImVec2((float)saveIconWidth, (float)saveIconHeight));
-      drawList->AddImage(texture_ids.save_icon, ImGui::GetItemRectMin(),
-                         ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
-                         IM_COL32(255, 255, 255, 32));
-    }
+            if (ImGui::IsItemActive())
+              drawList->AddImage(texture_ids.save_icon, ImGui::GetItemRectMin(),
+                                 ImGui::GetItemRectMax(), ImVec2(0, 0),
+                                 ImVec2(1, 1), IM_COL32(255, 255, 255, 96));
+            else if (ImGui::IsItemHovered())
+              drawList->AddImage(texture_ids.save_icon, ImGui::GetItemRectMin(),
+                                 ImGui::GetItemRectMax(), ImVec2(0, 0),
+                                 ImVec2(1, 1), IM_COL32(255, 255, 255, 255));
+            else
+              drawList->AddImage(texture_ids.save_icon, ImGui::GetItemRectMin(),
+                                 ImGui::GetItemRectMax(), ImVec2(0, 0),
+                                 ImVec2(1, 1), IM_COL32(255, 255, 255, 160));
+          } else {
+            ImGui::Dummy(
+                ImVec2((float)save_icon_width, (float)save_icon_height));
+            drawList->AddImage(texture_ids.save_icon, ImGui::GetItemRectMin(),
+                               ImGui::GetItemRectMax(), ImVec2(0, 0),
+                               ImVec2(1, 1), IM_COL32(255, 255, 255, 32));
+          }
 
-    ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::SetItemAllowOverlap();
-    if (!node.SavedState.empty()) {
-      if (ImGui::InvisibleButton("restore", ImVec2((float)restoreIconWidth,
-                                                   (float)restoreIconHeight))) {
-        node.State = node.SavedState;
-        ne::RestoreNodeState(node.ID);
-        node.SavedState.clear();
+          ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
+          ImGui::SetItemAllowOverlap();
+          if (!node.SavedState.empty()) {
+            if (ImGui::InvisibleButton("restore",
+                                       ImVec2((float)restore_icon_width,
+                                              (float)restore_icon_height))) {
+              node.State = node.SavedState;
+              ne::RestoreNodeState(node.ID);
+              node.SavedState.clear();
+            }
+
+            if (ImGui::IsItemActive())
+              drawList->AddImage(texture_ids.restore_icon,
+                                 ImGui::GetItemRectMin(),
+                                 ImGui::GetItemRectMax(), ImVec2(0, 0),
+                                 ImVec2(1, 1), IM_COL32(255, 255, 255, 96));
+            else if (ImGui::IsItemHovered())
+              drawList->AddImage(texture_ids.restore_icon,
+                                 ImGui::GetItemRectMin(),
+                                 ImGui::GetItemRectMax(), ImVec2(0, 0),
+                                 ImVec2(1, 1), IM_COL32(255, 255, 255, 255));
+            else
+              drawList->AddImage(texture_ids.restore_icon,
+                                 ImGui::GetItemRectMin(),
+                                 ImGui::GetItemRectMax(), ImVec2(0, 0),
+                                 ImVec2(1, 1), IM_COL32(255, 255, 255, 160));
+          } else {
+            ImGui::Dummy(
+                ImVec2((float)restore_icon_width, (float)restore_icon_height));
+            drawList->AddImage(texture_ids.restore_icon,
+                               ImGui::GetItemRectMin(), ImGui::GetItemRectMax(),
+                               ImVec2(0, 0), ImVec2(1, 1),
+                               IM_COL32(255, 255, 255, 32));
+          }
+
+          ImGui::SameLine(0, 0);
+          ImGui::SetItemAllowOverlap();
+          ImGui::Dummy(ImVec2(0, (float)restore_icon_height));
+        }
       }
-
-      if (ImGui::IsItemActive())
-        drawList->AddImage(texture_ids.restore_icon, ImGui::GetItemRectMin(),
-                           ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
-                           IM_COL32(255, 255, 255, 96));
-      else if (ImGui::IsItemHovered())
-        drawList->AddImage(texture_ids.restore_icon, ImGui::GetItemRectMin(),
-                           ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
-                           IM_COL32(255, 255, 255, 255));
-      else
-        drawList->AddImage(texture_ids.restore_icon, ImGui::GetItemRectMin(),
-                           ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
-                           IM_COL32(255, 255, 255, 160));
-    } else {
-      ImGui::Dummy(ImVec2((float)restoreIconWidth, (float)restoreIconHeight));
-      drawList->AddImage(texture_ids.restore_icon, ImGui::GetItemRectMin(),
-                         ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
-                         IM_COL32(255, 255, 255, 32));
     }
-
-    ImGui::SameLine(0, 0);
-    ImGui::SetItemAllowOverlap();
-    ImGui::Dummy(ImVec2(0, (float)restoreIconHeight));
-
-    ImGui::PopID();
   }
-  ImGui::Unindent();
-
-  static int changeCount = 0;
-
-  ImGui::GetWindowDrawList()->AddRectFilled(
-      ImGui::GetCursorScreenPos(),
-      ImGui::GetCursorScreenPos() +
-          ImVec2(paneWidth, ImGui::GetTextLineHeight()),
-      ImColor(ImGui::GetStyle().Colors[ImGuiCol_HeaderActive]),
-      ImGui::GetTextLineHeight() * 0.25f);
-  ImGui::Spacing();
-  ImGui::SameLine();
-  ImGui::TextUnformatted("Selection");
-
-  ImGui::BeginHorizontal("Selection Stats", ImVec2(paneWidth, 0));
-  ImGui::Text("Changed %d time%s", changeCount, changeCount > 1 ? "s" : "");
-  ImGui::Spring();
-  if (ImGui::Button("Deselect All")) ne::ClearSelection();
-  ImGui::EndHorizontal();
-  ImGui::Indent();
-  for (int i = 0; i < nodeCount; ++i)
-    ImGui::Text("Node (%p)", selectedNodes[i].AsPointer());
-  for (int i = 0; i < linkCount; ++i)
-    ImGui::Text("Link (%p)", selectedLinks[i].AsPointer());
-  ImGui::Unindent();
-
-  if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)))
-    for (auto& link : nodes_and_links_.GetLinks()) ne::Flow(link.ID);
-
-  if (ne::HasSelectionChanged()) ++changeCount;
-
-  ImGui::EndChild();
 }
-          // create a file browser instance
-    ImGui::FileBrowser fileDialog = [](){
-      auto fileDialog = ImGui::FileBrowser{};
-
-    // (optional) set browser properties
-    fileDialog.SetTitle("title");
-    fileDialog.SetTypeFilters({ ".h", ".cpp" });
-
-    return fileDialog;
-    }();
-    
 
 void App::DrawFrame() {
-  if (ImGui::BeginMainMenuBar()) {
-    if (ImGui::BeginMenu("File")) {
-      ImGui::MenuItem("(demo menu)", NULL, false, false);
-      if (ImGui::MenuItem("New")) {
-  
-                fileDialog.Open();
-      }
-      if (ImGui::MenuItem("Open", "Ctrl+O")) {
-      }
-      if (ImGui::BeginMenu("Open Recent")) {
-        ImGui::MenuItem("fish_hat.c");
-        ImGui::MenuItem("fish_hat.inl");
-        ImGui::MenuItem("fish_hat.h");
-        if (ImGui::BeginMenu("More..")) {
-          ImGui::MenuItem("Hello");
-          ImGui::MenuItem("Sailor");
-          if (ImGui::BeginMenu("Recurse..")) {
-            ImGui::EndMenu();
-          }
-          ImGui::EndMenu();
-        }
-        ImGui::EndMenu();
-      }
-      if (ImGui::MenuItem("Save", "Ctrl+S")) {
-      }
-      if (ImGui::MenuItem("Save As..")) {
-      }
-
-      ImGui::Separator();
-      if (ImGui::BeginMenu("Options")) {
-        static bool enabled = true;
-        ImGui::MenuItem("Enabled", "", &enabled);
-        ImGui::BeginChild("child", ImVec2(0, 60), true);
-        for (int i = 0; i < 10; i++) ImGui::Text("Scrolling Text %d", i);
-        ImGui::EndChild();
-        static float f = 0.5f;
-        static int n = 0;
-        ImGui::SliderFloat("Value", &f, 0.0f, 1.0f);
-        ImGui::InputFloat("Input", &f, 0.1f);
-        ImGui::Combo("Combo", &n, "Yes\0No\0Maybe\0\0");
-        ImGui::EndMenu();
-      }
-
-      if (ImGui::BeginMenu("Colors")) {
-        float sz = ImGui::GetTextLineHeight();
-        for (int i = 0; i < ImGuiCol_COUNT; i++) {
-          const char* name = ImGui::GetStyleColorName((ImGuiCol)i);
-          ImVec2 p = ImGui::GetCursorScreenPos();
-          ImGui::GetWindowDrawList()->AddRectFilled(
-              p, ImVec2(p.x + sz, p.y + sz), ImGui::GetColorU32((ImGuiCol)i));
-          ImGui::Dummy(ImVec2(sz, sz));
-          ImGui::SameLine();
-          ImGui::MenuItem(name);
-        }
-        ImGui::EndMenu();
-      }
-
-      // Here we demonstrate appending again to the "Options" menu (which we
-      // already created above) Of course in this demo it is a little bit silly
-      // that this function calls BeginMenu("Options") twice. In a real
-      // code-base using it would make senses to use this feature from very
-      // different code locations.
-      if (ImGui::BeginMenu("Options"))  // <-- Append!
-      {
-        static bool b = true;
-        ImGui::Checkbox("SomeOption", &b);
-        ImGui::EndMenu();
-      }
-
-      if (ImGui::BeginMenu("Disabled", false))  // Disabled
-      {
-        IM_ASSERT(0);
-      }
-      if (ImGui::MenuItem("Checked", NULL, true)) {
-      }
-      if (ImGui::MenuItem("Quit", "Alt+F4")) {
-      }
-      ImGui::EndMenu();
-    }
-    if (ImGui::BeginMenu("Edit")) {
-      if (ImGui::MenuItem("Undo", "CTRL+Z")) {
-      }
-      if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {
-      }  // Disabled item
-      ImGui::Separator();
-      if (ImGui::MenuItem("Cut", "CTRL+X")) {
-      }
-      if (ImGui::MenuItem("Copy", "CTRL+C")) {
-      }
-      if (ImGui::MenuItem("Paste", "CTRL+V")) {
-      }
-      ImGui::EndMenu();
-    }
-    ImGui::EndMainMenuBar();
-  }
-
-          fileDialog.Display();
-        
-        if(fileDialog.HasSelected())
-        {
-            // std::cout << "Selected filename" << fileDialog.GetSelected().string() << std::endl;
-            fileDialog.ClearSelected();
-        }
-
   cpp::Expects(textures_.has_value());
-
-  auto& io = ImGui::GetIO();
-
-  ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate,
-              io.Framerate ? 1000.0f / io.Framerate : 0.0f);
-
-  // auto& style = ImGui::GetStyle();
-
-  // {
-  //     for (auto x = -io.DisplaySize.y; x < io.DisplaySize.x; x += 10.0f)
-  //     {
-  //         ImGui::GetWindowDrawList()->AddLine(ImVec2(x, 0), ImVec2(x +
-  //         io.DisplaySize.y, io.DisplaySize.y),
-  //             IM_COL32(255, 255, 0, 255));
-  //     }
-  // }
 
   static ne::NodeId contextNodeId = 0;
   static ne::LinkId contextLinkId = 0;
@@ -1567,44 +1440,14 @@ void App::DrawFrame() {
   auto editorMin = ImGui::GetItemRectMin();
   auto editorMax = ImGui::GetItemRectMax();
 
-  if (show_ordinals_) {
-    int nodeCount = ne::GetNodeCount();
-    std::vector<ne::NodeId> orderedNodeIds;
-    orderedNodeIds.resize(static_cast<size_t>(nodeCount));
-    ne::GetOrderedNodeIds(orderedNodeIds.data(), nodeCount);
-
-    auto drawList = ImGui::GetWindowDrawList();
-    drawList->PushClipRect(editorMin, editorMax);
-
-    int ordinal = 0;
-    for (auto& nodeId : orderedNodeIds) {
-      auto p0 = ne::GetNodePosition(nodeId);
-      auto p1 = p0 + ne::GetNodeSize(nodeId);
-      p0 = ne::CanvasToScreen(p0);
-      p1 = ne::CanvasToScreen(p1);
-
-      ImGuiTextBuffer builder;
-      builder.appendf("#%d", ordinal++);
-
-      auto textSize = ImGui::CalcTextSize(builder.c_str());
-      auto padding = ImVec2(2.0f, 2.0f);
-      auto widgetSize = textSize + padding * 2;
-
-      auto widgetPosition = ImVec2(p1.x, p0.y) + ImVec2(0.0f, -widgetSize.y);
-
-      drawList->AddRectFilled(widgetPosition, widgetPosition + widgetSize,
-                              IM_COL32(100, 80, 80, 190), 3.0f,
-                              ImDrawFlags_RoundCornersAll);
-      drawList->AddRect(widgetPosition, widgetPosition + widgetSize,
-                        IM_COL32(200, 160, 160, 190), 3.0f,
-                        ImDrawFlags_RoundCornersAll);
-      drawList->AddText(widgetPosition + padding, IM_COL32(255, 255, 255, 255),
-                        builder.c_str());
-    }
-
-    drawList->PopClipRect();
-  }
-
   ImGui::ShowDemoWindow();
   ImGui::ShowMetricsWindow();
+
+  file_browser_.Display();
+
+  if (file_browser_.HasSelected()) {
+    const auto selected_file_path = file_browser_.GetSelected().string();
+
+    file_browser_.ClearSelected();
+  }
 }

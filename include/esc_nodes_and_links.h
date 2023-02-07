@@ -12,6 +12,9 @@ class NodesAndLinks {
  public:
   explicit NodesAndLinks(std::shared_ptr<AutoIncrementable> auto_object_id);
 
+  static auto GetSelectedNodeIds [[nodiscard]] () -> std::vector<ne::NodeId>;
+  static auto GetSelectedLinkIds [[nodiscard]] () -> std::vector<ne::LinkId>;
+
   auto SpawnInputActionNode() -> Node *;
   auto SpawnBranchNode() -> Node *;
   auto SpawnDoNNode() -> Node *;

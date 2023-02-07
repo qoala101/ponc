@@ -11,6 +11,7 @@
 #include "esc_textures_handle.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
+#include <imfilebrowser.h>
 #include <imgui_internal.h>
 
 #include <algorithm>
@@ -20,8 +21,6 @@
 #include <vector>
 
 #include "esc_editor_context_handle.h"
-
-namespace ne = ax::NodeEditor;
 
 // NOLINTNEXTLINE(*-multiple-inheritance)
 class App : public Application, public std::enable_shared_from_this<App> {
@@ -43,6 +42,8 @@ class App : public Application, public std::enable_shared_from_this<App> {
   void OnStop() override;
   void OnFrame(float deltaTime) override;
 
+  void ShowFlow();
+
   //
 
   auto CreateEditorConfig();
@@ -55,12 +56,11 @@ class App : public Application, public std::enable_shared_from_this<App> {
 
   std::optional<esc::EditorContextHandle> editor_context_{};
   std::optional<esc::TexturesHandle> textures_{};
+  ImGui::FileBrowser file_browser_{};
 
   std::shared_ptr<esc::AutoIncrementable> auto_object_id_{};
 
   esc::NodesAndLinks nodes_and_links_;
-
-  bool show_ordinals_{};
 };
 
 #endif  // VH_ESC_APP_H_
