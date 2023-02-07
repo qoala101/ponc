@@ -4,6 +4,8 @@
 #include <application.h>
 #include <imgui_node_editor.h>
 
+#include <memory>
+
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
 
@@ -13,6 +15,7 @@
 #include <utility>
 #include <vector>
 
+#include "esc_editor_context_handle.h"
 #include "esc_types.h"
 
 namespace ne = ax::NodeEditor;
@@ -70,12 +73,29 @@ class Example : public Application {
 
   void ShowLeftPane(float paneWidth);
 
+  //
+
+  auto CreateEditorConfig() -> ne::Config;
+
+  void AddInitialNodes();
+  void AddInitialLinks();
+
+  void LoadTextures();
+  void DestroyTextures();
+
+  std::optional<esc::EditorContextHandle> editor_context_{};
+
   int next_id_{};
+
   std::vector<Node> nodes_{};
   std::vector<Link> links_{};
-  ImTextureID header_background_{};
-  ImTextureID save_icon_{};
-  ImTextureID restore_icon_{};
+
+  struct TextureIds {
+    ImTextureID header_background{};
+    ImTextureID save_icon{};
+    ImTextureID restore_icon{};
+  } texture_ids_{};
+
   std::map<ne::NodeId, float, NodeIdLess> node_touch_time_{};
   bool show_ordinals_{};
 };

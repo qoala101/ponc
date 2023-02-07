@@ -4,7 +4,9 @@
 #include <imgui_node_editor.h>
 
 #include "esc_builders.h"
+#include "esc_cpp.h"
 #include "esc_widgets.h"
+#include "imgui.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
@@ -16,7 +18,6 @@
 #include <vector>
 
 namespace {
-auto* kEditor = static_cast<ne::EditorContext*>(nullptr);
 const auto kPinIconSize = 24;
 const auto kTouchTime = 1.0F;
 
@@ -444,43 +445,65 @@ void Example::BuildNodes() {
   }
 }
 
-void Example::OnStart() {
-  ne::Config config;
+auto Example::CreateEditorConfig() -> ne::Config {
+  auto config = ne::Config{};
 
   config.SettingsFile = "Blueprints.json";
-
   config.UserPointer = this;
 
-  config.LoadNodeSettings = [](ne::NodeId nodeId, char* data,
-                               void* userPointer) -> size_t {
-    auto self = static_cast<Example*>(userPointer);
+  config.LoadNodeSettings = [](const auto node_id, auto* data,
+                               auto* user_pointer) -> size_t {
+    auto* self = static_cast<Example*>(user_pointer);
+    const auto* node = self->FindNode(node_id);
 
-    auto node = self->FindNode(nodeId);
-    if (!node) return 0;
+    if (node == nullptr) {
+      return 0;
+    }
 
-    if (data != nullptr) memcpy(data, node->State.data(), node->State.size());
+    if (data != nullptr) {
+      strcpy(data, node->State.data());
+    }
+
     return node->State.size();
   };
 
-  config.SaveNodeSettings = [](ne::NodeId nodeId, const char* data, size_t size,
-                               ne::SaveReasonFlags reason,
-                               void* userPointer) -> bool {
-    auto self = static_cast<Example*>(userPointer);
+  config.SaveNodeSettings = [](const auto node_id, const auto* data,
+                               const auto size, const auto,
+                               auto* user_pointer) -> bool {
+    auto* self = static_cast<Example*>(user_pointer);
+    auto* node = self->FindNode(node_id);
 
-    auto node = self->FindNode(nodeId);
-    if (!node) return false;
+    if (node == nullptr) {
+      return false;
+    }
 
     node->State.assign(data, size);
-
-    self->TouchNode(nodeId);
+    self->TouchNode(node_id);
 
     return true;
   };
 
-  kEditor = ne::CreateEditor(&config);
-  ne::SetCurrentEditor(kEditor);
+  return config;
+}
 
-  Node* node;
+void Example::OnStart() {
+  cpp::Expects(!editor_context_.has_value());
+
+  const auto editor_config = CreateEditorConfig();
+  editor_context_.emplace(editor_config);
+
+  AddInitialNodes();
+  ne::NavigateToContent();
+  BuildNodes();
+  AddInitialLinks();
+  LoadTextures();
+
+  cpp::Ensures(editor_context_.has_value());
+}
+
+void Example::AddInitialNodes() {
+  auto* node = static_cast<Node*>(nullptr);
+
   node = SpawnInputActionNode();
   ne::SetNodePosition(node->ID, ImVec2(-252, 220));
   node = SpawnBranchNode();
@@ -519,42 +542,52 @@ void Example::OnStart() {
   ne::SetNodePosition(node->ID, ImVec2(500, -70));
   node = SpawnHoudiniGroupNode();
   ne::SetNodePosition(node->ID, ImVec2(500, 42));
+}
 
-  ne::NavigateToContent();
+void Example::AddInitialLinks() {
+  links_.emplace_back(GetNextLinkId(), nodes_[5].Outputs[0].ID,
+                      nodes_[6].Inputs[0].ID);
+  links_.emplace_back(GetNextLinkId(), nodes_[5].Outputs[0].ID,
+                      nodes_[7].Inputs[0].ID);
+  links_.emplace_back(GetNextLinkId(), nodes_[14].Outputs[0].ID,
+                      nodes_[15].Inputs[0].ID);
+}
 
-  BuildNodes();
+void Example::LoadTextures() {
+  cpp::Expects(texture_ids_.header_background == nullptr);
+  cpp::Expects(texture_ids_.save_icon == nullptr);
+  cpp::Expects(texture_ids_.restore_icon == nullptr);
 
-  links_.push_back(
-      Link(GetNextLinkId(), nodes_[5].Outputs[0].ID, nodes_[6].Inputs[0].ID));
-  links_.push_back(
-      Link(GetNextLinkId(), nodes_[5].Outputs[0].ID, nodes_[7].Inputs[0].ID));
+  texture_ids_.header_background = LoadTexture("data/BlueprintBackground.png");
+  texture_ids_.save_icon = LoadTexture("data/ic_save_white_24dp.png");
+  texture_ids_.restore_icon = LoadTexture("data/ic_restore_white_24dp.png");
 
-  links_.push_back(
-      Link(GetNextLinkId(), nodes_[14].Outputs[0].ID, nodes_[15].Inputs[0].ID));
+  cpp::Ensures(texture_ids_.header_background != nullptr);
+  cpp::Ensures(texture_ids_.save_icon != nullptr);
+  cpp::Ensures(texture_ids_.restore_icon != nullptr);
+}
 
-  header_background_ = LoadTexture("data/BlueprintBackground.png");
-  save_icon_ = LoadTexture("data/ic_save_white_24dp.png");
-  restore_icon_ = LoadTexture("data/ic_restore_white_24dp.png");
+void Example::DestroyTextures() {
+  cpp::Expects(texture_ids_.header_background != nullptr);
+  cpp::Expects(texture_ids_.save_icon != nullptr);
+  cpp::Expects(texture_ids_.restore_icon != nullptr);
 
-  // auto& io = ImGui::GetIO();
+  for (auto* texture : {&texture_ids_.restore_icon, &texture_ids_.save_icon,
+                        &texture_ids_.header_background}) {
+    DestroyTexture(texture);
+    *texture = nullptr;
+  }
+
+  cpp::Ensures(texture_ids_.header_background == nullptr);
+  cpp::Ensures(texture_ids_.save_icon == nullptr);
+  cpp::Ensures(texture_ids_.restore_icon == nullptr);
 }
 
 void Example::OnStop() {
-  auto releaseTexture = [this](ImTextureID& id) {
-    if (id) {
-      DestroyTexture(id);
-      id = nullptr;
-    }
-  };
+  DestroyTextures();
 
-  releaseTexture(restore_icon_);
-  releaseTexture(save_icon_);
-  releaseTexture(header_background_);
-
-  if (kEditor) {
-    ne::DestroyEditor(kEditor);
-    kEditor = nullptr;
-  }
+  editor_context_.reset();
+  cpp::Ensures(!editor_context_.has_value());
 }
 
 void Example::DrawPinIcon(const Pin& pin, bool connected, int alpha) const {
@@ -630,10 +663,10 @@ void Example::ShowLeftPane(float paneWidth) {
   selectedNodes.resize(nodeCount);
   selectedLinks.resize(linkCount);
 
-  int saveIconWidth = GetTextureWidth(save_icon_);
-  int saveIconHeight = GetTextureWidth(save_icon_);
-  int restoreIconWidth = GetTextureWidth(restore_icon_);
-  int restoreIconHeight = GetTextureWidth(restore_icon_);
+  int saveIconWidth = GetTextureWidth(texture_ids_.save_icon);
+  int saveIconHeight = GetTextureWidth(texture_ids_.save_icon);
+  int restoreIconWidth = GetTextureWidth(texture_ids_.restore_icon);
+  int restoreIconHeight = GetTextureWidth(texture_ids_.restore_icon);
 
   ImGui::GetWindowDrawList()->AddRectFilled(
       ImGui::GetCursorScreenPos(),
@@ -700,20 +733,20 @@ void Example::ShowLeftPane(float paneWidth) {
         node.SavedState = node.State;
 
       if (ImGui::IsItemActive())
-        drawList->AddImage(save_icon_, ImGui::GetItemRectMin(),
+        drawList->AddImage(texture_ids_.save_icon, ImGui::GetItemRectMin(),
                            ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                            IM_COL32(255, 255, 255, 96));
       else if (ImGui::IsItemHovered())
-        drawList->AddImage(save_icon_, ImGui::GetItemRectMin(),
+        drawList->AddImage(texture_ids_.save_icon, ImGui::GetItemRectMin(),
                            ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                            IM_COL32(255, 255, 255, 255));
       else
-        drawList->AddImage(save_icon_, ImGui::GetItemRectMin(),
+        drawList->AddImage(texture_ids_.save_icon, ImGui::GetItemRectMin(),
                            ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                            IM_COL32(255, 255, 255, 160));
     } else {
       ImGui::Dummy(ImVec2((float)saveIconWidth, (float)saveIconHeight));
-      drawList->AddImage(save_icon_, ImGui::GetItemRectMin(),
+      drawList->AddImage(texture_ids_.save_icon, ImGui::GetItemRectMin(),
                          ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                          IM_COL32(255, 255, 255, 32));
     }
@@ -729,20 +762,20 @@ void Example::ShowLeftPane(float paneWidth) {
       }
 
       if (ImGui::IsItemActive())
-        drawList->AddImage(restore_icon_, ImGui::GetItemRectMin(),
+        drawList->AddImage(texture_ids_.restore_icon, ImGui::GetItemRectMin(),
                            ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                            IM_COL32(255, 255, 255, 96));
       else if (ImGui::IsItemHovered())
-        drawList->AddImage(restore_icon_, ImGui::GetItemRectMin(),
+        drawList->AddImage(texture_ids_.restore_icon, ImGui::GetItemRectMin(),
                            ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                            IM_COL32(255, 255, 255, 255));
       else
-        drawList->AddImage(restore_icon_, ImGui::GetItemRectMin(),
+        drawList->AddImage(texture_ids_.restore_icon, ImGui::GetItemRectMin(),
                            ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                            IM_COL32(255, 255, 255, 160));
     } else {
       ImGui::Dummy(ImVec2((float)restoreIconWidth, (float)restoreIconHeight));
-      drawList->AddImage(restore_icon_, ImGui::GetItemRectMin(),
+      drawList->AddImage(texture_ids_.restore_icon, ImGui::GetItemRectMin(),
                          ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1),
                          IM_COL32(255, 255, 255, 32));
     }
@@ -795,8 +828,6 @@ void Example::OnFrame(float deltaTime) {
   ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate,
               io.Framerate ? 1000.0f / io.Framerate : 0.0f);
 
-  ne::SetCurrentEditor(kEditor);
-
   // auto& style = ImGui::GetStyle();
 
   // {
@@ -827,9 +858,10 @@ void Example::OnFrame(float deltaTime) {
   {
     auto cursorTopLeft = ImGui::GetCursorScreenPos();
 
-    util::BlueprintNodeBuilder builder(header_background_,
-                                       GetTextureWidth(header_background_),
-                                       GetTextureHeight(header_background_));
+    util::BlueprintNodeBuilder builder(
+        texture_ids_.header_background,
+        GetTextureWidth(texture_ids_.header_background),
+        GetTextureHeight(texture_ids_.header_background));
 
     for (auto& node : nodes_) {
       if (node.Type != NodeType::Blueprint && node.Type != NodeType::Simple)
