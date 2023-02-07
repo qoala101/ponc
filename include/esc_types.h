@@ -29,7 +29,7 @@ struct Pin {
   PinKind Kind;
 };
 
-auto CanCreateLink [[nodiscard]] (Pin* left, Pin* right) -> bool;
+auto CanCreateLink [[nodiscard]] (const Pin* left, const Pin* right) -> bool;
 
 struct Node {
   Node(int id, const char* name, ImColor color = ImColor{255, 255, 255});
@@ -46,7 +46,7 @@ struct Node {
 };
 
 struct Link {
-  Link(ne::LinkId id, ne::PinId startPinId, ne::PinId endPinId);
+  // Link(ne::LinkId id, ne::PinId startPinId, ne::PinId endPinId);
 
   ne::LinkId ID;
   ne::PinId StartPinID;

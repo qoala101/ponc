@@ -10,11 +10,11 @@
 class App;
 
 namespace esc {
-class LeftPanel {
+class LeftPane {
  public:
-  explicit LeftPanel(std::shared_ptr<App> app);
+  explicit LeftPane(std::shared_ptr<App> app);
 
-  void Draw(float panel_width);
+  void Draw(float pane_width);
 
  private:
   void DrawMenu();

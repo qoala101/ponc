@@ -7,10 +7,12 @@ namespace cpp {
 void Expects(bool condition);
 void Ensures(bool condition);
 
-template <typename Start, typename End>
+template <typename End, typename Start = decltype([]() {})>
 class Scope {
  public:
-  Scope(const Start& start, End end) : end_{std::move(end)} { start(); }
+  explicit Scope(End end) : end_{std::move(end)} {}
+
+  Scope(const Start& start, End end) : Scope{std::move(end)} { start(); }
 
   Scope(const Scope&) = delete;
   Scope(Scope&&) noexcept = delete;

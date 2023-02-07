@@ -6,7 +6,7 @@
 
 #include <memory>
 
-#include "esc_left_panel.h"
+#include "esc_left_pane.h"
 #include "esc_nodes_and_links.h"
 #include "esc_textures_handle.h"
 #include "imgui.h"
@@ -36,6 +36,7 @@ class App : public Application, public std::enable_shared_from_this<App> {
   virtual ~App() = default;
 
   auto GetNextObjectId [[nodiscard]] () -> int;
+  auto GetNextLinkId [[nodiscard]] () -> ne::LinkId;
   auto GetTextures [[nodiscard]] () -> esc::TexturesHandle&;
   auto GetNodesAndLinks [[nodiscard]] () -> esc::NodesAndLinks&;
 
@@ -44,8 +45,6 @@ class App : public Application, public std::enable_shared_from_this<App> {
   auto GetTextureDims [[nodiscard]] (ImTextureID texture_id) -> ImVec2;
 
  private:
-  auto GetNextLinkId [[nodiscard]] ();
-
   void OnStart() override;
   void OnStop() override;
   void OnFrame(float deltaTime) override;
@@ -57,14 +56,25 @@ class App : public Application, public std::enable_shared_from_this<App> {
   void AddInitialNodes();
   void AddInitialLinks();
 
+  void DrawContextMenu();
   void DrawFrame();
 
   std::optional<esc::NodesAndLinks> nodes_and_links_;
   std::optional<esc::EditorContextHandle> editor_context_{};
   std::optional<esc::TexturesHandle> textures_{};
-  std::optional<esc::LeftPanel> left_panel_;
+  std::optional<esc::LeftPane> left_pane_;
 
   int next_object_id_{};
+
+  ne::NodeId context_node_id{};
+  ne::LinkId context_link_id{};
+  ne::PinId context_pin_id{};
+  bool create_new_node{};
+  Pin* existing_node_new_link_pin{};
+  Pin* new_link_pin{};
+
+  float left_pane_width{};
+  float right_pane_width{};
 };
 
 #endif  // VH_ESC_APP_H_

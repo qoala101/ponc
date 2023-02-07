@@ -1,4 +1,4 @@
-#include "esc_left_panel.h"
+#include "esc_left_pane.h"
 
 #include <bits/ranges_algo.h>
 #include <imgui_node_editor.h>
@@ -49,7 +49,7 @@ void DrawNode(Node& node, bool is_selected) {
 }
 }  // namespace
 // vh: norm
-LeftPanel::LeftPanel(std::shared_ptr<App> app)
+LeftPane::LeftPane(std::shared_ptr<App> app)
     : app_{(cpp::Expects(app != nullptr), std::move(app))}, file_browser_{[]() {
         auto file_browser_ = ImGui::FileBrowser{};
         file_browser_.SetTitle("Select");
@@ -59,20 +59,20 @@ LeftPanel::LeftPanel(std::shared_ptr<App> app)
   cpp::Ensures(app_ != nullptr);
 }
 // vh: norm
-void LeftPanel::Draw(float panel_width) {
+void LeftPane::Draw(float pane_width) {
   {
     const auto child_scope =
-        cpp::Scope{[panel_width]() {
-                     ImGui::BeginChild("Selection", ImVec2{panel_width, 0});
+        cpp::Scope{[pane_width]() {
+                     ImGui::BeginChild("Selection", ImVec2{pane_width, 0});
                    },
                    []() { ImGui::EndChild(); }};
 
-    panel_width = ImGui::GetContentRegionAvail().x;
+    pane_width = ImGui::GetContentRegionAvail().x;
 
     {
       const auto horizontal_scope = cpp::Scope{
-          [panel_width]() {
-            ImGui::BeginHorizontal("Style Editor", ImVec2{panel_width, 0});
+          [pane_width]() {
+            ImGui::BeginHorizontal("Style Editor", ImVec2{pane_width, 0});
           },
           []() { ImGui::EndHorizontal(); }};
 
@@ -98,7 +98,7 @@ void LeftPanel::Draw(float panel_width) {
   DrawDialog();
 }
 // vh: norm
-void LeftPanel::DrawMenu() {
+void LeftPane::DrawMenu() {
   if (ImGui::Button("Open...")) {
     file_browser_.Open();
   }
@@ -116,7 +116,7 @@ void LeftPanel::DrawMenu() {
   }
 }
 // vh: norm
-void LeftPanel::DrawDialog() {
+void LeftPane::DrawDialog() {
   file_browser_.Display();
 
   if (file_browser_.HasSelected()) {

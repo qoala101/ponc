@@ -15,6 +15,7 @@ class NodesAndLinks {
 
   static auto GetSelectedNodeIds [[nodiscard]] () -> std::vector<ne::NodeId>;
   static auto GetSelectedLinkIds [[nodiscard]] () -> std::vector<ne::LinkId>;
+  static auto GetNodeTypeNames [[nodiscard]] () -> std::vector<std::string>;
 
   auto SpawnInputActionNode() -> Node *;
   auto SpawnBranchNode() -> Node *;
@@ -33,6 +34,9 @@ class NodesAndLinks {
   auto SpawnHoudiniTransformNode() -> Node *;
   auto SpawnHoudiniGroupNode() -> Node *;
 
+  auto SpawnNodeByTypeName [[nodiscard]] (const std::string &type_name)
+  -> Node *;
+
   void BuildNodes();
 
   auto GetNodes [[nodiscard]] () -> std::vector<Node> &;
@@ -46,6 +50,8 @@ class NodesAndLinks {
 
   void SpawnLink(const Link &link);
   void EraseLinkWithId(ne::LinkId id);
+
+  void SpawnLinkFromPinToNode(const Pin *pin, const Node *node);
 
  private:
   std::shared_ptr<App> app_{};

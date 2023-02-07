@@ -11,7 +11,7 @@ Pin::Pin(int id, const char* name, PinType type)
       Type{type},
       Kind{PinKind::Input} {}
 // vh: ok
-auto CanCreateLink(Pin* left, Pin* right) -> bool {
+auto CanCreateLink(const Pin* left, const Pin* right) -> bool {
   return (left != nullptr) && (right != nullptr) && (left != right) &&
          (left->Kind != right->Kind) && (left->Type == right->Type) &&
          (left->Node != right->Node);
@@ -24,8 +24,8 @@ Node::Node(int id, const char* name, ImColor color)
       Type{NodeType::Blueprint},
       Size{0, 0} {}
 
-Link::Link(ne::LinkId id, ne::PinId startPinId, ne::PinId endPinId)
-    : ID{id},
-      StartPinID{startPinId},
-      EndPinID{endPinId},
-      Color{255, 255, 255} {}
+// Link::Link(ne::LinkId id, ne::PinId startPinId, ne::PinId endPinId)
+//     : ID{id},
+//       StartPinID{startPinId},
+//       EndPinID{endPinId},
+//       Color{255, 255, 255} {}
