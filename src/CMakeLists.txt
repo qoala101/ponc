@@ -109,12 +109,11 @@ add_example_executable(esc
   esc_auto_incrementable.cc
   esc_builders.cc
   esc_cpp.cc
-  esc_drawing.cc
   esc_editor_context_handle.cc
+  esc_enums.cc
   esc_nodes_and_links.cc
   esc_textures_handle.cc
   esc_types.cc
-  esc_widgets.cc
   main.cc
 )
 

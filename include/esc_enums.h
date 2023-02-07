@@ -18,7 +18,6 @@ enum class PinKind { Output, Input };
 
 enum class NodeType { Blueprint, Simple, Tree, Comment, Houdini };
 
-namespace ax::Drawing {
 enum class IconType : ImU32 {
   Flow,
   Circle,
@@ -27,6 +26,8 @@ enum class IconType : ImU32 {
   RoundSquare,
   Diamond
 };
-}  // namespace ax::Drawing
+
+auto GetIconColor(PinType pin_type) -> ImColor;
+auto GetIconType(PinType pin_type) -> IconType;
 
 #endif  // VH_ESC_ENUMS_H_

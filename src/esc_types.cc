@@ -10,6 +10,12 @@ Pin::Pin(int id, const char* name, PinType type)
       Name{name},
       Type{type},
       Kind{PinKind::Input} {}
+// vh: ok
+auto CanCreateLink(Pin* left, Pin* right) -> bool {
+  return (left != nullptr) && (right != nullptr) && (left != right) &&
+         (left->Kind != right->Kind) && (left->Type == right->Type) &&
+         (left->Node != right->Node);
+}
 
 Node::Node(int id, const char* name, ImColor color)
     : ID{static_cast<uint64_t>(id)},

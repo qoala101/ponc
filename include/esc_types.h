@@ -29,6 +29,8 @@ struct Pin {
   PinKind Kind;
 };
 
+auto CanCreateLink [[nodiscard]] (Pin* left, Pin* right) -> bool;
+
 struct Node {
   Node(int id, const char* name, ImColor color = ImColor{255, 255, 255});
 

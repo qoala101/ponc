@@ -20,7 +20,6 @@
 #include <vector>
 
 #include "esc_editor_context_handle.h"
-#include "esc_types.h"
 
 namespace ne = ax::NodeEditor;
 
@@ -38,21 +37,21 @@ class App : public Application, public std::enable_shared_from_this<App> {
   virtual ~App() = default;
 
  private:
-  auto GetNextLinkId() -> ne::LinkId;
+  auto GetNextLinkId();
 
   void OnStart() override;
   void OnStop() override;
   void OnFrame(float deltaTime) override;
 
-  void DrawLeftPane(float paneWidth);
-  void DrawFrame();
-
   //
 
-  auto CreateEditorConfig() -> ne::Config;
+  auto CreateEditorConfig();
 
   void AddInitialNodes();
   void AddInitialLinks();
+
+  void DrawLeftPane(float paneWidth);
+  void DrawFrame();
 
   std::optional<esc::EditorContextHandle> editor_context_{};
   std::optional<esc::TexturesHandle> textures_{};
