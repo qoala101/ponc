@@ -48,7 +48,12 @@ macro(add_example_executable name)
 
   add_executable(${name} ${_Example_Type} ${_Example_Sources} ${_Example_Resources} ${_Example_CommonResources})
 
-  target_link_libraries(${name} PRIVATE imgui imgui_node_editor application)
+  target_link_libraries(${name} PRIVATE
+    thirdparty::imgui
+    thirdparty::imgui_node_editor
+    thirdparty::imgui-filebrowser
+    thirdparty::application
+  )
 
   set(_ExampleBinDir ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 

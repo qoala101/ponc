@@ -17,3 +17,7 @@ add_subdirectory(
   ${imgui-node-editor_SOURCE_DIR}/examples/application
   ${imgui-node-editor_BINARY_DIR}/examples/application
 )
+
+add_library(thirdparty::imgui ALIAS imgui)
+add_library(thirdparty::imgui_node_editor ALIAS imgui_node_editor)
+add_library(thirdparty::application ALIAS application)

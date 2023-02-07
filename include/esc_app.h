@@ -56,7 +56,7 @@ class App : public Application, public std::enable_shared_from_this<App> {
   std::optional<esc::EditorContextHandle> editor_context_{};
   std::optional<esc::TexturesHandle> textures_{};
 
-  std::shared_ptr<esc::AutoIncrementable> auto_incrementable_object_id_{};
+  std::shared_ptr<esc::AutoIncrementable> auto_object_id_{};
 
   esc::NodesAndLinks nodes_and_links_;
 

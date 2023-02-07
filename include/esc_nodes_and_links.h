@@ -10,8 +10,7 @@
 namespace esc {
 class NodesAndLinks {
  public:
-  explicit NodesAndLinks(
-      std::shared_ptr<AutoIncrementable> auto_incrementable_object_id);
+  explicit NodesAndLinks(std::shared_ptr<AutoIncrementable> auto_object_id);
 
   auto SpawnInputActionNode() -> Node *;
   auto SpawnBranchNode() -> Node *;
@@ -45,7 +44,7 @@ class NodesAndLinks {
   void EraseLinkWithId(ne::LinkId id);
 
  private:
-  std::shared_ptr<esc::AutoIncrementable> auto_incrementable_object_id_{};
+  std::shared_ptr<esc::AutoIncrementable> auto_object_id_{};
   std::vector<Node> nodes_{};
   std::vector<Link> links_{};
 };
