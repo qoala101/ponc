@@ -23,8 +23,3 @@ Link::Link(ne::LinkId id, ne::PinId startPinId, ne::PinId endPinId)
       StartPinID{startPinId},
       EndPinID{endPinId},
       Color{255, 255, 255} {}
-
-auto NodeIdLess::operator()(const ne::NodeId& lhs, const ne::NodeId& rhs) const
-    -> bool {
-  return lhs.AsPointer() < rhs.AsPointer();
-}

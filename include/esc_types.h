@@ -52,8 +52,4 @@ struct Link {
   ImColor Color;
 };
 
-struct NodeIdLess {
-  auto operator()(const ne::NodeId& lhs, const ne::NodeId& rhs) const -> bool;
-};
-
 #endif  // VH_ESC_TYPES_H_

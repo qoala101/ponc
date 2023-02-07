@@ -5,6 +5,7 @@
 #include <imgui_node_editor.h>
 
 #include <memory>
+
 #include "esc_nodes_and_links.h"
 #include "esc_textures_handle.h"
 
@@ -38,11 +39,6 @@ class App : public Application {
   auto GetNextObjectId() -> int;
   auto GetNextLinkId() -> ne::LinkId;
 
-  void TouchNode(ne::NodeId id);
-  auto GetTouchProgress(ne::NodeId id) -> float;
-  void UpdateTouch();
-
-
   void OnStart() override;
   void OnStop() override;
   void OnFrame(float deltaTime) override;
@@ -63,7 +59,6 @@ class App : public Application {
 
   esc::NodesAndLinks nodes_and_links_;
 
-  std::map<ne::NodeId, float, NodeIdLess> node_touch_time_{};
   bool show_ordinals_{};
 };
 

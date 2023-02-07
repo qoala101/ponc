@@ -27,7 +27,6 @@ using ax::Widgets::IconType;
 
 namespace {
 const auto kPinIconSize = 24;
-const auto kTouchTime = 1.0F;
 
 auto ImGui_GetItemRect() -> ImRect {
   return ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
@@ -213,31 +212,14 @@ void DrawPinIcon(const Pin& pin, bool connected, int alpha) {
 
 // vh: norm
 App::App(const char* name, int argc, char** argv)
-    : Application{name, argc, argv}, next_object_id_{1}, nodes_and_links_{[this]() {
-        return GetNextObjectId();
-      }} {}
+    : Application{name, argc, argv},
+      next_object_id_{1},
+      nodes_and_links_{[this]() { return GetNextObjectId(); }} {}
 // vh: norm
 auto App::GetNextObjectId() -> int { return next_object_id_++; }
 // vh: norm
 auto App::GetNextLinkId() -> ne::LinkId {
   return {static_cast<uintptr_t>(GetNextObjectId())};
-}
-
-void App::TouchNode(ne::NodeId id) { node_touch_time_[id] = kTouchTime; }
-
-auto App::GetTouchProgress(ne::NodeId id) -> float {
-  auto it = node_touch_time_.find(id);
-  if (it != node_touch_time_.end() && it->second > 0.0f)
-    return (kTouchTime - it->second) / kTouchTime;
-  else
-    return 0.0f;
-}
-
-void App::UpdateTouch() {
-  const auto deltaTime = ImGui::GetIO().DeltaTime;
-  for (auto& entry : node_touch_time_) {
-    if (entry.second > 0.0f) entry.second -= deltaTime;
-  }
 }
 
 auto App::CreateEditorConfig() -> ne::Config {
@@ -273,7 +255,6 @@ auto App::CreateEditorConfig() -> ne::Config {
     }
 
     node->State.assign(data, size);
-    self->TouchNode(node_id);
 
     return true;
   };
@@ -343,12 +324,15 @@ void App::AddInitialNodes() {
 }
 
 void App::AddInitialLinks() {
-  nodes_and_links_.SpawnLink({GetNextLinkId(), nodes_and_links_.GetNodes()[5].Outputs[0].ID,
-                    nodes_and_links_.GetNodes()[6].Inputs[0].ID});
-  nodes_and_links_.SpawnLink({GetNextLinkId(), nodes_and_links_.GetNodes()[5].Outputs[0].ID,
-                    nodes_and_links_.GetNodes()[7].Inputs[0].ID});
-  nodes_and_links_.SpawnLink({GetNextLinkId(), nodes_and_links_.GetNodes()[14].Outputs[0].ID,
-                    nodes_and_links_.GetNodes()[15].Inputs[0].ID});
+  nodes_and_links_.SpawnLink({GetNextLinkId(),
+                              nodes_and_links_.GetNodes()[5].Outputs[0].ID,
+                              nodes_and_links_.GetNodes()[6].Inputs[0].ID});
+  nodes_and_links_.SpawnLink({GetNextLinkId(),
+                              nodes_and_links_.GetNodes()[5].Outputs[0].ID,
+                              nodes_and_links_.GetNodes()[7].Inputs[0].ID});
+  nodes_and_links_.SpawnLink({GetNextLinkId(),
+                              nodes_and_links_.GetNodes()[14].Outputs[0].ID,
+                              nodes_and_links_.GetNodes()[15].Inputs[0].ID});
 }
 
 void App::OnStop() {
@@ -417,13 +401,6 @@ void App::ShowLeftPane(float paneWidth) {
   for (auto& node : nodes_and_links_.GetNodes()) {
     ImGui::PushID(node.ID.AsPointer());
     auto start = ImGui::GetCursorScreenPos();
-
-    if (const auto progress = GetTouchProgress(node.ID)) {
-      ImGui::GetWindowDrawList()->AddLine(
-          start + ImVec2(-8, 0), start + ImVec2(-8, ImGui::GetTextLineHeight()),
-          IM_COL32(255, 0, 0, 255 - (int)(255 * progress)), 4.0f);
-    }
-
     bool isSelected = std::find(selectedNodes.begin(), selectedNodes.end(),
                                 node.ID) != selectedNodes.end();
     if (ImGui::Selectable(
@@ -559,8 +536,6 @@ void App::ShowLeftPane(float paneWidth) {
 void App::OnFrame(float /*unused*/) {
   cpp::Expects(textures_.has_value());
 
-  UpdateTouch();
-
   auto& io = ImGui::GetIO();
 
   ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate,
@@ -665,7 +640,8 @@ void App::OnFrame(float /*unused*/) {
 
         builder.Input(input.ID);
         ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
-        DrawPinIcon(input, nodes_and_links_.IsPinLinked(input.ID), (int)(alpha * 255));
+        DrawPinIcon(input, nodes_and_links_.IsPinLinked(input.ID),
+                    (int)(alpha * 255));
         ImGui::Spring(0);
         if (!input.Name.empty()) {
           ImGui::TextUnformatted(input.Name.c_str());
@@ -718,7 +694,8 @@ void App::OnFrame(float /*unused*/) {
           ImGui::TextUnformatted(output.Name.c_str());
         }
         ImGui::Spring(0);
-        DrawPinIcon(output, nodes_and_links_.IsPinLinked(output.ID), (int)(alpha * 255));
+        DrawPinIcon(output, nodes_and_links_.IsPinLinked(output.ID),
+                    (int)(alpha * 255));
         ImGui::PopStyleVar();
         builder.EndOutput();
       }
@@ -1220,9 +1197,11 @@ void App::OnFrame(float /*unused*/) {
         while (ne::QueryDeletedNode(&nodeId)) {
           if (ne::AcceptDeletedItem()) {
             auto id = std::find_if(
-                nodes_and_links_.GetNodes().begin(), nodes_and_links_.GetNodes().end(),
+                nodes_and_links_.GetNodes().begin(),
+                nodes_and_links_.GetNodes().end(),
                 [nodeId](auto& node) { return node.ID == nodeId; });
-            if (id != nodes_and_links_.GetNodes().end()) nodes_and_links_.GetNodes().erase(id);
+            if (id != nodes_and_links_.GetNodes().end())
+              nodes_and_links_.GetNodes().erase(id);
           }
         }
       }
@@ -1310,27 +1289,35 @@ void App::OnFrame(float /*unused*/) {
     // 0xFFFF00FF);
 
     Node* node = nullptr;
-    if (ImGui::MenuItem("Input Action")) node = nodes_and_links_.SpawnInputActionNode();
-    if (ImGui::MenuItem("Output Action")) node = nodes_and_links_.SpawnOutputActionNode();
+    if (ImGui::MenuItem("Input Action"))
+      node = nodes_and_links_.SpawnInputActionNode();
+    if (ImGui::MenuItem("Output Action"))
+      node = nodes_and_links_.SpawnOutputActionNode();
     if (ImGui::MenuItem("Branch")) node = nodes_and_links_.SpawnBranchNode();
     if (ImGui::MenuItem("Do N")) node = nodes_and_links_.SpawnDoNNode();
-    if (ImGui::MenuItem("Set Timer")) node = nodes_and_links_.SpawnSetTimerNode();
+    if (ImGui::MenuItem("Set Timer"))
+      node = nodes_and_links_.SpawnSetTimerNode();
     if (ImGui::MenuItem("Less")) node = nodes_and_links_.SpawnLessNode();
     if (ImGui::MenuItem("Weird")) node = nodes_and_links_.SpawnWeirdNode();
     if (ImGui::MenuItem("Trace by Channel"))
       node = nodes_and_links_.SpawnTraceByChannelNode();
-    if (ImGui::MenuItem("Print String")) node = nodes_and_links_.SpawnPrintStringNode();
+    if (ImGui::MenuItem("Print String"))
+      node = nodes_and_links_.SpawnPrintStringNode();
     ImGui::Separator();
     if (ImGui::MenuItem("Comment")) node = nodes_and_links_.SpawnComment();
     ImGui::Separator();
-    if (ImGui::MenuItem("Sequence")) node = nodes_and_links_.SpawnTreeSequenceNode();
+    if (ImGui::MenuItem("Sequence"))
+      node = nodes_and_links_.SpawnTreeSequenceNode();
     if (ImGui::MenuItem("Move To")) node = nodes_and_links_.SpawnTreeTaskNode();
-    if (ImGui::MenuItem("Random Wait")) node = nodes_and_links_.SpawnTreeTask2Node();
+    if (ImGui::MenuItem("Random Wait"))
+      node = nodes_and_links_.SpawnTreeTask2Node();
     ImGui::Separator();
     if (ImGui::MenuItem("Message")) node = nodes_and_links_.SpawnMessageNode();
     ImGui::Separator();
-    if (ImGui::MenuItem("Transform")) node = nodes_and_links_.SpawnHoudiniTransformNode();
-    if (ImGui::MenuItem("Group")) node = nodes_and_links_.SpawnHoudiniGroupNode();
+    if (ImGui::MenuItem("Transform"))
+      node = nodes_and_links_.SpawnHoudiniTransformNode();
+    if (ImGui::MenuItem("Group"))
+      node = nodes_and_links_.SpawnHoudiniGroupNode();
 
     if (node) {
       nodes_and_links_.BuildNodes();
