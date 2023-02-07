@@ -9,6 +9,7 @@
 #include "esc_left_panel.h"
 #include "esc_nodes_and_links.h"
 #include "esc_textures_handle.h"
+#include "imgui.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
@@ -34,14 +35,16 @@ class App : public Application, public std::enable_shared_from_this<App> {
 
   virtual ~App() = default;
 
-  auto GetNextObjectId() -> int;
-  auto GetTextures() -> esc::TexturesHandle&;
-  auto GetNodesAndLinks() -> esc::NodesAndLinks&;
+  auto GetNextObjectId [[nodiscard]] () -> int;
+  auto GetTextures [[nodiscard]] () -> esc::TexturesHandle&;
+  auto GetNodesAndLinks [[nodiscard]] () -> esc::NodesAndLinks&;
 
   void ShowFlow();
 
+  auto GetTextureDims [[nodiscard]] (ImTextureID texture_id) -> ImVec2;
+
  private:
-  auto GetNextLinkId();
+  auto GetNextLinkId [[nodiscard]] ();
 
   void OnStart() override;
   void OnStop() override;
@@ -49,13 +52,13 @@ class App : public Application, public std::enable_shared_from_this<App> {
 
   //
 
-  auto CreateEditorConfig();
+  auto CreateEditorConfig [[nodiscard]] ();
 
   void AddInitialNodes();
   void AddInitialLinks();
 
   void DrawFrame();
-  
+
   std::optional<esc::NodesAndLinks> nodes_and_links_;
   std::optional<esc::EditorContextHandle> editor_context_{};
   std::optional<esc::TexturesHandle> textures_{};

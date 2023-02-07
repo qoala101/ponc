@@ -12,8 +12,6 @@ class TexturesHandle {
  public:
   struct TextureIds {
     ImTextureID header_background{};
-    ImTextureID save_icon{};
-    ImTextureID restore_icon{};
   };
 
   explicit TexturesHandle(std::shared_ptr<Application> app);

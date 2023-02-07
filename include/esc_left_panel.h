@@ -14,9 +14,12 @@ class LeftPanel {
  public:
   explicit LeftPanel(std::shared_ptr<App> app);
 
-  void Draw(float pane_width);
+  void Draw(float panel_width);
 
  private:
+  void DrawMenu();
+  void DrawDialog();
+
   std::shared_ptr<App> app_;
   ImGui::FileBrowser file_browser_{};
 };
