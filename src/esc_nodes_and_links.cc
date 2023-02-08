@@ -406,13 +406,11 @@ void NodesAndLinks::UpdateNodePointerOnPins() {
 
 void ClearAllValuesExceptInput(std::vector<Node>& nodes_) {
   for (auto& node : nodes_) {
-    if (node.Name == "Input") {
-      continue;
-    }
-
     for (const auto& pins : {&node.Inputs, &node.Outputs}) {
       for (auto& pin : *pins) {
-        pin.value = 0;
+        if (!pin.editable) {
+          pin.value = 0;
+        }
       }
     }
   }
@@ -429,15 +427,30 @@ void NodesAndLinks::UpdatePinValues() {
     }
   }
 
+  auto visited_nodes =
+      std::unordered_set<Node*>{input_nodes.begin(), input_nodes.end()};
+
   while (!input_nodes.empty()) {
     auto next_input_nodes = std::unordered_set<Node*>{};
 
     for (auto* input_node : input_nodes) {
+      if (!visited_nodes.contains(input_node)) {
+        visited_nodes.emplace(input_node);
+
+        for (auto& input_pin : input_node->Inputs) {
+          if (input_pin.editable) {
+            for (auto& output_pin : input_node->Outputs) {
+              output_pin.value -= input_pin.value;
+            }
+          }
+        }
+      }
+
       for (auto& input_node_output_pin : input_node->Outputs) {
         for (auto& link : links_) {
           if (link.StartPinID == input_node_output_pin.ID) {
             auto* end_pin = FindPin(link.EndPinID);
-            
+
             if ((end_pin == nullptr) || (end_pin->node == nullptr)) {
               continue;
             }

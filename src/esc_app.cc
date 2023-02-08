@@ -172,7 +172,7 @@ void DrawPinField(Pin& pin) {
   if (pin.Type != PinType::Empty) {
     if (pin.editable) {
       ImGui::SetNextItemWidth(100);
-      ImGui::InputFloat(pin.Name.c_str(), &pin.value);
+      ImGui::InputFloat(pin.Name.c_str(), &pin.value, 0.0F, 0.0F, "%.3f");
     } else {
       ImGui::Text("%.3f %s", pin.value, pin.Name.c_str());
     }
