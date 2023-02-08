@@ -5,6 +5,7 @@
 #include <imgui_node_editor_internal.h>
 #include <sys/types.h>
 
+#include <cstring>
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -151,7 +152,10 @@ void NodesAndLinks::EraseLinkWithId(ne::LinkId linkId) {
 void NodesAndLinks::EraseNodeWithId(ne::NodeId id) {
   auto node =
       std::ranges::find_if(nodes_, [id](auto& node) { return node.ID == id; });
-  nodes_.erase(node);
+
+  if (node != nodes_.end()) {
+    nodes_.erase(node);
+  }
 }
 
 auto NodesAndLinks::GetSelectedNodeIds() -> std::vector<ne::NodeId> {
@@ -257,6 +261,8 @@ void NodesAndLinks::SafeToFile(const std::string& file_path) {
       node_json["name"] = node.Name;
       node_json["coupler_percentage_index"] =
           static_cast<crude_json::number>(node.coupler_percentage_index_);
+      node_json["comment_text"] =
+          std::string{node.comment_text_.begin(), node.comment_text_.end()};
 
       const auto pos = ne::GetNodePosition(node.ID);
 
@@ -342,6 +348,9 @@ void NodesAndLinks::LoadFromFile(const std::string& file_path) {
         SpawnNodeByTypeName(node_json["name"].get<crude_json::string>());
     node->coupler_percentage_index_ = static_cast<int>(
         node_json["coupler_percentage_index"].get<crude_json::number>());
+    const auto comment_text =
+        node_json["comment_text"].get<crude_json::string>();
+    strcpy(node->comment_text_.data(), comment_text.c_str());
 
     {
       const auto& input_pins = node_json["input_pins"];

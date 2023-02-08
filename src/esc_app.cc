@@ -190,7 +190,7 @@ void DrawBlueprintNodeHeader(Node& node) {
 
   if (node.Name == "Coupler 1x2") {
     ImGui::SetNextItemWidth(100);
-    const auto &coupler_percentage_names = GetCouplerPercentageNames();
+    const auto& coupler_percentage_names = GetCouplerPercentageNames();
     ImGui::SliderInt(
         "", &node.coupler_percentage_index_, 0,
         static_cast<int>(coupler_percentage_names.size()) - 1,
@@ -210,7 +210,10 @@ void DrawCommentNode(Node& node) {
   ImGui::BeginVertical("content");
   ImGui::BeginHorizontal("horizontal");
   ImGui::Spring(1);
-  ImGui::TextUnformatted(node.Name.c_str());
+
+  ImGui::SetNextItemWidth(200);
+  ImGui::InputText("", node.comment_text_.data(), node.comment_text_.size());
+
   ImGui::Spring(1);
   ImGui::EndHorizontal();
   ne::Group(node.Size);

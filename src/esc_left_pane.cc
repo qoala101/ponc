@@ -3,6 +3,7 @@
 #include <bits/ranges_algo.h>
 #include <imgui_node_editor.h>
 
+#include <iostream>
 #include <memory>
 #include <utility>
 
@@ -24,9 +25,12 @@ void DrawNode(Node& node, bool is_selected) {
         cpp::Scope{[&node]() { ImGui::PushID(node.ID.AsPointer()); },
                    []() { ImGui::PopID(); }};
 
-    const auto label =
-        node.Name + "##" +
-        std::to_string(reinterpret_cast<uintptr_t>(node.ID.AsPointer()));
+    auto label = node.Name;
+
+    if (node.Name == "Comment") {
+      label += ": " + std::string{node.comment_text_.begin(),
+                                  node.comment_text_.end()};
+    }
 
     if (ImGui::Selectable(label.c_str(), &is_selected)) {
       if (io.KeyCtrl) {

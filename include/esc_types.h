@@ -46,10 +46,13 @@ struct Node {
   ImVec2 Size{0, 0};
 
   int coupler_percentage_index_{};
+  std::array<char, 128> comment_text_{};
 };
 
-auto GetCouplerPercentageNames [[nodiscard]] () -> const std::vector<std::string> &;
-auto GetCouplerPercentageValues [[nodiscard]] () -> const std::vector<std::pair<float, float>> &;
+auto GetCouplerPercentageNames [[nodiscard]] ()
+-> const std::vector<std::string>&;
+auto GetCouplerPercentageValues [[nodiscard]] ()
+-> const std::vector<std::pair<float, float>>&;
 
 struct Link {
   ne::LinkId ID{};
