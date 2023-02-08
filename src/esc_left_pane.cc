@@ -47,14 +47,32 @@ void DrawNode(Node& node, bool is_selected) {
     }
   }
 }
+
+auto AsLowerCase(std::string text) {
+  for (auto& character : text) {
+    character = static_cast<char>(std::tolower(character));
+  }
+
+  return text;
+}
 }  // namespace
 // vh: norm
 LeftPane::LeftPane(std::shared_ptr<App> app)
-    : app_{(cpp::Expects(app != nullptr), std::move(app))}, file_browser_{[]() {
-        auto file_browser_ = ImGui::FileBrowser{};
-        file_browser_.SetTitle("Select");
-        file_browser_.SetTypeFilters({".h", ".cpp"});
-        return file_browser_;
+    : app_{(cpp::Expects(app != nullptr), std::move(app))},
+      open_file_dialog_{[]() {
+        auto open_file_dialog =
+            ImGui::FileBrowser{ImGuiFileBrowserFlags_CloseOnEsc};
+        open_file_dialog.SetTitle("Open");
+        open_file_dialog.SetTypeFilters({".json"});
+        return open_file_dialog;
+      }()},
+      save_as_file_dialog_{[]() {
+        auto save_as_file_dialog =
+            ImGui::FileBrowser{ImGuiFileBrowserFlags_CloseOnEsc |
+                               ImGuiFileBrowserFlags_EnterNewFilename |
+                               ImGuiFileBrowserFlags_CreateNewDir};
+        save_as_file_dialog.SetTitle("Save As");
+        return save_as_file_dialog;
       }()} {
   cpp::Ensures(app_ != nullptr);
 }
@@ -100,11 +118,11 @@ void LeftPane::Draw(float pane_width) {
 // vh: norm
 void LeftPane::DrawMenu() {
   if (ImGui::Button("Open...")) {
-    file_browser_.Open();
+    open_file_dialog_.Open();
   }
 
   if (ImGui::Button("Save As...")) {
-    file_browser_.Open();
+    save_as_file_dialog_.Open();
   }
 
   if (ImGui::Button("Zoom to Content")) {
@@ -117,12 +135,25 @@ void LeftPane::DrawMenu() {
 }
 // vh: norm
 void LeftPane::DrawDialog() {
-  file_browser_.Display();
+  open_file_dialog_.Display();
 
-  if (file_browser_.HasSelected()) {
-    const auto selected_file_path = file_browser_.GetSelected().string();
+  if (open_file_dialog_.HasSelected()) {
+    const auto selected_file_path = open_file_dialog_.GetSelected().string();
 
-    file_browser_.ClearSelected();
+    open_file_dialog_.ClearSelected();
+  }
+
+  save_as_file_dialog_.Display();
+
+  if (save_as_file_dialog_.HasSelected()) {
+    auto selected_file_path = save_as_file_dialog_.GetSelected().string();
+
+    if (const auto not_json_extension =
+            !AsLowerCase(selected_file_path).ends_with(".json")) {
+      selected_file_path += ".json";
+    }
+
+    save_as_file_dialog_.ClearSelected();
   }
 }
 }  // namespace esc
