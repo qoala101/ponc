@@ -28,8 +28,6 @@ NodesAndLinks::NodesAndLinks(std::shared_ptr<App> app)
 auto NodesAndLinks::SpawnInputActionNode() -> Node* {
   nodes_.emplace_back(app_->GetNextObjectId(), "InputAction Fire",
                       ImColor(255, 128, 128));
-  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "",
-                                     PinType::Delegate);
   nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "Pressed",
                                      PinType::Flow);
   nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "Released",
@@ -43,8 +41,6 @@ auto NodesAndLinks::SpawnInputActionNode() -> Node* {
 auto NodesAndLinks::SpawnBranchNode() -> Node* {
   nodes_.emplace_back(app_->GetNextObjectId(), "Branch");
   nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Condition",
-                                    PinType::Bool);
   nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "True",
                                      PinType::Flow);
   nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "False",
@@ -59,27 +55,10 @@ auto NodesAndLinks::SpawnDoNNode() -> Node* {
   nodes_.emplace_back(app_->GetNextObjectId(), "Do N");
   nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Enter",
                                     PinType::Flow);
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "N", PinType::Int);
   nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Reset",
                                     PinType::Flow);
   nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "Exit",
                                      PinType::Flow);
-  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "Counter",
-                                     PinType::Int);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto NodesAndLinks::SpawnOutputActionNode() -> Node* {
-  nodes_.emplace_back(app_->GetNextObjectId(), "OutputAction");
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Sample",
-                                    PinType::Float);
-  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "Condition",
-                                     PinType::Bool);
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Event",
-                                    PinType::Delegate);
 
   BuildNode(&nodes_.back());
 
@@ -88,164 +67,6 @@ auto NodesAndLinks::SpawnOutputActionNode() -> Node* {
 
 auto NodesAndLinks::SpawnPrintStringNode() -> Node* {
   nodes_.emplace_back(app_->GetNextObjectId(), "Print String");
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "In String",
-                                    PinType::String);
-  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "",
-                                     PinType::Flow);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto NodesAndLinks::SpawnMessageNode() -> Node* {
-  nodes_.emplace_back(app_->GetNextObjectId(), "", ImColor(128, 195, 248));
-  nodes_.back().Type = NodeType::Simple;
-  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "Message",
-                                     PinType::String);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto NodesAndLinks::SpawnSetTimerNode() -> Node* {
-  nodes_.emplace_back(app_->GetNextObjectId(), "Set Timer",
-                      ImColor(128, 195, 248));
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Object",
-                                    PinType::Object);
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Function Name",
-                                    PinType::Function);
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Time",
-                                    PinType::Float);
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Looping",
-                                    PinType::Bool);
-  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "",
-                                     PinType::Flow);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto NodesAndLinks::SpawnLessNode() -> Node* {
-  nodes_.emplace_back(app_->GetNextObjectId(), "<", ImColor(128, 195, 248));
-  nodes_.back().Type = NodeType::Simple;
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "",
-                                    PinType::Float);
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "",
-                                    PinType::Float);
-  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "",
-                                     PinType::Float);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto NodesAndLinks::SpawnWeirdNode() -> Node* {
-  nodes_.emplace_back(app_->GetNextObjectId(), "o.O", ImColor(128, 195, 248));
-  nodes_.back().Type = NodeType::Simple;
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "",
-                                    PinType::Float);
-  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "",
-                                     PinType::Float);
-  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "",
-                                     PinType::Float);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto NodesAndLinks::SpawnTraceByChannelNode() -> Node* {
-  nodes_.emplace_back(app_->GetNextObjectId(), "Single Line Trace by Channel",
-                      ImColor(255, 128, 64));
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Start",
-                                    PinType::Flow);
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "End",
-                                    PinType::Int);
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Trace Channel",
-                                    PinType::Float);
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Trace Complex",
-                                    PinType::Bool);
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Actors to Ignore",
-                                    PinType::Int);
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Draw Debug Type",
-                                    PinType::Bool);
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Ignore Self",
-                                    PinType::Bool);
-  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "",
-                                     PinType::Flow);
-  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "Out Hit",
-                                     PinType::Float);
-  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "Return Value",
-                                     PinType::Bool);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto NodesAndLinks::SpawnTreeSequenceNode() -> Node* {
-  nodes_.emplace_back(app_->GetNextObjectId(), "Sequence");
-  nodes_.back().Type = NodeType::Tree;
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
-  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "",
-                                     PinType::Flow);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto NodesAndLinks::SpawnTreeTaskNode() -> Node* {
-  nodes_.emplace_back(app_->GetNextObjectId(), "Move To");
-  nodes_.back().Type = NodeType::Tree;
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto NodesAndLinks::SpawnTreeTask2Node() -> Node* {
-  nodes_.emplace_back(app_->GetNextObjectId(), "Random Wait");
-  nodes_.back().Type = NodeType::Tree;
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto NodesAndLinks::SpawnComment() -> Node* {
-  nodes_.emplace_back(app_->GetNextObjectId(), "Test Comment");
-  nodes_.back().Type = NodeType::Comment;
-  nodes_.back().Size = ImVec2(300, 200);
-
-  return &nodes_.back();
-}
-
-auto NodesAndLinks::SpawnHoudiniTransformNode() -> Node* {
-  nodes_.emplace_back(app_->GetNextObjectId(), "Transform");
-  nodes_.back().Type = NodeType::Houdini;
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
-  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "",
-                                     PinType::Flow);
-
-  BuildNode(&nodes_.back());
-
-  return &nodes_.back();
-}
-
-auto NodesAndLinks::SpawnHoudiniGroupNode() -> Node* {
-  nodes_.emplace_back(app_->GetNextObjectId(), "Group");
-  nodes_.back().Type = NodeType::Houdini;
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
   nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
   nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "",
                                      PinType::Flow);
@@ -343,10 +164,6 @@ auto NodesAndLinks::SpawnNodeByTypeName(const std::string& type_name) -> Node* {
     return SpawnInputActionNode();
   }
 
-  if (type_name == "Output Action") {
-    return SpawnOutputActionNode();
-  }
-
   if (type_name == "Branch") {
     return SpawnBranchNode();
   }
@@ -355,60 +172,13 @@ auto NodesAndLinks::SpawnNodeByTypeName(const std::string& type_name) -> Node* {
     return SpawnDoNNode();
   }
 
-  if (type_name == "Set Timer") {
-    return SpawnSetTimerNode();
-  }
-
-  if (type_name == "Less") {
-    return SpawnLessNode();
-  }
-
-  if (type_name == "Weird") {
-    return SpawnWeirdNode();
-  }
-
-  if (type_name == "Trace by Channel") {
-    return SpawnTraceByChannelNode();
-  }
-
   if (type_name == "Print String") {
     return SpawnPrintStringNode();
-  }
-
-  if (type_name == "Comment") {
-    return SpawnComment();
-  }
-
-  if (type_name == "Sequence") {
-    return SpawnTreeSequenceNode();
-  }
-
-  if (type_name == "Move To") {
-    return SpawnTreeTaskNode();
-  }
-
-  if (type_name == "Random Wait") {
-    return SpawnTreeTask2Node();
-  }
-
-  if (type_name == "Message") {
-    return SpawnMessageNode();
-  }
-
-  if (type_name == "Transform") {
-    return SpawnHoudiniTransformNode();
-  }
-
-  if (type_name == "Group") {
-    return SpawnHoudiniGroupNode();
   }
 }
 
 auto NodesAndLinks::GetNodeTypeNames() -> std::vector<std::string> {
-  return {"Input Action", "Output Action", "Branch",    "Do N",
-          "Set Timer",    "Less",          "Weird",     "Trace by Channel",
-          "Print String", "Comment",       "Sequence",  "Move To",
-          "Random Wait",  "Message",       "Transform", "Group"};
+  return {"Input Action", "Branch", "Do N", "Print String"};
 }
 
 void NodesAndLinks::SpawnLinkFromPinToNode(const Pin* pin, const Node* node) {

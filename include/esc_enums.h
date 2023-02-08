@@ -3,29 +3,13 @@
 
 #include <imgui.h>
 
-enum class PinType {
-  Flow,
-  Bool,
-  Int,
-  Float,
-  String,
-  Object,
-  Function,
-  Delegate,
-};
+enum class PinType { Flow };
 
 enum class PinKind { Output, Input };
 
-enum class NodeType { Blueprint, Simple, Tree, Comment, Houdini };
+enum class NodeType { Blueprint };
 
-enum class IconType : ImU32 {
-  Flow,
-  Circle,
-  Square,
-  Grid,
-  RoundSquare,
-  Diamond
-};
+enum class IconType : ImU32 { Flow };
 
 auto GetIconColor(PinType pin_type) -> ImColor;
 auto GetIconType(PinType pin_type) -> IconType;

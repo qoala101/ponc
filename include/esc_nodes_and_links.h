@@ -20,19 +20,7 @@ class NodesAndLinks {
   auto SpawnInputActionNode() -> Node *;
   auto SpawnBranchNode() -> Node *;
   auto SpawnDoNNode() -> Node *;
-  auto SpawnOutputActionNode() -> Node *;
   auto SpawnPrintStringNode() -> Node *;
-  auto SpawnMessageNode() -> Node *;
-  auto SpawnSetTimerNode() -> Node *;
-  auto SpawnLessNode() -> Node *;
-  auto SpawnWeirdNode() -> Node *;
-  auto SpawnTraceByChannelNode() -> Node *;
-  auto SpawnTreeSequenceNode() -> Node *;
-  auto SpawnTreeTaskNode() -> Node *;
-  auto SpawnTreeTask2Node() -> Node *;
-  auto SpawnComment() -> Node *;
-  auto SpawnHoudiniTransformNode() -> Node *;
-  auto SpawnHoudiniGroupNode() -> Node *;
 
   auto SpawnNodeByTypeName [[nodiscard]] (const std::string &type_name)
   -> Node *;

@@ -46,12 +46,10 @@ struct Node {
 };
 
 struct Link {
-  // Link(ne::LinkId id, ne::PinId startPinId, ne::PinId endPinId);
-
-  ne::LinkId ID;
-  ne::PinId StartPinID;
-  ne::PinId EndPinID;
-  ImColor Color;
+  ne::LinkId ID{};
+  ne::PinId StartPinID{};
+  ne::PinId EndPinID{};
+  ImColor Color{255, 255, 255};
 };
 
 #endif  // VH_ESC_TYPES_H_

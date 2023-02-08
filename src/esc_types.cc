@@ -23,9 +23,3 @@ Node::Node(int id, const char* name, ImColor color)
       Color{color},
       Type{NodeType::Blueprint},
       Size{0, 0} {}
-
-// Link::Link(ne::LinkId id, ne::PinId startPinId, ne::PinId endPinId)
-//     : ID{id},
-//       StartPinID{startPinId},
-//       EndPinID{endPinId},
-//       Color{255, 255, 255} {}
