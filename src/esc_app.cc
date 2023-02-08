@@ -181,12 +181,22 @@ void DrawPinField(Pin& pin) {
   ImGui::Spring(0);
 }
 // vh: bad
-void DrawBlueprintNodeHeader(const Node& node) {
+void DrawBlueprintNodeHeader(Node& node) {
   ImGui::Spring(0);
   ImGui::TextUnformatted(node.Name.c_str());
   ImGui::Spring(1);
   ImGui::Dummy(ImVec2{0, 28});
   ImGui::Spring(0);
+
+  if (node.Name == "Coupler 1x2") {
+    ImGui::SetNextItemWidth(100);
+    const auto coupler_percentage_names = GetCouplerPercentageNames();
+    ImGui::SliderInt(
+        "", &node.coupler_percentage_index_, 0,
+        static_cast<int>(coupler_percentage_names.size()) - 1,
+        coupler_percentage_names[node.coupler_percentage_index_].c_str());
+    ImGui::Spring(0);
+  }
 }
 
 void DrawCommentNode(Node& node) {

@@ -33,59 +33,6 @@ auto NodesAndLinks::SpawnInputNode() -> Node* {
   return &node;
 }
 
-auto NodesAndLinks::SpawnDividerNode() -> Node* {
-  auto& node = nodes_.emplace_back(app_->GetNextObjectId(), "Divider",
-                                   ImColor{127, 127, 127});
-
-  node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow,
-                           PinKind::Input, &node);
-  node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Float,
-                           PinKind::Input, &node);
-  node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Float,
-                           PinKind::Input, &node);
-
-  node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Empty,
-                            PinKind::Output, &node);
-  auto* output = &node.Outputs.emplace_back(
-      app_->GetNextObjectId(), "", PinType::Flow, PinKind::Output, &node);
-  output->editable = true;
-  output = &node.Outputs.emplace_back(app_->GetNextObjectId(), "",
-                                      PinType::Flow, PinKind::Output, &node);
-  output->editable = true;
-
-  return &node;
-}
-
-auto NodesAndLinks::Spawn1ToNNode(int n) -> Node* {
-  const auto n_string = std::to_string(n);
-  const auto node_name = "1/" + n_string;
-
-  auto& node = nodes_.emplace_back(app_->GetNextObjectId(), node_name.c_str(),
-                                   ImColor{127 / n, 127 / n, 255});
-
-  node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow,
-                           PinKind::Input, &node);
-
-  auto& input = node.Inputs.emplace_back(app_->GetNextObjectId(), "",
-                                         PinType::Float, PinKind::Input, &node);
-  input.editable = true;
-
-  for (auto i = 0; i < n; ++i) {
-    node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow,
-                              PinKind::Output, &node);
-  }
-
-  return &node;
-}
-
-auto NodesAndLinks::Spawn1To2Node() -> Node* { return Spawn1ToNNode(2); }
-
-auto NodesAndLinks::Spawn1To4Node() -> Node* { return Spawn1ToNNode(4); }
-
-auto NodesAndLinks::Spawn1To8Node() -> Node* { return Spawn1ToNNode(8); }
-
-auto NodesAndLinks::Spawn1To16Node() -> Node* { return Spawn1ToNNode(16); }
-
 auto NodesAndLinks::SpawnClientNode() -> Node* {
   auto& node = nodes_.emplace_back(app_->GetNextObjectId(), "Client",
                                    ImColor{127, 255, 127});
@@ -101,6 +48,51 @@ auto NodesAndLinks::SpawnCommentNode() -> Node* {
 
   node.Type = NodeType::Comment;
   node.Size = ImVec2{300, 200};
+
+  return &node;
+}
+
+auto NodesAndLinks::SpawnCoupler1To2Node() -> Node* {
+  auto& node = nodes_.emplace_back(app_->GetNextObjectId(), "Coupler 1x2",
+                                   ImColor{127, 127, 127});
+
+  node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow,
+                           PinKind::Input, &node);
+  auto* input = &node.Inputs.emplace_back(
+      app_->GetNextObjectId(), "", PinType::Float, PinKind::Input, &node);
+  // input->editable = true;
+  input = &node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Float,
+                                    PinKind::Input, &node);
+  // input->editable = true;
+
+  node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Empty,
+                            PinKind::Output, &node);
+  node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow,
+                            PinKind::Output, &node);
+  node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow,
+                            PinKind::Output, &node);
+
+  return &node;
+}
+
+auto NodesAndLinks::SpawnSplitter1ToNNode(int n) -> Node* {
+  const auto n_string = std::to_string(n);
+  const auto node_name = "Splitter 1x" + n_string;
+
+  auto& node = nodes_.emplace_back(app_->GetNextObjectId(), node_name.c_str(),
+                                   ImColor{127 / n, 127 / n, 255});
+
+  node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow,
+                           PinKind::Input, &node);
+
+  auto& input = node.Inputs.emplace_back(app_->GetNextObjectId(), "",
+                                         PinType::Float, PinKind::Input, &node);
+  // input.editable = true;
+
+  for (auto i = 0; i < n; ++i) {
+    node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow,
+                              PinKind::Output, &node);
+  }
 
   return &node;
 }
@@ -193,26 +185,6 @@ auto NodesAndLinks::SpawnNodeByTypeName(const std::string& type_name) -> Node* {
     return SpawnInputNode();
   }
 
-  if (type_name == "Divider") {
-    return SpawnDividerNode();
-  }
-
-  if (type_name == "1/2") {
-    return Spawn1To2Node();
-  }
-
-  if (type_name == "1/4") {
-    return Spawn1To4Node();
-  }
-
-  if (type_name == "1/8") {
-    return Spawn1To8Node();
-  }
-
-  if (type_name == "1/16") {
-    return Spawn1To16Node();
-  }
-
   if (type_name == "Client") {
     return SpawnClientNode();
   }
@@ -220,10 +192,31 @@ auto NodesAndLinks::SpawnNodeByTypeName(const std::string& type_name) -> Node* {
   if (type_name == "Comment") {
     return SpawnCommentNode();
   }
+
+  if (type_name == "Coupler 1x2") {
+    return SpawnCoupler1To2Node();
+  }
+
+  if (type_name.starts_with("Splitter 1x")) {
+    const auto index_substring = std::string{
+        type_name.begin() + static_cast<int>(std::string{"Splitter 1x"}.size()),
+        type_name.end()};
+    const auto index = std::stoi(index_substring);
+    return SpawnSplitter1ToNNode(index);
+  }
+
+  cpp::Expects(false);
 }
 
 auto NodesAndLinks::GetNodeTypeNames() -> std::vector<std::string> {
-  return {"Input", "Divider", "1/2", "1/4", "1/8", "1/16", "Client", "Comment"};
+  auto names = std::vector<std::string>{"Input", "Client", "Comment",
+                                        "Coupler 1x2"};
+
+  for (auto i : {2, 4, 8, 16}) {
+    names.emplace_back("Splitter 1x" + std::to_string(i));
+  }
+
+  return names;
 }
 
 void NodesAndLinks::SpawnLinkFromPinToNode(const Pin* pin, const Node* node) {

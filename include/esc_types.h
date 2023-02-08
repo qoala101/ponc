@@ -20,7 +20,7 @@ namespace ne = ax::NodeEditor;
 struct Node;
 
 struct Pin {
-  Pin(int id, const char* name, PinType type, PinKind kind, Node *node);
+  Pin(int id, const char* name, PinType type, PinKind kind, Node* node);
 
   ne::PinId ID;
   Node* node;
@@ -35,7 +35,7 @@ struct Pin {
 auto CanCreateLink [[nodiscard]] (const Pin* left, const Pin* right) -> bool;
 
 struct Node {
-  Node(int id, const char* name, ImColor color = ImColor{255, 255 ,255});
+  Node(int id, const char* name, ImColor color = ImColor{255, 255, 255});
 
   ne::NodeId ID{};
   std::string Name{};
@@ -44,7 +44,11 @@ struct Node {
   ImColor Color{255, 255, 255};
   NodeType Type{NodeType::Blueprint};
   ImVec2 Size{0, 0};
+
+  int coupler_percentage_index_{};
 };
+
+auto GetCouplerPercentageNames [[nodiscard]] () -> std::vector<std::string>;
 
 struct Link {
   ne::LinkId ID{};

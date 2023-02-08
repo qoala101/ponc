@@ -4,7 +4,7 @@
 
 namespace ne = ax::NodeEditor;
 
-Pin::Pin(int id, const char* name, PinType type, PinKind kind, Node *node)
+Pin::Pin(int id, const char* name, PinType type, PinKind kind, Node* node)
     : ID{static_cast<uint64_t>(id)},
       node{node},
       Name{name},
@@ -23,3 +23,8 @@ Node::Node(int id, const char* name, ImColor color)
       Color{color},
       Type{NodeType::Blueprint},
       Size{0, 0} {}
+
+auto GetCouplerPercentageNames() -> std::vector<std::string> {
+  return {"05%%-95%%", "10%%-90%%", "15%%-85%%", "20%%-80%%", "25%%-75%%",
+          "30%%-70%%", "35%%-65%%", "40%%-60%%", "45%%-55%%", "50%%-50%%"};
+}
