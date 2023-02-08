@@ -3,8 +3,8 @@
 #include "esc_cpp.h"
 
 namespace esc {
-EditorContextHandle::EditorContextHandle(const ne::Config& config) {
-  editor_context_.reset(ne::CreateEditor(&config));
+EditorContextHandle::EditorContextHandle()
+    : editor_context_{ne::CreateEditor()} {
   ne::SetCurrentEditor(editor_context_.get());
 }
 

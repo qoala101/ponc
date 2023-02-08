@@ -10,7 +10,7 @@ namespace ne = ax::NodeEditor;
 namespace esc {
 class EditorContextHandle {
  public:
-  explicit EditorContextHandle(const ne::Config& config);
+  EditorContextHandle();
 
  private:
   struct ContextDestroyer {

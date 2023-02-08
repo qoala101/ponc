@@ -179,102 +179,21 @@ auto App::GetNextLinkId() -> ne::LinkId {
   return ne::LinkId{static_cast<uintptr_t>(GetNextObjectId())};
 }
 // vh: norm
-auto App::CreateEditorConfig() {
-  cpp::Expects(nodes_and_links_.has_value());
-
-  auto config = ne::Config{};
-
-  config.SettingsFile = "Blueprints.json";
-  config.UserPointer = this;
-
-  config.LoadNodeSettings = [](const auto node_id, auto* data,
-                               auto* user_pointer) -> size_t {
-    auto* self = static_cast<App*>(user_pointer);
-    const auto* node = self->nodes_and_links_->FindNode(node_id);
-
-    if (node == nullptr) {
-      return 0;
-    }
-
-    if (data != nullptr) {
-      strcpy(data, node->State.data());
-    }
-
-    return node->State.size();
-  };
-
-  config.SaveNodeSettings = [](const auto node_id, const auto* data,
-                               const auto size, const auto,
-                               auto* user_pointer) -> bool {
-    auto* self = static_cast<App*>(user_pointer);
-    auto* node = self->nodes_and_links_->FindNode(node_id);
-
-    if (node == nullptr) {
-      return false;
-    }
-
-    node->State.assign(data, size);
-
-    return true;
-  };
-
-  return config;
-}
-// vh: norm
 void App::OnStart() {
   cpp::Expects(!editor_context_.has_value());
   cpp::Expects(!textures_.has_value());
   cpp::Expects(!left_pane_.has_value());
   cpp::Expects(!nodes_and_links_.has_value());
 
-  nodes_and_links_.emplace(shared_from_this());
-  editor_context_.emplace(CreateEditorConfig());
+  editor_context_.emplace();
   textures_.emplace(shared_from_this());
   left_pane_.emplace(shared_from_this());
-
-  AddInitialNodes();
-  AddInitialLinks();
+  nodes_and_links_.emplace(shared_from_this());
 
   cpp::Ensures(editor_context_.has_value());
   cpp::Ensures(textures_.has_value());
   cpp::Ensures(left_pane_.has_value());
   cpp::Ensures(nodes_and_links_.has_value());
-}
-// vh: norm
-void App::AddInitialNodes() {
-  cpp::Expects(nodes_and_links_.has_value());
-
-  auto* node = static_cast<Node*>(nullptr);
-
-  node = nodes_and_links_->SpawnInputActionNode();
-  ne::SetNodePosition(node->ID, ImVec2(-252, 220));
-  node = nodes_and_links_->SpawnBranchNode();
-  ne::SetNodePosition(node->ID, ImVec2(-300, 351));
-  node = nodes_and_links_->SpawnDoNNode();
-  ne::SetNodePosition(node->ID, ImVec2(-238, 504));
-
-  node = nodes_and_links_->SpawnPrintStringNode();
-  ne::SetNodePosition(node->ID, ImVec2(-69, 652));
-
-  node = nodes_and_links_->SpawnComment();
-  ne::SetNodePosition(node->ID, ImVec2(800, 224));
-  ne::SetGroupSize(node->ID, ImVec2(640, 400));
-
-  nodes_and_links_->BuildNodes();
-}
-// vh: norm
-void App::AddInitialLinks() {
-  cpp::Expects(nodes_and_links_.has_value());
-
-  nodes_and_links_->SpawnLink({GetNextLinkId(),
-                               nodes_and_links_->GetNodes()[0].Outputs[0].ID,
-                               nodes_and_links_->GetNodes()[1].Inputs[0].ID});
-  nodes_and_links_->SpawnLink({GetNextLinkId(),
-                               nodes_and_links_->GetNodes()[0].Outputs[1].ID,
-                               nodes_and_links_->GetNodes()[2].Inputs[0].ID});
-  nodes_and_links_->SpawnLink({GetNextLinkId(),
-                               nodes_and_links_->GetNodes()[2].Outputs[0].ID,
-                               nodes_and_links_->GetNodes()[3].Inputs[0].ID});
 }
 // vh: norm
 void App::OnStop() {
@@ -283,10 +202,10 @@ void App::OnStop() {
   cpp::Expects(editor_context_.has_value());
   cpp::Expects(nodes_and_links_.has_value());
 
+  nodes_and_links_.reset();
   left_pane_.reset();
   textures_.reset();
   editor_context_.reset();
-  nodes_and_links_.reset();
 
   cpp::Ensures(!left_pane_.has_value());
   cpp::Ensures(!textures_.has_value());

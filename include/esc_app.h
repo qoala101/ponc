@@ -43,26 +43,22 @@ class App : public Application, public std::enable_shared_from_this<App> {
   void ShowFlow();
 
   auto GetTextureDims [[nodiscard]] (ImTextureID texture_id) -> ImVec2;
-
- private:
+  
   void OnStart() override;
   void OnStop() override;
+
+ private:
   void OnFrame(float deltaTime) override;
 
   //
 
-  auto CreateEditorConfig [[nodiscard]] ();
-
-  void AddInitialNodes();
-  void AddInitialLinks();
-
   void DrawContextMenu();
   void DrawFrame();
 
-  std::optional<esc::NodesAndLinks> nodes_and_links_;
   std::optional<esc::EditorContextHandle> editor_context_{};
   std::optional<esc::TexturesHandle> textures_{};
   std::optional<esc::LeftPane> left_pane_;
+  std::optional<esc::NodesAndLinks> nodes_and_links_;
 
   int next_object_id_{};
 

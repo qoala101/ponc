@@ -41,10 +41,6 @@ void DrawNode(Node& node, bool is_selected) {
 
       ne::NavigateToSelection();
     }
-
-    if (ImGui::IsItemHovered() && !node.State.empty()) {
-      ImGui::SetTooltip("State: %s", node.State.c_str());
-    }
   }
 }
 
@@ -139,6 +135,7 @@ void LeftPane::DrawDialog() {
 
   if (open_file_dialog_.HasSelected()) {
     const auto selected_file_path = open_file_dialog_.GetSelected().string();
+    app_->GetNodesAndLinks().LoadFromFile(selected_file_path);
 
     open_file_dialog_.ClearSelected();
   }
@@ -152,6 +149,8 @@ void LeftPane::DrawDialog() {
             !AsLowerCase(selected_file_path).ends_with(".json")) {
       selected_file_path += ".json";
     }
+
+    app_->GetNodesAndLinks().SafeToFile(selected_file_path);
 
     save_as_file_dialog_.ClearSelected();
   }

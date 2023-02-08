@@ -1,6 +1,11 @@
 #include "esc_nodes_and_links.h"
 
+#include <crude_json.h>
 #include <imgui_node_editor.h>
+#include <imgui_node_editor_internal.h>
+
+#include <iostream>
+#include <string>
 
 #include "esc_app.h"
 #include "esc_cpp.h"
@@ -25,63 +30,60 @@ NodesAndLinks::NodesAndLinks(std::shared_ptr<App> app)
   cpp::Ensures(app_ != nullptr);
 }
 
-auto NodesAndLinks::SpawnInputActionNode() -> Node* {
-  nodes_.emplace_back(app_->GetNextObjectId(), "InputAction Fire",
-                      ImColor(255, 128, 128));
-  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "Pressed",
-                                     PinType::Flow);
-  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "Released",
-                                     PinType::Flow);
+auto NodesAndLinks::SpawnInputNode() -> Node* {
+  auto& node = nodes_.emplace_back(app_->GetNextObjectId(), "Input",
+                                   ImColor{255, 127, 127});
 
-  BuildNode(&nodes_.back());
+  node.Outputs.emplace_back(app_->GetNextObjectId(), "6 dB", PinType::Flow);
 
-  return &nodes_.back();
+  BuildNode(&node);
+  return &node;
 }
 
-auto NodesAndLinks::SpawnBranchNode() -> Node* {
-  nodes_.emplace_back(app_->GetNextObjectId(), "Branch");
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
-  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "True",
-                                     PinType::Flow);
-  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "False",
-                                     PinType::Flow);
+auto NodesAndLinks::Spawn1ToNNode(int n) -> Node* {
+  const auto n_string = std::to_string(n);
+  const auto node_name = "1/" + n_string;
 
-  BuildNode(&nodes_.back());
+  auto& node = nodes_.emplace_back(app_->GetNextObjectId(), node_name.c_str(),
+                                   ImColor{127 / n, 127 / n, 255});
 
-  return &nodes_.back();
+  node.Inputs.emplace_back(app_->GetNextObjectId(), "In", PinType::Flow);
+
+  for (auto i = 0; i < n; ++i) {
+    const auto out_name = "Out " + n_string;
+    node.Outputs.emplace_back(app_->GetNextObjectId(), out_name.c_str(),
+                              PinType::Flow);
+  }
+
+  BuildNode(&node);
+  return &node;
 }
 
-auto NodesAndLinks::SpawnDoNNode() -> Node* {
-  nodes_.emplace_back(app_->GetNextObjectId(), "Do N");
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Enter",
-                                    PinType::Flow);
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "Reset",
-                                    PinType::Flow);
-  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "Exit",
-                                     PinType::Flow);
+auto NodesAndLinks::Spawn1To2Node() -> Node* { return Spawn1ToNNode(2); }
 
-  BuildNode(&nodes_.back());
+auto NodesAndLinks::Spawn1To4Node() -> Node* { return Spawn1ToNNode(4); }
 
-  return &nodes_.back();
+auto NodesAndLinks::Spawn1To8Node() -> Node* { return Spawn1ToNNode(8); }
+
+auto NodesAndLinks::Spawn1To16Node() -> Node* { return Spawn1ToNNode(16); }
+
+auto NodesAndLinks::SpawnClientNode() -> Node* {
+  auto& node = nodes_.emplace_back(app_->GetNextObjectId(), "Client",
+                                   ImColor{127, 255, 127});
+
+  node.Inputs.emplace_back(app_->GetNextObjectId(), "In", PinType::Flow);
+
+  BuildNode(&node);
+  return &node;
 }
 
-auto NodesAndLinks::SpawnPrintStringNode() -> Node* {
-  nodes_.emplace_back(app_->GetNextObjectId(), "Print String");
-  nodes_.back().Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
-  nodes_.back().Outputs.emplace_back(app_->GetNextObjectId(), "",
-                                     PinType::Flow);
+auto NodesAndLinks::SpawnCommentNode() -> Node* {
+  auto& node = nodes_.emplace_back(app_->GetNextObjectId(), "Comment");
 
-  BuildNode(&nodes_.back());
+  node.Type = NodeType::Comment;
+  node.Size = ImVec2{300, 200};
 
-  return &nodes_.back();
-}
-
-auto NodesAndLinks::SpawnComment() -> Node* {
-  nodes_.emplace_back(app_->GetNextObjectId(), "Test Comment");
-  nodes_.back().Type = NodeType::Comment;
-  nodes_.back().Size = ImVec2(300, 200);
-
-  return &nodes_.back();
+  return &node;
 }
 
 void NodesAndLinks::BuildNodes() {
@@ -168,29 +170,37 @@ auto NodesAndLinks::GetSelectedLinkIds() -> std::vector<ne::LinkId> {
 }
 
 auto NodesAndLinks::SpawnNodeByTypeName(const std::string& type_name) -> Node* {
-  if (type_name == "Input Action") {
-    return SpawnInputActionNode();
+  if (type_name == "Input") {
+    return SpawnInputNode();
   }
 
-  if (type_name == "Branch") {
-    return SpawnBranchNode();
+  if (type_name == "1/2") {
+    return Spawn1To2Node();
   }
 
-  if (type_name == "Do N") {
-    return SpawnDoNNode();
+  if (type_name == "1/4") {
+    return Spawn1To4Node();
   }
 
-  if (type_name == "Print String") {
-    return SpawnPrintStringNode();
+  if (type_name == "1/8") {
+    return Spawn1To8Node();
+  }
+
+  if (type_name == "1/16") {
+    return Spawn1To16Node();
+  }
+
+  if (type_name == "Client") {
+    return SpawnClientNode();
   }
 
   if (type_name == "Comment") {
-    return SpawnComment();
+    return SpawnCommentNode();
   }
 }
 
 auto NodesAndLinks::GetNodeTypeNames() -> std::vector<std::string> {
-  return {"Input Action", "Branch", "Do N", "Print String", "Comment"};
+  return {"Input", "1/2", "1/4", "1/8", "1/16", "Client", "Comment"};
 }
 
 void NodesAndLinks::SpawnLinkFromPinToNode(const Pin* pin, const Node* node) {
@@ -215,4 +225,8 @@ void NodesAndLinks::SpawnLinkFromPinToNode(const Pin* pin, const Node* node) {
 
   SpawnLink(link);
 }
+
+void NodesAndLinks::SafeToFile(const std::string& file_path) {}
+
+void NodesAndLinks::LoadFromFile(const std::string& file_path) {}
 }  // namespace esc

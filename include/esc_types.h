@@ -32,17 +32,15 @@ struct Pin {
 auto CanCreateLink [[nodiscard]] (const Pin* left, const Pin* right) -> bool;
 
 struct Node {
-  Node(int id, const char* name, ImColor color = ImColor{255, 255, 255});
+  Node(int id, const char* name, ImColor color = ImColor{255, 255 ,255});
 
-  ne::NodeId ID;
-  std::string Name;
-  std::vector<Pin> Inputs;
-  std::vector<Pin> Outputs;
-  ImColor Color;
-  NodeType Type;
-  ImVec2 Size;
-  std::string State;
-  std::string SavedState;
+  ne::NodeId ID{};
+  std::string Name{};
+  std::vector<Pin> Inputs{};
+  std::vector<Pin> Outputs{};
+  ImColor Color{255, 255, 255};
+  NodeType Type{NodeType::Blueprint};
+  ImVec2 Size{0, 0};
 };
 
 struct Link {

@@ -1,5 +1,5 @@
-#ifndef VH_ESC_NODES_HANDLE_H_
-#define VH_ESC_NODES_HANDLE_H_
+#ifndef VH_ESC_NODES_AND_LINKS_H_
+#define VH_ESC_NODES_AND_LINKS_H_
 
 #include <vector>
 
@@ -17,11 +17,15 @@ class NodesAndLinks {
   static auto GetSelectedLinkIds [[nodiscard]] () -> std::vector<ne::LinkId>;
   static auto GetNodeTypeNames [[nodiscard]] () -> std::vector<std::string>;
 
-  auto SpawnInputActionNode() -> Node *;
-  auto SpawnBranchNode() -> Node *;
-  auto SpawnDoNNode() -> Node *;
-  auto SpawnPrintStringNode() -> Node *;
-  auto SpawnComment() -> Node *;
+  auto SpawnInputNode() -> Node *;
+  auto Spawn1To2Node() -> Node *;
+  auto Spawn1To4Node() -> Node *;
+  auto Spawn1To8Node() -> Node *;
+  auto Spawn1To16Node() -> Node *;
+  auto SpawnClientNode() -> Node *;
+  auto SpawnCommentNode() -> Node *;
+
+  auto Spawn1ToNNode(int n) -> Node *;
 
   auto SpawnNodeByTypeName [[nodiscard]] (const std::string &type_name)
   -> Node *;
@@ -42,6 +46,9 @@ class NodesAndLinks {
 
   void SpawnLinkFromPinToNode(const Pin *pin, const Node *node);
 
+  void SafeToFile(const std::string &file_path);
+  void LoadFromFile(const std::string &file_path);
+
  private:
   std::shared_ptr<App> app_{};
   std::vector<Node> nodes_{};
@@ -49,4 +56,4 @@ class NodesAndLinks {
 };
 }  // namespace esc
 
-#endif  // VH_ESC_NODES_HANDLE_H_
+#endif  // VH_ESC_NODES_AND_LINKS_H_
