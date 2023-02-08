@@ -36,7 +36,9 @@ auto NodesAndLinks::SpawnInputNode() -> Node* {
   auto& node = nodes_.emplace_back(app_->GetNextObjectId(), "Input",
                                    ImColor{255, 127, 127});
 
-  node.Outputs.emplace_back(app_->GetNextObjectId(), "6 dB", PinType::Flow);
+  auto& output =
+      node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
+  output.editable = true;
 
   BuildNode(&node);
   return &node;
@@ -49,11 +51,10 @@ auto NodesAndLinks::Spawn1ToNNode(int n) -> Node* {
   auto& node = nodes_.emplace_back(app_->GetNextObjectId(), node_name.c_str(),
                                    ImColor{127 / n, 127 / n, 255});
 
-  node.Inputs.emplace_back(app_->GetNextObjectId(), "In", PinType::Flow);
+  node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
 
   for (auto i = 0; i < n; ++i) {
-    const auto out_name = "Out " + n_string;
-    node.Outputs.emplace_back(app_->GetNextObjectId(), out_name.c_str(),
+    node.Outputs.emplace_back(app_->GetNextObjectId(), "",
                               PinType::Flow);
   }
 

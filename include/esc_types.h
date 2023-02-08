@@ -27,6 +27,9 @@ struct Pin {
   std::string Name;
   PinType Type;
   PinKind Kind;
+
+  float value{};
+  bool editable{};
 };
 
 auto CanCreateLink [[nodiscard]] (const Pin* left, const Pin* right) -> bool;

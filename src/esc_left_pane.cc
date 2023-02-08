@@ -121,7 +121,7 @@ void LeftPane::DrawMenu() {
     save_as_file_dialog_.Open();
   }
 
-  if (ImGui::Button("Close")) {
+  if (ImGui::Button("Clear")) {
     app_->GetNodesAndLinks().DeleteAll();
   }
 

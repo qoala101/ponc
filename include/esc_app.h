@@ -54,6 +54,11 @@ class App : public Application, public std::enable_shared_from_this<App> {
 
   void DrawContextMenu();
   void DrawFrame();
+  void DrawBlueprintNode(Node &node);
+  void DrawLinks();
+  void DrawLinkConnection();
+
+  auto CalculateAlphaForPin(const Pin &pin);
 
   std::optional<esc::EditorContextHandle> editor_context_{};
   std::optional<esc::TexturesHandle> textures_{};
