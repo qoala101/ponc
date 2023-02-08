@@ -26,7 +26,7 @@ NodesAndLinks::NodesAndLinks(std::shared_ptr<App> app)
 
 auto NodesAndLinks::SpawnInputNode() -> Node* {
   auto& node = nodes_.emplace_back(app_->GetNextObjectId(), "Input",
-                                   ImColor{255, 127, 127});
+                                   ImColor{255, 0, 0});
 
   auto& output = node.Outputs.emplace_back(
       app_->GetNextObjectId(), "", PinType::Flow, PinKind::Output, &node);
@@ -37,7 +37,7 @@ auto NodesAndLinks::SpawnInputNode() -> Node* {
 
 auto NodesAndLinks::SpawnClientNode() -> Node* {
   auto& node = nodes_.emplace_back(app_->GetNextObjectId(), "Client",
-                                   ImColor{127, 255, 127});
+                                   ImColor{0, 255, 0});
 
   node.Inputs.emplace_back(app_->GetNextObjectId(), "In", PinType::Flow,
                            PinKind::Input, &node);
@@ -56,7 +56,7 @@ auto NodesAndLinks::SpawnCommentNode() -> Node* {
 
 auto NodesAndLinks::SpawnCoupler1To2Node() -> Node* {
   auto& node = nodes_.emplace_back(app_->GetNextObjectId(), "Coupler 1x2",
-                                   ImColor{127, 127, 127});
+                                   ImColor{255, 0, 255});
 
   node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow,
                            PinKind::Input, &node);
@@ -82,7 +82,7 @@ auto NodesAndLinks::SpawnSplitter1ToNNode(int n) -> Node* {
   const auto node_name = "Splitter 1x" + n_string;
 
   auto& node = nodes_.emplace_back(app_->GetNextObjectId(), node_name.c_str(),
-                                   ImColor{127 / n, 127 / n, 255});
+                                   ImColor{0, 0, 127 + 128 / n});
 
   node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow,
                            PinKind::Input, &node);

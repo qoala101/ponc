@@ -85,17 +85,7 @@ void LeftPane::Draw(float pane_width) {
                    },
                    []() { ImGui::EndChild(); }};
 
-    pane_width = ImGui::GetContentRegionAvail().x;
-
-    {
-      const auto horizontal_scope = cpp::Scope{
-          [pane_width]() {
-            ImGui::BeginHorizontal("Style Editor", ImVec2{pane_width, 0});
-          },
-          []() { ImGui::EndHorizontal(); }};
-
-      DrawMenu();
-    }
+    DrawMenu(ImGui::GetContentRegionAvail().x);
 
     const auto selected_node_ids = esc::NodesAndLinks::GetSelectedNodeIds();
 
@@ -116,25 +106,41 @@ void LeftPane::Draw(float pane_width) {
   DrawDialog();
 }
 // vh: norm
-void LeftPane::DrawMenu() {
-  if (ImGui::Button("Open...")) {
-    open_file_dialog_.Open();
+void LeftPane::DrawMenu(float pane_width) {
+  {
+    const auto horizontal_scope = cpp::Scope{
+        [pane_width]() {
+          ImGui::BeginHorizontal("Style Editor", ImVec2{pane_width, 0});
+        },
+        []() { ImGui::EndHorizontal(); }};
+
+    if (ImGui::Button("Open...")) {
+      open_file_dialog_.Open();
+    }
+
+    if (ImGui::Button("Save As...")) {
+      save_as_file_dialog_.Open();
+    }
+
+    if (ImGui::Button("Clear")) {
+      app_->GetNodesAndLinks().DeleteAll();
+    }
   }
 
-  if (ImGui::Button("Save As...")) {
-    save_as_file_dialog_.Open();
-  }
+  {
+    const auto horizontal_scope = cpp::Scope{
+        [pane_width]() {
+          ImGui::BeginHorizontal("Style Editor", ImVec2{pane_width, 0});
+        },
+        []() { ImGui::EndHorizontal(); }};
 
-  if (ImGui::Button("Clear")) {
-    app_->GetNodesAndLinks().DeleteAll();
-  }
+    if (ImGui::Button("Zoom to Content")) {
+      ne::NavigateToContent();
+    }
 
-  if (ImGui::Button("Zoom to Content")) {
-    ne::NavigateToContent();
-  }
-
-  if (ImGui::Button("Show Flow")) {
-    app_->ShowFlow();
+    if (ImGui::Button("Show Flow")) {
+      app_->ShowFlow();
+    }
   }
 }
 // vh: norm

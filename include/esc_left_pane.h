@@ -17,7 +17,7 @@ class LeftPane {
   void Draw(float pane_width);
 
  private:
-  void DrawMenu();
+  void DrawMenu(float pane_width);
   void DrawDialog();
 
   std::shared_ptr<App> app_;

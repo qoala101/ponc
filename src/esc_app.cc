@@ -237,7 +237,7 @@ void DrawCommentNode(Node& node) {
     ImGui::SetCursorScreenPos(
         min - ImVec2(-8, ImGui::GetTextLineHeightWithSpacing() + 4));
     ImGui::BeginGroup();
-    ImGui::TextUnformatted(node.Name.c_str());
+    ImGui::TextUnformatted(node.comment_text_.data());
     ImGui::EndGroup();
 
     auto drawList = ne::GetHintBackgroundDrawList();
@@ -666,6 +666,6 @@ void App::DrawFrame() {
     DrawContextMenu();
   }
 
-  ImGui::ShowDemoWindow();
-  ImGui::ShowMetricsWindow();
+  // ImGui::ShowDemoWindow();
+  // ImGui::ShowMetricsWindow();
 }
