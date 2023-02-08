@@ -255,6 +255,8 @@ void NodesAndLinks::SafeToFile(const std::string& file_path) {
 
       node_json["id"] = static_cast<crude_json::number>(node.ID.Get());
       node_json["name"] = node.Name;
+      node_json["coupler_percentage_index"] =
+          static_cast<crude_json::number>(node.coupler_percentage_index_);
 
       const auto pos = ne::GetNodePosition(node.ID);
 
@@ -267,22 +269,26 @@ void NodesAndLinks::SafeToFile(const std::string& file_path) {
       node_json["size_y"] = size.y;
 
       {
-        auto& input_pins_json = node_json["input_pin_ids"];
+        auto& input_pins_json = node_json["input_pins"];
         auto input_pin_index = 0;
 
         for (const auto& input_pin : node.Inputs) {
-          input_pins_json[input_pin_index++] =
+          auto& input_pin_json = input_pins_json[input_pin_index++];
+          input_pin_json["id"] =
               static_cast<crude_json::number>(input_pin.ID.Get());
+          input_pin_json["value"] = input_pin.value;
         }
       }
 
       {
-        auto& output_pins_json = node_json["output_pin_ids"];
+        auto& output_pins_json = node_json["output_pins"];
         auto output_pin_index = 0;
 
         for (const auto& output_pin : node.Outputs) {
-          output_pins_json[output_pin_index++] =
+          auto& output_pin_json = output_pins_json[output_pin_index++];
+          output_pin_json["id"] =
               static_cast<crude_json::number>(output_pin.ID.Get());
+          output_pin_json["value"] = output_pin.value;
         }
       }
     }
@@ -334,22 +340,30 @@ void NodesAndLinks::LoadFromFile(const std::string& file_path) {
 
     auto* node =
         SpawnNodeByTypeName(node_json["name"].get<crude_json::string>());
+    node->coupler_percentage_index_ = static_cast<int>(
+        node_json["coupler_percentage_index"].get<crude_json::number>());
 
     {
-      const auto& input_pin_ids = node_json["input_pin_ids"];
+      const auto& input_pins = node_json["input_pins"];
 
       for (auto i = 0; i < static_cast<int>(node->Inputs.size()); ++i) {
-        node->Inputs[i].ID =
-            static_cast<uint64_t>(input_pin_ids[i].get<crude_json::number>());
+        const auto& input_pin_json = input_pins[i];
+        node->Inputs[i].ID = static_cast<uint64_t>(
+            input_pin_json["id"].get<crude_json::number>());
+        node->Inputs[i].value = static_cast<float>(
+            input_pin_json["value"].get<crude_json::number>());
       }
     }
 
     {
-      const auto& output_pin_ids = node_json["output_pin_ids"];
+      const auto& output_pins = node_json["output_pins"];
 
       for (auto i = 0; i < static_cast<int>(node->Outputs.size()); ++i) {
-        node->Outputs[i].ID =
-            static_cast<uint64_t>(output_pin_ids[i].get<crude_json::number>());
+        const auto& output_pin_json = output_pins[i];
+        node->Outputs[i].ID = static_cast<uint64_t>(
+            output_pin_json["id"].get<crude_json::number>());
+        node->Outputs[i].value = static_cast<float>(
+            output_pin_json["value"].get<crude_json::number>());
       }
     }
 
