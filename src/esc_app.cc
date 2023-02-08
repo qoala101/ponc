@@ -190,7 +190,7 @@ void DrawBlueprintNodeHeader(Node& node) {
 
   if (node.Name == "Coupler 1x2") {
     ImGui::SetNextItemWidth(100);
-    const auto coupler_percentage_names = GetCouplerPercentageNames();
+    const auto &coupler_percentage_names = GetCouplerPercentageNames();
     ImGui::SliderInt(
         "", &node.coupler_percentage_index_, 0,
         static_cast<int>(coupler_percentage_names.size()) - 1,

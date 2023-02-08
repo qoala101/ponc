@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -87,7 +88,6 @@ auto NodesAndLinks::SpawnSplitter1ToNNode(int n) -> Node* {
 
   auto& input = node.Inputs.emplace_back(app_->GetNextObjectId(), "",
                                          PinType::Float, PinKind::Input, &node);
-  // input.editable = true;
 
   for (auto i = 0; i < n; ++i) {
     node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow,
@@ -209,8 +209,8 @@ auto NodesAndLinks::SpawnNodeByTypeName(const std::string& type_name) -> Node* {
 }
 
 auto NodesAndLinks::GetNodeTypeNames() -> std::vector<std::string> {
-  auto names = std::vector<std::string>{"Input", "Client", "Comment",
-                                        "Coupler 1x2"};
+  auto names =
+      std::vector<std::string>{"Input", "Client", "Comment", "Coupler 1x2"};
 
   for (auto i : {2, 4, 8, 16}) {
     names.emplace_back("Splitter 1x" + std::to_string(i));
@@ -398,6 +398,8 @@ void NodesAndLinks::UpdateNodePointerOnPins() {
 }
 
 void ClearAllValuesExceptInput(std::vector<Node>& nodes_) {
+  const auto& coupler_percentage_values = GetCouplerPercentageValues();
+
   for (auto& node : nodes_) {
     for (const auto& pins : {&node.Inputs, &node.Outputs}) {
       for (auto& pin : *pins) {
@@ -405,6 +407,25 @@ void ClearAllValuesExceptInput(std::vector<Node>& nodes_) {
           pin.value = 0;
         }
       }
+    }
+
+    if (node.Name.starts_with("Splitter 1x")) {
+      const auto index_substring =
+          std::string{node.Name.begin() +
+                          static_cast<int>(std::string{"Splitter 1x"}.size()),
+                      node.Name.end()};
+      const auto index = std::stoi(index_substring);
+
+      static const auto kSplitterValuesMap =
+          std::map<int, float>{{2, 4.3}, {4, 7.4}, {8, 10.7}, {16, 13.9}};
+
+      node.Inputs[1].value = kSplitterValuesMap.at(index);
+    } else if (node.Name == "Coupler 1x2") {
+      const auto& values =
+          coupler_percentage_values[node.coupler_percentage_index_];
+
+      node.Inputs[1].value = values.first;
+      node.Inputs[2].value = values.second;
     }
   }
 }
@@ -430,12 +451,23 @@ void NodesAndLinks::UpdatePinValues() {
       if (!visited_nodes.contains(input_node)) {
         visited_nodes.emplace(input_node);
 
-        for (auto& input_pin : input_node->Inputs) {
-          if (input_pin.editable) {
-            for (auto& output_pin : input_node->Outputs) {
-              output_pin.value -= input_pin.value;
-            }
+        // for (auto& input_pin : input_node->Inputs) {
+        //   if (input_pin.editable) {
+        //     for (auto& output_pin : input_node->Outputs) {
+        //       output_pin.value -= input_pin.value;
+        //     }
+        //   }
+        // }
+
+        if (input_node->Name.starts_with("Splitter 1x")) {
+          const auto splitter_value = input_node->Inputs[1].value;
+
+          for (auto& output_pin : input_node->Outputs) {
+            output_pin.value -= splitter_value;
           }
+        } else if (input_node->Name == "Coupler 1x2") {
+          input_node->Outputs[1].value -= input_node->Inputs[1].value;
+          input_node->Outputs[2].value -= input_node->Inputs[2].value;
         }
       }
 

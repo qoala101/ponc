@@ -48,7 +48,8 @@ struct Node {
   int coupler_percentage_index_{};
 };
 
-auto GetCouplerPercentageNames [[nodiscard]] () -> std::vector<std::string>;
+auto GetCouplerPercentageNames [[nodiscard]] () -> const std::vector<std::string> &;
+auto GetCouplerPercentageValues [[nodiscard]] () -> const std::vector<std::pair<float, float>> &;
 
 struct Link {
   ne::LinkId ID{};
