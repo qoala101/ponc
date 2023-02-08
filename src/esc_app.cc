@@ -144,6 +144,16 @@ void Icon(const ImVec2& size, IconType type, bool filled,
 }
 // vh: norm
 void DrawPinIcon(const Pin& pin, bool connected, float alpha) {
+  if (pin.Type != PinType::Flow) {
+    if (pin.editable) {
+      ImGui::Dummy(ImVec2{20, 24});
+    } else {
+      ImGui::Dummy(ImVec2{24, 24});
+    }
+
+    return;
+  }
+
   const auto type = GetIconType(pin.Type);
   const auto size = ImVec2{24, 24};
   const auto color = [&pin, alpha]() {
@@ -156,14 +166,16 @@ void DrawPinIcon(const Pin& pin, bool connected, float alpha) {
        ImColor{32, 32, 32, static_cast<int>(alpha * 255)});
 }
 // vh: bad
-void DrawPinField(Pin& input) {
+void DrawPinField(Pin& pin) {
   ImGui::Spring(0);
 
-  if (input.editable) {
-    ImGui::SetNextItemWidth(100);
-    ImGui::InputFloat(input.Name.c_str(), &input.value);
-  } else {
-    ImGui::Text("%.3f %s", input.value, input.Name.c_str());
+  if (pin.Type != PinType::Empty) {
+    if (pin.editable) {
+      ImGui::SetNextItemWidth(100);
+      ImGui::InputFloat(pin.Name.c_str(), &pin.value);
+    } else {
+      ImGui::Text("%.3f %s", pin.value, pin.Name.c_str());
+    }
   }
 
   ImGui::Spring(0);

@@ -18,6 +18,7 @@ class NodesAndLinks {
   static auto GetNodeTypeNames [[nodiscard]] () -> std::vector<std::string>;
 
   auto SpawnInputNode() -> Node *;
+  auto SpawnDividerNode() -> Node *;
   auto Spawn1To2Node() -> Node *;
   auto Spawn1To4Node() -> Node *;
   auto Spawn1To8Node() -> Node *;

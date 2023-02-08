@@ -44,6 +44,26 @@ auto NodesAndLinks::SpawnInputNode() -> Node* {
   return &node;
 }
 
+auto NodesAndLinks::SpawnDividerNode() -> Node* {
+  auto& node = nodes_.emplace_back(app_->GetNextObjectId(), "Divider",
+                                   ImColor{127, 127, 127});
+
+  node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
+  node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Float);
+  node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Float);
+
+  node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Empty);
+  auto* output =
+      &node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
+  output->editable = true;
+  output =
+      &node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
+  output->editable = true;
+
+  BuildNode(&node);
+  return &node;
+}
+
 auto NodesAndLinks::Spawn1ToNNode(int n) -> Node* {
   const auto n_string = std::to_string(n);
   const auto node_name = "1/" + n_string;
@@ -53,9 +73,12 @@ auto NodesAndLinks::Spawn1ToNNode(int n) -> Node* {
 
   node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
 
+  auto& input =
+      node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Float);
+  input.editable = true;
+
   for (auto i = 0; i < n; ++i) {
-    node.Outputs.emplace_back(app_->GetNextObjectId(), "",
-                              PinType::Flow);
+    node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
   }
 
   BuildNode(&node);
@@ -177,6 +200,10 @@ auto NodesAndLinks::SpawnNodeByTypeName(const std::string& type_name) -> Node* {
     return SpawnInputNode();
   }
 
+  if (type_name == "Divider") {
+    return SpawnDividerNode();
+  }
+
   if (type_name == "1/2") {
     return Spawn1To2Node();
   }
@@ -203,7 +230,7 @@ auto NodesAndLinks::SpawnNodeByTypeName(const std::string& type_name) -> Node* {
 }
 
 auto NodesAndLinks::GetNodeTypeNames() -> std::vector<std::string> {
-  return {"Input", "1/2", "1/4", "1/8", "1/16", "Client", "Comment"};
+  return {"Input", "Divider", "1/2", "1/4", "1/8", "1/16", "Client", "Comment"};
 }
 
 void NodesAndLinks::SpawnLinkFromPinToNode(const Pin* pin, const Node* node) {

@@ -3,7 +3,7 @@
 
 #include <imgui.h>
 
-enum class PinType { Flow };
+enum class PinType { Flow, Float, Empty };
 
 enum class PinKind { Output, Input };
 
