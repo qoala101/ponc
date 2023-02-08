@@ -4,17 +4,17 @@
 
 namespace ne = ax::NodeEditor;
 
-Pin::Pin(int id, const char* name, PinType type)
+Pin::Pin(int id, const char* name, PinType type, PinKind kind, Node *node)
     : ID{static_cast<uint64_t>(id)},
-      Node{nullptr},
+      node{node},
       Name{name},
       Type{type},
-      Kind{PinKind::Input} {}
+      Kind{kind} {}
 // vh: ok
 auto CanCreateLink(const Pin* left, const Pin* right) -> bool {
   return (left != nullptr) && (right != nullptr) && (left != right) &&
          (left->Kind != right->Kind) && (left->Type == right->Type) &&
-         (left->Node != right->Node);
+         (left->node != right->node);
 }
 
 Node::Node(int id, const char* name, ImColor color)

@@ -7,26 +7,16 @@
 
 #include <iostream>
 #include <string>
+#include <unordered_set>
+#include <vector>
 
 #include "esc_app.h"
 #include "esc_cpp.h"
+#include "esc_enums.h"
+#include "esc_types.h"
 #include "imgui.h"
 
 namespace esc {
-namespace {
-void BuildNode(Node* node) {
-  for (auto& input : node->Inputs) {
-    input.Node = node;
-    input.Kind = PinKind::Input;
-  }
-
-  for (auto& output : node->Outputs) {
-    output.Node = node;
-    output.Kind = PinKind::Output;
-  }
-}
-}  // namespace
-
 NodesAndLinks::NodesAndLinks(std::shared_ptr<App> app)
     : app_{(cpp::Expects(app != nullptr), std::move(app))} {
   cpp::Ensures(app_ != nullptr);
@@ -36,11 +26,10 @@ auto NodesAndLinks::SpawnInputNode() -> Node* {
   auto& node = nodes_.emplace_back(app_->GetNextObjectId(), "Input",
                                    ImColor{255, 127, 127});
 
-  auto& output =
-      node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
+  auto& output = node.Outputs.emplace_back(
+      app_->GetNextObjectId(), "", PinType::Flow, PinKind::Output, &node);
   output.editable = true;
 
-  BuildNode(&node);
   return &node;
 }
 
@@ -48,19 +37,22 @@ auto NodesAndLinks::SpawnDividerNode() -> Node* {
   auto& node = nodes_.emplace_back(app_->GetNextObjectId(), "Divider",
                                    ImColor{127, 127, 127});
 
-  node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
-  node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Float);
-  node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Float);
+  node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow,
+                           PinKind::Input, &node);
+  node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Float,
+                           PinKind::Input, &node);
+  node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Float,
+                           PinKind::Input, &node);
 
-  node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Empty);
-  auto* output =
-      &node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
+  node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Empty,
+                            PinKind::Output, &node);
+  auto* output = &node.Outputs.emplace_back(
+      app_->GetNextObjectId(), "", PinType::Flow, PinKind::Output, &node);
   output->editable = true;
-  output =
-      &node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
+  output = &node.Outputs.emplace_back(app_->GetNextObjectId(), "",
+                                      PinType::Flow, PinKind::Output, &node);
   output->editable = true;
 
-  BuildNode(&node);
   return &node;
 }
 
@@ -71,17 +63,18 @@ auto NodesAndLinks::Spawn1ToNNode(int n) -> Node* {
   auto& node = nodes_.emplace_back(app_->GetNextObjectId(), node_name.c_str(),
                                    ImColor{127 / n, 127 / n, 255});
 
-  node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
+  node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow,
+                           PinKind::Input, &node);
 
-  auto& input =
-      node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Float);
+  auto& input = node.Inputs.emplace_back(app_->GetNextObjectId(), "",
+                                         PinType::Float, PinKind::Input, &node);
   input.editable = true;
 
   for (auto i = 0; i < n; ++i) {
-    node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow);
+    node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow,
+                              PinKind::Output, &node);
   }
 
-  BuildNode(&node);
   return &node;
 }
 
@@ -97,9 +90,9 @@ auto NodesAndLinks::SpawnClientNode() -> Node* {
   auto& node = nodes_.emplace_back(app_->GetNextObjectId(), "Client",
                                    ImColor{127, 255, 127});
 
-  node.Inputs.emplace_back(app_->GetNextObjectId(), "In", PinType::Flow);
+  node.Inputs.emplace_back(app_->GetNextObjectId(), "In", PinType::Flow,
+                           PinKind::Input, &node);
 
-  BuildNode(&node);
   return &node;
 }
 
@@ -110,12 +103,6 @@ auto NodesAndLinks::SpawnCommentNode() -> Node* {
   node.Size = ImVec2{300, 200};
 
   return &node;
-}
-
-void NodesAndLinks::BuildNodes() {
-  for (auto& node : nodes_) {
-    BuildNode(&node);
-  }
 }
 
 auto NodesAndLinks::GetNodes() -> std::vector<Node>& { return nodes_; }
@@ -167,6 +154,12 @@ void NodesAndLinks::EraseLinkWithId(ne::LinkId linkId) {
   auto id = std::find_if(links_.begin(), links_.end(),
                          [linkId](auto& link) { return link.ID == linkId; });
   if (id != links_.end()) links_.erase(id);
+}
+
+void NodesAndLinks::EraseNodeWithId(ne::NodeId id) {
+  auto node =
+      std::ranges::find_if(nodes_, [id](auto& node) { return node.ID == id; });
+  nodes_.erase(node);
 }
 
 auto NodesAndLinks::GetSelectedNodeIds() -> std::vector<ne::NodeId> {
@@ -392,43 +385,76 @@ void NodesAndLinks::LoadFromFile(const std::string& file_path) {
                static_cast<uint64_t>(
                    link_json["end_pin_id"].get<crude_json::number>())});
   }
-
-  BuildNodes();
 }
 
-//   cpp::Expects(nodes_and_links_.has_value());
+void NodesAndLinks::OnFrame() {
+  UpdateNodePointerOnPins();
+  UpdatePinValues();
+}
 
-//   auto* node = static_cast<Node*>(nullptr);
+void NodesAndLinks::UpdateNodePointerOnPins() {
+  for (auto& node : nodes_) {
+    for (auto& input : node.Inputs) {
+      input.node = &node;
+    }
 
-//   node = nodes_and_links_->SpawnInputActionNode();
-//   ne::SetNodePosition(node->ID, ImVec2(-252, 220));
+    for (auto& output : node.Outputs) {
+      output.node = &node;
+    }
+  }
+}
 
-//   node = nodes_and_links_->SpawnBranchNode();
-//   ne::SetNodePosition(node->ID, ImVec2(-300, 351));
-//   node = nodes_and_links_->SpawnDoNNode();
-//   ne::SetNodePosition(node->ID, ImVec2(-238, 504));
+void ClearAllValuesExceptInput(std::vector<Node>& nodes_) {
+  for (auto& node : nodes_) {
+    if (node.Name == "Input") {
+      continue;
+    }
 
-//   node = nodes_and_links_->SpawnPrintStringNode();
-//   ne::SetNodePosition(node->ID, ImVec2(-69, 652));
+    for (const auto& pins : {&node.Inputs, &node.Outputs}) {
+      for (auto& pin : *pins) {
+        pin.value = 0;
+      }
+    }
+  }
+}
 
-//   node = nodes_and_links_->SpawnComment();
-//   ne::SetNodePosition(node->ID, ImVec2(800, 224));
-//   ne::SetGroupSize(node->ID, ImVec2(640, 400));
+void NodesAndLinks::UpdatePinValues() {
+  ClearAllValuesExceptInput(nodes_);
 
-//   nodes_and_links_->BuildNodes();
-// }
-// // vh: norm
-// void App::AddInitialLinks() {
-//   cpp::Expects(nodes_and_links_.has_value());
+  auto input_nodes = std::vector<Node*>{};
 
-//   nodes_and_links_->SpawnLink({GetNextLinkId(),
-//                                nodes_and_links_->GetNodes()[0].Outputs[0].ID,
-//                                nodes_and_links_->GetNodes()[1].Inputs[0].ID});
-//   nodes_and_links_->SpawnLink({GetNextLinkId(),
-//                                nodes_and_links_->GetNodes()[0].Outputs[1].ID,
-//                                nodes_and_links_->GetNodes()[2].Inputs[0].ID});
-//   nodes_and_links_->SpawnLink({GetNextLinkId(),
-//                                nodes_and_links_->GetNodes()[2].Outputs[0].ID,
-//                                nodes_and_links_->GetNodes()[3].Inputs[0].ID});
-// }
+  for (auto& node : nodes_) {
+    if (node.Name == "Input") {
+      input_nodes.emplace_back(&node);
+    }
+  }
+
+  while (!input_nodes.empty()) {
+    auto next_input_nodes = std::unordered_set<Node*>{};
+
+    for (auto* input_node : input_nodes) {
+      for (auto& input_node_output_pin : input_node->Outputs) {
+        for (auto& link : links_) {
+          if (link.StartPinID == input_node_output_pin.ID) {
+            auto* end_pin = FindPin(link.EndPinID);
+            
+            if ((end_pin == nullptr) || (end_pin->node == nullptr)) {
+              continue;
+            }
+
+            end_pin->value += input_node_output_pin.value;
+
+            for (auto& output_pin : end_pin->node->Outputs) {
+              output_pin.value += input_node_output_pin.value;
+            }
+
+            next_input_nodes.emplace(end_pin->node);
+          }
+        }
+      }
+    }
+
+    input_nodes.assign(next_input_nodes.begin(), next_input_nodes.end());
+  }
+}
 }  // namespace esc

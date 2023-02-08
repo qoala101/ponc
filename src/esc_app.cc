@@ -300,7 +300,10 @@ void App::OnStop() {
   cpp::Ensures(!nodes_and_links_.has_value());
 }
 // vh: ok
-void App::OnFrame(float /*unused*/) { DrawFrame(); }
+void App::OnFrame(float /*unused*/) {
+  nodes_and_links_->OnFrame();
+  DrawFrame();
+}
 // vh: ok
 void App::ShowFlow() {
   cpp::Expects(nodes_and_links_.has_value());
@@ -377,8 +380,8 @@ void App::DrawContextMenu() {
         if (pin != nullptr) {
           ImGui::Text("ID: %p", pin->ID.AsPointer());
 
-          if (pin->Node != nullptr) {
-            ImGui::Text("Node: %p", pin->Node->ID.AsPointer());
+          if (pin->node != nullptr) {
+            ImGui::Text("Node: %p", pin->node->ID.AsPointer());
           } else {
             ImGui::Text("Node: %s", "<none>");
           }
@@ -562,7 +565,7 @@ void App::DrawLinkConnection() {
         } else if (endPin->Kind == startPin->Kind) {
           showLabel("x Incompatible Pin Kind", ImColor(45, 32, 32, 180));
           ne::RejectNewItem(ImColor(255, 0, 0), 2.0f);
-        } else if (endPin->Node == startPin->Node) {
+        } else if (endPin->node == startPin->node) {
           showLabel("x Cannot connect to self", ImColor(45, 32, 32, 180));
           ne::RejectNewItem(ImColor(255, 0, 0), 1.0f);
         } else if (endPin->Type != startPin->Type) {
@@ -609,12 +612,7 @@ void App::DrawLinkConnection() {
     ne::NodeId nodeId = 0;
     while (ne::QueryDeletedNode(&nodeId)) {
       if (ne::AcceptDeletedItem()) {
-        auto id =
-            std::find_if(nodes_and_links_->GetNodes().begin(),
-                         nodes_and_links_->GetNodes().end(),
-                         [nodeId](auto& node) { return node.ID == nodeId; });
-        if (id != nodes_and_links_->GetNodes().end())
-          nodes_and_links_->GetNodes().erase(id);
+        nodes_and_links_->EraseNodeWithId(nodeId);
       }
     }
   }

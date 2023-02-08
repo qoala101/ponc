@@ -20,10 +20,10 @@ namespace ne = ax::NodeEditor;
 struct Node;
 
 struct Pin {
-  Pin(int id, const char* name, PinType type);
+  Pin(int id, const char* name, PinType type, PinKind kind, Node *node);
 
   ne::PinId ID;
-  ::Node* Node;
+  Node* node;
   std::string Name;
   PinType Type;
   PinKind Kind;

@@ -31,8 +31,6 @@ class NodesAndLinks {
   auto SpawnNodeByTypeName [[nodiscard]] (const std::string &type_name)
   -> Node *;
 
-  void BuildNodes();
-
   auto GetNodes [[nodiscard]] () -> std::vector<Node> &;
   auto GetLinks [[nodiscard]] () const -> const std::vector<Link> &;
 
@@ -44,12 +42,17 @@ class NodesAndLinks {
 
   void SpawnLink(const Link &link);
   void EraseLinkWithId(ne::LinkId id);
+  void EraseNodeWithId(ne::NodeId id);
 
   void SpawnLinkFromPinToNode(const Pin *pin, const Node *node);
 
   void LoadFromFile(const std::string &file_path);
   void SafeToFile(const std::string &file_path);
   void DeleteAll();
+
+  void OnFrame();
+  void UpdateNodePointerOnPins();
+  void UpdatePinValues();
 
  private:
   std::shared_ptr<App> app_{};
