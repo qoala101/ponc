@@ -121,6 +121,10 @@ void LeftPane::DrawMenu() {
     save_as_file_dialog_.Open();
   }
 
+  if (ImGui::Button("Close")) {
+    app_->GetNodesAndLinks().DeleteAll();
+  }
+
   if (ImGui::Button("Zoom to Content")) {
     ne::NavigateToContent();
   }
@@ -135,15 +139,16 @@ void LeftPane::DrawDialog() {
 
   if (open_file_dialog_.HasSelected()) {
     const auto selected_file_path = open_file_dialog_.GetSelected().string();
-    app_->GetNodesAndLinks().LoadFromFile(selected_file_path);
-
     open_file_dialog_.ClearSelected();
+
+    app_->GetNodesAndLinks().LoadFromFile(selected_file_path);
   }
 
   save_as_file_dialog_.Display();
 
   if (save_as_file_dialog_.HasSelected()) {
     auto selected_file_path = save_as_file_dialog_.GetSelected().string();
+    save_as_file_dialog_.ClearSelected();
 
     if (const auto not_json_extension =
             !AsLowerCase(selected_file_path).ends_with(".json")) {
@@ -151,8 +156,6 @@ void LeftPane::DrawDialog() {
     }
 
     app_->GetNodesAndLinks().SafeToFile(selected_file_path);
-
-    save_as_file_dialog_.ClearSelected();
   }
 }
 }  // namespace esc

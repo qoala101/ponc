@@ -46,8 +46,9 @@ class NodesAndLinks {
 
   void SpawnLinkFromPinToNode(const Pin *pin, const Node *node);
 
-  void SafeToFile(const std::string &file_path);
   void LoadFromFile(const std::string &file_path);
+  void SafeToFile(const std::string &file_path);
+  void DeleteAll();
 
  private:
   std::shared_ptr<App> app_{};

@@ -3,12 +3,14 @@
 #include <crude_json.h>
 #include <imgui_node_editor.h>
 #include <imgui_node_editor_internal.h>
+#include <sys/types.h>
 
 #include <iostream>
 #include <string>
 
 #include "esc_app.h"
 #include "esc_cpp.h"
+#include "imgui.h"
 
 namespace esc {
 namespace {
@@ -226,7 +228,179 @@ void NodesAndLinks::SpawnLinkFromPinToNode(const Pin* pin, const Node* node) {
   SpawnLink(link);
 }
 
-void NodesAndLinks::SafeToFile(const std::string& file_path) {}
+void NodesAndLinks::SafeToFile(const std::string& file_path) {
+  auto json = crude_json::value{};
 
-void NodesAndLinks::LoadFromFile(const std::string& file_path) {}
+  {
+    json["nodes_size"] = static_cast<crude_json::number>(nodes_.size());
+    auto& nodes_json = json["nodes"];
+    auto node_index = 0;
+
+    for (const auto& node : nodes_) {
+      auto& node_json = nodes_json[node_index++];
+
+      node_json["id"] = static_cast<crude_json::number>(node.ID.Get());
+      node_json["name"] = node.Name;
+
+      const auto pos = ne::GetNodePosition(node.ID);
+
+      node_json["pos_x"] = pos.x;
+      node_json["pos_y"] = pos.y;
+
+      const auto size = ne::GetNodeSize(node.ID);
+
+      node_json["size_x"] = size.x;
+      node_json["size_y"] = size.y;
+
+      {
+        auto& input_pins_json = node_json["input_pin_ids"];
+        auto input_pin_index = 0;
+
+        for (const auto& input_pin : node.Inputs) {
+          input_pins_json[input_pin_index++] =
+              static_cast<crude_json::number>(input_pin.ID.Get());
+        }
+      }
+
+      {
+        auto& output_pins_json = node_json["output_pin_ids"];
+        auto output_pin_index = 0;
+
+        for (const auto& output_pin : node.Outputs) {
+          output_pins_json[output_pin_index++] =
+              static_cast<crude_json::number>(output_pin.ID.Get());
+        }
+      }
+    }
+  }
+
+  {
+    json["links_size"] = static_cast<crude_json::number>(links_.size());
+    auto& links_json = json["links"];
+    auto link_index = 0;
+
+    for (const auto& link : links_) {
+      auto& link_json = links_json[link_index++];
+
+      link_json["id"] = static_cast<crude_json::number>(link.ID.Get());
+      link_json["start_pin_id"] =
+          static_cast<crude_json::number>(link.StartPinID.Get());
+      link_json["end_pin_id"] =
+          static_cast<crude_json::number>(link.EndPinID.Get());
+    }
+  }
+
+  std::cout << "save:" << json.dump() << "\n";
+  json.save(file_path);
+}
+
+void NodesAndLinks::DeleteAll() {
+  for (const auto& link : links_) {
+    ne::DeleteLink(link.ID);
+  }
+
+  links_.clear();
+
+  for (const auto& node : nodes_) {
+    ne::DeleteNode(node.ID);
+  }
+
+  nodes_.clear();
+}
+
+void NodesAndLinks::LoadFromFile(const std::string& file_path) {
+  DeleteAll();
+
+  const auto json = crude_json::value::load(file_path).first;
+  const auto nodes_size = json["nodes_size"].get<crude_json::number>();
+  const auto& nodes_json = json["nodes"];
+
+  for (auto i = 0; i < nodes_size; ++i) {
+    const auto& node_json = nodes_json[i];
+
+    auto* node =
+        SpawnNodeByTypeName(node_json["name"].get<crude_json::string>());
+
+    {
+      const auto& input_pin_ids = node_json["input_pin_ids"];
+
+      for (auto i = 0; i < static_cast<int>(node->Inputs.size()); ++i) {
+        node->Inputs[i].ID =
+            static_cast<uint64_t>(input_pin_ids[i].get<crude_json::number>());
+      }
+    }
+
+    {
+      const auto& output_pin_ids = node_json["output_pin_ids"];
+
+      for (auto i = 0; i < static_cast<int>(node->Outputs.size()); ++i) {
+        node->Outputs[i].ID =
+            static_cast<uint64_t>(output_pin_ids[i].get<crude_json::number>());
+      }
+    }
+
+    ne::SetNodePosition(
+        node->ID,
+        {static_cast<float>(node_json["pos_x"].get<crude_json::number>()),
+         static_cast<float>(node_json["pos_y"].get<crude_json::number>())});
+
+    if (node->Name == "Comment") {
+      ne::SetGroupSize(
+          node->ID,
+          {static_cast<float>(node_json["size_x"].get<crude_json::number>()),
+           static_cast<float>(node_json["size_y"].get<crude_json::number>())});
+    }
+  }
+
+  const auto links_size = json["links_size"].get<crude_json::number>();
+  const auto& links_json = json["links"];
+
+  for (auto i = 0; i < links_size; ++i) {
+    const auto& link_json = links_json[i];
+
+    SpawnLink({static_cast<uint64_t>(link_json["id"].get<crude_json::number>()),
+               static_cast<uint64_t>(
+                   link_json["start_pin_id"].get<crude_json::number>()),
+               static_cast<uint64_t>(
+                   link_json["end_pin_id"].get<crude_json::number>())});
+  }
+
+  BuildNodes();
+}
+
+//   cpp::Expects(nodes_and_links_.has_value());
+
+//   auto* node = static_cast<Node*>(nullptr);
+
+//   node = nodes_and_links_->SpawnInputActionNode();
+//   ne::SetNodePosition(node->ID, ImVec2(-252, 220));
+
+//   node = nodes_and_links_->SpawnBranchNode();
+//   ne::SetNodePosition(node->ID, ImVec2(-300, 351));
+//   node = nodes_and_links_->SpawnDoNNode();
+//   ne::SetNodePosition(node->ID, ImVec2(-238, 504));
+
+//   node = nodes_and_links_->SpawnPrintStringNode();
+//   ne::SetNodePosition(node->ID, ImVec2(-69, 652));
+
+//   node = nodes_and_links_->SpawnComment();
+//   ne::SetNodePosition(node->ID, ImVec2(800, 224));
+//   ne::SetGroupSize(node->ID, ImVec2(640, 400));
+
+//   nodes_and_links_->BuildNodes();
+// }
+// // vh: norm
+// void App::AddInitialLinks() {
+//   cpp::Expects(nodes_and_links_.has_value());
+
+//   nodes_and_links_->SpawnLink({GetNextLinkId(),
+//                                nodes_and_links_->GetNodes()[0].Outputs[0].ID,
+//                                nodes_and_links_->GetNodes()[1].Inputs[0].ID});
+//   nodes_and_links_->SpawnLink({GetNextLinkId(),
+//                                nodes_and_links_->GetNodes()[0].Outputs[1].ID,
+//                                nodes_and_links_->GetNodes()[2].Inputs[0].ID});
+//   nodes_and_links_->SpawnLink({GetNextLinkId(),
+//                                nodes_and_links_->GetNodes()[2].Outputs[0].ID,
+//                                nodes_and_links_->GetNodes()[3].Inputs[0].ID});
+// }
 }  // namespace esc
