@@ -256,6 +256,10 @@ void App::AddInitialNodes() {
   node = nodes_and_links_->SpawnPrintStringNode();
   ne::SetNodePosition(node->ID, ImVec2(-69, 652));
 
+  node = nodes_and_links_->SpawnComment();
+  ne::SetNodePosition(node->ID, ImVec2(800, 224));
+  ne::SetGroupSize(node->ID, ImVec2(640, 400));
+
   nodes_and_links_->BuildNodes();
 }
 // vh: norm
@@ -449,179 +453,237 @@ void App::DrawFrame() {
     const auto indent_scope =
         cpp::Scope{[]() { ne::Begin("Node editor"); }, []() { ne::End(); }};
 
-    {
-      auto cursorTopLeft = ImGui::GetCursorScreenPos();
+    auto cursorTopLeft = ImGui::GetCursorScreenPos();
 
-      auto* header_background = textures_->GetTextureIds().header_background;
-      auto node_builder = util::BlueprintNodeBuilder{
-          header_background, GetTextureWidth(header_background),
-          GetTextureHeight(header_background)};
+    auto* header_background = textures_->GetTextureIds().header_background;
+    auto node_builder = util::BlueprintNodeBuilder{
+        header_background, GetTextureWidth(header_background),
+        GetTextureHeight(header_background)};
 
-      for (auto& node : nodes_and_links_->GetNodes()) {
-        node_builder.Begin(node.ID);
-        node_builder.Header(node.Color);
+    for (auto& node : nodes_and_links_->GetNodes()) {
+      if (node.Type != NodeType::Blueprint) {
+        continue;
+      }
+
+      node_builder.Begin(node.ID);
+      node_builder.Header(node.Color);
+      ImGui::Spring(0);
+      ImGui::TextUnformatted(node.Name.c_str());
+      ImGui::Spring(1);
+      ImGui::Dummy(ImVec2(0, 28));
+      ImGui::Spring(0);
+      node_builder.EndHeader();
+
+      for (auto& input : node.Inputs) {
+        auto alpha = ImGui::GetStyle().Alpha;
+
+        if ((new_link_pin != nullptr) && !CanCreateLink(new_link_pin, &input) &&
+            &input != new_link_pin) {
+          alpha = alpha * (48.0f / 255.0f);
+        }
+
+        node_builder.Input(input.ID);
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
+        DrawPinIcon(input, nodes_and_links_->IsPinLinked(input.ID), alpha);
         ImGui::Spring(0);
+
+        if (!input.Name.empty()) {
+          ImGui::TextUnformatted(input.Name.c_str());
+          ImGui::Spring(0);
+        }
+
+        ImGui::PopStyleVar();
+        node_builder.EndInput();
+      }
+
+      for (auto& output : node.Outputs) {
+        auto alpha = ImGui::GetStyle().Alpha;
+
+        if ((new_link_pin != nullptr) &&
+            !CanCreateLink(new_link_pin, &output) && &output != new_link_pin) {
+          alpha = alpha * (48.0f / 255.0f);
+        }
+
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
+        node_builder.Output(output.ID);
+
+        if (!output.Name.empty()) {
+          ImGui::Spring(0);
+          ImGui::TextUnformatted(output.Name.c_str());
+        }
+
+        ImGui::Spring(0);
+        DrawPinIcon(output, nodes_and_links_->IsPinLinked(output.ID), alpha);
+        ImGui::PopStyleVar();
+        node_builder.EndOutput();
+      }
+
+      node_builder.End();
+    }
+
+    for (auto& node : nodes_and_links_->GetNodes()) {
+      if (node.Type != NodeType::Comment) continue;
+
+      const float commentAlpha = 0.75f;
+
+      ImGui::PushStyleVar(ImGuiStyleVar_Alpha, commentAlpha);
+      ne::PushStyleColor(ne::StyleColor_NodeBg, ImColor(255, 255, 255, 64));
+      ne::PushStyleColor(ne::StyleColor_NodeBorder, ImColor(255, 255, 255, 64));
+      ne::BeginNode(node.ID);
+      ImGui::PushID(node.ID.AsPointer());
+      ImGui::BeginVertical("content");
+      ImGui::BeginHorizontal("horizontal");
+      ImGui::Spring(1);
+      ImGui::TextUnformatted(node.Name.c_str());
+      ImGui::Spring(1);
+      ImGui::EndHorizontal();
+      ne::Group(node.Size);
+      ImGui::EndVertical();
+      ImGui::PopID();
+      ne::EndNode();
+      ne::PopStyleColor(2);
+      ImGui::PopStyleVar();
+
+      if (ne::BeginGroupHint(node.ID)) {
+        // auto alpha   = static_cast<int>(commentAlpha *
+        // ImGui::GetStyle().Alpha * 255);
+        auto bgAlpha = static_cast<int>(ImGui::GetStyle().Alpha * 255);
+
+        // ImGui::PushStyleVar(ImGuiStyleVar_Alpha, commentAlpha *
+        // ImGui::GetStyle().Alpha);
+
+        auto min = ne::GetGroupMin();
+        // auto max = ed::GetGroupMax();
+
+        ImGui::SetCursorScreenPos(
+            min - ImVec2(-8, ImGui::GetTextLineHeightWithSpacing() + 4));
+        ImGui::BeginGroup();
         ImGui::TextUnformatted(node.Name.c_str());
-        ImGui::Spring(1);
-        ImGui::Dummy(ImVec2(0, 28));
-        ImGui::Spring(0);
-        node_builder.EndHeader();
+        ImGui::EndGroup();
 
-        for (auto& input : node.Inputs) {
-          auto alpha = ImGui::GetStyle().Alpha;
+        auto drawList = ne::GetHintBackgroundDrawList();
 
-          if ((new_link_pin != nullptr) &&
-              !CanCreateLink(new_link_pin, &input) && &input != new_link_pin) {
-            alpha = alpha * (48.0f / 255.0f);
-          }
+        auto hintBounds = GetItemRect();
+        auto hintFrameBounds = GetExpandedRect(hintBounds, {.x = 8, .y = 4});
 
-          node_builder.Input(input.ID);
-          ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
-          DrawPinIcon(input, nodes_and_links_->IsPinLinked(input.ID), alpha);
-          ImGui::Spring(0);
+        drawList->AddRectFilled(
+            hintFrameBounds.GetTL(), hintFrameBounds.GetBR(),
+            IM_COL32(255, 255, 255, 64 * bgAlpha / 255), 4.0f);
 
-          if (!input.Name.empty()) {
-            ImGui::TextUnformatted(input.Name.c_str());
-            ImGui::Spring(0);
-          }
+        drawList->AddRect(hintFrameBounds.GetTL(), hintFrameBounds.GetBR(),
+                          IM_COL32(255, 255, 255, 128 * bgAlpha / 255), 4.0f);
 
-          ImGui::PopStyleVar();
-          node_builder.EndInput();
-        }
-
-        for (auto& output : node.Outputs) {
-          auto alpha = ImGui::GetStyle().Alpha;
-
-          if ((new_link_pin != nullptr) &&
-              !CanCreateLink(new_link_pin, &output) &&
-              &output != new_link_pin) {
-            alpha = alpha * (48.0f / 255.0f);
-          }
-
-          ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
-          node_builder.Output(output.ID);
-
-          if (!output.Name.empty()) {
-            ImGui::Spring(0);
-            ImGui::TextUnformatted(output.Name.c_str());
-          }
-          
-          ImGui::Spring(0);
-          DrawPinIcon(output, nodes_and_links_->IsPinLinked(output.ID), alpha);
-          ImGui::PopStyleVar();
-          node_builder.EndOutput();
-        }
-
-        node_builder.End();
+        // ImGui::PopStyleVar();
       }
+      ne::EndGroupHint();
+    }
 
-      for (const auto& link : nodes_and_links_->GetLinks()) {
-        ne::Link(link.ID, link.StartPinID, link.EndPinID, link.Color, 2.0F);
-      }
+    for (const auto& link : nodes_and_links_->GetLinks()) {
+      ne::Link(link.ID, link.StartPinID, link.EndPinID, link.Color, 2.0F);
+    }
 
-      if (!create_new_node) {
-        if (ne::BeginCreate(ImColor(255, 255, 255), 2.0f)) {
-          auto showLabel = [](const char* label, ImColor color) {
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() -
-                                 ImGui::GetTextLineHeight());
-            auto size = ImGui::CalcTextSize(label);
+    if (!create_new_node) {
+      if (ne::BeginCreate(ImColor(255, 255, 255), 2.0f)) {
+        auto showLabel = [](const char* label, ImColor color) {
+          ImGui::SetCursorPosY(ImGui::GetCursorPosY() -
+                               ImGui::GetTextLineHeight());
+          auto size = ImGui::CalcTextSize(label);
 
-            auto padding = ImGui::GetStyle().FramePadding;
-            auto spacing = ImGui::GetStyle().ItemSpacing;
+          auto padding = ImGui::GetStyle().FramePadding;
+          auto spacing = ImGui::GetStyle().ItemSpacing;
 
-            ImGui::SetCursorPos(ImGui::GetCursorPos() +
-                                ImVec2(spacing.x, -spacing.y));
+          ImGui::SetCursorPos(ImGui::GetCursorPos() +
+                              ImVec2(spacing.x, -spacing.y));
 
-            auto rectMin = ImGui::GetCursorScreenPos() - padding;
-            auto rectMax = ImGui::GetCursorScreenPos() + size + padding;
+          auto rectMin = ImGui::GetCursorScreenPos() - padding;
+          auto rectMax = ImGui::GetCursorScreenPos() + size + padding;
 
-            auto drawList = ImGui::GetWindowDrawList();
-            drawList->AddRectFilled(rectMin, rectMax, color, size.y * 0.15f);
-            ImGui::TextUnformatted(label);
-          };
+          auto drawList = ImGui::GetWindowDrawList();
+          drawList->AddRectFilled(rectMin, rectMax, color, size.y * 0.15f);
+          ImGui::TextUnformatted(label);
+        };
 
-          ne::PinId startPinId = 0, endPinId = 0;
-          if (ne::QueryNewLink(&startPinId, &endPinId)) {
-            auto startPin = nodes_and_links_->FindPin(startPinId);
-            auto endPin = nodes_and_links_->FindPin(endPinId);
+        ne::PinId startPinId = 0, endPinId = 0;
+        if (ne::QueryNewLink(&startPinId, &endPinId)) {
+          auto startPin = nodes_and_links_->FindPin(startPinId);
+          auto endPin = nodes_and_links_->FindPin(endPinId);
 
-            new_link_pin = startPin ? startPin : endPin;
+          new_link_pin = startPin ? startPin : endPin;
 
-            if (startPin->Kind == PinKind::Input) {
-              using std::swap;
+          if (startPin->Kind == PinKind::Input) {
+            using std::swap;
 
-              swap(startPin, endPin);
-              swap(startPinId, endPinId);
-            }
+            swap(startPin, endPin);
+            swap(startPinId, endPinId);
+          }
 
-            if (startPin && endPin) {
-              if (endPin == startPin) {
-                ne::RejectNewItem(ImColor(255, 0, 0), 2.0f);
-              } else if (endPin->Kind == startPin->Kind) {
-                showLabel("x Incompatible Pin Kind", ImColor(45, 32, 32, 180));
-                ne::RejectNewItem(ImColor(255, 0, 0), 2.0f);
-              } else if (endPin->Node == startPin->Node) {
-                showLabel("x Cannot connect to self", ImColor(45, 32, 32, 180));
-                ne::RejectNewItem(ImColor(255, 0, 0), 1.0f);
-              } else if (endPin->Type != startPin->Type) {
-                showLabel("x Incompatible Pin Type", ImColor(45, 32, 32, 180));
-                ne::RejectNewItem(ImColor(255, 128, 128), 1.0f);
-              } else {
-                showLabel("+ Create Link", ImColor(32, 45, 32, 180));
-                if (ne::AcceptNewItem(ImColor(128, 255, 128), 4.0f)) {
-                  auto link = Link{GetNextLinkId(), startPinId, endPinId};
-                  link.Color = GetIconColor(startPin->Type);
-                  nodes_and_links_->SpawnLink(link);
-                }
+          if (startPin && endPin) {
+            if (endPin == startPin) {
+              ne::RejectNewItem(ImColor(255, 0, 0), 2.0f);
+            } else if (endPin->Kind == startPin->Kind) {
+              showLabel("x Incompatible Pin Kind", ImColor(45, 32, 32, 180));
+              ne::RejectNewItem(ImColor(255, 0, 0), 2.0f);
+            } else if (endPin->Node == startPin->Node) {
+              showLabel("x Cannot connect to self", ImColor(45, 32, 32, 180));
+              ne::RejectNewItem(ImColor(255, 0, 0), 1.0f);
+            } else if (endPin->Type != startPin->Type) {
+              showLabel("x Incompatible Pin Type", ImColor(45, 32, 32, 180));
+              ne::RejectNewItem(ImColor(255, 128, 128), 1.0f);
+            } else {
+              showLabel("+ Create Link", ImColor(32, 45, 32, 180));
+              if (ne::AcceptNewItem(ImColor(128, 255, 128), 4.0f)) {
+                auto link = Link{GetNextLinkId(), startPinId, endPinId};
+                link.Color = GetIconColor(startPin->Type);
+                nodes_and_links_->SpawnLink(link);
               }
             }
           }
+        }
 
-          ne::PinId pinId = 0;
-          if (ne::QueryNewNode(&pinId)) {
-            new_link_pin = nodes_and_links_->FindPin(pinId);
-            if (new_link_pin)
-              showLabel("+ Create Node", ImColor(32, 45, 32, 180));
+        ne::PinId pinId = 0;
+        if (ne::QueryNewNode(&pinId)) {
+          new_link_pin = nodes_and_links_->FindPin(pinId);
+          if (new_link_pin)
+            showLabel("+ Create Node", ImColor(32, 45, 32, 180));
 
-            if (ne::AcceptNewItem()) {
-              create_new_node = true;
-              existing_node_new_link_pin = nodes_and_links_->FindPin(pinId);
-              new_link_pin = nullptr;
-              ne::Suspend();
-              ImGui::OpenPopup("Create New Node");
-              ne::Resume();
-            }
-          }
-        } else
-          new_link_pin = nullptr;
-
-        ne::EndCreate();
-
-        if (ne::BeginDelete()) {
-          ne::LinkId linkId = 0;
-          while (ne::QueryDeletedLink(&linkId)) {
-            if (ne::AcceptDeletedItem()) {
-              nodes_and_links_->EraseLinkWithId(linkId);
-            }
-          }
-
-          ne::NodeId nodeId = 0;
-          while (ne::QueryDeletedNode(&nodeId)) {
-            if (ne::AcceptDeletedItem()) {
-              auto id = std::find_if(
-                  nodes_and_links_->GetNodes().begin(),
-                  nodes_and_links_->GetNodes().end(),
-                  [nodeId](auto& node) { return node.ID == nodeId; });
-              if (id != nodes_and_links_->GetNodes().end())
-                nodes_and_links_->GetNodes().erase(id);
-            }
+          if (ne::AcceptNewItem()) {
+            create_new_node = true;
+            existing_node_new_link_pin = nodes_and_links_->FindPin(pinId);
+            new_link_pin = nullptr;
+            ne::Suspend();
+            ImGui::OpenPopup("Create New Node");
+            ne::Resume();
           }
         }
-        ne::EndDelete();
-      }
+      } else
+        new_link_pin = nullptr;
 
-      ImGui::SetCursorScreenPos(cursorTopLeft);
+      ne::EndCreate();
+
+      if (ne::BeginDelete()) {
+        ne::LinkId linkId = 0;
+        while (ne::QueryDeletedLink(&linkId)) {
+          if (ne::AcceptDeletedItem()) {
+            nodes_and_links_->EraseLinkWithId(linkId);
+          }
+        }
+
+        ne::NodeId nodeId = 0;
+        while (ne::QueryDeletedNode(&nodeId)) {
+          if (ne::AcceptDeletedItem()) {
+            auto id = std::find_if(
+                nodes_and_links_->GetNodes().begin(),
+                nodes_and_links_->GetNodes().end(),
+                [nodeId](auto& node) { return node.ID == nodeId; });
+            if (id != nodes_and_links_->GetNodes().end())
+              nodes_and_links_->GetNodes().erase(id);
+          }
+        }
+      }
+      ne::EndDelete();
     }
+
+    ImGui::SetCursorScreenPos(cursorTopLeft);
 
     DrawContextMenu();
   }

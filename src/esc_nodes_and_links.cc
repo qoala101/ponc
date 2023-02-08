@@ -76,6 +76,14 @@ auto NodesAndLinks::SpawnPrintStringNode() -> Node* {
   return &nodes_.back();
 }
 
+auto NodesAndLinks::SpawnComment() -> Node* {
+  nodes_.emplace_back(app_->GetNextObjectId(), "Test Comment");
+  nodes_.back().Type = NodeType::Comment;
+  nodes_.back().Size = ImVec2(300, 200);
+
+  return &nodes_.back();
+}
+
 void NodesAndLinks::BuildNodes() {
   for (auto& node : nodes_) {
     BuildNode(&node);
@@ -175,10 +183,14 @@ auto NodesAndLinks::SpawnNodeByTypeName(const std::string& type_name) -> Node* {
   if (type_name == "Print String") {
     return SpawnPrintStringNode();
   }
+
+  if (type_name == "Comment") {
+    return SpawnComment();
+  }
 }
 
 auto NodesAndLinks::GetNodeTypeNames() -> std::vector<std::string> {
-  return {"Input Action", "Branch", "Do N", "Print String"};
+  return {"Input Action", "Branch", "Do N", "Print String", "Comment"};
 }
 
 void NodesAndLinks::SpawnLinkFromPinToNode(const Pin* pin, const Node* node) {

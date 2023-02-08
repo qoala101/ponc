@@ -7,7 +7,7 @@ enum class PinType { Flow };
 
 enum class PinKind { Output, Input };
 
-enum class NodeType { Blueprint };
+enum class NodeType { Blueprint, Comment };
 
 enum class IconType : ImU32 { Flow };
 

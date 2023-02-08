@@ -21,6 +21,7 @@ class NodesAndLinks {
   auto SpawnBranchNode() -> Node *;
   auto SpawnDoNNode() -> Node *;
   auto SpawnPrintStringNode() -> Node *;
+  auto SpawnComment() -> Node *;
 
   auto SpawnNodeByTypeName [[nodiscard]] (const std::string &type_name)
   -> Node *;
