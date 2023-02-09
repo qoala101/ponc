@@ -6,21 +6,12 @@
 
 namespace ne = ax::NodeEditor;
 
-Pin::Pin(ne::PinId id, std::string name, PinType type, PinKind kind, Node* node)
-    : ID{id},
-      node{node},
-      Name{std::move(name)},
-      Type{type},
-      Kind{kind} {}
 // vh: ok
 auto CanCreateLink(const Pin* left, const Pin* right) -> bool {
   return (left != nullptr) && (right != nullptr) && (left != right) &&
          (left->Kind != right->Kind) && (left->Type == right->Type) &&
          (left->node != right->node);
 }
-
-Node::Node(ne::NodeId id, std::string name, ImColor color)
-    : ID{id}, Name{std::move(name)}, Color{color}, Size{0, 0} {}
 
 auto GetCouplerPercentageNames() -> const std::vector<std::string>& {
   static auto kNames = std::vector<std::string>{
