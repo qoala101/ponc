@@ -4,9 +4,10 @@
 
 #include "core_float_pin.h"
 #include "core_flow_pin.h"
+#include "esc_cpp.h"
 #include "esc_id_generator.h"
-#include "ui_client_node_drawer.h"
 
+namespace esc {
 ClientNode::ClientNode(esc::IdGenerator& id_generator)
     : Node{id_generator.GetNext<ne::NodeId>(),
            {std::make_shared<FlowPin>(id_generator.GetNext<ne::PinId>(),
@@ -17,6 +18,14 @@ ClientNode::ClientNode(esc::IdGenerator& id_generator)
                                        PinKind::Input, true)},
            {}} {}
 
-auto ClientNode::GetDrawer() -> std::unique_ptr<vh::esc::ui::INodeDrawer> {
-  return std::make_unique<vh::esc::ui::ClientNodeDrawer>(shared_from_this());
+auto ClientNode::CreateDrawer() -> std::unique_ptr<INodeDrawer> {
+  return std::make_unique<ClientNodeDrawer>(shared_from_this());
 }
+
+ClientNodeDrawer::ClientNodeDrawer(std::shared_ptr<ClientNode> node)
+    : node_{(cpp::Expects(node != nullptr), std::move(node))} {}
+
+auto ClientNodeDrawer::GetLabel() const -> std::string { return "Client"; }
+
+auto ClientNodeDrawer::GetColor() const -> ImColor { return {0, 255, 0}; }
+}  // namespace esc

@@ -10,6 +10,7 @@
 
 #include "core_coupler_node.h"
 #include "core_float_pin.h"
+#include "core_i_node_factory.h"
 #include "esc_cpp.h"
 #include "esc_enums.h"
 #include "esc_id_generator.h"
@@ -180,12 +181,12 @@ void DrawPinField(Pin& pin) {
 // vh: bad
 void DrawNodeHeader(Node& node) {
   ImGui::Spring(0);
-  ImGui::TextUnformatted(node.GetDrawer()->GetName().c_str());
+  ImGui::TextUnformatted(node.CreateDrawer()->GetLabel().c_str());
   ImGui::Spring(1);
   ImGui::Dummy(ImVec2{0, 28});
   ImGui::Spring(0);
 
-  if (auto* coupler_node = dynamic_cast<CouplerNode*>(&node)) {
+  if (auto* coupler_node = dynamic_cast<esc::CouplerNode*>(&node)) {
     ImGui::SetNextItemWidth(100);
     const auto& coupler_percentage_names = GetCouplerPercentageNames();
     ImGui::SliderInt(
@@ -235,7 +236,8 @@ void App::OnStart() {
   editor_context_.emplace();
   textures_.emplace(shared_from_this());
   left_pane_.emplace(shared_from_this());
-  nodes_and_links_.emplace(shared_from_this());
+  nodes_and_links_.emplace(shared_from_this(),
+                           std::vector<std::shared_ptr<esc::INodeFactory>>{});
 }
 // vh: norm
 void App::OnStop() {
@@ -313,12 +315,11 @@ void App::DrawContextMenuProcess() {
         ImGui::TextUnformatted("Node");
         ImGui::Separator();
 
-        auto* node =
-            nodes_and_links_->FindNode(popup_state_.context_node_id);
+        auto* node = nodes_and_links_->FindNode(popup_state_.context_node_id);
         cpp::Expects(node != nullptr);
 
         ImGui::Text("ID: %p", node->GetId().AsPointer());
-        ImGui::Text("Type: %s", node->GetDrawer()->GetName().c_str());
+        ImGui::Text("Type: %s", node->CreateDrawer()->GetLabel().c_str());
         ImGui::Text("Inputs: %d",
                     static_cast<int>(node->GetInputPins().size()));
         ImGui::Text("Outputs: %d",
@@ -401,7 +402,7 @@ void App::DrawNode(Node& node) {
 
   {
     const auto header_scope =
-        node_builder.AddHeader(header_texture, node.GetDrawer()->GetColor());
+        node_builder.AddHeader(header_texture, node.CreateDrawer()->GetColor());
 
     DrawNodeHeader(node);
   }

@@ -22,8 +22,8 @@ class Node {
 
   virtual ~Node() = default;
 
-  virtual auto GetDrawer [[nodiscard]] ()
-  -> std::unique_ptr<vh::esc::ui::INodeDrawer> = 0;
+  virtual auto CreateDrawer [[nodiscard]] ()
+  -> std::unique_ptr<esc::INodeDrawer> = 0;
 
   auto GetId [[nodiscard]] () const -> ne::NodeId;
 
@@ -36,7 +36,6 @@ class Node {
   auto GetOutputPins [[nodiscard]] () -> std::vector<std::shared_ptr<Pin>> &;
 
  protected:
- Node() = default;
   Node(ne::NodeId id, std::vector<std::shared_ptr<Pin>> input_pins,
        std::vector<std::shared_ptr<Pin>> output_pins);
 

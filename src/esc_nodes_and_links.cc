@@ -21,8 +21,11 @@
 #include "imgui.h"
 
 namespace esc {
-NodesAndLinks::NodesAndLinks(std::shared_ptr<App> app)
-    : app_{(cpp::Expects(app != nullptr), std::move(app))} {
+NodesAndLinks::NodesAndLinks(
+    std::shared_ptr<App> app,
+    std::vector<std::shared_ptr<INodeFactory>> node_factories)
+    : app_{(cpp::Expects(app != nullptr), std::move(app))},
+      node_factories_{std::move(node_factories)} {
   cpp::Ensures(app_ != nullptr);
 }
 

@@ -1,8 +1,10 @@
 #ifndef VH_ESC_NODES_AND_LINKS_H_
 #define VH_ESC_NODES_AND_LINKS_H_
 
+#include <memory>
 #include <vector>
 
+#include "core_i_node_factory.h"
 #include "esc_types.h"
 #include "imgui_node_editor.h"
 
@@ -11,10 +13,12 @@ class App;
 namespace esc {
 class NodesAndLinks {
  public:
-  explicit NodesAndLinks(std::shared_ptr<App> app);
+  NodesAndLinks(std::shared_ptr<App> app,
+                std::vector<std::shared_ptr<INodeFactory>>);
 
   static auto GetSelectedNodeIds [[nodiscard]] () -> std::vector<ne::NodeId>;
   static auto GetSelectedLinkIds [[nodiscard]] () -> std::vector<ne::LinkId>;
+
   static auto GetNodeTypeNames [[nodiscard]] () -> std::vector<std::string>;
 
   auto SpawnInputNode() -> Node *;
@@ -54,6 +58,8 @@ class NodesAndLinks {
   std::shared_ptr<App> app_{};
   std::vector<std::shared_ptr<Node>> nodes_{};
   std::vector<Link> links_{};
+
+  std::vector<std::shared_ptr<INodeFactory>> node_factories_{};
 };
 }  // namespace esc
 

@@ -120,10 +120,6 @@ add_example_executable(esc
   core/core_link.cc
   core/core_node.cc
   core/core_pin.cc
-  ui/node/ui_client_node_drawer.cc
-  ui/node/ui_coupler_node_drawer.cc
-  ui/node/ui_input_node_drawer.cc
-  ui/node/ui_splitter_node_drawer.cc
   esc_app.cc
   esc_cpp.cc
   esc_editor_context_handle.cc

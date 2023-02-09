@@ -2,8 +2,9 @@
 
 #include "core_float_pin.h"
 #include "core_flow_pin.h"
-#include "ui_splitter_node_drawer.h"
+#include "esc_cpp.h"
 
+namespace esc {
 SplitterNode::SplitterNode(esc::IdGenerator& id_generator, int n)
     : Node{id_generator.GetNext<ne::NodeId>(),
            {std::make_shared<FlowPin>(id_generator.GetNext<ne::PinId>(),
@@ -21,6 +22,22 @@ SplitterNode::SplitterNode(esc::IdGenerator& id_generator, int n)
              return pins;
            }()} {}
 
-auto SplitterNode::GetDrawer() -> std::unique_ptr<vh::esc::ui::INodeDrawer> {
-  return std::make_unique<vh::esc::ui::SplitterNodeDrawer>(shared_from_this());
+auto SplitterNode::CreateDrawer() -> std::unique_ptr<INodeDrawer> {
+  return std::make_unique<SplitterNodeDrawer>(shared_from_this());
 }
+
+SplitterNodeDrawer::SplitterNodeDrawer(std::shared_ptr<SplitterNode> node)
+    : node_{(cpp::Expects(node != nullptr), std::move(node))} {}
+
+auto SplitterNodeDrawer::GetNumOutputs() const {
+  return static_cast<int>(node_->GetOutputPins().size());
+}
+
+auto SplitterNodeDrawer::GetLabel() const -> std::string {
+  return "Splitter 1x" + std::to_string(GetNumOutputs());
+}
+
+auto SplitterNodeDrawer::GetColor() const -> ImColor {
+  return {0, 0, 127 + 128 / GetNumOutputs()};
+}
+}  // namespace esc

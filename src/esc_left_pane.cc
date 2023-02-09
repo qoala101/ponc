@@ -25,7 +25,7 @@ void DrawNode(Node& node, bool is_selected) {
         cpp::Scope{[&node]() { ImGui::PushID(node.GetId().AsPointer()); },
                    []() { ImGui::PopID(); }};
 
-    const auto label = node.GetDrawer()->GetName();
+    const auto label = node.CreateDrawer()->GetLabel();
 
     if (ImGui::Selectable(label.c_str(), &is_selected)) {
       if (io.KeyCtrl) {
