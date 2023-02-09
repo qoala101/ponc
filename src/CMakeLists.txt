@@ -114,6 +114,9 @@ add_example_executable(esc
   core/node/core_coupler_node.cc
   core/node/core_input_node.cc
   core/node/core_splitter_node.cc
+  core/pin/core_empty_pin.cc
+  core/pin/core_float_pin.cc
+  core/pin/core_flow_pin.cc
   core/core_link.cc
   core/core_node.cc
   core/core_pin.cc
@@ -132,4 +135,5 @@ target_include_directories(esc
   PUBLIC ${PROJECT_SOURCE_DIR}/include
   PUBLIC ${PROJECT_SOURCE_DIR}/include/core
   PUBLIC ${PROJECT_SOURCE_DIR}/include/core/node
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/core/pin
 )

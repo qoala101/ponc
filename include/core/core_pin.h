@@ -13,20 +13,32 @@ class Node;
 
 class Pin {
  public:
-  Pin(ne::PinId id, std::string name, PinType type, PinKind kind,
-      bool editable);
+  Pin(ne::PinId id, std::string name, PinKind kind, bool editable);
 
-  ne::PinId ID;
-  PinType Type;
-  PinKind Kind;
+  Pin(const Pin &) = delete;
+  Pin(Pin &&) noexcept = delete;
+
+  auto operator=(const Pin &) noexcept -> Node & = delete;
+  auto operator=(Pin &&) noexcept -> Node & = delete;
+
+  virtual ~Pin() = default;
+
+  auto GetId [[nodiscard]] () const -> ne::PinId;
+  void SetId(ne::PinId id);
+
+  virtual auto GetType [[nodiscard]] () const -> PinType = 0;
 
   float value{};
 
   struct {
     std::string Name{};
     bool editable{};
-    Node* node;
+    Node *node;
+    PinKind Kind;
   } ui_data_{};
+
+ private:
+  ne::PinId id_;
 };
 
 #endif  // VH_CORE_PIN_H_

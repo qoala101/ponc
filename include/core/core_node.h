@@ -3,6 +3,7 @@
 
 #include <imgui_node_editor.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -22,11 +23,11 @@ class Node {
 
   auto GetId [[nodiscard]] () const -> ne::NodeId;
 
-  auto GetInputPins [[nodiscard]] () const -> const std::vector<Pin> &;
-  auto GetInputPins [[nodiscard]] () -> std::vector<Pin> &;
+  auto GetInputPins [[nodiscard]] () const -> const std::vector<std::shared_ptr<Pin>>&;
+  auto GetInputPins [[nodiscard]] () -> std::vector<std::shared_ptr<Pin>> &;
 
-  auto GetOutputPins [[nodiscard]] () const -> const std::vector<Pin> &;
-  auto GetOutputPins [[nodiscard]] () -> std::vector<Pin> &;
+  auto GetOutputPins [[nodiscard]] () const -> const std::vector<std::shared_ptr<Pin>> &;
+  auto GetOutputPins [[nodiscard]] () -> std::vector<std::shared_ptr<Pin>> &;
 
   struct {
     std::string name{};
@@ -34,13 +35,14 @@ class Node {
   } ui_data_{};
 
  protected:
-  Node(ne::NodeId id, std::vector<Pin> input_pins, std::vector<Pin> output_pins,
-       std::string name, ImColor color);
+  Node(ne::NodeId id, std::vector<std::shared_ptr<Pin>> input_pins,
+       std::vector<std::shared_ptr<Pin>> output_pins, std::string name,
+       ImColor color);
 
  private:
   ne::NodeId id_{};
-  std::vector<Pin> input_pins_{};
-  std::vector<Pin> output_pins_{};
+  std::vector<std::shared_ptr<Pin>> input_pins_{};
+  std::vector<std::shared_ptr<Pin>> output_pins_{};
 };
 
 #endif  // VH_CORE_NODE_H_

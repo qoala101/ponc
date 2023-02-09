@@ -143,7 +143,7 @@ void Icon(const ImVec2& size, bool filled,
 }
 // vh: norm
 void DrawPinIcon(const Pin& pin, bool connected, float alpha) {
-  if (pin.Type != PinType::Flow) {
+  if (pin.GetType() != PinType::Flow) {
     if (pin.ui_data_.editable) {
       ImGui::Dummy(ImVec2{20, 24});
     } else {
@@ -164,7 +164,7 @@ void DrawPinIcon(const Pin& pin, bool connected, float alpha) {
 void DrawPinField(Pin& pin) {
   ImGui::Spring(0);
 
-  if (pin.Type != PinType::Empty) {
+  if (pin.GetType() != PinType::Empty) {
     if (pin.ui_data_.editable) {
       ImGui::SetNextItemWidth(100);
       ImGui::InputFloat(pin.ui_data_.Name.c_str(), &pin.value, 0.0F, 0.0F,
@@ -340,7 +340,7 @@ void App::DrawContextMenuProcess() {
             nodes_and_links_->FindPin(popup_state_.context_pin_id);
         cpp::Expects(pin != nullptr);
 
-        ImGui::Text("ID: %p", pin->ID.AsPointer());
+        ImGui::Text("ID: %p", pin->GetId().AsPointer());
 
         cpp::Expects(pin->ui_data_.node != nullptr);
 
@@ -406,22 +406,22 @@ void App::DrawNode(Node& node) {
   }
 
   for (auto& input : node.GetInputPins()) {
-    const auto input_scope = node_builder.AddPin(input.ID, ne::PinKind::Input);
+    const auto input_scope = node_builder.AddPin(input->GetId(), ne::PinKind::Input);
 
-    const auto alpha = CalculateAlphaForPin(input);
+    const auto alpha = CalculateAlphaForPin(*input);
 
     {
       const auto style_var_scope = cpp::Scope{
           [alpha]() { ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha); },
           []() { ImGui::PopStyleVar(); }};
 
-      DrawPinIcon(input, nodes_and_links_->IsPinLinked(input.ID), alpha);
-      DrawPinField(input);
+      DrawPinIcon(*input, nodes_and_links_->IsPinLinked(input->GetId()), alpha);
+      DrawPinField(*input);
     }
   }
 
   for (auto& output : node.GetOutputPins()) {
-    const auto alpha = CalculateAlphaForPin(output);
+    const auto alpha = CalculateAlphaForPin(*output);
 
     {
       const auto style_var_scope = cpp::Scope{
@@ -430,10 +430,10 @@ void App::DrawNode(Node& node) {
 
       {
         const auto input_scope =
-            node_builder.AddPin(output.ID, ne::PinKind::Output);
+            node_builder.AddPin(output->GetId(), ne::PinKind::Output);
 
-        DrawPinField(output);
-        DrawPinIcon(output, nodes_and_links_->IsPinLinked(output.ID), alpha);
+        DrawPinField(*output);
+        DrawPinIcon(*output, nodes_and_links_->IsPinLinked(output->GetId()), alpha);
       }
     }
   }
@@ -470,7 +470,7 @@ void App::DrawLinkConnectionProcess() {
         auto* end_pin = nodes_and_links_->FindPin(end_pin_id);
         cpp::Expects(end_pin != nullptr);
 
-        if (start_pin->Kind == PinKind::Input) {
+        if (start_pin->ui_data_.Kind == PinKind::Input) {
           using std::swap;
 
           swap(start_pin, end_pin);
@@ -479,13 +479,13 @@ void App::DrawLinkConnectionProcess() {
 
         if (end_pin == start_pin) {
           ne::RejectNewItem(ImColor{255, 0, 0}, 2.0F);
-        } else if (end_pin->Kind == start_pin->Kind) {
+        } else if (end_pin->ui_data_.Kind == start_pin->ui_data_.Kind) {
           DrawHintLabel("x Incompatible Pin Kind", ImColor{45, 32, 32, 180});
           ne::RejectNewItem(ImColor{255, 0, 0}, 2.0F);
         } else if (end_pin->ui_data_.node == start_pin->ui_data_.node) {
           DrawHintLabel("x Cannot connect to self", ImColor{45, 32, 32, 180});
           ne::RejectNewItem(ImColor{255, 0, 0}, 1.0F);
-        } else if (end_pin->Type != start_pin->Type) {
+        } else if (end_pin->GetType() != start_pin->GetType()) {
           DrawHintLabel("x Incompatible Pin Type", ImColor{45, 32, 32, 180});
           ne::RejectNewItem(ImColor{255, 127, 127}, 1.0F);
         } else {
