@@ -2,12 +2,14 @@
 
 #include <cstdint>
 
+#include "imgui_node_editor.h"
+
 namespace ne = ax::NodeEditor;
 
-Pin::Pin(int id, const char* name, PinType type, PinKind kind, Node* node)
-    : ID{static_cast<uint64_t>(id)},
+Pin::Pin(ne::PinId id, std::string name, PinType type, PinKind kind, Node* node)
+    : ID{id},
       node{node},
-      Name{name},
+      Name{std::move(name)},
       Type{type},
       Kind{kind} {}
 // vh: ok
@@ -17,12 +19,8 @@ auto CanCreateLink(const Pin* left, const Pin* right) -> bool {
          (left->node != right->node);
 }
 
-Node::Node(int id, const char* name, ImColor color)
-    : ID{static_cast<uint64_t>(id)},
-      Name{name},
-      Color{color},
-      Type{NodeType::Blueprint},
-      Size{0, 0} {}
+Node::Node(ne::NodeId id, std::string name, ImColor color)
+    : ID{id}, Name{std::move(name)}, Color{color}, Size{0, 0} {}
 
 auto GetCouplerPercentageNames() -> const std::vector<std::string>& {
   static auto kNames = std::vector<std::string>{

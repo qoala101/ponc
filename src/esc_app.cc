@@ -8,9 +8,10 @@
 #include <ios>
 #include <memory>
 
-#include "esc_node_drawer.h"
 #include "esc_cpp.h"
 #include "esc_enums.h"
+#include "esc_id_generator.h"
+#include "esc_node_drawer.h"
 #include "esc_nodes_and_links.h"
 #include "esc_types.h"
 #include "imgui.h"
@@ -199,63 +200,6 @@ void DrawBlueprintNodeHeader(Node& node) {
     ImGui::Spring(0);
   }
 }
-
-void DrawCommentNode(Node& node) {
-  const float commentAlpha = 0.75f;
-
-  ImGui::PushStyleVar(ImGuiStyleVar_Alpha, commentAlpha);
-  ne::PushStyleColor(ne::StyleColor_NodeBg, ImColor(255, 255, 255, 64));
-  ne::PushStyleColor(ne::StyleColor_NodeBorder, ImColor(255, 255, 255, 64));
-  ne::BeginNode(node.ID);
-  ImGui::PushID(node.ID.AsPointer());
-  ImGui::BeginVertical("content");
-  ImGui::BeginHorizontal("horizontal");
-  ImGui::Spring(1);
-
-  ImGui::SetNextItemWidth(200);
-  ImGui::InputText("", node.comment_text_.data(), node.comment_text_.size());
-
-  ImGui::Spring(1);
-  ImGui::EndHorizontal();
-  ne::Group(node.Size);
-  ImGui::EndVertical();
-  ImGui::PopID();
-  ne::EndNode();
-  ne::PopStyleColor(2);
-  ImGui::PopStyleVar();
-
-  if (ne::BeginGroupHint(node.ID)) {
-    // auto alpha   = static_cast<int>(commentAlpha *
-    // ImGui::GetStyle().Alpha * 255);
-    auto bgAlpha = static_cast<int>(ImGui::GetStyle().Alpha * 255);
-
-    // ImGui::PushStyleVar(ImGuiStyleVar_Alpha, commentAlpha *
-    // ImGui::GetStyle().Alpha);
-
-    auto min = ne::GetGroupMin();
-    // auto max = ed::GetGroupMax();
-
-    ImGui::SetCursorScreenPos(
-        min - ImVec2(-8, ImGui::GetTextLineHeightWithSpacing() + 4));
-    ImGui::BeginGroup();
-    ImGui::TextUnformatted(node.comment_text_.data());
-    ImGui::EndGroup();
-
-    auto drawList = ne::GetHintBackgroundDrawList();
-
-    auto hintBounds = GetItemRect();
-    auto hintFrameBounds = GetExpandedRect(hintBounds, {.x = 8, .y = 4});
-
-    drawList->AddRectFilled(hintFrameBounds.GetTL(), hintFrameBounds.GetBR(),
-                            IM_COL32(255, 255, 255, 64 * bgAlpha / 255), 4.0f);
-
-    drawList->AddRect(hintFrameBounds.GetTL(), hintFrameBounds.GetBR(),
-                      IM_COL32(255, 255, 255, 128 * bgAlpha / 255), 4.0f);
-
-    // ImGui::PopStyleVar();
-  }
-  ne::EndGroupHint();
-}
 // vh: norm
 void DrawHintLabel(const char* label, const ImColor& color) {
   ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetTextLineHeight());
@@ -279,20 +223,16 @@ void DrawHintLabel(const char* label, const ImColor& color) {
 // vh: norm
 App::App(const char* name, int argc, char** argv)
     : Application{name, argc, argv},
-      next_object_id_{1},
+      id_generator_{std::make_shared<esc::IdGenerator>()},
       left_pane_width{400},
-      right_pane_width{800} {}
-// vh: ok
-auto App::GetNextObjectId() -> int { return next_object_id_++; }
+      right_pane_width{800} {
+  cpp::Ensures(id_generator_ != nullptr);
+}
 // vh: ok
 auto App::GetTextures() -> esc::TexturesHandle& { return *textures_; }
 // vh: ok
 auto App::GetNodesAndLinks() -> esc::NodesAndLinks& {
   return *nodes_and_links_;
-}
-// vh: norm
-auto App::GetNextLinkId() -> ne::LinkId {
-  return ne::LinkId{static_cast<uintptr_t>(GetNextObjectId())};
 }
 // vh: norm
 void App::OnStart() {
@@ -504,14 +444,8 @@ void App::DrawBlueprintNode(Node& node) {
 // vh: norm
 void App::DrawNodes() {
   for (auto& node : nodes_and_links_->GetNodes()) {
-    if (node.Type == NodeType::Blueprint) {
-      DrawBlueprintNode(node);
-    }
-  }
-
-  for (auto& node : nodes_and_links_->GetNodes()) {
-    if (node.Type == NodeType::Comment) {
-      DrawCommentNode(node);
+    if (node->Type == NodeType::Blueprint) {
+      DrawBlueprintNode(*node);
     }
   }
 }
@@ -563,7 +497,8 @@ void App::DrawLinkConnectionProcess() {
 
           if (ne::AcceptNewItem(ImColor{127, 255, 127}, 4.0F)) {
             nodes_and_links_->SpawnLink(
-                Link{GetNextLinkId(), start_pin_id, end_pin_id});
+                Link{id_generator_->GetNext<ne::LinkId>(), start_pin_id,
+                     end_pin_id});
           }
         }
       }

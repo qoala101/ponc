@@ -25,12 +25,7 @@ void DrawNode(Node& node, bool is_selected) {
         cpp::Scope{[&node]() { ImGui::PushID(node.ID.AsPointer()); },
                    []() { ImGui::PopID(); }};
 
-    auto label = node.Name;
-
-    if (node.Name == "Comment") {
-      label += ": " + std::string{node.comment_text_.begin(),
-                                  node.comment_text_.end()};
-    }
+    const auto label = node.Name;
 
     if (ImGui::Selectable(label.c_str(), &is_selected)) {
       if (io.KeyCtrl) {
@@ -95,10 +90,10 @@ void LeftPane::Draw(float pane_width) {
 
       for (auto& node : app_->GetNodesAndLinks().GetNodes()) {
         const auto is_node_selected =
-            std::ranges::find(selected_node_ids, node.ID) !=
+            std::ranges::find(selected_node_ids, node->ID) !=
             selected_node_ids.end();
 
-        DrawNode(node, is_node_selected);
+        DrawNode(*node, is_node_selected);
       }
     }
   }

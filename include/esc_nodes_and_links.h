@@ -19,15 +19,14 @@ class NodesAndLinks {
 
   auto SpawnInputNode() -> Node *;
   auto SpawnClientNode() -> Node *;
-  auto SpawnCommentNode() -> Node *;
-
-  auto SpawnCoupler1To2Node() -> Node *;
-  auto SpawnSplitter1ToNNode(int n) -> Node *;
+  auto SpawnCouplerNode() -> Node *;
+  auto SpawnSplitterNode(int n) -> Node *;
 
   auto SpawnNodeByTypeName [[nodiscard]] (const std::string &type_name)
   -> Node *;
 
-  auto GetNodes [[nodiscard]] () -> std::vector<Node> &;
+  auto GetNodes [[nodiscard]] ()
+  -> std::vector<std::shared_ptr<Node>> &;  // return weaks
   auto GetLinks [[nodiscard]] () const -> const std::vector<Link> &;
 
   auto FindNode(ne::NodeId id) -> Node *;
@@ -49,10 +48,11 @@ class NodesAndLinks {
   void OnFrame();
   void UpdateNodePointerOnPins();
   void UpdatePinValues();
+  void ClearAllValuesExceptInput();
 
  private:
   std::shared_ptr<App> app_{};
-  std::vector<Node> nodes_{};
+  std::vector<std::shared_ptr<Node>> nodes_{};
   std::vector<Link> links_{};
 };
 }  // namespace esc

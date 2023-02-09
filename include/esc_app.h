@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "esc_id_generator.h"
 #include "esc_left_pane.h"
 #include "esc_nodes_and_links.h"
 #include "esc_textures_handle.h"
@@ -35,8 +36,6 @@ class App : public Application, public std::enable_shared_from_this<App> {
 
   virtual ~App() = default;
 
-  auto GetNextObjectId [[nodiscard]] () -> int;
-  auto GetNextLinkId [[nodiscard]] () -> ne::LinkId;
   auto GetTextures [[nodiscard]] () -> esc::TexturesHandle&;
   auto GetNodesAndLinks [[nodiscard]] () -> esc::NodesAndLinks&;
 
@@ -46,6 +45,8 @@ class App : public Application, public std::enable_shared_from_this<App> {
 
   void OnStart() override;
   void OnStop() override;
+
+  auto GetIdGenerator() -> esc::IdGenerator& { return *id_generator_; }
 
  private:
   void OnFrame(float deltaTime) override;
@@ -63,12 +64,12 @@ class App : public Application, public std::enable_shared_from_this<App> {
 
   auto CalculateAlphaForPin(const Pin& pin);
 
+  std::shared_ptr<esc::IdGenerator> id_generator_{};
+
   std::optional<esc::EditorContextHandle> editor_context_{};
   std::optional<esc::TexturesHandle> textures_{};
   std::optional<esc::LeftPane> left_pane_;
   std::optional<esc::NodesAndLinks> nodes_and_links_;
-
-  int next_object_id_{};
 
   struct PopupState {
     ne::NodeId context_node_id{};

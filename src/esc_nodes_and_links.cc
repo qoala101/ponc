@@ -25,87 +25,32 @@ NodesAndLinks::NodesAndLinks(std::shared_ptr<App> app)
 }
 
 auto NodesAndLinks::SpawnInputNode() -> Node* {
-  auto& node =
-      nodes_.emplace_back(app_->GetNextObjectId(), "Input", ImColor{255, 0, 0});
-
-  auto& output = node.Outputs.emplace_back(
-      app_->GetNextObjectId(), "", PinType::Flow, PinKind::Output, &node);
-  output.editable = true;
-
-  return &node;
+  return nodes_
+      .emplace_back(std::make_shared<InputNode>(app_->GetIdGenerator()))
+      .get();
 }
 
 auto NodesAndLinks::SpawnClientNode() -> Node* {
-  auto& node = nodes_.emplace_back(app_->GetNextObjectId(), "Client",
-                                   ImColor{0, 255, 0});
-
-  node.Inputs.emplace_back(app_->GetNextObjectId(), "In", PinType::Flow,
-                           PinKind::Input, &node);
-
-  auto* pin = &node.Inputs.emplace_back(app_->GetNextObjectId(), "min",
-                                        PinType::Float, PinKind::Input, &node);
-  pin->editable = true;
-  pin = &node.Inputs.emplace_back(app_->GetNextObjectId(), "max",
-                                  PinType::Float, PinKind::Input, &node);
-  pin->editable = true;
-
-  return &node;
+  return nodes_
+      .emplace_back(std::make_shared<ClientNode>(app_->GetIdGenerator()))
+      .get();
 }
 
-auto NodesAndLinks::SpawnCommentNode() -> Node* {
-  auto& node = nodes_.emplace_back(app_->GetNextObjectId(), "Comment");
-
-  node.Type = NodeType::Comment;
-  node.Size = ImVec2{300, 200};
-
-  return &node;
+auto NodesAndLinks::SpawnCouplerNode() -> Node* {
+  return nodes_
+      .emplace_back(std::make_shared<CouplerNode>(app_->GetIdGenerator()))
+      .get();
 }
 
-auto NodesAndLinks::SpawnCoupler1To2Node() -> Node* {
-  auto& node = nodes_.emplace_back(app_->GetNextObjectId(), "Coupler 1x2",
-                                   ImColor{255, 0, 255});
-
-  node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow,
-                           PinKind::Input, &node);
-  auto* input = &node.Inputs.emplace_back(
-      app_->GetNextObjectId(), "", PinType::Float, PinKind::Input, &node);
-  // input->editable = true;
-  input = &node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Float,
-                                    PinKind::Input, &node);
-  // input->editable = true;
-
-  node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Empty,
-                            PinKind::Output, &node);
-  node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow,
-                            PinKind::Output, &node);
-  node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow,
-                            PinKind::Output, &node);
-
-  return &node;
+auto NodesAndLinks::SpawnSplitterNode(int n) -> Node* {
+  return nodes_
+      .emplace_back(std::make_shared<SplitterNode>(app_->GetIdGenerator(), n))
+      .get();
 }
 
-auto NodesAndLinks::SpawnSplitter1ToNNode(int n) -> Node* {
-  const auto n_string = std::to_string(n);
-  const auto node_name = "Splitter 1x" + n_string;
-
-  auto& node = nodes_.emplace_back(app_->GetNextObjectId(), node_name.c_str(),
-                                   ImColor{0, 0, 127 + 128 / n});
-
-  node.Inputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow,
-                           PinKind::Input, &node);
-
-  auto& input = node.Inputs.emplace_back(app_->GetNextObjectId(), "",
-                                         PinType::Float, PinKind::Input, &node);
-
-  for (auto i = 0; i < n; ++i) {
-    node.Outputs.emplace_back(app_->GetNextObjectId(), "", PinType::Flow,
-                              PinKind::Output, &node);
-  }
-
-  return &node;
+auto NodesAndLinks::GetNodes() -> std::vector<std::shared_ptr<Node>>& {
+  return nodes_;
 }
-
-auto NodesAndLinks::GetNodes() -> std::vector<Node>& { return nodes_; }
 
 auto NodesAndLinks::GetLinks() const -> const std::vector<Link>& {
   return links_;
@@ -113,7 +58,7 @@ auto NodesAndLinks::GetLinks() const -> const std::vector<Link>& {
 
 auto NodesAndLinks::FindNode(ne::NodeId id) -> Node* {
   for (auto& node : nodes_)
-    if (node.ID == id) return &node;
+    if (node->ID == id) return node.get();
 
   return nullptr;
 }
@@ -122,10 +67,10 @@ auto NodesAndLinks::FindPin(ne::PinId id) -> Pin* {
   if (!id) return nullptr;
 
   for (auto& node : nodes_) {
-    for (auto& pin : node.Inputs)
+    for (auto& pin : node->Inputs)
       if (pin.ID == id) return &pin;
 
-    for (auto& pin : node.Outputs)
+    for (auto& pin : node->Outputs)
       if (pin.ID == id) return &pin;
   }
 
@@ -157,8 +102,8 @@ void NodesAndLinks::EraseLinkWithId(ne::LinkId linkId) {
 }
 
 void NodesAndLinks::EraseNodeWithId(ne::NodeId id) {
-  auto node =
-      std::ranges::find_if(nodes_, [id](auto& node) { return node.ID == id; });
+  const auto node = std::ranges::find_if(
+      nodes_, [id](const auto& node) { return node->ID == id; });
 
   if (node != nodes_.end()) {
     nodes_.erase(node);
@@ -200,12 +145,8 @@ auto NodesAndLinks::SpawnNodeByTypeName(const std::string& type_name) -> Node* {
     return SpawnClientNode();
   }
 
-  if (type_name == "Comment") {
-    return SpawnCommentNode();
-  }
-
   if (type_name == "Coupler 1x2") {
-    return SpawnCoupler1To2Node();
+    return SpawnCouplerNode();
   }
 
   if (type_name.starts_with("Splitter 1x")) {
@@ -213,15 +154,14 @@ auto NodesAndLinks::SpawnNodeByTypeName(const std::string& type_name) -> Node* {
         type_name.begin() + static_cast<int>(std::string{"Splitter 1x"}.size()),
         type_name.end()};
     const auto index = std::stoi(index_substring);
-    return SpawnSplitter1ToNNode(index);
+    return SpawnSplitterNode(index);
   }
 
   cpp::Expects(false);
 }
 
 auto NodesAndLinks::GetNodeTypeNames() -> std::vector<std::string> {
-  auto names =
-      std::vector<std::string>{"Input", "Client", "Comment", "Coupler 1x2"};
+  auto names = std::vector<std::string>{"Input", "Client", "Coupler 1x2"};
 
   for (auto i : {2, 4, 8, 16}) {
     names.emplace_back("Splitter 1x" + std::to_string(i));
@@ -243,7 +183,7 @@ void NodesAndLinks::SpawnLinkFromPinToNode(const Pin* pin, const Node* node) {
 
   const auto is_link_starts_on_existing_node = pin->Kind == PinKind::Output;
   const auto link = Link{
-      .ID = app_->GetNextLinkId(),
+      .ID = app_->GetIdGenerator().GetNext<ne::LinkId>(),
       .StartPinID =
           is_link_starts_on_existing_node ? pin->ID : matching_node_pin->ID,
       .EndPinID =
@@ -264,19 +204,17 @@ void NodesAndLinks::SafeToFile(const std::string& file_path) {
     for (const auto& node : nodes_) {
       auto& node_json = nodes_json[node_index++];
 
-      node_json["id"] = static_cast<crude_json::number>(node.ID.Get());
-      node_json["name"] = node.Name;
+      node_json["id"] = static_cast<crude_json::number>(node->ID.Get());
+      node_json["name"] = node->Name;
       node_json["coupler_percentage_index"] =
-          static_cast<crude_json::number>(node.coupler_percentage_index_);
-      node_json["comment_text"] =
-          std::string{node.comment_text_.begin(), node.comment_text_.end()};
+          static_cast<crude_json::number>(node->coupler_percentage_index_);
 
-      const auto pos = ne::GetNodePosition(node.ID);
+      const auto pos = ne::GetNodePosition(node->ID);
 
       node_json["pos_x"] = pos.x;
       node_json["pos_y"] = pos.y;
 
-      const auto size = ne::GetNodeSize(node.ID);
+      const auto size = ne::GetNodeSize(node->ID);
 
       node_json["size_x"] = size.x;
       node_json["size_y"] = size.y;
@@ -285,7 +223,7 @@ void NodesAndLinks::SafeToFile(const std::string& file_path) {
         auto& input_pins_json = node_json["input_pins"];
         auto input_pin_index = 0;
 
-        for (const auto& input_pin : node.Inputs) {
+        for (const auto& input_pin : node->Inputs) {
           auto& input_pin_json = input_pins_json[input_pin_index++];
           input_pin_json["id"] =
               static_cast<crude_json::number>(input_pin.ID.Get());
@@ -297,7 +235,7 @@ void NodesAndLinks::SafeToFile(const std::string& file_path) {
         auto& output_pins_json = node_json["output_pins"];
         auto output_pin_index = 0;
 
-        for (const auto& output_pin : node.Outputs) {
+        for (const auto& output_pin : node->Outputs) {
           auto& output_pin_json = output_pins_json[output_pin_index++];
           output_pin_json["id"] =
               static_cast<crude_json::number>(output_pin.ID.Get());
@@ -335,7 +273,7 @@ void NodesAndLinks::DeleteAll() {
   links_.clear();
 
   for (const auto& node : nodes_) {
-    ne::DeleteNode(node.ID);
+    ne::DeleteNode(node->ID);
   }
 
   nodes_.clear();
@@ -355,9 +293,6 @@ void NodesAndLinks::LoadFromFile(const std::string& file_path) {
         SpawnNodeByTypeName(node_json["name"].get<crude_json::string>());
     node->coupler_percentage_index_ = static_cast<int>(
         node_json["coupler_percentage_index"].get<crude_json::number>());
-    const auto comment_text =
-        node_json["comment_text"].get<crude_json::string>();
-    strcpy(node->comment_text_.data(), comment_text.c_str());
 
     {
       const auto& input_pins = node_json["input_pins"];
@@ -387,13 +322,6 @@ void NodesAndLinks::LoadFromFile(const std::string& file_path) {
         node->ID,
         {static_cast<float>(node_json["pos_x"].get<crude_json::number>()),
          static_cast<float>(node_json["pos_y"].get<crude_json::number>())});
-
-    if (node->Name == "Comment") {
-      ne::SetGroupSize(
-          node->ID,
-          {static_cast<float>(node_json["size_x"].get<crude_json::number>()),
-           static_cast<float>(node_json["size_y"].get<crude_json::number>())});
-    }
   }
 
   const auto links_size = json["links_size"].get<crude_json::number>();
@@ -417,21 +345,21 @@ void NodesAndLinks::OnFrame() {
 
 void NodesAndLinks::UpdateNodePointerOnPins() {
   for (auto& node : nodes_) {
-    for (auto& input : node.Inputs) {
-      input.node = &node;
+    for (auto& input : node->Inputs) {
+      input.node = node.get();
     }
 
-    for (auto& output : node.Outputs) {
-      output.node = &node;
+    for (auto& output : node->Outputs) {
+      output.node = node.get();
     }
   }
 }
 
-void ClearAllValuesExceptInput(std::vector<Node>& nodes_) {
+void NodesAndLinks::ClearAllValuesExceptInput() {
   const auto& coupler_percentage_values = GetCouplerPercentageValues();
 
   for (auto& node : nodes_) {
-    for (const auto& pins : {&node.Inputs, &node.Outputs}) {
+    for (const auto& pins : {&node->Inputs, &node->Outputs}) {
       for (auto& pin : *pins) {
         if (!pin.editable) {
           pin.value = 0;
@@ -439,35 +367,35 @@ void ClearAllValuesExceptInput(std::vector<Node>& nodes_) {
       }
     }
 
-    if (node.Name.starts_with("Splitter 1x")) {
+    if (node->Name.starts_with("Splitter 1x")) {
       const auto index_substring =
-          std::string{node.Name.begin() +
+          std::string{node->Name.begin() +
                           static_cast<int>(std::string{"Splitter 1x"}.size()),
-                      node.Name.end()};
+                      node->Name.end()};
       const auto index = std::stoi(index_substring);
 
       static const auto kSplitterValuesMap =
           std::map<int, float>{{2, 4.3}, {4, 7.4}, {8, 10.7}, {16, 13.9}};
 
-      node.Inputs[1].value = kSplitterValuesMap.at(index);
-    } else if (node.Name == "Coupler 1x2") {
+      node->Inputs[1].value = kSplitterValuesMap.at(index);
+    } else if (node->Name == "Coupler 1x2") {
       const auto& values =
-          coupler_percentage_values[node.coupler_percentage_index_];
+          coupler_percentage_values[node->coupler_percentage_index_];
 
-      node.Inputs[1].value = values.first;
-      node.Inputs[2].value = values.second;
+      node->Inputs[1].value = values.first;
+      node->Inputs[2].value = values.second;
     }
   }
 }
 
 void NodesAndLinks::UpdatePinValues() {
-  ClearAllValuesExceptInput(nodes_);
+  ClearAllValuesExceptInput();
 
   auto input_nodes = std::vector<Node*>{};
 
   for (auto& node : nodes_) {
-    if (node.Name == "Input") {
-      input_nodes.emplace_back(&node);
+    if (node->Name == "Input") {
+      input_nodes.emplace_back(node.get());
     }
   }
 
