@@ -58,7 +58,7 @@ auto NodesAndLinks::GetLinks() const -> const std::vector<Link>& {
 
 auto NodesAndLinks::FindNode(ne::NodeId id) -> Node* {
   for (auto& node : nodes_)
-    if (node->ID == id) return node.get();
+    if (node->GetId() == id) return node.get();
 
   return nullptr;
 }
@@ -67,10 +67,10 @@ auto NodesAndLinks::FindPin(ne::PinId id) -> Pin* {
   if (!id) return nullptr;
 
   for (auto& node : nodes_) {
-    for (auto& pin : node->Inputs)
+    for (auto& pin : node->GetInputPins())
       if (pin.ID == id) return &pin;
 
-    for (auto& pin : node->Outputs)
+    for (auto& pin : node->GetOutputPins())
       if (pin.ID == id) return &pin;
   }
 
@@ -103,7 +103,7 @@ void NodesAndLinks::EraseLinkWithId(ne::LinkId linkId) {
 
 void NodesAndLinks::EraseNodeWithId(ne::NodeId id) {
   const auto node = std::ranges::find_if(
-      nodes_, [id](const auto& node) { return node->ID == id; });
+      nodes_, [id](const auto& node) { return node->GetId() == id; });
 
   if (node != nodes_.end()) {
     nodes_.erase(node);
@@ -171,13 +171,13 @@ auto NodesAndLinks::GetNodeTypeNames() -> std::vector<std::string> {
 }
 
 void NodesAndLinks::SpawnLinkFromPinToNode(const Pin* pin, const Node* node) {
-  const auto& node_pins =
-      (pin->Kind == PinKind::Input) ? node->Outputs : node->Inputs;
+  const auto* node_pins = (pin->Kind == PinKind::Input) ? &node->GetOutputPins()
+                                                        : &node->GetInputPins();
   const auto matching_node_pin = std::ranges::find_if(
-      node_pins,
+      *node_pins,
       [pin](const auto& node_pin) { return CanCreateLink(pin, &node_pin); });
 
-  if (matching_node_pin == node_pins.end()) {
+  if (matching_node_pin == node_pins->end()) {
     return;
   }
 
@@ -204,17 +204,17 @@ void NodesAndLinks::SafeToFile(const std::string& file_path) {
     for (const auto& node : nodes_) {
       auto& node_json = nodes_json[node_index++];
 
-      node_json["id"] = static_cast<crude_json::number>(node->ID.Get());
-      node_json["name"] = node->Name;
+      node_json["id"] = static_cast<crude_json::number>(node->GetId().Get());
+      node_json["name"] = node->ui_data_.name;
       node_json["coupler_percentage_index"] =
           static_cast<crude_json::number>(node->coupler_percentage_index_);
 
-      const auto pos = ne::GetNodePosition(node->ID);
+      const auto pos = ne::GetNodePosition(node->GetId());
 
       node_json["pos_x"] = pos.x;
       node_json["pos_y"] = pos.y;
 
-      const auto size = ne::GetNodeSize(node->ID);
+      const auto size = ne::GetNodeSize(node->GetId());
 
       node_json["size_x"] = size.x;
       node_json["size_y"] = size.y;
@@ -223,7 +223,7 @@ void NodesAndLinks::SafeToFile(const std::string& file_path) {
         auto& input_pins_json = node_json["input_pins"];
         auto input_pin_index = 0;
 
-        for (const auto& input_pin : node->Inputs) {
+        for (const auto& input_pin : node->GetInputPins()) {
           auto& input_pin_json = input_pins_json[input_pin_index++];
           input_pin_json["id"] =
               static_cast<crude_json::number>(input_pin.ID.Get());
@@ -235,7 +235,7 @@ void NodesAndLinks::SafeToFile(const std::string& file_path) {
         auto& output_pins_json = node_json["output_pins"];
         auto output_pin_index = 0;
 
-        for (const auto& output_pin : node->Outputs) {
+        for (const auto& output_pin : node->GetOutputPins()) {
           auto& output_pin_json = output_pins_json[output_pin_index++];
           output_pin_json["id"] =
               static_cast<crude_json::number>(output_pin.ID.Get());
@@ -273,7 +273,7 @@ void NodesAndLinks::DeleteAll() {
   links_.clear();
 
   for (const auto& node : nodes_) {
-    ne::DeleteNode(node->ID);
+    ne::DeleteNode(node->GetId());
   }
 
   nodes_.clear();
@@ -297,11 +297,11 @@ void NodesAndLinks::LoadFromFile(const std::string& file_path) {
     {
       const auto& input_pins = node_json["input_pins"];
 
-      for (auto i = 0; i < static_cast<int>(node->Inputs.size()); ++i) {
+      for (auto i = 0; i < static_cast<int>(node->GetInputPins().size()); ++i) {
         const auto& input_pin_json = input_pins[i];
-        node->Inputs[i].ID = static_cast<uint64_t>(
+        node->GetInputPins()[i].ID = static_cast<uint64_t>(
             input_pin_json["id"].get<crude_json::number>());
-        node->Inputs[i].value = static_cast<float>(
+        node->GetInputPins()[i].value = static_cast<float>(
             input_pin_json["value"].get<crude_json::number>());
       }
     }
@@ -309,17 +309,18 @@ void NodesAndLinks::LoadFromFile(const std::string& file_path) {
     {
       const auto& output_pins = node_json["output_pins"];
 
-      for (auto i = 0; i < static_cast<int>(node->Outputs.size()); ++i) {
+      for (auto i = 0; i < static_cast<int>(node->GetOutputPins().size());
+           ++i) {
         const auto& output_pin_json = output_pins[i];
-        node->Outputs[i].ID = static_cast<uint64_t>(
+        node->GetOutputPins()[i].ID = static_cast<uint64_t>(
             output_pin_json["id"].get<crude_json::number>());
-        node->Outputs[i].value = static_cast<float>(
+        node->GetOutputPins()[i].value = static_cast<float>(
             output_pin_json["value"].get<crude_json::number>());
       }
     }
 
     ne::SetNodePosition(
-        node->ID,
+        node->GetId(),
         {static_cast<float>(node_json["pos_x"].get<crude_json::number>()),
          static_cast<float>(node_json["pos_y"].get<crude_json::number>())});
   }
@@ -345,11 +346,11 @@ void NodesAndLinks::OnFrame() {
 
 void NodesAndLinks::UpdateNodePointerOnPins() {
   for (auto& node : nodes_) {
-    for (auto& input : node->Inputs) {
+    for (auto& input : node->GetInputPins()) {
       input.node = node.get();
     }
 
-    for (auto& output : node->Outputs) {
+    for (auto& output : node->GetOutputPins()) {
       output.node = node.get();
     }
   }
@@ -359,7 +360,7 @@ void NodesAndLinks::ClearAllValuesExceptInput() {
   const auto& coupler_percentage_values = GetCouplerPercentageValues();
 
   for (auto& node : nodes_) {
-    for (const auto& pins : {&node->Inputs, &node->Outputs}) {
+    for (const auto& pins : {&node->GetInputPins(), &node->GetOutputPins()}) {
       for (auto& pin : *pins) {
         if (!pin.editable) {
           pin.value = 0;
@@ -367,23 +368,23 @@ void NodesAndLinks::ClearAllValuesExceptInput() {
       }
     }
 
-    if (node->Name.starts_with("Splitter 1x")) {
+    if (node->ui_data_.name.starts_with("Splitter 1x")) {
       const auto index_substring =
-          std::string{node->Name.begin() +
+          std::string{node->ui_data_.name.begin() +
                           static_cast<int>(std::string{"Splitter 1x"}.size()),
-                      node->Name.end()};
+                      node->ui_data_.name.end()};
       const auto index = std::stoi(index_substring);
 
       static const auto kSplitterValuesMap =
           std::map<int, float>{{2, 4.3}, {4, 7.4}, {8, 10.7}, {16, 13.9}};
 
-      node->Inputs[1].value = kSplitterValuesMap.at(index);
-    } else if (node->Name == "Coupler 1x2") {
+      node->GetInputPins()[1].value = kSplitterValuesMap.at(index);
+    } else if (node->ui_data_.name == "Coupler 1x2") {
       const auto& values =
           coupler_percentage_values[node->coupler_percentage_index_];
 
-      node->Inputs[1].value = values.first;
-      node->Inputs[2].value = values.second;
+      node->GetInputPins()[1].value = values.first;
+      node->GetInputPins()[2].value = values.second;
     }
   }
 }
@@ -394,7 +395,7 @@ void NodesAndLinks::UpdatePinValues() {
   auto input_nodes = std::vector<Node*>{};
 
   for (auto& node : nodes_) {
-    if (node->Name == "Input") {
+    if (node->ui_data_.name == "Input") {
       input_nodes.emplace_back(node.get());
     }
   }
@@ -409,27 +410,29 @@ void NodesAndLinks::UpdatePinValues() {
       if (!visited_nodes.contains(input_node)) {
         visited_nodes.emplace(input_node);
 
-        // for (auto& input_pin : input_node->Inputs) {
+        // for (auto& input_pin : input_node->GetInputPins()) {
         //   if (input_pin.editable) {
-        //     for (auto& output_pin : input_node->Outputs) {
+        //     for (auto& output_pin : input_node->GetOutputPins()) {
         //       output_pin.value -= input_pin.value;
         //     }
         //   }
         // }
 
-        if (input_node->Name.starts_with("Splitter 1x")) {
-          const auto splitter_value = input_node->Inputs[1].value;
+        if (input_node->ui_data_.name.starts_with("Splitter 1x")) {
+          const auto splitter_value = input_node->GetInputPins()[1].value;
 
-          for (auto& output_pin : input_node->Outputs) {
+          for (auto& output_pin : input_node->GetOutputPins()) {
             output_pin.value -= splitter_value;
           }
-        } else if (input_node->Name == "Coupler 1x2") {
-          input_node->Outputs[1].value -= input_node->Inputs[1].value;
-          input_node->Outputs[2].value -= input_node->Inputs[2].value;
+        } else if (input_node->ui_data_.name == "Coupler 1x2") {
+          input_node->GetOutputPins()[1].value -=
+              input_node->GetInputPins()[1].value;
+          input_node->GetOutputPins()[2].value -=
+              input_node->GetInputPins()[2].value;
         }
       }
 
-      for (auto& input_node_output_pin : input_node->Outputs) {
+      for (auto& input_node_output_pin : input_node->GetOutputPins()) {
         for (auto& link : links_) {
           if (link.StartPinID == input_node_output_pin.ID) {
             auto* end_pin = FindPin(link.EndPinID);
@@ -440,7 +443,7 @@ void NodesAndLinks::UpdatePinValues() {
 
             end_pin->value += input_node_output_pin.value;
 
-            for (auto& output_pin : end_pin->node->Outputs) {
+            for (auto& output_pin : end_pin->node->GetOutputPins()) {
               output_pin.value += input_node_output_pin.value;
             }
 

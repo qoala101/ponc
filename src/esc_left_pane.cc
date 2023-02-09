@@ -22,20 +22,20 @@ void DrawNode(Node& node, bool is_selected) {
 
   {
     const auto id_scope =
-        cpp::Scope{[&node]() { ImGui::PushID(node.ID.AsPointer()); },
+        cpp::Scope{[&node]() { ImGui::PushID(node.GetId().AsPointer()); },
                    []() { ImGui::PopID(); }};
 
-    const auto label = node.Name;
+    const auto label = node.ui_data_.name;
 
     if (ImGui::Selectable(label.c_str(), &is_selected)) {
       if (io.KeyCtrl) {
         if (is_selected) {
-          ne::SelectNode(node.ID, true);
+          ne::SelectNode(node.GetId(), true);
         } else {
-          ne::DeselectNode(node.ID);
+          ne::DeselectNode(node.GetId());
         }
       } else {
-        ne::SelectNode(node.ID, false);
+        ne::SelectNode(node.GetId(), false);
       }
 
       ne::NavigateToSelection();
@@ -90,7 +90,7 @@ void LeftPane::Draw(float pane_width) {
 
       for (auto& node : app_->GetNodesAndLinks().GetNodes()) {
         const auto is_node_selected =
-            std::ranges::find(selected_node_ids, node->ID) !=
+            std::ranges::find(selected_node_ids, node->GetId()) !=
             selected_node_ids.end();
 
         DrawNode(*node, is_node_selected);

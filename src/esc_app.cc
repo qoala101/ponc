@@ -183,14 +183,14 @@ void DrawPinField(Pin& pin) {
   ImGui::Spring(0);
 }
 // vh: bad
-void DrawBlueprintNodeHeader(Node& node) {
+void DrawNodeHeader(Node& node) {
   ImGui::Spring(0);
-  ImGui::TextUnformatted(node.Name.c_str());
+  ImGui::TextUnformatted(node.ui_data_.name.c_str());
   ImGui::Spring(1);
   ImGui::Dummy(ImVec2{0, 28});
   ImGui::Spring(0);
 
-  if (node.Name == "Coupler 1x2") {
+  if (node.ui_data_.name == "Coupler 1x2") {
     ImGui::SetNextItemWidth(100);
     const auto& coupler_percentage_names = GetCouplerPercentageNames();
     ImGui::SliderInt(
@@ -321,10 +321,10 @@ void App::DrawContextMenuProcess() {
             nodes_and_links_->FindNode(popup_state_.context_node_id);
         cpp::Expects(node != nullptr);
 
-        ImGui::Text("ID: %p", node->ID.AsPointer());
-        ImGui::Text("Type: %s", node->Name.c_str());
-        ImGui::Text("Inputs: %d", static_cast<int>(node->Inputs.size()));
-        ImGui::Text("Outputs: %d", static_cast<int>(node->Outputs.size()));
+        ImGui::Text("ID: %p", node->GetId().AsPointer());
+        ImGui::Text("Type: %s", node->ui_data_.name.c_str());
+        ImGui::Text("Inputs: %d", static_cast<int>(node->GetInputPins().size()));
+        ImGui::Text("Outputs: %d", static_cast<int>(node->GetOutputPins().size()));
 
         ImGui::Separator();
 
@@ -347,7 +347,7 @@ void App::DrawContextMenuProcess() {
 
         cpp::Expects(pin->node != nullptr);
 
-        ImGui::Text("Node: %p", pin->node->ID.AsPointer());
+        ImGui::Text("Node: %p", pin->node->GetId().AsPointer());
       }
 
       if (ImGui::BeginPopup("Create New Node")) {
@@ -366,7 +366,7 @@ void App::DrawContextMenuProcess() {
               continue;
             }
 
-            ne::SetNodePosition(new_node->ID, open_popup_pos);
+            ne::SetNodePosition(new_node->GetId(), open_popup_pos);
 
             if (const auto node_created_by_link_from_existing_one =
                     drawing_state_.connect_new_node_to_existing_pin !=
@@ -395,20 +395,20 @@ auto App::CalculateAlphaForPin(const Pin& pin) {
   return alpha;
 }
 // vh: bad
-void App::DrawBlueprintNode(Node& node) {
-  auto node_builder = esc::NodeDrawer{node.ID};
+void App::DrawNode(Node& node) {
+  auto node_builder = esc::NodeDrawer{node.GetId()};
 
   const auto header_texture =
       textures_->GetTextureWithDims(textures_->GetTextureIds().node_header);
 
   {
     const auto header_scope =
-        node_builder.AddHeader(header_texture, node.Color);
+        node_builder.AddHeader(header_texture, node.ui_data_.color);
 
-    DrawBlueprintNodeHeader(node);
+    DrawNodeHeader(node);
   }
 
-  for (auto& input : node.Inputs) {
+  for (auto& input : node.GetInputPins()) {
     const auto input_scope = node_builder.AddPin(input.ID, ne::PinKind::Input);
 
     const auto alpha = CalculateAlphaForPin(input);
@@ -423,7 +423,7 @@ void App::DrawBlueprintNode(Node& node) {
     }
   }
 
-  for (auto& output : node.Outputs) {
+  for (auto& output : node.GetOutputPins()) {
     const auto alpha = CalculateAlphaForPin(output);
 
     {
@@ -444,9 +444,7 @@ void App::DrawBlueprintNode(Node& node) {
 // vh: norm
 void App::DrawNodes() {
   for (auto& node : nodes_and_links_->GetNodes()) {
-    if (node->Type == NodeType::Blueprint) {
-      DrawBlueprintNode(*node);
-    }
+    DrawNode(*node);
   }
 }
 // vh: norm

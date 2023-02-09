@@ -8,10 +8,10 @@
 
 namespace ne = ax::NodeEditor;
 
-struct Node;
+class Node;
 
 struct Pin {
-  Pin(ne::PinId id, std::string name, PinType type, PinKind kind, Node* node);
+  Pin(ne::PinId id, std::string name, PinType type, PinKind kind, Node* node, bool editable);
 
   ne::PinId ID;
   Node* node;

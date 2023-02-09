@@ -19,7 +19,7 @@ TexturesHandle::TexturesHandle(std::shared_ptr<Application> app)
     : app_{(cpp::Expects(app != nullptr), std::move(app))},
       texture_ids_{[&app = app_]() {
         return TextureIds{.node_header =
-                              app->LoadTexture("data/BlueprintBackground.png")};
+                              app->LoadTexture("data/node_header_texture.png")};
       }()} {
   cpp::Ensures(app_ != nullptr);
   cpp::Ensures(AreTexturesLoaded());

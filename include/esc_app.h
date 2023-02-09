@@ -55,7 +55,7 @@ class App : public Application, public std::enable_shared_from_this<App> {
 
   void DrawContextMenuProcess();
   void DrawFrame();
-  void DrawBlueprintNode(Node& node);
+  void DrawNode(Node& node);
   void DrawNodeEditor();
   void DrawNodes();
   void DrawLinks();

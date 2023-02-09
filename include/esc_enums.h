@@ -7,8 +7,6 @@ enum class PinType { Flow, Float, Empty };
 
 enum class PinKind { Output, Input };
 
-enum class NodeType { Blueprint };
-
 enum class IconType : ImU32 { Flow };
 
 auto GetIconColor(PinType pin_type) -> ImColor;
