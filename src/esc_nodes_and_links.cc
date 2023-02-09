@@ -205,8 +205,11 @@ void NodesAndLinks::SafeToFile(const std::string& file_path) {
 
       node_json["id"] = static_cast<crude_json::number>(node->GetId().Get());
       node_json["name"] = node->ui_data_.name;
-      node_json["coupler_percentage_index"] =
-          static_cast<crude_json::number>(node->coupler_percentage_index_);
+
+      if (auto* coupler_node = dynamic_cast<CouplerNode*>(node.get())) {
+        node_json["coupler_percentage_index"] = static_cast<crude_json::number>(
+            coupler_node->GetCouplerPercentageIndex());
+      }
 
       const auto pos = ne::GetNodePosition(node->GetId());
 
@@ -290,8 +293,11 @@ void NodesAndLinks::LoadFromFile(const std::string& file_path) {
 
     auto* node =
         SpawnNodeByTypeName(node_json["name"].get<crude_json::string>());
-    node->coupler_percentage_index_ = static_cast<int>(
-        node_json["coupler_percentage_index"].get<crude_json::number>());
+
+    if (auto* coupler_node = dynamic_cast<CouplerNode*>(node)) {
+      coupler_node->SetCouplerPercentageIndex(static_cast<int>(
+          node_json["coupler_percentage_index"].get<crude_json::number>()));
+    }
 
     {
       const auto& input_pins = node_json["input_pins"];
@@ -378,9 +384,9 @@ void NodesAndLinks::ClearAllValuesExceptInput() {
           std::map<int, float>{{2, 4.3}, {4, 7.4}, {8, 10.7}, {16, 13.9}};
 
       node->GetInputPins()[1].value = kSplitterValuesMap.at(index);
-    } else if (node->ui_data_.name == "Coupler 1x2") {
+    } else if (auto* coupler_node = dynamic_cast<CouplerNode*>(node.get())) {
       const auto& values =
-          coupler_percentage_values[node->coupler_percentage_index_];
+          coupler_percentage_values[coupler_node->GetCouplerPercentageIndex()];
 
       node->GetInputPins()[1].value = values.first;
       node->GetInputPins()[2].value = values.second;

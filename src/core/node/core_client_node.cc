@@ -4,7 +4,7 @@
 
 ClientNode::ClientNode(esc::IdGenerator& id_generator)
     : Node{id_generator.GetNext<ne::NodeId>(),
-           {{id_generator.GetNext<ne::PinId>(), "In", PinType::Flow,
+           {{id_generator.GetNext<ne::PinId>(), "", PinType::Flow,
              PinKind::Input, false},
             {id_generator.GetNext<ne::PinId>(), "min", PinType::Float,
              PinKind::Input, true},

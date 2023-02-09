@@ -4,7 +4,8 @@
 #include "core_node.h"
 #include "esc_id_generator.h"
 
-struct SplitterNode : public Node {
+class SplitterNode : public Node {
+  public:
   explicit SplitterNode(esc::IdGenerator& id_generator, int n);
 };
 

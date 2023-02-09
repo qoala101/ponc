@@ -4,7 +4,8 @@
 #include "core_node.h"
 #include "esc_id_generator.h"
 
-struct InputNode : public Node {
+class InputNode : public Node {
+  public:
   explicit InputNode(esc::IdGenerator& id_generator);
 };
 

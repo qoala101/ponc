@@ -8,6 +8,7 @@
 #include <ios>
 #include <memory>
 
+#include "core_coupler_node.h"
 #include "esc_cpp.h"
 #include "esc_enums.h"
 #include "esc_id_generator.h"
@@ -166,7 +167,8 @@ void DrawPinField(Pin& pin) {
   if (pin.Type != PinType::Empty) {
     if (pin.ui_data_.editable) {
       ImGui::SetNextItemWidth(100);
-      ImGui::InputFloat(pin.ui_data_.Name.c_str(), &pin.value, 0.0F, 0.0F, "%.3f");
+      ImGui::InputFloat(pin.ui_data_.Name.c_str(), &pin.value, 0.0F, 0.0F,
+                        "%.3f");
     } else {
       ImGui::Text("%.3f %s", pin.value, pin.ui_data_.Name.c_str());
     }
@@ -182,13 +184,14 @@ void DrawNodeHeader(Node& node) {
   ImGui::Dummy(ImVec2{0, 28});
   ImGui::Spring(0);
 
-  if (node.ui_data_.name == "Coupler 1x2") {
+  if (auto* coupler_node = dynamic_cast<CouplerNode*>(&node)) {
     ImGui::SetNextItemWidth(100);
     const auto& coupler_percentage_names = GetCouplerPercentageNames();
     ImGui::SliderInt(
-        "", &node.coupler_percentage_index_, 0,
+        "", &coupler_node->GetCouplerPercentageIndex(), 0,
         static_cast<int>(coupler_percentage_names.size()) - 1,
-        coupler_percentage_names[node.coupler_percentage_index_].c_str());
+        coupler_percentage_names[coupler_node->GetCouplerPercentageIndex()]
+            .c_str());
     ImGui::Spring(0);
   }
 }
@@ -444,8 +447,8 @@ void App::DrawNodes() {
 // vh: norm
 void App::DrawLinks() {
   for (const auto& link : nodes_and_links_->GetLinks()) {
-    ne::Link(link.id, link.start_pin_id, link.end_pin_id, ImColor{255, 255, 255},
-             2.0F);
+    ne::Link(link.id, link.start_pin_id, link.end_pin_id,
+             ImColor{255, 255, 255}, 2.0F);
   }
 }
 // vh: norm

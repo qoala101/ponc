@@ -4,7 +4,8 @@
 #include "core_node.h"
 #include "esc_id_generator.h"
 
-struct ClientNode : public Node {
+class ClientNode : public Node {
+ public:
   explicit ClientNode(esc::IdGenerator& id_generator);
 };
 

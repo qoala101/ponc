@@ -7,12 +7,19 @@
 #include <vector>
 
 #include "core_pin.h"
-#include "esc_enums.h"
 
 namespace ne = ax::NodeEditor;
 
 class Node {
  public:
+  Node(const Node &) = delete;
+  Node(Node &&) noexcept = delete;
+
+  auto operator=(const Node &) noexcept -> Node & = delete;
+  auto operator=(Node &&) noexcept -> Node & = delete;
+
+  virtual ~Node() = default;
+
   auto GetId [[nodiscard]] () const -> ne::NodeId;
 
   auto GetInputPins [[nodiscard]] () const -> const std::vector<Pin> &;
@@ -25,8 +32,6 @@ class Node {
     std::string name{};
     ImColor color{255, 255, 255};
   } ui_data_{};
-
-  int coupler_percentage_index_{};
 
  protected:
   Node(ne::NodeId id, std::vector<Pin> input_pins, std::vector<Pin> output_pins,

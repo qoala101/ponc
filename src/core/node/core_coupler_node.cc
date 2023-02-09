@@ -16,3 +16,11 @@ CouplerNode::CouplerNode(esc::IdGenerator& id_generator)
              PinKind::Output, false}},
            "Coupler 1x2",
            {255, 0, 255}} {}
+
+auto CouplerNode::GetCouplerPercentageIndex() -> int& {
+  return coupler_percentage_index_;
+}
+
+void CouplerNode::SetCouplerPercentageIndex(int index) {
+  coupler_percentage_index_ = index;
+}
