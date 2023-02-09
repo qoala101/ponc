@@ -4,9 +4,14 @@
 #include "core_node.h"
 #include "esc_id_generator.h"
 
-class CouplerNode : public Node {
+// NOLINTNEXTLINE(*-multiple-inheritance)
+class CouplerNode : public Node,
+                    public std::enable_shared_from_this<CouplerNode> {
  public:
   explicit CouplerNode(esc::IdGenerator& id_generator);
+
+  auto GetDrawer [[nodiscard]] ()
+  -> std::unique_ptr<vh::esc::ui::INodeDrawer> override;
 
   auto GetCouplerPercentageIndex [[nodiscard]] () -> int&;
   void SetCouplerPercentageIndex(int index);

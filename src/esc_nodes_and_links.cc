@@ -7,6 +7,7 @@
 
 #include <cstring>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -209,7 +210,6 @@ void NodesAndLinks::SafeToFile(const std::string& file_path) {
       auto& node_json = nodes_json[node_index++];
 
       node_json["id"] = static_cast<crude_json::number>(node->GetId().Get());
-      node_json["name"] = node->ui_data_.name;
 
       if (auto* coupler_node = dynamic_cast<CouplerNode*>(node.get())) {
         node_json["coupler_percentage_index"] = static_cast<crude_json::number>(
@@ -394,12 +394,9 @@ void NodesAndLinks::ClearAllValuesExceptInput() {
       }
     }
 
-    if (node->ui_data_.name.starts_with("Splitter 1x")) {
-      const auto index_substring =
-          std::string{node->ui_data_.name.begin() +
-                          static_cast<int>(std::string{"Splitter 1x"}.size()),
-                      node->ui_data_.name.end()};
-      const auto index = std::stoi(index_substring);
+    if (auto* splitter_node = dynamic_cast<SplitterNode*>(node.get())) {
+      const auto index =
+          static_cast<int>(splitter_node->GetOutputPins().size());
 
       static const auto kSplitterValuesMap =
           std::map<int, float>{{2, 4.3}, {4, 7.4}, {8, 10.7}, {16, 13.9}};
@@ -424,7 +421,7 @@ void NodesAndLinks::UpdatePinValues() {
   auto input_nodes = std::vector<Node*>{};
 
   for (auto& node : nodes_) {
-    if (node->ui_data_.name == "Input") {
+    if (dynamic_cast<InputNode*>(node.get()) != nullptr) {
       input_nodes.emplace_back(node.get());
     }
   }
@@ -439,7 +436,7 @@ void NodesAndLinks::UpdatePinValues() {
       if (!visited_nodes.contains(input_node)) {
         visited_nodes.emplace(input_node);
 
-        if (input_node->ui_data_.name.starts_with("Splitter 1x")) {
+        if (dynamic_cast<SplitterNode*>(input_node) != nullptr) {
           const auto splitter_value =
               dynamic_cast<FloatPin*>(input_node->GetInputPins()[1].get())
                   ->GetValue();
@@ -449,7 +446,7 @@ void NodesAndLinks::UpdatePinValues() {
               float_pin->SetValue(float_pin->GetValue() - splitter_value);
             }
           }
-        } else if (input_node->ui_data_.name == "Coupler 1x2") {
+        } else if (dynamic_cast<CouplerNode*>(input_node) != nullptr) {
           dynamic_cast<FloatPin*>(input_node->GetOutputPins()[1].get())
               ->SetValue(
                   dynamic_cast<FloatPin*>(input_node->GetOutputPins()[1].get())

@@ -2,6 +2,7 @@
 
 #include "core_float_pin.h"
 #include "core_flow_pin.h"
+#include "ui_splitter_node_drawer.h"
 
 SplitterNode::SplitterNode(esc::IdGenerator& id_generator, int n)
     : Node{id_generator.GetNext<ne::NodeId>(),
@@ -18,6 +19,8 @@ SplitterNode::SplitterNode(esc::IdGenerator& id_generator, int n)
              }
 
              return pins;
-           }(),
-           "Splitter 1x" + std::to_string(n),
-           {0, 0, 127 + 128 / n}} {}
+           }()} {}
+
+auto SplitterNode::GetDrawer() -> std::unique_ptr<vh::esc::ui::INodeDrawer> {
+  return std::make_unique<vh::esc::ui::SplitterNodeDrawer>(shared_from_this());
+}

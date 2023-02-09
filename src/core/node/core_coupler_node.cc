@@ -2,6 +2,7 @@
 #include "core_empty_pin.h"
 #include "core_float_pin.h"
 #include "core_flow_pin.h"
+#include "ui_coupler_node_drawer.h"
 
 CouplerNode::CouplerNode(esc::IdGenerator& id_generator)
     : Node{id_generator.GetNext<ne::NodeId>(),
@@ -16,9 +17,11 @@ CouplerNode::CouplerNode(esc::IdGenerator& id_generator)
             std::make_shared<FlowPin>(id_generator.GetNext<ne::PinId>(),
                                       PinKind::Output, false),
             std::make_shared<FlowPin>(id_generator.GetNext<ne::PinId>(),
-                                      PinKind::Output, false)},
-           "Coupler 1x2",
-           {255, 0, 255}} {}
+                                      PinKind::Output, false)}} {}
+
+auto CouplerNode::GetDrawer() -> std::unique_ptr<vh::esc::ui::INodeDrawer> {
+  return std::make_unique<vh::esc::ui::CouplerNodeDrawer>(shared_from_this());
+}
 
 auto CouplerNode::GetCouplerPercentageIndex() -> int& {
   return coupler_percentage_index_;

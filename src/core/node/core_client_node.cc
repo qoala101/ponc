@@ -5,6 +5,7 @@
 #include "core_float_pin.h"
 #include "core_flow_pin.h"
 #include "esc_id_generator.h"
+#include "ui_client_node_drawer.h"
 
 ClientNode::ClientNode(esc::IdGenerator& id_generator)
     : Node{id_generator.GetNext<ne::NodeId>(),
@@ -14,6 +15,8 @@ ClientNode::ClientNode(esc::IdGenerator& id_generator)
                                        PinKind::Input, true),
             std::make_shared<FloatPin>(id_generator.GetNext<ne::PinId>(), "max",
                                        PinKind::Input, true)},
-           {},
-           "Client",
-           {0, 255, 0}} {}
+           {}} {}
+
+auto ClientNode::GetDrawer() -> std::unique_ptr<vh::esc::ui::INodeDrawer> {
+  return std::make_unique<vh::esc::ui::ClientNodeDrawer>(shared_from_this());
+}

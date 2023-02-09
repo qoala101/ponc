@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "core_pin.h"
+#include "ui_i_node_drawer.h"
 
 namespace ne = ax::NodeEditor;
 
@@ -21,23 +22,23 @@ class Node {
 
   virtual ~Node() = default;
 
+  virtual auto GetDrawer [[nodiscard]] ()
+  -> std::unique_ptr<vh::esc::ui::INodeDrawer> = 0;
+
   auto GetId [[nodiscard]] () const -> ne::NodeId;
 
-  auto GetInputPins [[nodiscard]] () const -> const std::vector<std::shared_ptr<Pin>>&;
+  auto GetInputPins [[nodiscard]] () const
+      -> const std::vector<std::shared_ptr<Pin>> &;
   auto GetInputPins [[nodiscard]] () -> std::vector<std::shared_ptr<Pin>> &;
 
-  auto GetOutputPins [[nodiscard]] () const -> const std::vector<std::shared_ptr<Pin>> &;
+  auto GetOutputPins [[nodiscard]] () const
+      -> const std::vector<std::shared_ptr<Pin>> &;
   auto GetOutputPins [[nodiscard]] () -> std::vector<std::shared_ptr<Pin>> &;
 
-  struct {
-    std::string name{};
-    ImColor color{255, 255, 255};
-  } ui_data_{};
-
  protected:
+ Node() = default;
   Node(ne::NodeId id, std::vector<std::shared_ptr<Pin>> input_pins,
-       std::vector<std::shared_ptr<Pin>> output_pins, std::string name,
-       ImColor color);
+       std::vector<std::shared_ptr<Pin>> output_pins);
 
  private:
   ne::NodeId id_{};

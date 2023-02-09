@@ -180,7 +180,7 @@ void DrawPinField(Pin& pin) {
 // vh: bad
 void DrawNodeHeader(Node& node) {
   ImGui::Spring(0);
-  ImGui::TextUnformatted(node.ui_data_.name.c_str());
+  ImGui::TextUnformatted(node.GetDrawer()->GetName().c_str());
   ImGui::Spring(1);
   ImGui::Dummy(ImVec2{0, 28});
   ImGui::Spring(0);
@@ -313,12 +313,12 @@ void App::DrawContextMenuProcess() {
         ImGui::TextUnformatted("Node");
         ImGui::Separator();
 
-        const auto* node =
+        auto* node =
             nodes_and_links_->FindNode(popup_state_.context_node_id);
         cpp::Expects(node != nullptr);
 
         ImGui::Text("ID: %p", node->GetId().AsPointer());
-        ImGui::Text("Type: %s", node->ui_data_.name.c_str());
+        ImGui::Text("Type: %s", node->GetDrawer()->GetName().c_str());
         ImGui::Text("Inputs: %d",
                     static_cast<int>(node->GetInputPins().size()));
         ImGui::Text("Outputs: %d",
@@ -401,7 +401,7 @@ void App::DrawNode(Node& node) {
 
   {
     const auto header_scope =
-        node_builder.AddHeader(header_texture, node.ui_data_.color);
+        node_builder.AddHeader(header_texture, node.GetDrawer()->GetColor());
 
     DrawNodeHeader(node);
   }

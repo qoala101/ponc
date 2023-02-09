@@ -4,9 +4,13 @@
 #include "core_node.h"
 #include "esc_id_generator.h"
 
-class InputNode : public Node {
-  public:
+// NOLINTNEXTLINE(*-multiple-inheritance)
+class InputNode : public Node, public std::enable_shared_from_this<InputNode> {
+ public:
   explicit InputNode(esc::IdGenerator& id_generator);
+
+  auto GetDrawer [[nodiscard]] ()
+  -> std::unique_ptr<vh::esc::ui::INodeDrawer> override;
 };
 
 #endif  // VH_CORE_INPUT_NODE_H_
