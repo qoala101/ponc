@@ -3,46 +3,49 @@
 
 #include <imgui_node_editor.h>
 
-namespace ax::NodeEditor::Utilities {
+#include "esc_cpp.h"
+
+namespace ne = ax::NodeEditor;
+
+namespace esc {
 struct BlueprintNodeBuilder {
-  explicit BlueprintNodeBuilder(ImTextureID texture = nullptr,
+  explicit BlueprintNodeBuilder(ne::NodeId node_id,
+                                ImTextureID texture = nullptr,
                                 int textureWidth = 0, int textureHeight = 0);
 
-  void Begin(NodeId id);
-  void End();
+  BlueprintNodeBuilder(const BlueprintNodeBuilder&) = delete;
+  BlueprintNodeBuilder(BlueprintNodeBuilder&&) noexcept = default;
 
-  void Header(const ImVec4& color = ImVec4(1, 1, 1, 1));
-  void EndHeader();
+  auto operator=(const BlueprintNodeBuilder&) noexcept
+      -> BlueprintNodeBuilder& = delete;
+  auto operator=(BlueprintNodeBuilder&&) noexcept
+      -> BlueprintNodeBuilder& = default;
 
-  void Input(PinId id);
-  void EndInput();
+  ~BlueprintNodeBuilder();
 
-  void Middle();
+  auto Header [[nodiscard]] (const ImVec4& color = ImVec4(1, 1, 1, 1))
+  -> cpp::ScopeFunction;
 
-  void Output(PinId id);
-  void EndOutput();
+  auto Input [[nodiscard]] (ne::PinId id) -> cpp::ScopeFunction;
+
+  auto Output [[nodiscard]] (ne::PinId id) -> cpp::ScopeFunction;
 
  private:
-  enum class Stage {
-    Invalid,
-    Begin,
-    Header,
-    Content,
-    Input,
-    Output,
-    Middle,
-    End
-  };
+  enum class Stage { Invalid, Begin, Header, Content, Input, Output, End };
+
+  void EndHeader();
+  void EndInput();
+  void EndOutput();
 
   auto SetStage(Stage stage) -> bool;
 
-  void Pin(PinId id, ax::NodeEditor::PinKind kind);
+  void Pin(ne::PinId id, ax::NodeEditor::PinKind kind);
   void EndPin();
 
   ImTextureID HeaderTextureId;
   int HeaderTextureWidth;
   int HeaderTextureHeight;
-  NodeId CurrentNodeId;
+  ne::NodeId CurrentNodeId;
   Stage CurrentStage;
   ImU32 HeaderColor;
   ImVec2 NodeMin;
@@ -53,6 +56,6 @@ struct BlueprintNodeBuilder {
   ImVec2 ContentMax;
   bool HasHeader;
 };
-}  // namespace ax::NodeEditor::Utilities
+}  // namespace esc
 
 #endif  // VH_ESC_BUILDERS_H_

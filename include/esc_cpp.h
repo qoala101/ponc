@@ -1,6 +1,7 @@
 #ifndef VH_ESC_CPP_H_
 #define VH_ESC_CPP_H_
 
+#include <functional>
 #include <utility>
 
 namespace cpp {
@@ -24,6 +25,22 @@ class Scope {
 
  private:
   End end_;
+};
+
+class ScopeFunction {
+ public:
+  explicit ScopeFunction(std::function<void()> end);
+
+  ScopeFunction(const ScopeFunction&) = delete;
+  ScopeFunction(ScopeFunction&&) noexcept = default;
+
+  auto operator=(const ScopeFunction&) noexcept -> ScopeFunction& = delete;
+  auto operator=(ScopeFunction&&) noexcept -> ScopeFunction& = default;
+
+  ~ScopeFunction();
+
+ private:
+  std::function<void()> end_{};
 };
 }  // namespace cpp
 

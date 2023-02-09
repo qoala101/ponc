@@ -70,9 +70,11 @@ class App : public Application, public std::enable_shared_from_this<App> {
 
   int next_object_id_{};
 
-  ne::NodeId context_node_id{};
-  ne::LinkId context_link_id{};
-  ne::PinId context_pin_id{};
+  struct PopupState {
+    ne::NodeId context_node_id{};
+    ne::LinkId context_link_id{};
+    ne::PinId context_pin_id{};
+  } popup_state_{};
 
   struct DrawingState {
     Pin* not_yet_connected_pin_of_new_link{};

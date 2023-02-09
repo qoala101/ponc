@@ -13,33 +13,31 @@
 
 //------------------------------------------------------------------------------
 namespace ne = ax::NodeEditor;
-namespace util = ax::NodeEditor::Utilities;
 
-util::BlueprintNodeBuilder::BlueprintNodeBuilder(ImTextureID texture,
-                                                 int textureWidth,
-                                                 int textureHeight)
+namespace esc {
+BlueprintNodeBuilder::BlueprintNodeBuilder(ne::NodeId node_id,
+                                           ImTextureID texture,
+                                           int textureWidth, int textureHeight)
     : HeaderTextureId(texture),
       HeaderTextureWidth(textureWidth),
       HeaderTextureHeight(textureHeight),
       CurrentNodeId(0),
       CurrentStage(Stage::Invalid),
-      HasHeader(false) {}
-
-void util::BlueprintNodeBuilder::Begin(ne::NodeId id) {
+      HasHeader(false) {
   HasHeader = false;
   HeaderMin = HeaderMax = ImVec2();
 
-  ne::PushStyleVar(StyleVar_NodePadding, ImVec4(8, 4, 8, 8));
+  ne::PushStyleVar(ne::StyleVar_NodePadding, ImVec4(8, 4, 8, 8));
 
-  ne::BeginNode(id);
+  ne::BeginNode(node_id);
 
-  ImGui::PushID(id.AsPointer());
-  CurrentNodeId = id;
+  ImGui::PushID(node_id.AsPointer());
+  CurrentNodeId = node_id;
 
   SetStage(Stage::Begin);
 }
 
-void util::BlueprintNodeBuilder::End() {
+BlueprintNodeBuilder::~BlueprintNodeBuilder() {
   SetStage(Stage::End);
 
   ne::EndNode();
@@ -64,8 +62,8 @@ void util::BlueprintNodeBuilder::End() {
           HeaderMin - ImVec2(8 - halfBorderWidth, 4 - halfBorderWidth),
           HeaderMax + ImVec2(8 - halfBorderWidth, 0), ImVec2(0.0f, 0.0f), uv,
 
-          headerColor, GetStyle().NodeRounding, ImDrawFlags_RoundCornersTop);
-
+          headerColor, ne::GetStyle().NodeRounding,
+          ImDrawFlags_RoundCornersTop);
 
       auto headerSeparatorMin = ImVec2(HeaderMin.x, HeaderMax.y);
       auto headerSeparatorMax = ImVec2(HeaderMax.x, HeaderMin.y);
@@ -89,14 +87,16 @@ void util::BlueprintNodeBuilder::End() {
   SetStage(Stage::Invalid);
 }
 
-void util::BlueprintNodeBuilder::Header(const ImVec4& color) {
+auto BlueprintNodeBuilder::Header(const ImVec4& color) -> cpp::ScopeFunction {
   HeaderColor = ImColor(color);
   SetStage(Stage::Header);
+
+  return cpp::ScopeFunction{[this]() { EndHeader(); }};
 }
 
-void util::BlueprintNodeBuilder::EndHeader() { SetStage(Stage::Content); }
+void BlueprintNodeBuilder::EndHeader() { SetStage(Stage::Content); }
 
-void util::BlueprintNodeBuilder::Input(ne::PinId id) {
+auto BlueprintNodeBuilder::Input(ne::PinId id) -> cpp::ScopeFunction {
   if (CurrentStage == Stage::Begin) SetStage(Stage::Content);
 
   const auto applyPadding = (CurrentStage == Stage::Input);
@@ -105,24 +105,20 @@ void util::BlueprintNodeBuilder::Input(ne::PinId id) {
 
   if (applyPadding) ImGui::Spring(0);
 
-  Pin(id, PinKind::Input);
+  Pin(id, ne::PinKind::Input);
 
   ImGui::BeginHorizontal(id.AsPointer());
+
+  return cpp::ScopeFunction{[this]() { EndInput(); }};
 }
 
-void util::BlueprintNodeBuilder::EndInput() {
+void BlueprintNodeBuilder::EndInput() {
   ImGui::EndHorizontal();
 
   EndPin();
 }
 
-void util::BlueprintNodeBuilder::Middle() {
-  if (CurrentStage == Stage::Begin) SetStage(Stage::Content);
-
-  SetStage(Stage::Middle);
-}
-
-void util::BlueprintNodeBuilder::Output(ne::PinId id) {
+auto BlueprintNodeBuilder::Output(ne::PinId id) -> cpp::ScopeFunction {
   if (CurrentStage == Stage::Begin) SetStage(Stage::Content);
 
   const auto applyPadding = (CurrentStage == Stage::Output);
@@ -131,18 +127,20 @@ void util::BlueprintNodeBuilder::Output(ne::PinId id) {
 
   if (applyPadding) ImGui::Spring(0);
 
-  Pin(id, PinKind::Output);
+  Pin(id, ne::PinKind::Output);
 
   ImGui::BeginHorizontal(id.AsPointer());
+
+  return cpp::ScopeFunction{[this]() { EndOutput(); }};
 }
 
-void util::BlueprintNodeBuilder::EndOutput() {
+void BlueprintNodeBuilder::EndOutput() {
   ImGui::EndHorizontal();
 
   EndPin();
 }
 
-bool util::BlueprintNodeBuilder::SetStage(Stage stage) {
+bool BlueprintNodeBuilder::SetStage(Stage stage) {
   if (stage == CurrentStage) return false;
 
   auto oldStage = CurrentStage;
@@ -167,44 +165,15 @@ bool util::BlueprintNodeBuilder::SetStage(Stage stage) {
       break;
 
     case Stage::Input:
-      ne::PopStyleVar(2);
-
-      ImGui::Spring(1, 0);
-      ImGui::EndVertical();
-
-      // #debug
-      // ImGui::GetWindowDrawList()->AddRect(
-      //     ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), IM_COL32(255, 0,
-      //     0, 255));
-
-      break;
-
-    case Stage::Middle:
-      ImGui::EndVertical();
-
-      // #debug
-      // ImGui::GetWindowDrawList()->AddRect(
-      //     ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), IM_COL32(255, 0,
-      //     0, 255));
-
-      break;
-
     case Stage::Output:
       ne::PopStyleVar(2);
 
       ImGui::Spring(1, 0);
       ImGui::EndVertical();
 
-      // #debug
-      // ImGui::GetWindowDrawList()->AddRect(
-      //     ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), IM_COL32(255, 0,
-      //     0, 255));
-
       break;
 
     case Stage::End:
-      break;
-
     case Stage::Invalid:
       break;
   }
@@ -236,13 +205,8 @@ bool util::BlueprintNodeBuilder::SetStage(Stage stage) {
       if (!HasHeader) ImGui::Spring(1, 0);
       break;
 
-    case Stage::Middle:
-      ImGui::Spring(1);
-      ImGui::BeginVertical("middle", ImVec2(0, 0), 1.0f);
-      break;
-
     case Stage::Output:
-      if (oldStage == Stage::Middle || oldStage == Stage::Input)
+      if (oldStage == Stage::Input)
         ImGui::Spring(1);
       else
         ImGui::Spring(1, 0);
@@ -273,15 +237,9 @@ bool util::BlueprintNodeBuilder::SetStage(Stage stage) {
   return true;
 }
 
-void util::BlueprintNodeBuilder::Pin(ne::PinId id, ne::PinKind kind) {
+void BlueprintNodeBuilder::Pin(ne::PinId id, ne::PinKind kind) {
   ne::BeginPin(id, kind);
 }
 
-void util::BlueprintNodeBuilder::EndPin() {
-  ne::EndPin();
-
-  // #debug
-  // ImGui::GetWindowDrawList()->AddRectFilled(
-  //     ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), IM_COL32(255, 0, 0,
-  //     64));
-}
+void BlueprintNodeBuilder::EndPin() { ne::EndPin(); }
+}  // namespace esc

@@ -27,7 +27,6 @@
 #include <vector>
 
 namespace ne = ax::NodeEditor;
-namespace util = ax::NodeEditor::Utilities;
 
 namespace {
 // vh: ok
@@ -328,12 +327,12 @@ void App::DrawContextMenuProcess() {
     const auto suspend_scope =
         cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
 
-    if (ne::ShowNodeContextMenu(&context_node_id)) {
-      ImGui::OpenPopup("Node Context Menu");
-    } else if (ne::ShowPinContextMenu(&context_pin_id)) {
-      ImGui::OpenPopup("Pin Context Menu");
-    } else if (ne::ShowLinkContextMenu(&context_link_id)) {
+    if (ne::ShowLinkContextMenu(&popup_state_.context_link_id)) {
       ImGui::OpenPopup("Link Context Menu");
+    } else if (ne::ShowNodeContextMenu(&popup_state_.context_node_id)) {
+      ImGui::OpenPopup("Node Context Menu");
+    } else if (ne::ShowPinContextMenu(&popup_state_.context_pin_id)) {
+      ImGui::OpenPopup("Pin Context Menu");
     } else if (ne::ShowBackgroundContextMenu()) {
       drawing_state_.connect_new_node_to_existing_pin = nullptr;
       ImGui::OpenPopup("Create New Node");
@@ -351,74 +350,64 @@ void App::DrawContextMenuProcess() {
           },
           []() { ImGui::PopStyleVar(); }};
 
-      if (ImGui::BeginPopup("Node Context Menu")) {
+      if (ImGui::BeginPopup("Link Context Menu")) {
         const auto popup_scope = cpp::Scope{[]() { ImGui::EndPopup(); }};
 
-        ImGui::TextUnformatted("Node Context Menu");
+        ImGui::TextUnformatted("Link");
         ImGui::Separator();
 
-        const auto* node = nodes_and_links_->FindNode(context_node_id);
+        const auto* link =
+            nodes_and_links_->FindLink(popup_state_.context_link_id);
+        cpp::Expects(link != nullptr);
 
-        if (node != nullptr) {
-          ImGui::Text("ID: %p", node->ID.AsPointer());
-          ImGui::Text("Type: %s", (node->Type == NodeType::Blueprint)
-                                      ? "Blueprint"
-                                      : "Not blueprint");
-          ImGui::Text("Inputs: %d", static_cast<int>(node->Inputs.size()));
-          ImGui::Text("Outputs: %d", static_cast<int>(node->Outputs.size()));
-        } else {
-          ImGui::Text("Unknown node: %p", context_node_id.AsPointer());
-        }
+        ImGui::Text("ID: %p", link->ID.AsPointer());
+        ImGui::Text("From: %p", link->StartPinID.AsPointer());
+        ImGui::Text("To: %p", link->EndPinID.AsPointer());
 
         ImGui::Separator();
 
         if (ImGui::MenuItem("Delete")) {
-          ne::DeleteNode(context_node_id);
+          ne::DeleteLink(popup_state_.context_link_id);
+        }
+      }
+
+      if (ImGui::BeginPopup("Node Context Menu")) {
+        const auto popup_scope = cpp::Scope{[]() { ImGui::EndPopup(); }};
+
+        ImGui::TextUnformatted("Node");
+        ImGui::Separator();
+
+        const auto* node =
+            nodes_and_links_->FindNode(popup_state_.context_node_id);
+        cpp::Expects(node != nullptr);
+
+        ImGui::Text("ID: %p", node->ID.AsPointer());
+        ImGui::Text("Type: %s", node->Name.c_str());
+        ImGui::Text("Inputs: %d", static_cast<int>(node->Inputs.size()));
+        ImGui::Text("Outputs: %d", static_cast<int>(node->Outputs.size()));
+
+        ImGui::Separator();
+
+        if (ImGui::MenuItem("Delete")) {
+          ne::DeleteNode(popup_state_.context_node_id);
         }
       }
 
       if (ImGui::BeginPopup("Pin Context Menu")) {
         const auto popup_scope = cpp::Scope{[]() { ImGui::EndPopup(); }};
 
-        const auto* pin = nodes_and_links_->FindPin(context_pin_id);
-
-        ImGui::TextUnformatted("Pin Context Menu");
+        ImGui::TextUnformatted("Pin");
         ImGui::Separator();
 
-        if (pin != nullptr) {
-          ImGui::Text("ID: %p", pin->ID.AsPointer());
+        const auto* pin =
+            nodes_and_links_->FindPin(popup_state_.context_pin_id);
+        cpp::Expects(pin != nullptr);
 
-          if (pin->node != nullptr) {
-            ImGui::Text("Node: %p", pin->node->ID.AsPointer());
-          } else {
-            ImGui::Text("Node: %s", "<none>");
-          }
-        } else {
-          ImGui::Text("Unknown pin: %p", context_pin_id.AsPointer());
-        }
-      }
+        ImGui::Text("ID: %p", pin->ID.AsPointer());
 
-      if (ImGui::BeginPopup("Link Context Menu")) {
-        const auto popup_scope = cpp::Scope{[]() { ImGui::EndPopup(); }};
+        cpp::Expects(pin->node != nullptr);
 
-        const auto* link = nodes_and_links_->FindLink(context_link_id);
-
-        ImGui::TextUnformatted("Link Context Menu");
-        ImGui::Separator();
-
-        if (link != nullptr) {
-          ImGui::Text("ID: %p", link->ID.AsPointer());
-          ImGui::Text("From: %p", link->StartPinID.AsPointer());
-          ImGui::Text("To: %p", link->EndPinID.AsPointer());
-        } else {
-          ImGui::Text("Unknown link: %p", context_link_id.AsPointer());
-        }
-
-        ImGui::Separator();
-
-        if (ImGui::MenuItem("Delete")) {
-          ne::DeleteLink(context_link_id);
-        }
+        ImGui::Text("Node: %p", pin->node->ID.AsPointer());
       }
 
       if (ImGui::BeginPopup("Create New Node")) {
@@ -468,26 +457,18 @@ auto App::CalculateAlphaForPin(const Pin& pin) {
 // vh: bad
 void App::DrawBlueprintNode(Node& node) {
   auto* header_background = textures_->GetTextureIds().header_background;
-  auto node_builder = util::BlueprintNodeBuilder{
-      header_background, GetTextureWidth(header_background),
+  auto node_builder = esc::BlueprintNodeBuilder{
+      node.ID, header_background, GetTextureWidth(header_background),
       GetTextureHeight(header_background)};
 
-  const auto node_builder_scope =
-      cpp::Scope{[&node_builder, &node]() { node_builder.Begin(node.ID); },
-                 [&node_builder]() { node_builder.End(); }};
-
   {
-    const auto header_scope = cpp::Scope{
-        [&node_builder, &node]() { node_builder.Header(node.Color); },
-        [&node_builder]() { node_builder.EndHeader(); }};
+    const auto header_scope = node_builder.Header(node.Color);
 
     DrawBlueprintNodeHeader(node);
   }
 
   for (auto& input : node.Inputs) {
-    const auto input_scope =
-        cpp::Scope{[&node_builder, &input]() { node_builder.Input(input.ID); },
-                   [&node_builder]() { node_builder.EndInput(); }};
+    const auto input_scope = node_builder.Input(input.ID);
 
     const auto alpha = CalculateAlphaForPin(input);
 
@@ -510,9 +491,7 @@ void App::DrawBlueprintNode(Node& node) {
           []() { ImGui::PopStyleVar(); }};
 
       {
-        const auto input_scope = cpp::Scope{
-            [&node_builder, &output]() { node_builder.Output(output.ID); },
-            [&node_builder]() { node_builder.EndOutput(); }};
+        const auto input_scope = node_builder.Output(output.ID);
 
         DrawPinField(output);
         DrawPinIcon(output, nodes_and_links_->IsPinLinked(output.ID), alpha);
