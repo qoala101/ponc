@@ -120,7 +120,6 @@ add_example_executable(esc
   esc_app.cc
   esc_cpp.cc
   esc_editor_context_handle.cc
-  esc_enums.cc
   esc_node_drawer.cc
   esc_left_pane.cc
   esc_nodes_and_links.cc

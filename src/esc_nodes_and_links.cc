@@ -79,7 +79,7 @@ auto NodesAndLinks::FindPin(ne::PinId id) -> Pin* {
 
 auto NodesAndLinks::FindLink(ne::LinkId id) -> Link* {
   for (auto& link : links_)
-    if (link.ID == id) return &link;
+    if (link.id == id) return &link;
 
   return nullptr;
 }
@@ -88,7 +88,7 @@ auto NodesAndLinks::IsPinLinked(ne::PinId id) -> bool {
   if (!id) return false;
 
   for (auto& link : links_)
-    if (link.StartPinID == id || link.EndPinID == id) return true;
+    if (link.start_pin_id == id || link.end_pin_id == id) return true;
 
   return false;
 }
@@ -97,7 +97,7 @@ void NodesAndLinks::SpawnLink(const Link& link) { links_.emplace_back(link); }
 
 void NodesAndLinks::EraseLinkWithId(ne::LinkId linkId) {
   auto id = std::find_if(links_.begin(), links_.end(),
-                         [linkId](auto& link) { return link.ID == linkId; });
+                         [linkId](auto& link) { return link.id == linkId; });
   if (id != links_.end()) links_.erase(id);
 }
 
@@ -183,12 +183,11 @@ void NodesAndLinks::SpawnLinkFromPinToNode(const Pin* pin, const Node* node) {
 
   const auto is_link_starts_on_existing_node = pin->Kind == PinKind::Output;
   const auto link = Link{
-      .ID = app_->GetIdGenerator().GetNext<ne::LinkId>(),
-      .StartPinID =
+      .id = app_->GetIdGenerator().GetNext<ne::LinkId>(),
+      .start_pin_id =
           is_link_starts_on_existing_node ? pin->ID : matching_node_pin->ID,
-      .EndPinID =
-          is_link_starts_on_existing_node ? matching_node_pin->ID : pin->ID,
-      .Color = GetIconColor(pin->Type)};
+      .end_pin_id =
+          is_link_starts_on_existing_node ? matching_node_pin->ID : pin->ID};
 
   SpawnLink(link);
 }
@@ -253,11 +252,11 @@ void NodesAndLinks::SafeToFile(const std::string& file_path) {
     for (const auto& link : links_) {
       auto& link_json = links_json[link_index++];
 
-      link_json["id"] = static_cast<crude_json::number>(link.ID.Get());
+      link_json["id"] = static_cast<crude_json::number>(link.id.Get());
       link_json["start_pin_id"] =
-          static_cast<crude_json::number>(link.StartPinID.Get());
+          static_cast<crude_json::number>(link.start_pin_id.Get());
       link_json["end_pin_id"] =
-          static_cast<crude_json::number>(link.EndPinID.Get());
+          static_cast<crude_json::number>(link.end_pin_id.Get());
     }
   }
 
@@ -267,7 +266,7 @@ void NodesAndLinks::SafeToFile(const std::string& file_path) {
 
 void NodesAndLinks::DeleteAll() {
   for (const auto& link : links_) {
-    ne::DeleteLink(link.ID);
+    ne::DeleteLink(link.id);
   }
 
   links_.clear();
@@ -347,11 +346,11 @@ void NodesAndLinks::OnFrame() {
 void NodesAndLinks::UpdateNodePointerOnPins() {
   for (auto& node : nodes_) {
     for (auto& input : node->GetInputPins()) {
-      input.node = node.get();
+      input.ui_data_.node = node.get();
     }
 
     for (auto& output : node->GetOutputPins()) {
-      output.node = node.get();
+      output.ui_data_.node = node.get();
     }
   }
 }
@@ -362,7 +361,7 @@ void NodesAndLinks::ClearAllValuesExceptInput() {
   for (auto& node : nodes_) {
     for (const auto& pins : {&node->GetInputPins(), &node->GetOutputPins()}) {
       for (auto& pin : *pins) {
-        if (!pin.editable) {
+        if (!pin.ui_data_.editable) {
           pin.value = 0;
         }
       }
@@ -434,20 +433,20 @@ void NodesAndLinks::UpdatePinValues() {
 
       for (auto& input_node_output_pin : input_node->GetOutputPins()) {
         for (auto& link : links_) {
-          if (link.StartPinID == input_node_output_pin.ID) {
-            auto* end_pin = FindPin(link.EndPinID);
+          if (link.start_pin_id == input_node_output_pin.ID) {
+            auto* end_pin = FindPin(link.end_pin_id);
 
-            if ((end_pin == nullptr) || (end_pin->node == nullptr)) {
+            if ((end_pin == nullptr) || (end_pin->ui_data_.node == nullptr)) {
               continue;
             }
 
             end_pin->value += input_node_output_pin.value;
 
-            for (auto& output_pin : end_pin->node->GetOutputPins()) {
+            for (auto& output_pin : end_pin->ui_data_.node->GetOutputPins()) {
               output_pin.value += input_node_output_pin.value;
             }
 
-            next_input_nodes.emplace(end_pin->node);
+            next_input_nodes.emplace(end_pin->ui_data_.node);
           }
         }
       }

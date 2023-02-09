@@ -65,8 +65,8 @@ void DrawSplitter(float thickness, float* left_size, float* right_size,
                           min_left_size, min_right_size, 0.0F);
 }
 
-void DrawIcon(ImDrawList* drawList, const ImVec2& a, const ImVec2& b,
-              IconType type, bool filled, ImU32 color, ImU32 innerColor) {
+void DrawFlowIcon(ImDrawList* drawList, const ImVec2& a, const ImVec2& b,
+                  bool filled, ImU32 color, ImU32 innerColor) {
   auto rect = ImRect(a, b);
   auto rect_x = rect.Min.x;
   auto rect_y = rect.Min.y;
@@ -79,67 +79,63 @@ void DrawIcon(ImDrawList* drawList, const ImVec2& a, const ImVec2& b,
   const auto extra_segments =
       static_cast<int>(2 * outline_scale);  // for full circle
 
-  if (type == IconType::Flow) {
-    const auto origin_scale = rect_w / 24.0f;
+  const auto origin_scale = rect_w / 24.0f;
 
-    const auto offset_x = 1.0f * origin_scale;
-    const auto offset_y = 0.0f * origin_scale;
-    const auto margin = (filled ? 2.0f : 2.0f) * origin_scale;
-    const auto rounding = 0.1f * origin_scale;
-    const auto tip_round = 0.7f;  // percentage of triangle edge (for tip)
-    // const auto edge_round = 0.7f; // percentage of triangle edge (for corner)
-    const auto canvas =
-        ImRect(rect.Min.x + margin + offset_x, rect.Min.y + margin + offset_y,
-               rect.Max.x - margin + offset_x, rect.Max.y - margin + offset_y);
-    const auto canvas_x = canvas.Min.x;
-    const auto canvas_y = canvas.Min.y;
-    const auto canvas_w = canvas.Max.x - canvas.Min.x;
-    const auto canvas_h = canvas.Max.y - canvas.Min.y;
+  const auto offset_x = 1.0f * origin_scale;
+  const auto offset_y = 0.0f * origin_scale;
+  const auto margin = (filled ? 2.0f : 2.0f) * origin_scale;
+  const auto rounding = 0.1f * origin_scale;
+  const auto tip_round = 0.7f;  // percentage of triangle edge (for tip)
+  // const auto edge_round = 0.7f; // percentage of triangle edge (for corner)
+  const auto canvas =
+      ImRect(rect.Min.x + margin + offset_x, rect.Min.y + margin + offset_y,
+             rect.Max.x - margin + offset_x, rect.Max.y - margin + offset_y);
+  const auto canvas_x = canvas.Min.x;
+  const auto canvas_y = canvas.Min.y;
+  const auto canvas_w = canvas.Max.x - canvas.Min.x;
+  const auto canvas_h = canvas.Max.y - canvas.Min.y;
 
-    const auto left = canvas_x + canvas_w * 0.5f * 0.3f;
-    const auto right = canvas_x + canvas_w - canvas_w * 0.5f * 0.3f;
-    const auto top = canvas_y + canvas_h * 0.5f * 0.2f;
-    const auto bottom = canvas_y + canvas_h - canvas_h * 0.5f * 0.2f;
-    const auto center_y = (top + bottom) * 0.5f;
-    // const auto angle = AX_PI * 0.5f * 0.5f * 0.5f;
+  const auto left = canvas_x + canvas_w * 0.5f * 0.3f;
+  const auto right = canvas_x + canvas_w - canvas_w * 0.5f * 0.3f;
+  const auto top = canvas_y + canvas_h * 0.5f * 0.2f;
+  const auto bottom = canvas_y + canvas_h - canvas_h * 0.5f * 0.2f;
+  const auto center_y = (top + bottom) * 0.5f;
+  // const auto angle = AX_PI * 0.5f * 0.5f * 0.5f;
 
-    const auto tip_top = ImVec2(canvas_x + canvas_w * 0.5f, top);
-    const auto tip_right = ImVec2(right, center_y);
-    const auto tip_bottom = ImVec2(canvas_x + canvas_w * 0.5f, bottom);
+  const auto tip_top = ImVec2(canvas_x + canvas_w * 0.5f, top);
+  const auto tip_right = ImVec2(right, center_y);
+  const auto tip_bottom = ImVec2(canvas_x + canvas_w * 0.5f, bottom);
 
-    drawList->PathLineTo(ImVec2(left, top) + ImVec2(0, rounding));
-    drawList->PathBezierCubicCurveTo(ImVec2(left, top), ImVec2(left, top),
-                                     ImVec2(left, top) + ImVec2(rounding, 0));
-    drawList->PathLineTo(tip_top);
-    drawList->PathLineTo(tip_top + (tip_right - tip_top) * tip_round);
-    drawList->PathBezierCubicCurveTo(
-        tip_right, tip_right,
-        tip_bottom + (tip_right - tip_bottom) * tip_round);
-    drawList->PathLineTo(tip_bottom);
-    drawList->PathLineTo(ImVec2(left, bottom) + ImVec2(rounding, 0));
-    drawList->PathBezierCubicCurveTo(
-        ImVec2(left, bottom), ImVec2(left, bottom),
-        ImVec2(left, bottom) - ImVec2(0, rounding));
+  drawList->PathLineTo(ImVec2(left, top) + ImVec2(0, rounding));
+  drawList->PathBezierCubicCurveTo(ImVec2(left, top), ImVec2(left, top),
+                                   ImVec2(left, top) + ImVec2(rounding, 0));
+  drawList->PathLineTo(tip_top);
+  drawList->PathLineTo(tip_top + (tip_right - tip_top) * tip_round);
+  drawList->PathBezierCubicCurveTo(
+      tip_right, tip_right, tip_bottom + (tip_right - tip_bottom) * tip_round);
+  drawList->PathLineTo(tip_bottom);
+  drawList->PathLineTo(ImVec2(left, bottom) + ImVec2(rounding, 0));
+  drawList->PathBezierCubicCurveTo(ImVec2(left, bottom), ImVec2(left, bottom),
+                                   ImVec2(left, bottom) - ImVec2(0, rounding));
 
-    if (!filled) {
-      if (innerColor & 0xFF000000)
-        drawList->AddConvexPolyFilled(drawList->_Path.Data,
-                                      drawList->_Path.Size, innerColor);
+  if (!filled) {
+    if (innerColor & 0xFF000000)
+      drawList->AddConvexPolyFilled(drawList->_Path.Data, drawList->_Path.Size,
+                                    innerColor);
 
-      drawList->PathStroke(color, true, 2.0f * outline_scale);
-    } else
-      drawList->PathFillConvex(color);
-  }
+    drawList->PathStroke(color, true, 2.0f * outline_scale);
+  } else
+    drawList->PathFillConvex(color);
 }
 
-void Icon(const ImVec2& size, IconType type, bool filled,
+void Icon(const ImVec2& size, bool filled,
           const ImVec4& color /* = ImVec4(1, 1, 1, 1)*/,
           const ImVec4& innerColor /* = ImVec4(0, 0, 0, 0)*/) {
   if (ImGui::IsRectVisible(size)) {
     auto cursorPos = ImGui::GetCursorScreenPos();
     auto drawList = ImGui::GetWindowDrawList();
-    DrawIcon(drawList, cursorPos, cursorPos + size, type, filled,
-             ImColor(color), ImColor(innerColor));
+    DrawFlowIcon(drawList, cursorPos, cursorPos + size, filled, ImColor(color),
+                 ImColor(innerColor));
   }
 
   ImGui::Dummy(size);
@@ -147,7 +143,7 @@ void Icon(const ImVec2& size, IconType type, bool filled,
 // vh: norm
 void DrawPinIcon(const Pin& pin, bool connected, float alpha) {
   if (pin.Type != PinType::Flow) {
-    if (pin.editable) {
+    if (pin.ui_data_.editable) {
       ImGui::Dummy(ImVec2{20, 24});
     } else {
       ImGui::Dummy(ImVec2{24, 24});
@@ -156,27 +152,23 @@ void DrawPinIcon(const Pin& pin, bool connected, float alpha) {
     return;
   }
 
-  const auto type = GetIconType(pin.Type);
   const auto size = ImVec2{24, 24};
-  const auto color = [&pin, alpha]() {
-    auto icon_color = GetIconColor(pin.Type);
-    icon_color.Value.w = alpha;
-    return icon_color;
-  }();
+  const auto stroke_color =
+      ImColor{255, 255, 255, static_cast<int>(alpha * 255)};
+  const auto fill_color = ImColor{32, 32, 32, static_cast<int>(alpha * 255)};
 
-  Icon(size, type, connected, color,
-       ImColor{32, 32, 32, static_cast<int>(alpha * 255)});
+  Icon(size, connected, stroke_color, fill_color);
 }
 // vh: bad
 void DrawPinField(Pin& pin) {
   ImGui::Spring(0);
 
   if (pin.Type != PinType::Empty) {
-    if (pin.editable) {
+    if (pin.ui_data_.editable) {
       ImGui::SetNextItemWidth(100);
-      ImGui::InputFloat(pin.Name.c_str(), &pin.value, 0.0F, 0.0F, "%.3f");
+      ImGui::InputFloat(pin.ui_data_.Name.c_str(), &pin.value, 0.0F, 0.0F, "%.3f");
     } else {
-      ImGui::Text("%.3f %s", pin.value, pin.Name.c_str());
+      ImGui::Text("%.3f %s", pin.value, pin.ui_data_.Name.c_str());
     }
   }
 
@@ -256,7 +248,7 @@ void App::OnFrame(float /*unused*/) {
 // vh: ok
 void App::ShowFlow() {
   for (const auto& link : nodes_and_links_->GetLinks()) {
-    ne::Flow(link.ID);
+    ne::Flow(link.id);
   }
 }
 // vh: bad
@@ -300,9 +292,9 @@ void App::DrawContextMenuProcess() {
             nodes_and_links_->FindLink(popup_state_.context_link_id);
         cpp::Expects(link != nullptr);
 
-        ImGui::Text("ID: %p", link->ID.AsPointer());
-        ImGui::Text("From: %p", link->StartPinID.AsPointer());
-        ImGui::Text("To: %p", link->EndPinID.AsPointer());
+        ImGui::Text("ID: %p", link->id.AsPointer());
+        ImGui::Text("From: %p", link->start_pin_id.AsPointer());
+        ImGui::Text("To: %p", link->end_pin_id.AsPointer());
 
         ImGui::Separator();
 
@@ -323,8 +315,10 @@ void App::DrawContextMenuProcess() {
 
         ImGui::Text("ID: %p", node->GetId().AsPointer());
         ImGui::Text("Type: %s", node->ui_data_.name.c_str());
-        ImGui::Text("Inputs: %d", static_cast<int>(node->GetInputPins().size()));
-        ImGui::Text("Outputs: %d", static_cast<int>(node->GetOutputPins().size()));
+        ImGui::Text("Inputs: %d",
+                    static_cast<int>(node->GetInputPins().size()));
+        ImGui::Text("Outputs: %d",
+                    static_cast<int>(node->GetOutputPins().size()));
 
         ImGui::Separator();
 
@@ -345,9 +339,9 @@ void App::DrawContextMenuProcess() {
 
         ImGui::Text("ID: %p", pin->ID.AsPointer());
 
-        cpp::Expects(pin->node != nullptr);
+        cpp::Expects(pin->ui_data_.node != nullptr);
 
-        ImGui::Text("Node: %p", pin->node->GetId().AsPointer());
+        ImGui::Text("Node: %p", pin->ui_data_.node->GetId().AsPointer());
       }
 
       if (ImGui::BeginPopup("Create New Node")) {
@@ -450,7 +444,8 @@ void App::DrawNodes() {
 // vh: norm
 void App::DrawLinks() {
   for (const auto& link : nodes_and_links_->GetLinks()) {
-    ne::Link(link.ID, link.StartPinID, link.EndPinID, link.Color, 2.0F);
+    ne::Link(link.id, link.start_pin_id, link.end_pin_id, ImColor{255, 255, 255},
+             2.0F);
   }
 }
 // vh: norm
@@ -484,7 +479,7 @@ void App::DrawLinkConnectionProcess() {
         } else if (end_pin->Kind == start_pin->Kind) {
           DrawHintLabel("x Incompatible Pin Kind", ImColor{45, 32, 32, 180});
           ne::RejectNewItem(ImColor{255, 0, 0}, 2.0F);
-        } else if (end_pin->node == start_pin->node) {
+        } else if (end_pin->ui_data_.node == start_pin->ui_data_.node) {
           DrawHintLabel("x Cannot connect to self", ImColor{45, 32, 32, 180});
           ne::RejectNewItem(ImColor{255, 0, 0}, 1.0F);
         } else if (end_pin->Type != start_pin->Type) {

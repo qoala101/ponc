@@ -11,11 +11,6 @@
 
 namespace ne = ax::NodeEditor;
 
-struct NodeUiData {
-  std::string name{};
-  ImColor color{255, 255, 255};
-};
-
 class Node {
  public:
   auto GetId [[nodiscard]] () const -> ne::NodeId;
@@ -26,7 +21,10 @@ class Node {
   auto GetOutputPins [[nodiscard]] () const -> const std::vector<Pin> &;
   auto GetOutputPins [[nodiscard]] () -> std::vector<Pin> &;
 
-  NodeUiData ui_data_{};
+  struct {
+    std::string name{};
+    ImColor color{255, 255, 255};
+  } ui_data_{};
 
   int coupler_percentage_index_{};
 

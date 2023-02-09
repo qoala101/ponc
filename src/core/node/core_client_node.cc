@@ -5,11 +5,11 @@
 ClientNode::ClientNode(esc::IdGenerator& id_generator)
     : Node{id_generator.GetNext<ne::NodeId>(),
            {{id_generator.GetNext<ne::PinId>(), "In", PinType::Flow,
-             PinKind::Input, this, false},
+             PinKind::Input, false},
             {id_generator.GetNext<ne::PinId>(), "min", PinType::Float,
-             PinKind::Input, this, true},
+             PinKind::Input, true},
             {id_generator.GetNext<ne::PinId>(), "max", PinType::Float,
-             PinKind::Input, this, true}},
+             PinKind::Input, true}},
            {},
            "Client",
            {0, 255, 0}} {}

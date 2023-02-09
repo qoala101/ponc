@@ -6,10 +6,9 @@
 namespace ne = ax::NodeEditor;
 
 struct Link {
-  ne::LinkId ID{};
-  ne::PinId StartPinID{};
-  ne::PinId EndPinID{};
-  ImColor Color{255, 255, 255};
+  ne::LinkId id{};
+  ne::PinId start_pin_id{};
+  ne::PinId end_pin_id{};
 };
 
 #endif  // VH_CORE_LINK_H_
