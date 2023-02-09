@@ -4,6 +4,8 @@
 #include <imgui_node_editor.h>
 #include <sys/types.h>
 
+#include <chrono>
+#include <ios>
 #include <memory>
 
 #include "esc_builders.h"
@@ -255,6 +257,25 @@ void DrawCommentNode(Node& node) {
   }
   ne::EndGroupHint();
 }
+// vh: norm
+void DrawHintLabel(const char* label, const ImColor& color) {
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetTextLineHeight());
+
+  const auto& style = ImGui::GetStyle();
+  const auto spacing = style.ItemSpacing;
+
+  ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2{spacing.x, -spacing.y});
+
+  const auto padding = style.FramePadding;
+  const auto rect_min = ImGui::GetCursorScreenPos() - padding;
+  const auto text_size = ImGui::CalcTextSize(label);
+  const auto rect_max = ImGui::GetCursorScreenPos() + text_size + padding;
+
+  auto* drawList = ImGui::GetWindowDrawList();
+  drawList->AddRectFilled(rect_min, rect_max, color, text_size.y * 0.15F);
+
+  ImGui::TextUnformatted(label);
+}
 }  // namespace
 // vh: norm
 App::App(const char* name, int argc, char** argv)
@@ -265,13 +286,9 @@ App::App(const char* name, int argc, char** argv)
 // vh: ok
 auto App::GetNextObjectId() -> int { return next_object_id_++; }
 // vh: ok
-auto App::GetTextures() -> esc::TexturesHandle& {
-  cpp::Expects(textures_.has_value());
-  return *textures_;
-}
+auto App::GetTextures() -> esc::TexturesHandle& { return *textures_; }
 // vh: ok
 auto App::GetNodesAndLinks() -> esc::NodesAndLinks& {
-  cpp::Expects(nodes_and_links_.has_value());
   return *nodes_and_links_;
 }
 // vh: norm
@@ -280,37 +297,17 @@ auto App::GetNextLinkId() -> ne::LinkId {
 }
 // vh: norm
 void App::OnStart() {
-  cpp::Expects(!editor_context_.has_value());
-  cpp::Expects(!textures_.has_value());
-  cpp::Expects(!left_pane_.has_value());
-  cpp::Expects(!nodes_and_links_.has_value());
-
   editor_context_.emplace();
   textures_.emplace(shared_from_this());
   left_pane_.emplace(shared_from_this());
   nodes_and_links_.emplace(shared_from_this());
-
-  cpp::Ensures(editor_context_.has_value());
-  cpp::Ensures(textures_.has_value());
-  cpp::Ensures(left_pane_.has_value());
-  cpp::Ensures(nodes_and_links_.has_value());
 }
 // vh: norm
 void App::OnStop() {
-  cpp::Expects(left_pane_.has_value());
-  cpp::Expects(textures_.has_value());
-  cpp::Expects(editor_context_.has_value());
-  cpp::Expects(nodes_and_links_.has_value());
-
   nodes_and_links_.reset();
   left_pane_.reset();
   textures_.reset();
   editor_context_.reset();
-
-  cpp::Ensures(!left_pane_.has_value());
-  cpp::Ensures(!textures_.has_value());
-  cpp::Ensures(!editor_context_.has_value());
-  cpp::Ensures(!nodes_and_links_.has_value());
 }
 // vh: ok
 void App::OnFrame(float /*unused*/) {
@@ -319,14 +316,12 @@ void App::OnFrame(float /*unused*/) {
 }
 // vh: ok
 void App::ShowFlow() {
-  cpp::Expects(nodes_and_links_.has_value());
-
   for (const auto& link : nodes_and_links_->GetLinks()) {
     ne::Flow(link.ID);
   }
 }
 // vh: bad
-void App::DrawContextMenu() {
+void App::DrawContextMenuProcess() {
   const auto open_popup_pos = ImGui::GetMousePos();
 
   {
@@ -340,8 +335,8 @@ void App::DrawContextMenu() {
     } else if (ne::ShowLinkContextMenu(&context_link_id)) {
       ImGui::OpenPopup("Link Context Menu");
     } else if (ne::ShowBackgroundContextMenu()) {
+      drawing_state_.connect_new_node_to_existing_pin = nullptr;
       ImGui::OpenPopup("Create New Node");
-      existing_node_new_link_pin = nullptr;
     }
   }
 
@@ -445,17 +440,15 @@ void App::DrawContextMenu() {
             ne::SetNodePosition(new_node->ID, open_popup_pos);
 
             if (const auto node_created_by_link_from_existing_one =
-                    existing_node_new_link_pin != nullptr) {
+                    drawing_state_.connect_new_node_to_existing_pin !=
+                    nullptr) {
               nodes_and_links_->SpawnLinkFromPinToNode(
-                  existing_node_new_link_pin, new_node);
+                  drawing_state_.connect_new_node_to_existing_pin, new_node);
             }
 
-            create_new_node = false;
             break;
           }
         }
-      } else {
-        create_new_node = false;
       }
     }
   }
@@ -464,8 +457,9 @@ void App::DrawContextMenu() {
 auto App::CalculateAlphaForPin(const Pin& pin) {
   auto alpha = ImGui::GetStyle().Alpha;
 
-  if ((new_link_pin != nullptr) && !CanCreateLink(new_link_pin, &pin) &&
-      (&pin != new_link_pin)) {
+  if ((drawing_state_.not_yet_connected_pin_of_new_link != nullptr) &&
+      !CanCreateLink(drawing_state_.not_yet_connected_pin_of_new_link, &pin) &&
+      (&pin != drawing_state_.not_yet_connected_pin_of_new_link)) {
     alpha = alpha * (48.0F / 255.0F);
   }
 
@@ -473,9 +467,6 @@ auto App::CalculateAlphaForPin(const Pin& pin) {
 }
 // vh: bad
 void App::DrawBlueprintNode(Node& node) {
-  cpp::Expects(textures_.has_value());
-  cpp::Expects(nodes_and_links_.has_value());
-
   auto* header_background = textures_->GetTextureIds().header_background;
   auto node_builder = util::BlueprintNodeBuilder{
       header_background, GetTextureWidth(header_background),
@@ -530,142 +521,135 @@ void App::DrawBlueprintNode(Node& node) {
   }
 }
 // vh: norm
-void App::DrawLinks() {
-  cpp::Expects(nodes_and_links_.has_value());
+void App::DrawNodes() {
+  for (auto& node : nodes_and_links_->GetNodes()) {
+    if (node.Type == NodeType::Blueprint) {
+      DrawBlueprintNode(node);
+    }
+  }
 
+  for (auto& node : nodes_and_links_->GetNodes()) {
+    if (node.Type == NodeType::Comment) {
+      DrawCommentNode(node);
+    }
+  }
+}
+// vh: norm
+void App::DrawLinks() {
   for (const auto& link : nodes_and_links_->GetLinks()) {
     ne::Link(link.ID, link.StartPinID, link.EndPinID, link.Color, 2.0F);
   }
 }
+// vh: norm
+void App::DrawLinkConnectionProcess() {
+  {
+    const auto create_scope = cpp::Scope{[]() { ne::EndCreate(); }};
 
-void App::DrawLinkConnection() {
-  if (ne::BeginCreate(ImColor(255, 255, 255), 2.0f)) {
-    auto showLabel = [](const char* label, ImColor color) {
-      ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetTextLineHeight());
-      auto size = ImGui::CalcTextSize(label);
+    if (ne::BeginCreate(ImColor{255, 255, 255}, 2.0F)) {
+      auto start_pin_id = ne::PinId{};
+      auto end_pin_id = ne::PinId{};
 
-      auto padding = ImGui::GetStyle().FramePadding;
-      auto spacing = ImGui::GetStyle().ItemSpacing;
+      if (ne::QueryNewLink(&start_pin_id, &end_pin_id)) {
+        drawing_state_.not_yet_connected_pin_of_new_link =
+            nodes_and_links_->FindPin(start_pin_id);
 
-      ImGui::SetCursorPos(ImGui::GetCursorPos() +
-                          ImVec2(spacing.x, -spacing.y));
+        auto* start_pin = drawing_state_.not_yet_connected_pin_of_new_link;
+        cpp::Expects(start_pin != nullptr);
 
-      auto rectMin = ImGui::GetCursorScreenPos() - padding;
-      auto rectMax = ImGui::GetCursorScreenPos() + size + padding;
+        auto* end_pin = nodes_and_links_->FindPin(end_pin_id);
+        cpp::Expects(end_pin != nullptr);
 
-      auto drawList = ImGui::GetWindowDrawList();
-      drawList->AddRectFilled(rectMin, rectMax, color, size.y * 0.15f);
-      ImGui::TextUnformatted(label);
-    };
+        if (start_pin->Kind == PinKind::Input) {
+          using std::swap;
 
-    ne::PinId startPinId = 0, endPinId = 0;
-    if (ne::QueryNewLink(&startPinId, &endPinId)) {
-      auto startPin = nodes_and_links_->FindPin(startPinId);
-      auto endPin = nodes_and_links_->FindPin(endPinId);
+          swap(start_pin, end_pin);
+          swap(start_pin_id, end_pin_id);
+        }
 
-      new_link_pin = startPin ? startPin : endPin;
-
-      if (startPin->Kind == PinKind::Input) {
-        using std::swap;
-
-        swap(startPin, endPin);
-        swap(startPinId, endPinId);
-      }
-
-      if (startPin && endPin) {
-        if (endPin == startPin) {
-          ne::RejectNewItem(ImColor(255, 0, 0), 2.0f);
-        } else if (endPin->Kind == startPin->Kind) {
-          showLabel("x Incompatible Pin Kind", ImColor(45, 32, 32, 180));
-          ne::RejectNewItem(ImColor(255, 0, 0), 2.0f);
-        } else if (endPin->node == startPin->node) {
-          showLabel("x Cannot connect to self", ImColor(45, 32, 32, 180));
-          ne::RejectNewItem(ImColor(255, 0, 0), 1.0f);
-        } else if (endPin->Type != startPin->Type) {
-          showLabel("x Incompatible Pin Type", ImColor(45, 32, 32, 180));
-          ne::RejectNewItem(ImColor(255, 128, 128), 1.0f);
+        if (end_pin == start_pin) {
+          ne::RejectNewItem(ImColor{255, 0, 0}, 2.0F);
+        } else if (end_pin->Kind == start_pin->Kind) {
+          DrawHintLabel("x Incompatible Pin Kind", ImColor{45, 32, 32, 180});
+          ne::RejectNewItem(ImColor{255, 0, 0}, 2.0F);
+        } else if (end_pin->node == start_pin->node) {
+          DrawHintLabel("x Cannot connect to self", ImColor{45, 32, 32, 180});
+          ne::RejectNewItem(ImColor{255, 0, 0}, 1.0F);
+        } else if (end_pin->Type != start_pin->Type) {
+          DrawHintLabel("x Incompatible Pin Type", ImColor{45, 32, 32, 180});
+          ne::RejectNewItem(ImColor{255, 127, 127}, 1.0F);
         } else {
-          showLabel("+ Create Link", ImColor(32, 45, 32, 180));
-          if (ne::AcceptNewItem(ImColor(128, 255, 128), 4.0f)) {
-            auto link = Link{GetNextLinkId(), startPinId, endPinId};
-            link.Color = GetIconColor(startPin->Type);
-            nodes_and_links_->SpawnLink(link);
+          DrawHintLabel("+ Create Link", ImColor{32, 45, 32, 180});
+
+          if (ne::AcceptNewItem(ImColor{127, 255, 127}, 4.0F)) {
+            nodes_and_links_->SpawnLink(
+                Link{GetNextLinkId(), start_pin_id, end_pin_id});
           }
         }
       }
-    }
 
-    ne::PinId pinId = 0;
-    if (ne::QueryNewNode(&pinId)) {
-      new_link_pin = nodes_and_links_->FindPin(pinId);
-      if (new_link_pin) showLabel("+ Create Node", ImColor(32, 45, 32, 180));
+      if (ne::QueryNewNode(&end_pin_id)) {
+        drawing_state_.not_yet_connected_pin_of_new_link =
+            nodes_and_links_->FindPin(end_pin_id);
 
-      if (ne::AcceptNewItem()) {
-        create_new_node = true;
-        existing_node_new_link_pin = nodes_and_links_->FindPin(pinId);
-        new_link_pin = nullptr;
-        ne::Suspend();
-        ImGui::OpenPopup("Create New Node");
-        ne::Resume();
+        DrawHintLabel("+ Create Node", ImColor{32, 45, 32, 180});
+
+        if (ne::AcceptNewItem()) {
+          drawing_state_.connect_new_node_to_existing_pin =
+              drawing_state_.not_yet_connected_pin_of_new_link;
+          drawing_state_.not_yet_connected_pin_of_new_link = nullptr;
+
+          {
+            const auto suspend_scope =
+                cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
+
+            ImGui::OpenPopup("Create New Node");
+          }
+        }
       }
+    } else {
+      drawing_state_.not_yet_connected_pin_of_new_link = nullptr;
     }
-  } else
-    new_link_pin = nullptr;
-
-  ne::EndCreate();
+  }
+}
+// vh: norm
+void App::DrawDeleteItemsProcess() {
+  const auto delete_scope = cpp::Scope{[]() { ne::EndDelete(); }};
 
   if (ne::BeginDelete()) {
-    ne::LinkId linkId = 0;
-    while (ne::QueryDeletedLink(&linkId)) {
+    auto link_id = ne::LinkId{};
+
+    while (ne::QueryDeletedLink(&link_id)) {
       if (ne::AcceptDeletedItem()) {
-        nodes_and_links_->EraseLinkWithId(linkId);
+        nodes_and_links_->EraseLinkWithId(link_id);
       }
     }
 
-    ne::NodeId nodeId = 0;
-    while (ne::QueryDeletedNode(&nodeId)) {
+    auto node_id = ne::NodeId{};
+
+    while (ne::QueryDeletedNode(&node_id)) {
       if (ne::AcceptDeletedItem()) {
-        nodes_and_links_->EraseNodeWithId(nodeId);
+        nodes_and_links_->EraseNodeWithId(node_id);
       }
     }
   }
+}
+// vh: norm
+void App::DrawNodeEditor() {
+  const auto node_editor_scope =
+      cpp::Scope{[]() { ne::Begin("Node editor"); }, []() { ne::End(); }};
 
-  ne::EndDelete();
+  DrawNodes();
+  DrawLinks();
+  DrawLinkConnectionProcess();
+  DrawDeleteItemsProcess();
+  DrawContextMenuProcess();
 }
 // vh: bad
 void App::DrawFrame() {
-  cpp::Expects(left_pane_.has_value());
-  cpp::Expects(nodes_and_links_.has_value());
-
   DrawSplitter(4.0F, &left_pane_width, &right_pane_width, 50.0F, 50.0F);
   left_pane_->Draw(left_pane_width - 4.0F);
   ImGui::SameLine(0.0F, 10.0F);
-
-  {
-    const auto node_editor_scope =
-        cpp::Scope{[]() { ne::Begin("Node editor"); }, []() { ne::End(); }};
-
-    for (auto& node : nodes_and_links_->GetNodes()) {
-      if (node.Type == NodeType::Blueprint) {
-        DrawBlueprintNode(node);
-      }
-    }
-
-    for (auto& node : nodes_and_links_->GetNodes()) {
-      if (node.Type == NodeType::Comment) {
-        DrawCommentNode(node);
-      }
-    }
-
-    DrawLinks();
-
-    if (!create_new_node) {
-      DrawLinkConnection();
-    }
-
-    DrawContextMenu();
-  }
-
-  // ImGui::ShowDemoWindow();
-  // ImGui::ShowMetricsWindow();
+  DrawNodeEditor();
+  ImGui::ShowDemoWindow();
+  ImGui::ShowMetricsWindow();
 }

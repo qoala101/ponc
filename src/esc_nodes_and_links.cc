@@ -25,8 +25,8 @@ NodesAndLinks::NodesAndLinks(std::shared_ptr<App> app)
 }
 
 auto NodesAndLinks::SpawnInputNode() -> Node* {
-  auto& node = nodes_.emplace_back(app_->GetNextObjectId(), "Input",
-                                   ImColor{255, 0, 0});
+  auto& node =
+      nodes_.emplace_back(app_->GetNextObjectId(), "Input", ImColor{255, 0, 0});
 
   auto& output = node.Outputs.emplace_back(
       app_->GetNextObjectId(), "", PinType::Flow, PinKind::Output, &node);
@@ -41,6 +41,13 @@ auto NodesAndLinks::SpawnClientNode() -> Node* {
 
   node.Inputs.emplace_back(app_->GetNextObjectId(), "In", PinType::Flow,
                            PinKind::Input, &node);
+
+  auto* pin = &node.Inputs.emplace_back(app_->GetNextObjectId(), "min",
+                                        PinType::Float, PinKind::Input, &node);
+  pin->editable = true;
+  pin = &node.Inputs.emplace_back(app_->GetNextObjectId(), "max",
+                                  PinType::Float, PinKind::Input, &node);
+  pin->editable = true;
 
   return &node;
 }

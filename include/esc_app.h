@@ -43,7 +43,7 @@ class App : public Application, public std::enable_shared_from_this<App> {
   void ShowFlow();
 
   auto GetTextureDims [[nodiscard]] (ImTextureID texture_id) -> ImVec2;
-  
+
   void OnStart() override;
   void OnStop() override;
 
@@ -52,13 +52,16 @@ class App : public Application, public std::enable_shared_from_this<App> {
 
   //
 
-  void DrawContextMenu();
+  void DrawContextMenuProcess();
   void DrawFrame();
-  void DrawBlueprintNode(Node &node);
+  void DrawBlueprintNode(Node& node);
+  void DrawNodeEditor();
+  void DrawNodes();
   void DrawLinks();
-  void DrawLinkConnection();
+  void DrawLinkConnectionProcess();
+  void DrawDeleteItemsProcess();
 
-  auto CalculateAlphaForPin(const Pin &pin);
+  auto CalculateAlphaForPin(const Pin& pin);
 
   std::optional<esc::EditorContextHandle> editor_context_{};
   std::optional<esc::TexturesHandle> textures_{};
@@ -70,9 +73,11 @@ class App : public Application, public std::enable_shared_from_this<App> {
   ne::NodeId context_node_id{};
   ne::LinkId context_link_id{};
   ne::PinId context_pin_id{};
-  bool create_new_node{};
-  Pin* existing_node_new_link_pin{};
-  Pin* new_link_pin{};
+
+  struct DrawingState {
+    Pin* not_yet_connected_pin_of_new_link{};
+    Pin* connect_new_node_to_existing_pin{};
+  } drawing_state_{};
 
   float left_pane_width{};
   float right_pane_width{};
