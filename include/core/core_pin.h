@@ -28,8 +28,6 @@ class Pin {
 
   virtual auto GetType [[nodiscard]] () const -> PinType = 0;
 
-  float value{};
-
   struct {
     std::string Name{};
     bool editable{};

@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "core_coupler_node.h"
+#include "core_float_pin.h"
 #include "esc_cpp.h"
 #include "esc_enums.h"
 #include "esc_id_generator.h"
@@ -164,13 +165,13 @@ void DrawPinIcon(const Pin& pin, bool connected, float alpha) {
 void DrawPinField(Pin& pin) {
   ImGui::Spring(0);
 
-  if (pin.GetType() != PinType::Empty) {
+  if (auto* float_pin = dynamic_cast<FloatPin*>(&pin)) {
     if (pin.ui_data_.editable) {
       ImGui::SetNextItemWidth(100);
-      ImGui::InputFloat(pin.ui_data_.Name.c_str(), &pin.value, 0.0F, 0.0F,
-                        "%.3f");
+      ImGui::InputFloat(pin.ui_data_.Name.c_str(), &float_pin->GetValue(), 0.0F,
+                        0.0F, "%.3f");
     } else {
-      ImGui::Text("%.3f %s", pin.value, pin.ui_data_.Name.c_str());
+      ImGui::Text("%.3f %s", float_pin->GetValue(), pin.ui_data_.Name.c_str());
     }
   }
 
@@ -406,7 +407,8 @@ void App::DrawNode(Node& node) {
   }
 
   for (auto& input : node.GetInputPins()) {
-    const auto input_scope = node_builder.AddPin(input->GetId(), ne::PinKind::Input);
+    const auto input_scope =
+        node_builder.AddPin(input->GetId(), ne::PinKind::Input);
 
     const auto alpha = CalculateAlphaForPin(*input);
 
@@ -433,7 +435,8 @@ void App::DrawNode(Node& node) {
             node_builder.AddPin(output->GetId(), ne::PinKind::Output);
 
         DrawPinField(*output);
-        DrawPinIcon(*output, nodes_and_links_->IsPinLinked(output->GetId()), alpha);
+        DrawPinIcon(*output, nodes_and_links_->IsPinLinked(output->GetId()),
+                    alpha);
       }
     }
   }
