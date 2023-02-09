@@ -4,6 +4,8 @@
 #include <application.h>
 #include <imgui_node_editor.h>
 
+#include "imgui.h"
+
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
 
@@ -59,6 +61,12 @@ struct Link {
   ne::PinId StartPinID{};
   ne::PinId EndPinID{};
   ImColor Color{255, 255, 255};
+};
+
+struct TextureWithDims {
+  ImTextureID id{};
+  int width{};
+  int height{};
 };
 
 #endif  // VH_ESC_TYPES_H_

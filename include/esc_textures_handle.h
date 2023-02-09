@@ -7,11 +7,13 @@
 #include <functional>
 #include <memory>
 
+#include "esc_types.h"
+
 namespace esc {
 class TexturesHandle {
  public:
   struct TextureIds {
-    ImTextureID header_background{};
+    ImTextureID node_header{};
   };
 
   explicit TexturesHandle(std::shared_ptr<Application> app);
@@ -25,6 +27,8 @@ class TexturesHandle {
   ~TexturesHandle();
 
   auto GetTextureIds [[nodiscard]] () -> const TextureIds&;
+  auto GetTextureWithDims [[nodiscard]] (ImTextureID texture_id)
+  -> TextureWithDims;
 
  private:
   auto GetTextureIdsAsArray [[nodiscard]] ();

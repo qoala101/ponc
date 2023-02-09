@@ -8,7 +8,7 @@
 #include <ios>
 #include <memory>
 
-#include "esc_builders.h"
+#include "esc_node_drawer.h"
 #include "esc_cpp.h"
 #include "esc_enums.h"
 #include "esc_nodes_and_links.h"
@@ -456,19 +456,20 @@ auto App::CalculateAlphaForPin(const Pin& pin) {
 }
 // vh: bad
 void App::DrawBlueprintNode(Node& node) {
-  auto* header_background = textures_->GetTextureIds().header_background;
-  auto node_builder = esc::BlueprintNodeBuilder{
-      node.ID, header_background, GetTextureWidth(header_background),
-      GetTextureHeight(header_background)};
+  auto node_builder = esc::NodeDrawer{node.ID};
+
+  const auto header_texture =
+      textures_->GetTextureWithDims(textures_->GetTextureIds().node_header);
 
   {
-    const auto header_scope = node_builder.Header(node.Color);
+    const auto header_scope =
+        node_builder.AddHeader(header_texture, node.Color);
 
     DrawBlueprintNodeHeader(node);
   }
 
   for (auto& input : node.Inputs) {
-    const auto input_scope = node_builder.Input(input.ID);
+    const auto input_scope = node_builder.AddPin(input.ID, ne::PinKind::Input);
 
     const auto alpha = CalculateAlphaForPin(input);
 
@@ -491,7 +492,8 @@ void App::DrawBlueprintNode(Node& node) {
           []() { ImGui::PopStyleVar(); }};
 
       {
-        const auto input_scope = node_builder.Output(output.ID);
+        const auto input_scope =
+            node_builder.AddPin(output.ID, ne::PinKind::Output);
 
         DrawPinField(output);
         DrawPinIcon(output, nodes_and_links_->IsPinLinked(output.ID), alpha);

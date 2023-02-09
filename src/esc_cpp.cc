@@ -12,5 +12,9 @@ ScopeFunction::ScopeFunction(std::function<void()> end)
   Ensures(bool{end_});
 }
 
-ScopeFunction::~ScopeFunction() { end_(); }
+ScopeFunction::~ScopeFunction() {
+  if (end_) {
+    end_();
+  }
+}
 }  // namespace cpp

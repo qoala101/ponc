@@ -6,7 +6,7 @@
 
 namespace esc {
 auto TexturesHandle::GetTextureIdsAsArray() {
-  return std::array{&texture_ids_.header_background};
+  return std::array{&texture_ids_.node_header};
 }
 
 auto TexturesHandle::AreTexturesLoaded() {
@@ -18,7 +18,7 @@ auto TexturesHandle::AreTexturesLoaded() {
 TexturesHandle::TexturesHandle(std::shared_ptr<Application> app)
     : app_{(cpp::Expects(app != nullptr), std::move(app))},
       texture_ids_{[&app = app_]() {
-        return TextureIds{.header_background =
+        return TextureIds{.node_header =
                               app->LoadTexture("data/BlueprintBackground.png")};
       }()} {
   cpp::Ensures(app_ != nullptr);
@@ -27,6 +27,13 @@ TexturesHandle::TexturesHandle(std::shared_ptr<Application> app)
 
 auto TexturesHandle::GetTextureIds() -> const TextureIds& {
   return texture_ids_;
+}
+
+auto TexturesHandle::GetTextureWithDims(ImTextureID texture_id)
+    -> TextureWithDims {
+  return {.id = texture_id,
+          .width = app_->GetTextureWidth(texture_id),
+          .height = app_->GetTextureHeight(texture_id)};
 }
 
 TexturesHandle::~TexturesHandle() {
