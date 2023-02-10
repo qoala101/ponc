@@ -27,7 +27,7 @@ class Node123 : public INode, public std::enable_shared_from_this<Node123> {
              std::make_shared<FloatPin>(id_generator.GetNext<ne::PinId>(), "",
                                         PinKind::Input, false)},
             [&id_generator, num_outputs]() {
-              auto pins = std::vector<std::shared_ptr<Pin>>{};
+              auto pins = std::vector<std::shared_ptr<IPin>>{};
 
               for (auto i = 0; i < num_outputs; ++i) {
                 pins.emplace_back(std::make_shared<FlowPin>(

@@ -9,7 +9,7 @@
 
 #include "esc_app.h"
 #include "esc_cpp.h"
-#include "esc_nodes_and_links.h"
+#include "core_diagram.h"
 #include "imgui.h"
 
 namespace ne = ax::NodeEditor;
@@ -67,13 +67,13 @@ void LeftPane::Draw(float pane_width) {
 
     DrawMenu(ImGui::GetContentRegionAvail().x);
 
-    const auto selected_node_ids = esc::NodesAndLinks::GetSelectedNodeIds();
+    const auto selected_node_ids = core::Diagram::GetSelectedNodeIds();
 
     {
       const auto indent_scope =
           cpp::Scope{[]() { ImGui::Indent(); }, []() { ImGui::Unindent(); }};
 
-      for (auto& node : app_->GetNodesAndLinks().GetNodes()) {
+      for (auto& node : app_->GetDiagram().GetNodes()) {
         const auto is_node_selected =
             std::ranges::find(selected_node_ids, node->GetId()) !=
             selected_node_ids.end();

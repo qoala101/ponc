@@ -4,7 +4,7 @@
 #include "core_pin.h"
 #include "esc_enums.h"
 
-class EmptyPin : public Pin {
+class EmptyPin : public IPin {
  public:
   explicit EmptyPin(ne::PinId id, PinKind kind);
 

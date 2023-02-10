@@ -40,20 +40,20 @@ class INode {
 
   auto GetId() const -> ne::NodeId;
 
-  auto GetInputPins() const -> const std::vector<std::shared_ptr<Pin>> &;
-  auto GetInputPins() -> std::vector<std::shared_ptr<Pin>> &;
+  auto GetInputPins() const -> const std::vector<std::shared_ptr<IPin>> &;
+  auto GetInputPins() -> std::vector<std::shared_ptr<IPin>> &;
 
-  auto GetOutputPins() const -> const std::vector<std::shared_ptr<Pin>> &;
-  auto GetOutputPins() -> std::vector<std::shared_ptr<Pin>> &;
+  auto GetOutputPins() const -> const std::vector<std::shared_ptr<IPin>> &;
+  auto GetOutputPins() -> std::vector<std::shared_ptr<IPin>> &;
 
  protected:
-  INode(ne::NodeId id, std::vector<std::shared_ptr<Pin>> input_pins,
-       std::vector<std::shared_ptr<Pin>> output_pins);
+  INode(ne::NodeId id, std::vector<std::shared_ptr<IPin>> input_pins,
+       std::vector<std::shared_ptr<IPin>> output_pins);
 
  private:
   ne::NodeId id_{};
-  std::vector<std::shared_ptr<Pin>> input_pins_{};
-  std::vector<std::shared_ptr<Pin>> output_pins_{};
+  std::vector<std::shared_ptr<IPin>> input_pins_{};
+  std::vector<std::shared_ptr<IPin>> output_pins_{};
 };
 
 namespace esc {

@@ -15,7 +15,7 @@ void MenuBar::Draw() {
       }
 
       if (ImGui::MenuItem("Clear")) {
-        // app_->GetNodesAndLinks().DeleteAll();
+        // app_->GetDiagram().DeleteAll();
       }
 
       ImGui::EndMenu();

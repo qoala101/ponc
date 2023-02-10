@@ -12,6 +12,6 @@ OpenFileDialog::OpenFileDialog()
       }()} {}
 
 void OpenFileDialog::OnFileSelected(std::string file_path) const {
-  // app_->GetNodesAndLinks().LoadFromFile(selected_file_path);
+  // app_->GetDiagram().LoadFromFile(selected_file_path);
 }
 }  // namespace esc::draw

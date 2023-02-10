@@ -3,7 +3,7 @@
 
 #include "core_pin.h"
 
-class FloatPin : public Pin {
+class FloatPin : public IPin {
  public:
   explicit FloatPin(ne::PinId id, std::string name, PinKind kind,
                     bool editable);

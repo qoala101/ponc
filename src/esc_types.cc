@@ -7,7 +7,7 @@
 namespace ne = ax::NodeEditor;
 
 // vh: ok
-auto CanCreateLink(const Pin* left, const Pin* right) -> bool {
+auto CanCreateLink(const IPin* left, const IPin* right) -> bool {
   return (left != nullptr) && (right != nullptr) && (left != right) &&
          (left->ui_data_.Kind != right->ui_data_.Kind) &&
          (left->GetType() == right->GetType()) &&

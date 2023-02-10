@@ -11,17 +11,17 @@ namespace ne = ax::NodeEditor;
 
 class INode;
 
-class Pin {
+class IPin {
  public:
-  Pin(ne::PinId id, std::string name, PinKind kind, bool editable);
+  IPin(ne::PinId id, std::string name, PinKind kind, bool editable);
 
-  Pin(const Pin &) = delete;
-  Pin(Pin &&) noexcept = delete;
+  IPin(const IPin &) = delete;
+  IPin(IPin &&) noexcept = delete;
 
-  auto operator=(const Pin &) noexcept -> INode & = delete;
-  auto operator=(Pin &&) noexcept -> INode & = delete;
+  auto operator=(const IPin &) noexcept -> INode & = delete;
+  auto operator=(IPin &&) noexcept -> INode & = delete;
 
-  virtual ~Pin() = default;
+  virtual ~IPin() = default;
 
   auto GetId  () const -> ne::PinId;
   void SetId(ne::PinId id);

@@ -29,6 +29,6 @@ void SaveAsFileDialog::OnFileSelected(std::string file_path) const {
     file_path += ".json";
   }
 
-  // app_->GetNodesAndLinks().SaveToFile(selected_file_path);
+  // app_->GetDiagram().SaveToFile(selected_file_path);
 }
 }  // namespace esc::draw

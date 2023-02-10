@@ -117,6 +117,7 @@ add_example_executable(esc
   core/pin/core_empty_pin.cc
   core/pin/core_float_pin.cc
   core/pin/core_flow_pin.cc
+  core/core_diagram.cc
   core/core_link.cc
   core/core_node.cc
   core/core_pin.cc
@@ -132,7 +133,6 @@ add_example_executable(esc
   esc_editor_context_handle.cc
   esc_left_pane.cc
   esc_node_drawer.cc
-  esc_nodes_and_links.cc
   esc_textures_handle.cc
   esc_types.cc
   main.cc

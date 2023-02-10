@@ -8,7 +8,7 @@
 
 #include "esc_id_generator.h"
 #include "esc_left_pane.h"
-#include "esc_nodes_and_links.h"
+#include "core_diagram.h"
 #include "esc_textures_handle.h"
 #include "imgui.h"
 
@@ -39,7 +39,7 @@ class App : public Application, public std::enable_shared_from_this<App> {
   virtual ~App() = default;
 
   auto GetTextures() -> esc::TexturesHandle&;
-  auto GetNodesAndLinks() -> esc::NodesAndLinks&;
+  auto GetDiagram() -> core::Diagram&;
 
   void ShowFlow();
 
@@ -65,15 +65,19 @@ class App : public Application, public std::enable_shared_from_this<App> {
   void DrawLinkConnectionProcess();
   void DrawDeleteItemsProcess();
 
-  auto CalculateAlphaForPin(const Pin& pin);
+  auto CalculateAlphaForPin(const IPin& pin);
 
-  std::shared_ptr<esc::IdGenerator> id_generator_{};
+  auto IsPinLinked(ne::PinId id) const -> bool;
+  void AddLinkFromPinToNode(ne::LinkId link_id, const IPin *pin,
+                            const INode *node);
+
+  std::shared_ptr<esc::IdGenerator> id_generator_{};  
+  std::optional<core::Diagram> diagram_;
 
   std::optional<esc::EditorContextHandle> editor_context_{};
   std::optional<esc::TexturesHandle> textures_{};
   std::optional<esc::LeftPane> left_pane_;
   std::optional<draw::MenuBar> menu_bar_;
-  std::optional<esc::NodesAndLinks> nodes_and_links_;
 
   struct PopupState {
     ne::NodeId context_node_id{};
@@ -82,8 +86,8 @@ class App : public Application, public std::enable_shared_from_this<App> {
   } popup_state_{};
 
   struct DrawingState {
-    Pin* not_yet_connected_pin_of_new_link{};
-    Pin* connect_new_node_to_existing_pin{};
+    IPin* not_yet_connected_pin_of_new_link{};
+    IPin* connect_new_node_to_existing_pin{};
   } drawing_state_{};
 
   float left_pane_width{};

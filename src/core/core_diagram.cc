@@ -1,4 +1,4 @@
-#include "esc_nodes_and_links.h"
+#include "core_diagram.h"
 
 #include <crude_json.h>
 #include <imgui_node_editor.h>
@@ -14,41 +14,36 @@
 #include <vector>
 
 #include "core_float_pin.h"
+#include "core_link.h"
 #include "esc_app.h"
 #include "esc_cpp.h"
 #include "esc_enums.h"
 #include "esc_types.h"
 #include "imgui.h"
 
-namespace esc {
-NodesAndLinks::NodesAndLinks(
-    std::shared_ptr<App> app,
-    std::vector<std::shared_ptr<INodeFactory>> node_factories)
-    : app_{(cpp::Expects(app != nullptr), std::move(app))},
-      node_factories_{std::move(node_factories)} {
-  cpp::Ensures(app_ != nullptr);
+namespace esc::core {
+Diagram::Diagram(std::vector<std::shared_ptr<INodeFactory>> node_factories)
+    : node_factories_{std::move(node_factories)} {
 }
 
-auto NodesAndLinks::GetNodes() -> std::vector<std::shared_ptr<INode>>& {
+auto Diagram::GetNodes() const -> const std::vector<std::shared_ptr<INode>>& {
   return nodes_;
 }
 
-auto NodesAndLinks::GetLinks() const -> const std::vector<Link>& {
-  return links_;
-}
+auto Diagram::GetLinks() const -> const std::vector<Link>& { return links_; }
 
-auto NodesAndLinks::EmplaceNode(std::shared_ptr<INode> node) -> INode & {
+auto Diagram::EmplaceNode(std::shared_ptr<INode> node) -> INode& {
   return *nodes_.emplace_back(std::move(node));
 }
 
-auto NodesAndLinks::FindNode(ne::NodeId id) -> INode* {
+auto Diagram::FindNode(ne::NodeId id) -> INode* {
   for (auto& node : nodes_)
     if (node->GetId() == id) return node.get();
 
   return nullptr;
 }
 
-auto NodesAndLinks::FindPin(ne::PinId id) -> Pin* {
+auto Diagram::FindPin(ne::PinId id) -> IPin* {
   if (!id) return nullptr;
 
   for (auto& node : nodes_) {
@@ -62,31 +57,22 @@ auto NodesAndLinks::FindPin(ne::PinId id) -> Pin* {
   return nullptr;
 }
 
-auto NodesAndLinks::FindLink(ne::LinkId id) -> Link* {
+auto Diagram::FindLink(ne::LinkId id) -> Link* {
   for (auto& link : links_)
     if (link.id == id) return &link;
 
   return nullptr;
 }
 
-auto NodesAndLinks::IsPinLinked(ne::PinId id) -> bool {
-  if (!id) return false;
+auto Diagram::EmplaceLink(const Link& link) -> Link & { links_.emplace_back(link); }
 
-  for (auto& link : links_)
-    if (link.start_pin_id == id || link.end_pin_id == id) return true;
-
-  return false;
-}
-
-void NodesAndLinks::SpawnLink(const Link& link) { links_.emplace_back(link); }
-
-void NodesAndLinks::EraseLinkWithId(ne::LinkId linkId) {
+void Diagram::EraseLink(ne::LinkId linkId) {
   auto id = std::find_if(links_.begin(), links_.end(),
                          [linkId](auto& link) { return link.id == linkId; });
   if (id != links_.end()) links_.erase(id);
 }
 
-void NodesAndLinks::EraseNodeWithId(ne::NodeId id) {
+void Diagram::EraseNode(ne::NodeId id) {
   const auto node = std::ranges::find_if(
       nodes_, [id](const auto& node) { return node->GetId() == id; });
 
@@ -95,7 +81,7 @@ void NodesAndLinks::EraseNodeWithId(ne::NodeId id) {
   }
 }
 
-auto NodesAndLinks::GetSelectedNodeIds() -> std::vector<ne::NodeId> {
+auto Diagram::GetSelectedNodeIds() -> std::vector<ne::NodeId> {
   const auto num_selected_objects = ne::GetSelectedObjectCount();
 
   auto selected_ids = std::vector<ne::NodeId>{};
@@ -108,7 +94,7 @@ auto NodesAndLinks::GetSelectedNodeIds() -> std::vector<ne::NodeId> {
   return selected_ids;
 }
 
-auto NodesAndLinks::GetSelectedLinkIds() -> std::vector<ne::LinkId> {
+auto Diagram::GetSelectedLinkIds() -> std::vector<ne::LinkId> {
   const auto num_selected_objects = ne::GetSelectedObjectCount();
 
   auto selected_ids = std::vector<ne::LinkId>{};
@@ -121,38 +107,12 @@ auto NodesAndLinks::GetSelectedLinkIds() -> std::vector<ne::LinkId> {
   return selected_ids;
 }
 
-auto NodesAndLinks::GetNodeFactories()
-    -> std::vector<std::shared_ptr<INodeFactory>>& {
+auto Diagram::GetNodeFactories() const
+    -> const std::vector<std::shared_ptr<INodeFactory>>& {
   return node_factories_;
 }
 
-void NodesAndLinks::SpawnLinkFromPinToNode(const Pin* pin, const INode* node) {
-  const auto* node_pins = (pin->ui_data_.Kind == PinKind::Input)
-                              ? &node->GetOutputPins()
-                              : &node->GetInputPins();
-  const auto matching_node_pin =
-      std::ranges::find_if(*node_pins, [pin](const auto& node_pin) {
-        return CanCreateLink(pin, node_pin.get());
-      });
-
-  if (matching_node_pin == node_pins->end()) {
-    return;
-  }
-
-  const auto is_link_starts_on_existing_node =
-      pin->ui_data_.Kind == PinKind::Output;
-  const auto link = Link{.id = app_->GetIdGenerator().GetNext<ne::LinkId>(),
-                         .start_pin_id = is_link_starts_on_existing_node
-                                             ? pin->GetId()
-                                             : (*matching_node_pin)->GetId(),
-                         .end_pin_id = is_link_starts_on_existing_node
-                                           ? (*matching_node_pin)->GetId()
-                                           : pin->GetId()};
-
-  SpawnLink(link);
-}
-
-void NodesAndLinks::SaveToFile(const std::string& file_path) {
+void Diagram::SaveToFile(const std::string& file_path) {
   // auto json = crude_json::value{};
 
   // {
@@ -233,7 +193,7 @@ void NodesAndLinks::SaveToFile(const std::string& file_path) {
   // json.save(file_path);
 }
 
-void NodesAndLinks::DeleteAll() {
+void Diagram::Clear() {
   for (const auto& link : links_) {
     ne::DeleteLink(link.id);
   }
@@ -247,7 +207,7 @@ void NodesAndLinks::DeleteAll() {
   nodes_.clear();
 }
 
-void NodesAndLinks::LoadFromFile(const std::string& file_path) {
+void Diagram::LoadFromFile(const std::string& file_path) {
   // DeleteAll();
 
   // const auto json = crude_json::value::load(file_path).first;
@@ -311,7 +271,7 @@ void NodesAndLinks::LoadFromFile(const std::string& file_path) {
   // for (auto i = 0; i < links_size; ++i) {
   //   const auto& link_json = links_json[i];
 
-  //   SpawnLink({static_cast<uint64_t>(link_json["id"].get<crude_json::number>()),
+  //   AddLink({static_cast<uint64_t>(link_json["id"].get<crude_json::number>()),
   //              static_cast<uint64_t>(
   //                  link_json["start_pin_id"].get<crude_json::number>()),
   //              static_cast<uint64_t>(
@@ -319,12 +279,12 @@ void NodesAndLinks::LoadFromFile(const std::string& file_path) {
   // }
 }
 
-void NodesAndLinks::OnFrame() {
+void Diagram::OnFrame() {
   UpdateNodePointerOnPins();
   UpdatePinValues();
 }
 
-void NodesAndLinks::UpdateNodePointerOnPins() {
+void Diagram::UpdateNodePointerOnPins() {
   for (auto& node : nodes_) {
     for (auto& input : node->GetInputPins()) {
       input->ui_data_.node = node.get();
@@ -336,7 +296,7 @@ void NodesAndLinks::UpdateNodePointerOnPins() {
   }
 }
 
-void NodesAndLinks::ClearAllValuesExceptInput() {
+void Diagram::ClearAllValuesExceptInput() {
   // const auto& coupler_percentage_values = GetCouplerPercentageValues();
 
   // for (auto& node : nodes_) {
@@ -372,7 +332,7 @@ void NodesAndLinks::ClearAllValuesExceptInput() {
   // }
 }
 
-void NodesAndLinks::UpdatePinValues() {
+void Diagram::UpdatePinValues() {
   // ClearAllValuesExceptInput();
 
   // auto input_nodes = std::vector<Node*>{};
@@ -458,4 +418,4 @@ void NodesAndLinks::UpdatePinValues() {
   //   input_nodes.assign(next_input_nodes.begin(), next_input_nodes.end());
   // }
 }
-}  // namespace esc
+}  // namespace esc::core
