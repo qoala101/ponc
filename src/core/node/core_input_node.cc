@@ -5,18 +5,18 @@
 
 namespace esc {
 namespace {
-class Node123;
+class Node;
 class NodeFactory;
 
-auto CreateNodeDrawer(std::shared_ptr<Node123> node)
+auto CreateNodeDrawer(std::shared_ptr<Node> node)
     -> std::unique_ptr<INodeDrawer>;
 auto CreateNodeFactoryDrawer(std::shared_ptr<NodeFactory> node_factory)
     -> std::unique_ptr<INodeFactoryDrawer>;
 
 // NOLINTNEXTLINE(*-multiple-inheritance)
-class Node123 : public INode, public std::enable_shared_from_this<Node123> {
+class Node : public INode, public std::enable_shared_from_this<Node> {
  public:
-  explicit Node123(esc::IdGenerator& id_generator)
+  explicit Node(esc::IdGenerator& id_generator)
       : INode{id_generator.GetNext<ne::NodeId>(),
              {},
              {std::make_shared<FlowPin>(id_generator.GetNext<ne::PinId>(),
@@ -29,7 +29,7 @@ class Node123 : public INode, public std::enable_shared_from_this<Node123> {
 
 class NodeDrawer : public INodeDrawer {
  public:
-  explicit NodeDrawer(std::shared_ptr<Node123> node) : node_{std::move(node)} {}
+  explicit NodeDrawer(std::shared_ptr<Node> node) : node_{std::move(node)} {}
 
   auto GetLabel() const -> std::string override {
     return CreateInputNodeFactory()->CreateDrawer()->GetLabel();
@@ -40,10 +40,10 @@ class NodeDrawer : public INodeDrawer {
   }
 
  private:
-  std::shared_ptr<Node123> node_{};
+  std::shared_ptr<Node> node_{};
 };
 
-auto CreateNodeDrawer(std::shared_ptr<Node123> node)
+auto CreateNodeDrawer(std::shared_ptr<Node> node)
     -> std::unique_ptr<INodeDrawer> {
   return std::make_unique<NodeDrawer>(std::move(node));
 }
@@ -53,7 +53,7 @@ class NodeFactory : public INodeFactory,
                     public std::enable_shared_from_this<NodeFactory> {
  public:
   auto CreateNode(IdGenerator& id_generator) -> std::shared_ptr<INode> override {
-    return std::make_shared<Node123>(id_generator);
+    return std::make_shared<Node>(id_generator);
   }
 
   auto CreateDrawer() -> std::unique_ptr<INodeFactoryDrawer> override {

@@ -12,15 +12,9 @@ void NodeFactoriesView::Draw() {
   const float TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
 
   ImGui::SetNextWindowSize(ImVec2(500, 440), ImGuiCond_FirstUseEver);
+  
   if (ImGui::Begin("Example: Simple layout", &GetVisible(),
                    ImGuiWindowFlags_MenuBar)) {
-    if (ImGui::BeginMenuBar()) {
-      if (ImGui::BeginMenu("File")) {
-        if (ImGui::MenuItem("Close")) SetVisible(false);
-        ImGui::EndMenu();
-      }
-      ImGui::EndMenuBar();
-    }
     {
       static ImGuiTableFlags flags =
           ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH |

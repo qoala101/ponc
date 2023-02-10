@@ -8,11 +8,40 @@
 #include <vector>
 
 #include "core_pin.h"
+#include "crude_json.h"
 #include "esc_id_generator.h"
 
 namespace ne = ax::NodeEditor;
 
+class INode;
+
 namespace esc {
+class INodeFactory;
+
+// NOLINTNEXTLINE(*-special-member-functions)
+class INodeParser {
+ public:
+  virtual ~INodeParser() = default;
+
+  virtual auto ParseFromJson(const crude_json::value &json) const
+      -> std::shared_ptr<INode> = 0;
+
+ protected:
+  INodeParser() = default;
+};
+
+// NOLINTNEXTLINE(*-special-member-functions)
+class INodeWriter {
+ public:
+  virtual ~INodeWriter() = default;
+
+  virtual auto GetTypeName() const -> std::string = 0;
+  virtual auto WriteToJson() const -> crude_json::value = 0;
+
+ protected:
+  INodeWriter() = default;
+};
+
 // NOLINTNEXTLINE(*-special-member-functions)
 class INodeDrawer {
  public:
@@ -34,8 +63,10 @@ class INode {
   auto operator=(const INode &) noexcept -> INode & = delete;
   auto operator=(INode &&) noexcept -> INode & = delete;
 
+// ADD ID REGISTERING AS RAII
   virtual ~INode() = default;
 
+  virtual auto CreateWriter() -> std::unique_ptr<esc::INodeWriter> = 0;
   virtual auto CreateDrawer() -> std::unique_ptr<esc::INodeDrawer> = 0;
 
   auto GetId() const -> ne::NodeId;
@@ -48,7 +79,7 @@ class INode {
 
  protected:
   INode(ne::NodeId id, std::vector<std::shared_ptr<IPin>> input_pins,
-       std::vector<std::shared_ptr<IPin>> output_pins);
+        std::vector<std::shared_ptr<IPin>> output_pins);
 
  private:
   ne::NodeId id_{};
@@ -57,6 +88,31 @@ class INode {
 };
 
 namespace esc {
+// NOLINTNEXTLINE(*-special-member-functions)
+class INodeFactoryParser {
+ public:
+  virtual ~INodeFactoryParser() = default;
+
+  virtual auto GetTypeName() const -> std::string = 0;
+  virtual auto ParseFromJson(const crude_json::value &json) const
+      -> std::shared_ptr<INodeFactory> = 0;
+
+ protected:
+  INodeFactoryParser() = default;
+};
+
+// NOLINTNEXTLINE(*-special-member-functions)
+class INodeFactoryWriter {
+ public:
+  virtual ~INodeFactoryWriter() = default;
+
+  virtual auto GetTypeName() const -> std::string = 0;
+  virtual auto WriteToJson() const -> crude_json::value = 0;
+
+ protected:
+  INodeFactoryWriter() = default;
+};
+
 // NOLINTNEXTLINE(*-special-member-functions)
 class INodeFactoryDrawer {
  public:
@@ -74,7 +130,10 @@ class INodeFactory {
  public:
   virtual ~INodeFactory() = default;
 
-  virtual auto CreateNode(IdGenerator &id_generator) -> std::shared_ptr<INode> = 0;
+  virtual auto CreateNode(IdGenerator &id_generator)
+      -> std::shared_ptr<INode> = 0;
+  virtual auto CreateNodeParser() -> std::unique_ptr<INodeParser> = 0;
+  virtual auto CreateWriter() -> std::unique_ptr<INodeFactoryWriter> = 0;
   virtual auto CreateDrawer() -> std::unique_ptr<INodeFactoryDrawer> = 0;
 
  protected:

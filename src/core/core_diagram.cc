@@ -22,8 +22,26 @@
 #include "imgui.h"
 
 namespace esc::core {
-Diagram::Diagram(std::vector<std::shared_ptr<INodeFactory>> node_factories)
-    : node_factories_{std::move(node_factories)} {
+Diagram::Diagram(std::vector<std::shared_ptr<INodeFactory>> node_factories,
+                 std::vector<std::shared_ptr<INode>> nodes,
+                 std::vector<Link> links)
+    : node_factories_{std::move(node_factories)},
+      nodes_{std::move(nodes)},
+      links_{std::move(links)} {}
+
+Diagram::~Diagram() {
+  // MOVE TO RAII
+  for (const auto& link : links_) {
+    ne::DeleteLink(link.id);
+  }
+
+  links_.clear();
+
+  for (const auto& node : nodes_) {
+    ne::DeleteNode(node->GetId());
+  }
+
+  nodes_.clear();
 }
 
 auto Diagram::GetNodes() const -> const std::vector<std::shared_ptr<INode>>& {
@@ -64,7 +82,9 @@ auto Diagram::FindLink(ne::LinkId id) -> Link* {
   return nullptr;
 }
 
-auto Diagram::EmplaceLink(const Link& link) -> Link & { links_.emplace_back(link); }
+auto Diagram::EmplaceLink(const Link& link) -> Link& {
+  return links_.emplace_back(link);
+}
 
 void Diagram::EraseLink(ne::LinkId linkId) {
   auto id = std::find_if(links_.begin(), links_.end(),
@@ -110,173 +130,6 @@ auto Diagram::GetSelectedLinkIds() -> std::vector<ne::LinkId> {
 auto Diagram::GetNodeFactories() const
     -> const std::vector<std::shared_ptr<INodeFactory>>& {
   return node_factories_;
-}
-
-void Diagram::SaveToFile(const std::string& file_path) {
-  // auto json = crude_json::value{};
-
-  // {
-  //   json["nodes_size"] = static_cast<crude_json::number>(nodes_.size());
-  //   auto& nodes_json = json["nodes"];
-  //   auto node_index = 0;
-
-  //   for (const auto& node : nodes_) {
-  //     auto& node_json = nodes_json[node_index++];
-
-  //     node_json["id"] = static_cast<crude_json::number>(node->GetId().Get());
-
-  //     if (auto* coupler_node = dynamic_cast<CouplerNode*>(node.get())) {
-  //       node_json["coupler_percentage_index"] =
-  //       static_cast<crude_json::number>(
-  //           coupler_node->GetCouplerPercentageIndex());
-  //     }
-
-  //     const auto pos = ne::GetNodePosition(node->GetId());
-
-  //     node_json["pos_x"] = pos.x;
-  //     node_json["pos_y"] = pos.y;
-
-  //     const auto size = ne::GetNodeSize(node->GetId());
-
-  //     node_json["size_x"] = size.x;
-  //     node_json["size_y"] = size.y;
-
-  //     {
-  //       auto& input_pins_json = node_json["input_pins"];
-  //       auto input_pin_index = 0;
-
-  //       for (const auto& input_pin : node->GetInputPins()) {
-  //         auto& input_pin_json = input_pins_json[input_pin_index++];
-  //         input_pin_json["id"] =
-  //             static_cast<crude_json::number>(input_pin->GetId().Get());
-
-  //         if (auto* float_pin = dynamic_cast<FloatPin*>(input_pin.get())) {
-  //           input_pin_json["value"] = float_pin->GetValue();
-  //         }
-  //       }
-  //     }
-
-  //     {
-  //       auto& output_pins_json = node_json["output_pins"];
-  //       auto output_pin_index = 0;
-
-  //       for (const auto& output_pin : node->GetOutputPins()) {
-  //         auto& output_pin_json = output_pins_json[output_pin_index++];
-  //         output_pin_json["id"] =
-  //             static_cast<crude_json::number>(output_pin->GetId().Get());
-
-  //         if (auto* float_pin = dynamic_cast<FloatPin*>(output_pin.get())) {
-  //           output_pin_json["value"] = float_pin->GetValue();
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-
-  // {
-  //   json["links_size"] = static_cast<crude_json::number>(links_.size());
-  //   auto& links_json = json["links"];
-  //   auto link_index = 0;
-
-  //   for (const auto& link : links_) {
-  //     auto& link_json = links_json[link_index++];
-
-  //     link_json["id"] = static_cast<crude_json::number>(link.id.Get());
-  //     link_json["start_pin_id"] =
-  //         static_cast<crude_json::number>(link.start_pin_id.Get());
-  //     link_json["end_pin_id"] =
-  //         static_cast<crude_json::number>(link.end_pin_id.Get());
-  //   }
-  // }
-
-  // std::cout << "save:" << json.dump() << "\n";
-  // json.save(file_path);
-}
-
-void Diagram::Clear() {
-  for (const auto& link : links_) {
-    ne::DeleteLink(link.id);
-  }
-
-  links_.clear();
-
-  for (const auto& node : nodes_) {
-    ne::DeleteNode(node->GetId());
-  }
-
-  nodes_.clear();
-}
-
-void Diagram::LoadFromFile(const std::string& file_path) {
-  // DeleteAll();
-
-  // const auto json = crude_json::value::load(file_path).first;
-  // const auto nodes_size = json["nodes_size"].get<crude_json::number>();
-  // const auto& nodes_json = json["nodes"];
-
-  // for (auto i = 0; i < nodes_size; ++i) {
-  //   const auto& node_json = nodes_json[i];
-
-  //   auto* node =
-  //       SpawnNodeByTypeName(node_json["name"].get<crude_json::string>());
-
-  //   if (auto* coupler_node = dynamic_cast<CouplerNode*>(node)) {
-  //     coupler_node->SetCouplerPercentageIndex(static_cast<int>(
-  //         node_json["coupler_percentage_index"].get<crude_json::number>()));
-  //   }
-
-  //   {
-  //     const auto& input_pins = node_json["input_pins"];
-
-  //     for (auto i = 0; i < static_cast<int>(node->GetInputPins().size());
-  //     ++i) {
-  //       const auto& input_pin_json = input_pins[i];
-  //       node->GetInputPins()[i]->SetId(static_cast<uint64_t>(
-  //           input_pin_json["id"].get<crude_json::number>()));
-
-  //       if (auto* float_pin =
-  //               dynamic_cast<FloatPin*>(node->GetInputPins()[i].get())) {
-  //         float_pin->SetValue(static_cast<float>(
-  //             input_pin_json["value"].get<crude_json::number>()));
-  //       }
-  //     }
-  //   }
-
-  //   {
-  //     const auto& output_pins = node_json["output_pins"];
-
-  //     for (auto i = 0; i < static_cast<int>(node->GetOutputPins().size());
-  //          ++i) {
-  //       const auto& output_pin_json = output_pins[i];
-  //       node->GetOutputPins()[i]->SetId(static_cast<uint64_t>(
-  //           output_pin_json["id"].get<crude_json::number>()));
-
-  //       if (auto* float_pin =
-  //               dynamic_cast<FloatPin*>(node->GetOutputPins()[i].get())) {
-  //         float_pin->SetValue(static_cast<float>(
-  //             output_pin_json["value"].get<crude_json::number>()));
-  //       }
-  //     }
-  //   }
-
-  //   ne::SetNodePosition(
-  //       node->GetId(),
-  //       {static_cast<float>(node_json["pos_x"].get<crude_json::number>()),
-  //        static_cast<float>(node_json["pos_y"].get<crude_json::number>())});
-  // }
-
-  // const auto links_size = json["links_size"].get<crude_json::number>();
-  // const auto& links_json = json["links"];
-
-  // for (auto i = 0; i < links_size; ++i) {
-  //   const auto& link_json = links_json[i];
-
-  //   AddLink({static_cast<uint64_t>(link_json["id"].get<crude_json::number>()),
-  //              static_cast<uint64_t>(
-  //                  link_json["start_pin_id"].get<crude_json::number>()),
-  //              static_cast<uint64_t>(
-  //                  link_json["end_pin_id"].get<crude_json::number>())});
-  // }
 }
 
 void Diagram::OnFrame() {

@@ -8,6 +8,7 @@
 #include <imfilebrowser.h>
 
 #include "draw_i_drawable.h"
+#include "esc_app_state.h"
 
 namespace esc::draw {
 class IFileDialog : public IDrawable {
@@ -15,13 +16,17 @@ class IFileDialog : public IDrawable {
   void Draw() override;
 
  protected:
-  explicit IFileDialog(const ImGui::FileBrowser &dialog);
+  IFileDialog(std::shared_ptr<AppState> app_state,
+              const ImGui::FileBrowser &dialog);
+
+  auto GetAppState() const -> AppState &;
 
  private:
   void OnVisibleChanged() override;
 
   virtual void OnFileSelected(std::string file_path) const = 0;
 
+  std::shared_ptr<AppState> app_state_{};
   ImGui::FileBrowser dialog_{};
 };
 }  // namespace esc::draw

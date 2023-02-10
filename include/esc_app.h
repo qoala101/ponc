@@ -6,9 +6,10 @@
 
 #include <memory>
 
-#include "esc_id_generator.h"
-#include "esc_left_pane.h"
+#include "core_app.h"
 #include "core_diagram.h"
+#include "draw_main_window.h"
+#include "esc_app_state.h"
 #include "esc_textures_handle.h"
 #include "imgui.h"
 
@@ -39,7 +40,6 @@ class App : public Application, public std::enable_shared_from_this<App> {
   virtual ~App() = default;
 
   auto GetTextures() -> esc::TexturesHandle&;
-  auto GetDiagram() -> core::Diagram&;
 
   void ShowFlow();
 
@@ -48,8 +48,6 @@ class App : public Application, public std::enable_shared_from_this<App> {
   void OnStart() override;
   void OnStop() override;
   auto GetWindowFlags() const -> ImGuiWindowFlags override;
-
-  auto GetIdGenerator() -> esc::IdGenerator& { return *id_generator_; }
 
  private:
   void OnFrame(float deltaTime) override;
@@ -68,16 +66,14 @@ class App : public Application, public std::enable_shared_from_this<App> {
   auto CalculateAlphaForPin(const IPin& pin);
 
   auto IsPinLinked(ne::PinId id) const -> bool;
-  void AddLinkFromPinToNode(ne::LinkId link_id, const IPin *pin,
-                            const INode *node);
+  void AddLinkFromPinToNode(ne::LinkId link_id, const IPin* pin,
+                            const INode* node);
 
-  std::shared_ptr<esc::IdGenerator> id_generator_{};  
-  std::optional<core::Diagram> diagram_;
-
+  
+  std::optional<std::shared_ptr<AppState>> app_state_{};
   std::optional<esc::EditorContextHandle> editor_context_{};
-  std::optional<esc::TexturesHandle> textures_{};
-  std::optional<esc::LeftPane> left_pane_;
-  std::optional<draw::MenuBar> menu_bar_;
+  std::optional<esc::TexturesHandle> textures_{};  
+  std::optional<draw::MainWindow> main_window_;
 
   struct PopupState {
     ne::NodeId context_node_id{};
@@ -89,9 +85,6 @@ class App : public Application, public std::enable_shared_from_this<App> {
     IPin* not_yet_connected_pin_of_new_link{};
     IPin* connect_new_node_to_existing_pin{};
   } drawing_state_{};
-
-  float left_pane_width{};
-  float right_pane_width{};
 };
 }  // namespace esc
 

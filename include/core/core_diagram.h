@@ -11,7 +11,16 @@
 namespace esc::core {
 class Diagram {
  public:
-  explicit Diagram(std::vector<std::shared_ptr<INodeFactory>>);
+  Diagram(std::vector<std::shared_ptr<INodeFactory>> node_factories,
+          std::vector<std::shared_ptr<INode>> nodes, std::vector<Link> links);
+
+  Diagram(const Diagram &) = delete;
+  Diagram(Diagram &&) noexcept = default;
+
+  auto operator=(const Diagram &) noexcept -> Diagram & = delete;
+  auto operator=(Diagram &&) noexcept -> Diagram & = default;
+
+  ~Diagram();
 
   auto GetNodeFactories() const
       -> const std::vector<std::shared_ptr<INodeFactory>> &;
@@ -27,17 +36,9 @@ class Diagram {
   auto FindNode(ne::NodeId id) -> INode *;
   auto FindPin(ne::PinId id) -> IPin *;
   auto FindLink(ne::LinkId id) -> Link *;
-  
-  void Clear();
 
   static auto GetSelectedNodeIds() -> std::vector<ne::NodeId>;
   static auto GetSelectedLinkIds() -> std::vector<ne::LinkId>;
-
-
-
-
-  void LoadFromFile(const std::string &file_path);
-  void SaveToFile(const std::string &file_path);
 
   void OnFrame();
   void UpdateNodePointerOnPins();

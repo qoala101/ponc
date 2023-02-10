@@ -13,15 +13,15 @@ auto AsLowerCase(std::string text) {
 }
 }  // namespace
 
-SaveAsFileDialog::SaveAsFileDialog()
-    : IFileDialog{[]() {
-        auto dialog =
-            ImGui::FileBrowser{ImGuiFileBrowserFlags_EnterNewFilename |
-                               ImGuiFileBrowserFlags_CreateNewDir |
-                               ImGuiFileBrowserFlags_CloseOnEsc};
-        dialog.SetTitle("Save Diagram As JSON");
-        return dialog;
-      }()} {}
+SaveAsFileDialog::SaveAsFileDialog(std::shared_ptr<AppState> app_state)
+    : IFileDialog{std::move(app_state), []() {
+                    auto dialog = ImGui::FileBrowser{
+                        ImGuiFileBrowserFlags_EnterNewFilename |
+                        ImGuiFileBrowserFlags_CreateNewDir |
+                        ImGuiFileBrowserFlags_CloseOnEsc};
+                    dialog.SetTitle("Save Diagram As JSON");
+                    return dialog;
+                  }()} {}
 
 void SaveAsFileDialog::OnFileSelected(std::string file_path) const {
   if (const auto not_json_extension =
@@ -29,6 +29,6 @@ void SaveAsFileDialog::OnFileSelected(std::string file_path) const {
     file_path += ".json";
   }
 
-  // app_->GetDiagram().SaveToFile(selected_file_path);
+  GetAppState().SaveDiagramToFile(file_path);
 }
 }  // namespace esc::draw
