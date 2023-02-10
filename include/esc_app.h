@@ -21,8 +21,10 @@
 #include <utility>
 #include <vector>
 
+#include "draw_menu_bar.h"
 #include "esc_editor_context_handle.h"
 
+namespace esc {
 // NOLINTNEXTLINE(*-multiple-inheritance)
 class App : public Application, public std::enable_shared_from_this<App> {
  public:
@@ -36,15 +38,16 @@ class App : public Application, public std::enable_shared_from_this<App> {
 
   virtual ~App() = default;
 
-  auto GetTextures  () -> esc::TexturesHandle&;
-  auto GetNodesAndLinks  () -> esc::NodesAndLinks&;
+  auto GetTextures() -> esc::TexturesHandle&;
+  auto GetNodesAndLinks() -> esc::NodesAndLinks&;
 
   void ShowFlow();
 
-  auto GetTextureDims  (ImTextureID texture_id) -> ImVec2;
+  auto GetTextureDims(ImTextureID texture_id) -> ImVec2;
 
   void OnStart() override;
   void OnStop() override;
+  auto GetWindowFlags() const -> ImGuiWindowFlags override;
 
   auto GetIdGenerator() -> esc::IdGenerator& { return *id_generator_; }
 
@@ -69,6 +72,7 @@ class App : public Application, public std::enable_shared_from_this<App> {
   std::optional<esc::EditorContextHandle> editor_context_{};
   std::optional<esc::TexturesHandle> textures_{};
   std::optional<esc::LeftPane> left_pane_;
+  std::optional<draw::MenuBar> menu_bar_;
   std::optional<esc::NodesAndLinks> nodes_and_links_;
 
   struct PopupState {
@@ -85,5 +89,6 @@ class App : public Application, public std::enable_shared_from_this<App> {
   float left_pane_width{};
   float right_pane_width{};
 };
+}  // namespace esc
 
 #endif  // VH_ESC_APP_H_

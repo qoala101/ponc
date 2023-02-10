@@ -7,9 +7,9 @@
 
 #include <imfilebrowser.h>
 
+namespace esc {
 class App;
 
-namespace esc {
 class LeftPane {
  public:
   explicit LeftPane(std::shared_ptr<App> app);
@@ -18,11 +18,8 @@ class LeftPane {
 
  private:
   void DrawMenu(float pane_width);
-  void DrawDialog();
 
   std::shared_ptr<App> app_;
-  ImGui::FileBrowser open_file_dialog_{};
-  ImGui::FileBrowser save_as_file_dialog_{};
 };
 }  // namespace esc
 

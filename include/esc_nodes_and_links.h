@@ -8,9 +8,9 @@
 #include "esc_types.h"
 #include "imgui_node_editor.h"
 
+namespace esc {
 class App;
 
-namespace esc {
 class NodesAndLinks {
  public:
   NodesAndLinks(std::shared_ptr<App> app,

@@ -3,7 +3,7 @@
 #include "esc_app.h"
 
 auto Main(int argc, char **argv) -> int {
-  auto example = std::make_shared<App>("ESC", argc, argv);
+  auto example = std::make_shared<esc::App>("ESC", argc, argv);
 
   if (!example->Create()) {
     return 0;

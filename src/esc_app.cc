@@ -32,6 +32,7 @@
 #include <utility>
 #include <vector>
 
+namespace esc {
 namespace ne = ax::NodeEditor;
 
 namespace {
@@ -238,6 +239,7 @@ void App::OnStart() {
   editor_context_.emplace();
   textures_.emplace(shared_from_this());
   left_pane_.emplace(shared_from_this());
+  menu_bar_.emplace();
 
   auto node_factories = std::vector<std::shared_ptr<esc::INodeFactory>>{
       esc::CreateInputNodeFactory(), esc::CreateClientNodeFactory(),
@@ -252,10 +254,15 @@ void App::OnStart() {
 // vh: norm
 void App::OnStop() {
   nodes_and_links_.reset();
+  menu_bar_.reset();
   left_pane_.reset();
   textures_.reset();
   editor_context_.reset();
 }
+auto App::GetWindowFlags() const -> ImGuiWindowFlags {
+  return Application::GetWindowFlags() | ImGuiWindowFlags_MenuBar;
+}
+
 // vh: ok
 void App::OnFrame(float /*unused*/) {
   nodes_and_links_->OnFrame();
@@ -366,7 +373,7 @@ void App::DrawContextMenuProcess() {
         ImGui::Separator();
 
         for (const auto& node_factory : nodes_and_links_->GetNodeFactories()) {
-          auto drawer =  node_factory->CreateDrawer();
+          auto drawer = node_factory->CreateDrawer();
 
           if (ImGui::MenuItem(
                   node_factory->CreateDrawer()->GetLabel().c_str())) {
@@ -571,9 +578,11 @@ void App::DrawNodeEditor() {
 // vh: bad
 void App::DrawFrame() {
   DrawSplitter(4.0F, &left_pane_width, &right_pane_width, 50.0F, 50.0F);
+  menu_bar_->Draw();
   left_pane_->Draw(left_pane_width - 4.0F);
   ImGui::SameLine(0.0F, 10.0F);
   DrawNodeEditor();
   ImGui::ShowDemoWindow();
   ImGui::ShowMetricsWindow();
 }
+}  // namespace esc
