@@ -36,12 +36,12 @@ class App : public Application, public std::enable_shared_from_this<App> {
 
   virtual ~App() = default;
 
-  auto GetTextures [[nodiscard]] () -> esc::TexturesHandle&;
-  auto GetNodesAndLinks [[nodiscard]] () -> esc::NodesAndLinks&;
+  auto GetTextures  () -> esc::TexturesHandle&;
+  auto GetNodesAndLinks  () -> esc::NodesAndLinks&;
 
   void ShowFlow();
 
-  auto GetTextureDims [[nodiscard]] (ImTextureID texture_id) -> ImVec2;
+  auto GetTextureDims  (ImTextureID texture_id) -> ImVec2;
 
   void OnStart() override;
   void OnStop() override;
@@ -55,7 +55,7 @@ class App : public Application, public std::enable_shared_from_this<App> {
 
   void DrawContextMenuProcess();
   void DrawFrame();
-  void DrawNode(Node& node);
+  void DrawNode(INode& node);
   void DrawNodeEditor();
   void DrawNodes();
   void DrawLinks();

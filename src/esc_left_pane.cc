@@ -17,7 +17,7 @@ namespace ne = ax::NodeEditor;
 namespace esc {
 namespace {
 // vh: norm
-void DrawNode(Node& node, bool is_selected) {
+void DrawNode(INode& node, bool is_selected) {
   const auto& io = ImGui::GetIO();
 
   {
@@ -160,7 +160,7 @@ void LeftPane::DrawDialog() {
       selected_file_path += ".json";
     }
 
-    app_->GetNodesAndLinks().SafeToFile(selected_file_path);
+    app_->GetNodesAndLinks().SaveToFile(selected_file_path);
   }
 }
 }  // namespace esc

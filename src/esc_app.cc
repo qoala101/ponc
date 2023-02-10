@@ -8,9 +8,11 @@
 #include <ios>
 #include <memory>
 
+#include "core_client_node.h"
 #include "core_coupler_node.h"
 #include "core_float_pin.h"
-#include "core_i_node_factory.h"
+#include "core_input_node.h"
+#include "core_splitter_node.h"
 #include "esc_cpp.h"
 #include "esc_enums.h"
 #include "esc_id_generator.h"
@@ -34,7 +36,7 @@ namespace ne = ax::NodeEditor;
 
 namespace {
 // vh: ok
-auto GetItemRect [[nodiscard]] () {
+auto GetItemRect() {
   return ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
 }
 // vh: ok
@@ -43,7 +45,7 @@ struct Xy {
   float y{};
 };
 // vh: ok
-auto GetExpandedRect [[nodiscard]] (const ImRect& rect, const Xy& xy) {
+auto GetExpandedRect(const ImRect& rect, const Xy& xy) {
   auto result = rect;
   result.Min.x -= xy.x;
   result.Min.y -= xy.y;
@@ -179,23 +181,23 @@ void DrawPinField(Pin& pin) {
   ImGui::Spring(0);
 }
 // vh: bad
-void DrawNodeHeader(Node& node) {
+void DrawNodeHeader(INode& node) {
   ImGui::Spring(0);
   ImGui::TextUnformatted(node.CreateDrawer()->GetLabel().c_str());
   ImGui::Spring(1);
   ImGui::Dummy(ImVec2{0, 28});
   ImGui::Spring(0);
 
-  if (auto* coupler_node = dynamic_cast<esc::CouplerNode*>(&node)) {
-    ImGui::SetNextItemWidth(100);
-    const auto& coupler_percentage_names = GetCouplerPercentageNames();
-    ImGui::SliderInt(
-        "", &coupler_node->GetCouplerPercentageIndex(), 0,
-        static_cast<int>(coupler_percentage_names.size()) - 1,
-        coupler_percentage_names[coupler_node->GetCouplerPercentageIndex()]
-            .c_str());
-    ImGui::Spring(0);
-  }
+  // if (auto* coupler_node = dynamic_cast<esc::CouplerNode*>(&node)) {
+  //   ImGui::SetNextItemWidth(100);
+  //   const auto& coupler_percentage_names = GetCouplerPercentageNames();
+  //   ImGui::SliderInt(
+  //       "", &coupler_node->GetCouplerPercentageIndex(), 0,
+  //       static_cast<int>(coupler_percentage_names.size()) - 1,
+  //       coupler_percentage_names[coupler_node->GetCouplerPercentageIndex()]
+  //           .c_str());
+  //   ImGui::Spring(0);
+  // }
 }
 // vh: norm
 void DrawHintLabel(const char* label, const ImColor& color) {
@@ -236,8 +238,16 @@ void App::OnStart() {
   editor_context_.emplace();
   textures_.emplace(shared_from_this());
   left_pane_.emplace(shared_from_this());
-  nodes_and_links_.emplace(shared_from_this(),
-                           std::vector<std::shared_ptr<esc::INodeFactory>>{});
+
+  auto node_factories = std::vector<std::shared_ptr<esc::INodeFactory>>{
+      esc::CreateInputNodeFactory(), esc::CreateClientNodeFactory(),
+      esc::CreateCouplerNodeFactory()};
+
+  for (auto num_outputs : {2, 4, 8, 16}) {
+    node_factories.emplace_back(esc::CreateSplitterNodeFactory(num_outputs));
+  }
+
+  nodes_and_links_.emplace(shared_from_this(), std::move(node_factories));
 }
 // vh: norm
 void App::OnStop() {
@@ -355,23 +365,21 @@ void App::DrawContextMenuProcess() {
         ImGui::TextUnformatted("Create New Node");
         ImGui::Separator();
 
-        for (const auto& node_type_name :
-             esc::NodesAndLinks::GetNodeTypeNames()) {
-          if (ImGui::MenuItem(node_type_name.c_str())) {
-            auto* new_node =
-                nodes_and_links_->SpawnNodeByTypeName(node_type_name);
+        for (const auto& node_factory : nodes_and_links_->GetNodeFactories()) {
+          auto drawer =  node_factory->CreateDrawer();
 
-            if (new_node == nullptr) {
-              continue;
-            }
+          if (ImGui::MenuItem(
+                  node_factory->CreateDrawer()->GetLabel().c_str())) {
+            auto& new_node = nodes_and_links_->EmplaceNode(
+                node_factory->CreateNode(*id_generator_));
 
-            ne::SetNodePosition(new_node->GetId(), open_popup_pos);
+            ne::SetNodePosition(new_node.GetId(), open_popup_pos);
 
             if (const auto node_created_by_link_from_existing_one =
                     drawing_state_.connect_new_node_to_existing_pin !=
                     nullptr) {
               nodes_and_links_->SpawnLinkFromPinToNode(
-                  drawing_state_.connect_new_node_to_existing_pin, new_node);
+                  drawing_state_.connect_new_node_to_existing_pin, &new_node);
             }
 
             break;
@@ -394,7 +402,7 @@ auto App::CalculateAlphaForPin(const Pin& pin) {
   return alpha;
 }
 // vh: bad
-void App::DrawNode(Node& node) {
+void App::DrawNode(INode& node) {
   auto node_builder = esc::NodeDrawer{node.GetId()};
 
   const auto header_texture =

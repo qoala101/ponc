@@ -8,35 +8,46 @@
 #include <vector>
 
 #include "core_pin.h"
-#include "ui_i_node_drawer.h"
+#include "esc_id_generator.h"
 
 namespace ne = ax::NodeEditor;
 
-class Node {
+namespace esc {
+// NOLINTNEXTLINE(*-special-member-functions)
+class INodeDrawer {
  public:
-  Node(const Node &) = delete;
-  Node(Node &&) noexcept = delete;
+  virtual ~INodeDrawer() = default;
 
-  auto operator=(const Node &) noexcept -> Node & = delete;
-  auto operator=(Node &&) noexcept -> Node & = delete;
-
-  virtual ~Node() = default;
-
-  virtual auto CreateDrawer [[nodiscard]] ()
-  -> std::unique_ptr<esc::INodeDrawer> = 0;
-
-  auto GetId [[nodiscard]] () const -> ne::NodeId;
-
-  auto GetInputPins [[nodiscard]] () const
-      -> const std::vector<std::shared_ptr<Pin>> &;
-  auto GetInputPins [[nodiscard]] () -> std::vector<std::shared_ptr<Pin>> &;
-
-  auto GetOutputPins [[nodiscard]] () const
-      -> const std::vector<std::shared_ptr<Pin>> &;
-  auto GetOutputPins [[nodiscard]] () -> std::vector<std::shared_ptr<Pin>> &;
+  virtual auto GetLabel() const -> std::string = 0;
+  virtual auto GetColor() const -> ImColor = 0;
 
  protected:
-  Node(ne::NodeId id, std::vector<std::shared_ptr<Pin>> input_pins,
+  INodeDrawer() = default;
+};
+}  // namespace esc
+
+class INode {
+ public:
+  INode(const INode &) = delete;
+  INode(INode &&) noexcept = delete;
+
+  auto operator=(const INode &) noexcept -> INode & = delete;
+  auto operator=(INode &&) noexcept -> INode & = delete;
+
+  virtual ~INode() = default;
+
+  virtual auto CreateDrawer() -> std::unique_ptr<esc::INodeDrawer> = 0;
+
+  auto GetId() const -> ne::NodeId;
+
+  auto GetInputPins() const -> const std::vector<std::shared_ptr<Pin>> &;
+  auto GetInputPins() -> std::vector<std::shared_ptr<Pin>> &;
+
+  auto GetOutputPins() const -> const std::vector<std::shared_ptr<Pin>> &;
+  auto GetOutputPins() -> std::vector<std::shared_ptr<Pin>> &;
+
+ protected:
+  INode(ne::NodeId id, std::vector<std::shared_ptr<Pin>> input_pins,
        std::vector<std::shared_ptr<Pin>> output_pins);
 
  private:
@@ -44,5 +55,31 @@ class Node {
   std::vector<std::shared_ptr<Pin>> input_pins_{};
   std::vector<std::shared_ptr<Pin>> output_pins_{};
 };
+
+namespace esc {
+// NOLINTNEXTLINE(*-special-member-functions)
+class INodeFactoryDrawer {
+ public:
+  virtual ~INodeFactoryDrawer() = default;
+
+  virtual auto GetLabel() const -> std::string = 0;
+  virtual auto GetColor() const -> ImColor = 0;
+
+ protected:
+  INodeFactoryDrawer() = default;
+};
+
+// NOLINTNEXTLINE(*-special-member-functions)
+class INodeFactory {
+ public:
+  virtual ~INodeFactory() = default;
+
+  virtual auto CreateNode(IdGenerator &id_generator) -> std::shared_ptr<INode> = 0;
+  virtual auto CreateDrawer() -> std::unique_ptr<INodeFactoryDrawer> = 0;
+
+ protected:
+  INodeFactory() = default;
+};
+}  // namespace esc
 
 #endif  // VH_CORE_NODE_H_

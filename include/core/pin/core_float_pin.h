@@ -8,9 +8,9 @@ class FloatPin : public Pin {
   explicit FloatPin(ne::PinId id, std::string name, PinKind kind,
                     bool editable);
 
-  auto GetType [[nodiscard]] () const -> PinType override;
+  auto GetType  () const -> PinType override;
 
-  auto GetValue [[nodiscard]] () -> float &;
+  auto GetValue  () -> float &;
   void SetValue(float value);
 
  private:

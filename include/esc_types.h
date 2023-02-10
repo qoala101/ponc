@@ -27,11 +27,11 @@
 
 namespace ne = ax::NodeEditor;
 
-auto CanCreateLink [[nodiscard]] (const Pin* left, const Pin* right) -> bool;
+auto CanCreateLink  (const Pin* left, const Pin* right) -> bool;
 
-auto GetCouplerPercentageNames [[nodiscard]] ()
+auto GetCouplerPercentageNames  ()
 -> const std::vector<std::string>&;
-auto GetCouplerPercentageValues [[nodiscard]] ()
+auto GetCouplerPercentageValues  ()
 -> const std::vector<std::pair<float, float>>&;
 
 struct TextureWithDims {

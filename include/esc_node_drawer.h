@@ -24,11 +24,11 @@ class NodeDrawer {
 
   ~NodeDrawer();
 
-  auto AddHeader [[nodiscard]] (const TextureWithDims& header_texture,
+  auto AddHeader  (const TextureWithDims& header_texture,
                                 const ImColor& header_color)
   -> cpp::ScopeFunction;
 
-  auto AddPin [[nodiscard]] (ne::PinId id, ne::PinKind kind)
+  auto AddPin  (ne::PinId id, ne::PinKind kind)
   -> cpp::ScopeFunction;
 
  private:

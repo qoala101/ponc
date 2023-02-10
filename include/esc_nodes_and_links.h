@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include "core_i_node_factory.h"
+#include "core_node.h"
 #include "esc_types.h"
 #include "imgui_node_editor.h"
 
@@ -16,24 +16,17 @@ class NodesAndLinks {
   NodesAndLinks(std::shared_ptr<App> app,
                 std::vector<std::shared_ptr<INodeFactory>>);
 
-  static auto GetSelectedNodeIds [[nodiscard]] () -> std::vector<ne::NodeId>;
-  static auto GetSelectedLinkIds [[nodiscard]] () -> std::vector<ne::LinkId>;
+  static auto GetSelectedNodeIds() -> std::vector<ne::NodeId>;
+  static auto GetSelectedLinkIds() -> std::vector<ne::LinkId>;
 
-  static auto GetNodeTypeNames [[nodiscard]] () -> std::vector<std::string>;
+  auto GetNodeFactories() -> std::vector<std::shared_ptr<INodeFactory>> &;
 
-  auto SpawnInputNode() -> Node *;
-  auto SpawnClientNode() -> Node *;
-  auto SpawnCouplerNode() -> Node *;
-  auto SpawnSplitterNode(int n) -> Node *;
+  auto GetNodes() -> std::vector<std::shared_ptr<INode>> &;  // return weaks
+  auto GetLinks() const -> const std::vector<Link> &;
 
-  auto SpawnNodeByTypeName [[nodiscard]] (const std::string &type_name)
-  -> Node *;
+  auto EmplaceNode(std::shared_ptr<INode> node) -> INode &;
 
-  auto GetNodes [[nodiscard]] ()
-  -> std::vector<std::shared_ptr<Node>> &;  // return weaks
-  auto GetLinks [[nodiscard]] () const -> const std::vector<Link> &;
-
-  auto FindNode(ne::NodeId id) -> Node *;
+  auto FindNode(ne::NodeId id) -> INode *;
   auto FindPin(ne::PinId id) -> Pin *;
 
   auto FindLink(ne::LinkId id) -> Link *;
@@ -43,10 +36,10 @@ class NodesAndLinks {
   void EraseLinkWithId(ne::LinkId id);
   void EraseNodeWithId(ne::NodeId id);
 
-  void SpawnLinkFromPinToNode(const Pin *pin, const Node *node);
+  void SpawnLinkFromPinToNode(const Pin *pin, const INode *node);
 
   void LoadFromFile(const std::string &file_path);
-  void SafeToFile(const std::string &file_path);
+  void SaveToFile(const std::string &file_path);
   void DeleteAll();
 
   void OnFrame();
@@ -56,7 +49,7 @@ class NodesAndLinks {
 
  private:
   std::shared_ptr<App> app_{};
-  std::vector<std::shared_ptr<Node>> nodes_{};
+  std::vector<std::shared_ptr<INode>> nodes_{};
   std::vector<Link> links_{};
 
   std::vector<std::shared_ptr<INodeFactory>> node_factories_{};

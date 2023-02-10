@@ -8,7 +8,7 @@ class EmptyPin : public Pin {
  public:
   explicit EmptyPin(ne::PinId id, PinKind kind);
 
-  auto GetType [[nodiscard]] () const -> PinType override;
+  auto GetType  () const -> PinType override;
 };
 
 #endif  // VH_CORE_EMPTY_PIN_H_

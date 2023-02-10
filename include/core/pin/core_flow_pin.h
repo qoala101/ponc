@@ -8,7 +8,7 @@ class FlowPin : public FloatPin {
  public:
   explicit FlowPin(ne::PinId id, PinKind kind, bool editable);
 
-  auto GetType [[nodiscard]] () const -> PinType override;
+  auto GetType  () const -> PinType override;
 };
 
 #endif  // VH_CORE_FLOW_PIN_H_

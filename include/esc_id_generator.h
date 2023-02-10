@@ -7,7 +7,7 @@ namespace esc {
 class IdGenerator {
  public:
   template <typename T>
-  auto GetNext [[nodiscard]] () -> T {
+  auto GetNext  () -> T {
     return T{next_value_++};
   }
 

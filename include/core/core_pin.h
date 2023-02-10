@@ -9,7 +9,7 @@
 
 namespace ne = ax::NodeEditor;
 
-class Node;
+class INode;
 
 class Pin {
  public:
@@ -18,20 +18,20 @@ class Pin {
   Pin(const Pin &) = delete;
   Pin(Pin &&) noexcept = delete;
 
-  auto operator=(const Pin &) noexcept -> Node & = delete;
-  auto operator=(Pin &&) noexcept -> Node & = delete;
+  auto operator=(const Pin &) noexcept -> INode & = delete;
+  auto operator=(Pin &&) noexcept -> INode & = delete;
 
   virtual ~Pin() = default;
 
-  auto GetId [[nodiscard]] () const -> ne::PinId;
+  auto GetId  () const -> ne::PinId;
   void SetId(ne::PinId id);
 
-  virtual auto GetType [[nodiscard]] () const -> PinType = 0;
+  virtual auto GetType  () const -> PinType = 0;
 
   struct {
     std::string Name{};
     bool editable{};
-    Node *node;
+    INode *node;
     PinKind Kind;
   } ui_data_{};
 
