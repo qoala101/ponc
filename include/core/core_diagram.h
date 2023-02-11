@@ -4,8 +4,8 @@
 #include <memory>
 #include <vector>
 
+#include "core_i_family.h"
 #include "core_i_node.h"
-#include "core_i_node_factory.h"
 #include "core_link.h"
 #include "draw_i_pin_drawer.h"
 #include "imgui_node_editor.h"
@@ -13,9 +13,8 @@
 namespace esc::core {
 class Diagram {
  public:
-  explicit Diagram(
-      std::vector<std::shared_ptr<INodeFactory>> node_factories = {},
-      std::vector<Link> links = {});
+  explicit Diagram(std::vector<std::shared_ptr<IFamily>> families = {},
+                   std::vector<Link> links = {});
 
   Diagram(const Diagram &) = delete;
   Diagram(Diagram &&) noexcept = default;
@@ -25,8 +24,7 @@ class Diagram {
 
   ~Diagram();
 
-  auto GetNodeFactories() const
-      -> const std::vector<std::shared_ptr<INodeFactory>> &;
+  auto GetFamilies() const -> const std::vector<std::shared_ptr<IFamily>> &;
   auto GetLinks() const -> const std::vector<Link> &;
 
   auto EmplaceLink(const Link &link) -> Link &;
@@ -46,7 +44,7 @@ class Diagram {
   void ClearAllValuesExceptInput();
 
  private:
-  std::vector<std::shared_ptr<INodeFactory>> node_factories_{};
+  std::vector<std::shared_ptr<IFamily>> families_{};
   std::vector<Link> links_{};
 };
 }  // namespace esc::core

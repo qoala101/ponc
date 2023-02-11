@@ -14,7 +14,5 @@ auto App::GetDiagram() -> Diagram * {
   return &*diagram_;
 }
 
-void App::SetDiagram(Diagram diagram) {
-  diagram_ = std::move(diagram);
-}
+void App::SetDiagram(Diagram diagram) { diagram_ = std::move(diagram); }
 }  // namespace esc::core

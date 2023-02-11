@@ -1,4 +1,4 @@
-#include "json_i_node_factory_writer.h"
+#include "json_i_family_writer.h"
 
 #include "json_i_node_writer.h"
 
@@ -16,13 +16,13 @@ void WriteNodes(const std::vector<std::shared_ptr<core::INode>>& nodes,
 }
 }  // namespace
 
-auto INodeFactoryWriter::WriteToJson(
-    const core::INodeFactory& node_factory) const -> crude_json::value {
+auto IFamilyWriter::WriteToJson(const core::IFamily& family) const
+    -> crude_json::value {
   auto json = crude_json::value{};
 
   json["type"] = GetTypeName();
   json["data"] = WriteToJson();
-  WriteNodes(node_factory.GetNodes(), json);
+  WriteNodes(family.GetNodes(), json);
 
   return json;
 }

@@ -112,7 +112,7 @@ endmacro()
 add_example_executable(esc
   core/core_app.cc
   core/core_diagram.cc
-  core/core_i_node_factory.cc
+  core/core_i_family.cc
   core/core_i_node.cc
   core/core_id_generator.cc
   cpp/cpp_assert.cc
@@ -121,22 +121,23 @@ add_example_executable(esc
   draw/pin/draw_flow_input_pin_drawer.cc
   draw/pin/draw_flow_output_pin_drawer.cc
   draw/draw_constants.cc
+  draw/draw_families_view.cc
   draw/draw_i_drawable.cc
   draw/draw_i_file_dialog.cc
   draw/draw_i_pin_drawer.cc
   draw/draw_main_window.cc
   draw/draw_menu_bar.cc
-  draw/draw_node_factories_view.cc
   draw/draw_nodes_view.cc
   draw/draw_open_file_dialog.cc
   draw/draw_save_as_file_dialog.cc
   json/json_diagram_serializer.cc
-  json/json_i_node_factory_parser.cc
-  json/json_i_node_factory_writer.cc
+  json/json_i_family_parser.cc
+  json/json_i_family_writer.cc
   json/json_i_node_parser.cc
   json/json_i_node_writer.cc
   json/json_link_serializer.cc
   impl/impl_client_node.cc
+
   # impl/impl_coupler_node.cc
   impl/impl_input_node.cc
   impl/impl_splitter_node.cc

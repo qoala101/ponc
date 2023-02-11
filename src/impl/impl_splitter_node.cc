@@ -8,18 +8,18 @@
 #include "crude_json.h"
 #include "draw_flow_input_pin_drawer.h"
 #include "draw_flow_output_pin_drawer.h"
+#include "draw_i_family_drawer.h"
 #include "draw_i_node_drawer.h"
-#include "draw_i_node_factory_drawer.h"
 #include "draw_i_pin_drawer.h"
 #include "imgui_node_editor.h"
-#include "json_i_node_factory_writer.h"
+#include "json_i_family_writer.h"
 #include "json_i_node_parser.h"
 #include "json_i_node_writer.h"
 
 namespace esc::impl {
 namespace {
 class Node;
-class NodeFactory;
+class Family;
 
 constexpr auto kTypeName = "SplitterNode";
 
@@ -27,10 +27,10 @@ auto CreateNodeWriter(std::shared_ptr<Node> node)
     -> std::unique_ptr<json::INodeWriter>;
 auto CreateNodeDrawer(std::shared_ptr<Node> node)
     -> std::unique_ptr<draw::INodeDrawer>;
-auto CreateNodeFactoryWriter(std::shared_ptr<NodeFactory> node_factory)
-    -> std::unique_ptr<json::INodeFactoryWriter>;
-auto CreateNodeFactoryDrawer(std::shared_ptr<NodeFactory> node_factory)
-    -> std::unique_ptr<draw::INodeFactoryDrawer>;
+auto CreateFamilyWriter(std::shared_ptr<Family> family)
+    -> std::unique_ptr<json::IFamilyWriter>;
+auto CreateFamilyDrawer(std::shared_ptr<Family> family)
+    -> std::unique_ptr<draw::IFamilyDrawer>;
 
 // NOLINTNEXTLINE(*-multiple-inheritance)
 class Node : public core::INode, public std::enable_shared_from_this<Node> {
@@ -118,13 +118,13 @@ class NodeDrawer : public draw::INodeDrawer {
   explicit NodeDrawer(std::shared_ptr<Node> node) : node_{std::move(node)} {}
 
   auto GetLabel() const -> std::string override {
-    return SplitterNode::CreateNodeFactory(node_->GetNumOutputs())
+    return SplitterNode::CreateFamily(node_->GetNumOutputs())
         ->CreateDrawer()
         ->GetLabel();
   }
 
   auto GetColor() const -> ImColor override {
-    return SplitterNode::CreateNodeFactory(node_->GetNumOutputs())
+    return SplitterNode::CreateFamily(node_->GetNumOutputs())
         ->CreateDrawer()
         ->GetColor();
   }
@@ -154,12 +154,12 @@ auto CreateNodeDrawer(std::shared_ptr<Node> node)
 }
 
 // NOLINTNEXTLINE(*-multiple-inheritance)
-class NodeFactory : public core::INodeFactory,
-                    public std::enable_shared_from_this<NodeFactory> {
+class Family : public core::IFamily,
+               public std::enable_shared_from_this<Family> {
  public:
-  explicit NodeFactory(int num_outputs,
-                       std::vector<std::shared_ptr<core::INode>> nodes = {})
-      : INodeFactory{std::move(nodes)}, num_outputs_{num_outputs} {}
+  explicit Family(int num_outputs,
+                  std::vector<std::shared_ptr<core::INode>> nodes = {})
+      : IFamily{std::move(nodes)}, num_outputs_{num_outputs} {}
 
   auto CreateNode(core::IdGenerator& id_generator)
       -> std::shared_ptr<core::INode> override {
@@ -182,12 +182,12 @@ class NodeFactory : public core::INodeFactory,
     return std::make_unique<NodeParser>();
   }
 
-  auto CreateWriter() -> std::unique_ptr<json::INodeFactoryWriter> override {
-    return CreateNodeFactoryWriter(shared_from_this());
+  auto CreateWriter() -> std::unique_ptr<json::IFamilyWriter> override {
+    return CreateFamilyWriter(shared_from_this());
   }
 
-  auto CreateDrawer() -> std::unique_ptr<draw::INodeFactoryDrawer> override {
-    return CreateNodeFactoryDrawer(shared_from_this());
+  auto CreateDrawer() -> std::unique_ptr<draw::IFamilyDrawer> override {
+    return CreateFamilyDrawer(shared_from_this());
   }
 
   auto GetNumOutputs() const { return num_outputs_; }
@@ -196,72 +196,72 @@ class NodeFactory : public core::INodeFactory,
   int num_outputs_{};
 };
 
-class NodeFactoryParser : public json::INodeFactoryParser {
+class FamilyParser : public json::IFamilyParser {
  public:
   auto GetTypeName() const -> std::string override { return kTypeName; }
 
   auto ParseFromJson(std::vector<std::shared_ptr<core::INode>> parsed_nodes,
                      const crude_json::value& json) const
-      -> std::shared_ptr<core::INodeFactory> override {
+      -> std::shared_ptr<core::IFamily> override {
     const auto num_outputs =
         static_cast<int>(json["num_outputs"].get<crude_json::number>());
-    return std::make_shared<NodeFactory>(num_outputs, std::move(parsed_nodes));
+    return std::make_shared<Family>(num_outputs, std::move(parsed_nodes));
   }
 };
 
-class NodeFactoryWriter : public json::INodeFactoryWriter {
+class FamilyWriter : public json::IFamilyWriter {
  public:
-  explicit NodeFactoryWriter(std::shared_ptr<NodeFactory> node_factory)
-      : node_factory_{std::move(node_factory)} {}
+  explicit FamilyWriter(std::shared_ptr<Family> family)
+      : family_{std::move(family)} {}
 
   auto GetTypeName() const -> std::string override { return kTypeName; }
 
   auto WriteToJson() const -> crude_json::value override {
     auto json = crude_json::value{};
     json["num_outputs"] =
-        static_cast<crude_json::number>(node_factory_->GetNumOutputs());
+        static_cast<crude_json::number>(family_->GetNumOutputs());
     return json;
   }
 
  private:
-  std::shared_ptr<NodeFactory> node_factory_{};
+  std::shared_ptr<Family> family_{};
 };
 
-auto CreateNodeFactoryWriter(std::shared_ptr<NodeFactory> node_factory)
-    -> std::unique_ptr<json::INodeFactoryWriter> {
-  return std::make_unique<NodeFactoryWriter>(std::move(node_factory));
+auto CreateFamilyWriter(std::shared_ptr<Family> family)
+    -> std::unique_ptr<json::IFamilyWriter> {
+  return std::make_unique<FamilyWriter>(std::move(family));
 }
 
-class NodeFactoryDrawer : public draw::INodeFactoryDrawer {
+class FamilyDrawer : public draw::IFamilyDrawer {
  public:
-  explicit NodeFactoryDrawer(std::shared_ptr<NodeFactory> node_factory)
-      : node_factory_{std::move(node_factory)} {}
+  explicit FamilyDrawer(std::shared_ptr<Family> family)
+      : family_{std::move(family)} {}
 
   auto GetLabel() const -> std::string override {
-    return "Splitter 1x" + std::to_string(node_factory_->GetNumOutputs());
+    return "Splitter 1x" + std::to_string(family_->GetNumOutputs());
   }
 
   auto GetColor() const -> ImColor override {
-    return {0, 0, 127 + 128 / node_factory_->GetNumOutputs()};
+    return {0, 0, 127 + 128 / family_->GetNumOutputs()};
   }
 
  private:
-  std::shared_ptr<NodeFactory> node_factory_{};
+  std::shared_ptr<Family> family_{};
 };
 
-auto CreateNodeFactoryDrawer(std::shared_ptr<NodeFactory> node_factory)
-    -> std::unique_ptr<draw::INodeFactoryDrawer> {
-  return std::make_unique<NodeFactoryDrawer>(std::move(node_factory));
+auto CreateFamilyDrawer(std::shared_ptr<Family> family)
+    -> std::unique_ptr<draw::IFamilyDrawer> {
+  return std::make_unique<FamilyDrawer>(std::move(family));
 }
 }  // namespace
 
-auto SplitterNode::CreateNodeFactory(int num_outputs)
-    -> std::shared_ptr<core::INodeFactory> {
-  return std::make_unique<NodeFactory>(num_outputs);
+auto SplitterNode::CreateFamily(int num_outputs)
+    -> std::shared_ptr<core::IFamily> {
+  return std::make_unique<Family>(num_outputs);
 }
 
-auto SplitterNode::CreateNodeFactoryParser()
-    -> std::unique_ptr<json::INodeFactoryParser> {
-  return std::make_unique<NodeFactoryParser>();
+auto SplitterNode::CreateFamilyParser()
+    -> std::unique_ptr<json::IFamilyParser> {
+  return std::make_unique<FamilyParser>();
 }
 }  // namespace esc::impl

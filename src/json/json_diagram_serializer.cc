@@ -5,37 +5,34 @@
 #include "core_diagram.h"
 #include "core_link.h"
 #include "crude_json.h"
-#include "json_i_node_factory_writer.h"
+#include "json_i_family_writer.h"
 #include "json_link_serializer.h"
 
 namespace esc::json {
 namespace {
-auto ParseNodeFactories
-    [[nodiscard]] (const crude_json::value& json,
-                   const std::vector<std::unique_ptr<INodeFactoryParser>>&
-                       node_factory_parsers) {
-  const auto node_factories_size =
-      json["node_factories_size"].get<crude_json::number>();
-  const auto& node_factories_json = json["node_factories"];
+auto ParseFamilies [[nodiscard]] (
+    const crude_json::value& json,
+    const std::vector<std::unique_ptr<IFamilyParser>>& family_parsers) {
+  const auto families_size = json["families_size"].get<crude_json::number>();
+  const auto& families_json = json["families"];
 
-  auto parsed_node_factories =
-      std::vector<std::shared_ptr<core::INodeFactory>>{};
+  auto parsed_families = std::vector<std::shared_ptr<core::IFamily>>{};
 
-  for (auto i = 0; i < node_factories_size; ++i) {
-    const auto& node_factory_json = node_factories_json[i];
+  for (auto i = 0; i < families_size; ++i) {
+    const auto& family_json = families_json[i];
 
-    for (const auto& parser : node_factory_parsers) {
-      auto parsed_node_factory = parser->TryToParseFromJson(node_factory_json);
+    for (const auto& parser : family_parsers) {
+      auto parsed_family = parser->TryToParseFromJson(family_json);
 
-      if (!parsed_node_factory.has_value()) {
+      if (!parsed_family.has_value()) {
         continue;
       }
 
-      parsed_node_factories.emplace_back(std::move(*parsed_node_factory));
+      parsed_families.emplace_back(std::move(*parsed_family));
     }
   }
 
-  return parsed_node_factories;
+  return parsed_families;
 }
 
 auto ParseLinks [[nodiscard]] (const crude_json::value& json) {
@@ -51,17 +48,14 @@ auto ParseLinks [[nodiscard]] (const crude_json::value& json) {
   return parsed_links;
 }
 
-void WriteNodeFactories(
-    const std::vector<std::shared_ptr<core::INodeFactory>>& node_factories,
-    crude_json::value& json) {
-  json["node_factories_size"] =
-      static_cast<crude_json::number>(node_factories.size());
-  auto& node_factories_json = json["node_factories"];
+void WriteFamilies(const std::vector<std::shared_ptr<core::IFamily>>& families,
+                   crude_json::value& json) {
+  json["families_size"] = static_cast<crude_json::number>(families.size());
+  auto& families_json = json["families"];
 
-  for (auto i = 0; i < static_cast<int>(node_factories.size()); ++i) {
-    const auto& node_factory = node_factories[i];
-    node_factories_json[i] =
-        node_factory->CreateWriter()->WriteToJson(*node_factory);
+  for (auto i = 0; i < static_cast<int>(families.size()); ++i) {
+    const auto& family = families[i];
+    families_json[i] = family->CreateWriter()->WriteToJson(*family);
   }
 }
 
@@ -77,18 +71,17 @@ void WriteLinks(const std::vector<core::Link>& links, crude_json::value& json) {
 
 auto DiagramSerializer::ParseFromJson(
     const crude_json::value& json,
-    const std::vector<std::unique_ptr<INodeFactoryParser>>&
-        node_factory_parsers) -> core::Diagram {
-  auto parsed_node_factories = ParseNodeFactories(json, node_factory_parsers);
+    const std::vector<std::unique_ptr<IFamilyParser>>& family_parsers)
+    -> core::Diagram {
+  auto parsed_families = ParseFamilies(json, family_parsers);
   auto parsed_links = ParseLinks(json);
-  return core::Diagram{std::move(parsed_node_factories),
-                       std::move(parsed_links)};
+  return core::Diagram{std::move(parsed_families), std::move(parsed_links)};
 }
 
 auto DiagramSerializer::WriteToJson(const core::Diagram& diagram)
     -> crude_json::value {
   auto json = crude_json::value{};
-  WriteNodeFactories(diagram.GetNodeFactories(), json);
+  WriteFamilies(diagram.GetFamilies(), json);
   WriteLinks(diagram.GetLinks(), json);
   return json;
 }

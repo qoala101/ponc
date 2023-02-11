@@ -6,7 +6,7 @@
 // #include "core_i_node.h"
 
 // namespace esc {
-// auto CreateCouplerNodeFactory() -> std::shared_ptr<INodeFactory>;
+// auto CreateCouplerFamily() -> std::shared_ptr<IFamily>;
 // }  // namespace esc
 
 #endif  // VH_IMPL_COUPLER_NODE_H_

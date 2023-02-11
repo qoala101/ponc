@@ -1,5 +1,5 @@
-#ifndef VH_CORE_I_NODE_FACTORY_H_
-#define VH_CORE_I_NODE_FACTORY_H_
+#ifndef VH_CORE_I_FAMILY_H_
+#define VH_CORE_I_FAMILY_H_
 
 #include <memory>
 #include <vector>
@@ -12,26 +12,26 @@
 namespace esc {
 namespace json {
 class INodeParser;
-class INodeFactoryWriter;
+class IFamilyWriter;
 }  // namespace json
 
 namespace draw {
-class INodeFactoryDrawer;
+class IFamilyDrawer;
 }  // namespace draw
 
 namespace core {
 // ---
-class INodeFactory : public cpp::Interface {
+class IFamily : public cpp::Interface {
  public:
   // ---
   virtual auto CreateNodeParser [[nodiscard]] ()
   -> std::unique_ptr<json::INodeParser> = 0;
   // ---
   virtual auto CreateWriter [[nodiscard]] ()
-  -> std::unique_ptr<json::INodeFactoryWriter> = 0;
+  -> std::unique_ptr<json::IFamilyWriter> = 0;
   // ---
   virtual auto CreateDrawer [[nodiscard]] ()
-  -> std::unique_ptr<draw::INodeFactoryDrawer> = 0;
+  -> std::unique_ptr<draw::IFamilyDrawer> = 0;
 
   // ---
   auto GetNodes [[nodiscard]] () const
@@ -43,7 +43,7 @@ class INodeFactory : public cpp::Interface {
 
  protected:
   // ---
-  explicit INodeFactory(std::vector<std::shared_ptr<core::INode>> nodes);
+  explicit IFamily(std::vector<std::shared_ptr<core::INode>> nodes);
 
  private:
   // ---
@@ -56,4 +56,4 @@ class INodeFactory : public cpp::Interface {
 }  // namespace core
 }  // namespace esc
 
-#endif  // VH_CORE_I_NODE_FACTORY_H_
+#endif  // VH_CORE_I_FAMILY_H_

@@ -14,36 +14,33 @@
 
 namespace esc {
 namespace {
-auto CreateNodeFactories() {
-  auto node_factories = std::vector<std::shared_ptr<core::INodeFactory>>{
-      impl::InputNode::CreateNodeFactory(),
-      impl::ClientNode::CreateNodeFactory()
+auto CreateFamilies() {
+  auto families = std::vector<std::shared_ptr<core::IFamily>>{
+      impl::InputNode::CreateFamily(), impl::ClientNode::CreateFamily()
       // ,
-      // esc::CreateCouplerNodeFactory()
+      // esc::CreateCouplerFamily()
   };
 
   for (auto num_outputs : {2, 4, 8, 16}) {
-    node_factories.emplace_back(
-        impl::SplitterNode::CreateNodeFactory(num_outputs));
+    families.emplace_back(impl::SplitterNode::CreateFamily(num_outputs));
   }
 
-  return node_factories;
+  return families;
 }
 
-auto CreateNodeFactoryParsers() {
-  auto factory_parsers =
-      std::vector<std::unique_ptr<json::INodeFactoryParser>>{};
-  factory_parsers.emplace_back(impl::InputNode::CreateNodeFactoryParser());
-  factory_parsers.emplace_back(impl::ClientNode::CreateNodeFactoryParser());
-  factory_parsers.emplace_back(impl::SplitterNode::CreateNodeFactoryParser());
-  return factory_parsers;
+auto CreateFamilyParsers() {
+  auto family_parsers = std::vector<std::unique_ptr<json::IFamilyParser>>{};
+  family_parsers.emplace_back(impl::InputNode::CreateFamilyParser());
+  family_parsers.emplace_back(impl::ClientNode::CreateFamilyParser());
+  family_parsers.emplace_back(impl::SplitterNode::CreateFamilyParser());
+  return family_parsers;
 }
 
 auto FindMaxId(const core::Diagram &diagram) {
   auto max_id = uintptr_t{};
 
-  for (const auto &node_factory : diagram.GetNodeFactories()) {
-    for (const auto &node : node_factory->GetNodes()) {
+  for (const auto &family : diagram.GetFamilies()) {
+    for (const auto &node : family->GetNodes()) {
       max_id = std::max(node->GetId().Get(), max_id);
 
       for (const auto pin_id : node->GetPinIds()) {
@@ -63,7 +60,7 @@ auto FindMaxId(const core::Diagram &diagram) {
 AppState::AppState() { ResetDiagram(); }
 
 void AppState::ResetDiagram() {
-  app_.SetDiagram(core::Diagram{CreateNodeFactories()});
+  app_.SetDiagram(core::Diagram{CreateFamilies()});
   id_generator_.emplace();
 }
 
@@ -71,7 +68,7 @@ void AppState::OpenDiagramFromFile(const std::string &file_path) {
   const auto json = crude_json::value::load(file_path).first;
 
   auto diagram =
-      json::DiagramSerializer::ParseFromJson(json, CreateNodeFactoryParsers());
+      json::DiagramSerializer::ParseFromJson(json, CreateFamilyParsers());
   auto max_id = FindMaxId(diagram);
 
   app_.SetDiagram(std::move(diagram));

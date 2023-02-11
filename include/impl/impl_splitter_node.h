@@ -3,18 +3,18 @@
 
 #include <memory>
 
-#include "core_i_node_factory.h"
-#include "json_i_node_factory_parser.h"
+#include "core_i_family.h"
+#include "json_i_family_parser.h"
 
 namespace esc::impl {
 // ---
 struct SplitterNode {
   // ---
-  static auto CreateNodeFactory [[nodiscard]] (int num_outputs)
-  -> std::shared_ptr<core::INodeFactory>;
+  static auto CreateFamily [[nodiscard]] (int num_outputs)
+  -> std::shared_ptr<core::IFamily>;
   // ---
-  static auto CreateNodeFactoryParser [[nodiscard]] ()
-  -> std::unique_ptr<json::INodeFactoryParser>;
+  static auto CreateFamilyParser [[nodiscard]] ()
+  -> std::unique_ptr<json::IFamilyParser>;
 };
 }  // namespace esc::impl
 

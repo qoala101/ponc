@@ -22,17 +22,17 @@
 #include "imgui.h"
 
 namespace esc::core {
-Diagram::Diagram(std::vector<std::shared_ptr<INodeFactory>> node_factories,
+Diagram::Diagram(std::vector<std::shared_ptr<IFamily>> families,
                  std::vector<Link> links)
-    : node_factories_{std::move(node_factories)}, links_{std::move(links)} {}
+    : families_{std::move(families)}, links_{std::move(links)} {}
 
 Diagram::~Diagram() {
   for (const auto& link : links_) {
     ne::DeleteLink(link.id);
   }
 
-  for (const auto& node_factory : node_factories_) {
-    for (const auto& node : node_factory->GetNodes()) {
+  for (const auto& family : families_) {
+    for (const auto& node : family->GetNodes()) {
       ne::DeleteNode(node->GetId());
     }
   }
@@ -41,8 +41,8 @@ Diagram::~Diagram() {
 auto Diagram::GetLinks() const -> const std::vector<Link>& { return links_; }
 
 auto Diagram::FindNode(ne::NodeId id) -> INode& {
-  for (const auto& node_factory : node_factories_) {
-    for (const auto& node : node_factory->GetNodes()) {
+  for (const auto& family : families_) {
+    for (const auto& node : family->GetNodes()) {
       if (node->GetId() == id) {
         return *node;
       }
@@ -53,8 +53,8 @@ auto Diagram::FindNode(ne::NodeId id) -> INode& {
 }
 
 auto Diagram::FindPin(ne::PinId id) -> std::unique_ptr<draw::IPinDrawer> {
-  for (const auto& node_factory : node_factories_) {
-    for (const auto& node : node_factory->GetNodes()) {
+  for (const auto& family : families_) {
+    for (const auto& node : family->GetNodes()) {
       for (const auto pin_id : node->GetPinIds()) {
         if (pin_id == id) {
           return node->CreateDrawer()->CreatePinDrawer(pin_id);
@@ -87,10 +87,10 @@ void Diagram::EraseLink(ne::LinkId linkId) {
 }
 
 void Diagram::EraseNode(ne::NodeId id) {
-  for (const auto& node_factory : node_factories_) {
-    for (const auto& node : node_factory->GetNodes()) {
+  for (const auto& family : families_) {
+    for (const auto& node : family->GetNodes()) {
       if (node->GetId() == id) {
-        return node_factory->EraseNode(id);
+        return family->EraseNode(id);
       }
     }
   }
@@ -122,9 +122,9 @@ auto Diagram::GetSelectedLinkIds() -> std::vector<ne::LinkId> {
   return selected_ids;
 }
 
-auto Diagram::GetNodeFactories() const
-    -> const std::vector<std::shared_ptr<INodeFactory>>& {
-  return node_factories_;
+auto Diagram::GetFamilies() const
+    -> const std::vector<std::shared_ptr<IFamily>>& {
+  return families_;
 }
 
 void Diagram::OnFrame() { UpdatePinValues(); }

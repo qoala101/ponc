@@ -26,13 +26,12 @@ class TexturesHandle {
 
   ~TexturesHandle();
 
-  auto GetTextureIds  () -> const TextureIds&;
-  auto GetTextureWithDims  (ImTextureID texture_id)
-  -> TextureWithDims;
+  auto GetTextureIds() -> const TextureIds&;
+  auto GetTextureWithDims(ImTextureID texture_id) -> TextureWithDims;
 
  private:
-  auto GetTextureIdsAsArray  ();
-  auto AreTexturesLoaded  ();
+  auto GetTextureIdsAsArray();
+  auto AreTexturesLoaded();
 
   std::shared_ptr<Application> app_{};
   TextureIds texture_ids_{};

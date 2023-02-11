@@ -1,5 +1,4 @@
 #include "core_coupler_node.h"
-
 #include "core_empty_pin.h"
 #include "core_float_pin.h"
 #include "core_flow_pin.h"
@@ -8,30 +7,30 @@
 namespace esc {
 namespace {
 class Node;
-class NodeFactory;
+class Family;
 
 auto CreateNodeDrawer(std::shared_ptr<Node> node)
     -> std::unique_ptr<INodeDrawer>;
-auto CreateNodeFactoryDrawer(std::shared_ptr<NodeFactory> node_factory)
-    -> std::unique_ptr<INodeFactoryDrawer>;
+auto CreateFamilyDrawer(std::shared_ptr<Family> family)
+    -> std::unique_ptr<IFamilyDrawer>;
 
 // NOLINTNEXTLINE(*-multiple-inheritance)
 class Node : public INode, public std::enable_shared_from_this<Node> {
  public:
   explicit Node(esc::IdGenerator& id_generator)
       : INode{id_generator.GetNext<ne::NodeId>(),
-             {std::make_shared<FlowPin>(id_generator.GetNext<ne::PinId>(),
-                                        PinKind::Input, false),
-              std::make_shared<FloatPin>(id_generator.GetNext<ne::PinId>(), "",
+              {std::make_shared<FlowPin>(id_generator.GetNext<ne::PinId>(),
                                          PinKind::Input, false),
-              std::make_shared<FloatPin>(id_generator.GetNext<ne::PinId>(), "",
-                                         PinKind::Input, false)},
-             {std::make_shared<EmptyPin>(id_generator.GetNext<ne::PinId>(),
-                                         PinKind::Output),
-              std::make_shared<FlowPin>(id_generator.GetNext<ne::PinId>(),
-                                        PinKind::Output, false),
-              std::make_shared<FlowPin>(id_generator.GetNext<ne::PinId>(),
-                                        PinKind::Output, false)}} {}
+               std::make_shared<FloatPin>(id_generator.GetNext<ne::PinId>(), "",
+                                          PinKind::Input, false),
+               std::make_shared<FloatPin>(id_generator.GetNext<ne::PinId>(), "",
+                                          PinKind::Input, false)},
+              {std::make_shared<EmptyPin>(id_generator.GetNext<ne::PinId>(),
+                                          PinKind::Output),
+               std::make_shared<FlowPin>(id_generator.GetNext<ne::PinId>(),
+                                         PinKind::Output, false),
+               std::make_shared<FlowPin>(id_generator.GetNext<ne::PinId>(),
+                                         PinKind::Output, false)}} {}
 
   auto CreateDrawer() -> std::unique_ptr<INodeDrawer> override {
     return CreateNodeDrawer(shared_from_this());
@@ -52,11 +51,11 @@ class NodeDrawer : public INodeDrawer {
   explicit NodeDrawer(std::shared_ptr<Node> node) : node_{std::move(node)} {}
 
   auto GetLabel() const -> std::string override {
-    return CreateCouplerNodeFactory()->CreateDrawer()->GetLabel();
+    return CreateCouplerFamily()->CreateDrawer()->GetLabel();
   }
 
   auto GetColor() const -> ImColor override {
-    return CreateCouplerNodeFactory()->CreateDrawer()->GetColor();
+    return CreateCouplerFamily()->CreateDrawer()->GetColor();
   }
 
  private:
@@ -69,38 +68,38 @@ auto CreateNodeDrawer(std::shared_ptr<Node> node)
 }
 
 // NOLINTNEXTLINE(*-multiple-inheritance)
-class NodeFactory : public INodeFactory,
-                    public std::enable_shared_from_this<NodeFactory> {
+class Family : public IFamily, public std::enable_shared_from_this<Family> {
  public:
-  auto CreateNode(IdGenerator& id_generator) -> std::shared_ptr<INode> override {
+  auto CreateNode(IdGenerator& id_generator)
+      -> std::shared_ptr<INode> override {
     return std::make_shared<Node>(id_generator);
   }
 
-  auto CreateDrawer() -> std::unique_ptr<INodeFactoryDrawer> override {
-    return CreateNodeFactoryDrawer(shared_from_this());
+  auto CreateDrawer() -> std::unique_ptr<IFamilyDrawer> override {
+    return CreateFamilyDrawer(shared_from_this());
   }
 };
 
-class NodeFactoryDrawer : public INodeFactoryDrawer {
+class FamilyDrawer : public IFamilyDrawer {
  public:
-  explicit NodeFactoryDrawer(std::shared_ptr<NodeFactory> node_factory)
-      : node_factory_{std::move(node_factory)} {}
+  explicit FamilyDrawer(std::shared_ptr<Family> family)
+      : family_{std::move(family)} {}
 
   auto GetLabel() const -> std::string override { return "Coupler 1x2"; }
 
   auto GetColor() const -> ImColor override { return {255, 0, 255}; }
 
  private:
-  std::shared_ptr<NodeFactory> node_factory_{};
+  std::shared_ptr<Family> family_{};
 };
 
-auto CreateNodeFactoryDrawer(std::shared_ptr<NodeFactory> node_factory)
-    -> std::unique_ptr<INodeFactoryDrawer> {
-  return std::make_unique<NodeFactoryDrawer>(std::move(node_factory));
+auto CreateFamilyDrawer(std::shared_ptr<Family> family)
+    -> std::unique_ptr<IFamilyDrawer> {
+  return std::make_unique<FamilyDrawer>(std::move(family));
 }
 }  // namespace
 
-auto CreateCouplerNodeFactory() -> std::shared_ptr<INodeFactory> {
-  return std::make_unique<NodeFactory>();
+auto CreateCouplerFamily() -> std::shared_ptr<IFamily> {
+  return std::make_unique<Family>();
 }
 }  // namespace esc

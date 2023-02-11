@@ -1,20 +1,20 @@
-#ifndef VH_JSON_I_NODE_FACTORY_PARSER_H_
-#define VH_JSON_I_NODE_FACTORY_PARSER_H_
+#ifndef VH_JSON_I_FAMILY_PARSER_H_
+#define VH_JSON_I_FAMILY_PARSER_H_
 
 #include <memory>
 
+#include "core_i_family.h"
 #include "core_i_node.h"
-#include "core_i_node_factory.h"
 #include "cpp_interface.h"
 #include "crude_json.h"
 
 namespace esc::json {
 // ---
-class INodeFactoryParser : public cpp::Interface {
+class IFamilyParser : public cpp::Interface {
  public:
   // ---
   auto TryToParseFromJson [[nodiscard]] (const crude_json::value &json) const
-      -> std::optional<std::shared_ptr<core::INodeFactory>>;
+      -> std::optional<std::shared_ptr<core::IFamily>>;
 
  private:
   // ---
@@ -23,8 +23,8 @@ class INodeFactoryParser : public cpp::Interface {
   virtual auto ParseFromJson
       [[nodiscard]] (std::vector<std::shared_ptr<core::INode>> parsed_nodes,
                      const crude_json::value &json) const
-      -> std::shared_ptr<core::INodeFactory> = 0;
+      -> std::shared_ptr<core::IFamily> = 0;
 };
 }  // namespace esc::json
 
-#endif  // VH_JSON_I_NODE_FACTORY_PARSER_H_
+#endif  // VH_JSON_I_FAMILY_PARSER_H_

@@ -1,5 +1,5 @@
-#ifndef VH_DRAW_I_NODE_FACTORY_DRAWER_H_
-#define VH_DRAW_I_NODE_FACTORY_DRAWER_H_
+#ifndef VH_DRAW_I_FAMILY_DRAWER_H_
+#define VH_DRAW_I_FAMILY_DRAWER_H_
 
 #include <string>
 
@@ -8,7 +8,7 @@
 
 namespace esc::draw {
 // ---
-class INodeFactoryDrawer : public cpp::Interface {
+class IFamilyDrawer : public cpp::Interface {
  public:
   // ---
   virtual auto GetLabel [[nodiscard]] () const -> std::string = 0;
@@ -17,4 +17,4 @@ class INodeFactoryDrawer : public cpp::Interface {
 };
 }  // namespace esc::draw
 
-#endif  // VH_DRAW_I_NODE_FACTORY_DRAWER_H_
+#endif  // VH_DRAW_I_FAMILY_DRAWER_H_

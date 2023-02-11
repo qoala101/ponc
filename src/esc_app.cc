@@ -12,8 +12,8 @@
 #include "core_id_generator.h"
 #include "cpp_assert.h"
 #include "cpp_scope.h"
+#include "draw_i_family_drawer.h"
 #include "draw_i_node_drawer.h"
-#include "draw_i_node_factory_drawer.h"
 #include "draw_i_pin_drawer.h"
 #include "esc_app_state.h"
 #include "esc_node_drawer.h"
@@ -370,12 +370,10 @@ void App::DrawContextMenuProcess() {
         ImGui::TextUnformatted("Create New Node");
         ImGui::Separator();
 
-        for (const auto& node_factory :
-             (*app_state_)->app_.GetDiagram()->GetNodeFactories()) {
-          if (ImGui::MenuItem(
-                  node_factory->CreateDrawer()->GetLabel().c_str())) {
-            auto& new_node =
-                node_factory->EmplaceNode(*(*app_state_)->id_generator_);
+        for (const auto& family :
+             (*app_state_)->app_.GetDiagram()->GetFamilies()) {
+          if (ImGui::MenuItem(family->CreateDrawer()->GetLabel().c_str())) {
+            auto& new_node = family->EmplaceNode(*(*app_state_)->id_generator_);
 
             new_node.SetPosition(open_popup_pos);
 
@@ -461,9 +459,8 @@ void App::DrawNode(core::INode& node) {
 }
 // vh: norm
 void App::DrawNodes() {
-  for (const auto& node_factory :
-       (*app_state_)->app_.GetDiagram()->GetNodeFactories()) {
-    for (const auto& node : node_factory->GetNodes()) {
+  for (const auto& family : (*app_state_)->app_.GetDiagram()->GetFamilies()) {
+    for (const auto& node : family->GetNodes()) {
       DrawNode(*node);
     }
   }

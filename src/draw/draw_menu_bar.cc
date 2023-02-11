@@ -7,7 +7,7 @@
 #include "imgui.h"
 
 namespace esc::draw {
-void MenuBar::Draw(AppState &app_state) {
+void MenuBar::Draw(AppState& app_state) {
   if (ImGui::BeginMainMenuBar()) {
     const auto menu_bar_scope = cpp::Scope{[]() { ImGui::EndMainMenuBar(); }};
 
@@ -34,9 +34,9 @@ void MenuBar::Draw(AppState &app_state) {
         nodes_view_.SetVisible(!nodes_view_.IsVisible());
       }
 
-      if (ImGui::MenuItem("Node Factories", nullptr,
-                          node_factories_view_.IsVisible())) {
-        node_factories_view_.SetVisible(!node_factories_view_.IsVisible());
+      if (ImGui::MenuItem("Node Families", nullptr,
+                          families_view_.IsVisible())) {
+        families_view_.SetVisible(!families_view_.IsVisible());
       }
     }
 
@@ -54,6 +54,6 @@ void MenuBar::Draw(AppState &app_state) {
   open_file_dialog_.Draw(app_state);
   save_as_file_dialog_.Draw(app_state);
   nodes_view_.Draw(app_state);
-  node_factories_view_.Draw(app_state);
+  families_view_.Draw(app_state);
 }
 }  // namespace esc::draw
