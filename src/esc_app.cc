@@ -147,9 +147,7 @@ void Icon(const ImVec2& size, bool filled,
 }
 // vh: norm
 void DrawPinIcon(draw::IPinDrawer& pin_drawer, bool connected, float alpha) {
-  if ((pin_drawer.GetFloat() == nullptr) ||
-      (pin_drawer.IsEditable() &&
-       (pin_drawer.GetKind() == ne::PinKind::Input))) {
+  if (!pin_drawer.IsConnectable()) {
     if (pin_drawer.IsEditable()) {
       ImGui::Dummy(ImVec2{20, 24});
     } else {
@@ -249,12 +247,6 @@ auto App::GetWindowFlags() const -> ImGuiWindowFlags {
 void App::OnFrame(float /*unused*/) {
   (*app_state_)->app_.GetDiagram()->OnFrame();
   DrawFrame();
-}
-// vh: ok
-void App::ShowFlow() {
-  for (const auto& link : (*app_state_)->app_.GetDiagram()->GetLinks()) {
-    ne::Flow(link.id);
-  }
 }
 
 void App::AddLinkFromPinToNode(ne::LinkId link_id, ne::PinId pin_id,

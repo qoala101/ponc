@@ -118,8 +118,10 @@ add_example_executable(esc
   cpp/cpp_scope_function.cc
   draw/pin/draw_empty_pin_drawer.cc
   draw/pin/draw_flow_input_pin_drawer.cc
+  draw/pin/draw_flow_output_pin_drawer.cc
   draw/draw_i_drawable.cc
   draw/draw_i_file_dialog.cc
+  draw/draw_i_pin_drawer.cc
   draw/draw_main_window.cc
   draw/draw_menu_bar.cc
   draw/draw_node_factories_view.cc
@@ -133,7 +135,7 @@ add_example_executable(esc
   impl/impl_client_node.cc
   # impl/impl_coupler_node.cc
   impl/impl_input_node.cc
-  # impl/impl_splitter_node.cc
+  impl/impl_splitter_node.cc
   esc_app_state.cc
   esc_app.cc
   esc_editor_context_handle.cc

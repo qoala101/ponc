@@ -21,6 +21,8 @@ class IPinDrawer : public cpp::Interface {
   virtual auto GetFloat [[nodiscard]] () -> float* = 0;
   // ---
   virtual auto IsEditable [[nodiscard]] () const -> bool = 0;
+  // ---
+  virtual auto IsConnectable [[nodiscard]] () const -> bool;
 };
 }  // namespace esc::draw
 

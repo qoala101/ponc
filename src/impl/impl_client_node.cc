@@ -98,6 +98,8 @@ class MinPinDrawer : public draw::IPinDrawer {
 
   auto IsEditable [[nodiscard]] () const -> bool override { return true; }
 
+  auto IsConnectable [[nodiscard]] () const -> bool override { return false; }
+
  private:
   std::shared_ptr<Node> node_{};
 };
@@ -115,6 +117,8 @@ class MaxPinDrawer : public draw::IPinDrawer {
   auto GetFloat [[nodiscard]] () -> float* override { return &node_->max_; }
 
   auto IsEditable [[nodiscard]] () const -> bool override { return true; }
+
+  auto IsConnectable [[nodiscard]] () const -> bool override { return false; }
 
  private:
   std::shared_ptr<Node> node_{};

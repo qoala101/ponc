@@ -46,11 +46,13 @@ void MenuBar::Draw() {
     }
 
     if (ImGui::MenuItem("Zoom to Content")) {
-      // ne::NavigateToContent();
+      ne::NavigateToContent();
     }
 
     if (ImGui::MenuItem("Show Flow")) {
-      // app_->ShowFlow();
+      for (const auto& link : app_state_->app_.GetDiagram()->GetLinks()) {
+        ne::Flow(link.id);
+      }
     }
   }
 

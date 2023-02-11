@@ -9,13 +9,13 @@
 #include "crude_json.h"
 #include "impl_client_node.h"
 #include "impl_input_node.h"
+#include "impl_splitter_node.h"
 #include "json_diagram_serializer.h"
 
 namespace esc {
 namespace {
 auto CreateNodeFactories() {
   auto node_factories = std::vector<std::shared_ptr<core::INodeFactory>>{
-      // esc::CreateInputNodeFactory(),
       impl::InputNode::CreateNodeFactory(),
       impl::ClientNode::CreateNodeFactory()
       // ,
@@ -23,7 +23,8 @@ auto CreateNodeFactories() {
   };
 
   for (auto num_outputs : {2, 4, 8, 16}) {
-    // node_factories.emplace_back(esc::CreateSplitterNodeFactory(num_outputs));
+    node_factories.emplace_back(
+        impl::SplitterNode::CreateNodeFactory(num_outputs));
   }
 
   return node_factories;
@@ -34,6 +35,7 @@ auto CreateNodeFactoryParsers() {
       std::vector<std::unique_ptr<json::INodeFactoryParser>>{};
   factory_parsers.emplace_back(impl::InputNode::CreateNodeFactoryParser());
   factory_parsers.emplace_back(impl::ClientNode::CreateNodeFactoryParser());
+  factory_parsers.emplace_back(impl::SplitterNode::CreateNodeFactoryParser());
   return factory_parsers;
 }
 

@@ -1,65 +1,148 @@
-#include "core_splitter_node.h"
+#include "impl_splitter_node.h"
+
 #include <memory>
+#include <string>
 
-#include "core_float_pin.h"
-#include "core_flow_pin.h"
 #include "core_i_node.h"
-#include "esc_cpp.h"
+#include "core_id_generator.h"
+#include "cpp_assert.h"
+#include "crude_json.h"
+#include "draw_flow_input_pin_drawer.h"
+#include "draw_flow_output_pin_drawer.h"
+#include "draw_i_node_drawer.h"
+#include "draw_i_node_factory_drawer.h"
+#include "draw_i_pin_drawer.h"
+#include "imgui_node_editor.h"
+#include "json_node_serializer.h"
 
-namespace esc {
+namespace esc::impl {
 namespace {
 class Node;
 class NodeFactory;
 
+constexpr auto kTypeName = "SplitterNode";
+
+auto CreateNodeWriter(std::shared_ptr<Node> node)
+    -> std::unique_ptr<json::INodeWriter>;
 auto CreateNodeDrawer(std::shared_ptr<Node> node)
-    -> std::unique_ptr<INodeDrawer>;
+    -> std::unique_ptr<draw::INodeDrawer>;
+auto CreateNodeFactoryWriter(std::shared_ptr<NodeFactory> node_factory)
+    -> std::unique_ptr<json::INodeFactoryWriter>;
 auto CreateNodeFactoryDrawer(std::shared_ptr<NodeFactory> node_factory)
-    -> std::unique_ptr<INodeFactoryDrawer>;
+    -> std::unique_ptr<draw::INodeFactoryDrawer>;
 
 // NOLINTNEXTLINE(*-multiple-inheritance)
-class Node : public INode, public std::enable_shared_from_this<Node> {
+class Node : public core::INode, public std::enable_shared_from_this<Node> {
  public:
-  explicit Node(esc::IdGenerator& id_generator, int num_outputs)
-      : INode{
-            id_generator.GetNext<ne::NodeId>(),
-            {std::make_shared<FlowPin>(id_generator.GetNext<ne::PinId>(),
-                                       PinKind::Input, false),
-             std::make_shared<FloatPin>(id_generator.GetNext<ne::PinId>(), "",
-                                        PinKind::Input, false)},
-            [&id_generator, num_outputs]() {
-              auto pins = std::vector<std::shared_ptr<IPin>>{};
+  Node(ne::NodeId id, std::vector<ne::PinId> pin_ids)
+      : INode{id, std::move(pin_ids)} {}
 
-              for (auto i = 0; i < num_outputs; ++i) {
-                pins.emplace_back(std::make_shared<FlowPin>(
-                    id_generator.GetNext<ne::PinId>(), PinKind::Output, false));
-              }
+  auto CreateWriter() -> std::unique_ptr<json::INodeWriter> override {
+    return CreateNodeWriter(shared_from_this());
+  }
 
-              return pins;
-            }()} {}
-
-  auto CreateDrawer() -> std::unique_ptr<INodeDrawer> override {
+  auto CreateDrawer() -> std::unique_ptr<draw::INodeDrawer> override {
     return CreateNodeDrawer(shared_from_this());
   }
 
   auto GetNumOutputs() const {
-    return static_cast<int>(GetOutputPins().size());
+    return static_cast<int>(GetPinIds().size()) - 2;
   }
 };
 
-class NodeDrawer : public INodeDrawer {
+class NodeParser : public json::INodeParser {
+ private:
+  auto GetTypeName() const -> std::string override { return kTypeName; }
+
+  auto ParseFromJson(ne::NodeId parsed_node_id,
+                     std::vector<ne::PinId> parsed_pin_ids,
+                     const crude_json::value& json) const
+      -> std::shared_ptr<core::INode> override {
+    return std::make_shared<Node>(parsed_node_id, std::move(parsed_pin_ids));
+  }
+};
+
+class NodeWriter : public json::INodeWriter {
+ public:
+  explicit NodeWriter(std::shared_ptr<Node> node) : node_{std::move(node)} {}
+
+ private:
+  auto GetTypeName() const -> std::string override { return kTypeName; }
+
+  auto WriteToJson() const -> crude_json::value override { return {}; }
+
+  std::shared_ptr<Node> node_{};
+};
+
+auto CreateNodeWriter(std::shared_ptr<Node> node)
+    -> std::unique_ptr<json::INodeWriter> {
+  return std::make_unique<NodeWriter>(std::move(node));
+}
+
+class DropPinDrawer : public draw::IPinDrawer {
+ public:
+  explicit DropPinDrawer(int num_outputs)
+      : drop_{[num_outputs]() {
+          switch (num_outputs) {
+            case 2:
+              return -4.3F;
+            case 4:
+              return -7.4F;
+            case 8:
+              return -10.7F;
+            case 16:
+            default:
+              return -13.9F;
+          };
+        }()} {}
+
+  auto GetLabel [[nodiscard]] () const -> std::string override {
+    return "drop";
+  }
+
+  auto GetKind [[nodiscard]] () const -> ne::PinKind override {
+    return ne::PinKind::Input;
+  }
+
+  auto GetFloat [[nodiscard]] () -> float* override { return &drop_; }
+
+  auto IsEditable [[nodiscard]] () const -> bool override { return false; }
+
+  auto IsConnectable [[nodiscard]] () const -> bool override { return false; }
+
+ private:
+  float drop_{};
+};
+
+class NodeDrawer : public draw::INodeDrawer {
  public:
   explicit NodeDrawer(std::shared_ptr<Node> node) : node_{std::move(node)} {}
 
   auto GetLabel() const -> std::string override {
-    return CreateSplitterNodeFactory(node_->GetNumOutputs())
+    return SplitterNode::CreateNodeFactory(node_->GetNumOutputs())
         ->CreateDrawer()
         ->GetLabel();
   }
 
   auto GetColor() const -> ImColor override {
-    return CreateSplitterNodeFactory(node_->GetNumOutputs())
+    return SplitterNode::CreateNodeFactory(node_->GetNumOutputs())
         ->CreateDrawer()
         ->GetColor();
+  }
+
+  auto CreatePinDrawer(ne::PinId pin_id) const
+      -> std::unique_ptr<draw::IPinDrawer> override {
+    const auto pin_index = node_->GetPinIndex(pin_id);
+
+    if (pin_index == 0) {
+      return std::make_unique<draw::FlowInputPinDrawer>();
+    }
+
+    if (pin_index == 1) {
+      return std::make_unique<DropPinDrawer>(node_->GetNumOutputs());
+    }
+
+    return std::make_unique<draw::FlowOutputPinDrawer>();
   }
 
  private:
@@ -67,21 +150,42 @@ class NodeDrawer : public INodeDrawer {
 };
 
 auto CreateNodeDrawer(std::shared_ptr<Node> node)
-    -> std::unique_ptr<INodeDrawer> {
+    -> std::unique_ptr<draw::INodeDrawer> {
   return std::make_unique<NodeDrawer>(std::move(node));
 }
 
 // NOLINTNEXTLINE(*-multiple-inheritance)
-class NodeFactory : public INodeFactory,
+class NodeFactory : public core::INodeFactory,
                     public std::enable_shared_from_this<NodeFactory> {
  public:
   explicit NodeFactory(int num_outputs) : num_outputs_{num_outputs} {}
 
-  auto CreateNode(IdGenerator& id_generator) -> std::shared_ptr<INode> override {
-    return std::make_shared<Node>(id_generator, num_outputs_);
+  auto CreateNode(core::IdGenerator& id_generator)
+      -> std::shared_ptr<core::INode> override {
+    return std::make_shared<Node>(
+        id_generator.GetNext<ne::NodeId>(),
+        [&id_generator, num_outputs = num_outputs_]() {
+          auto pin_ids =
+              std::vector<ne::PinId>{id_generator.GetNext<ne::PinId>(),
+                                     id_generator.GetNext<ne::PinId>()};
+
+          for (auto i = 0; i < num_outputs; ++i) {
+            pin_ids.emplace_back(id_generator.GetNext<ne::PinId>());
+          }
+
+          return pin_ids;
+        }());
   }
 
-  auto CreateDrawer() -> std::unique_ptr<INodeFactoryDrawer> override {
+  auto CreateNodeParser() -> std::unique_ptr<json::INodeParser> override {
+    return std::make_unique<NodeParser>();
+  }
+
+  auto CreateWriter() -> std::unique_ptr<json::INodeFactoryWriter> override {
+    return CreateNodeFactoryWriter(shared_from_this());
+  }
+
+  auto CreateDrawer() -> std::unique_ptr<draw::INodeFactoryDrawer> override {
     return CreateNodeFactoryDrawer(shared_from_this());
   }
 
@@ -91,7 +195,42 @@ class NodeFactory : public INodeFactory,
   int num_outputs_{};
 };
 
-class NodeFactoryDrawer : public INodeFactoryDrawer {
+class NodeFactoryParser : public json::INodeFactoryParser {
+ public:
+  auto GetTypeName() const -> std::string override { return kTypeName; }
+
+  auto ParseFromJson(const crude_json::value& json) const
+      -> std::shared_ptr<core::INodeFactory> override {
+    const auto num_outputs =
+        static_cast<int>(json["num_outputs"].get<crude_json::number>());
+    return std::make_shared<NodeFactory>(num_outputs);
+  }
+};
+
+class NodeFactoryWriter : public json::INodeFactoryWriter {
+ public:
+  explicit NodeFactoryWriter(std::shared_ptr<NodeFactory> node_factory)
+      : node_factory_{std::move(node_factory)} {}
+
+  auto GetTypeName() const -> std::string override { return kTypeName; }
+
+  auto WriteToJson() const -> crude_json::value override {
+    auto json = crude_json::value{};
+    json["num_outputs"] =
+        static_cast<crude_json::number>(node_factory_->GetNumOutputs());
+    return json;
+  }
+
+ private:
+  std::shared_ptr<NodeFactory> node_factory_{};
+};
+
+auto CreateNodeFactoryWriter(std::shared_ptr<NodeFactory> node_factory)
+    -> std::unique_ptr<json::INodeFactoryWriter> {
+  return std::make_unique<NodeFactoryWriter>(std::move(node_factory));
+}
+
+class NodeFactoryDrawer : public draw::INodeFactoryDrawer {
  public:
   explicit NodeFactoryDrawer(std::shared_ptr<NodeFactory> node_factory)
       : node_factory_{std::move(node_factory)} {}
@@ -109,12 +248,18 @@ class NodeFactoryDrawer : public INodeFactoryDrawer {
 };
 
 auto CreateNodeFactoryDrawer(std::shared_ptr<NodeFactory> node_factory)
-    -> std::unique_ptr<INodeFactoryDrawer> {
+    -> std::unique_ptr<draw::INodeFactoryDrawer> {
   return std::make_unique<NodeFactoryDrawer>(std::move(node_factory));
 }
 }  // namespace
 
-auto CreateSplitterNodeFactory(int num_outputs) -> std::shared_ptr<INodeFactory> {
+auto SplitterNode::CreateNodeFactory(int num_outputs)
+    -> std::shared_ptr<core::INodeFactory> {
   return std::make_unique<NodeFactory>(num_outputs);
 }
-}  // namespace esc
+
+auto SplitterNode::CreateNodeFactoryParser()
+    -> std::unique_ptr<json::INodeFactoryParser> {
+  return std::make_unique<NodeFactoryParser>();
+}
+}  // namespace esc::impl

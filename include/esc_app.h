@@ -41,8 +41,6 @@ class App : public Application, public std::enable_shared_from_this<App> {
 
   auto GetTextures() -> esc::TexturesHandle&;
 
-  void ShowFlow();
-
   auto GetTextureDims(ImTextureID texture_id) -> ImVec2;
 
   void OnStart() override;
