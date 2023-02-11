@@ -2,14 +2,14 @@
 #define VH_DRAW_I_DRAWABLE_H_
 
 #include "cpp_interface.h"
-#include "esc_app_state.h"
+#include "esc_state.h"
 
 namespace esc::draw {
 // ---
 class IDrawable : public cpp::Interface {
  public:
   // ---
-  virtual void Draw(AppState &app_state) = 0;
+  virtual void Draw(State &state) = 0;
 
   // ---
   auto IsVisible [[nodiscard]] () const -> bool;

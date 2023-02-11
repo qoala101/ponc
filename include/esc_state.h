@@ -5,9 +5,9 @@
 #include "core_id_generator.h"
 
 namespace esc {
-struct AppState {
+struct State {
  public:
-  AppState();
+  State();
 
   void OpenDiagramFromFile(const std::string &file_path);
   void SaveDiagramToFile(const std::string &file_path) const;

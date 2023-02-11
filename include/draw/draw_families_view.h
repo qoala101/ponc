@@ -8,7 +8,7 @@ namespace esc::draw {
 class FamiliesView : public IDrawable {
  public:
   // ---
-  void Draw(AppState &app_state) override;
+  void Draw(State &state) override;
 };
 }  // namespace esc::draw
 

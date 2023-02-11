@@ -146,13 +146,13 @@ add_example_executable(esc
   impl/impl_input_node.cc
   impl/impl_splitter_node.cc
 
-  esc_app_state.cc
   esc_app.cc
   esc_editor_context_handle.cc
   esc_node_drawer.cc
+  esc_state.cc
   esc_textures_handle.cc
   esc_types.cc
-  
+
   main.cc
 )
 

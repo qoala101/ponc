@@ -2,11 +2,11 @@
 
 #include "cpp_scope.h"
 #include "draw_i_family_drawer.h"
-#include "esc_app_state.h"
+#include "esc_state.h"
 #include "imgui.h"
 
 namespace esc::draw {
-void FamiliesView::Draw(AppState& app_state) {
+void FamiliesView::Draw(State& state) {
   if (!IsVisible()) {
     return;
   }
@@ -22,7 +22,7 @@ void FamiliesView::Draw(AppState& app_state) {
         ImGui::TableSetupColumn("Number");
         ImGui::TableHeadersRow();
 
-        for (const auto& family : app_state.app_.GetDiagram()->GetFamilies()) {
+        for (const auto& family : state.app_.GetDiagram()->GetFamilies()) {
           ImGui::TableNextRow();
           ImGui::TableNextColumn();
 

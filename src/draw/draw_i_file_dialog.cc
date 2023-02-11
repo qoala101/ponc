@@ -1,14 +1,14 @@
 #include "draw_i_file_dialog.h"
 
 namespace esc::draw {
-void IFileDialog::Draw(AppState &app_state) {
+void IFileDialog::Draw(State &state) {
   dialog_.Display();
 
   if (!dialog_.HasSelected()) {
     return;
   }
 
-  OnFileSelected(app_state, dialog_.GetSelected().string());
+  OnFileSelected(state, dialog_.GetSelected().string());
   dialog_.ClearSelected();
 }
 

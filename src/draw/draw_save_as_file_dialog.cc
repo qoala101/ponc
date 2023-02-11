@@ -23,13 +23,13 @@ SaveAsFileDialog::SaveAsFileDialog()
         return dialog;
       }()} {}
 
-void SaveAsFileDialog::OnFileSelected(AppState& app_state,
+void SaveAsFileDialog::OnFileSelected(State& state,
                                       std::string file_path) const {
   if (const auto not_json_extension =
           !AsLowerCase(file_path).ends_with(".json")) {
     file_path += ".json";
   }
 
-  app_state.SaveDiagramToFile(file_path);
+  state.SaveDiagramToFile(file_path);
 }
 }  // namespace esc::draw

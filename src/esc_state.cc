@@ -1,4 +1,4 @@
-#include "esc_app_state.h"
+#include "esc_state.h"
 
 #include <memory>
 #include <utility>
@@ -59,14 +59,14 @@ auto FindMaxId(const core::Diagram &diagram) {
 }
 }  // namespace
 
-AppState::AppState() { ResetDiagram(); }
+State::State() { ResetDiagram(); }
 
-void AppState::ResetDiagram() {
+void State::ResetDiagram() {
   app_.SetDiagram(core::Diagram{CreateFamilies()});
   id_generator_.emplace();
 }
 
-void AppState::OpenDiagramFromFile(const std::string &file_path) {
+void State::OpenDiagramFromFile(const std::string &file_path) {
   const auto json = crude_json::value::load(file_path).first;
 
   auto diagram =
@@ -77,7 +77,7 @@ void AppState::OpenDiagramFromFile(const std::string &file_path) {
   id_generator_.emplace(max_id);
 }
 
-void AppState::SaveDiagramToFile(const std::string &file_path) const {
+void State::SaveDiagramToFile(const std::string &file_path) const {
   const auto *diagram = app_.GetDiagram();
   const auto json = json::DiagramSerializer::WriteToJson(*diagram);
   json.save(file_path);

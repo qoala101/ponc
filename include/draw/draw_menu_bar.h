@@ -5,14 +5,14 @@
 #include "draw_i_drawable.h"
 #include "draw_open_file_dialog.h"
 #include "draw_save_as_file_dialog.h"
-#include "esc_app_state.h"
+#include "esc_state.h"
 
 namespace esc::draw {
 // ---
 class MenuBar : public IDrawable {
  public:
   // ---
-  void Draw(AppState &app_state) override;
+  void Draw(State &state) override;
 
  private:
   OpenFileDialog open_file_dialog_;

@@ -5,14 +5,14 @@
 
 #include "draw_i_drawable.h"
 #include "draw_menu_bar.h"
-#include "esc_app_state.h"
+#include "esc_state.h"
 
 namespace esc::draw {
 // ---
 class MainWindow : public IDrawable {
  public:
   // ---
-  void Draw(AppState &app_state) override;
+  void Draw(State &state) override;
 
  private:
   draw::MenuBar menu_bar_;

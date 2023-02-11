@@ -8,14 +8,14 @@
 #include <imfilebrowser.h>
 
 #include "draw_i_drawable.h"
-#include "esc_app_state.h"
+#include "esc_state.h"
 
 namespace esc::draw {
 // ---
 class IFileDialog : public IDrawable {
  public:
   // ---
-  void Draw(AppState &app_state) override;
+  void Draw(State &state) override;
 
  protected:
   // ---
@@ -23,13 +23,12 @@ class IFileDialog : public IDrawable {
 
  private:
   // ---
-  virtual void OnFileSelected(AppState &app_state,
-                              std::string file_path) const = 0;
+  virtual void OnFileSelected(State &state, std::string file_path) const = 0;
 
   // ---
   void OnVisibleChanged() override;
 
-  std::shared_ptr<AppState> app_state_{};
+  std::shared_ptr<State> state_{};
   ImGui::FileBrowser dialog_{};
 };
 }  // namespace esc::draw

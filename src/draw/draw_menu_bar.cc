@@ -3,11 +3,11 @@
 #include "cpp_scope.h"
 #include "draw_open_file_dialog.h"
 #include "draw_save_as_file_dialog.h"
-#include "esc_app_state.h"
+#include "esc_state.h"
 #include "imgui.h"
 
 namespace esc::draw {
-void MenuBar::Draw(AppState& app_state) {
+void MenuBar::Draw(State& state) {
   if (ImGui::BeginMainMenuBar()) {
     const auto menu_bar_scope = cpp::Scope{[]() { ImGui::EndMainMenuBar(); }};
 
@@ -23,7 +23,7 @@ void MenuBar::Draw(AppState& app_state) {
       }
 
       if (ImGui::MenuItem("Reset")) {
-        app_state.ResetDiagram();
+        state.ResetDiagram();
       }
     }
 
@@ -36,14 +36,14 @@ void MenuBar::Draw(AppState& app_state) {
     }
 
     if (ImGui::MenuItem("Show Flow")) {
-      for (const auto& link : app_state.app_.GetDiagram()->GetLinks()) {
+      for (const auto& link : state.app_.GetDiagram()->GetLinks()) {
         ne::Flow(link.id);
       }
     }
   }
 
-  open_file_dialog_.Draw(app_state);
-  save_as_file_dialog_.Draw(app_state);
-  families_view_.Draw(app_state);
+  open_file_dialog_.Draw(state);
+  save_as_file_dialog_.Draw(state);
+  families_view_.Draw(state);
 }
 }  // namespace esc::draw
