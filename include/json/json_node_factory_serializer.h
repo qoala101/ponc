@@ -1,5 +1,5 @@
-#ifndef VH_JSON_NODE_SERIALIZER_H_
-#define VH_JSON_NODE_SERIALIZER_H_
+#ifndef VH_JSON_NODE_FACTORY_SERIALIZER_H_
+#define VH_JSON_NODE_FACTORY_SERIALIZER_H_
 
 #include <memory>
 
@@ -7,43 +7,43 @@
 
 namespace esc {
 namespace core {
-class INode;
+class INodeFactory;
 }  // namespace core
 
 namespace json {
 // ---
 // NOLINTNEXTLINE(*-special-member-functions)
-class INodeParser {
+class INodeFactoryParser {
  public:
-  virtual ~INodeParser() = default;
+  virtual ~INodeFactoryParser() = default;
 
   // ---
   auto TryToParseFromJson [[nodiscard]] (const crude_json::value &json) const
-      -> std::optional<std::shared_ptr<core::INode>>;
+      -> std::optional<std::shared_ptr<core::INodeFactory>>;
 
  protected:
-  INodeParser() = default;
+  INodeFactoryParser() = default;
 
  private:
   // ---
   virtual auto GetTypeName [[nodiscard]] () const -> std::string = 0;
   // ---
   virtual auto ParseFromJson [[nodiscard]] (const crude_json::value &json) const
-      -> std::shared_ptr<core::INode> = 0;
+      -> std::shared_ptr<core::INodeFactory> = 0;
 };
 
 // ---
 // NOLINTNEXTLINE(*-special-member-functions)
-class INodeWriter {
+class INodeFactoryWriter {
  public:
-  virtual ~INodeWriter() = default;
+  virtual ~INodeFactoryWriter() = default;
 
   // ---
-  auto WriteToJson [[nodiscard]] (const core::INode &node) const
+  auto WriteToJson [[nodiscard]] (const core::INodeFactory &factory) const
       -> crude_json::value;
 
  protected:
-  INodeWriter() = default;
+  INodeFactoryWriter() = default;
 
  private:
   // ---
@@ -54,4 +54,4 @@ class INodeWriter {
 }  // namespace json
 }  // namespace esc
 
-#endif  // VH_JSON_NODE_SERIALIZER_H_
+#endif  // VH_JSON_NODE_FACTORY_SERIALIZER_H_

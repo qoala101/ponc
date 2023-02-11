@@ -3,7 +3,7 @@
 
 #include "core_float_pin.h"
 #include "core_flow_pin.h"
-#include "core_node.h"
+#include "core_i_node.h"
 #include "esc_cpp.h"
 
 namespace esc {

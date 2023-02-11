@@ -9,7 +9,9 @@
 
 namespace ne = ax::NodeEditor;
 
+namespace esc::core {
 class INode;
+}  // namespace esc::core
 
 class IPin {
  public:
@@ -18,20 +20,20 @@ class IPin {
   IPin(const IPin &) = delete;
   IPin(IPin &&) noexcept = delete;
 
-  auto operator=(const IPin &) noexcept -> INode & = delete;
-  auto operator=(IPin &&) noexcept -> INode & = delete;
+  auto operator=(const IPin &) noexcept -> IPin & = delete;
+  auto operator=(IPin &&) noexcept -> IPin & = delete;
 
   virtual ~IPin() = default;
 
-  auto GetId  () const -> ne::PinId;
+  auto GetId() const -> ne::PinId;
   void SetId(ne::PinId id);
 
-  virtual auto GetType  () const -> PinType = 0;
+  virtual auto GetType() const -> PinType = 0;
 
   struct {
     std::string Name{};
     bool editable{};
-    INode *node;
+    esc::core::INode *node;
     PinKind Kind;
   } ui_data_{};
 

@@ -56,7 +56,7 @@ class App : public Application, public std::enable_shared_from_this<App> {
 
   void DrawContextMenuProcess();
   void DrawFrame();
-  void DrawNode(INode& node);
+  void DrawNode(core::INode& node);
   void DrawNodeEditor();
   void DrawNodes();
   void DrawLinks();
@@ -67,7 +67,7 @@ class App : public Application, public std::enable_shared_from_this<App> {
 
   auto IsPinLinked(ne::PinId id) const -> bool;
   void AddLinkFromPinToNode(ne::LinkId link_id, const IPin* pin,
-                            const INode* node);
+                            const core::INode* node);
 
   
   std::optional<std::shared_ptr<AppState>> app_state_{};

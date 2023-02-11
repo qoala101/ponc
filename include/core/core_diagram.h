@@ -4,8 +4,9 @@
 #include <memory>
 #include <vector>
 
-#include "core_node.h"
-#include "esc_types.h"
+#include "core_i_node.h"
+#include "core_i_node_factory.h"
+#include "core_link.h"
 #include "imgui_node_editor.h"
 
 namespace esc::core {

@@ -1,12 +1,12 @@
-// #ifndef VH_CORE_INPUT_NODE_H_
-// #define VH_CORE_INPUT_NODE_H_
+#ifndef VH_IMPL_INPUT_NODE_H_
+#define VH_IMPL_INPUT_NODE_H_
 
 // #include <memory>
 
-// #include "core_node.h"
+// #include "core_i_node.h"
 
 // namespace esc {
 // auto CreateInputNodeFactory() -> std::shared_ptr<INodeFactory>;
 // }  // namespace esc
 
-// #endif  // VH_CORE_INPUT_NODE_H_
+#endif  // VH_IMPL_INPUT_NODE_H_

@@ -16,14 +16,10 @@
 #include <utility>
 #include <vector>
 
-#include "core_client_node.h"
-#include "core_coupler_node.h"
 #include "esc_enums.h"
-#include "core_input_node.h"
 #include "core_link.h"
-#include "core_node.h"
+#include "core_i_node.h"
 #include "core_pin.h"
-#include "core_splitter_node.h"
 
 namespace ne = ax::NodeEditor;
 

@@ -8,12 +8,10 @@
 #include <ios>
 #include <memory>
 
-#include "core_client_node.h"
-#include "core_coupler_node.h"
 #include "core_diagram.h"
 #include "core_float_pin.h"
-#include "core_input_node.h"
-#include "core_splitter_node.h"
+#include "draw_i_node_drawer.h"
+#include "draw_i_node_factory_drawer.h"
 #include "esc_app_state.h"
 #include "esc_cpp.h"
 #include "esc_enums.h"
@@ -183,7 +181,7 @@ void DrawPinField(IPin& pin) {
   ImGui::Spring(0);
 }
 // vh: bad
-void DrawNodeHeader(INode& node) {
+void DrawNodeHeader(core::INode& node) {
   ImGui::Spring(0);
   ImGui::TextUnformatted(node.CreateDrawer()->GetLabel().c_str());
   ImGui::Spring(1);
@@ -258,7 +256,7 @@ void App::ShowFlow() {
 }
 
 void App::AddLinkFromPinToNode(ne::LinkId link_id, const IPin* pin,
-                               const INode* node) {
+                               const core::INode* node) {
   const auto* node_pins = (pin->ui_data_.Kind == PinKind::Input)
                               ? &node->GetOutputPins()
                               : &node->GetInputPins();
@@ -430,7 +428,7 @@ auto App::CalculateAlphaForPin(const IPin& pin) {
   return alpha;
 }
 // vh: bad
-void App::DrawNode(INode& node) {
+void App::DrawNode(core::INode& node) {
   auto node_builder = esc::NodeDrawer{node.GetId()};
 
   const auto header_texture =

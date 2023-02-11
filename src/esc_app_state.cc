@@ -3,25 +3,27 @@
 #include <memory>
 
 #include "core_app.h"
-#include "core_client_node.h"
 #include "crude_json.h"
 #include "esc_id_generator.h"
+#include "impl_client_node.h"
 #include "json_diagram_serializer.h"
 
 namespace esc {
 namespace {
 auto CreateNodeFactoryParsers() {
-  auto factory_parsers = std::vector<std::unique_ptr<INodeFactoryParser>>{};
-  factory_parsers.emplace_back(CreateClientNodeFactoryParser());
+  auto factory_parsers =
+      std::vector<std::unique_ptr<json::INodeFactoryParser>>{};
+  factory_parsers.emplace_back(
+      impl::ClientNode::CreateNodeFactoryParser());
   return factory_parsers;
 }
 }  // namespace
 
 AppState::AppState()
     : app_{[]() {
-        auto node_factories = std::vector<std::shared_ptr<esc::INodeFactory>>{
+        auto node_factories = std::vector<std::shared_ptr<core::INodeFactory>>{
             // esc::CreateInputNodeFactory(),
-            esc::CreateClientNodeFactory()
+            impl::ClientNode::CreateNodeFactory()
             // ,
             // esc::CreateCouplerNodeFactory()
         };

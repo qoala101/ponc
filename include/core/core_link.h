@@ -3,9 +3,9 @@
 
 #include <imgui_node_editor.h>
 
+namespace esc::core {
 namespace ne = ax::NodeEditor;
 
-namespace esc::core {
 struct Link {
   ne::LinkId id{};
   ne::PinId start_pin_id{};
