@@ -115,11 +115,14 @@ add_example_executable(esc
   core/core_i_family.cc
   core/core_i_node.cc
   core/core_id_generator.cc
+
   cpp/cpp_assert.cc
   cpp/cpp_scope_function.cc
+
   draw/pin/draw_empty_pin_drawer.cc
   draw/pin/draw_flow_input_pin_drawer.cc
   draw/pin/draw_flow_output_pin_drawer.cc
+
   draw/draw_constants.cc
   draw/draw_families_view.cc
   draw/draw_i_drawable.cc
@@ -129,22 +132,27 @@ add_example_executable(esc
   draw/draw_menu_bar.cc
   draw/draw_open_file_dialog.cc
   draw/draw_save_as_file_dialog.cc
+
   json/json_diagram_serializer.cc
   json/json_i_family_parser.cc
   json/json_i_family_writer.cc
   json/json_i_node_parser.cc
   json/json_i_node_writer.cc
   json/json_link_serializer.cc
+
   impl/impl_client_node.cc
   impl/impl_coupler_node.cc
+  impl/impl_hub_node.cc
   impl/impl_input_node.cc
   impl/impl_splitter_node.cc
+
   esc_app_state.cc
   esc_app.cc
   esc_editor_context_handle.cc
   esc_node_drawer.cc
   esc_textures_handle.cc
   esc_types.cc
+  
   main.cc
 )
 
