@@ -23,41 +23,29 @@
 
 namespace esc::core {
 Diagram::Diagram(std::vector<std::shared_ptr<INodeFactory>> node_factories,
-                 std::vector<std::shared_ptr<INode>> nodes,
                  std::vector<Link> links)
-    : node_factories_{std::move(node_factories)},
-      nodes_{std::move(nodes)},
-      links_{std::move(links)} {}
+    : node_factories_{std::move(node_factories)}, links_{std::move(links)} {}
 
 Diagram::~Diagram() {
-  // MOVE TO RAII
   for (const auto& link : links_) {
     ne::DeleteLink(link.id);
   }
 
-  links_.clear();
-
-  for (const auto& node : nodes_) {
-    ne::DeleteNode(node->GetId());
+  for (const auto& node_factory : node_factories_) {
+    for (const auto& node : node_factory->GetNodes()) {
+      ne::DeleteNode(node->GetId());
+    }
   }
-
-  nodes_.clear();
-}
-
-auto Diagram::GetNodes() const -> const std::vector<std::shared_ptr<INode>>& {
-  return nodes_;
 }
 
 auto Diagram::GetLinks() const -> const std::vector<Link>& { return links_; }
 
-auto Diagram::EmplaceNode(std::shared_ptr<INode> node) -> INode& {
-  return *nodes_.emplace_back(std::move(node));
-}
-
 auto Diagram::FindNode(ne::NodeId id) -> INode& {
-  for (auto& node : nodes_) {
-    if (node->GetId() == id) {
-      return *node;
+  for (const auto& node_factory : node_factories_) {
+    for (const auto& node : node_factory->GetNodes()) {
+      if (node->GetId() == id) {
+        return *node;
+      }
     }
   }
 
@@ -65,10 +53,12 @@ auto Diagram::FindNode(ne::NodeId id) -> INode& {
 }
 
 auto Diagram::FindPin(ne::PinId id) -> std::unique_ptr<draw::IPinDrawer> {
-  for (auto& node : nodes_) {
-    for (const auto pin_id : node->GetPinIds()) {
-      if (pin_id == id) {
-        return node->CreateDrawer()->CreatePinDrawer(pin_id);
+  for (const auto& node_factory : node_factories_) {
+    for (const auto& node : node_factory->GetNodes()) {
+      for (const auto pin_id : node->GetPinIds()) {
+        if (pin_id == id) {
+          return node->CreateDrawer()->CreatePinDrawer(pin_id);
+        }
       }
     }
   }
@@ -97,11 +87,12 @@ void Diagram::EraseLink(ne::LinkId linkId) {
 }
 
 void Diagram::EraseNode(ne::NodeId id) {
-  const auto node = std::ranges::find_if(
-      nodes_, [id](const auto& node) { return node->GetId() == id; });
-
-  if (node != nodes_.end()) {
-    nodes_.erase(node);
+  for (const auto& node_factory : node_factories_) {
+    for (const auto& node : node_factory->GetNodes()) {
+      if (node->GetId() == id) {
+        return node_factory->EraseNode(id);
+      }
+    }
   }
 }
 

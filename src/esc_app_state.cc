@@ -42,11 +42,13 @@ auto CreateNodeFactoryParsers() {
 auto FindMaxId(const core::Diagram &diagram) {
   auto max_id = uintptr_t{};
 
-  for (const auto &node : diagram.GetNodes()) {
-    max_id = std::max(node->GetId().Get(), max_id);
+  for (const auto &node_factory : diagram.GetNodeFactories()) {
+    for (const auto &node : node_factory->GetNodes()) {
+      max_id = std::max(node->GetId().Get(), max_id);
 
-    for (const auto pin_id : node->GetPinIds()) {
-      max_id = std::max(pin_id.Get(), max_id);
+      for (const auto pin_id : node->GetPinIds()) {
+        max_id = std::max(pin_id.Get(), max_id);
+      }
     }
   }
 

@@ -4,7 +4,6 @@
 #include <imgui_node_editor.h>
 
 #include <memory>
-#include <string>
 #include <vector>
 
 #include "cpp_interface.h"
@@ -24,9 +23,6 @@ class INodeDrawer;
 namespace core {
 class INode : public cpp::Interface {
  public:
-  // ADD ID REGISTERING AS RAII
-  // virtual ~INode() = default;
-
   // ---
   virtual auto CreateWriter [[nodiscard]] ()
   -> std::unique_ptr<json::INodeWriter> = 0;

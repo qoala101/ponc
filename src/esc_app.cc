@@ -374,10 +374,8 @@ void App::DrawContextMenuProcess() {
              (*app_state_)->app_.GetDiagram()->GetNodeFactories()) {
           if (ImGui::MenuItem(
                   node_factory->CreateDrawer()->GetLabel().c_str())) {
-            auto& new_node = (*app_state_)
-                                 ->app_.GetDiagram()
-                                 ->EmplaceNode(node_factory->CreateNode(
-                                     *(*app_state_)->id_generator_));
+            auto& new_node =
+                node_factory->EmplaceNode(*(*app_state_)->id_generator_);
 
             new_node.SetPosition(open_popup_pos);
 
@@ -463,8 +461,11 @@ void App::DrawNode(core::INode& node) {
 }
 // vh: norm
 void App::DrawNodes() {
-  for (auto& node : (*app_state_)->app_.GetDiagram()->GetNodes()) {
-    DrawNode(*node);
+  for (const auto& node_factory :
+       (*app_state_)->app_.GetDiagram()->GetNodeFactories()) {
+    for (const auto& node : node_factory->GetNodes()) {
+      DrawNode(*node);
+    }
   }
 }
 // vh: norm

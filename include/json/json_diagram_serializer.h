@@ -3,7 +3,7 @@
 
 #include "core_diagram.h"
 #include "crude_json.h"
-#include "json_node_factory_serializer.h"
+#include "json_i_node_factory_parser.h"
 
 namespace esc::json {
 // ---

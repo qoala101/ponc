@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "core_i_node_factory.h"
-#include "json_node_factory_serializer.h"
+#include "json_i_node_factory_parser.h"
 
 namespace esc::impl {
 // ---

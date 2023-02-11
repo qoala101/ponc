@@ -15,7 +15,6 @@ class Diagram {
  public:
   explicit Diagram(
       std::vector<std::shared_ptr<INodeFactory>> node_factories = {},
-      std::vector<std::shared_ptr<INode>> nodes = {},
       std::vector<Link> links = {});
 
   Diagram(const Diagram &) = delete;
@@ -28,10 +27,8 @@ class Diagram {
 
   auto GetNodeFactories() const
       -> const std::vector<std::shared_ptr<INodeFactory>> &;
-  auto GetNodes() const -> const std::vector<std::shared_ptr<INode>> &;
   auto GetLinks() const -> const std::vector<Link> &;
 
-  auto EmplaceNode(std::shared_ptr<INode> node) -> INode &;
   auto EmplaceLink(const Link &link) -> Link &;
 
   void EraseNode(ne::NodeId id);
@@ -50,7 +47,6 @@ class Diagram {
 
  private:
   std::vector<std::shared_ptr<INodeFactory>> node_factories_{};
-  std::vector<std::shared_ptr<INode>> nodes_{};
   std::vector<Link> links_{};
 };
 }  // namespace esc::core

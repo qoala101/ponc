@@ -112,6 +112,7 @@ endmacro()
 add_example_executable(esc
   core/core_app.cc
   core/core_diagram.cc
+  core/core_i_node_factory.cc
   core/core_i_node.cc
   core/core_id_generator.cc
   cpp/cpp_assert.cc
@@ -130,9 +131,11 @@ add_example_executable(esc
   draw/draw_open_file_dialog.cc
   draw/draw_save_as_file_dialog.cc
   json/json_diagram_serializer.cc
+  json/json_i_node_factory_parser.cc
+  json/json_i_node_factory_writer.cc
+  json/json_i_node_parser.cc
+  json/json_i_node_writer.cc
   json/json_link_serializer.cc
-  json/json_node_factory_serializer.cc
-  json/json_node_serializer.cc
   impl/impl_client_node.cc
   # impl/impl_coupler_node.cc
   impl/impl_input_node.cc

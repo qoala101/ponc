@@ -3,15 +3,17 @@
 #include <memory>
 
 #include "core_i_node.h"
+#include "core_id_generator.h"
 #include "cpp_assert.h"
 #include "crude_json.h"
 #include "draw_flow_input_pin_drawer.h"
 #include "draw_i_node_drawer.h"
 #include "draw_i_node_factory_drawer.h"
 #include "draw_i_pin_drawer.h"
-#include "core_id_generator.h"
 #include "imgui_node_editor.h"
-#include "json_node_serializer.h"
+#include "json_i_node_factory_writer.h"
+#include "json_i_node_parser.h"
+#include "json_i_node_writer.h"
 
 namespace esc::impl {
 namespace {
@@ -48,8 +50,6 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
 
 class NodeParser : public json::INodeParser {
  private:
-  auto GetTypeName() const -> std::string override { return kTypeName; }
-
   auto ParseFromJson(ne::NodeId parsed_node_id,
                      std::vector<ne::PinId> parsed_pin_ids,
                      const crude_json::value& json) const
@@ -134,6 +134,9 @@ auto CreateNodeDrawer(std::shared_ptr<Node> node)
 class NodeFactory : public core::INodeFactory,
                     public std::enable_shared_from_this<NodeFactory> {
  public:
+  explicit NodeFactory(std::vector<std::shared_ptr<core::INode>> nodes = {})
+      : INodeFactory{std::move(nodes)} {}
+
   auto CreateNode(core::IdGenerator& id_generator)
       -> std::shared_ptr<core::INode> override {
     return std::make_shared<Node>(
@@ -158,9 +161,10 @@ class NodeFactoryParser : public json::INodeFactoryParser {
  public:
   auto GetTypeName() const -> std::string override { return kTypeName; }
 
-  auto ParseFromJson(const crude_json::value& json) const
+  auto ParseFromJson(std::vector<std::shared_ptr<core::INode>> parsed_nodes,
+                     const crude_json::value& json) const
       -> std::shared_ptr<core::INodeFactory> override {
-    return std::make_shared<NodeFactory>();
+    return std::make_shared<NodeFactory>(std::move(parsed_nodes));
   }
 };
 
