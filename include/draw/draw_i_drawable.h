@@ -1,23 +1,26 @@
 #ifndef VH_DRAW_I_DRAWABLE_H_
 #define VH_DRAW_I_DRAWABLE_H_
 
-namespace esc::draw {
-// NOLINTNEXTLINE(*-special-member-functions)
-class IDrawable {
- public:
-  virtual ~IDrawable() = default;
+#include "cpp_interface.h"
 
+namespace esc::draw {
+// ---
+class IDrawable : public cpp::Interface {
+ public:
+  // ---
   virtual void Draw() = 0;
 
-  auto IsVisible() const -> bool;
+  // ---
+  auto IsVisible [[nodiscard]] () const -> bool;
+  // ---
   void SetVisible(bool visible);
 
  protected:
-  IDrawable() = default;
-
-  auto GetVisible() -> bool &;
-
+  // ---
   virtual void OnVisibleChanged();
+
+  // ---
+  auto GetVisible [[nodiscard]] () -> bool &;
 
  private:
   bool visible_{};

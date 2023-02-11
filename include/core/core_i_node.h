@@ -39,6 +39,8 @@ class INode : public cpp::Interface {
   // ---
   auto GetPinIds [[nodiscard]] () const -> const std::vector<ne::PinId> &;
   // ---
+  auto GetPinIndex [[nodiscard]] (ne::PinId pin_id) const -> int;
+  // ---
   auto GetPosition [[nodiscard]] () const -> ImVec2;
   // ---
   void SetPosition(const ImVec2 &position);

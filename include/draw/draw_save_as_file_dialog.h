@@ -4,11 +4,14 @@
 #include "draw_i_file_dialog.h"
 
 namespace esc::draw {
+// ---
 class SaveAsFileDialog : public IFileDialog {
  public:
+  // ---
   explicit SaveAsFileDialog(std::shared_ptr<AppState> app_state);
 
  private:
+  // ---
   void OnFileSelected(std::string file_path) const override;
 };
 }  // namespace esc::draw

@@ -3,22 +3,18 @@
 
 #include <string>
 
+#include "cpp_interface.h"
 #include "imgui.h"
 
 namespace esc::draw {
 // ---
 // NOLINTNEXTLINE(*-special-member-functions)
-class INodeFactoryDrawer {
+class INodeFactoryDrawer : public cpp::Interface {
  public:
-  virtual ~INodeFactoryDrawer() = default;
-
   // ---
   virtual auto GetLabel [[nodiscard]] () const -> std::string = 0;
   // ---
   virtual auto GetColor [[nodiscard]] () const -> ImColor = 0;
-
- protected:
-  INodeFactoryDrawer() = default;
 };
 }  // namespace esc::draw
 

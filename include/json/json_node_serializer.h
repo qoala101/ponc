@@ -1,9 +1,13 @@
 #ifndef VH_JSON_NODE_SERIALIZER_H_
 #define VH_JSON_NODE_SERIALIZER_H_
 
+#include <imgui_node_editor.h>
+
 #include <memory>
 
 #include "crude_json.h"
+
+namespace ne = ax::NodeEditor;
 
 namespace esc {
 namespace core {
@@ -28,7 +32,10 @@ class INodeParser {
   // ---
   virtual auto GetTypeName [[nodiscard]] () const -> std::string = 0;
   // ---
-  virtual auto ParseFromJson [[nodiscard]] (const crude_json::value &json) const
+  virtual auto ParseFromJson
+      [[nodiscard]] (ne::NodeId parsed_node_id,
+                     std::vector<ne::PinId> parsed_pin_ids,
+                     const crude_json::value &json) const
       -> std::shared_ptr<core::INode> = 0;
 };
 

@@ -3,10 +3,14 @@
 #include <memory>
 
 #include "core_i_node.h"
+#include "cpp_assert.h"
 #include "crude_json.h"
+#include "draw_flow_input_pin_drawer.h"
 #include "draw_i_node_drawer.h"
 #include "draw_i_node_factory_drawer.h"
+#include "draw_i_pin_drawer.h"
 #include "esc_id_generator.h"
+#include "imgui_node_editor.h"
 #include "json_node_serializer.h"
 
 namespace esc::impl {
@@ -28,17 +32,9 @@ auto CreateNodeFactoryDrawer(std::shared_ptr<NodeFactory> node_factory)
 // NOLINTNEXTLINE(*-multiple-inheritance)
 class Node : public core::INode, public std::enable_shared_from_this<Node> {
  public:
-  explicit Node(esc::IdGenerator& id_generator)
-      : INode{
-            id_generator.GetNext<ne::NodeId>(),
-            {
-                //   std::make_shared<FlowPin>(id_generator.GetNext<ne::PinId>(),
-                //                            ne::PinKind::Input, false),
-                //  std::make_shared<FloatPin>(id_generator.GetNext<ne::PinId>(),
-                //                             "min", ne::PinKind::Input, true),
-                //  std::make_shared<FloatPin>(id_generator.GetNext<ne::PinId>(),
-                //                             "max", ne::PinKind::Input, true)
-            }} {}
+  Node(ne::NodeId id, std::vector<ne::PinId> pin_ids, float min = {},
+       float max = {})
+      : INode{id, std::move(pin_ids)}, min_{min}, max_{max} {}
 
   auto CreateWriter() -> std::unique_ptr<json::INodeWriter> override {
     return CreateNodeWriter(shared_from_this());
@@ -47,16 +43,22 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
   auto CreateDrawer() -> std::unique_ptr<draw::INodeDrawer> override {
     return CreateNodeDrawer(shared_from_this());
   }
+
+  float min_{};
+  float max_{};
 };
 
 class NodeParser : public json::INodeParser {
  private:
   auto GetTypeName() const -> std::string override { return kTypeName; }
 
-  auto ParseFromJson(const crude_json::value& json) const
+  auto ParseFromJson(ne::NodeId parsed_node_id,
+                     std::vector<ne::PinId> parsed_pin_ids,
+                     const crude_json::value& json) const
       -> std::shared_ptr<core::INode> override {
-    IdGenerator TEMP_GENERATOR{};
-    return std::make_shared<Node>(TEMP_GENERATOR);
+    return std::make_shared<Node>(parsed_node_id, std::move(parsed_pin_ids),
+                                  json["min"].get<crude_json::number>(),
+                                  json["max"].get<crude_json::number>());
   }
 };
 
@@ -69,8 +71,8 @@ class NodeWriter : public json::INodeWriter {
 
   auto WriteToJson() const -> crude_json::value override {
     auto json = crude_json::value{};
-    json["min"] = static_cast<crude_json::number>(10);
-    json["max"] = static_cast<crude_json::number>(20);
+    json["min"] = static_cast<crude_json::number>(node_->min_);
+    json["max"] = static_cast<crude_json::number>(node_->max_);
     return json;
   }
 
@@ -82,6 +84,42 @@ auto CreateNodeWriter(std::shared_ptr<Node> node)
     -> std::unique_ptr<json::INodeWriter> {
   return std::make_unique<NodeWriter>(std::move(node));
 }
+
+class MinPinDrawer : public draw::IPinDrawer {
+ public:
+  explicit MinPinDrawer(std::shared_ptr<Node> node) : node_{std::move(node)} {}
+
+  auto GetLabel [[nodiscard]] () const -> std::string override { return "min"; }
+
+  auto GetKind [[nodiscard]] () const -> ne::PinKind override {
+    return ne::PinKind::Input;
+  }
+
+  auto GetFloat [[nodiscard]] () -> float* override { return &node_->min_; }
+
+  auto IsEditable [[nodiscard]] () const -> bool override { return true; }
+
+ private:
+  std::shared_ptr<Node> node_{};
+};
+
+class MaxPinDrawer : public draw::IPinDrawer {
+ public:
+  explicit MaxPinDrawer(std::shared_ptr<Node> node) : node_{std::move(node)} {}
+
+  auto GetLabel [[nodiscard]] () const -> std::string override { return "max"; }
+
+  auto GetKind [[nodiscard]] () const -> ne::PinKind override {
+    return ne::PinKind::Input;
+  }
+
+  auto GetFloat [[nodiscard]] () -> float* override { return &node_->max_; }
+
+  auto IsEditable [[nodiscard]] () const -> bool override { return true; }
+
+ private:
+  std::shared_ptr<Node> node_{};
+};
 
 class NodeDrawer : public draw::INodeDrawer {
  public:
@@ -97,7 +135,21 @@ class NodeDrawer : public draw::INodeDrawer {
 
   auto CreatePinDrawer(ne::PinId pin_id) const
       -> std::unique_ptr<draw::IPinDrawer> override {
-    return {};
+    const auto pin_index = node_->GetPinIndex(pin_id);
+
+    if (pin_index == 0) {
+      return std::make_unique<draw::FlowInputPinDrawer>();
+    }
+
+    if (pin_index == 1) {
+      return std::make_unique<MinPinDrawer>(node_);
+    }
+
+    if (pin_index == 2) {
+      return std::make_unique<MaxPinDrawer>(node_);
+    }
+
+    cpp::Expects(false);
   }
 
  private:
@@ -115,7 +167,11 @@ class NodeFactory : public core::INodeFactory,
  public:
   auto CreateNode(IdGenerator& id_generator)
       -> std::shared_ptr<core::INode> override {
-    return std::make_shared<Node>(id_generator);
+    return std::make_shared<Node>(
+        id_generator.GetNext<ne::NodeId>(),
+        std::vector<ne::PinId>{id_generator.GetNext<ne::PinId>(),
+                               id_generator.GetNext<ne::PinId>(),
+                               id_generator.GetNext<ne::PinId>()});
   }
 
   auto CreateNodeParser() -> std::unique_ptr<json::INodeParser> override {

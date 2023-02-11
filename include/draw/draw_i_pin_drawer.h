@@ -19,7 +19,7 @@ class IPinDrawer : public cpp::Interface {
   // ---
   virtual auto GetKind [[nodiscard]] () const -> ne::PinKind = 0;
   // ---
-  virtual auto GetFloat [[nodiscard]] () const -> float* = 0;
+  virtual auto GetFloat [[nodiscard]] () -> float* = 0;
   // ---
   virtual auto IsEditable [[nodiscard]] () const -> bool = 0;
 };
