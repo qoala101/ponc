@@ -10,7 +10,7 @@ namespace esc::core {
 class IdGenerator {
  public:
   // ---
-  explicit IdGenerator(uintptr_t next_value = 0);
+  explicit IdGenerator(uintptr_t next_value = 1);
 
   // ---
   template <typename T>

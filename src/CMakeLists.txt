@@ -140,6 +140,7 @@ add_example_executable(esc
   json/json_i_node_writer.cc
   json/json_link_serializer.cc
 
+  impl/impl_attenuator_node.cc
   impl/impl_client_node.cc
   impl/impl_coupler_node.cc
   impl/impl_hub_node.cc

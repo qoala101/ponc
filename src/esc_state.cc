@@ -7,6 +7,7 @@
 #include "core_diagram.h"
 #include "core_id_generator.h"
 #include "crude_json.h"
+#include "impl_attenuator_node.h"
 #include "impl_client_node.h"
 #include "impl_coupler_node.h"
 #include "impl_hub_node.h"
@@ -19,7 +20,8 @@ namespace {
 auto CreateFamilies() {
   auto families = std::vector<std::shared_ptr<core::IFamily>>{
       impl::HubNode::CreateFamily(), impl::InputNode::CreateFamily(),
-      impl::ClientNode::CreateFamily(), impl::CouplerNode::CreateFamily()};
+      impl::ClientNode::CreateFamily(), impl::CouplerNode::CreateFamily(),
+      impl::AttenuatorNode::CreateFamily()};
 
   for (auto num_outputs : {2, 4, 8, 16}) {
     families.emplace_back(impl::SplitterNode::CreateFamily(num_outputs));
@@ -34,12 +36,13 @@ auto CreateFamilyParsers() {
   family_parsers.emplace_back(impl::InputNode::CreateFamilyParser());
   family_parsers.emplace_back(impl::ClientNode::CreateFamilyParser());
   family_parsers.emplace_back(impl::CouplerNode::CreateFamilyParser());
+  family_parsers.emplace_back(impl::AttenuatorNode::CreateFamilyParser());
   family_parsers.emplace_back(impl::SplitterNode::CreateFamilyParser());
   return family_parsers;
 }
 
 auto FindMaxId(const core::Diagram &diagram) {
-  auto max_id = uintptr_t{};
+  auto max_id = uintptr_t{1};
 
   for (const auto &family : diagram.GetFamilies()) {
     for (const auto &node : family->GetNodes()) {
