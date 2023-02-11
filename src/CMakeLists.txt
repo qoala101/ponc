@@ -113,9 +113,11 @@ add_example_executable(esc
   core/core_app.cc
   core/core_diagram.cc
   core/core_i_node.cc
+  core/core_id_generator.cc
   cpp/cpp_assert.cc
   cpp/cpp_scope_function.cc
   draw/pin/draw_empty_pin_drawer.cc
+  draw/pin/draw_flow_input_pin_drawer.cc
   draw/draw_i_drawable.cc
   draw/draw_i_file_dialog.cc
   draw/draw_main_window.cc
@@ -129,7 +131,7 @@ add_example_executable(esc
   json/json_node_serializer.cc
   impl/impl_client_node.cc
   # impl/impl_coupler_node.cc
-  # impl/impl_input_node.cc
+  impl/impl_input_node.cc
   # impl/impl_splitter_node.cc
   esc_app_state.cc
   esc_app.cc

@@ -9,7 +9,7 @@
 #include "draw_i_node_drawer.h"
 #include "draw_i_node_factory_drawer.h"
 #include "draw_i_pin_drawer.h"
-#include "esc_id_generator.h"
+#include "core_id_generator.h"
 #include "imgui_node_editor.h"
 #include "json_node_serializer.h"
 
@@ -76,7 +76,6 @@ class NodeWriter : public json::INodeWriter {
     return json;
   }
 
- private:
   std::shared_ptr<Node> node_{};
 };
 
@@ -165,7 +164,7 @@ auto CreateNodeDrawer(std::shared_ptr<Node> node)
 class NodeFactory : public core::INodeFactory,
                     public std::enable_shared_from_this<NodeFactory> {
  public:
-  auto CreateNode(IdGenerator& id_generator)
+  auto CreateNode(core::IdGenerator& id_generator)
       -> std::shared_ptr<core::INode> override {
     return std::make_shared<Node>(
         id_generator.GetNext<ne::NodeId>(),

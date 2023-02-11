@@ -7,11 +7,10 @@
 
 #include "cpp_interface.h"
 
-namespace esc::draw {
 namespace ne = ax::NodeEditor;
 
+namespace esc::draw {
 // ---
-// NOLINTNEXTLINE(*-special-member-functions)
 class IPinDrawer : public cpp::Interface {
  public:
   // ---

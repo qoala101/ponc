@@ -12,7 +12,6 @@
 
 namespace esc::draw {
 // ---
-// NOLINTNEXTLINE(*-special-member-functions)
 class INodeDrawer : public cpp::Interface {
  public:
   // ---

@@ -4,7 +4,7 @@
 #include <application.h>
 #include <imgui_node_editor.h>
 
-#include "esc_id_generator.h"
+#include "core_id_generator.h"
 #include "imgui.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS

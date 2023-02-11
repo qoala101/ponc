@@ -9,13 +9,13 @@
 #include <memory>
 
 #include "core_diagram.h"
+#include "core_id_generator.h"
 #include "cpp_assert.h"
 #include "cpp_scope.h"
 #include "draw_i_node_drawer.h"
 #include "draw_i_node_factory_drawer.h"
 #include "draw_i_pin_drawer.h"
 #include "esc_app_state.h"
-#include "esc_id_generator.h"
 #include "esc_node_drawer.h"
 #include "esc_types.h"
 #include "imgui.h"
@@ -31,9 +31,9 @@
 #include <utility>
 #include <vector>
 
-namespace esc {
 namespace ne = ax::NodeEditor;
 
+namespace esc {
 namespace {
 // vh: ok
 auto GetItemRect() {
@@ -147,7 +147,9 @@ void Icon(const ImVec2& size, bool filled,
 }
 // vh: norm
 void DrawPinIcon(draw::IPinDrawer& pin_drawer, bool connected, float alpha) {
-  if ((pin_drawer.GetFloat() == nullptr) || pin_drawer.IsEditable()) {
+  if ((pin_drawer.GetFloat() == nullptr) ||
+      (pin_drawer.IsEditable() &&
+       (pin_drawer.GetKind() == ne::PinKind::Input))) {
     if (pin_drawer.IsEditable()) {
       ImGui::Dummy(ImVec2{20, 24});
     } else {

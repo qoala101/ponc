@@ -13,8 +13,10 @@
 namespace esc::core {
 class Diagram {
  public:
-  Diagram(std::vector<std::shared_ptr<INodeFactory>> node_factories,
-          std::vector<std::shared_ptr<INode>> nodes, std::vector<Link> links);
+  explicit Diagram(
+      std::vector<std::shared_ptr<INodeFactory>> node_factories = {},
+      std::vector<std::shared_ptr<INode>> nodes = {},
+      std::vector<Link> links = {});
 
   Diagram(const Diagram &) = delete;
   Diagram(Diagram &&) noexcept = default;

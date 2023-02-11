@@ -1,14 +1,16 @@
 #include "draw_menu_bar.h"
 
+#include "cpp_scope.h"
 #include "draw_open_file_dialog.h"
 #include "draw_save_as_file_dialog.h"
 #include "esc_app_state.h"
-#include "cpp_scope.h"
 #include "imgui.h"
 
 namespace esc::draw {
 MenuBar::MenuBar(std::shared_ptr<AppState> app_state)
-    : open_file_dialog_{app_state}, save_as_file_dialog_{std::move(app_state)} {}
+    : app_state_{std::move(app_state)},
+      open_file_dialog_{app_state_},
+      save_as_file_dialog_{app_state_} {}
 
 void MenuBar::Draw() {
   if (ImGui::BeginMainMenuBar()) {
@@ -25,8 +27,8 @@ void MenuBar::Draw() {
         save_as_file_dialog_.SetVisible(true);
       }
 
-      if (ImGui::MenuItem("Clear")) {
-        // app_->GetDiagram().DeleteAll();
+      if (ImGui::MenuItem("Reset")) {
+        app_state_->ResetDiagram();
       }
     }
 

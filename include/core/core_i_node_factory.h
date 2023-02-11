@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "esc_id_generator.h"
+#include "core_id_generator.h"
 
 namespace esc {
 namespace json {

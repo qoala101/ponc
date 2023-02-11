@@ -8,7 +8,6 @@
 
 namespace esc::draw {
 // ---
-// NOLINTNEXTLINE(*-special-member-functions)
 class INodeFactoryDrawer : public cpp::Interface {
  public:
   // ---
