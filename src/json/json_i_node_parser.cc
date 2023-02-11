@@ -27,7 +27,14 @@ auto INodeParser::ParseFromJson(const crude_json::value& json) const
   const auto parsed_node_id =
       IdSerializer::ParseFromJson<ne::NodeId>(json["id"]);
   auto parsed_pin_ids = ParsePinIds(json);
+  auto parsed_node =
+      ParseFromJson(parsed_node_id, std::move(parsed_pin_ids), json["data"]);
 
-  return ParseFromJson(parsed_node_id, std::move(parsed_pin_ids), json["data"]);
+  const auto parsed_position =
+      ImVec2{static_cast<float>(json["pos_x"].get<crude_json::number>()),
+             static_cast<float>(json["pos_y"].get<crude_json::number>())};
+  parsed_node->SetPosition(parsed_position);
+
+  return parsed_node;
 }
 }  // namespace esc::json

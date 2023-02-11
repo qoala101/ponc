@@ -25,9 +25,9 @@ auto INodeWriter::WriteToJson(const core::INode& node) const
   json["id"] = IdSerializer::WriteToJson(node.GetId());
   WritePinIds(node.GetPinIds(), json);
 
-  const auto pos = node.GetPosition();
-  json["pos_x"] = pos.x;
-  json["pos_y"] = pos.y;
+  const auto position = node.GetPosition();
+  json["pos_x"] = position.x;
+  json["pos_y"] = position.y;
   json["data"] = WriteToJson();
 
   return json;
