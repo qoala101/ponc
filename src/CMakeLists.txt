@@ -127,6 +127,7 @@ add_example_executable(esc
   draw/draw_open_file_dialog.cc
   draw/draw_save_as_file_dialog.cc
   json/json_diagram_serializer.cc
+  json/json_link_serializer.cc
   json/json_node_factory_serializer.cc
   json/json_node_serializer.cc
   impl/impl_client_node.cc
