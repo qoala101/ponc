@@ -27,17 +27,8 @@ void MenuBar::Draw(AppState& app_state) {
       }
     }
 
-    if (ImGui::BeginMenu("Views")) {
-      const auto menu_scope = cpp::Scope{[]() { ImGui::EndMenu(); }};
-
-      if (ImGui::MenuItem("Nodes", nullptr, nodes_view_.IsVisible())) {
-        nodes_view_.SetVisible(!nodes_view_.IsVisible());
-      }
-
-      if (ImGui::MenuItem("Node Families", nullptr,
-                          families_view_.IsVisible())) {
-        families_view_.SetVisible(!families_view_.IsVisible());
-      }
+    if (ImGui::MenuItem("Families", nullptr, families_view_.IsVisible())) {
+      families_view_.SetVisible(!families_view_.IsVisible());
     }
 
     if (ImGui::MenuItem("Zoom to Content")) {
@@ -53,7 +44,6 @@ void MenuBar::Draw(AppState& app_state) {
 
   open_file_dialog_.Draw(app_state);
   save_as_file_dialog_.Draw(app_state);
-  nodes_view_.Draw(app_state);
   families_view_.Draw(app_state);
 }
 }  // namespace esc::draw

@@ -8,6 +8,7 @@
 #include "core_id_generator.h"
 #include "crude_json.h"
 #include "impl_client_node.h"
+#include "impl_coupler_node.h"
 #include "impl_input_node.h"
 #include "impl_splitter_node.h"
 #include "json_diagram_serializer.h"
@@ -16,10 +17,8 @@ namespace esc {
 namespace {
 auto CreateFamilies() {
   auto families = std::vector<std::shared_ptr<core::IFamily>>{
-      impl::InputNode::CreateFamily(), impl::ClientNode::CreateFamily()
-      // ,
-      // esc::CreateCouplerFamily()
-  };
+      impl::InputNode::CreateFamily(), impl::ClientNode::CreateFamily(),
+      impl::CouplerNode::CreateFamily()};
 
   for (auto num_outputs : {2, 4, 8, 16}) {
     families.emplace_back(impl::SplitterNode::CreateFamily(num_outputs));
@@ -32,6 +31,7 @@ auto CreateFamilyParsers() {
   auto family_parsers = std::vector<std::unique_ptr<json::IFamilyParser>>{};
   family_parsers.emplace_back(impl::InputNode::CreateFamilyParser());
   family_parsers.emplace_back(impl::ClientNode::CreateFamilyParser());
+  family_parsers.emplace_back(impl::CouplerNode::CreateFamilyParser());
   family_parsers.emplace_back(impl::SplitterNode::CreateFamilyParser());
   return family_parsers;
 }

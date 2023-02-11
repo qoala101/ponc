@@ -25,9 +25,17 @@ void FamiliesView::Draw(AppState& app_state) {
         for (const auto& family : app_state.app_.GetDiagram()->GetFamilies()) {
           ImGui::TableNextRow();
           ImGui::TableNextColumn();
-          ImGui::TextUnformatted(family->CreateDrawer()->GetLabel().c_str());
+
+          if (ImGui::TreeNode(family->CreateDrawer()->GetLabel().c_str())) {
+            const auto tree_node_scope = cpp::Scope{[]() { ImGui::TreePop(); }};
+
+            for (const auto& node : family->GetNodes()) {
+              ImGui::Text("#%d", node->GetId().Get());
+            }
+          }
+
           ImGui::TableNextColumn();
-          ImGui::Text("%d", 33);
+          ImGui::Text("%d", family->GetNodes().size());
         }
       }
     }

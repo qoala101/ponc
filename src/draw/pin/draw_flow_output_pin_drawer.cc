@@ -10,4 +10,6 @@ auto FlowOutputPinDrawer::GetKind() const -> ne::PinKind {
 auto FlowOutputPinDrawer::GetFloat() -> float* { return &value_; }
 
 auto FlowOutputPinDrawer::IsEditable() const -> bool { return false; }
+
+auto FlowOutputPinDrawer::IsConnectable() const -> bool { return true; }
 }  // namespace esc::draw

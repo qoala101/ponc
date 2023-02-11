@@ -127,7 +127,6 @@ add_example_executable(esc
   draw/draw_i_pin_drawer.cc
   draw/draw_main_window.cc
   draw/draw_menu_bar.cc
-  draw/draw_nodes_view.cc
   draw/draw_open_file_dialog.cc
   draw/draw_save_as_file_dialog.cc
   json/json_diagram_serializer.cc
@@ -137,8 +136,7 @@ add_example_executable(esc
   json/json_i_node_writer.cc
   json/json_link_serializer.cc
   impl/impl_client_node.cc
-
-  # impl/impl_coupler_node.cc
+  impl/impl_coupler_node.cc
   impl/impl_input_node.cc
   impl/impl_splitter_node.cc
   esc_app_state.cc

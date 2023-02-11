@@ -173,11 +173,8 @@ class Family : public core::IFamily,
 
   auto CreateNode(core::IdGenerator& id_generator)
       -> std::shared_ptr<core::INode> override {
-    return std::make_shared<Node>(
-        id_generator.GetNext<ne::NodeId>(),
-        std::vector<ne::PinId>{id_generator.GetNext<ne::PinId>(),
-                               id_generator.GetNext<ne::PinId>(),
-                               id_generator.GetNext<ne::PinId>()});
+    return std::make_shared<Node>(id_generator.GetNext<ne::NodeId>(),
+                                  id_generator.GetNextN<ne::PinId>(3));
   }
 
   auto CreateNodeParser() -> std::unique_ptr<json::INodeParser> override {

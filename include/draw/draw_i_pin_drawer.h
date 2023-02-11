@@ -14,13 +14,13 @@ namespace esc::draw {
 class IPinDrawer : public cpp::Interface {
  public:
   // ---
-  virtual auto GetLabel [[nodiscard]] () const -> std::string = 0;
+  virtual auto GetLabel [[nodiscard]] () const -> std::string;
   // ---
   virtual auto GetKind [[nodiscard]] () const -> ne::PinKind = 0;
   // ---
-  virtual auto GetFloat [[nodiscard]] () -> float* = 0;
+  virtual auto GetFloat [[nodiscard]] () -> float*;
   // ---
-  virtual auto IsEditable [[nodiscard]] () const -> bool = 0;
+  virtual auto IsEditable [[nodiscard]] () const -> bool;
   // ---
   virtual auto IsConnectable [[nodiscard]] () const -> bool;
 };

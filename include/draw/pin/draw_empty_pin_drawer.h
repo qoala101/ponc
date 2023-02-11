@@ -2,17 +2,20 @@
 #define VH_DRAW_EMPTY_PIN_DRAWER_H_
 
 #include "draw_i_pin_drawer.h"
+#include "imgui_node_editor.h"
 
 namespace esc::draw {
 // ---
 class EmptyPinDrawer : public IPinDrawer {
  public:
   // ---
-  auto GetLabel [[nodiscard]] () const -> std::string override;
+  explicit EmptyPinDrawer(ne::PinKind pin_kind);
+
   // ---
-  auto GetFloat [[nodiscard]] () -> float* override;
-  // ---
-  auto IsEditable [[nodiscard]] () const -> bool override;
+  auto GetKind [[nodiscard]] () const -> ne::PinKind override;
+
+ private:
+  ne::PinKind pin_kind_{};
 };
 }  // namespace esc::draw
 

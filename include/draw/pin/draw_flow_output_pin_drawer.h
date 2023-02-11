@@ -15,6 +15,8 @@ class FlowOutputPinDrawer : public IPinDrawer {
   auto GetFloat [[nodiscard]] () -> float* override;
   // ---
   auto IsEditable [[nodiscard]] () const -> bool override;
+  // ---
+  auto IsConnectable [[nodiscard]] () const -> bool override;
 
  private:
   float value_{};

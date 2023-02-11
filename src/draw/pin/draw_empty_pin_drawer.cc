@@ -1,9 +1,7 @@
 #include "draw_empty_pin_drawer.h"
 
 namespace esc::draw {
-auto EmptyPinDrawer::GetLabel() const -> std::string { return {}; }
+EmptyPinDrawer::EmptyPinDrawer(ne::PinKind pin_kind) : pin_kind_{pin_kind} {}
 
-auto EmptyPinDrawer::GetFloat() -> float* { return nullptr; }
-
-auto EmptyPinDrawer::IsEditable() const -> bool { return false; }
+auto EmptyPinDrawer::GetKind() const -> ne::PinKind { return pin_kind_; }
 }  // namespace esc::draw

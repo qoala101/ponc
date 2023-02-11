@@ -95,9 +95,7 @@ class DropPinDrawer : public draw::IPinDrawer {
           };
         }()} {}
 
-  auto GetLabel [[nodiscard]] () const -> std::string override {
-    return "drop";
-  }
+  auto GetLabel [[nodiscard]] () const -> std::string override { return {}; }
 
   auto GetKind [[nodiscard]] () const -> ne::PinKind override {
     return ne::PinKind::Input;
@@ -165,17 +163,7 @@ class Family : public core::IFamily,
       -> std::shared_ptr<core::INode> override {
     return std::make_shared<Node>(
         id_generator.GetNext<ne::NodeId>(),
-        [&id_generator, num_outputs = num_outputs_]() {
-          auto pin_ids =
-              std::vector<ne::PinId>{id_generator.GetNext<ne::PinId>(),
-                                     id_generator.GetNext<ne::PinId>()};
-
-          for (auto i = 0; i < num_outputs; ++i) {
-            pin_ids.emplace_back(id_generator.GetNext<ne::PinId>());
-          }
-
-          return pin_ids;
-        }());
+        id_generator.GetNextN<ne::PinId>(2 + num_outputs_));
   }
 
   auto CreateNodeParser() -> std::unique_ptr<json::INodeParser> override {

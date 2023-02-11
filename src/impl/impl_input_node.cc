@@ -94,6 +94,8 @@ class PinDrawer : public draw::IPinDrawer {
 
   auto IsEditable [[nodiscard]] () const -> bool override { return true; }
 
+  auto IsConnectable [[nodiscard]] () const -> bool override { return true; }
+
  private:
   std::shared_ptr<Node> node_{};
 };
@@ -139,9 +141,8 @@ class Family : public core::IFamily,
 
   auto CreateNode(core::IdGenerator& id_generator)
       -> std::shared_ptr<core::INode> override {
-    return std::make_shared<Node>(
-        id_generator.GetNext<ne::NodeId>(),
-        std::vector<ne::PinId>{id_generator.GetNext<ne::PinId>()});
+    return std::make_shared<Node>(id_generator.GetNext<ne::NodeId>(),
+                                  id_generator.GetNextN<ne::PinId>(1));
   }
 
   auto CreateNodeParser() -> std::unique_ptr<json::INodeParser> override {

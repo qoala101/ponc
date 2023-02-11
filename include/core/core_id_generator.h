@@ -3,6 +3,8 @@
 
 #include <imgui_node_editor.h>
 
+#include <vector>
+
 namespace esc::core {
 // ---
 class IdGenerator {
@@ -12,8 +14,21 @@ class IdGenerator {
 
   // ---
   template <typename T>
-  auto GetNext() -> T {
+  auto GetNext() {
     return T{next_value_++};
+  }
+
+  // ---
+  template <typename T>
+  auto GetNextN(int n) {
+    auto ids = std::vector<T>{};
+    ids.reserve(n);
+
+    for (auto i = 0; i < n; ++i) {
+      ids.emplace_back(GetNext<T>());
+    }
+
+    return ids;
   }
 
  private:
