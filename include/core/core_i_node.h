@@ -12,6 +12,8 @@
 namespace ne = ax::NodeEditor;
 
 namespace esc {
+class State;
+
 namespace json {
 class INodeWriter;
 }  // namespace json
@@ -23,6 +25,8 @@ class INodeDrawer;
 namespace core {
 class INode : public cpp::Interface {
  public:
+  // ---
+  virtual void OnFrame(const State &state);
   // ---
   virtual auto CreateWriter [[nodiscard]] ()
   -> std::unique_ptr<json::INodeWriter> = 0;

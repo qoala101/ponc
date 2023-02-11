@@ -61,6 +61,14 @@ auto FindMaxId(const core::Diagram &diagram) {
 
 State::State() { ResetDiagram(); }
 
+void State::OnFrame() const {
+  for (const auto &family : app_.GetDiagram().GetFamilies()) {
+    for (const auto &node : family->GetNodes()) {
+      node->OnFrame(*this);
+    }
+  }
+}
+
 void State::ResetDiagram() {
   app_.SetDiagram(core::Diagram{CreateFamilies()});
   id_generator_.emplace();
@@ -78,8 +86,8 @@ void State::OpenDiagramFromFile(const std::string &file_path) {
 }
 
 void State::SaveDiagramToFile(const std::string &file_path) const {
-  const auto *diagram = app_.GetDiagram();
-  const auto json = json::DiagramSerializer::WriteToJson(*diagram);
+  const auto &diagram = app_.GetDiagram();
+  const auto json = json::DiagramSerializer::WriteToJson(diagram);
   json.save(file_path);
 }
 }  // namespace esc

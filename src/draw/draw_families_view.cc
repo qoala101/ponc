@@ -22,7 +22,7 @@ void FamiliesView::Draw(State& state) {
         ImGui::TableSetupColumn("Number");
         ImGui::TableHeadersRow();
 
-        for (const auto& family : state.app_.GetDiagram()->GetFamilies()) {
+        for (const auto& family : state.app_.GetDiagram().GetFamilies()) {
           ImGui::TableNextRow();
           ImGui::TableNextColumn();
 

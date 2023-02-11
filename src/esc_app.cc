@@ -249,7 +249,7 @@ auto App::GetWindowFlags() const -> ImGuiWindowFlags {
 
 // vh: ok
 void App::OnFrame(float /*unused*/) {
-  (*state_)->app_.GetDiagram()->OnFrame();
+  (*state_)->OnFrame();
   DrawFrame();
 }
 
@@ -266,7 +266,7 @@ void App::AddLinkFromPinToNode(ne::LinkId link_id, ne::PinId pin_id,
   }
 
   const auto is_link_starts_on_existing_node =
-      (*state_)->app_.GetDiagram()->FindPin(pin_id)->GetKind() ==
+      (*state_)->app_.GetDiagram().FindPin(pin_id)->GetKind() ==
       ne::PinKind::Output;
   const auto link = core::Link{
       .id = link_id,
@@ -275,13 +275,13 @@ void App::AddLinkFromPinToNode(ne::LinkId link_id, ne::PinId pin_id,
       .end_pin_id =
           is_link_starts_on_existing_node ? *matching_node_pin_id : pin_id};
 
-  (*state_)->app_.GetDiagram()->EmplaceLink(link);
+  (*state_)->app_.GetDiagram().EmplaceLink(link);
 }
 
 auto App::IsPinLinked(ne::PinId id) const -> bool {
   if (!id) return false;
 
-  for (const auto& link : (*state_)->app_.GetDiagram()->GetLinks())
+  for (const auto& link : (*state_)->app_.GetDiagram().GetLinks())
     if (link.start_pin_id == id || link.end_pin_id == id) return true;
 
   return false;
@@ -324,7 +324,7 @@ void App::DrawContextMenuProcess() {
         ImGui::TextUnformatted("Link");
         ImGui::Separator();
 
-        const auto& link = (*state_)->app_.GetDiagram()->FindLink(
+        const auto& link = (*state_)->app_.GetDiagram().FindLink(
             popup_state_.context_link_id);
 
         ImGui::Text("ID: %p", link.id.AsPointer());
@@ -344,7 +344,7 @@ void App::DrawContextMenuProcess() {
         ImGui::TextUnformatted("Node");
         ImGui::Separator();
 
-        auto& node = (*state_)->app_.GetDiagram()->FindNode(
+        auto& node = (*state_)->app_.GetDiagram().FindNode(
             popup_state_.context_node_id);
 
         ImGui::Text("ID: %p", node.GetId().AsPointer());
@@ -372,7 +372,7 @@ void App::DrawContextMenuProcess() {
         ImGui::TextUnformatted("Create New Node");
         ImGui::Separator();
 
-        for (const auto& family : (*state_)->app_.GetDiagram()->GetFamilies()) {
+        for (const auto& family : (*state_)->app_.GetDiagram().GetFamilies()) {
           if (ImGui::MenuItem(family->CreateDrawer()->GetLabel().c_str())) {
             auto& new_node = family->EmplaceNode(*(*state_)->id_generator_);
 
@@ -397,8 +397,8 @@ void App::DrawContextMenuProcess() {
 // vh: ok
 auto App::CanCreateLink(ne::PinId left, ne::PinId right) -> bool {
   return (left != right) &&
-         ((*state_)->app_.GetDiagram()->FindPin(left)->GetKind() !=
-          (*state_)->app_.GetDiagram()->FindPin(right)->GetKind());
+         ((*state_)->app_.GetDiagram().FindPin(left)->GetKind() !=
+          (*state_)->app_.GetDiagram().FindPin(right)->GetKind());
 }
 // vh: bad
 auto App::CalculateAlphaForPin(ne::PinId pin_id) {
@@ -428,7 +428,7 @@ void App::DrawNode(core::INode& node) {
   }
 
   for (const auto pin_id : node.GetPinIds()) {
-    auto drawer = (*state_)->app_.GetDiagram()->FindPin(pin_id);
+    auto drawer = (*state_)->app_.GetDiagram().FindPin(pin_id);
     const auto kind = drawer->GetKind();
     const auto alpha = CalculateAlphaForPin(pin_id);
 
@@ -460,7 +460,7 @@ void App::DrawNode(core::INode& node) {
 }
 // vh: norm
 void App::DrawNodes() {
-  for (const auto& family : (*state_)->app_.GetDiagram()->GetFamilies()) {
+  for (const auto& family : (*state_)->app_.GetDiagram().GetFamilies()) {
     for (const auto& node : family->GetNodes()) {
       DrawNode(*node);
     }
@@ -468,7 +468,7 @@ void App::DrawNodes() {
 }
 // vh: norm
 void App::DrawLinks() {
-  for (const auto& link : (*state_)->app_.GetDiagram()->GetLinks()) {
+  for (const auto& link : (*state_)->app_.GetDiagram().GetLinks()) {
     ne::Link(link.id, link.start_pin_id, link.end_pin_id,
              ImColor{255, 255, 255}, 2.0F);
   }
@@ -486,8 +486,8 @@ void App::DrawLinkConnectionProcess() {
         drawing_state_.not_yet_connected_pin_of_new_link_id = start_pin_id;
 
         auto start_pin_drawer =
-            (*state_)->app_.GetDiagram()->FindPin(start_pin_id);
-        auto end_pin_drawer = (*state_)->app_.GetDiagram()->FindPin(end_pin_id);
+            (*state_)->app_.GetDiagram().FindPin(start_pin_id);
+        auto end_pin_drawer = (*state_)->app_.GetDiagram().FindPin(end_pin_id);
 
         if (start_pin_drawer->GetKind() == ne::PinKind::Input) {
           using std::swap;
@@ -512,7 +512,7 @@ void App::DrawLinkConnectionProcess() {
           DrawHintLabel("+ Create Link", ImColor{32, 45, 32, 180});
 
           if (ne::AcceptNewItem(ImColor{127, 255, 127}, 4.0F)) {
-            (*state_)->app_.GetDiagram()->EmplaceLink(
+            (*state_)->app_.GetDiagram().EmplaceLink(
                 core::Link{(*state_)->id_generator_->GetNext<ne::LinkId>(),
                            start_pin_id, end_pin_id});
           }
@@ -551,7 +551,7 @@ void App::DrawDeleteItemsProcess() {
 
     while (ne::QueryDeletedLink(&link_id)) {
       if (ne::AcceptDeletedItem()) {
-        (*state_)->app_.GetDiagram()->EraseLink(link_id);
+        (*state_)->app_.GetDiagram().EraseLink(link_id);
       }
     }
 
@@ -559,7 +559,7 @@ void App::DrawDeleteItemsProcess() {
 
     while (ne::QueryDeletedNode(&node_id)) {
       if (ne::AcceptDeletedItem()) {
-        (*state_)->app_.GetDiagram()->EraseNode(node_id);
+        (*state_)->app_.GetDiagram().EraseNode(node_id);
       }
     }
   }

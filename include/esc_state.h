@@ -1,16 +1,23 @@
-#ifndef VH_ESC_APP_STATE_H_
-#define VH_ESC_APP_STATE_H_
+#ifndef VH_ESC_STATE_H_
+#define VH_ESC_STATE_H_
 
 #include "core_app.h"
 #include "core_id_generator.h"
 
 namespace esc {
-struct State {
+// ---
+class State {
  public:
+  // ---
   State();
 
+  // ---
+  void OnFrame() const;
+  // ---
   void OpenDiagramFromFile(const std::string &file_path);
+  // ---
   void SaveDiagramToFile(const std::string &file_path) const;
+  // ---
   void ResetDiagram();
 
   //  private:
@@ -19,4 +26,4 @@ struct State {
 };
 }  // namespace esc
 
-#endif  // VH_ESC_APP_STATE_H_
+#endif  // VH_ESC_STATE_H_

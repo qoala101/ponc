@@ -8,8 +8,8 @@
 namespace esc::core {
 class App {
  public:
-  auto GetDiagram() const -> const Diagram *;
-  auto GetDiagram() -> Diagram *;
+  auto GetDiagram() const -> const Diagram &;
+  auto GetDiagram() -> Diagram &;
 
   void SetDiagram(Diagram diagram);
 

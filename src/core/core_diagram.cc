@@ -127,9 +127,9 @@ auto Diagram::GetFamilies() const
   return families_;
 }
 
-void Diagram::OnFrame() { UpdatePinValues(); }
+// void Diagram::OnFrame() { UpdatePinValues(); }
 
-void Diagram::ClearAllValuesExceptInput() {
+// void Diagram::ClearAllValuesExceptInput() {
   // const auto& coupler_percentage_values = GetCouplerPercentageValues();
 
   // for (auto& node : nodes_) {
@@ -163,9 +163,9 @@ void Diagram::ClearAllValuesExceptInput() {
   //         ->SetValue(values.second);
   //   }
   // }
-}
+// }
 
-void Diagram::UpdatePinValues() {
+// void Diagram::UpdatePinValues() {
   // ClearAllValuesExceptInput();
 
   // auto input_nodes = std::vector<Node*>{};
@@ -250,5 +250,5 @@ void Diagram::UpdatePinValues() {
 
   //   input_nodes.assign(next_input_nodes.begin(), next_input_nodes.end());
   // }
-}
+// }
 }  // namespace esc::core

@@ -36,7 +36,7 @@ void MenuBar::Draw(State& state) {
     }
 
     if (ImGui::MenuItem("Show Flow")) {
-      for (const auto& link : state.app_.GetDiagram()->GetLinks()) {
+      for (const auto& link : state.app_.GetDiagram().GetLinks()) {
         ne::Flow(link.id);
       }
     }

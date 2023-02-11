@@ -39,9 +39,9 @@ class Diagram {
   static auto GetSelectedNodeIds() -> std::vector<ne::NodeId>;
   static auto GetSelectedLinkIds() -> std::vector<ne::LinkId>;
 
-  void OnFrame();
-  void UpdatePinValues();
-  void ClearAllValuesExceptInput();
+  // void OnFrame();
+  // void UpdatePinValues();
+  // void ClearAllValuesExceptInput();
 
  private:
   std::vector<std::shared_ptr<IFamily>> families_{};
