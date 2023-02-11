@@ -63,16 +63,16 @@ class App : public Application, public std::enable_shared_from_this<App> {
   void DrawLinkConnectionProcess();
   void DrawDeleteItemsProcess();
 
-  auto CalculateAlphaForPin(const IPin& pin);
+  auto CanCreateLink(ne::PinId left, ne::PinId right) -> bool;
+  auto CalculateAlphaForPin(ne::PinId pin_id);
 
   auto IsPinLinked(ne::PinId id) const -> bool;
-  void AddLinkFromPinToNode(ne::LinkId link_id, const IPin* pin,
-                            const core::INode* node);
+  void AddLinkFromPinToNode(ne::LinkId link_id, ne::PinId pin_id,
+                            core::INode& node);
 
-  
   std::optional<std::shared_ptr<AppState>> app_state_{};
   std::optional<esc::EditorContextHandle> editor_context_{};
-  std::optional<esc::TexturesHandle> textures_{};  
+  std::optional<esc::TexturesHandle> textures_{};
   std::optional<draw::MainWindow> main_window_;
 
   struct PopupState {
@@ -82,8 +82,8 @@ class App : public Application, public std::enable_shared_from_this<App> {
   } popup_state_{};
 
   struct DrawingState {
-    IPin* not_yet_connected_pin_of_new_link{};
-    IPin* connect_new_node_to_existing_pin{};
+    std::optional<ne::PinId> not_yet_connected_pin_of_new_link_id{};
+    std::optional<ne::PinId> connect_new_node_to_existing_pin_id{};
   } drawing_state_{};
 };
 }  // namespace esc

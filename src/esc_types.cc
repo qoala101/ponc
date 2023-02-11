@@ -6,14 +6,6 @@
 
 namespace ne = ax::NodeEditor;
 
-// vh: ok
-auto CanCreateLink(const IPin* left, const IPin* right) -> bool {
-  return (left != nullptr) && (right != nullptr) && (left != right) &&
-         (left->ui_data_.Kind != right->ui_data_.Kind) &&
-         (left->GetType() == right->GetType()) &&
-         (left->ui_data_.node != right->ui_data_.node);
-}
-
 auto GetCouplerPercentageNames() -> const std::vector<std::string>& {
   static auto kNames = std::vector<std::string>{
       "05%%-95%%", "10%%-90%%", "15%%-85%%", "20%%-80%%", "25%%-75%%",

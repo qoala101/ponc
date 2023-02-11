@@ -110,14 +110,12 @@ macro(add_example_executable name)
 endmacro()
 
 add_example_executable(esc
-  core/pin/core_empty_pin.cc
-  core/pin/core_float_pin.cc
-  core/pin/core_flow_pin.cc
   core/core_app.cc
   core/core_diagram.cc
-  core/core_link.cc
   core/core_i_node.cc
-  core/core_pin.cc
+  cpp/cpp_assert.cc
+  cpp/cpp_scope_function.cc
+  draw/pin/draw_empty_pin_drawer.cc
   draw/draw_i_drawable.cc
   draw/draw_i_file_dialog.cc
   draw/draw_main_window.cc
@@ -135,7 +133,6 @@ add_example_executable(esc
   # impl/impl_splitter_node.cc
   esc_app_state.cc
   esc_app.cc
-  esc_cpp.cc
   esc_editor_context_handle.cc
   esc_node_drawer.cc
   esc_textures_handle.cc
@@ -146,9 +143,9 @@ add_example_executable(esc
 target_include_directories(esc
   PUBLIC ${PROJECT_SOURCE_DIR}/include
   PUBLIC ${PROJECT_SOURCE_DIR}/include/core
-  PUBLIC ${PROJECT_SOURCE_DIR}/include/core/node
-  PUBLIC ${PROJECT_SOURCE_DIR}/include/core/pin
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/cpp
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/pin
   PUBLIC ${PROJECT_SOURCE_DIR}/include/impl
   PUBLIC ${PROJECT_SOURCE_DIR}/include/json
 )

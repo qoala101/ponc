@@ -8,16 +8,16 @@
 #include <cstring>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
-#include "core_float_pin.h"
 #include "core_link.h"
+#include "cpp_assert.h"
+#include "draw_i_node_drawer.h"
 #include "esc_app.h"
-#include "esc_cpp.h"
-#include "esc_enums.h"
 #include "esc_types.h"
 #include "imgui.h"
 
@@ -54,32 +54,36 @@ auto Diagram::EmplaceNode(std::shared_ptr<INode> node) -> INode& {
   return *nodes_.emplace_back(std::move(node));
 }
 
-auto Diagram::FindNode(ne::NodeId id) -> INode* {
-  for (auto& node : nodes_)
-    if (node->GetId() == id) return node.get();
-
-  return nullptr;
-}
-
-auto Diagram::FindPin(ne::PinId id) -> IPin* {
-  if (!id) return nullptr;
-
+auto Diagram::FindNode(ne::NodeId id) -> INode& {
   for (auto& node : nodes_) {
-    for (auto& pin : node->GetInputPins())
-      if (pin->GetId() == id) return pin.get();
-
-    for (auto& pin : node->GetOutputPins())
-      if (pin->GetId() == id) return pin.get();
+    if (node->GetId() == id) {
+      return *node;
+    }
   }
 
-  return nullptr;
+  cpp::Expects(false);
 }
 
-auto Diagram::FindLink(ne::LinkId id) -> Link* {
-  for (auto& link : links_)
-    if (link.id == id) return &link;
+auto Diagram::FindPin(ne::PinId id) -> std::unique_ptr<draw::IPinDrawer> {
+  for (auto& node : nodes_) {
+    for (const auto pin_id : node->GetPinIds()) {
+      if (pin_id == id) {
+        return node->CreateDrawer()->CreatePinDrawer(pin_id);
+      }
+    }
+  }
 
-  return nullptr;
+  cpp::Expects(false);
+}
+
+auto Diagram::FindLink(ne::LinkId id) -> Link& {
+  for (auto& link : links_) {
+    if (link.id == id) {
+      return link;
+    }
+  }
+
+  cpp::Expects(false);
 }
 
 auto Diagram::EmplaceLink(const Link& link) -> Link& {
@@ -132,22 +136,7 @@ auto Diagram::GetNodeFactories() const
   return node_factories_;
 }
 
-void Diagram::OnFrame() {
-  UpdateNodePointerOnPins();
-  UpdatePinValues();
-}
-
-void Diagram::UpdateNodePointerOnPins() {
-  for (auto& node : nodes_) {
-    for (auto& input : node->GetInputPins()) {
-      input->ui_data_.node = node.get();
-    }
-
-    for (auto& output : node->GetOutputPins()) {
-      output->ui_data_.node = node.get();
-    }
-  }
-}
+void Diagram::OnFrame() { UpdatePinValues(); }
 
 void Diagram::ClearAllValuesExceptInput() {
   // const auto& coupler_percentage_values = GetCouplerPercentageValues();

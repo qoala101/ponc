@@ -6,6 +6,7 @@
 namespace esc::core {
 namespace ne = ax::NodeEditor;
 
+// ---
 struct Link {
   ne::LinkId id{};
   ne::PinId start_pin_id{};

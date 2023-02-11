@@ -16,19 +16,15 @@
 #include <utility>
 #include <vector>
 
-#include "esc_enums.h"
-#include "core_link.h"
 #include "core_i_node.h"
-#include "core_pin.h"
+#include "core_link.h"
 
 namespace ne = ax::NodeEditor;
 
-auto CanCreateLink  (const IPin* left, const IPin* right) -> bool;
-
-auto GetCouplerPercentageNames  ()
--> const std::vector<std::string>&;
-auto GetCouplerPercentageValues  ()
--> const std::vector<std::pair<float, float>>&;
+// auto GetCouplerPercentageNames  ()
+// -> const std::vector<std::string>&;
+// auto GetCouplerPercentageValues  ()
+// -> const std::vector<std::pair<float, float>>&;
 
 struct TextureWithDims {
   ImTextureID id{};

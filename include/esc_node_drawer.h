@@ -5,7 +5,7 @@
 
 #include <optional>
 
-#include "esc_cpp.h"
+#include "cpp_scope_function.h"
 #include "esc_types.h"
 #include "imgui.h"
 

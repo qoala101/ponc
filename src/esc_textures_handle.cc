@@ -2,7 +2,7 @@
 
 #include <bits/ranges_algo.h>
 
-#include "esc_cpp.h"
+#include "cpp_assert.h"
 
 namespace esc {
 auto TexturesHandle::GetTextureIdsAsArray() {

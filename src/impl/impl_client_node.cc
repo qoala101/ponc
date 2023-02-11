@@ -2,8 +2,6 @@
 
 #include <memory>
 
-#include "core_float_pin.h"
-#include "core_flow_pin.h"
 #include "core_i_node.h"
 #include "crude_json.h"
 #include "draw_i_node_drawer.h"
@@ -31,14 +29,16 @@ auto CreateNodeFactoryDrawer(std::shared_ptr<NodeFactory> node_factory)
 class Node : public core::INode, public std::enable_shared_from_this<Node> {
  public:
   explicit Node(esc::IdGenerator& id_generator)
-      : INode{id_generator.GetNext<ne::NodeId>(),
-              {std::make_shared<FlowPin>(id_generator.GetNext<ne::PinId>(),
-                                         PinKind::Input, false),
-               std::make_shared<FloatPin>(id_generator.GetNext<ne::PinId>(),
-                                          "min", PinKind::Input, true),
-               std::make_shared<FloatPin>(id_generator.GetNext<ne::PinId>(),
-                                          "max", PinKind::Input, true)},
-              {}} {}
+      : INode{
+            id_generator.GetNext<ne::NodeId>(),
+            {
+                //   std::make_shared<FlowPin>(id_generator.GetNext<ne::PinId>(),
+                //                            ne::PinKind::Input, false),
+                //  std::make_shared<FloatPin>(id_generator.GetNext<ne::PinId>(),
+                //                             "min", ne::PinKind::Input, true),
+                //  std::make_shared<FloatPin>(id_generator.GetNext<ne::PinId>(),
+                //                             "max", ne::PinKind::Input, true)
+            }} {}
 
   auto CreateWriter() -> std::unique_ptr<json::INodeWriter> override {
     return CreateNodeWriter(shared_from_this());
@@ -93,6 +93,11 @@ class NodeDrawer : public draw::INodeDrawer {
 
   auto GetColor() const -> ImColor override {
     return ClientNode::CreateNodeFactory()->CreateDrawer()->GetColor();
+  }
+
+  auto CreatePinDrawer(ne::PinId pin_id) const
+      -> std::unique_ptr<draw::IPinDrawer> override {
+    return {};
   }
 
  private:

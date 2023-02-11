@@ -7,6 +7,7 @@
 #include "core_i_node.h"
 #include "core_i_node_factory.h"
 #include "core_link.h"
+#include "draw_i_pin_drawer.h"
 #include "imgui_node_editor.h"
 
 namespace esc::core {
@@ -34,15 +35,14 @@ class Diagram {
   void EraseNode(ne::NodeId id);
   void EraseLink(ne::LinkId id);
 
-  auto FindNode(ne::NodeId id) -> INode *;
-  auto FindPin(ne::PinId id) -> IPin *;
-  auto FindLink(ne::LinkId id) -> Link *;
+  auto FindNode(ne::NodeId id) -> INode &;
+  auto FindPin(ne::PinId id) -> std::unique_ptr<draw::IPinDrawer>;
+  auto FindLink(ne::LinkId id) -> Link &;
 
   static auto GetSelectedNodeIds() -> std::vector<ne::NodeId>;
   static auto GetSelectedLinkIds() -> std::vector<ne::LinkId>;
 
   void OnFrame();
-  void UpdateNodePointerOnPins();
   void UpdatePinValues();
   void ClearAllValuesExceptInput();
 

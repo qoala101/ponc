@@ -1,24 +1,27 @@
 #ifndef VH_DRAW_I_NODE_DRAWER_H_
 #define VH_DRAW_I_NODE_DRAWER_H_
 
+#include <memory>
 #include <string>
+#include <vector>
 
+#include "cpp_interface.h"
+#include "draw_i_pin_drawer.h"
 #include "imgui.h"
+#include "imgui_node_editor.h"
 
 namespace esc::draw {
 // ---
 // NOLINTNEXTLINE(*-special-member-functions)
-class INodeDrawer {
+class INodeDrawer : public cpp::Interface {
  public:
-  virtual ~INodeDrawer() = default;
-
   // ---
   virtual auto GetLabel [[nodiscard]] () const -> std::string = 0;
   // ---
   virtual auto GetColor [[nodiscard]] () const -> ImColor = 0;
-
- protected:
-  INodeDrawer() = default;
+  // ---
+  virtual auto CreatePinDrawer [[nodiscard]] (ne::PinId pin_id) const
+      -> std::unique_ptr<IPinDrawer> = 0;
 };
 }  // namespace esc::draw
 

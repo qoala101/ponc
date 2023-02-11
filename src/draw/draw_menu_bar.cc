@@ -3,7 +3,7 @@
 #include "draw_open_file_dialog.h"
 #include "draw_save_as_file_dialog.h"
 #include "esc_app_state.h"
-#include "esc_cpp.h"
+#include "cpp_scope.h"
 #include "imgui.h"
 
 namespace esc::draw {
