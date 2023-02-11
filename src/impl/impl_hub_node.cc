@@ -75,6 +75,10 @@ auto CreateNodeWriter(std::shared_ptr<Node> node)
 
 class InputPinDrawer : public draw::IPinDrawer {
  public:
+  auto GetLabel [[nodiscard]] () const -> std::string {
+    return "24";
+  }
+
   auto GetKind [[nodiscard]] () const -> ne::PinKind override {
     return ne::PinKind::Input;
   }
@@ -84,6 +88,10 @@ class InputPinDrawer : public draw::IPinDrawer {
 
 class OutputPinDrawer : public draw::IPinDrawer {
  public:
+  auto GetLabel [[nodiscard]] () const -> std::string {
+    return "0";
+  }
+
   auto GetKind [[nodiscard]] () const -> ne::PinKind override {
     return ne::PinKind::Output;
   }

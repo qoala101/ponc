@@ -176,6 +176,10 @@ void DrawPinField(draw::IPinDrawer& pin_drawer) {
     } else {
       ImGui::Text("%.3f %s", *float_value, pin_drawer.GetLabel().c_str());
     }
+  } else {
+    if (!pin_drawer.GetLabel().empty()) {
+      ImGui::TextUnformatted(pin_drawer.GetLabel().c_str());
+    }
   }
 
   ImGui::Spring(0);
