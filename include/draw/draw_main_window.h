@@ -8,11 +8,11 @@
 #include "esc_app_state.h"
 
 namespace esc::draw {
+// ---
 class MainWindow : public IDrawable {
  public:
-  explicit MainWindow(std::shared_ptr<AppState> app_state);
-
-  void Draw() override;
+  // ---
+  void Draw(AppState &app_state) override;
 
  private:
   draw::MenuBar menu_bar_;

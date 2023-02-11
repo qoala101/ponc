@@ -8,11 +8,12 @@ namespace esc::draw {
 class SaveAsFileDialog : public IFileDialog {
  public:
   // ---
-  explicit SaveAsFileDialog(std::shared_ptr<AppState> app_state);
+  SaveAsFileDialog();
 
  private:
   // ---
-  void OnFileSelected(std::string file_path) const override;
+  void OnFileSelected(AppState &app_state,
+                      std::string file_path) const override;
 };
 }  // namespace esc::draw
 

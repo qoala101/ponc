@@ -15,19 +15,16 @@ namespace esc::draw {
 class IFileDialog : public IDrawable {
  public:
   // ---
-  void Draw() override;
+  void Draw(AppState &app_state) override;
 
  protected:
   // ---
-  IFileDialog(std::shared_ptr<AppState> app_state,
-              const ImGui::FileBrowser &dialog);
-
-  // ---
-  auto GetAppState [[nodiscard]] () const -> AppState &;
+  explicit IFileDialog(const ImGui::FileBrowser &dialog);
 
  private:
   // ---
-  virtual void OnFileSelected(std::string file_path) const = 0;
+  virtual void OnFileSelected(AppState &app_state,
+                              std::string file_path) const = 0;
 
   // ---
   void OnVisibleChanged() override;

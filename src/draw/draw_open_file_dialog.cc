@@ -5,16 +5,16 @@
 #include "json_diagram_serializer.h"
 
 namespace esc::draw {
-OpenFileDialog::OpenFileDialog(std::shared_ptr<AppState> app_state)
-    : IFileDialog{std::move(app_state), []() {
-                    auto dialog =
-                        ImGui::FileBrowser{ImGuiFileBrowserFlags_CloseOnEsc};
-                    dialog.SetTitle("Open Diagram JSON");
-                    dialog.SetTypeFilters({".json"});
-                    return dialog;
-                  }()} {}
+OpenFileDialog::OpenFileDialog()
+    : IFileDialog{[]() {
+        auto dialog = ImGui::FileBrowser{ImGuiFileBrowserFlags_CloseOnEsc};
+        dialog.SetTitle("Open Diagram JSON");
+        dialog.SetTypeFilters({".json"});
+        return dialog;
+      }()} {}
 
-void OpenFileDialog::OnFileSelected(std::string file_path) const {
-  GetAppState().OpenDiagramFromFile(file_path);
+void OpenFileDialog::OnFileSelected(AppState &app_state,
+                                    std::string file_path) const {
+  app_state.OpenDiagramFromFile(file_path);
 }
 }  // namespace esc::draw

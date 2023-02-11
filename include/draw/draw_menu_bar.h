@@ -9,14 +9,13 @@
 #include "esc_app_state.h"
 
 namespace esc::draw {
+// ---
 class MenuBar : public IDrawable {
  public:
-  explicit MenuBar(std::shared_ptr<AppState> app_state);
-
-  void Draw() override;
+  // ---
+  void Draw(AppState &app_state) override;
 
  private:
-  std::shared_ptr<AppState> app_state_{};
   OpenFileDialog open_file_dialog_;
   SaveAsFileDialog save_as_file_dialog_;
   NodesView nodes_view_{};

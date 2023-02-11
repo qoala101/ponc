@@ -229,7 +229,7 @@ void App::OnStart() {
   app_state_.emplace(std::make_shared<AppState>());
   editor_context_.emplace();
   textures_.emplace(shared_from_this());
-  main_window_.emplace(*app_state_);
+  main_window_.emplace();
 }
 // vh: norm
 void App::OnStop() {
@@ -581,7 +581,7 @@ void App::DrawNodeEditor() {
 }
 // vh: bad
 void App::DrawFrame() {
-  main_window_->Draw();
+  main_window_->Draw(**app_state_);
   DrawNodeEditor();
 
   ImGui::ShowDemoWindow();

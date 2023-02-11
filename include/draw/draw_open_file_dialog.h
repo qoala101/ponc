@@ -4,18 +4,18 @@
 #include <memory>
 
 #include "draw_i_file_dialog.h"
-#include "esc_app_state.h"
 
 namespace esc::draw {
 // ---
 class OpenFileDialog : public IFileDialog {
  public:
   // ---
-  explicit OpenFileDialog(std::shared_ptr<AppState> app_state);
+  OpenFileDialog();
 
  private:
   // ---
-  void OnFileSelected(std::string file_path) const override;
+  void OnFileSelected(AppState &app_state,
+                      std::string file_path) const override;
 };
 }  // namespace esc::draw
 

@@ -4,9 +4,11 @@
 #include "draw_i_drawable.h"
 
 namespace esc::draw {
+// ---
 class NodeFactoriesView : public IDrawable {
  public:
-  void Draw() override;
+  // ---
+  void Draw(AppState &app_state) override;
 };
 }  // namespace esc::draw
 

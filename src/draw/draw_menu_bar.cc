@@ -7,12 +7,7 @@
 #include "imgui.h"
 
 namespace esc::draw {
-MenuBar::MenuBar(std::shared_ptr<AppState> app_state)
-    : app_state_{std::move(app_state)},
-      open_file_dialog_{app_state_},
-      save_as_file_dialog_{app_state_} {}
-
-void MenuBar::Draw() {
+void MenuBar::Draw(AppState &app_state) {
   if (ImGui::BeginMainMenuBar()) {
     const auto menu_bar_scope = cpp::Scope{[]() { ImGui::EndMainMenuBar(); }};
 
@@ -28,7 +23,7 @@ void MenuBar::Draw() {
       }
 
       if (ImGui::MenuItem("Reset")) {
-        app_state_->ResetDiagram();
+        app_state.ResetDiagram();
       }
     }
 
@@ -50,15 +45,15 @@ void MenuBar::Draw() {
     }
 
     if (ImGui::MenuItem("Show Flow")) {
-      for (const auto& link : app_state_->app_.GetDiagram()->GetLinks()) {
+      for (const auto& link : app_state.app_.GetDiagram()->GetLinks()) {
         ne::Flow(link.id);
       }
     }
   }
 
-  open_file_dialog_.Draw();
-  save_as_file_dialog_.Draw();
-  nodes_view_.Draw();
-  node_factories_view_.Draw();
+  open_file_dialog_.Draw(app_state);
+  save_as_file_dialog_.Draw(app_state);
+  nodes_view_.Draw(app_state);
+  node_factories_view_.Draw(app_state);
 }
 }  // namespace esc::draw

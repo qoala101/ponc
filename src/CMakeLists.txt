@@ -119,6 +119,7 @@ add_example_executable(esc
   draw/pin/draw_empty_pin_drawer.cc
   draw/pin/draw_flow_input_pin_drawer.cc
   draw/pin/draw_flow_output_pin_drawer.cc
+  draw/draw_constants.cc
   draw/draw_i_drawable.cc
   draw/draw_i_file_dialog.cc
   draw/draw_i_pin_drawer.cc
