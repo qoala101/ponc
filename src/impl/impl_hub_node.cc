@@ -51,7 +51,7 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
     return CreateNodeDrawer(shared_from_this(), state);
   }
 
-  auto GetFlowValues [[nodiscard]] () const -> core::FlowValues override {
+  auto GetInitialFlow [[nodiscard]] () const -> core::NodeFlow override {
     return {};
   }
 };

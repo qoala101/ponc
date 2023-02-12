@@ -282,17 +282,17 @@ void App::AddLinkFromPinToNode(ne::LinkId link_id, ne::PinId pin_id,
 }
 
 auto App::IsFlowPin(ne::PinId id, const core::INode& node) const -> bool {
-  const auto flow_values = node.GetFlowValues();
+  const auto flow_values = node.GetInitialFlow();
 
-  if (flow_values.parent_value.has_value() &&
-      flow_values.parent_value->id == id) {
+  if (flow_values.parent_flow.has_value() &&
+      flow_values.parent_flow->id == id) {
     return true;
   }
 
-  return std::ranges::find_if(flow_values.child_values,
+  return std::ranges::find_if(flow_values.child_flows,
                               [id](const auto& flow_value) {
                                 return flow_value.id == id;
-                              }) != flow_values.child_values.end();
+                              }) != flow_values.child_flows.end();
 }
 
 auto App::IsPinLinked(ne::PinId id) const -> bool {

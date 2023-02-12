@@ -12,9 +12,9 @@ void FamiliesView::Draw(State& state) {
   }
 
   {
-    const auto families_scope = cpp::Scope{[]() { ImGui::End(); }};
+    const auto window_scope = cpp::Scope{[]() { ImGui::End(); }};
 
-    if (ImGui::Begin("Node Families", &GetVisible())) {
+    if (ImGui::Begin("Families", &GetVisible())) {
       if (ImGui::BeginTable("3ways", 2)) {
         const auto table_scope = cpp::Scope{[]() { ImGui::EndTable(); }};
 

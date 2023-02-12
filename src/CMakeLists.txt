@@ -110,9 +110,10 @@ macro(add_example_executable name)
 endmacro()
 
 add_example_executable(esc
+  core/flow/core_flow_calculator.cc
+
   core/core_app.cc
   core/core_diagram.cc
-  core/core_flow_calculator.cc
   core/core_i_family.cc
   core/core_i_node.cc
   core/core_id_generator.cc
@@ -126,6 +127,7 @@ add_example_executable(esc
 
   draw/draw_constants.cc
   draw/draw_families_view.cc
+  draw/draw_flow_tree_view.cc
   draw/draw_i_drawable.cc
   draw/draw_i_file_dialog.cc
   draw/draw_i_pin_drawer.cc
@@ -161,6 +163,7 @@ add_example_executable(esc
 target_include_directories(esc
   PUBLIC ${PROJECT_SOURCE_DIR}/include
   PUBLIC ${PROJECT_SOURCE_DIR}/include/core
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/core/flow
   PUBLIC ${PROJECT_SOURCE_DIR}/include/cpp
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/pin

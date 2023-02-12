@@ -8,18 +8,27 @@
 #include <vector>
 
 #include "core_i_node.h"
+#include "core_tree.h"
 
 namespace esc {
 class State;
 
 namespace core {
+// ---
 class FlowCalculator {
  public:
+  // ---
   void OnFrame(const State &state);
-
-  auto GetCalculatedFlowValues(const INode &node) const -> FlowValues;
+  // ---
+  auto GetFlowTree() const -> const Tree &;
+  // ---
+  auto GetCalculatedFlow(const INode &node) const -> NodeFlow;
 
  private:
+  void RebuildFlowTree(const State &state);
+  void CalculateFlowValues(const State &state);
+
+  Tree flow_tree_{};
   std::unordered_map<uintptr_t, float> pin_values_{};
 };
 }  // namespace core

@@ -99,11 +99,11 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
     };
   }
 
-  auto GetFlowValues [[nodiscard]] () const -> core::FlowValues override {
+  auto GetInitialFlow [[nodiscard]] () const -> core::NodeFlow override {
     const auto& pin_ids = GetPinIds();
 
-    return {.parent_value = core::FlowValue{.id = pin_ids[0]},
-            .child_values = {{.id = pin_ids[4], .value = GetSmallDrop()},
+    return {.parent_flow = core::PinFlow{.id = pin_ids[0]},
+            .child_flows = {{.id = pin_ids[4], .value = GetSmallDrop()},
                              {.id = pin_ids[5], .value = GetBigDrop()}}};
   }
 
@@ -181,7 +181,7 @@ class NodeDrawer : public draw::INodeDrawer {
   explicit NodeDrawer(std::shared_ptr<Node> node, const State& state)
       : node_{std::move(node)},
         flow_pin_values_{
-            state.flow_calculator_.GetCalculatedFlowValues(*node_)} {}
+            state.flow_calculator_.GetCalculatedFlow(*node_)} {}
 
   auto GetLabel() const -> std::string override {
     return CouplerNode::CreateFamily(node_->percentage_index_)
@@ -201,7 +201,7 @@ class NodeDrawer : public draw::INodeDrawer {
 
     if (pin_index == 0) {
       return std::make_unique<draw::FlowInputPinDrawer>(
-          flow_pin_values_.parent_value->value);
+          flow_pin_values_.parent_flow->value);
     }
 
     if (pin_index == 1) {
@@ -217,12 +217,12 @@ class NodeDrawer : public draw::INodeDrawer {
     }
 
     return std::make_unique<draw::FlowOutputPinDrawer>(
-        flow_pin_values_.child_values[pin_index - 4].value);
+        flow_pin_values_.child_flows[pin_index - 4].value);
   }
 
  private:
   std::shared_ptr<Node> node_{};
-  core::FlowValues flow_pin_values_{};
+  core::NodeFlow flow_pin_values_{};
 };
 
 auto CreateNodeDrawer(std::shared_ptr<Node> node, const State& state)
@@ -306,7 +306,7 @@ class FamilyDrawer : public draw::IFamilyDrawer {
 
   auto GetLabel() const -> std::string override {
     const auto percentage = (family_->GetPercentageIndex() + 1) * 5;
-    return "Coupler " + std::to_string(percentage) + "%/" +
+    return "Coupler " + std::to_string(percentage) + "%-" +
            std::to_string(100 - percentage) + "%";
   }
 

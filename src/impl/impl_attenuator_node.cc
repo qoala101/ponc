@@ -11,11 +11,11 @@
 #include "draw_i_family_drawer.h"
 #include "draw_i_node_drawer.h"
 #include "draw_i_pin_drawer.h"
+#include "esc_state.h"
 #include "imgui_node_editor.h"
 #include "json_i_family_writer.h"
 #include "json_i_node_parser.h"
 #include "json_i_node_writer.h"
-#include "esc_state.h"
 
 namespace esc::impl {
 namespace {
@@ -48,11 +48,11 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
     return CreateNodeDrawer(shared_from_this(), state);
   }
 
-  auto GetFlowValues [[nodiscard]] () const -> core::FlowValues {
+  auto GetInitialFlow [[nodiscard]] () const -> core::NodeFlow override {
     const auto& pin_ids = GetPinIds();
 
-    return {.parent_value = core::FlowValue{.id = pin_ids[0]},
-            .child_values = {{.id = pin_ids[2], .value = drop_}}};
+    return {.parent_flow = core::PinFlow{.id = pin_ids[0]},
+            .child_flows = {{.id = pin_ids[2], .value = drop_}}};
   }
 
   float drop_{};
@@ -110,8 +110,7 @@ class NodeDrawer : public draw::INodeDrawer {
  public:
   explicit NodeDrawer(std::shared_ptr<Node> node, const State& state)
       : node_{std::move(node)},
-        flow_pin_values_{
-            state.flow_calculator_.GetCalculatedFlowValues(*node_)} {}
+        flow_pin_values_{state.flow_calculator_.GetCalculatedFlow(*node_)} {}
 
   auto GetLabel() const -> std::string override {
     return AttenuatorNode::CreateFamily()->CreateDrawer()->GetLabel();
@@ -134,12 +133,12 @@ class NodeDrawer : public draw::INodeDrawer {
     }
 
     return std::make_unique<draw::FlowOutputPinDrawer>(
-        flow_pin_values_.child_values[0].value);
+        flow_pin_values_.child_flows[0].value);
   }
 
  private:
   std::shared_ptr<Node> node_{};
-  core::FlowValues flow_pin_values_{};
+  core::NodeFlow flow_pin_values_{};
 };
 
 auto CreateNodeDrawer(std::shared_ptr<Node> node, const State& state)

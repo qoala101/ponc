@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "core_flow.h"
 #include "cpp_interface.h"
 #include "imgui.h"
 
@@ -25,26 +26,17 @@ class INodeDrawer;
 }  // namespace draw
 
 namespace core {
-struct FlowValue {
-  ne::PinId id{};
-  float value{};
-};
-
-struct FlowValues {
-  std::optional<FlowValue> parent_value{};
-  std::vector<FlowValue> child_values{};
-};
 
 class INode : public cpp::Interface {
  public:
+  // ---
+  virtual auto GetInitialFlow [[nodiscard]] () const -> NodeFlow = 0;
   // ---
   virtual auto CreateWriter [[nodiscard]] ()
   -> std::unique_ptr<json::INodeWriter> = 0;
   // ---
   virtual auto CreateDrawer [[nodiscard]] (const State &state)
   -> std::unique_ptr<draw::INodeDrawer> = 0;
-
-  virtual auto GetFlowValues [[nodiscard]] () const -> FlowValues = 0;
 
   // ---
   auto GetId [[nodiscard]] () const -> ne::NodeId;

@@ -48,8 +48,8 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
     return CreateNodeDrawer(shared_from_this(), state);
   }
 
-  auto GetFlowValues [[nodiscard]] () const -> core::FlowValues {
-    return {.parent_value = core::FlowValue{.id = GetPinIds()[0]}};
+  auto GetInitialFlow [[nodiscard]] () const -> core::NodeFlow override {
+    return {.parent_flow = core::PinFlow{.id = GetPinIds()[0]}};
   }
 
   float min_{};
@@ -131,7 +131,7 @@ class NodeDrawer : public draw::INodeDrawer {
   explicit NodeDrawer(std::shared_ptr<Node> node, const State& state)
       : node_{std::move(node)},
         flow_pin_values_{
-            state.flow_calculator_.GetCalculatedFlowValues(*node_)} {}
+            state.flow_calculator_.GetCalculatedFlow(*node_)} {}
 
   auto GetLabel() const -> std::string override {
     return ClientNode::CreateFamily()->CreateDrawer()->GetLabel();
@@ -147,7 +147,7 @@ class NodeDrawer : public draw::INodeDrawer {
 
     if (pin_index == 0) {
       return std::make_unique<draw::FlowInputPinDrawer>(
-          flow_pin_values_.parent_value->value);
+          flow_pin_values_.parent_flow->value);
     }
 
     if (pin_index == 1) {
@@ -163,7 +163,7 @@ class NodeDrawer : public draw::INodeDrawer {
 
  private:
   std::shared_ptr<Node> node_{};
-  core::FlowValues flow_pin_values_{};
+  core::NodeFlow flow_pin_values_{};
 };
 
 auto CreateNodeDrawer(std::shared_ptr<Node> node, const State& state)

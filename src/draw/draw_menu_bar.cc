@@ -31,6 +31,10 @@ void MenuBar::Draw(State& state) {
       families_view_.SetVisible(!families_view_.IsVisible());
     }
 
+    if (ImGui::MenuItem("Flow Tree", nullptr, flow_tree_view_.IsVisible())) {
+      flow_tree_view_.SetVisible(!flow_tree_view_.IsVisible());
+    }
+
     if (ImGui::MenuItem("Zoom to Content")) {
       ne::NavigateToContent();
     }
@@ -45,5 +49,6 @@ void MenuBar::Draw(State& state) {
   open_file_dialog_.Draw(state);
   save_as_file_dialog_.Draw(state);
   families_view_.Draw(state);
+  flow_tree_view_.Draw(state);
 }
 }  // namespace esc::draw
