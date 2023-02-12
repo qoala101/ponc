@@ -11,20 +11,16 @@ void MenuBar::Draw(State& state) {
   if (ImGui::BeginMainMenuBar()) {
     const auto menu_bar_scope = cpp::Scope{[]() { ImGui::EndMainMenuBar(); }};
 
-    if (ImGui::BeginMenu("File")) {
-      const auto menu_scope = cpp::Scope{[]() { ImGui::EndMenu(); }};
+    if (ImGui::MenuItem("Open...")) {
+      open_file_dialog_.SetVisible(true);
+    }
 
-      if (ImGui::MenuItem("Open...")) {
-        open_file_dialog_.SetVisible(true);
-      }
+    if (ImGui::MenuItem("Save As...")) {
+      save_as_file_dialog_.SetVisible(true);
+    }
 
-      if (ImGui::MenuItem("Save As...")) {
-        save_as_file_dialog_.SetVisible(true);
-      }
-
-      if (ImGui::MenuItem("Reset")) {
-        state.PostEvent([](auto& state) { State::ResetDiagram(state); });
-      }
+    if (ImGui::MenuItem("Reset")) {
+      state.PostEvent([](auto& state) { State::ResetDiagram(state); });
     }
 
     if (ImGui::MenuItem("Families", nullptr, families_view_.IsVisible())) {

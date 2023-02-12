@@ -48,11 +48,11 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
     return CreateNodeDrawer(shared_from_this(), state);
   }
 
-  auto GetInitialFlow [[nodiscard]] () const -> core::NodeFlow override {
+  auto GetInitialFlow [[nodiscard]] () const -> core::NodePinFlows override {
     const auto& pin_ids = GetPinIds();
 
-    return {.parent_flow = core::PinFlow{.id = pin_ids[0]},
-            .child_flows = {{.id = pin_ids[2], .value = drop_}}};
+    return {.input_pin_flow = core::PinFlow{.id = pin_ids[0]},
+            .output_pin_flows = {{.id = pin_ids[2], .value = drop_}}};
   }
 
   float drop_{};
@@ -133,12 +133,12 @@ class NodeDrawer : public draw::INodeDrawer {
     }
 
     return std::make_unique<draw::FlowOutputPinDrawer>(
-        flow_pin_values_.child_flows[0].value);
+        flow_pin_values_.output_pin_flows[0].value);
   }
 
  private:
   std::shared_ptr<Node> node_{};
-  core::NodeFlow flow_pin_values_{};
+  core::NodePinFlows flow_pin_values_{};
 };
 
 auto CreateNodeDrawer(std::shared_ptr<Node> node, const State& state)

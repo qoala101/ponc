@@ -30,7 +30,7 @@ namespace core {
 class INode : public cpp::Interface {
  public:
   // ---
-  virtual auto GetInitialFlow [[nodiscard]] () const -> NodeFlow = 0;
+  virtual auto GetInitialFlow [[nodiscard]] () const -> NodePinFlows = 0;
   // ---
   virtual auto CreateWriter [[nodiscard]] ()
   -> std::unique_ptr<json::INodeWriter> = 0;

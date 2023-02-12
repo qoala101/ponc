@@ -16,9 +16,9 @@ struct PinFlow {
 };
 
 // ---
-struct NodeFlow {
-  std::optional<PinFlow> parent_flow{};
-  std::vector<PinFlow> child_flows{};
+struct NodePinFlows {
+  std::optional<PinFlow> input_pin_flow{};
+  std::vector<PinFlow> output_pin_flows{};
 };
 }  // namespace esc::core
 

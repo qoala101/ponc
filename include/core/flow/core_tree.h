@@ -10,7 +10,7 @@ namespace esc::core {
 // ---
 struct TreeNode {
   std::shared_ptr<INode> node{};
-  std::vector<TreeNode> child_nodes{};
+  std::map<uintptr_t, TreeNode> child_nodes{};
 };
 
 // ---
