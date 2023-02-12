@@ -1,6 +1,8 @@
 #include "draw_flow_input_pin_drawer.h"
 
 namespace esc::draw {
+FlowInputPinDrawer::FlowInputPinDrawer(float value) : value_{value} {}
+
 auto FlowInputPinDrawer::GetLabel() const -> std::string { return {}; }
 
 auto FlowInputPinDrawer::GetKind() const -> ne::PinKind {
@@ -10,6 +12,4 @@ auto FlowInputPinDrawer::GetKind() const -> ne::PinKind {
 auto FlowInputPinDrawer::GetFloat() -> float* { return &value_; }
 
 auto FlowInputPinDrawer::IsEditable() const -> bool { return false; }
-
-auto FlowInputPinDrawer::IsConnectable() const -> bool { return true; }
 }  // namespace esc::draw

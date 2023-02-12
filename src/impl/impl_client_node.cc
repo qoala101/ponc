@@ -14,6 +14,7 @@
 #include "json_i_family_writer.h"
 #include "json_i_node_parser.h"
 #include "json_i_node_writer.h"
+#include "esc_state.h"
 
 namespace esc::impl {
 namespace {
@@ -24,7 +25,7 @@ constexpr auto kTypeName = "ClientNode";
 
 auto CreateNodeWriter(std::shared_ptr<Node> node)
     -> std::unique_ptr<json::INodeWriter>;
-auto CreateNodeDrawer(std::shared_ptr<Node> node)
+auto CreateNodeDrawer(std::shared_ptr<Node> node, const State& state)
     -> std::unique_ptr<draw::INodeDrawer>;
 auto CreateFamilyWriter(std::shared_ptr<Family> family)
     -> std::unique_ptr<json::IFamilyWriter>;
@@ -42,8 +43,13 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
     return CreateNodeWriter(shared_from_this());
   }
 
-  auto CreateDrawer() -> std::unique_ptr<draw::INodeDrawer> override {
-    return CreateNodeDrawer(shared_from_this());
+  auto CreateDrawer(const State& state)
+      -> std::unique_ptr<draw::INodeDrawer> override {
+    return CreateNodeDrawer(shared_from_this(), state);
+  }
+
+  auto GetFlowValues [[nodiscard]] () const -> core::FlowValues {
+    return {.parent_value = core::FlowValue{.id = GetPinIds()[0]}};
   }
 
   float min_{};
@@ -98,8 +104,6 @@ class MinPinDrawer : public draw::IPinDrawer {
 
   auto IsEditable [[nodiscard]] () const -> bool override { return true; }
 
-  auto IsConnectable [[nodiscard]] () const -> bool override { return false; }
-
  private:
   std::shared_ptr<Node> node_{};
 };
@@ -118,15 +122,16 @@ class MaxPinDrawer : public draw::IPinDrawer {
 
   auto IsEditable [[nodiscard]] () const -> bool override { return true; }
 
-  auto IsConnectable [[nodiscard]] () const -> bool override { return false; }
-
  private:
   std::shared_ptr<Node> node_{};
 };
 
 class NodeDrawer : public draw::INodeDrawer {
  public:
-  explicit NodeDrawer(std::shared_ptr<Node> node) : node_{std::move(node)} {}
+  explicit NodeDrawer(std::shared_ptr<Node> node, const State& state)
+      : node_{std::move(node)},
+        flow_pin_values_{
+            state.flow_calculator_.GetCalculatedFlowValues(*node_)} {}
 
   auto GetLabel() const -> std::string override {
     return ClientNode::CreateFamily()->CreateDrawer()->GetLabel();
@@ -141,7 +146,8 @@ class NodeDrawer : public draw::INodeDrawer {
     const auto pin_index = node_->GetPinIndex(pin_id);
 
     if (pin_index == 0) {
-      return std::make_unique<draw::FlowInputPinDrawer>();
+      return std::make_unique<draw::FlowInputPinDrawer>(
+          flow_pin_values_.parent_value->value);
     }
 
     if (pin_index == 1) {
@@ -157,11 +163,12 @@ class NodeDrawer : public draw::INodeDrawer {
 
  private:
   std::shared_ptr<Node> node_{};
+  core::FlowValues flow_pin_values_{};
 };
 
-auto CreateNodeDrawer(std::shared_ptr<Node> node)
+auto CreateNodeDrawer(std::shared_ptr<Node> node, const State& state)
     -> std::unique_ptr<draw::INodeDrawer> {
-  return std::make_unique<NodeDrawer>(std::move(node));
+  return std::make_unique<NodeDrawer>(std::move(node), state);
 }
 
 // NOLINTNEXTLINE(*-multiple-inheritance)

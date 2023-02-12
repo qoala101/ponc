@@ -33,7 +33,7 @@ class Diagram {
   void EraseLink(ne::LinkId id);
 
   auto FindNode(ne::NodeId id) -> INode &;
-  auto FindPin(ne::PinId id) -> std::unique_ptr<draw::IPinDrawer>;
+  auto FindPin(ne::PinId id, const State &state) -> std::unique_ptr<draw::IPinDrawer>;
   auto FindLink(ne::LinkId id) -> Link &;
 
   static auto GetSelectedNodeIds() -> std::vector<ne::NodeId>;

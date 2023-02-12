@@ -30,6 +30,8 @@ void SaveAsFileDialog::OnFileSelected(State& state,
     file_path += ".json";
   }
 
-  state.SaveDiagramToFile(file_path);
+  state.PostEvent([file_path = std::move(file_path)](auto& state) {
+    State::SaveDiagramToFile(state, file_path);
+  });
 }
 }  // namespace esc::draw

@@ -52,12 +52,13 @@ auto Diagram::FindNode(ne::NodeId id) -> INode& {
   cpp::Expects(false);
 }
 
-auto Diagram::FindPin(ne::PinId id) -> std::unique_ptr<draw::IPinDrawer> {
+auto Diagram::FindPin(ne::PinId id, const State& state)
+    -> std::unique_ptr<draw::IPinDrawer> {
   for (const auto& family : families_) {
     for (const auto& node : family->GetNodes()) {
       for (const auto pin_id : node->GetPinIds()) {
         if (pin_id == id) {
-          return node->CreateDrawer()->CreatePinDrawer(pin_id);
+          return node->CreateDrawer(state)->CreatePinDrawer(pin_id);
         }
       }
     }
@@ -130,125 +131,125 @@ auto Diagram::GetFamilies() const
 // void Diagram::OnFrame() { UpdatePinValues(); }
 
 // void Diagram::ClearAllValuesExceptInput() {
-  // const auto& coupler_percentage_values = GetCouplerPercentageValues();
+// const auto& coupler_percentage_values = GetCouplerPercentageValues();
 
-  // for (auto& node : nodes_) {
-  //   for (const auto& pins : {&node->GetInputPins(), &node->GetOutputPins()})
-  //   {
-  //     for (auto& pin : *pins) {
-  //       if (!pin->ui_data_.editable) {
-  //         if (auto* float_pin = dynamic_cast<FloatPin*>(pin.get())) {
-  //           float_pin->SetValue(0);
-  //         }
-  //       }
-  //     }
-  //   }
+// for (auto& node : nodes_) {
+//   for (const auto& pins : {&node->GetInputPins(), &node->GetOutputPins()})
+//   {
+//     for (auto& pin : *pins) {
+//       if (!pin->ui_data_.editable) {
+//         if (auto* float_pin = dynamic_cast<FloatPin*>(pin.get())) {
+//           float_pin->SetValue(0);
+//         }
+//       }
+//     }
+//   }
 
-  //   if (auto* splitter_node = dynamic_cast<SplitterNode*>(node.get())) {
-  //     const auto index =
-  //         static_cast<int>(splitter_node->GetOutputPins().size());
+//   if (auto* splitter_node = dynamic_cast<SplitterNode*>(node.get())) {
+//     const auto index =
+//         static_cast<int>(splitter_node->GetOutputPins().size());
 
-  //     static const auto kSplitterValuesMap =
-  //         std::map<int, float>{{2, 4.3}, {4, 7.4}, {8, 10.7}, {16, 13.9}};
+//     static const auto kSplitterValuesMap =
+//         std::map<int, float>{{2, 4.3}, {4, 7.4}, {8, 10.7}, {16, 13.9}};
 
-  //     dynamic_cast<FloatPin*>(node->GetInputPins()[1].get())
-  //         ->SetValue(kSplitterValuesMap.at(index));
-  //   } else if (auto* coupler_node = dynamic_cast<CouplerNode*>(node.get())) {
-  //     const auto& values =
-  //         coupler_percentage_values[coupler_node->GetCouplerPercentageIndex()];
+//     dynamic_cast<FloatPin*>(node->GetInputPins()[1].get())
+//         ->SetValue(kSplitterValuesMap.at(index));
+//   } else if (auto* coupler_node = dynamic_cast<CouplerNode*>(node.get())) {
+//     const auto& values =
+//         coupler_percentage_values[coupler_node->GetCouplerPercentageIndex()];
 
-  //     dynamic_cast<FloatPin*>(node->GetInputPins()[1].get())
-  //         ->SetValue(values.first);
-  //     dynamic_cast<FloatPin*>(node->GetInputPins()[2].get())
-  //         ->SetValue(values.second);
-  //   }
-  // }
+//     dynamic_cast<FloatPin*>(node->GetInputPins()[1].get())
+//         ->SetValue(values.first);
+//     dynamic_cast<FloatPin*>(node->GetInputPins()[2].get())
+//         ->SetValue(values.second);
+//   }
+// }
 // }
 
 // void Diagram::UpdatePinValues() {
-  // ClearAllValuesExceptInput();
+// ClearAllValuesExceptInput();
 
-  // auto input_nodes = std::vector<Node*>{};
+// auto input_nodes = std::vector<Node*>{};
 
-  // for (auto& node : nodes_) {
-  //   if (dynamic_cast<InputNode*>(node.get()) != nullptr) {
-  //     input_nodes.emplace_back(node.get());
-  //   }
-  // }
+// for (auto& node : nodes_) {
+//   if (dynamic_cast<InputNode*>(node.get()) != nullptr) {
+//     input_nodes.emplace_back(node.get());
+//   }
+// }
 
-  // auto visited_nodes =
-  //     std::unordered_set<Node*>{input_nodes.begin(), input_nodes.end()};
+// auto visited_nodes =
+//     std::unordered_set<Node*>{input_nodes.begin(), input_nodes.end()};
 
-  // while (!input_nodes.empty()) {
-  //   auto next_input_nodes = std::unordered_set<Node*>{};
+// while (!input_nodes.empty()) {
+//   auto next_input_nodes = std::unordered_set<Node*>{};
 
-  //   for (auto* input_node : input_nodes) {
-  //     if (!visited_nodes.contains(input_node)) {
-  //       visited_nodes.emplace(input_node);
+//   for (auto* input_node : input_nodes) {
+//     if (!visited_nodes.contains(input_node)) {
+//       visited_nodes.emplace(input_node);
 
-  //       if (dynamic_cast<SplitterNode*>(input_node) != nullptr) {
-  //         const auto splitter_value =
-  //             dynamic_cast<FloatPin*>(input_node->GetInputPins()[1].get())
-  //                 ->GetValue();
+//       if (dynamic_cast<SplitterNode*>(input_node) != nullptr) {
+//         const auto splitter_value =
+//             dynamic_cast<FloatPin*>(input_node->GetInputPins()[1].get())
+//                 ->GetValue();
 
-  //         for (auto& output_pin : input_node->GetOutputPins()) {
-  //           if (auto* float_pin = dynamic_cast<FloatPin*>(output_pin.get()))
-  //           {
-  //             float_pin->SetValue(float_pin->GetValue() - splitter_value);
-  //           }
-  //         }
-  //       } else if (dynamic_cast<CouplerNode*>(input_node) != nullptr) {
-  //         dynamic_cast<FloatPin*>(input_node->GetOutputPins()[1].get())
-  //             ->SetValue(
-  //                 dynamic_cast<FloatPin*>(input_node->GetOutputPins()[1].get())
-  //                     ->GetValue() -
-  //                 dynamic_cast<FloatPin*>(input_node->GetInputPins()[1].get())
-  //                     ->GetValue());
-  //         dynamic_cast<FloatPin*>(input_node->GetOutputPins()[2].get())
-  //             ->SetValue(
-  //                 dynamic_cast<FloatPin*>(input_node->GetOutputPins()[2].get())
-  //                     ->GetValue() -
-  //                 dynamic_cast<FloatPin*>(input_node->GetInputPins()[2].get())
-  //                     ->GetValue());
-  //       }
-  //     }
+//         for (auto& output_pin : input_node->GetOutputPins()) {
+//           if (auto* float_pin = dynamic_cast<FloatPin*>(output_pin.get()))
+//           {
+//             float_pin->SetValue(float_pin->GetValue() - splitter_value);
+//           }
+//         }
+//       } else if (dynamic_cast<CouplerNode*>(input_node) != nullptr) {
+//         dynamic_cast<FloatPin*>(input_node->GetOutputPins()[1].get())
+//             ->SetValue(
+//                 dynamic_cast<FloatPin*>(input_node->GetOutputPins()[1].get())
+//                     ->GetValue() -
+//                 dynamic_cast<FloatPin*>(input_node->GetInputPins()[1].get())
+//                     ->GetValue());
+//         dynamic_cast<FloatPin*>(input_node->GetOutputPins()[2].get())
+//             ->SetValue(
+//                 dynamic_cast<FloatPin*>(input_node->GetOutputPins()[2].get())
+//                     ->GetValue() -
+//                 dynamic_cast<FloatPin*>(input_node->GetInputPins()[2].get())
+//                     ->GetValue());
+//       }
+//     }
 
-  //     for (auto& input_node_output_pin : input_node->GetOutputPins()) {
-  //       if (auto* float_input_node_output_pin =
-  //               dynamic_cast<FloatPin*>(input_node_output_pin.get())) {
-  //         for (auto& link : links_) {
-  //           if (link.start_pin_id == input_node_output_pin->GetId()) {
-  //             auto* end_pin = FindPin(link.end_pin_id);
+//     for (auto& input_node_output_pin : input_node->GetOutputPins()) {
+//       if (auto* float_input_node_output_pin =
+//               dynamic_cast<FloatPin*>(input_node_output_pin.get())) {
+//         for (auto& link : links_) {
+//           if (link.start_pin_id == input_node_output_pin->GetId()) {
+//             auto* end_pin = FindPin(link.end_pin_id);
 
-  //             if ((end_pin == nullptr) || (end_pin->ui_data_.node ==
-  //             nullptr)) {
-  //               continue;
-  //             }
+//             if ((end_pin == nullptr) || (end_pin->ui_data_.node ==
+//             nullptr)) {
+//               continue;
+//             }
 
-  //             if (auto* float_end_pin = dynamic_cast<FloatPin*>(end_pin)) {
-  //               float_end_pin->SetValue(
-  //                   float_end_pin->GetValue() +
-  //                   float_input_node_output_pin->GetValue());
+//             if (auto* float_end_pin = dynamic_cast<FloatPin*>(end_pin)) {
+//               float_end_pin->SetValue(
+//                   float_end_pin->GetValue() +
+//                   float_input_node_output_pin->GetValue());
 
-  //               for (auto& output_pin :
-  //                    end_pin->ui_data_.node->GetOutputPins()) {
-  //                 if (auto* float_output_pin =
-  //                         dynamic_cast<FloatPin*>(output_pin.get())) {
-  //                   float_output_pin->SetValue(
-  //                       float_output_pin->GetValue() +
-  //                       float_input_node_output_pin->GetValue());
-  //                 }
+//               for (auto& output_pin :
+//                    end_pin->ui_data_.node->GetOutputPins()) {
+//                 if (auto* float_output_pin =
+//                         dynamic_cast<FloatPin*>(output_pin.get())) {
+//                   float_output_pin->SetValue(
+//                       float_output_pin->GetValue() +
+//                       float_input_node_output_pin->GetValue());
+//                 }
 
-  //                 next_input_nodes.emplace(end_pin->ui_data_.node);
-  //               }
-  //             }
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
+//                 next_input_nodes.emplace(end_pin->ui_data_.node);
+//               }
+//             }
+//           }
+//         }
+//       }
+//     }
+//   }
 
-  //   input_nodes.assign(next_input_nodes.begin(), next_input_nodes.end());
-  // }
+//   input_nodes.assign(next_input_nodes.begin(), next_input_nodes.end());
+// }
 // }
 }  // namespace esc::core

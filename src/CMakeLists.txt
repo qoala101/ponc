@@ -112,6 +112,7 @@ endmacro()
 add_example_executable(esc
   core/core_app.cc
   core/core_diagram.cc
+  core/core_flow_calculator.cc
   core/core_i_family.cc
   core/core_i_node.cc
   core/core_id_generator.cc

@@ -65,6 +65,7 @@ class App : public Application, public std::enable_shared_from_this<App> {
   auto CalculateAlphaForPin(ne::PinId pin_id);
 
   auto IsPinLinked(ne::PinId id) const -> bool;
+  auto IsFlowPin(ne::PinId id, const core::INode &node) const -> bool;
   void AddLinkFromPinToNode(ne::LinkId link_id, ne::PinId pin_id,
                             core::INode& node);
 

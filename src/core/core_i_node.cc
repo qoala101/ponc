@@ -8,8 +8,6 @@ namespace esc::core {
 INode::INode(ne::NodeId id, std::vector<ne::PinId> pin_ids)
     : id_{id}, pin_ids_{std::move(pin_ids)} {}
 
-void INode::OnFrame(const State& /*unused*/) {}
-
 auto INode::GetId() const -> ne::NodeId { return id_; }
 
 auto INode::GetPinIds() const -> const std::vector<ne::PinId>& {

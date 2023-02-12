@@ -15,6 +15,7 @@
 #include "json_i_family_writer.h"
 #include "json_i_node_parser.h"
 #include "json_i_node_writer.h"
+#include "esc_state.h"
 
 namespace esc::impl {
 namespace {
@@ -25,7 +26,7 @@ constexpr auto kTypeName = "AttenuatorNode";
 
 auto CreateNodeWriter(std::shared_ptr<Node> node)
     -> std::unique_ptr<json::INodeWriter>;
-auto CreateNodeDrawer(std::shared_ptr<Node> node)
+auto CreateNodeDrawer(std::shared_ptr<Node> node, const State& state)
     -> std::unique_ptr<draw::INodeDrawer>;
 auto CreateFamilyWriter(std::shared_ptr<Family> family)
     -> std::unique_ptr<json::IFamilyWriter>;
@@ -35,15 +36,23 @@ auto CreateFamilyDrawer(std::shared_ptr<Family> family)
 // NOLINTNEXTLINE(*-multiple-inheritance)
 class Node : public core::INode, public std::enable_shared_from_this<Node> {
  public:
-  Node(ne::NodeId id, std::vector<ne::PinId> pin_ids, float drop = {})
+  Node(ne::NodeId id, std::vector<ne::PinId> pin_ids, float drop = -15.0F)
       : INode{id, std::move(pin_ids)}, drop_{drop} {}
 
   auto CreateWriter() -> std::unique_ptr<json::INodeWriter> override {
     return CreateNodeWriter(shared_from_this());
   }
 
-  auto CreateDrawer() -> std::unique_ptr<draw::INodeDrawer> override {
-    return CreateNodeDrawer(shared_from_this());
+  auto CreateDrawer(const State& state)
+      -> std::unique_ptr<draw::INodeDrawer> override {
+    return CreateNodeDrawer(shared_from_this(), state);
+  }
+
+  auto GetFlowValues [[nodiscard]] () const -> core::FlowValues {
+    const auto& pin_ids = GetPinIds();
+
+    return {.parent_value = core::FlowValue{.id = pin_ids[0]},
+            .child_values = {{.id = pin_ids[2], .value = drop_}}};
   }
 
   float drop_{};
@@ -93,15 +102,16 @@ class DropPinDrawer : public draw::IPinDrawer {
 
   auto IsEditable [[nodiscard]] () const -> bool override { return true; }
 
-  auto IsConnectable [[nodiscard]] () const -> bool override { return false; }
-
  private:
   std::shared_ptr<Node> node_{};
 };
 
 class NodeDrawer : public draw::INodeDrawer {
  public:
-  explicit NodeDrawer(std::shared_ptr<Node> node) : node_{std::move(node)} {}
+  explicit NodeDrawer(std::shared_ptr<Node> node, const State& state)
+      : node_{std::move(node)},
+        flow_pin_values_{
+            state.flow_calculator_.GetCalculatedFlowValues(*node_)} {}
 
   auto GetLabel() const -> std::string override {
     return AttenuatorNode::CreateFamily()->CreateDrawer()->GetLabel();
@@ -123,20 +133,18 @@ class NodeDrawer : public draw::INodeDrawer {
       return std::make_unique<DropPinDrawer>(node_);
     }
 
-    if (pin_index == 2) {
-      return std::make_unique<draw::FlowOutputPinDrawer>();
-    }
-
-    cpp::Expects(false);
+    return std::make_unique<draw::FlowOutputPinDrawer>(
+        flow_pin_values_.child_values[0].value);
   }
 
  private:
   std::shared_ptr<Node> node_{};
+  core::FlowValues flow_pin_values_{};
 };
 
-auto CreateNodeDrawer(std::shared_ptr<Node> node)
+auto CreateNodeDrawer(std::shared_ptr<Node> node, const State& state)
     -> std::unique_ptr<draw::INodeDrawer> {
-  return std::make_unique<NodeDrawer>(std::move(node));
+  return std::make_unique<NodeDrawer>(std::move(node), state);
 }
 
 // NOLINTNEXTLINE(*-multiple-inheritance)

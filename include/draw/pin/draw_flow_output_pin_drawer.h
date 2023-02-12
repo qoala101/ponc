@@ -8,6 +8,9 @@ namespace esc::draw {
 class FlowOutputPinDrawer : public IPinDrawer {
  public:
   // ---
+  explicit FlowOutputPinDrawer(float value = {});
+
+  // ---
   auto GetLabel [[nodiscard]] () const -> std::string override;
   // ---
   auto GetKind [[nodiscard]] () const -> ne::PinKind override;
@@ -15,8 +18,6 @@ class FlowOutputPinDrawer : public IPinDrawer {
   auto GetFloat [[nodiscard]] () -> float* override;
   // ---
   auto IsEditable [[nodiscard]] () const -> bool override;
-  // ---
-  auto IsConnectable [[nodiscard]] () const -> bool override;
 
  private:
   float value_{};

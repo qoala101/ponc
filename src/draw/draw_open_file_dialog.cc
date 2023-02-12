@@ -14,6 +14,8 @@ OpenFileDialog::OpenFileDialog()
       }()} {}
 
 void OpenFileDialog::OnFileSelected(State &state, std::string file_path) const {
-  state.OpenDiagramFromFile(file_path);
+  state.PostEvent([file_path = std::move(file_path)](auto &state) {
+    State::OpenDiagramFromFile(state, file_path);
+  });
 }
 }  // namespace esc::draw

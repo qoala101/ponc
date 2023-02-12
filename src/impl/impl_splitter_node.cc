@@ -2,15 +2,18 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "core_i_node.h"
 #include "core_id_generator.h"
+#include "cpp_assert.h"
 #include "crude_json.h"
 #include "draw_flow_input_pin_drawer.h"
 #include "draw_flow_output_pin_drawer.h"
 #include "draw_i_family_drawer.h"
 #include "draw_i_node_drawer.h"
 #include "draw_i_pin_drawer.h"
+#include "esc_state.h"
 #include "imgui_node_editor.h"
 #include "json_i_family_writer.h"
 #include "json_i_node_parser.h"
@@ -25,7 +28,7 @@ constexpr auto kTypeName = "SplitterNode";
 
 auto CreateNodeWriter(std::shared_ptr<Node> node)
     -> std::unique_ptr<json::INodeWriter>;
-auto CreateNodeDrawer(std::shared_ptr<Node> node)
+auto CreateNodeDrawer(std::shared_ptr<Node> node, const State& state)
     -> std::unique_ptr<draw::INodeDrawer>;
 auto CreateFamilyWriter(std::shared_ptr<Family> family)
     -> std::unique_ptr<json::IFamilyWriter>;
@@ -42,12 +45,40 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
     return CreateNodeWriter(shared_from_this());
   }
 
-  auto CreateDrawer() -> std::unique_ptr<draw::INodeDrawer> override {
-    return CreateNodeDrawer(shared_from_this());
+  auto CreateDrawer(const State& state)
+      -> std::unique_ptr<draw::INodeDrawer> override {
+    return CreateNodeDrawer(shared_from_this(), state);
   }
 
   auto GetNumOutputs() const {
     return static_cast<int>(GetPinIds().size()) - 2;
+  }
+
+  auto GetDrop() const {
+    switch (GetNumOutputs()) {
+      case 2:
+        return -4.3F;
+      case 4:
+        return -7.4F;
+      case 8:
+        return -10.7F;
+      case 16:
+      default:
+        return -13.9F;
+    };
+  }
+
+  auto GetFlowValues [[nodiscard]] () const -> core::FlowValues override {
+    const auto& pin_ids = GetPinIds();
+    auto flow_values =
+        core::FlowValues{.parent_value = core::FlowValue{.id = pin_ids[0]}};
+    const auto drop = GetDrop();
+
+    for (auto i = 0; i < static_cast<int>(pin_ids.size() - 2); ++i) {
+      flow_values.child_values.emplace_back(core::FlowValue{pin_ids[i + 2], drop});
+    }
+
+    return flow_values;
   }
 };
 
@@ -80,20 +111,7 @@ auto CreateNodeWriter(std::shared_ptr<Node> node)
 
 class DropPinDrawer : public draw::IPinDrawer {
  public:
-  explicit DropPinDrawer(int num_outputs)
-      : drop_{[num_outputs]() {
-          switch (num_outputs) {
-            case 2:
-              return -4.3F;
-            case 4:
-              return -7.4F;
-            case 8:
-              return -10.7F;
-            case 16:
-            default:
-              return -13.9F;
-          };
-        }()} {}
+  explicit DropPinDrawer(float drop) : drop_{drop} {}
 
   auto GetLabel [[nodiscard]] () const -> std::string override { return {}; }
 
@@ -105,15 +123,16 @@ class DropPinDrawer : public draw::IPinDrawer {
 
   auto IsEditable [[nodiscard]] () const -> bool override { return false; }
 
-  auto IsConnectable [[nodiscard]] () const -> bool override { return false; }
-
  private:
   float drop_{};
 };
 
 class NodeDrawer : public draw::INodeDrawer {
  public:
-  explicit NodeDrawer(std::shared_ptr<Node> node) : node_{std::move(node)} {}
+  explicit NodeDrawer(std::shared_ptr<Node> node, const State& state)
+      : node_{std::move(node)},
+        flow_pin_values_{
+            state.flow_calculator_.GetCalculatedFlowValues(*node_)} {}
 
   auto GetLabel() const -> std::string override {
     return SplitterNode::CreateFamily(node_->GetNumOutputs())
@@ -136,19 +155,21 @@ class NodeDrawer : public draw::INodeDrawer {
     }
 
     if (pin_index == 1) {
-      return std::make_unique<DropPinDrawer>(node_->GetNumOutputs());
+      return std::make_unique<DropPinDrawer>(node_->GetDrop());
     }
 
-    return std::make_unique<draw::FlowOutputPinDrawer>();
+    return std::make_unique<draw::FlowOutputPinDrawer>(
+        flow_pin_values_.child_values[pin_index - 2].value);
   }
 
  private:
   std::shared_ptr<Node> node_{};
+  core::FlowValues flow_pin_values_{};
 };
 
-auto CreateNodeDrawer(std::shared_ptr<Node> node)
+auto CreateNodeDrawer(std::shared_ptr<Node> node, const State& state)
     -> std::unique_ptr<draw::INodeDrawer> {
-  return std::make_unique<NodeDrawer>(std::move(node));
+  return std::make_unique<NodeDrawer>(std::move(node), state);
 }
 
 // NOLINTNEXTLINE(*-multiple-inheritance)

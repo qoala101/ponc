@@ -10,7 +10,8 @@ namespace esc::impl {
 // ---
 struct CouplerNode {
   // ---
-  static auto CreateFamily [[nodiscard]] () -> std::shared_ptr<core::IFamily>;
+  static auto CreateFamily [[nodiscard]] (int percentage_index)
+  -> std::shared_ptr<core::IFamily>;
   // ---
   static auto CreateFamilyParser [[nodiscard]] ()
   -> std::unique_ptr<json::IFamilyParser>;

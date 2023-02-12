@@ -29,7 +29,7 @@ constexpr auto kTypeName = "HubNode";
 
 auto CreateNodeWriter(std::shared_ptr<Node> node)
     -> std::unique_ptr<json::INodeWriter>;
-auto CreateNodeDrawer(std::shared_ptr<Node> node)
+auto CreateNodeDrawer(std::shared_ptr<Node> node, const State& state)
     -> std::unique_ptr<draw::INodeDrawer>;
 auto CreateFamilyWriter(std::shared_ptr<Family> family)
     -> std::unique_ptr<json::IFamilyWriter>;
@@ -42,30 +42,18 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
   Node(ne::NodeId id, std::vector<ne::PinId> pin_ids)
       : INode{id, std::move(pin_ids)} {}
 
-  void OnFrame(const State& state) override {
-    const auto& pin_ids = GetPinIds();
-    const auto& links = state.app_.GetDiagram().GetLinks();
-
-    num_input_pins_ = static_cast<int>(std::ranges::count_if(
-        links, [node_pin = pin_ids[0]](const core::Link& link) {
-          return link.end_pin_id == node_pin;
-        }));
-    num_output_pins_ = static_cast<int>(std::ranges::count_if(
-        links, [node_pin = pin_ids[1]](const core::Link& link) {
-          return link.start_pin_id == node_pin;
-        }));
-  }
-
   auto CreateWriter() -> std::unique_ptr<json::INodeWriter> override {
     return CreateNodeWriter(shared_from_this());
   }
 
-  auto CreateDrawer() -> std::unique_ptr<draw::INodeDrawer> override {
-    return CreateNodeDrawer(shared_from_this());
+  auto CreateDrawer(const State& state)
+      -> std::unique_ptr<draw::INodeDrawer> override {
+    return CreateNodeDrawer(shared_from_this(), state);
   }
 
-  int num_input_pins_{};
-  int num_output_pins_{};
+  auto GetFlowValues [[nodiscard]] () const -> core::FlowValues override {
+    return {};
+  }
 };
 
 class NodeParser : public json::INodeParser {
@@ -97,45 +85,53 @@ auto CreateNodeWriter(std::shared_ptr<Node> node)
 
 class InputPinDrawer : public draw::IPinDrawer {
  public:
-  explicit InputPinDrawer(std::shared_ptr<Node> node)
-      : node_{std::move(node)} {}
+  explicit InputPinDrawer(int num_connected_links)
+      : num_connected_links_{num_connected_links} {}
 
   auto GetLabel [[nodiscard]] () const -> std::string {
-    return std::to_string(node_->num_input_pins_);
+    return std::to_string(num_connected_links_);
   }
 
   auto GetKind [[nodiscard]] () const -> ne::PinKind override {
     return ne::PinKind::Input;
   }
 
-  auto IsConnectable [[nodiscard]] () const -> bool override { return true; }
-
  private:
-  std::shared_ptr<Node> node_{};
+  int num_connected_links_{};
 };
 
 class OutputPinDrawer : public draw::IPinDrawer {
  public:
-  explicit OutputPinDrawer(std::shared_ptr<Node> node)
-      : node_{std::move(node)} {}
+  explicit OutputPinDrawer(int num_connected_links)
+      : num_connected_links_{num_connected_links} {}
 
   auto GetLabel [[nodiscard]] () const -> std::string {
-    return std::to_string(node_->num_output_pins_);
+    return std::to_string(num_connected_links_);
   }
 
   auto GetKind [[nodiscard]] () const -> ne::PinKind override {
     return ne::PinKind::Output;
   }
 
-  auto IsConnectable [[nodiscard]] () const -> bool override { return true; }
-
  private:
-  std::shared_ptr<Node> node_{};
+  int num_connected_links_{};
 };
 
 class NodeDrawer : public draw::INodeDrawer {
  public:
-  explicit NodeDrawer(std::shared_ptr<Node> node) : node_{std::move(node)} {}
+  explicit NodeDrawer(std::shared_ptr<Node> node, const State& state) : node_{std::move(node)} {
+    const auto& pin_ids = node_->GetPinIds();
+    const auto& links = state.app_.GetDiagram().GetLinks();
+
+    num_connected_input_links_ = static_cast<int>(std::ranges::count_if(
+        links, [node_pin = pin_ids[0]](const core::Link& link) {
+          return link.end_pin_id == node_pin;
+        }));
+    num_connected_output_links_ = static_cast<int>(std::ranges::count_if(
+        links, [node_pin = pin_ids[1]](const core::Link& link) {
+          return link.start_pin_id == node_pin;
+        }));
+  }
 
   auto GetLabel() const -> std::string override {
     return HubNode::CreateFamily()->CreateDrawer()->GetLabel();
@@ -150,11 +146,11 @@ class NodeDrawer : public draw::INodeDrawer {
     const auto pin_index = node_->GetPinIndex(pin_id);
 
     if (pin_index == 0) {
-      return std::make_unique<InputPinDrawer>(node_);
+      return std::make_unique<InputPinDrawer>(num_connected_input_links_);
     }
 
     if (pin_index == 1) {
-      return std::make_unique<OutputPinDrawer>(node_);
+      return std::make_unique<OutputPinDrawer>(num_connected_output_links_);
     }
 
     cpp::Expects(false);
@@ -162,11 +158,13 @@ class NodeDrawer : public draw::INodeDrawer {
 
  private:
   std::shared_ptr<Node> node_{};
+  int num_connected_input_links_{};
+  int num_connected_output_links_{};
 };
 
-auto CreateNodeDrawer(std::shared_ptr<Node> node)
+auto CreateNodeDrawer(std::shared_ptr<Node> node, const State& state)
     -> std::unique_ptr<draw::INodeDrawer> {
-  return std::make_unique<NodeDrawer>(std::move(node));
+  return std::make_unique<NodeDrawer>(std::move(node), state);
 }
 
 // NOLINTNEXTLINE(*-multiple-inheritance)

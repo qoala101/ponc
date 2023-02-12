@@ -23,7 +23,7 @@ void MenuBar::Draw(State& state) {
       }
 
       if (ImGui::MenuItem("Reset")) {
-        state.ResetDiagram();
+        state.PostEvent([](auto& state) { State::ResetDiagram(state); });
       }
     }
 

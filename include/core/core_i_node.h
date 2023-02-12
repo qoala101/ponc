@@ -3,7 +3,9 @@
 
 #include <imgui_node_editor.h>
 
+#include <map>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 #include "cpp_interface.h"
@@ -23,16 +25,26 @@ class INodeDrawer;
 }  // namespace draw
 
 namespace core {
+struct FlowValue {
+  ne::PinId id{};
+  float value{};
+};
+
+struct FlowValues {
+  std::optional<FlowValue> parent_value{};
+  std::vector<FlowValue> child_values{};
+};
+
 class INode : public cpp::Interface {
  public:
-  // ---
-  virtual void OnFrame(const State &state);
   // ---
   virtual auto CreateWriter [[nodiscard]] ()
   -> std::unique_ptr<json::INodeWriter> = 0;
   // ---
-  virtual auto CreateDrawer [[nodiscard]] ()
+  virtual auto CreateDrawer [[nodiscard]] (const State &state)
   -> std::unique_ptr<draw::INodeDrawer> = 0;
+
+  virtual auto GetFlowValues [[nodiscard]] () const -> FlowValues = 0;
 
   // ---
   auto GetId [[nodiscard]] () const -> ne::NodeId;
