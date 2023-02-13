@@ -19,8 +19,8 @@ class PlaceholderFamily
   -> std::unique_ptr<json::IFamilyParser>;
 
   // ---
-  auto CreateNodeParser [[nodiscard]] () const
-      -> std::unique_ptr<json::INodeParser> override;
+  auto CreateNodeParser [[nodiscard]] ()
+  -> std::unique_ptr<json::INodeParser> override;
   // ---
   auto CreateWriter [[nodiscard]] ()
   -> std::unique_ptr<json::IFamilyWriter> override;

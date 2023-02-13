@@ -71,6 +71,8 @@ auto FindMaxId(const core::Diagram &diagram) {
 State::State() { ResetDiagram(*this); }
 
 void State::OpenDiagramFromFile(State &state, const std::string &file_path) {
+  ResetDiagram(state);
+
   const auto json = crude_json::value::load(file_path).first;
 
   auto diagram =
@@ -103,6 +105,9 @@ void State::ResetDiagram(State &state) {
       ne::DeleteNode(node->GetId());
     }
   }
+
+  state.drawing_.not_yet_connected_pin_of_new_link_id.reset();
+  state.drawing_.connect_new_node_to_existing_pin_id.reset();
 
   state.id_generator_ = core::IdGenerator{};
   state.app_.SetDiagram(core::Diagram{CreateFamilies()});

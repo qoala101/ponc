@@ -155,7 +155,7 @@ auto PlaceholderFamily::CreateNode(IdGenerator& id_generator)
   cpp::Expects(false);
 }
 
-auto PlaceholderFamily::CreateNodeParser() const
+auto PlaceholderFamily::CreateNodeParser()
     -> std::unique_ptr<json::INodeParser> {
   return std::make_unique<NodeParser>();
 }
