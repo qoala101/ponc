@@ -111,15 +111,20 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
 };
 
 class NodeParser : public json::INodeParser {
+ public:
+  explicit NodeParser(int percentage_index)
+      : percentage_index_{percentage_index} {}
+
  private:
   auto ParseFromJson(ne::NodeId parsed_node_id,
                      std::vector<ne::PinId> parsed_pin_ids,
                      const crude_json::value& json) const
       -> std::shared_ptr<core::INode> override {
-    return std::make_shared<Node>(
-        parsed_node_id, std::move(parsed_pin_ids),
-        json["percentage_index"].get<crude_json::number>());
+    return std::make_shared<Node>(parsed_node_id, std::move(parsed_pin_ids),
+                                  percentage_index_);
   }
+
+  int percentage_index_{};
 };
 
 class NodeWriter : public json::INodeWriter {
@@ -129,12 +134,7 @@ class NodeWriter : public json::INodeWriter {
  private:
   auto GetTypeName() const -> std::string override { return kTypeName; }
 
-  auto WriteToJson() const -> crude_json::value override {
-    auto json = crude_json::value{};
-    json["percentage_index"] =
-        static_cast<crude_json::number>(node_->percentage_index_);
-    return json;
-  }
+  auto WriteToJson() const -> crude_json::value override { return {}; }
 
   std::shared_ptr<Node> node_{};
 };
@@ -199,8 +199,7 @@ class NodeDrawer : public draw::INodeDrawer {
     const auto pin_index = node_->GetPinIndex(pin_id);
 
     if (pin_index == 0) {
-      return std::make_unique<draw::FlowInputPinDrawer>(
-          flow_pin_values_);
+      return std::make_unique<draw::FlowInputPinDrawer>(flow_pin_values_);
     }
 
     if (pin_index == 1) {
@@ -245,7 +244,7 @@ class Family : public core::IFamily,
   }
 
   auto CreateNodeParser() -> std::unique_ptr<json::INodeParser> override {
-    return std::make_unique<NodeParser>();
+    return std::make_unique<NodeParser>(percentage_index_);
   }
 
   auto CreateWriter() -> std::unique_ptr<json::IFamilyWriter> override {
