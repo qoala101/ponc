@@ -35,7 +35,7 @@ auto CreateFamilyDrawer(std::shared_ptr<Family> family)
 // NOLINTNEXTLINE(*-multiple-inheritance)
 class Node : public core::INode, public std::enable_shared_from_this<Node> {
  public:
-  Node(ne::NodeId id, std::vector<ne::PinId> pin_ids, float value = {})
+  Node(ne::NodeId id, std::vector<ne::PinId> pin_ids, float value = 6.0F)
       : INode{id, std::move(pin_ids)}, value_{value} {}
 
   auto CreateWriter() -> std::unique_ptr<json::INodeWriter> override {
@@ -47,8 +47,8 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
     return CreateNodeDrawer(shared_from_this(), state);
   }
 
-  auto GetInitialFlow [[nodiscard]] () const -> core::NodePinFlows override {
-    return {.output_pin_flows = {{.id = GetPinIds()[0], .value = value_}}};
+  auto GetInitialFlow [[nodiscard]] () const -> core::Flow override {
+    return {.output_pin_flows = {{GetPinIds()[0].Get(), value_}}};
   }
 
   float value_{};
@@ -126,7 +126,7 @@ class NodeDrawer : public draw::INodeDrawer {
 
  private:
   std::shared_ptr<Node> node_{};
-  core::NodePinFlows flow_pin_values_{};
+  core::Flow flow_pin_values_{};
 };
 
 auto CreateNodeDrawer(std::shared_ptr<Node> node, const State& state)

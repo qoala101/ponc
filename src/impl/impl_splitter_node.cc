@@ -68,14 +68,14 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
     };
   }
 
-  auto GetInitialFlow [[nodiscard]] () const -> core::NodePinFlows override {
+  auto GetInitialFlow [[nodiscard]] () const -> core::Flow override {
     const auto& pin_ids = GetPinIds();
-    auto flow_values =
-        core::NodePinFlows{.input_pin_flow = core::PinFlow{.id = pin_ids[0]}};
+    auto flow_values = core::Flow{
+        .input_pin_flow = std::pair{pin_ids[0].Get(), float{}}};
     const auto drop = GetDrop();
 
     for (auto i = 0; i < static_cast<int>(pin_ids.size() - 2); ++i) {
-      flow_values.output_pin_flows.emplace_back(core::PinFlow{pin_ids[i + 2], drop});
+      flow_values.output_pin_flows.emplace(pin_ids[i + 2], drop);
     }
 
     return flow_values;
@@ -131,8 +131,7 @@ class NodeDrawer : public draw::INodeDrawer {
  public:
   explicit NodeDrawer(std::shared_ptr<Node> node, const State& state)
       : node_{std::move(node)},
-        flow_pin_values_{
-            state.flow_calculator_.GetCalculatedFlow(*node_)} {}
+        flow_pin_values_{state.flow_calculator_.GetCalculatedFlow(*node_)} {}
 
   auto GetLabel() const -> std::string override {
     return SplitterNode::CreateFamily(node_->GetNumOutputs())
@@ -151,7 +150,8 @@ class NodeDrawer : public draw::INodeDrawer {
     const auto pin_index = node_->GetPinIndex(pin_id);
 
     if (pin_index == 0) {
-      return std::make_unique<draw::FlowInputPinDrawer>();
+      return std::make_unique<draw::FlowInputPinDrawer>(
+          flow_pin_values_.input_pin_flow->second);
     }
 
     if (pin_index == 1) {
@@ -159,12 +159,12 @@ class NodeDrawer : public draw::INodeDrawer {
     }
 
     return std::make_unique<draw::FlowOutputPinDrawer>(
-        flow_pin_values_.output_pin_flows[pin_index - 2].value);
+        flow_pin_values_.output_pin_flows.at(pin_id.Get()));
   }
 
  private:
   std::shared_ptr<Node> node_{};
-  core::NodePinFlows flow_pin_values_{};
+  core::Flow flow_pin_values_{};
 };
 
 auto CreateNodeDrawer(std::shared_ptr<Node> node, const State& state)

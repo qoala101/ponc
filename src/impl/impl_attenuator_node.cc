@@ -1,5 +1,6 @@
 #include "impl_attenuator_node.h"
 
+#include <cstdint>
 #include <memory>
 
 #include "core_i_node.h"
@@ -48,11 +49,11 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
     return CreateNodeDrawer(shared_from_this(), state);
   }
 
-  auto GetInitialFlow [[nodiscard]] () const -> core::NodePinFlows override {
+  auto GetInitialFlow [[nodiscard]] () const -> core::Flow override {
     const auto& pin_ids = GetPinIds();
 
-    return {.input_pin_flow = core::PinFlow{.id = pin_ids[0]},
-            .output_pin_flows = {{.id = pin_ids[2], .value = drop_}}};
+    return {.input_pin_flow = std::pair{pin_ids[0].Get(), float{}},
+            .output_pin_flows = {{pin_ids[2].Get(), drop_}}};
   }
 
   float drop_{};
@@ -125,7 +126,8 @@ class NodeDrawer : public draw::INodeDrawer {
     const auto pin_index = node_->GetPinIndex(pin_id);
 
     if (pin_index == 0) {
-      return std::make_unique<draw::FlowInputPinDrawer>();
+      return std::make_unique<draw::FlowInputPinDrawer>(
+          flow_pin_values_.input_pin_flow->second);
     }
 
     if (pin_index == 1) {
@@ -133,12 +135,12 @@ class NodeDrawer : public draw::INodeDrawer {
     }
 
     return std::make_unique<draw::FlowOutputPinDrawer>(
-        flow_pin_values_.output_pin_flows[0].value);
+        flow_pin_values_.output_pin_flows.at(pin_id.Get()));
   }
 
  private:
   std::shared_ptr<Node> node_{};
-  core::NodePinFlows flow_pin_values_{};
+  core::Flow flow_pin_values_{};
 };
 
 auto CreateNodeDrawer(std::shared_ptr<Node> node, const State& state)

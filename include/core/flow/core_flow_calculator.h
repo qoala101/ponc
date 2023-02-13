@@ -4,12 +4,11 @@
 #include <imgui_node_editor.h>
 
 #include <cstdint>
-#include <map>
 #include <unordered_map>
 #include <vector>
 
-#include "core_diagram.h"
 #include "core_flow.h"
+#include "core_i_family.h"
 #include "core_i_node.h"
 #include "core_link.h"
 #include "core_tree.h"
@@ -26,20 +25,22 @@ class FlowCalculator {
   // ---
   auto GetFlowTree() const -> const Tree &;
   // ---
-  auto GetCalculatedFlow(const INode &node) const -> NodePinFlows;
+  auto GetCalculatedFlow(const INode &node) const -> const Flow &;
 
  private:
   // ---
   void RebuildFlowTree(const std::vector<std::shared_ptr<IFamily>> &families,
                        const std::vector<Link> &links);
-  void CalculateFlowValues(const State &state);
+  // ---
+  void RecalculateFlowValues();
+  // ---
+  void CalculateFlowValuesForNode(const TreeNode &node,
+                                  float input_from_parent = {});
 
-  void VisitNode(const TreeNode &node, const State &state);
-
+  // ---
   Tree flow_tree_{};
-  std::unordered_map<uintptr_t, float> pin_values_{};
-
-  std::unordered_map<uintptr_t, NodePinFlows> node_flows_{};
+  // ---
+  std::unordered_map<uintptr_t, Flow> node_flows_{};
 };
 }  // namespace core
 }  // namespace esc

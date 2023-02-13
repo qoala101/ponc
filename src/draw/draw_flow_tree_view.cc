@@ -25,7 +25,7 @@ void DisplayNode(State& state, const core::TreeNode& tree_node) {
     ImGui::Text("%d", 33);
     if (open) {
       for (const auto& child_node : tree_node.child_nodes) {
-        DisplayNode(state, child_node);
+        DisplayNode(state, child_node.second);
       }
       ImGui::TreePop();
     }

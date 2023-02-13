@@ -285,13 +285,13 @@ auto App::IsFlowPin(ne::PinId id, const core::INode& node) const -> bool {
   const auto flow_values = node.GetInitialFlow();
 
   if (flow_values.input_pin_flow.has_value() &&
-      flow_values.input_pin_flow->id == id) {
+      flow_values.input_pin_flow->first == id.Get()) {
     return true;
   }
 
   return std::ranges::find_if(flow_values.output_pin_flows,
                               [id](const auto& flow_value) {
-                                return flow_value.id == id;
+                                return flow_value.first == id.Get();
                               }) != flow_values.output_pin_flows.end();
 }
 

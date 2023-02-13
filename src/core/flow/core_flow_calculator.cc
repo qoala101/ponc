@@ -20,15 +20,17 @@
 namespace esc::core {
 namespace {
 // ---
-auto HasInputPin [[nodiscard]] (const NodePinFlows &node_flow) {
+auto HasInputPin [[nodiscard]] (const Flow &node_flow) {
   return node_flow.input_pin_flow.has_value();
 }
 
 // ---
-auto HasLinkFromParent [[nodiscard]] (const NodePinFlows &node_flow,
-                                      const std::vector<Link> &links) {
+auto HasLinkFromParent
+    [[nodiscard]] (const Flow &node_flow, const std::vector<Link> &links) {
+  cpp::Expects(node_flow.input_pin_flow.has_value());
+
   return std::ranges::any_of(links, [&node_flow](const auto &link) {
-    return link.end_pin_id == node_flow.input_pin_flow->id;
+    return link.end_pin_id.Get() == node_flow.input_pin_flow->first;
   });
 }
 
@@ -71,12 +73,12 @@ auto FindLinkConnectingPins
 
 // ---
 auto FindLinkFromParentToChild
-    [[nodiscard]] (const std::vector<PinFlow> &parent_output_pins,
+    [[nodiscard]] (const std::map<uintptr_t, float> &parent_output_pins,
                    ne::PinId child_input_pin, const std::vector<Link> &links)
     -> const Link * {
-  for (const auto &parent_output_pin : parent_output_pins) {
+  for (const auto &[parent_output_pin, value] : parent_output_pins) {
     const auto *const link =
-        FindLinkConnectingPins(parent_output_pin.id, child_input_pin, links);
+        FindLinkConnectingPins(parent_output_pin, child_input_pin, links);
 
     if (link != nullptr) {
       return link;
@@ -87,49 +89,24 @@ auto FindLinkFromParentToChild
 }
 }  // namespace
 
+// ---
 void FlowCalculator::OnFrame(const State &state) {
-  // auto node_flows =
-  //     std::unordered_map<const std::shared_ptr<INode> *, NodeFlow>{};
-
-  // for (auto &family : state.app_.GetDiagram().GetFamilies()) {
-  //   for (auto &node : family->GetNodes()) {
-  //     const auto &initial_node_flow =
-  //         node_flows.emplace(&node, node->GetInitialFlow()).first->second;
-
-  //     if (initial_node_flow.parent_flow.has_value()) {
-  //       pin_values_.emplace(initial_node_flow.parent_flow->id.Get(),
-  //                           initial_node_flow.parent_flow->value);
-  //     }
-
-  //     for (const auto &child_value : initial_node_flow.child_flows) {
-  //       pin_values_.emplace(child_value.id.Get(), child_value.value);
-  //     }
-  //   }
-  // }
-  // pin_values_.clear();
   const auto &diagram = state.app_.GetDiagram();
   const auto &families = diagram.GetFamilies();
   const auto &links = diagram.GetLinks();
   RebuildFlowTree(families, links);
-  CalculateFlowValues(state);
+  RecalculateFlowValues();
 }
 
+// ---
 auto FlowCalculator::GetFlowTree() const -> const Tree & { return flow_tree_; }
 
+// ---
 auto FlowCalculator::GetCalculatedFlow(const INode &node) const
-    -> NodePinFlows {
-  auto flow_values = node.GetInitialFlow();
-
-  if (flow_values.input_pin_flow.has_value()) {
-    flow_values.input_pin_flow->value =
-        pin_values_.at(flow_values.input_pin_flow->id.Get());
-  }
-
-  for (auto &child_pin_value : flow_values.output_pin_flows) {
-    child_pin_value.value = pin_values_.at(child_pin_value.id.Get());
-  }
-
-  return flow_values;
+    -> const Flow & {
+  const auto node_id = node.GetId().Get();
+  cpp::Expects(node_flows_.contains(node_id));
+  return node_flows_.at(node_id);
 }
 
 // ---
@@ -163,7 +140,7 @@ void FlowCalculator::RebuildFlowTree(
               possible_parent->node->GetInitialFlow().output_pin_flows;
 
           const auto *link_to_parent = FindLinkFromParentToChild(
-              parent_output_pins, node_input_pin->id, links);
+              parent_output_pins, node_input_pin->first, links);
 
           if (link_to_parent == nullptr) {
             continue;
@@ -183,40 +160,37 @@ void FlowCalculator::RebuildFlowTree(
   }
 }
 
-void FlowCalculator::VisitNode(const TreeNode &node, const State &state) {
-  // const auto initial_node_flow = node.node->GetInitialFlow();
+// ---
+void FlowCalculator::RecalculateFlowValues() {
+  node_flows_.clear();
 
-  // if (initial_node_flow.parent_flow.has_value()) {
-  //   pin_values_[initial_node_flow.parent_flow->id.Get()] +=
-  //       initial_node_flow.parent_flow->value;
-  // }
-
-  // const auto &links = state.app_.GetDiagram().GetLinks();
-
-  // for (const auto &child_value : initial_node_flow.child_flows) {
-  //   pin_values_[child_value.id.Get()] += child_value.value;
-
-  //   for (const auto &child_node : node.child_nodes) {
-  //     const auto child_pin_id =
-  //         child_node.node->GetInitialFlow().parent_flow->id;
-
-  //     if (HasLink(child_value.id, child_pin_id, links)) {
-  //       pin_values_[child_pin_id.Get()] += child_value.value;
-  //     }
-  //   }
-  // }
-
-  // for (const auto &child_node : node.child_nodes) {
-  //   VisitNode(child_node, state);
-  // }
+  for (const auto &node : flow_tree_.root_nodes) {
+    CalculateFlowValuesForNode(node);
+  }
 }
 
-void FlowCalculator::CalculateFlowValues(const State &state) {
-  // pin_values_.clear();
-  // node_flows_.clear();
+// ---
+// NOLINTNEXTLINE(*-no-recursion)
+void FlowCalculator::CalculateFlowValuesForNode(const TreeNode &node,
+                                                float input_from_parent) {
+  const auto node_id = node.node->GetId();
+  auto calculated_flow = node_flows_.find(node_id.Get());
 
-  // for (const auto &node : flow_tree_.root_nodes) {
-  //   VisitNode(node, state);
-  // }
+  const auto initial_flow = node.node->GetInitialFlow();
+
+  if (calculated_flow == node_flows_.end()) {
+    calculated_flow = node_flows_.emplace(node_id, initial_flow).first;
+  } else {
+    calculated_flow->second += initial_flow;
+  }
+
+  calculated_flow->second += input_from_parent;
+
+  for (const auto &[child_pin, child_node] : node.child_nodes) {
+    const auto added_flow =
+        calculated_flow->second.output_pin_flows.at(child_pin);
+
+    CalculateFlowValuesForNode(child_node, added_flow);
+  }
 }
 }  // namespace esc::core
