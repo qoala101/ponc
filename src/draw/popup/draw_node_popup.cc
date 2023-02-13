@@ -18,5 +18,13 @@ void NodePopup::DrawContent(State& state) {
       State::EraseNodeAndConnectedLinks(state, node_id);
     });
   }
+
+  if (ImGui::MenuItem("Delete Ex")) {
+    SetVisible(false);
+
+    state.PostEvent([node_id = node_->GetId()](auto& state) {
+      State::ReplaceWithPlaceholder(state, node_id);
+    });
+  }
 }
 }  // namespace esc::draw

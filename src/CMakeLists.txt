@@ -118,6 +118,7 @@ add_example_executable(esc
   core/core_i_family.cc
   core/core_i_node.cc
   core/core_id_generator.cc
+  core/core_placeholder_family.cc
 
   cpp/cpp_assert.cc
   cpp/cpp_scope_function.cc
@@ -157,7 +158,6 @@ add_example_executable(esc
   impl/impl_attenuator_node.cc
   impl/impl_client_node.cc
   impl/impl_coupler_node.cc
-  impl/impl_hub_node.cc
   impl/impl_input_node.cc
   impl/impl_splitter_node.cc
 

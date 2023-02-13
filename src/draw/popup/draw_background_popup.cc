@@ -17,8 +17,13 @@ void BackgroundPopup::DrawContent(State& state) {
     auto family_groups = std::map<std::string, std::vector<core::IFamily*>>{};
 
     for (const auto& family : families) {
-      family_groups[family->CreateDrawer()->GetGroupLabel()].emplace_back(
-          &*family);
+      const auto drawer = family->CreateDrawer();
+
+      if (!drawer->IsUserAccessible()) {
+        continue;
+      }
+
+      family_groups[drawer->GetGroupLabel()].emplace_back(&*family);
     }
 
     return family_groups;

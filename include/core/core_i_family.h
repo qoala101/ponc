@@ -45,6 +45,9 @@ class IFamily : public cpp::Interface {
   // ---
   explicit IFamily(std::vector<std::shared_ptr<core::INode>> nodes);
 
+  // ---
+  auto EmplaceNode [[nodiscard]] (std::shared_ptr<core::INode> node) -> INode &;
+
  private:
   // ---
   virtual auto CreateNode [[nodiscard]] (IdGenerator &id_generator)

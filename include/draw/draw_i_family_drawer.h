@@ -16,6 +16,8 @@ class IFamilyDrawer : public cpp::Interface {
   virtual auto GetColor [[nodiscard]] () const -> ImColor = 0;
   // ---
   virtual auto GetGroupLabel [[nodiscard]] () const -> std::string;
+  // ---
+  virtual auto IsUserAccessible [[nodiscard]] () -> bool;
 };
 }  // namespace esc::draw
 

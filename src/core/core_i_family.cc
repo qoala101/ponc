@@ -3,19 +3,28 @@
 #include <bits/ranges_algo.h>
 
 namespace esc::core {
-IFamily::IFamily(std::vector<std::shared_ptr<core::INode>> nodes)
-    : nodes_{std::move(nodes)} {}
-
+// ---
 auto IFamily::GetNodes() const -> const std::vector<std::shared_ptr<INode>> & {
   return nodes_;
 }
 
+// ---
 auto IFamily::EmplaceNode(IdGenerator &id_generator) -> INode & {
-  return *nodes_.emplace_back(CreateNode(id_generator));
+  return EmplaceNode(CreateNode(id_generator));
 }
 
+// ---
 void IFamily::EraseNode(ne::NodeId &id) {
   nodes_.erase(std::ranges::find_if(
       nodes_, [id](const auto &node) { return node->GetId() == id; }));
+}
+
+// ---
+IFamily::IFamily(std::vector<std::shared_ptr<core::INode>> nodes)
+    : nodes_{std::move(nodes)} {}
+
+// ---
+auto IFamily::EmplaceNode(std::shared_ptr<core::INode> node) -> INode & {
+  return *nodes_.emplace_back(std::move(node));
 }
 }  // namespace esc::core

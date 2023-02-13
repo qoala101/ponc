@@ -15,18 +15,24 @@
 #include <vector>
 
 #include "core_link.h"
+#include "core_placeholder_family.h"
 #include "cpp_assert.h"
 #include "draw_i_node_drawer.h"
-#include "esc_app.h"
-#include "esc_types.h"
-#include "imgui.h"
 
 namespace esc::core {
 Diagram::Diagram(std::vector<std::shared_ptr<IFamily>> families,
                  std::vector<Link> links)
-    : families_{std::move(families)}, links_{std::move(links)} {}
+    : families_{std::move(families)},
+      links_{std::move(links)},
+      placeholder_family_{std::make_shared<PlaceholderFamily>()} {
+  families_.emplace_back(placeholder_family_);
+}
 
 auto Diagram::GetLinks() const -> const std::vector<Link>& { return links_; }
+
+auto Diagram::GetPlaceholderFamily() const -> PlaceholderFamily& {
+  return *placeholder_family_;
+}
 
 auto Diagram::FindNode(ne::NodeId id) -> INode& {
   for (const auto& family : families_) {

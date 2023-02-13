@@ -7,6 +7,7 @@
 #include "core_i_family.h"
 #include "core_i_node.h"
 #include "core_link.h"
+#include "core_placeholder_family.h"
 #include "draw_i_pin_drawer.h"
 #include "imgui_node_editor.h"
 
@@ -18,6 +19,7 @@ class Diagram {
 
   auto GetFamilies() const -> const std::vector<std::shared_ptr<IFamily>> &;
   auto GetLinks() const -> const std::vector<Link> &;
+  auto GetPlaceholderFamily() const -> PlaceholderFamily &;
 
   auto EmplaceLink(const Link &link) -> Link &;
 
@@ -40,6 +42,7 @@ class Diagram {
  private:
   std::vector<std::shared_ptr<IFamily>> families_{};
   std::vector<Link> links_{};
+  std::shared_ptr<PlaceholderFamily> placeholder_family_{};
 };
 }  // namespace esc::core
 

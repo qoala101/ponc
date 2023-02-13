@@ -7,12 +7,12 @@
 #include "core_app.h"
 #include "core_diagram.h"
 #include "core_id_generator.h"
+#include "core_placeholder_family.h"
 #include "crude_json.h"
 #include "imgui_node_editor.h"
 #include "impl_attenuator_node.h"
 #include "impl_client_node.h"
 #include "impl_coupler_node.h"
-#include "impl_hub_node.h"
 #include "impl_input_node.h"
 #include "impl_splitter_node.h"
 #include "json_diagram_serializer.h"
@@ -32,7 +32,6 @@ auto CreateFamilies() {
   }
 
   families.emplace_back(impl::AttenuatorNode::CreateFamily());
-  families.emplace_back(impl::HubNode::CreateFamily());
 
   return families;
 }
@@ -44,7 +43,7 @@ auto CreateFamilyParsers() {
   family_parsers.emplace_back(impl::CouplerNode::CreateFamilyParser());
   family_parsers.emplace_back(impl::SplitterNode::CreateFamilyParser());
   family_parsers.emplace_back(impl::AttenuatorNode::CreateFamilyParser());
-  family_parsers.emplace_back(impl::HubNode::CreateFamilyParser());
+  family_parsers.emplace_back(core::PlaceholderFamily::CreateParser());
   return family_parsers;
 }
 
@@ -116,7 +115,7 @@ void State::EraseLink(State &state, ne::LinkId link_id) {
 
 void State::EraseNodeAndConnectedLinks(State &state, ne::NodeId node_id) {
   auto &diagram = state.app_.GetDiagram();
-  const auto &links = state.app_.GetDiagram().GetLinks();
+  const auto &links = diagram.GetLinks();
   const auto &node = diagram.FindNode(node_id);
   const auto &node_pins = node.GetPinIds();
 
@@ -143,6 +142,21 @@ void State::EraseNodeAndConnectedLinks(State &state, ne::NodeId node_id) {
 
   ne::DeleteNode(node_id);
   state.app_.GetDiagram().EraseNode(node_id);
+}
+
+void State::ReplaceWithPlaceholder(State &state, ne::NodeId node_id) {
+  auto &diagram = state.app_.GetDiagram();
+  const auto &node = diagram.FindNode(node_id);
+  const auto node_flow = node.GetInitialFlow();
+  const auto node_position = node.GetPosition();
+
+  EraseNodeAndConnectedLinks(state, node_id);
+
+  auto &placeholder_family = diagram.GetPlaceholderFamily();
+  auto &placeholder =
+      placeholder_family.EmplaceNodeFromFlow(state.id_generator_, node_flow);
+
+  placeholder.SetPosition(node_position);
 }
 
 void State::OnFrame() {

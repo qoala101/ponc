@@ -28,6 +28,8 @@ class State {
   // ---
   static void EraseNodeAndConnectedLinks(State &state, ne::NodeId node_id);
 
+  static void ReplaceWithPlaceholder(State &state, ne::NodeId node_id);
+
   // ---
   void OnFrame();
   // ---
@@ -44,6 +46,7 @@ class State {
   } drawing_{};
 
  private:
+  // ---
   void ExecuteEvents();
 
   std::vector<std::function<void(State &state)>> events_{};
