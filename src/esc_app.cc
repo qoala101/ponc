@@ -8,8 +8,10 @@
 #include <chrono>
 #include <ios>
 #include <memory>
+#include <unordered_map>
 
 #include "core_diagram.h"
+#include "core_i_family.h"
 #include "core_i_node.h"
 #include "core_id_generator.h"
 #include "cpp_assert.h"
@@ -237,9 +239,11 @@ void App::OnStart() {
   editor_context_.emplace();
   textures_.emplace(shared_from_this());
   main_window_.emplace();
+  popups_.emplace();
 }
 // vh: norm
 void App::OnStop() {
+  popups_.reset();
   main_window_.reset();
   textures_.reset();
   editor_context_.reset();
@@ -304,114 +308,6 @@ auto App::IsPinLinked(ne::PinId id) const -> bool {
   return false;
 }
 
-// vh: bad
-void App::DrawContextMenuProcess() {
-  const auto open_popup_pos = ImGui::GetMousePos();
-
-  {
-    const auto suspend_scope =
-        cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
-
-    if (ne::ShowLinkContextMenu(&popup_state_.context_link_id)) {
-      ImGui::OpenPopup("Link Context Menu");
-    } else if (ne::ShowNodeContextMenu(&popup_state_.context_node_id)) {
-      ImGui::OpenPopup("Node Context Menu");
-    } else if (ne::ShowPinContextMenu(&popup_state_.context_pin_id)) {
-      ImGui::OpenPopup("Pin Context Menu");
-    } else if (ne::ShowBackgroundContextMenu()) {
-      drawing_state_.connect_new_node_to_existing_pin_id.reset();
-      ImGui::OpenPopup("Create New Node");
-    }
-  }
-
-  {
-    const auto suspend_scope =
-        cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
-
-    {
-      const auto style_var_scope = cpp::Scope{
-          []() {
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
-          },
-          []() { ImGui::PopStyleVar(); }};
-
-      if (ImGui::BeginPopup("Link Context Menu")) {
-        const auto popup_scope = cpp::Scope{[]() { ImGui::EndPopup(); }};
-
-        ImGui::TextUnformatted("Link");
-        ImGui::Separator();
-
-        const auto& link =
-            (*state_)->app_.GetDiagram().FindLink(popup_state_.context_link_id);
-
-        ImGui::Text("ID: %p", link.id.AsPointer());
-        ImGui::Text("From: %p", link.start_pin_id.AsPointer());
-        ImGui::Text("To: %p", link.end_pin_id.AsPointer());
-
-        ImGui::Separator();
-
-        if (ImGui::MenuItem("Delete")) {
-          ne::DeleteLink(popup_state_.context_link_id);
-        }
-      }
-
-      if (ImGui::BeginPopup("Node Context Menu")) {
-        const auto popup_scope = cpp::Scope{[]() { ImGui::EndPopup(); }};
-
-        ImGui::TextUnformatted("Node");
-        ImGui::Separator();
-
-        auto& node =
-            (*state_)->app_.GetDiagram().FindNode(popup_state_.context_node_id);
-
-        ImGui::Text("ID: %p", node.GetId().AsPointer());
-        ImGui::Text("Type: %s",
-                    node.CreateDrawer(**state_)->GetLabel().c_str());
-
-        ImGui::Separator();
-
-        if (ImGui::MenuItem("Delete")) {
-          ne::DeleteNode(popup_state_.context_node_id);
-        }
-      }
-
-      if (ImGui::BeginPopup("Pin Context Menu")) {
-        const auto popup_scope = cpp::Scope{[]() { ImGui::EndPopup(); }};
-
-        ImGui::TextUnformatted("Pin");
-        ImGui::Separator();
-
-        ImGui::Text("ID: %p", popup_state_.context_pin_id.AsPointer());
-      }
-
-      if (ImGui::BeginPopup("Create New Node")) {
-        const auto popup_scope = cpp::Scope{[]() { ImGui::EndPopup(); }};
-
-        ImGui::TextUnformatted("Create New Node");
-        ImGui::Separator();
-
-        for (const auto& family : (*state_)->app_.GetDiagram().GetFamilies()) {
-          if (ImGui::MenuItem(family->CreateDrawer()->GetLabel().c_str())) {
-            auto& new_node = family->EmplaceNode((*state_)->id_generator_);
-
-            new_node.SetPosition(open_popup_pos);
-
-            if (const auto node_created_by_link_from_existing_one =
-                    drawing_state_.connect_new_node_to_existing_pin_id
-                        .has_value()) {
-              AddLinkFromPinToNode(
-                  (*state_)->id_generator_.GetNext<ne::LinkId>(),
-                  *drawing_state_.connect_new_node_to_existing_pin_id,
-                  new_node);
-            }
-
-            break;
-          }
-        }
-      }
-    }
-  }
-}
 // vh: ok
 auto App::CanCreateLink(ne::PinId left, ne::PinId right) -> bool {
   return (left != right) &&
@@ -594,7 +490,7 @@ void App::DrawNodeEditor() {
   DrawLinks();
   DrawLinkConnectionProcess();
   DrawDeleteItemsProcess();
-  DrawContextMenuProcess();
+  popups_->Draw(**state_);
 }
 // vh: bad
 void App::DrawFrame() {

@@ -9,12 +9,10 @@ auto App::GetDiagram() const -> const Diagram & {
 }
 
 auto App::GetDiagram() -> Diagram & {
-  cpp::Expects(diagram_.has_value());
-  return *diagram_;
+  return diagram_;
 }
 
 void App::SetDiagram(Diagram diagram) {
   diagram_ = std::move(diagram);
-  cpp::Ensures(diagram_.has_value());
 }
 }  // namespace esc::core

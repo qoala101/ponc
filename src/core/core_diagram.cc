@@ -26,18 +26,6 @@ Diagram::Diagram(std::vector<std::shared_ptr<IFamily>> families,
                  std::vector<Link> links)
     : families_{std::move(families)}, links_{std::move(links)} {}
 
-Diagram::~Diagram() {
-  for (const auto& link : links_) {
-    ne::DeleteLink(link.id);
-  }
-
-  for (const auto& family : families_) {
-    for (const auto& node : family->GetNodes()) {
-      ne::DeleteNode(node->GetId());
-    }
-  }
-}
-
 auto Diagram::GetLinks() const -> const std::vector<Link>& { return links_; }
 
 auto Diagram::FindNode(ne::NodeId id) -> INode& {
@@ -45,6 +33,18 @@ auto Diagram::FindNode(ne::NodeId id) -> INode& {
     for (const auto& node : family->GetNodes()) {
       if (node->GetId() == id) {
         return *node;
+      }
+    }
+  }
+
+  cpp::Expects(false);
+}
+
+auto Diagram::FindNodePTR(ne::NodeId id) -> const std::shared_ptr<INode>& {
+  for (const auto& family : families_) {
+    for (const auto& node : family->GetNodes()) {
+      if (node->GetId() == id) {
+        return node;
       }
     }
   }
@@ -91,7 +91,8 @@ void Diagram::EraseNode(ne::NodeId id) {
   for (const auto& family : families_) {
     for (const auto& node : family->GetNodes()) {
       if (node->GetId() == id) {
-        return family->EraseNode(id);
+        family->EraseNode(id);
+        return;
       }
     }
   }

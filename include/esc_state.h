@@ -1,6 +1,8 @@
 #ifndef VH_ESC_STATE_H_
 #define VH_ESC_STATE_H_
 
+#include <imgui_node_editor.h>
+
 #include <functional>
 
 #include "core_app.h"
@@ -21,6 +23,10 @@ class State {
                                 const std::string &file_path);
   // ---
   static void ResetDiagram(State &state);
+  // ---
+  static void EraseLink(State &state, ne::LinkId link_id);
+  // ---
+  static void EraseNodeAndConnectedLinks(State &state, ne::NodeId node_id);
 
   // ---
   void OnFrame();

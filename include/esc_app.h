@@ -9,6 +9,7 @@
 #include "core_app.h"
 #include "core_diagram.h"
 #include "draw_main_window.h"
+#include "draw_popups.h"
 #include "esc_state.h"
 #include "esc_textures_handle.h"
 #include "imgui.h"
@@ -52,7 +53,6 @@ class App : public Application, public std::enable_shared_from_this<App> {
 
   //
 
-  void DrawContextMenuProcess();
   void DrawFrame();
   void DrawNode(core::INode& node);
   void DrawNodeEditor();
@@ -73,12 +73,7 @@ class App : public Application, public std::enable_shared_from_this<App> {
   std::optional<esc::EditorContextHandle> editor_context_{};
   std::optional<esc::TexturesHandle> textures_{};
   std::optional<draw::MainWindow> main_window_;
-
-  struct PopupState {
-    ne::NodeId context_node_id{};
-    ne::LinkId context_link_id{};
-    ne::PinId context_pin_id{};
-  } popup_state_{};
+  std::optional<draw::Popups> popups_{};
 
   struct DrawingState {
     std::optional<ne::PinId> not_yet_connected_pin_of_new_link_id{};

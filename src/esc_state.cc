@@ -2,11 +2,13 @@
 
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "core_app.h"
 #include "core_diagram.h"
 #include "core_id_generator.h"
 #include "crude_json.h"
+#include "imgui_node_editor.h"
 #include "impl_attenuator_node.h"
 #include "impl_client_node.h"
 #include "impl_coupler_node.h"
@@ -88,8 +90,59 @@ void State::SaveDiagramToFile(const State &state,
 }
 
 void State::ResetDiagram(State &state) {
-  state.app_.SetDiagram(core::Diagram{CreateFamilies()});
+  const auto &diagram = state.app_.GetDiagram();
+  const auto &links = diagram.GetLinks();
+
+  for (const auto &link : links) {
+    ne::DeleteLink(link.id);
+  }
+
+  const auto &families = diagram.GetFamilies();
+
+  for (const auto &family : families) {
+    for (const auto &node : family->GetNodes()) {
+      ne::DeleteNode(node->GetId());
+    }
+  }
+
   state.id_generator_ = core::IdGenerator{};
+  state.app_.SetDiagram(core::Diagram{CreateFamilies()});
+}
+
+void State::EraseLink(State &state, ne::LinkId link_id) {
+  ne::DeleteLink(link_id);
+  state.app_.GetDiagram().EraseLink(link_id);
+}
+
+void State::EraseNodeAndConnectedLinks(State &state, ne::NodeId node_id) {
+  auto &diagram = state.app_.GetDiagram();
+  const auto &links = state.app_.GetDiagram().GetLinks();
+  const auto &node = diagram.FindNode(node_id);
+  const auto &node_pins = node.GetPinIds();
+
+  const auto links_to_erase = [&links, &node_pins]() {
+    auto links_to_erase = std::vector<ne::LinkId>{};
+
+    for (const auto &link : links) {
+      for (const auto node_pin : node_pins) {
+        if ((link.start_pin_id == node_pin) || (link.end_pin_id == node_pin)) {
+          links_to_erase.emplace_back(link.id);
+        }
+      }
+    }
+    return links_to_erase;
+  }();
+
+  for (const auto link : links_to_erase) {
+    ne::DeleteLink(link);
+  }
+
+  for (const auto link : links_to_erase) {
+    diagram.EraseLink(link);
+  }
+
+  ne::DeleteNode(node_id);
+  state.app_.GetDiagram().EraseNode(node_id);
 }
 
 void State::OnFrame() {

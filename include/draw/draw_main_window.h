@@ -15,7 +15,7 @@ class MainWindow : public IDrawable {
   void Draw(State &state) override;
 
  private:
-  draw::MenuBar menu_bar_;
+  MenuBar menu_bar_{};
 };
 }  // namespace esc::draw
 

@@ -16,14 +16,6 @@ class Diagram {
   explicit Diagram(std::vector<std::shared_ptr<IFamily>> families = {},
                    std::vector<Link> links = {});
 
-  Diagram(const Diagram &) = delete;
-  Diagram(Diagram &&) noexcept = default;
-
-  auto operator=(const Diagram &) noexcept -> Diagram & = delete;
-  auto operator=(Diagram &&) noexcept -> Diagram & = default;
-
-  ~Diagram();
-
   auto GetFamilies() const -> const std::vector<std::shared_ptr<IFamily>> &;
   auto GetLinks() const -> const std::vector<Link> &;
 
@@ -33,6 +25,7 @@ class Diagram {
   void EraseLink(ne::LinkId id);
 
   auto FindNode(ne::NodeId id) -> INode &;
+  auto FindNodePTR(ne::NodeId id) -> const std::shared_ptr<INode> &;
   auto FindPin(ne::PinId id, const State &state) -> std::unique_ptr<draw::IPinDrawer>;
   auto FindLink(ne::LinkId id) -> Link &;
 

@@ -304,11 +304,13 @@ class FamilyDrawer : public draw::IFamilyDrawer {
 
   auto GetLabel() const -> std::string override {
     const auto percentage = (family_->GetPercentageIndex() + 1) * 5;
-    return "Coupler " + std::to_string(percentage) + "%-" +
+    return GetGroupLabel() + " " + std::to_string(percentage) + "%-" +
            std::to_string(100 - percentage) + "%";
   }
 
   auto GetColor() const -> ImColor override { return {255, 0, 255}; }
+
+  auto GetGroupLabel() const -> std::string override { return "Coupler"; }
 
  private:
   std::shared_ptr<Family> family_{};

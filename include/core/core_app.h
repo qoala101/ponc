@@ -14,7 +14,7 @@ class App {
   void SetDiagram(Diagram diagram);
 
  private:
-  std::optional<Diagram> diagram_{};
+  Diagram diagram_{};
 };
 }  // namespace esc::core
 

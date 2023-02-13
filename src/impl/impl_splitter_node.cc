@@ -70,8 +70,8 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
 
   auto GetInitialFlow [[nodiscard]] () const -> core::Flow override {
     const auto& pin_ids = GetPinIds();
-    auto flow_values = core::Flow{
-        .input_pin_flow = std::pair{pin_ids[0].Get(), float{}}};
+    auto flow_values =
+        core::Flow{.input_pin_flow = std::pair{pin_ids[0].Get(), float{}}};
     const auto drop = GetDrop();
 
     for (auto i = 0; i < static_cast<int>(pin_ids.size() - 2); ++i) {
@@ -150,8 +150,7 @@ class NodeDrawer : public draw::INodeDrawer {
     const auto pin_index = node_->GetPinIndex(pin_id);
 
     if (pin_index == 0) {
-      return std::make_unique<draw::FlowInputPinDrawer>(
-          flow_pin_values_);
+      return std::make_unique<draw::FlowInputPinDrawer>(flow_pin_values_);
     }
 
     if (pin_index == 1) {
@@ -247,12 +246,14 @@ class FamilyDrawer : public draw::IFamilyDrawer {
       : family_{std::move(family)} {}
 
   auto GetLabel() const -> std::string override {
-    return "Splitter 1x" + std::to_string(family_->GetNumOutputs());
+    return GetGroupLabel() + " 1x" + std::to_string(family_->GetNumOutputs());
   }
 
   auto GetColor() const -> ImColor override {
     return {0, 0, 127 + 128 / family_->GetNumOutputs()};
   }
+
+  auto GetGroupLabel() const -> std::string override { return "Splitter"; }
 
  private:
   std::shared_ptr<Family> family_{};
