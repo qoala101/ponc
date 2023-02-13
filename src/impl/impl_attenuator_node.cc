@@ -126,16 +126,15 @@ class NodeDrawer : public draw::INodeDrawer {
     const auto pin_index = node_->GetPinIndex(pin_id);
 
     if (pin_index == 0) {
-      return std::make_unique<draw::FlowInputPinDrawer>(
-          flow_pin_values_.input_pin_flow->second);
+      return std::make_unique<draw::FlowInputPinDrawer>(flow_pin_values_);
     }
 
     if (pin_index == 1) {
       return std::make_unique<DropPinDrawer>(node_);
     }
 
-    return std::make_unique<draw::FlowOutputPinDrawer>(
-        flow_pin_values_.output_pin_flows.at(pin_id.Get()));
+    return std::make_unique<draw::FlowOutputPinDrawer>(flow_pin_values_,
+                                                       pin_id);
   }
 
  private:

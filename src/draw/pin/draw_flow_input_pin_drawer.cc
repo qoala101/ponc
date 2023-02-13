@@ -1,7 +1,12 @@
 #include "draw_flow_input_pin_drawer.h"
 
+#include "core_flow.h"
+#include "cpp_assert.h"
+
 namespace esc::draw {
-FlowInputPinDrawer::FlowInputPinDrawer(float value) : value_{value} {}
+FlowInputPinDrawer::FlowInputPinDrawer(const core::Flow& flow)
+    : value_{(cpp::Expects(flow.input_pin_flow.has_value()),
+              flow.input_pin_flow->second)} {}
 
 auto FlowInputPinDrawer::GetLabel() const -> std::string { return {}; }
 

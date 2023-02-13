@@ -1,6 +1,9 @@
 #ifndef VH_DRAW_FLOW_OUTPUT_PIN_DRAWER_H_
 #define VH_DRAW_FLOW_OUTPUT_PIN_DRAWER_H_
 
+#include <imgui_node_editor.h>
+
+#include "core_flow.h"
 #include "draw_i_pin_drawer.h"
 
 namespace esc::draw {
@@ -8,7 +11,7 @@ namespace esc::draw {
 class FlowOutputPinDrawer : public IPinDrawer {
  public:
   // ---
-  explicit FlowOutputPinDrawer(float value = {});
+  explicit FlowOutputPinDrawer(const core::Flow& flow, ne::PinId pin_id);
 
   // ---
   auto GetLabel [[nodiscard]] () const -> std::string override;

@@ -146,7 +146,7 @@ class NodeDrawer : public draw::INodeDrawer {
 
     if (pin_index == 0) {
       return std::make_unique<draw::FlowInputPinDrawer>(
-          flow_pin_values_.input_pin_flow->second);
+          flow_pin_values_);
     }
 
     if (pin_index == 1) {
