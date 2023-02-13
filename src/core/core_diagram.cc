@@ -54,11 +54,15 @@ auto Diagram::FindNodePTR(ne::NodeId id) -> const std::shared_ptr<INode>& {
 
 auto Diagram::FindPin(ne::PinId id, const State& state)
     -> std::unique_ptr<draw::IPinDrawer> {
+  return FindPinNode(id)->CreateDrawer(state)->CreatePinDrawer(id);
+}
+
+auto Diagram::FindPinNode(ne::PinId id) -> const std::shared_ptr<INode>& {
   for (const auto& family : families_) {
     for (const auto& node : family->GetNodes()) {
       for (const auto pin_id : node->GetPinIds()) {
         if (pin_id == id) {
-          return node->CreateDrawer(state)->CreatePinDrawer(pin_id);
+          return node;
         }
       }
     }

@@ -208,25 +208,6 @@ void DrawNodeHeader(draw::INodeDrawer& node_drawer) {
   //   ImGui::Spring(0);
   // }
 }
-// vh: norm
-void DrawHintLabel(const char* label, const ImColor& color) {
-  ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetTextLineHeight());
-
-  const auto& style = ImGui::GetStyle();
-  const auto spacing = style.ItemSpacing;
-
-  ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2{spacing.x, -spacing.y});
-
-  const auto padding = style.FramePadding;
-  const auto rect_min = ImGui::GetCursorScreenPos() - padding;
-  const auto text_size = ImGui::CalcTextSize(label);
-  const auto rect_max = ImGui::GetCursorScreenPos() + text_size + padding;
-
-  auto* drawList = ImGui::GetWindowDrawList();
-  drawList->AddRectFilled(rect_min, rect_max, color, text_size.y * 0.15F);
-
-  ImGui::TextUnformatted(label);
-}
 }  // namespace
 // vh: norm
 App::App(const char* name, int argc, char** argv)
@@ -240,9 +221,11 @@ void App::OnStart() {
   textures_.emplace(shared_from_this());
   main_window_.emplace();
   popups_.emplace();
+  link_connection_process_.emplace();
 }
 // vh: norm
 void App::OnStop() {
+  link_connection_process_.reset();
   popups_.reset();
   main_window_.reset();
   textures_.reset();
@@ -318,10 +301,10 @@ auto App::CanCreateLink(ne::PinId left, ne::PinId right) -> bool {
 auto App::CalculateAlphaForPin(ne::PinId pin_id) {
   auto alpha = ImGui::GetStyle().Alpha;
 
-  if (drawing_state_.not_yet_connected_pin_of_new_link_id.has_value() &&
-      !CanCreateLink(*drawing_state_.not_yet_connected_pin_of_new_link_id,
+  if ((*state_)->drawing_.not_yet_connected_pin_of_new_link_id.has_value() &&
+      !CanCreateLink(*(*state_)->drawing_.not_yet_connected_pin_of_new_link_id,
                      pin_id) &&
-      (pin_id != *drawing_state_.not_yet_connected_pin_of_new_link_id)) {
+      (pin_id != *(*state_)->drawing_.not_yet_connected_pin_of_new_link_id)) {
     alpha = alpha * (48.0F / 255.0F);
   }
 
@@ -390,76 +373,6 @@ void App::DrawLinks() {
   }
 }
 // vh: norm
-void App::DrawLinkConnectionProcess() {
-  {
-    const auto create_scope = cpp::Scope{[]() { ne::EndCreate(); }};
-
-    if (ne::BeginCreate(ImColor{255, 255, 255}, 2.0F)) {
-      auto start_pin_id = ne::PinId{};
-      auto end_pin_id = ne::PinId{};
-
-      if (ne::QueryNewLink(&start_pin_id, &end_pin_id)) {
-        drawing_state_.not_yet_connected_pin_of_new_link_id = start_pin_id;
-
-        auto start_pin_drawer =
-            (*state_)->app_.GetDiagram().FindPin(start_pin_id, **state_);
-        auto end_pin_drawer =
-            (*state_)->app_.GetDiagram().FindPin(end_pin_id, **state_);
-
-        if (start_pin_drawer->GetKind() == ne::PinKind::Input) {
-          using std::swap;
-
-          swap(start_pin_drawer, end_pin_drawer);
-          swap(start_pin_id, end_pin_id);
-        }
-
-        if (end_pin_id == start_pin_id) {
-          ne::RejectNewItem(ImColor{255, 0, 0}, 2.0F);
-        } else if (end_pin_drawer->GetKind() == start_pin_drawer->GetKind()) {
-          DrawHintLabel("x Incompatible Pin Kind", ImColor{45, 32, 32, 180});
-          ne::RejectNewItem(ImColor{255, 0, 0}, 2.0F);
-          // } else if (end_pin->ui_data_.node ==
-          // start_pin_drawer->ui_data_.node) {
-          //   DrawHintLabel("x Cannot connect to self", ImColor{45, 32, 32,
-          //   180}); ne::RejectNewItem(ImColor{255, 0, 0}, 1.0F);
-          // } else if (end_pin->GetType() != start_pin_drawer->GetType()) {
-          //   DrawHintLabel("x Incompatible Pin Type", ImColor{45, 32, 32,
-          //   180}); ne::RejectNewItem(ImColor{255, 127, 127}, 1.0F);
-        } else {
-          DrawHintLabel("+ Create Link", ImColor{32, 45, 32, 180});
-
-          if (ne::AcceptNewItem(ImColor{127, 255, 127}, 4.0F)) {
-            (*state_)->app_.GetDiagram().EmplaceLink(
-                core::Link{(*state_)->id_generator_.GetNext<ne::LinkId>(),
-                           start_pin_id, end_pin_id});
-          }
-        }
-      }
-
-      if (ne::QueryNewNode(&end_pin_id)) {
-        drawing_state_.not_yet_connected_pin_of_new_link_id = end_pin_id;
-
-        DrawHintLabel("+ Create Node", ImColor{32, 45, 32, 180});
-
-        if (ne::AcceptNewItem()) {
-          drawing_state_.connect_new_node_to_existing_pin_id =
-              drawing_state_.not_yet_connected_pin_of_new_link_id;
-          drawing_state_.not_yet_connected_pin_of_new_link_id.reset();
-
-          {
-            const auto suspend_scope =
-                cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
-
-            ImGui::OpenPopup("Create New Node");
-          }
-        }
-      }
-    } else {
-      drawing_state_.not_yet_connected_pin_of_new_link_id.reset();
-    }
-  }
-}
-// vh: norm
 void App::DrawDeleteItemsProcess() {
   const auto delete_scope = cpp::Scope{[]() { ne::EndDelete(); }};
 
@@ -468,7 +381,6 @@ void App::DrawDeleteItemsProcess() {
 
     while (ne::QueryDeletedLink(&link_id)) {
       if (ne::AcceptDeletedItem()) {
-        (*state_)->app_.GetDiagram().EraseLink(link_id);
       }
     }
 
@@ -476,7 +388,6 @@ void App::DrawDeleteItemsProcess() {
 
     while (ne::QueryDeletedNode(&node_id)) {
       if (ne::AcceptDeletedItem()) {
-        (*state_)->app_.GetDiagram().EraseNode(node_id);
       }
     }
   }
@@ -488,7 +399,7 @@ void App::DrawNodeEditor() {
 
   DrawNodes();
   DrawLinks();
-  DrawLinkConnectionProcess();
+  link_connection_process_->Draw(**state_);
   DrawDeleteItemsProcess();
   popups_->Draw(**state_);
 }

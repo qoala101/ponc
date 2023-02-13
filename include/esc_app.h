@@ -5,9 +5,11 @@
 #include <imgui_node_editor.h>
 
 #include <memory>
+#include <optional>
 
 #include "core_app.h"
 #include "core_diagram.h"
+#include "draw_link_connection_process.h"
 #include "draw_main_window.h"
 #include "draw_popups.h"
 #include "esc_state.h"
@@ -58,7 +60,6 @@ class App : public Application, public std::enable_shared_from_this<App> {
   void DrawNodeEditor();
   void DrawNodes();
   void DrawLinks();
-  void DrawLinkConnectionProcess();
   void DrawDeleteItemsProcess();
 
   auto CanCreateLink(ne::PinId left, ne::PinId right) -> bool;
@@ -74,11 +75,7 @@ class App : public Application, public std::enable_shared_from_this<App> {
   std::optional<esc::TexturesHandle> textures_{};
   std::optional<draw::MainWindow> main_window_;
   std::optional<draw::Popups> popups_{};
-
-  struct DrawingState {
-    std::optional<ne::PinId> not_yet_connected_pin_of_new_link_id{};
-    std::optional<ne::PinId> connect_new_node_to_existing_pin_id{};
-  } drawing_state_{};
+  std::optional<draw::LinkConnectionProcess> link_connection_process_{};
 };
 }  // namespace esc
 

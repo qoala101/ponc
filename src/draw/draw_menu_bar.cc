@@ -40,11 +40,16 @@ void MenuBar::Draw(State& state) {
         ne::Flow(link.id);
       }
     }
+
+    if (ImGui::MenuItem("Settings", nullptr, settings_view_.IsVisible())) {
+      settings_view_.SetVisible(!settings_view_.IsVisible());
+    }
   }
 
   open_file_dialog_.Draw(state);
   save_as_file_dialog_.Draw(state);
   families_view_.Draw(state);
   flow_tree_view_.Draw(state);
+  settings_view_.Draw(state);
 }
 }  // namespace esc::draw

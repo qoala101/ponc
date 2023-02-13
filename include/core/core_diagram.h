@@ -27,6 +27,7 @@ class Diagram {
   auto FindNode(ne::NodeId id) -> INode &;
   auto FindNodePTR(ne::NodeId id) -> const std::shared_ptr<INode> &;
   auto FindPin(ne::PinId id, const State &state) -> std::unique_ptr<draw::IPinDrawer>;
+  auto FindPinNode(ne::PinId id) -> const std::shared_ptr<INode> &;
   auto FindLink(ne::LinkId id) -> Link &;
 
   static auto GetSelectedNodeIds() -> std::vector<ne::NodeId>;

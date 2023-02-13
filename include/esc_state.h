@@ -38,6 +38,11 @@ class State {
   core::IdGenerator id_generator_{};
   core::FlowCalculator flow_calculator_{};
 
+  struct {
+    std::optional<ne::PinId> not_yet_connected_pin_of_new_link_id{};
+    std::optional<ne::PinId> connect_new_node_to_existing_pin_id{};
+  } drawing_{};
+
  private:
   void ExecuteEvents();
 
