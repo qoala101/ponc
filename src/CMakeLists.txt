@@ -126,12 +126,19 @@ add_example_executable(esc
   draw/pin/draw_flow_input_pin_drawer.cc
   draw/pin/draw_flow_output_pin_drawer.cc
 
+  draw/popup/draw_background_popup.cc
+  draw/popup/draw_link_popup.cc
+  draw/popup/draw_node_popup.cc
+  draw/popup/draw_popups.cc
+
   draw/draw_constants.cc
   draw/draw_families_view.cc
   draw/draw_flow_tree_view.cc
   draw/draw_i_drawable.cc
+  draw/draw_i_family_drawer.cc
   draw/draw_i_file_dialog.cc
   draw/draw_i_pin_drawer.cc
+  draw/draw_i_popup.cc
   draw/draw_main_window.cc
   draw/draw_menu_bar.cc
   draw/draw_open_file_dialog.cc
@@ -168,6 +175,7 @@ target_include_directories(esc
   PUBLIC ${PROJECT_SOURCE_DIR}/include/cpp
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/pin
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/popup
   PUBLIC ${PROJECT_SOURCE_DIR}/include/impl
   PUBLIC ${PROJECT_SOURCE_DIR}/include/json
 )

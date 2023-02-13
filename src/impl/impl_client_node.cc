@@ -35,9 +35,8 @@ auto CreateFamilyDrawer(std::shared_ptr<Family> family)
 // NOLINTNEXTLINE(*-multiple-inheritance)
 class Node : public core::INode, public std::enable_shared_from_this<Node> {
  public:
-  Node(ne::NodeId id, std::vector<ne::PinId> pin_ids, float min = {},
-       float max = {})
-      : INode{id, std::move(pin_ids)}, min_{min}, max_{max} {}
+  Node(ne::NodeId id, std::vector<ne::PinId> pin_ids)
+      : INode{id, std::move(pin_ids)} {}
 
   auto CreateWriter() -> std::unique_ptr<json::INodeWriter> override {
     return CreateNodeWriter(shared_from_this());
@@ -51,9 +50,6 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
   auto GetInitialFlow [[nodiscard]] () const -> core::Flow override {
     return {.input_pin_flow = std::pair{GetPinIds()[0].Get(), float{}}};
   }
-
-  float min_{};
-  float max_{};
 };
 
 class NodeParser : public json::INodeParser {
@@ -62,9 +58,7 @@ class NodeParser : public json::INodeParser {
                      std::vector<ne::PinId> parsed_pin_ids,
                      const crude_json::value& json) const
       -> std::shared_ptr<core::INode> override {
-    return std::make_shared<Node>(parsed_node_id, std::move(parsed_pin_ids),
-                                  json["min"].get<crude_json::number>(),
-                                  json["max"].get<crude_json::number>());
+    return std::make_shared<Node>(parsed_node_id, std::move(parsed_pin_ids));
   }
 };
 
@@ -75,12 +69,7 @@ class NodeWriter : public json::INodeWriter {
  private:
   auto GetTypeName() const -> std::string override { return kTypeName; }
 
-  auto WriteToJson() const -> crude_json::value override {
-    auto json = crude_json::value{};
-    json["min"] = static_cast<crude_json::number>(node_->min_);
-    json["max"] = static_cast<crude_json::number>(node_->max_);
-    return json;
-  }
+  auto WriteToJson() const -> crude_json::value override { return {}; }
 
   std::shared_ptr<Node> node_{};
 };
@@ -89,42 +78,6 @@ auto CreateNodeWriter(std::shared_ptr<Node> node)
     -> std::unique_ptr<json::INodeWriter> {
   return std::make_unique<NodeWriter>(std::move(node));
 }
-
-class MinPinDrawer : public draw::IPinDrawer {
- public:
-  explicit MinPinDrawer(std::shared_ptr<Node> node) : node_{std::move(node)} {}
-
-  auto GetLabel [[nodiscard]] () const -> std::string override { return "min"; }
-
-  auto GetKind [[nodiscard]] () const -> ne::PinKind override {
-    return ne::PinKind::Input;
-  }
-
-  auto GetFloat [[nodiscard]] () -> float* override { return &node_->min_; }
-
-  auto IsEditable [[nodiscard]] () const -> bool override { return true; }
-
- private:
-  std::shared_ptr<Node> node_{};
-};
-
-class MaxPinDrawer : public draw::IPinDrawer {
- public:
-  explicit MaxPinDrawer(std::shared_ptr<Node> node) : node_{std::move(node)} {}
-
-  auto GetLabel [[nodiscard]] () const -> std::string override { return "max"; }
-
-  auto GetKind [[nodiscard]] () const -> ne::PinKind override {
-    return ne::PinKind::Input;
-  }
-
-  auto GetFloat [[nodiscard]] () -> float* override { return &node_->max_; }
-
-  auto IsEditable [[nodiscard]] () const -> bool override { return true; }
-
- private:
-  std::shared_ptr<Node> node_{};
-};
 
 class NodeDrawer : public draw::INodeDrawer {
  public:
@@ -142,22 +95,7 @@ class NodeDrawer : public draw::INodeDrawer {
 
   auto CreatePinDrawer(ne::PinId pin_id) const
       -> std::unique_ptr<draw::IPinDrawer> override {
-    const auto pin_index = node_->GetPinIndex(pin_id);
-
-    if (pin_index == 0) {
-      return std::make_unique<draw::FlowInputPinDrawer>(
-          flow_pin_values_);
-    }
-
-    if (pin_index == 1) {
-      return std::make_unique<MinPinDrawer>(node_);
-    }
-
-    if (pin_index == 2) {
-      return std::make_unique<MaxPinDrawer>(node_);
-    }
-
-    cpp::Expects(false);
+    return std::make_unique<draw::FlowInputPinDrawer>(flow_pin_values_);
   }
 
  private:
@@ -180,7 +118,7 @@ class Family : public core::IFamily,
   auto CreateNode(core::IdGenerator& id_generator)
       -> std::shared_ptr<core::INode> override {
     return std::make_shared<Node>(id_generator.GetNext<ne::NodeId>(),
-                                  id_generator.GetNextN<ne::PinId>(3));
+                                  id_generator.GetNextN<ne::PinId>(1));
   }
 
   auto CreateNodeParser() -> std::unique_ptr<json::INodeParser> override {

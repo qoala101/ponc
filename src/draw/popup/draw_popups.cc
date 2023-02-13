@@ -14,38 +14,40 @@ void Popups::Draw(State& state) {
 
 // ---
 void Popups::UpdateCurrentPopup(State& state) {
-  const auto suspend_scope =
-      cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
+  const auto popup_position = ImGui::GetMousePos();
 
-  if (ne::ShowBackgroundContextMenu()) {
-    const auto position = ImGui::GetMousePos();
+  {
+    const auto suspend_scope =
+        cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
 
-    current_popup_.emplace(std::make_unique<BackgroundPopup>(position))
-        ->Open(state);
+    if (ne::ShowBackgroundContextMenu()) {
+      current_popup_.emplace(std::make_unique<BackgroundPopup>(popup_position))
+          ->Open(state);
 
-    return;
-  }
+      return;
+    }
 
-  auto selected_node_id = ne::NodeId{};
+    auto selected_node_id = ne::NodeId{};
 
-  if (ne::ShowNodeContextMenu(&selected_node_id)) {
-    const auto& selected_node =
-        state.app_.GetDiagram().FindNodePTR(selected_node_id);
+    if (ne::ShowNodeContextMenu(&selected_node_id)) {
+      const auto& selected_node =
+          state.app_.GetDiagram().FindNodePTR(selected_node_id);
 
-    current_popup_.emplace(std::make_unique<NodePopup>(selected_node))
-        ->Open(state);
+      current_popup_.emplace(std::make_unique<NodePopup>(selected_node))
+          ->Open(state);
 
-    return;
-  }
+      return;
+    }
 
-  auto selected_link_id = ne::LinkId{};
+    auto selected_link_id = ne::LinkId{};
 
-  if (ne::ShowLinkContextMenu(&selected_link_id)) {
-    const auto& selected_link =
-        state.app_.GetDiagram().FindLink(selected_link_id);
+    if (ne::ShowLinkContextMenu(&selected_link_id)) {
+      const auto& selected_link =
+          state.app_.GetDiagram().FindLink(selected_link_id);
 
-    current_popup_.emplace(std::make_unique<LinkPopup>(selected_link))
-        ->Open(state);
+      current_popup_.emplace(std::make_unique<LinkPopup>(selected_link))
+          ->Open(state);
+    }
   }
 }
 
