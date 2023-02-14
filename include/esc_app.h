@@ -14,6 +14,7 @@
 #include "draw_main_window.h"
 #include "draw_nodes.h"
 #include "draw_popups.h"
+#include "draw_repin_curve.h"
 #include "esc_state.h"
 #include "esc_textures_handle.h"
 #include "imgui.h"
@@ -64,6 +65,7 @@ class App : public Application, public std::enable_shared_from_this<App> {
 
   std::optional<std::shared_ptr<State>> state_{};
   std::optional<esc::EditorContextHandle> editor_context_{};
+  std::optional<draw::RepinCurve> repin_curve_{};
   std::optional<draw::Nodes> nodes_{};
   std::optional<draw::MainWindow> main_window_;
   std::optional<draw::Popups> popups_{};

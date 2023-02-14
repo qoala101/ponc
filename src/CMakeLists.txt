@@ -146,6 +146,7 @@ add_example_executable(esc
   draw/draw_menu_bar.cc
   draw/draw_nodes.cc
   draw/draw_open_file_dialog.cc
+  draw/draw_repin_curve.cc
   draw/draw_save_as_file_dialog.cc
   draw/draw_settings_view.cc
   draw/draw_tooltip.cc

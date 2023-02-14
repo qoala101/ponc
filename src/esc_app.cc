@@ -48,6 +48,7 @@ App::App(const char* name, int argc, char** argv)
 void App::OnStart() {
   state_.emplace(std::make_shared<State>());
   editor_context_.emplace();
+  repin_curve_.emplace();
   nodes_.emplace(std::move(TexturesHandle{shared_from_this()}));
   main_window_.emplace();
   popups_.emplace();
@@ -61,6 +62,7 @@ void App::OnStop() {
   popups_.reset();
   main_window_.reset();
   nodes_.reset();
+  repin_curve_.reset();
   editor_context_.reset();
   state_.reset();
 }
@@ -99,6 +101,7 @@ void App::DrawNodeEditor() {
   const auto node_editor_scope =
       cpp::Scope{[]() { ne::Begin("Node editor"); }, []() { ne::End(); }};
 
+  repin_curve_->Draw(**state_);
   nodes_->Draw(**state_);
   links_->Draw(**state_);
   link_connection_process_->Draw(**state_);
