@@ -30,6 +30,7 @@ class State {
   static void EraseNodeAndConnectedLinks(State &state, ne::NodeId node_id);
 
   static void ReplaceWithPlaceholder(State &state, ne::NodeId node_id);
+  static void MakeGroupFromSelectedNodes(State &state, std::string group_name);
 
   // ---
   void OnFrame();

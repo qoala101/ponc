@@ -1,5 +1,6 @@
 #include "esc_state.h"
 
+#include <iostream>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -162,6 +163,15 @@ void State::ReplaceWithPlaceholder(State &state, ne::NodeId node_id) {
       placeholder_family.EmplaceNodeFromFlow(state.id_generator_, node_flow);
 
   placeholder.SetPosition(node_position);
+}
+
+void State::MakeGroupFromSelectedNodes(State &state, std::string group_name) {
+  const auto selectedNodes = state.app_.GetDiagram().GetSelectedNodeIds();
+
+  std::cout << selectedNodes.size() << " " << group_name << "\n";
+
+  auto &group = state.app_.GetDiagram().EmplaceGroup(selectedNodes);
+  group.SetName(std::move(group_name));
 }
 
 void State::OnFrame() {

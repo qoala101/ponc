@@ -115,6 +115,7 @@ add_example_executable(esc
 
   core/core_app.cc
   core/core_diagram.cc
+  core/core_group.cc
   core/core_i_family.cc
   core/core_i_node.cc
   core/core_id_generator.cc
@@ -135,6 +136,8 @@ add_example_executable(esc
   draw/draw_constants.cc
   draw/draw_families_view.cc
   draw/draw_flow_tree_view.cc
+  draw/draw_groups_view.cc
+  draw/draw_groups.cc
   draw/draw_i_drawable.cc
   draw/draw_i_family_drawer.cc
   draw/draw_i_file_dialog.cc

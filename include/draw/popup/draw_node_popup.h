@@ -17,6 +17,7 @@ class NodePopup : public IPopup {
   void DrawContent(State &state) override;
 
   std::shared_ptr<core::INode> node_{};
+  std::array<char, 100> group_name_{};
 };
 }  // namespace esc::draw
 

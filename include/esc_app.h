@@ -9,6 +9,7 @@
 
 #include "core_app.h"
 #include "core_diagram.h"
+#include "draw_groups.h"
 #include "draw_link_connection_process.h"
 #include "draw_links.h"
 #include "draw_main_window.h"
@@ -66,6 +67,7 @@ class App : public Application, public std::enable_shared_from_this<App> {
   std::optional<std::shared_ptr<State>> state_{};
   std::optional<esc::EditorContextHandle> editor_context_{};
   std::optional<draw::RepinCurve> repin_curve_{};
+  std::optional<draw::Groups> groups_{};
   std::optional<draw::Nodes> nodes_{};
   std::optional<draw::MainWindow> main_window_;
   std::optional<draw::Popups> popups_{};

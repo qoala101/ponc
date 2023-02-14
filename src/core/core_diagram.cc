@@ -14,6 +14,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "core_i_node.h"
 #include "core_link.h"
 #include "core_placeholder_family.h"
 #include "cpp_assert.h"
@@ -22,17 +23,19 @@
 namespace esc::core {
 Diagram::Diagram(std::vector<std::shared_ptr<IFamily>> families,
                  std::vector<Link> links)
-    : families_{std::move(families)},
-      links_{std::move(links)},
-      placeholder_family_{std::make_shared<PlaceholderFamily>()} {
-  families_.emplace_back(placeholder_family_);
+    : families_{std::move(families)}, links_{std::move(links)} {
+  auto placeholder_family = std::make_shared<PlaceholderFamily>();
+  placeholder_family_ = placeholder_family;
+  families_.emplace_back(std::move(placeholder_family));
 }
 
 auto Diagram::GetLinks() const -> const std::vector<Link>& { return links_; }
 
 auto Diagram::GetPlaceholderFamily() const -> PlaceholderFamily& {
-  return *placeholder_family_;
+  return *placeholder_family_.lock();
 }
+
+auto Diagram::GetGroups() const -> const std::vector<Group>& { return groups_; }
 
 auto Diagram::FindNode(ne::NodeId id) -> INode& {
   for (const auto& family : families_) {
@@ -99,6 +102,23 @@ auto Diagram::FindLinkFromPin(ne::PinId pin_id) -> const Link* {
 
 auto Diagram::EmplaceLink(const Link& link) -> Link& {
   return links_.emplace_back(link);
+}
+
+auto Diagram::EmplaceGroup(std::vector<ne::NodeId> node_ids) -> Group& {
+  auto nodes = std::vector<std::shared_ptr<INode>>{};
+
+  for (const auto node_id : node_ids) {
+    nodes.emplace_back(FindNodePTR(node_id));
+  }
+
+  return groups_.emplace_back(std::move(nodes));
+}
+
+void Diagram::EraseGroup(Group* group) {
+  auto id = std::find_if(
+      groups_.begin(), groups_.end(),
+      [group](auto& owned_group) { return &owned_group == group; });
+  if (id != groups_.end()) groups_.erase(id);
 }
 
 void Diagram::EraseLink(ne::LinkId linkId) {

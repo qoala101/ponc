@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include "core_group.h"
 #include "core_i_family.h"
 #include "core_i_node.h"
 #include "core_link.h"
@@ -20,11 +21,14 @@ class Diagram {
   auto GetFamilies() const -> const std::vector<std::shared_ptr<IFamily>> &;
   auto GetLinks() const -> const std::vector<Link> &;
   auto GetPlaceholderFamily() const -> PlaceholderFamily &;
+  auto GetGroups() const -> const std::vector<Group> &;
 
   auto EmplaceLink(const Link &link) -> Link &;
+  auto EmplaceGroup(std::vector<ne::NodeId> node_ids) -> Group &;
 
   void EraseNode(ne::NodeId id);
   void EraseLink(ne::LinkId id);
+  void EraseGroup(Group *group);
 
   auto FindNode(ne::NodeId id) -> INode &;
   auto FindNodePTR(ne::NodeId id) -> const std::shared_ptr<INode> &;
@@ -44,7 +48,8 @@ class Diagram {
  private:
   std::vector<std::shared_ptr<IFamily>> families_{};
   std::vector<Link> links_{};
-  std::shared_ptr<PlaceholderFamily> placeholder_family_{};
+  std::weak_ptr<PlaceholderFamily> placeholder_family_{};
+  std::vector<Group> groups_{};
 };
 }  // namespace esc::core
 

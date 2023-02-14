@@ -36,18 +36,7 @@ void DisplayNode(
 
   ImGui::SameLine();
 
-  std::vector<ne::NodeId> selectedNodes;
-  std::vector<ne::LinkId> selectedLinks;
-  selectedNodes.resize(ne::GetSelectedObjectCount());
-  selectedLinks.resize(ne::GetSelectedObjectCount());
-
-  int nodeCount = ne::GetSelectedNodes(selectedNodes.data(),
-                                       static_cast<int>(selectedNodes.size()));
-  int linkCount = ne::GetSelectedLinks(selectedLinks.data(),
-                                       static_cast<int>(selectedLinks.size()));
-
-  selectedNodes.resize(nodeCount);
-  selectedLinks.resize(linkCount);
+  const auto selectedNodes = state.app_.GetDiagram().GetSelectedNodeIds();
 
   bool isSelected = std::find(selectedNodes.begin(), selectedNodes.end(),
                               node_id) != selectedNodes.end();
@@ -109,7 +98,7 @@ void FlowTreeView::Draw(State& state) {
         child_count_per_family.emplace(family.get(), 0);
       }
 
-      ImGui::SameLine();
+      // ImGui::SameLine();
 
       const auto table_flags =
           ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
