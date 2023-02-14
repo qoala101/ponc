@@ -13,6 +13,8 @@ void Groups::Draw(State& state) {
   const auto& groups = state.app_.GetDiagram().GetGroups();
 
   for (const auto& group : groups) {
+    const auto color =
+        ImColor{group.color_[0], group.color_[1], group.color_[2]};
     const auto nodes = group.GetNodes();
 
     auto rect = std::optional<ImRect>{};
@@ -37,12 +39,12 @@ void Groups::Draw(State& state) {
       }
 
       auto* draw_list = ImGui::GetWindowDrawList();
-      draw_list->AddRectFilled(rect_min, rect_max, group.color_);
+      draw_list->AddRectFilled(rect_min, rect_max, color);
     }
 
     if (group.unite_ && rect.has_value()) {
       auto* draw_list = ImGui::GetWindowDrawList();
-      draw_list->AddRectFilled(rect->Min, rect->Max, group.color_);
+      draw_list->AddRectFilled(rect->Min, rect->Max, color);
     }
   }
 }

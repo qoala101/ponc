@@ -5,15 +5,13 @@
 #include "core_group.h"
 #include "core_i_node.h"
 #include "cpp_scope.h"
-#include "draw_i_family_drawer.h"
 #include "draw_i_node_drawer.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
 namespace {
-void DisplayNode(
-    State& state, core::INode& node) {
+void DisplayNode(State& state, core::INode& node) {
   ImGui::TableNextRow();
   ImGui::TableNextColumn();
 
@@ -55,7 +53,7 @@ void DisplayNode(
   }
 }
 
-void DisplayGroup(State& state, const core::Group& group) {
+void DisplayGroup(State& state, core::Group& group) {
   ImGui::TableNextRow();
   ImGui::TableNextColumn();
 
@@ -65,8 +63,8 @@ void DisplayGroup(State& state, const core::Group& group) {
       has_children ? (ImGuiTreeNodeFlags_DefaultOpen)
                    : ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
 
-  const auto node_is_open = ImGui::TreeNodeEx(
-      std::string{"##" + group.name_}.c_str(), draw_flags);
+  const auto node_is_open =
+      ImGui::TreeNodeEx(std::string{"##" + group.name_}.c_str(), draw_flags);
 
   ImGui::SameLine();
 
@@ -150,9 +148,9 @@ void GroupsView::Draw(State& state) {
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableHeadersRow();
 
-        const auto& groups = state.app_.GetDiagram().GetGroups();
+        auto& groups = state.app_.GetDiagram().GetGroups();
 
-        for (const auto& group : groups) {
+        for (auto& group : groups) {
           DisplayGroup(state, group);
         }
       }

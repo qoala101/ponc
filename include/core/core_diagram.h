@@ -21,7 +21,7 @@ class Diagram {
   auto GetFamilies() const -> const std::vector<std::shared_ptr<IFamily>> &;
   auto GetLinks() const -> const std::vector<Link> &;
   auto GetPlaceholderFamily() const -> PlaceholderFamily &;
-  auto GetGroups() const -> const std::vector<Group> &;
+  auto GetGroups() -> std::vector<Group> &;
 
   auto EmplaceLink(const Link &link) -> Link &;
   auto EmplaceGroup(std::vector<ne::NodeId> node_ids) -> Group &;

@@ -14,7 +14,7 @@ class Group {
   auto GetNodes() const -> std::vector<std::shared_ptr<INode>>;
 
   std::string name_{};
-  ImColor color_{};
+  std::array<float, 3> color_{};
   bool fill_background_{};
   bool unite_{};
 

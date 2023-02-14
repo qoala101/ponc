@@ -3,6 +3,7 @@
 
 #include "draw_families_view.h"
 #include "draw_flow_tree_view.h"
+#include "draw_group_settings_view.h"
 #include "draw_groups_view.h"
 #include "draw_i_drawable.h"
 #include "draw_open_file_dialog.h"
@@ -23,6 +24,7 @@ class MenuBar : public IDrawable {
   FamiliesView families_view_{};
   FlowTreeView flow_tree_view_{};
   GroupsView groups_view_{};
+  GroupSettingsView group_settings_view_{};
   SettingsView settings_view_{};
 };
 }  // namespace esc::draw

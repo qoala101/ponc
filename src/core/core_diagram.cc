@@ -35,7 +35,7 @@ auto Diagram::GetPlaceholderFamily() const -> PlaceholderFamily& {
   return *placeholder_family_.lock();
 }
 
-auto Diagram::GetGroups() const -> const std::vector<Group>& { return groups_; }
+auto Diagram::GetGroups() -> std::vector<Group>& { return groups_; }
 
 auto Diagram::FindNode(ne::NodeId id) -> INode& {
   for (const auto& family : families_) {

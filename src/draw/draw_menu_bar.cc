@@ -35,6 +35,11 @@ void MenuBar::Draw(State& state) {
       groups_view_.SetVisible(!groups_view_.IsVisible());
     }
 
+    if (ImGui::MenuItem("Group Settings", nullptr,
+                        group_settings_view_.IsVisible())) {
+      group_settings_view_.SetVisible(!group_settings_view_.IsVisible());
+    }
+
     if (ImGui::MenuItem("Zoom to Content")) {
       ne::NavigateToContent();
     }
@@ -55,6 +60,7 @@ void MenuBar::Draw(State& state) {
   families_view_.Draw(state);
   flow_tree_view_.Draw(state);
   groups_view_.Draw(state);
+  group_settings_view_.Draw(state);
   settings_view_.Draw(state);
 }
 }  // namespace esc::draw
