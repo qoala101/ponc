@@ -19,6 +19,7 @@
 #include "draw_i_family_drawer.h"
 #include "draw_i_node_drawer.h"
 #include "draw_i_pin_drawer.h"
+#include "draw_tooltip.h"
 #include "esc_node_drawer.h"
 #include "esc_state.h"
 #include "esc_types.h"
@@ -40,39 +41,10 @@ namespace ne = ax::NodeEditor;
 namespace esc {
 namespace {
 // vh: ok
-auto GetItemRect() {
-  return ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
-}
-// vh: ok
 struct Xy {
   float x{};
   float y{};
 };
-// vh: ok
-auto GetExpandedRect(const ImRect& rect, const Xy& xy) {
-  auto result = rect;
-  result.Min.x -= xy.x;
-  result.Min.y -= xy.y;
-  result.Max.x += xy.x;
-  result.Max.y += xy.y;
-  return result;
-}
-// vh: norm
-void DrawSplitter(float thickness, float* left_size, float* right_size,
-                  float min_left_size, float min_right_size) {
-  cpp::Expects(left_size != nullptr);
-  cpp::Expects(GImGui != nullptr);
-
-  const auto id = GImGui->CurrentWindow->GetID("##Splitter");
-  const auto rect_min =
-      GImGui->CurrentWindow->DC.CursorPos + ImVec2{*left_size, 0.0F};
-  const auto rect_max =
-      rect_min + ImGui::CalcItemSize(ImVec2{thickness, -1.0F}, 0.0F, 0.0F);
-  const auto rect = ImRect{rect_min, rect_max};
-
-  ImGui::SplitterBehavior(rect, id, ImGuiAxis_X, left_size, right_size,
-                          min_left_size, min_right_size, 0.0F);
-}
 
 void DrawFlowIcon(ImDrawList* drawList, const ImVec2& a, const ImVec2& b,
                   bool filled, ImU32 color, ImU32 innerColor) {
@@ -196,24 +168,11 @@ void DrawNodeHeader(draw::INodeDrawer& node_drawer) {
   ImGui::Spring(1);
   ImGui::Dummy(ImVec2{0, 28});
   ImGui::Spring(0);
-
-  // if (auto* coupler_node = dynamic_cast<esc::CouplerNode*>(&node)) {
-  //   ImGui::SetNextItemWidth(100);
-  //   const auto& coupler_percentage_names = GetCouplerPercentageNames();
-  //   ImGui::SliderInt(
-  //       "", &coupler_node->GetCouplerPercentageIndex(), 0,
-  //       static_cast<int>(coupler_percentage_names.size()) - 1,
-  //       coupler_percentage_names[coupler_node->GetCouplerPercentageIndex()]
-  //           .c_str());
-  //   ImGui::Spring(0);
-  // }
 }
 }  // namespace
 // vh: norm
 App::App(const char* name, int argc, char** argv)
     : Application{name, argc, argv} {}
-// vh: ok
-auto App::GetTextures() -> esc::TexturesHandle& { return *textures_; }
 // vh: norm
 void App::OnStart() {
   state_.emplace(std::make_shared<State>());
@@ -221,11 +180,13 @@ void App::OnStart() {
   textures_.emplace(shared_from_this());
   main_window_.emplace();
   popups_.emplace();
+  links_.emplace();
   link_connection_process_.emplace();
 }
 // vh: norm
 void App::OnStop() {
   link_connection_process_.reset();
+  links_.reset();
   popups_.reset();
   main_window_.reset();
   textures_.reset();
@@ -241,31 +202,6 @@ auto App::GetWindowFlags() const -> ImGuiWindowFlags {
 void App::OnFrame(float /*unused*/) {
   (*state_)->OnFrame();
   DrawFrame();
-}
-
-void App::AddLinkFromPinToNode(ne::LinkId link_id, ne::PinId pin_id,
-                               core::INode& node) {
-  const auto& node_pin_ids = node.GetPinIds();
-  const auto matching_node_pin_id =
-      std::ranges::find_if(node_pin_ids, [this, pin_id](auto node_pin_id) {
-        return CanCreateLink(pin_id, node_pin_id);
-      });
-
-  if (matching_node_pin_id == node_pin_ids.end()) {
-    return;
-  }
-
-  const auto is_link_starts_on_existing_node =
-      (*state_)->app_.GetDiagram().FindPin(pin_id, **state_)->GetKind() ==
-      ne::PinKind::Output;
-  const auto link = core::Link{
-      .id = link_id,
-      .start_pin_id =
-          is_link_starts_on_existing_node ? pin_id : *matching_node_pin_id,
-      .end_pin_id =
-          is_link_starts_on_existing_node ? *matching_node_pin_id : pin_id};
-
-  (*state_)->app_.GetDiagram().EmplaceLink(link);
 }
 
 auto App::IsFlowPin(ne::PinId id, const core::INode& node) const -> bool {
@@ -301,9 +237,14 @@ auto App::CanCreateLink(ne::PinId left, ne::PinId right) -> bool {
 auto App::CalculateAlphaForPin(ne::PinId pin_id) {
   auto alpha = ImGui::GetStyle().Alpha;
 
-  if ((*state_)->drawing_.not_yet_connected_pin_of_new_link_id.has_value() &&
-      !CanCreateLink(*(*state_)->drawing_.not_yet_connected_pin_of_new_link_id,
-                     pin_id) &&
+  // if ((*state_)->drawing_.not_yet_connected_pin_of_new_link_id.has_value() &&
+  //     !CanCreateLink(*(*state_)->drawing_.not_yet_connected_pin_of_new_link_id,
+  //                    pin_id) &&
+  //     (pin_id != *(*state_)->drawing_.not_yet_connected_pin_of_new_link_id)) {
+  //   alpha = alpha * (48.0F / 255.0F);
+  // }
+
+  if ((*state_)->drawing_.not_yet_connected_pin_of_new_link_id.has_value() && 
       (pin_id != *(*state_)->drawing_.not_yet_connected_pin_of_new_link_id)) {
     alpha = alpha * (48.0F / 255.0F);
   }
@@ -366,13 +307,6 @@ void App::DrawNodes() {
   }
 }
 // vh: norm
-void App::DrawLinks() {
-  for (const auto& link : (*state_)->app_.GetDiagram().GetLinks()) {
-    ne::Link(link.id, link.start_pin_id, link.end_pin_id,
-             ImColor{255, 255, 255}, 2.0F);
-  }
-}
-// vh: norm
 void App::DrawDeleteItemsProcess() {
   const auto delete_scope = cpp::Scope{[]() { ne::EndDelete(); }};
 
@@ -398,7 +332,7 @@ void App::DrawNodeEditor() {
       cpp::Scope{[]() { ne::Begin("Node editor"); }, []() { ne::End(); }};
 
   DrawNodes();
-  DrawLinks();
+  links_->Draw(**state_);
   link_connection_process_->Draw(**state_);
   DrawDeleteItemsProcess();
   popups_->Draw(**state_);

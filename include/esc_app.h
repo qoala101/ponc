@@ -10,6 +10,7 @@
 #include "core_app.h"
 #include "core_diagram.h"
 #include "draw_link_connection_process.h"
+#include "draw_links.h"
 #include "draw_main_window.h"
 #include "draw_popups.h"
 #include "esc_state.h"
@@ -42,8 +43,6 @@ class App : public Application, public std::enable_shared_from_this<App> {
 
   virtual ~App() = default;
 
-  auto GetTextures() -> esc::TexturesHandle&;
-
   auto GetTextureDims(ImTextureID texture_id) -> ImVec2;
 
   void OnStart() override;
@@ -59,7 +58,6 @@ class App : public Application, public std::enable_shared_from_this<App> {
   void DrawNode(core::INode& node);
   void DrawNodeEditor();
   void DrawNodes();
-  void DrawLinks();
   void DrawDeleteItemsProcess();
 
   auto CanCreateLink(ne::PinId left, ne::PinId right) -> bool;
@@ -75,6 +73,7 @@ class App : public Application, public std::enable_shared_from_this<App> {
   std::optional<esc::TexturesHandle> textures_{};
   std::optional<draw::MainWindow> main_window_;
   std::optional<draw::Popups> popups_{};
+  std::optional<draw::Links> links_{};
   std::optional<draw::LinkConnectionProcess> link_connection_process_{};
 };
 }  // namespace esc

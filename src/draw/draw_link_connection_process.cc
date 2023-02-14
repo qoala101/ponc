@@ -1,8 +1,11 @@
 #include "draw_link_connection_process.h"
 
+#include <iostream>
+
 #include "cpp_scope.h"
 #include "draw_i_node_drawer.h"
 #include "draw_tooltip.h"
+#include "imgui_node_editor.h"
 
 namespace esc::draw {
 void LinkConnectionProcess::Draw(State& state) {
@@ -17,20 +20,12 @@ void LinkConnectionProcess::Draw(State& state) {
 
       const auto& start_node =
           state.app_.GetDiagram().FindPinNode(start_pin_id);
-      const auto& end_node =
-          state.app_.GetDiagram().FindPinNode(end_pin_id);
+      const auto& end_node = state.app_.GetDiagram().FindPinNode(end_pin_id);
 
       auto start_pin_drawer =
           start_node->CreateDrawer(state)->CreatePinDrawer(start_pin_id);
       auto end_pin_drawer =
           end_node->CreateDrawer(state)->CreatePinDrawer(end_pin_id);
-
-      if (start_pin_drawer->GetKind() == ne::PinKind::Input) {
-        using std::swap;
-
-        swap(start_pin_drawer, end_pin_drawer);
-        swap(start_pin_id, end_pin_id);
-      }
 
       if (end_pin_id == start_pin_id) {
         ne::RejectNewItem(ImColor{255, 0, 0}, 2.0F);
@@ -48,9 +43,16 @@ void LinkConnectionProcess::Draw(State& state) {
         Tooltip{"+ Create Link", {32, 45, 32, 180}}.Draw(state);
 
         if (ne::AcceptNewItem(ImColor{127, 255, 127}, 4.0F)) {
-          state.app_.GetDiagram().EmplaceLink(
-              core::Link{state.id_generator_.GetNext<ne::LinkId>(),
-                         start_pin_id, end_pin_id});
+          // if (start_pin_drawer->GetKind() == ne::PinKind::Input) {
+          //   using std::swap;
+
+          //   swap(start_pin_drawer, end_pin_drawer);
+          //   swap(start_pin_id, end_pin_id);
+          // }
+
+          // state.app_.GetDiagram().EmplaceLink(
+          //     core::Link{state.id_generator_.GetNext<ne::LinkId>(),
+          //                start_pin_id, end_pin_id});
         }
       }
     }

@@ -141,6 +141,7 @@ add_example_executable(esc
   draw/draw_i_pin_drawer.cc
   draw/draw_i_popup.cc
   draw/draw_link_connection_process.cc
+  draw/draw_links.cc
   draw/draw_main_window.cc
   draw/draw_menu_bar.cc
   draw/draw_open_file_dialog.cc

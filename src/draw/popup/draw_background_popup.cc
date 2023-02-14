@@ -4,6 +4,33 @@
 #include "draw_i_family_drawer.h"
 
 namespace esc::draw {
+namespace {
+// void AddLinkFromPinToNode(ne::LinkId link_id, ne::PinId pin_id,
+//                                core::INode& node) {
+//   const auto& node_pin_ids = node.GetPinIds();
+//   const auto matching_node_pin_id =
+//       std::ranges::find_if(node_pin_ids, [this, pin_id](auto node_pin_id) {
+//         return CanCreateLink(pin_id, node_pin_id);
+//       });
+
+//   if (matching_node_pin_id == node_pin_ids.end()) {
+//     return;
+//   }
+
+//   const auto is_link_starts_on_existing_node =
+//       (*state_)->app_.GetDiagram().FindPin(pin_id, **state_)->GetKind() ==
+//       ne::PinKind::Output;
+//   const auto link = core::Link{
+//       .id = link_id,
+//       .start_pin_id =
+//           is_link_starts_on_existing_node ? pin_id : *matching_node_pin_id,
+//       .end_pin_id =
+//           is_link_starts_on_existing_node ? *matching_node_pin_id : pin_id};
+
+//   (*state_)->app_.GetDiagram().EmplaceLink(link);
+// }
+}
+
 BackgroundPopup::BackgroundPopup(const ImVec2& position)
     : position_{position} {}
 
