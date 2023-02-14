@@ -12,6 +12,7 @@
 #include "draw_link_connection_process.h"
 #include "draw_links.h"
 #include "draw_main_window.h"
+#include "draw_nodes.h"
 #include "draw_popups.h"
 #include "esc_state.h"
 #include "esc_textures_handle.h"
@@ -55,22 +56,15 @@ class App : public Application, public std::enable_shared_from_this<App> {
   //
 
   void DrawFrame();
-  void DrawNode(core::INode& node);
   void DrawNodeEditor();
-  void DrawNodes();
   void DrawDeleteItemsProcess();
 
-  auto CanCreateLink(ne::PinId left, ne::PinId right) -> bool;
-  auto CalculateAlphaForPin(ne::PinId pin_id);
-
-  auto IsPinLinked(ne::PinId id) const -> bool;
-  auto IsFlowPin(ne::PinId id, const core::INode &node) const -> bool;
   void AddLinkFromPinToNode(ne::LinkId link_id, ne::PinId pin_id,
                             core::INode& node);
 
   std::optional<std::shared_ptr<State>> state_{};
   std::optional<esc::EditorContextHandle> editor_context_{};
-  std::optional<esc::TexturesHandle> textures_{};
+  std::optional<draw::Nodes> nodes_{};
   std::optional<draw::MainWindow> main_window_;
   std::optional<draw::Popups> popups_{};
   std::optional<draw::Links> links_{};

@@ -37,6 +37,10 @@ auto TexturesHandle::GetTextureWithDims(ImTextureID texture_id)
 }
 
 TexturesHandle::~TexturesHandle() {
+  if (const auto object_was_moved = app_ == nullptr) {
+    return;
+  }
+
   for (auto* texture_id : GetTextureIdsAsArray()) {
     app_->DestroyTexture(texture_id);
     *texture_id = nullptr;

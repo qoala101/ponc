@@ -6,7 +6,22 @@
 #include "imgui.h"
 
 namespace esc::draw {
+namespace {
+auto GetExistingLinkFromSamePin(State& state) -> const core::Link* {
+  if (!state.drawing_.not_yet_connected_pin_of_new_link_id.has_value()) {
+    return nullptr;
+  }
+
+  const auto new_link_starts_from_pin =
+      *state.drawing_.not_yet_connected_pin_of_new_link_id;
+
+  return state.app_.GetDiagram().FindLinkFromPin(new_link_starts_from_pin);
+}
+}  // namespace
+
 void Links::Draw(State& state) {
+  const auto* existing_link_from_same_pin = GetExistingLinkFromSamePin(state);
+
   for (const auto& link : state.app_.GetDiagram().GetLinks()) {
     // if (state.drawing_.not_yet_connected_pin_of_new_link_id.has_value()) {
     //   const auto pin_id =
@@ -23,22 +38,18 @@ void Links::Draw(State& state) {
     //   }
     // }
 
-    ne::Link(link.id, link.start_pin_id, link.end_pin_id,
-             ImColor{255, 255, 255}, 2.0F);
+    if (&link != existing_link_from_same_pin) {
+      ne::Link(link.id, link.start_pin_id, link.end_pin_id,
+               ImColor{255, 255, 255}, 2.0F);
+    }
   }
-
-  if (!state.drawing_.not_yet_connected_pin_of_new_link_id.has_value()) {
-    return;
-  }
-
-  const auto new_link_starts_from_pin =
-      *state.drawing_.not_yet_connected_pin_of_new_link_id;
-  const auto* existing_link_from_same_pin =
-      state.app_.GetDiagram().FindLinkFromPin(new_link_starts_from_pin);
 
   if (existing_link_from_same_pin == nullptr) {
     return;
   }
+  
+  const auto new_link_starts_from_pin =
+      *state.drawing_.not_yet_connected_pin_of_new_link_id;
 
   const auto existing_link_pinned_pin =
       (existing_link_from_same_pin->start_pin_id == new_link_starts_from_pin)
@@ -50,6 +61,7 @@ void Links::Draw(State& state) {
 
   auto* drawList = ImGui::GetWindowDrawList();
   // ImGui::GetMousePos() - ImGui::GetMouseDragDelta();
-  drawList->AddLine(pinned_node->GetPosition(), ImGui::GetMousePos(), ImColor{255, 0, 0}, 5);
+  drawList->AddLine(pinned_node->GetPosition(), ImGui::GetMousePos(),
+                    ImColor{255, 0, 0}, 5);
 }
 }  // namespace esc::draw
