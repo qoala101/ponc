@@ -8,6 +8,7 @@
 #include "core_app.h"
 #include "core_flow_calculator.h"
 #include "core_id_generator.h"
+#include "imgui.h"
 
 namespace esc {
 // ---
@@ -43,7 +44,36 @@ class State {
   struct {
     std::optional<ne::PinId> not_yet_connected_pin_of_new_link_id{};
     std::optional<ne::PinId> connect_new_node_to_existing_pin_id{};
+
+    ImVec2 pinned_pin_pos{};
   } drawing_{};
+
+  auto GetExistingLinkFromSamePin() -> const core::Link * {
+    if (!drawing_.not_yet_connected_pin_of_new_link_id.has_value()) {
+      return nullptr;
+    }
+
+    const auto new_link_starts_from_pin =
+        *drawing_.not_yet_connected_pin_of_new_link_id;
+
+    return app_.GetDiagram().FindLinkFromPin(new_link_starts_from_pin);
+  }
+
+  auto GetDrawLINEFromPin() -> std::optional<ne::PinId> {
+    const auto *existing_link_from_same_pin = GetExistingLinkFromSamePin();
+
+    if (existing_link_from_same_pin == nullptr) {
+      return std::nullopt;
+    }
+
+    const auto new_link_starts_from_pin =
+        *drawing_.not_yet_connected_pin_of_new_link_id;
+
+    return (existing_link_from_same_pin->start_pin_id ==
+            new_link_starts_from_pin)
+               ? existing_link_from_same_pin->end_pin_id
+               : existing_link_from_same_pin->start_pin_id;
+  }
 
  private:
   // ---

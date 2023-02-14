@@ -4,6 +4,8 @@
 #include "draw_i_node_drawer.h"
 #include "esc_node_drawer.h"
 #include "esc_textures_handle.h"
+#include "imgui_bezier_math.h"
+#include "imgui_node_editor.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
@@ -191,7 +193,7 @@ auto CalculateAlphaForPin(State& state, ne::PinId pin_id) {
   return alpha;
 }
 
-void DrawNode(State& state, TexturesHandle &textures, core::INode& node) {
+void DrawNode(State& state, TexturesHandle& textures, core::INode& node) {
   auto node_builder = esc::NodeDrawer{node.GetId()};
 
   const auto header_texture =
@@ -208,6 +210,8 @@ void DrawNode(State& state, TexturesHandle &textures, core::INode& node) {
     auto drawer = state.app_.GetDiagram().FindPin(pin_id, state);
     const auto kind = drawer->GetKind();
     const auto alpha = CalculateAlphaForPin(state, pin_id);
+
+    auto* drawList = ImGui::GetWindowDrawList();
 
     if (kind == ne::PinKind::Input) {
       const auto input_scope = node_builder.AddPin(pin_id, kind);
@@ -235,6 +239,25 @@ void DrawNode(State& state, TexturesHandle &textures, core::INode& node) {
                     IsPinLinked(state, pin_id), alpha);
       }
     }
+
+    if (state.GetDrawLINEFromPin().has_value()) {
+      if (*state.GetDrawLINEFromPin() == pin_id) {
+        const auto rect =
+            ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
+
+        const auto end_pos =
+            (kind == ax::NodeEditor::PinKind::Input)
+                ? ImVec2{rect.Min.x, (rect.Min.y + rect.Max.y) * 0.5f}
+                : ImVec2{rect.Max.x, (rect.Min.y + rect.Max.y) * 0.5f};
+
+        state.drawing_.pinned_pin_pos = end_pos;
+      }
+    }
+
+    // drawList->AddLine(ImGui::GetItemRectMin(), ImGui::GetMousePos(),
+    //                   ImColor{55, 0, 255}, 2);
+    // drawList->AddLine(ImGui::GetItemRectMax(), ImGui::GetMousePos(),
+    //                   ImColor{77, 0, 255}, 2);
   }
 }
 }  // namespace

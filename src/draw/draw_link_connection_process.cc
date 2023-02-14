@@ -11,7 +11,7 @@ namespace esc::draw {
 void LinkConnectionProcess::Draw(State& state) {
   const auto create_scope = cpp::Scope{[]() { ne::EndCreate(); }};
 
-  if (ne::BeginCreate(ImColor{255, 255, 255}, 2.0F)) {
+  if (ne::BeginCreate(ImColor{255, 255, 255, 0}, 2.0F)) {
     auto start_pin_id = ne::PinId{};
     auto end_pin_id = ne::PinId{};
 
