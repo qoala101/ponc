@@ -171,7 +171,7 @@ void State::MakeGroupFromSelectedNodes(State &state, std::string group_name) {
   std::cout << selectedNodes.size() << " " << group_name << "\n";
 
   auto &group = state.app_.GetDiagram().EmplaceGroup(selectedNodes);
-  group.SetName(std::move(group_name));
+  group.name_ = std::move(group_name);
 }
 
 void State::OnFrame() {

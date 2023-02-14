@@ -2,11 +2,7 @@
 
 namespace esc::core {
 Group::Group(const std::vector<std::shared_ptr<INode>> &nodes)
-    : nodes_{nodes.begin(), nodes.end()} {}
-
-auto Group::GetName() const -> const std::string & { return name_; }
-
-void Group::SetName(std::string name) { name_ = std::move(name); }
+    : nodes_{nodes.begin(), nodes.end()}, color_{127, 127, 127}, unite_{true} {}
 
 auto Group::GetNodes() const -> std::vector<std::shared_ptr<INode>> {
   auto nodes = std::vector<std::shared_ptr<INode>>{};

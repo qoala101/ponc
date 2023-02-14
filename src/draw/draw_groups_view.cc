@@ -66,7 +66,7 @@ void DisplayGroup(State& state, const core::Group& group) {
                    : ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
 
   const auto node_is_open = ImGui::TreeNodeEx(
-      std::string{"##" + group.GetName()}.c_str(), draw_flags);
+      std::string{"##" + group.name_}.c_str(), draw_flags);
 
   ImGui::SameLine();
 
@@ -93,7 +93,7 @@ void DisplayGroup(State& state, const core::Group& group) {
 
   auto isSelected = group_node_ids == selected_node_ids;
 
-  if (ImGui::Selectable(group.GetName().c_str(), &isSelected)) {
+  if (ImGui::Selectable(group.name_.c_str(), &isSelected)) {
     auto& io = ImGui::GetIO();
 
     if (io.KeyCtrl) {
