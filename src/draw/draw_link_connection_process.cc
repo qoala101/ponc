@@ -16,7 +16,20 @@ void LinkConnectionProcess::Draw(State& state) {
     auto end_pin_id = ne::PinId{};
 
     if (ne::QueryNewLink(&start_pin_id, &end_pin_id)) {
-      state.drawing_.not_yet_connected_pin_of_new_link_id = start_pin_id;
+      auto& new_link = state.drawing_.new_link.emplace(
+          State::NewLink{start_pin_id, end_pin_id});
+
+      for (const auto& link : state.app_.GetDiagram().GetLinks()) {
+        if (link.start_pin_id == new_link.pin_dragged_from) {
+          new_link.rebind.emplace(State::Rebind{link.end_pin_id});
+          break;
+        }
+
+        if (link.end_pin_id == new_link.pin_dragged_from) {
+          new_link.rebind.emplace(State::Rebind{link.start_pin_id});
+          break;
+        }
+      }
 
       const auto& start_node =
           state.app_.GetDiagram().FindPinNode(start_pin_id);
@@ -58,14 +71,27 @@ void LinkConnectionProcess::Draw(State& state) {
     }
 
     if (ne::QueryNewNode(&end_pin_id)) {
-      state.drawing_.not_yet_connected_pin_of_new_link_id = end_pin_id;
+      auto& new_link =
+          state.drawing_.new_link.emplace(State::NewLink{end_pin_id});
+
+      for (const auto& link : state.app_.GetDiagram().GetLinks()) {
+        if (link.start_pin_id == new_link.pin_dragged_from) {
+          new_link.rebind.emplace(State::Rebind{link.end_pin_id});
+          break;
+        }
+
+        if (link.end_pin_id == new_link.pin_dragged_from) {
+          new_link.rebind.emplace(State::Rebind{link.start_pin_id});
+          break;
+        }
+      }
 
       Tooltip{"+ Create Node", {32, 45, 32, 180}}.Draw(state);
 
       if (ne::AcceptNewItem()) {
-        state.drawing_.connect_new_node_to_existing_pin_id =
-            state.drawing_.not_yet_connected_pin_of_new_link_id;
-        state.drawing_.not_yet_connected_pin_of_new_link_id.reset();
+        // state.drawing_.connect_new_node_to_existing_pin_id =
+        //     state.drawing_.not_yet_connected_pin_of_new_link_id;
+        // state.drawing_.not_yet_connected_pin_of_new_link_id.reset();
 
         {
           const auto suspend_scope =
@@ -76,7 +102,7 @@ void LinkConnectionProcess::Draw(State& state) {
       }
     }
   } else {
-    state.drawing_.not_yet_connected_pin_of_new_link_id.reset();
+    state.drawing_.new_link.reset();
   }
 }
 }  // namespace esc::draw

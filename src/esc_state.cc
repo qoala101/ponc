@@ -109,8 +109,7 @@ void State::ResetDiagram(State &state) {
     }
   }
 
-  state.drawing_.not_yet_connected_pin_of_new_link_id.reset();
-  state.drawing_.connect_new_node_to_existing_pin_id.reset();
+  state.drawing_.new_link.reset();
 
   state.id_generator_ = core::IdGenerator{};
   state.app_.SetDiagram(core::Diagram{CreateFamilies()});

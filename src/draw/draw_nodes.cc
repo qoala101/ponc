@@ -99,6 +99,28 @@ void Icon(const ImVec2& size, bool filled,
 void DrawPinIcon(State& state, core::INode& node, ne::PinId pin_id,
                  draw::IPinDrawer& pin_drawer, bool connectable, bool connected,
                  float alpha) {
+  const auto& new_link = state.drawing_.new_link;
+  if (new_link.has_value()) {
+    if (pin_id == new_link->pin_dragged_from) {
+      ImGui::GetWindowDrawList()->AddCircle(ImGui::GetCursorPos(), 5.0F,
+                                            ImColor{255, 0, 0}, 0, 3.0F);
+    }
+
+    if (new_link->pin_hovered_over.has_value()) {
+      if (pin_id == *new_link->pin_hovered_over) {
+        ImGui::GetWindowDrawList()->AddCircle(ImGui::GetCursorPos(), 7.0F,
+                                              ImColor{0, 255, 0}, 0, 3.0F);
+      }
+    }
+
+    if (new_link->rebind.has_value()) {
+      if (pin_id == new_link->rebind->fixed_pin) {
+        ImGui::GetWindowDrawList()->AddCircle(ImGui::GetCursorPos(), 7.0F,
+                                              ImColor{0, 0, 255}, 0, 3.0F);
+      }
+    }
+  }
+
   if (!connectable) {
     if (pin_drawer.IsEditable()) {
       ImGui::Dummy(ImVec2{20, 24});
@@ -197,10 +219,10 @@ auto CalculateAlphaForPin(State& state, ne::PinId pin_id) {
   //   alpha = alpha * (48.0F / 255.0F);
   // }
 
-  if (state.drawing_.not_yet_connected_pin_of_new_link_id.has_value() &&
-      (pin_id != *state.drawing_.not_yet_connected_pin_of_new_link_id)) {
-    alpha = alpha * (48.0F / 255.0F);
-  }
+  // if (state.drawing_.not_yet_connected_pin_of_new_link_id.has_value() &&
+  //     (pin_id != *state.drawing_.not_yet_connected_pin_of_new_link_id)) {
+  //   alpha = alpha * (48.0F / 255.0F);
+  // }
 
   return alpha;
 }
@@ -265,17 +287,19 @@ void DrawNode(State& state, TexturesHandle& textures, core::INode& node) {
       }
     }
 
-    if (state.GetDrawLINEFromPin().has_value()) {
-      if (*state.GetDrawLINEFromPin() == pin_id) {
-        const auto rect =
-            ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
+    if (state.drawing_.new_link.has_value()) {
+      if (state.drawing_.new_link->rebind.has_value()) {
+        if (state.drawing_.new_link->rebind->fixed_pin == pin_id) {
+          const auto rect =
+              ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
 
-        const auto end_pos =
-            (kind == ax::NodeEditor::PinKind::Input)
-                ? ImVec2{rect.Min.x, (rect.Min.y + rect.Max.y) * 0.5f}
-                : ImVec2{rect.Max.x, (rect.Min.y + rect.Max.y) * 0.5f};
+          const auto end_pos =
+              (kind == ax::NodeEditor::PinKind::Input)
+                  ? ImVec2{rect.Min.x, (rect.Min.y + rect.Max.y) * 0.5f}
+                  : ImVec2{rect.Max.x, (rect.Min.y + rect.Max.y) * 0.5f};
 
-        state.drawing_.pinned_pin_pos = end_pos;
+          state.drawing_.new_link->rebind->fixed_pin_pos = end_pos;
+        }
       }
     }
 

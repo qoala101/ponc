@@ -53,24 +53,18 @@ auto GetCurve(const ImVec2& m_Start, const ImVec2& m_End) {
 }  // namespace
 
 void RepinCurve::Draw(State& state) {
-  const auto draw_line_from_pin = state.GetDrawLINEFromPin();
+  if (state.drawing_.new_link.has_value()) {
+    if (state.drawing_.new_link->rebind.has_value()) {
+      if (state.drawing_.new_link->rebind->fixed_pin_pos.has_value()) {
+        const auto curve =
+            GetCurve(*state.drawing_.new_link->rebind->fixed_pin_pos,
+                     ImGui::GetMousePos());
 
-  if (!draw_line_from_pin.has_value()) {
-    return;
+        auto* drawList = ImGui::GetWindowDrawList();
+        drawList->AddBezierCubic(curve.P0, curve.P1, curve.P2, curve.P3,
+                                 ImColor{255, 255, 255, 255}, 2.0F);
+      }
+    }
   }
-
-  auto* drawList = ImGui::GetWindowDrawList();
-  const auto curve =
-      GetCurve(state.drawing_.pinned_pin_pos, ImGui::GetMousePos());
-
-  ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 255.0F);
-
-  // ne::Suspend();
-  
-  drawList->AddBezierCubic(curve.P0, curve.P1, curve.P2, curve.P3,
-                           ImColor{255, 255, 255, 255}, 2.0F);
-  // ne::Resume();
-
-  ImGui::PopStyleVar();
 }
 }  // namespace esc::draw

@@ -43,34 +43,7 @@ auto BackgroundPopup::GetLabel(State& state) const -> std::string {
 
 void BackgroundPopup::DrawContent(State& state) {
   const auto& families = state.app_.GetDiagram().GetFamilies();
-  const auto family_groups = [&families]() {
-    auto family_groups =
-        std::vector<std::pair<std::string, std::vector<core::IFamily*>>>{};
-
-    for (const auto& family : families) {
-      const auto drawer = family->CreateDrawer();
-
-      if (!drawer->IsUserAccessible()) {
-        continue;
-      }
-
-      const auto group_label = drawer->GetGroupLabel();
-      const auto group = std::ranges::find_if(
-          family_groups, [&group_label](const auto& group) {
-            return group.first == group_label;
-          });
-
-      if (group != family_groups.end()) {
-        group->second.emplace_back(&*family);
-        continue;
-      }
-
-      family_groups.emplace_back(group_label,
-                                 std::vector<core::IFamily*>{&*family});
-    }
-
-    return family_groups;
-  }();
+  const auto family_groups = GroupByLabels(families);
 
   for (const auto& [group_label, families] : family_groups) {
     auto draw_items = true;

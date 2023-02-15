@@ -4,13 +4,6 @@
 
 namespace esc::core {
 // ---
-auto IsChildOf(const INode &node, const IFamily &family) -> bool {
-  return std::ranges::any_of(family.nodes_, [&node](const auto &family_node) {
-    return &*family_node == &node;
-  });
-}
-
-// ---
 auto IFamily::GetNodes() const -> const std::vector<std::shared_ptr<INode>> & {
   return nodes_;
 }
@@ -33,5 +26,12 @@ IFamily::IFamily(std::vector<std::shared_ptr<core::INode>> nodes)
 // ---
 auto IFamily::EmplaceNode(std::shared_ptr<core::INode> node) -> INode & {
   return *nodes_.emplace_back(std::move(node));
+}
+
+// ---
+auto IsChildOf(const INode &node, const IFamily &family) -> bool {
+  return std::ranges::any_of(
+      family.GetNodes(),
+      [&node](const auto &family_node) { return &*family_node == &node; });
 }
 }  // namespace esc::core

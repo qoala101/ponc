@@ -15,7 +15,7 @@ auto NodePopup::GetLabel(State& state) const -> std::string {
 }
 
 void NodePopup::DrawContent(State& state) {
-  if (ImGui::MenuItem("Delete")) {
+  if (ImGui::MenuItem("Delete With Links")) {
     SetVisible(false);
 
     state.PostEvent([node_id = node_->GetId()](auto& state) {
@@ -23,7 +23,7 @@ void NodePopup::DrawContent(State& state) {
     });
   }
 
-  if (ImGui::MenuItem("Delete Ex")) {
+  if (ImGui::MenuItem("Delete")) {
     SetVisible(false);
 
     state.PostEvent([node_id = node_->GetId()](auto& state) {

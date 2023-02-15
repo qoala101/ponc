@@ -5,7 +5,7 @@
 
 namespace esc::draw {
 void Links::Draw(State& state) {
-  const auto* existing_link_from_same_pin = state.GetExistingLinkFromSamePin();
+  // const auto* existing_link_from_same_pin = state.GetExistingLinkFromSamePin();
 
   for (const auto& link : state.app_.GetDiagram().GetLinks()) {
     // if (state.drawing_.not_yet_connected_pin_of_new_link_id.has_value()) {
@@ -23,7 +23,7 @@ void Links::Draw(State& state) {
     //   }
     // }
 
-    if (&link != existing_link_from_same_pin) {
+    // if (&link != existing_link_from_same_pin) {
       const auto& node = state.app_.GetDiagram().FindPinNode(link.start_pin_id);
       const auto node_flow = state.flow_calculator_.GetCalculatedFlow(*node);
       const auto flow = GetPinFlow(node_flow, link.start_pin_id);
@@ -33,7 +33,7 @@ void Links::Draw(State& state) {
       ne::Link(link.id, link.start_pin_id, link.end_pin_id, color, 2.0F);
 
       // ne::Flow(link.id);
-    }
+    // }
   }
 }
 }  // namespace esc::draw
