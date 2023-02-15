@@ -1,5 +1,7 @@
 #include "draw_popups.h"
 
+#include <iostream>
+
 #include "cpp_scope.h"
 #include "draw_background_popup.h"
 #include "draw_link_popup.h"
@@ -30,6 +32,8 @@ void Popups::UpdateCurrentPopup(State& state) {
     auto selected_node_id = ne::NodeId{};
 
     if (ne::ShowNodeContextMenu(&selected_node_id)) {
+      state.drawing_.popup_node_ = selected_node_id;
+
       const auto& selected_node =
           state.app_.GetDiagram().FindNodePTR(selected_node_id);
 

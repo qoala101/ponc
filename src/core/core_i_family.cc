@@ -4,6 +4,13 @@
 
 namespace esc::core {
 // ---
+auto IsChildOf(const INode &node, const IFamily &family) -> bool {
+  return std::ranges::any_of(family.nodes_, [&node](const auto &family_node) {
+    return &*family_node == &node;
+  });
+}
+
+// ---
 auto IFamily::GetNodes() const -> const std::vector<std::shared_ptr<INode>> & {
   return nodes_;
 }

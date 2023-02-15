@@ -18,7 +18,7 @@ void DisplayNode(State& state, core::INode& node) {
   const auto drawer = node.CreateDrawer(state);
 
   const auto node_id = node.GetId();
-  const auto draw_flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
+  const auto draw_flags = ImGuiTreeNodeFlags_Leaf;
 
   const auto node_is_open = ImGui::TreeNodeEx(
       std::string{"##" + std::to_string(static_cast<uintptr_t>(node_id.Get()))}
@@ -60,8 +60,7 @@ void DisplayGroup(State& state, core::Group& group) {
   const auto nodes = group.GetNodes();
   const auto has_children = !nodes.empty();
   const auto draw_flags =
-      has_children ? (ImGuiTreeNodeFlags_DefaultOpen)
-                   : ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
+      has_children ? (ImGuiTreeNodeFlags_DefaultOpen) : ImGuiTreeNodeFlags_Leaf;
 
   const auto node_is_open =
       ImGui::TreeNodeEx(std::string{"##" + group.name_}.c_str(), draw_flags);

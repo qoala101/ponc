@@ -47,6 +47,7 @@ class State {
     std::optional<ne::PinId> connect_new_node_to_existing_pin_id{};
 
     ImVec2 pinned_pin_pos{};
+    std::optional<ne::NodeId> popup_node_{};
   } drawing_{};
 
   auto GetExistingLinkFromSamePin() -> const core::Link * {

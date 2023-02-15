@@ -20,6 +20,7 @@ void IPopup::Draw(State &state) {
 // ---
 void IPopup::Open(State &state) {
   SetVisible(true);
-  ImGui::OpenPopup(GetLabel(state).c_str());
+  ImGui::OpenPopup(GetLabel(state).c_str(),
+                   ImGuiPopupFlags_NoOpenOverExistingPopup);
 }
 }  // namespace esc::draw

@@ -7,6 +7,9 @@ namespace esc::draw {
 class GroupSettingsView : public IDrawable {
  public:
   void Draw(State &state) override;
+
+ private:
+  int selected_group_index_{};
 };
 }  // namespace esc::draw
 

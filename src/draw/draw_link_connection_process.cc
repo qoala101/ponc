@@ -43,16 +43,16 @@ void LinkConnectionProcess::Draw(State& state) {
         Tooltip{"+ Create Link", {32, 45, 32, 180}}.Draw(state);
 
         if (ne::AcceptNewItem(ImColor{127, 255, 127}, 4.0F)) {
-          // if (start_pin_drawer->GetKind() == ne::PinKind::Input) {
-          //   using std::swap;
+          if (start_pin_drawer->GetKind() == ne::PinKind::Input) {
+            using std::swap;
 
-          //   swap(start_pin_drawer, end_pin_drawer);
-          //   swap(start_pin_id, end_pin_id);
-          // }
+            swap(start_pin_drawer, end_pin_drawer);
+            swap(start_pin_id, end_pin_id);
+          }
 
-          // state.app_.GetDiagram().EmplaceLink(
-          //     core::Link{state.id_generator_.GetNext<ne::LinkId>(),
-          //                start_pin_id, end_pin_id});
+          state.app_.GetDiagram().EmplaceLink(
+              core::Link{state.id_generator_.GetNext<ne::LinkId>(),
+                         start_pin_id, end_pin_id});
         }
       }
     }

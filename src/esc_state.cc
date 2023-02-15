@@ -1,5 +1,6 @@
 #include "esc_state.h"
 
+#include <algorithm>
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -166,9 +167,19 @@ void State::ReplaceWithPlaceholder(State &state, ne::NodeId node_id) {
 }
 
 void State::MakeGroupFromSelectedNodes(State &state, std::string group_name) {
-  const auto selectedNodes = state.app_.GetDiagram().GetSelectedNodeIds();
+  auto selectedNodes = state.app_.GetDiagram().GetSelectedNodeIds();
 
-  std::cout << selectedNodes.size() << " " << group_name << "\n";
+  if (state.drawing_.popup_node_.has_value()) {
+    const auto popup_node = *state.drawing_.popup_node_;
+
+    if (std::ranges::none_of(selectedNodes, [popup_node](const auto node) {
+          return node == popup_node;
+        })) {
+      selectedNodes.emplace_back(popup_node);
+    }
+
+    state.drawing_.popup_node_.reset();
+  }
 
   auto &group = state.app_.GetDiagram().EmplaceGroup(selectedNodes);
   group.name_ = std::move(group_name);

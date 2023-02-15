@@ -50,6 +50,9 @@ class IFamily : public cpp::Interface {
 
  private:
   // ---
+  friend auto IsChildOf(const INode &node, const IFamily &family) -> bool;
+
+  // ---
   virtual auto CreateNode [[nodiscard]] (IdGenerator &id_generator)
   -> std::shared_ptr<INode> = 0;
 

@@ -64,8 +64,12 @@ void RepinCurve::Draw(State& state) {
       GetCurve(state.drawing_.pinned_pin_pos, ImGui::GetMousePos());
 
   ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 255.0F);
+
+  // ne::Suspend();
+  
   drawList->AddBezierCubic(curve.P0, curve.P1, curve.P2, curve.P3,
                            ImColor{255, 255, 255, 255}, 2.0F);
+  // ne::Resume();
 
   ImGui::PopStyleVar();
 }

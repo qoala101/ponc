@@ -39,12 +39,21 @@ void Groups::Draw(State& state) {
       }
 
       auto* draw_list = ImGui::GetWindowDrawList();
-      draw_list->AddRectFilled(rect_min, rect_max, color);
+
+      if (group.fill_background_) {
+        draw_list->AddRectFilled(rect_min, rect_max, color);
+      } else {
+        draw_list->AddRect(rect_min, rect_max, color, 0.0f, {}, 10);
+      }
     }
 
     if (group.unite_ && rect.has_value()) {
       auto* draw_list = ImGui::GetWindowDrawList();
-      draw_list->AddRectFilled(rect->Min, rect->Max, color);
+      if (group.fill_background_) {
+        draw_list->AddRectFilled(rect->Min, rect->Max, color);
+      } else {
+        draw_list->AddRect(rect->Min, rect->Max, color, 0.0f, {}, 10);
+      }
     }
   }
 }

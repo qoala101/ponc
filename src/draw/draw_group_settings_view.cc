@@ -23,47 +23,36 @@ void GroupSettingsView::Draw(State& state) {
     if (ImGui::Begin("Group Settings", &GetVisible())) {
       auto& groups = state.app_.GetDiagram().GetGroups();
 
-      // Left
-      static int selected = 0;
       {
         ImGui::BeginChild("left pane", ImVec2(200, 0), true);
 
-        auto i = 0;
+        auto group_index = 0;
 
         for (auto& group : groups) {
-          if (ImGui::Selectable(group.name_.c_str(), selected == i)) {
-            selected = i;
+          if (ImGui::Selectable(group.name_.c_str(),
+                                selected_group_index_ == group_index)) {
+            selected_group_index_ = group_index;
           }
 
-          ++i;
+          ++group_index;
         }
+
         ImGui::EndChild();
       }
       ImGui::SameLine();
 
       // Right
       {
-        ImGui::BeginGroup();                                       // 1 line below us
-        auto& group = groups[selected];
+        ImGui::BeginGroup();  // 1 line below us
 
-        ImGui::Checkbox("Fill##asdas", &group.fill_background_);
-        ImGui::Checkbox("Unite##hhhh", &group.unite_);
+        if (!groups.empty()) {
+          auto& group = groups[selected_group_index_];
 
-        static bool alpha_preview = true;
-        static bool alpha_half_preview = false;
-        static bool drag_and_drop = true;
-        static bool options_menu = true;
-        static bool hdr = false;
-        ImGuiColorEditFlags misc_flags =
-            (hdr ? ImGuiColorEditFlags_HDR : 0) |
-            (drag_and_drop ? 0 : ImGuiColorEditFlags_NoDragDrop) |
-            (alpha_half_preview
-                 ? ImGuiColorEditFlags_AlphaPreviewHalf
-                 : (alpha_preview ? ImGuiColorEditFlags_AlphaPreview : 0)) |
-            (options_menu ? 0 : ImGuiColorEditFlags_NoOptions);
-
-        ImGui::ColorEdit3("Color##3asdas", group.color_.data(),
-                          ImGuiColorEditFlags_NoInputs  | misc_flags);
+          ImGui::Checkbox("Fill##asdas", &group.fill_background_);
+          ImGui::Checkbox("Unite##hhhh", &group.unite_);
+          ImGui::ColorEdit3("Color##3asdas", group.color_.data(),
+                            ImGuiColorEditFlags_NoInputs);
+        }
 
         ImGui::EndGroup();
       }
