@@ -17,13 +17,14 @@
 
 namespace esc::draw {
 namespace {
-auto GetCurve(const ImVec2& m_Start, const ImVec2& m_End) {
+auto GetCurve(const ImVec2& m_Start, const ImVec2& m_End, ne::PinKind kind) {
   const auto strength = ne::GetStyle().LinkStrength;
-  const auto start_dir = ne::GetStyle().SourceDirection;
-  const auto end_dir = ne::GetStyle().TargetDirection;
-  // m_CurrentPin->m_Dir = kind == PinKind::Output ? editorStyle.SourceDirection
-  //                                               :
-  //                                               editorStyle.TargetDirection;
+  const auto start_dir = kind == ne::PinKind::Output
+                             ? ne::GetStyle().SourceDirection
+                             : ne::GetStyle().TargetDirection;
+  const auto end_dir = kind == ne::PinKind::Input
+                           ? ne::GetStyle().SourceDirection
+                           : ne::GetStyle().TargetDirection;
 
   auto easeLinkStrength = [](const ImVec2& a, const ImVec2& b, float strength) {
     const auto distanceX = b.x - a.x;
@@ -58,7 +59,8 @@ void RepinCurve::Draw(State& state) {
       if (state.drawing_.new_link->rebind->fixed_pin_pos.has_value()) {
         const auto curve =
             GetCurve(*state.drawing_.new_link->rebind->fixed_pin_pos,
-                     ImGui::GetMousePos());
+                     ImGui::GetMousePos(),
+                     state.drawing_.new_link->rebind->fixed_pin_kind);
 
         auto* drawList = ImGui::GetWindowDrawList();
         drawList->AddBezierCubic(curve.P0, curve.P1, curve.P2, curve.P3,

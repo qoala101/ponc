@@ -47,6 +47,8 @@ class State {
 
   struct Rebind {
     ne::PinId fixed_pin{};
+    ne::PinKind fixed_pin_kind{};
+    ne::LinkId rebinding_link_id{};
     std::optional<ImVec2> fixed_pin_pos{};
   };
 

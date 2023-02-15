@@ -2,12 +2,31 @@
 
 #include <iostream>
 
+#include "core_link.h"
 #include "cpp_scope.h"
 #include "draw_i_node_drawer.h"
 #include "draw_tooltip.h"
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
+namespace {
+void UpdateNewLink(State& state, State::NewLink& new_link) {
+  for (const auto& link : state.app_.GetDiagram().GetLinks()) {
+    if (link.start_pin_id == new_link.pin_dragged_from) {
+      new_link.rebind.emplace(
+          State::Rebind{link.end_pin_id, ne::PinKind::Input, link.id});
+      break;
+    }
+
+    if (link.end_pin_id == new_link.pin_dragged_from) {
+      new_link.rebind.emplace(
+          State::Rebind{link.start_pin_id, ne::PinKind::Output, link.id});
+      break;
+    }
+  }
+}
+}  // namespace
+
 void LinkConnectionProcess::Draw(State& state) {
   const auto create_scope = cpp::Scope{[]() { ne::EndCreate(); }};
 
@@ -19,17 +38,7 @@ void LinkConnectionProcess::Draw(State& state) {
       auto& new_link = state.drawing_.new_link.emplace(
           State::NewLink{start_pin_id, end_pin_id});
 
-      for (const auto& link : state.app_.GetDiagram().GetLinks()) {
-        if (link.start_pin_id == new_link.pin_dragged_from) {
-          new_link.rebind.emplace(State::Rebind{link.end_pin_id});
-          break;
-        }
-
-        if (link.end_pin_id == new_link.pin_dragged_from) {
-          new_link.rebind.emplace(State::Rebind{link.start_pin_id});
-          break;
-        }
-      }
+      UpdateNewLink(state, new_link);
 
       const auto& start_node =
           state.app_.GetDiagram().FindPinNode(start_pin_id);
@@ -42,30 +51,49 @@ void LinkConnectionProcess::Draw(State& state) {
 
       if (end_pin_id == start_pin_id) {
         ne::RejectNewItem(ImColor{255, 0, 0}, 2.0F);
-      } else if (end_pin_drawer->GetKind() == start_pin_drawer->GetKind()) {
+      } else if ((end_pin_drawer->GetKind() == start_pin_drawer->GetKind()) &&
+                 !new_link.rebind.has_value()) {
         Tooltip{"x Incompatible Pin Kind", {45, 32, 32, 180}}.Draw(state);
         ne::RejectNewItem(ImColor{255, 0, 0}, 2.0F);
       } else if (start_node == end_node) {
         Tooltip{"x Cannot connect to self", {45, 32, 32, 180}}.Draw(state);
         ne::RejectNewItem(ImColor{255, 0, 0}, 1.0F);
-        // } else if (end_pin->GetType() != start_pin_drawer->GetType()) {
-        //   DrawHintLabel("x Incompatible Pin Type", ImColor{45, 32, 32,
-        //   180});
-        ne::RejectNewItem(ImColor{255, 127, 127}, 1.0F);
       } else {
-        Tooltip{"+ Create Link", {32, 45, 32, 180}}.Draw(state);
+        if (new_link.rebind.has_value()) {
+          Tooltip{"+ Move Link", {32, 45, 32, 180}}.Draw(state);
 
-        if (ne::AcceptNewItem(ImColor{127, 255, 127}, 4.0F)) {
-          if (start_pin_drawer->GetKind() == ne::PinKind::Input) {
-            using std::swap;
+          if (ne::AcceptNewItem(ImColor{0, 0, 0, 0})) {
+            ne::DeleteLink(new_link.rebind->rebinding_link_id);
+            state.app_.GetDiagram().EraseLink(
+                new_link.rebind->rebinding_link_id);
 
-            swap(start_pin_drawer, end_pin_drawer);
-            swap(start_pin_id, end_pin_id);
+            if (new_link.rebind->fixed_pin_kind == ne::PinKind::Input) {
+              state.app_.GetDiagram().EmplaceLink(
+                  core::Link{state.id_generator_.GetNext<ne::LinkId>(),
+                             new_link.pin_hovered_over->Get(),
+                             new_link.rebind->fixed_pin});
+            } else {
+              state.app_.GetDiagram().EmplaceLink(
+                  core::Link{state.id_generator_.GetNext<ne::LinkId>(),
+                             new_link.rebind->fixed_pin,
+                             new_link.pin_hovered_over->Get()});
+            }
           }
+        } else {
+          Tooltip{"+ Create Link", {32, 45, 32, 180}}.Draw(state);
 
-          state.app_.GetDiagram().EmplaceLink(
-              core::Link{state.id_generator_.GetNext<ne::LinkId>(),
-                         start_pin_id, end_pin_id});
+          if (ne::AcceptNewItem(ImColor{127, 255, 127}, 4.0F)) {
+            if (start_pin_drawer->GetKind() == ne::PinKind::Input) {
+              using std::swap;
+
+              swap(start_pin_drawer, end_pin_drawer);
+              swap(start_pin_id, end_pin_id);
+            }
+
+            state.app_.GetDiagram().EmplaceLink(
+                core::Link{state.id_generator_.GetNext<ne::LinkId>(),
+                           start_pin_id, end_pin_id});
+          }
         }
       }
     }
@@ -74,31 +102,15 @@ void LinkConnectionProcess::Draw(State& state) {
       auto& new_link =
           state.drawing_.new_link.emplace(State::NewLink{end_pin_id});
 
-      for (const auto& link : state.app_.GetDiagram().GetLinks()) {
-        if (link.start_pin_id == new_link.pin_dragged_from) {
-          new_link.rebind.emplace(State::Rebind{link.end_pin_id});
-          break;
-        }
-
-        if (link.end_pin_id == new_link.pin_dragged_from) {
-          new_link.rebind.emplace(State::Rebind{link.start_pin_id});
-          break;
-        }
-      }
+      UpdateNewLink(state, new_link);
 
       Tooltip{"+ Create Node", {32, 45, 32, 180}}.Draw(state);
 
       if (ne::AcceptNewItem()) {
-        // state.drawing_.connect_new_node_to_existing_pin_id =
-        //     state.drawing_.not_yet_connected_pin_of_new_link_id;
-        // state.drawing_.not_yet_connected_pin_of_new_link_id.reset();
+        const auto suspend_scope =
+            cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
 
-        {
-          const auto suspend_scope =
-              cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
-
-          ImGui::OpenPopup("Create New Node");
-        }
+        ImGui::OpenPopup("Create New Node");
       }
     }
   } else {

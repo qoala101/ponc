@@ -103,10 +103,10 @@ void App::DrawNodeEditor() {
   const auto node_editor_scope =
       cpp::Scope{[]() { ne::Begin("Node editor"); }, []() { ne::End(); }};
 
-  repin_curve_->Draw(**state_);
   groups_->Draw(**state_);
   nodes_->Draw(**state_);
   links_->Draw(**state_);
+  repin_curve_->Draw(**state_);
   link_connection_process_->Draw(**state_);
   DrawDeleteItemsProcess();
   popups_->Draw(**state_);
@@ -116,7 +116,7 @@ void App::DrawFrame() {
   main_window_->Draw(**state_);
   DrawNodeEditor();
 
-  ImGui::ShowDemoWindow();
-  ImGui::ShowMetricsWindow();
+  // ImGui::ShowDemoWindow();
+  // ImGui::ShowMetricsWindow();
 }
 }  // namespace esc
