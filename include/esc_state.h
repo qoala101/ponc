@@ -48,6 +48,14 @@ class State {
 
     ImVec2 pinned_pin_pos{};
     std::optional<ne::NodeId> popup_node_{};
+
+    struct {
+      bool color_flow{};
+      float min{-27};
+      float low{-22};
+      float high{-18};
+      float max{6};
+    } link_colors{};
   } drawing_{};
 
   auto GetExistingLinkFromSamePin() -> const core::Link * {
@@ -76,6 +84,8 @@ class State {
                ? existing_link_from_same_pin->end_pin_id
                : existing_link_from_same_pin->start_pin_id;
   }
+
+  auto GetColorForFlowValue(float value) const -> ImColor;
 
  private:
   // ---

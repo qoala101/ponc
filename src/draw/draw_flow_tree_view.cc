@@ -4,6 +4,7 @@
 #include <string>
 
 #include "core_i_family.h"
+#include "core_i_node.h"
 #include "core_tree.h"
 #include "cpp_scope.h"
 #include "draw_families_view.h"
@@ -17,7 +18,9 @@ namespace esc::draw {
 namespace {
 void DisplayNode(
     State& state, const core::TreeNode& tree_node,
-    std::unordered_map<core::IFamily*, int>& child_count_per_family) {
+    const std::unordered_map<const core::TreeNode*,
+                             std::vector<std::pair<const core::IFamily*, int>>>&
+        child_count_per_family_per_tree_node) {
   ImGui::TableNextRow();
 
   ImGui::TableNextColumn();
@@ -26,8 +29,7 @@ void DisplayNode(
   const auto node_id = tree_node.node->GetId();
   const auto has_children = !tree_node.child_nodes.empty();
   const auto draw_flags =
-      has_children ? (ImGuiTreeNodeFlags_DefaultOpen)
-                   : ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
+      has_children ? (ImGuiTreeNodeFlags_DefaultOpen) : ImGuiTreeNodeFlags_Leaf;
 
   const auto node_is_open = ImGui::TreeNodeEx(
       std::string{"##" + std::to_string(static_cast<uintptr_t>(node_id.Get()))}
@@ -62,18 +64,38 @@ void DisplayNode(
   const auto flow = state.flow_calculator_.GetCalculatedFlow(*tree_node.node);
 
   if (flow.input_pin_flow.has_value()) {
-    ImGui::Text("%.3f", flow.input_pin_flow->second);
+    ImGui::TextColored(state.GetColorForFlowValue(flow.input_pin_flow->second),
+                       "%.3f", flow.input_pin_flow->second);
+  }
+
+  const auto& child_cout_per_family =
+      child_count_per_family_per_tree_node.at(&tree_node);
+
+  auto index = 0;
+
+  for (const auto& family : state.app_.GetDiagram().GetFamilies()) {
+    ImGui::TableNextColumn();
+
+    auto child_count = child_cout_per_family[index++].second;
+
+    if (IsChildOf(*tree_node.node, *family)) {
+      if (child_count == 1) {
+        ImGui::TextUnformatted("*");
+      } else {
+        ImGui::Text("%d", child_count - 1);
+      }
+    } else {
+      if (child_count > 0) {
+        ImGui::Text("%d", child_count);
+      }
+    }
   }
 
   if (node_is_open) {
     if (has_children) {
       for (const auto& child_node : tree_node.child_nodes) {
-        DisplayNode(state, child_node.second, child_count_per_family);
-
-        for (const auto& child_count : child_count_per_family) {
-          ImGui::TableNextColumn();
-          ImGui::Text("%d", child_count.second);
-        }
+        DisplayNode(state, child_node.second,
+                    child_count_per_family_per_tree_node);
       }
     }
 
@@ -92,14 +114,6 @@ void FlowTreeView::Draw(State& state) {
 
     if (ImGui::Begin("Flow Tree", &GetVisible())) {
       const auto& families = state.app_.GetDiagram().GetFamilies();
-      auto child_count_per_family = std::unordered_map<core::IFamily*, int>{};
-
-      for (const auto& family : families) {
-        child_count_per_family.emplace(family.get(), 0);
-      }
-
-      // ImGui::SameLine();
-
       const auto table_flags =
           ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
           ImGuiTableFlags_Hideable | ImGuiTableFlags_ContextMenuInBody |
@@ -109,20 +123,52 @@ void FlowTreeView::Draw(State& state) {
       if (ImGui::BeginTable("Flow Tree", 2 + families.size(), table_flags)) {
         const auto table_scope = cpp::Scope{[]() { ImGui::EndTable(); }};
 
-        ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthStretch);
-        ImGui::TableSetupColumn("Input Value",
-                                ImGuiTableColumnFlags_WidthFixed);
+        ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthFixed, 300);
+        ImGui::TableSetupColumn("Input");
 
-        for (const auto& family : families) {
-          ImGui::TableSetupColumn(family->CreateDrawer()->GetLabel().c_str(),
-                                  ImGuiTableColumnFlags_WidthFixed);
+        for (auto& family : families) {
+          ImGui::TableSetupColumn(
+              std::string{family->CreateDrawer()->GetLabel() + " #"}.c_str());
         }
 
         ImGui::TableHeadersRow();
 
         for (const auto& root_node :
              state.flow_calculator_.GetFlowTree().root_nodes) {
-          DisplayNode(state, root_node, child_count_per_family);
+          auto child_count_per_family_per_tree_node = std::unordered_map<
+              const core::TreeNode*,
+              std::vector<std::pair<const core::IFamily*, int>>>{};
+
+          TraverseDepthFirst(
+              root_node, {},
+              [&families, &child_count_per_family_per_tree_node](
+                  const core::TreeNode& tree_node) {
+                auto child_count_per_family =
+                    std::vector<std::pair<const core::IFamily*, int>>{};
+
+                for (const auto& family : families) {
+                  const auto value =
+                      IsChildOf(*tree_node.node, *family) ? 1 : 0;
+                  child_count_per_family.emplace_back(&*family, value);
+                }
+
+                for (const auto& child : tree_node.child_nodes) {
+                  const auto& child_family_counts =
+                      child_count_per_family_per_tree_node.at(&child.second);
+
+                  auto index = 0;
+
+                  for (const auto& child_family_count : child_family_counts) {
+                    child_count_per_family[index++].second +=
+                        child_family_count.second;
+                  }
+                }
+
+                child_count_per_family_per_tree_node.emplace(
+                    &tree_node, std::move(child_count_per_family));
+              });
+
+          DisplayNode(state, root_node, child_count_per_family_per_tree_node);
         }
       }
     }

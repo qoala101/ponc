@@ -27,7 +27,7 @@ class FlowCalculator {
   // ---
   auto GetCalculatedFlow(const INode &node) const -> const Flow &;
 
- private:
+ private:  
   // ---
   void RebuildFlowTree(const std::vector<std::shared_ptr<IFamily>> &families,
                        const std::vector<Link> &links);

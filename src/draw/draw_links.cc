@@ -1,6 +1,7 @@
 #include "draw_links.h"
 
 #include "imgui.h"
+#include "imgui_node_editor.h"
 
 namespace esc::draw {
 void Links::Draw(State& state) {
@@ -23,8 +24,15 @@ void Links::Draw(State& state) {
     // }
 
     if (&link != existing_link_from_same_pin) {
-      ne::Link(link.id, link.start_pin_id, link.end_pin_id,
-               ImColor{255, 255, 255}, 2.0F);
+      const auto& node = state.app_.GetDiagram().FindPinNode(link.start_pin_id);
+      const auto node_flow = state.flow_calculator_.GetCalculatedFlow(*node);
+      const auto flow = GetPinFlow(node_flow, link.start_pin_id);
+
+      const auto color = state.GetColorForFlowValue(flow);
+
+      ne::Link(link.id, link.start_pin_id, link.end_pin_id, color, 2.0F);
+
+      // ne::Flow(link.id);
     }
   }
 }

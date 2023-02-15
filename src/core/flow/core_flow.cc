@@ -1,5 +1,7 @@
 #include "core_flow.h"
 
+#include <bits/ranges_algo.h>
+
 #include "cpp_assert.h"
 
 namespace esc::core {
@@ -7,7 +9,7 @@ namespace esc::core {
 auto operator+(Flow &left, const Flow &right) -> Flow & {
   if (left.input_pin_flow.has_value()) {
     auto &left_input = left.input_pin_flow->second;
-    
+
     cpp::Expects(right.input_pin_flow.has_value());
     const auto right_input = right.input_pin_flow->second;
 
@@ -41,4 +43,20 @@ void operator+=(Flow &left, const Flow &right) { left = left + right; }
 
 // ---
 void operator+=(Flow &left, float right) { left = left + right; }
+
+// ---
+auto GetPinFlow(const Flow &flow, ne::PinId pin_id) -> float {
+  const auto pin_id_as_number = pin_id.Get();
+
+  if (flow.input_pin_flow.has_value() &&
+      (flow.input_pin_flow->first == pin_id_as_number)) {
+    return flow.input_pin_flow->second;
+  }
+
+  return std::ranges::find_if(flow.output_pin_flows,
+                              [pin_id_as_number](const auto &output_pin) {
+                                return output_pin.first == pin_id_as_number;
+                              })
+      ->second;
+}
 }  // namespace esc::core

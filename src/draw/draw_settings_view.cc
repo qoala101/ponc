@@ -19,11 +19,42 @@ void SettingsView::Draw(State& state) {
     const auto window_scope = cpp::Scope{[]() { ImGui::End(); }};
 
     if (ImGui::Begin("Settings", &GetVisible())) {
-      static float color[3] = {};
+      const auto low_high_mid =
+          state.drawing_.link_colors.low +
+          (state.drawing_.link_colors.high - state.drawing_.link_colors.low) / 2;
 
-        ImGui::Text("Color widget:");
-        ImGui::SameLine();
-        ImGui::ColorEdit3("MyColor##1", (float*)&color);
+      ImGui::Checkbox("Color Flow", &state.drawing_.link_colors.color_flow);
+
+      ImGui::ColorButton("MyColor##1", state.GetColorForFlowValue(
+                                           state.drawing_.link_colors.min));
+      ImGui::SameLine();
+      ImGui::DragFloat("Very Low##link_color", &state.drawing_.link_colors.min,
+                       0.01F, -FLT_MAX, state.drawing_.link_colors.low, "%.3f");
+
+      ImGui::ColorButton("MyColor##2", state.GetColorForFlowValue(
+                                           state.drawing_.link_colors.low));
+      ImGui::SameLine();
+      ImGui::SliderFloat("Low##link_color", &state.drawing_.link_colors.low,
+                         state.drawing_.link_colors.min,
+                         state.drawing_.link_colors.high);
+
+      ImGui::ColorButton("MyColor##5", state.GetColorForFlowValue(low_high_mid));
+      ImGui::SameLine();
+      ImGui::Text("%.3f Good", low_high_mid);
+
+      ImGui::ColorButton("MyColor##3", state.GetColorForFlowValue(
+                                           state.drawing_.link_colors.high));
+      ImGui::SameLine();
+      ImGui::SliderFloat("High##link_color", &state.drawing_.link_colors.high,
+                         state.drawing_.link_colors.low,
+                         state.drawing_.link_colors.max);
+
+      ImGui::ColorButton("MyColor##4", state.GetColorForFlowValue(
+                                           state.drawing_.link_colors.max));
+      ImGui::SameLine();
+      ImGui::DragFloat("Very High##link_color", &state.drawing_.link_colors.max,
+                       0.01F, state.drawing_.link_colors.high, +FLT_MAX,
+                       "%.3f");
     }
   }
 }

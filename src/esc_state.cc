@@ -11,6 +11,7 @@
 #include "core_id_generator.h"
 #include "core_placeholder_family.h"
 #include "crude_json.h"
+#include "imgui.h"
 #include "imgui_node_editor.h"
 #include "impl_attenuator_node.h"
 #include "impl_client_node.h"
@@ -183,6 +184,68 @@ void State::MakeGroupFromSelectedNodes(State &state, std::string group_name) {
 
   auto &group = state.app_.GetDiagram().EmplaceGroup(selectedNodes);
   group.name_ = std::move(group_name);
+}
+
+auto State::GetColorForFlowValue(float value) const -> ImColor {
+  if (!drawing_.link_colors.color_flow) {
+    return ImColor{255, 255, 255};
+  }
+
+  const auto blue = ImColor{0, 0, 255};
+  const auto blue_green = ImColor{0, 255, 255};
+  const auto green = ImColor{0, 255, 0};
+  const auto green_red = ImColor{255, 255, 0};
+  const auto red = ImColor{255, 0, 0};
+
+  if (value < drawing_.link_colors.min) {
+    return blue;
+  }
+
+  if (value >= drawing_.link_colors.max) {
+    return red;
+  }
+
+  const auto range = (drawing_.link_colors.max - drawing_.link_colors.min);
+  const auto value_percentage = (value - drawing_.link_colors.min) / range;
+  const auto low_percentage =
+      (drawing_.link_colors.low - drawing_.link_colors.min) / range;
+  const auto high_percentage =
+      (drawing_.link_colors.high - drawing_.link_colors.min) / range;
+
+  auto percentage = 0.0F;
+  auto start_color = ImColor{};
+  auto end_color = ImColor{};
+
+  if (value_percentage < low_percentage) {
+    percentage = value_percentage / low_percentage;
+    start_color = blue;
+    end_color = blue_green;
+  } else if (value_percentage >= high_percentage) {
+    percentage =
+        (value_percentage - high_percentage) / (1.0F - high_percentage);
+    start_color = green_red;
+    end_color = red;
+  } else {
+    const auto low_high_range = (high_percentage - low_percentage);
+    percentage = (value_percentage - low_percentage) / low_high_range;
+
+    if (percentage < 0.5F) {
+      percentage = percentage * 2;
+      start_color = blue_green;
+      end_color = green;
+    } else {
+      percentage = (percentage - 0.5F) * 2;
+      start_color = green;
+      end_color = green_red;
+    }
+  }
+
+  return ImColor{start_color.Value.x +
+                     percentage * (end_color.Value.x - start_color.Value.x),
+                 start_color.Value.y +
+                     percentage * (end_color.Value.y - start_color.Value.y),
+                 start_color.Value.z +
+                     percentage * (end_color.Value.z - start_color.Value.z)};
 }
 
 void State::OnFrame() {

@@ -7,6 +7,8 @@
 #include <map>
 #include <optional>
 
+namespace ne = ax::NodeEditor;
+
 namespace esc::core {
 // ---
 struct Flow {
@@ -24,6 +26,9 @@ struct Flow {
   friend void operator+=(Flow &left, const Flow &right);
   // ---
   friend void operator+=(Flow &left, float right);
+
+  // ---
+  friend auto GetPinFlow(const Flow &flow, ne::PinId pin_id) -> float;
 };
 }  // namespace esc::core
 
