@@ -123,10 +123,10 @@ void FlowTreeView::Draw(State& state) {
       if (ImGui::BeginTable("Flow Tree", 2 + families.size(), table_flags)) {
         const auto table_scope = cpp::Scope{[]() { ImGui::EndTable(); }};
 
-        ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthFixed, 300);
+        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, 300);
         ImGui::TableSetupColumn("Input");
 
-        for (auto& family : families) {
+        for (const auto& family : families) {
           ImGui::TableSetupColumn(
               std::string{family->CreateDrawer()->GetLabel() + " #"}.c_str());
         }
