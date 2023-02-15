@@ -14,6 +14,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "core_free_pin_family.h"
 #include "core_i_node.h"
 #include "core_link.h"
 #include "core_placeholder_family.h"
@@ -27,12 +28,20 @@ Diagram::Diagram(std::vector<std::shared_ptr<IFamily>> families,
   auto placeholder_family = std::make_shared<PlaceholderFamily>();
   placeholder_family_ = placeholder_family;
   families_.emplace_back(std::move(placeholder_family));
+
+  auto free_pin_family = std::make_shared<FreePinFamily>();
+  free_pin_family_ = free_pin_family;
+  families_.emplace_back(std::move(free_pin_family));
 }
 
 auto Diagram::GetLinks() const -> const std::vector<Link>& { return links_; }
 
 auto Diagram::GetPlaceholderFamily() const -> PlaceholderFamily& {
   return *placeholder_family_.lock();
+}
+
+auto Diagram::GetFreePinFamily() const -> FreePinFamily& {
+  return *free_pin_family_.lock();
 }
 
 auto Diagram::GetGroups() -> std::vector<Group>& { return groups_; }

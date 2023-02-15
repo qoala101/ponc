@@ -110,6 +110,9 @@ macro(add_example_executable name)
 endmacro()
 
 add_example_executable(esc
+  core/family/core_free_pin_family.cc
+  core/family/core_placeholder_family.cc
+
   core/flow/core_flow_calculator.cc
   core/flow/core_flow.cc
   core/flow/core_tree.cc
@@ -120,7 +123,6 @@ add_example_executable(esc
   core/core_i_family.cc
   core/core_i_node.cc
   core/core_id_generator.cc
-  core/core_placeholder_family.cc
 
   cpp/cpp_assert.cc
   cpp/cpp_scope_function.cc
@@ -143,6 +145,7 @@ add_example_executable(esc
   draw/draw_i_drawable.cc
   draw/draw_i_family_drawer.cc
   draw/draw_i_file_dialog.cc
+  draw/draw_i_node_drawer.cc
   draw/draw_i_pin_drawer.cc
   draw/draw_i_popup.cc
   draw/draw_link_connection_process.cc
@@ -182,6 +185,7 @@ add_example_executable(esc
 target_include_directories(esc
   PUBLIC ${PROJECT_SOURCE_DIR}/include
   PUBLIC ${PROJECT_SOURCE_DIR}/include/core
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/core/family
   PUBLIC ${PROJECT_SOURCE_DIR}/include/core/flow
   PUBLIC ${PROJECT_SOURCE_DIR}/include/cpp
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw

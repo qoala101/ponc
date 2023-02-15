@@ -19,6 +19,8 @@ class INodeDrawer : public cpp::Interface {
   // ---
   virtual auto GetColor [[nodiscard]] () const -> ImColor = 0;
   // ---
+  virtual auto HasHeader [[nodiscard]] () const -> bool;
+  // ---
   virtual auto CreatePinDrawer [[nodiscard]] (ne::PinId pin_id) const
       -> std::unique_ptr<IPinDrawer> = 0;
 };

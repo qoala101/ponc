@@ -151,9 +151,9 @@ void DrawPinIcon(State& state, core::INode& node, ne::PinId pin_id,
 }
 // vh: bad
 void DrawPinField(draw::IPinDrawer& pin_drawer) {
-  ImGui::Spring(0);
-
   if (auto* float_value = pin_drawer.GetFloat()) {
+    ImGui::Spring(0);
+
     if (pin_drawer.IsEditable()) {
       ImGui::SetNextItemWidth(100);
       ImGui::InputFloat(pin_drawer.GetLabel().c_str(), float_value, 0.0F, 0.0F,
@@ -161,13 +161,15 @@ void DrawPinField(draw::IPinDrawer& pin_drawer) {
     } else {
       ImGui::Text("%.3f %s", *float_value, pin_drawer.GetLabel().c_str());
     }
+
+    ImGui::Spring(0);
   } else {
     if (!pin_drawer.GetLabel().empty()) {
+      ImGui::Spring(0);
       ImGui::TextUnformatted(pin_drawer.GetLabel().c_str());
+      ImGui::Spring(0);
     }
   }
-
-  ImGui::Spring(0);
 }
 // vh: bad
 void DrawNodeHeader(draw::INodeDrawer& node_drawer) {
@@ -229,28 +231,31 @@ auto CalculateAlphaForPin(State& state, ne::PinId pin_id) {
 
 void DrawNode(State& state, TexturesHandle& textures, core::INode& node) {
   auto node_builder = esc::NodeDrawer{node.GetId()};
+  auto drawer = node.CreateDrawer(state);
 
-  const auto header_texture =
-      textures.GetTextureWithDims(textures.GetTextureIds().node_header);
+  if (drawer->HasHeader()) {
+    const auto header_texture =
+        textures.GetTextureWithDims(textures.GetTextureIds().node_header);
 
-  {
-    auto color = node.CreateDrawer(state)->GetColor();
+    {
+      auto color = drawer->GetColor();
 
-    if (state.drawing_.link_colors.color_flow) {
-      const auto node_flow = state.flow_calculator_.GetCalculatedFlow(node);
+      if (state.drawing_.link_colors.color_flow) {
+        const auto node_flow = state.flow_calculator_.GetCalculatedFlow(node);
 
-      if (node_flow.input_pin_flow.has_value()) {
-        const auto flow =
-            GetPinFlow(node_flow, node_flow.input_pin_flow->first);
-        color = state.GetColorForFlowValue(flow);
-      } else {
-        color = ImColor{255, 255, 255};
+        if (node_flow.input_pin_flow.has_value()) {
+          const auto flow =
+              GetPinFlow(node_flow, node_flow.input_pin_flow->first);
+          color = state.GetColorForFlowValue(flow);
+        } else {
+          color = ImColor{255, 255, 255};
+        }
       }
+
+      const auto header_scope = node_builder.AddHeader(header_texture, color);
+
+      DrawNodeHeader(*node.CreateDrawer(state));
     }
-
-    const auto header_scope = node_builder.AddHeader(header_texture, color);
-
-    DrawNodeHeader(*node.CreateDrawer(state));
   }
 
   for (const auto pin_id : node.GetPinIds()) {
@@ -286,6 +291,8 @@ void DrawNode(State& state, TexturesHandle& textures, core::INode& node) {
                     IsPinLinked(state, pin_id), alpha);
       }
     }
+
+    state.drawing_.pin_poses_[pin_id.Get()] = ImGui::GetItemRectMin();
 
     if (state.drawing_.new_link.has_value()) {
       if (state.drawing_.new_link->rebind.has_value()) {

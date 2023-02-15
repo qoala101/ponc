@@ -8,6 +8,7 @@
 
 #include "core_app.h"
 #include "core_diagram.h"
+#include "core_flow.h"
 #include "core_id_generator.h"
 #include "core_placeholder_family.h"
 #include "crude_json.h"
@@ -164,6 +165,49 @@ void State::ReplaceWithPlaceholder(State &state, ne::NodeId node_id) {
       placeholder_family.EmplaceNodeFromFlow(state.id_generator_, node_flow);
 
   placeholder.SetPosition(node_position);
+}
+
+void State::ReplaceWithFreePins(State &state, ne::NodeId node_id) {
+  auto &diagram = state.app_.GetDiagram();
+  const auto &node = diagram.FindNode(node_id);
+  const auto node_flow = node.GetInitialFlow();
+  const auto node_position = node.GetPosition();
+
+  const auto &links = diagram.GetLinks();
+
+  auto connected_node_input_pin = std::optional<ne::PinId>{};
+  auto connected_node_output_pins = std::vector<ne::PinId>{};
+
+  if (node_flow.input_pin_flow.has_value()) {
+    if (diagram.FindLinkFromPin(node_flow.input_pin_flow->first) != nullptr) {
+      connected_node_input_pin = node_flow.input_pin_flow->first;
+    }
+  }
+
+  for (const auto &[pin, value] : node_flow.output_pin_flows) {
+    if (diagram.FindLinkFromPin(pin) != nullptr) {
+      connected_node_output_pins.emplace_back(pin);
+    }
+  }
+
+  ne::DeleteNode(node_id);
+  state.app_.GetDiagram().EraseNode(node_id);
+
+  auto &free_pin_family = diagram.GetFreePinFamily();
+
+  if (connected_node_input_pin.has_value()) {
+    auto &free_pin = free_pin_family.EmplaceNodeFromFlow(
+        state.id_generator_, *connected_node_input_pin, true);
+
+    free_pin.SetPosition(
+        state.drawing_.pin_poses_.at(connected_node_input_pin->Get()));
+  }
+
+  for (const auto pin : connected_node_output_pins) {
+    auto &free_pin =
+        free_pin_family.EmplaceNodeFromFlow(state.id_generator_, pin, false);
+    free_pin.SetPosition(state.drawing_.pin_poses_.at(pin.Get()));
+  }
 }
 
 void State::MakeGroupFromSelectedNodes(State &state, std::string group_name) {

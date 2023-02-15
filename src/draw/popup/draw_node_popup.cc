@@ -27,7 +27,7 @@ void NodePopup::DrawContent(State& state) {
     SetVisible(false);
 
     state.PostEvent([node_id = node_->GetId()](auto& state) {
-      State::ReplaceWithPlaceholder(state, node_id);
+      State::ReplaceWithFreePins(state, node_id);
     });
   }
 

@@ -2,7 +2,9 @@
 #define VH_ESC_STATE_H_
 
 #include <imgui_node_editor.h>
+#include <sys/types.h>
 
+#include <cstdint>
 #include <functional>
 
 #include "core_app.h"
@@ -30,6 +32,7 @@ class State {
   static void EraseNodeAndConnectedLinks(State &state, ne::NodeId node_id);
 
   static void ReplaceWithPlaceholder(State &state, ne::NodeId node_id);
+  static void ReplaceWithFreePins(State &state, ne::NodeId node_id);
   static void MakeGroupFromSelectedNodes(State &state, std::string group_name);
 
   // ---
@@ -65,6 +68,8 @@ class State {
     } link_colors{};
 
     std::optional<NewLink> new_link{};
+
+    std::unordered_map<uintptr_t, ImVec2> pin_poses_{};
   } drawing_{};
 
   auto GetColorForFlowValue(float value) const -> ImColor;
