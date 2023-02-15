@@ -76,6 +76,8 @@ class State {
 
   auto GetColorForFlowValue(float value) const -> ImColor;
 
+  auto CanConnectFromPinToPin(ne::PinId start_pin, ne::PinId end_pin) -> bool;
+
  private:
   // ---
   void ExecuteEvents();

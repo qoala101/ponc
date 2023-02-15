@@ -55,15 +55,15 @@ void LinkConnectionProcess::Draw(State& state) {
       auto end_pin_drawer =
           end_node->CreateDrawer(state)->CreatePinDrawer(end_pin_id);
 
-      if (end_pin_id == start_pin_id) {
-        ne::RejectNewItem(ImColor{255, 0, 0}, 2.0F);
-      } else if ((end_pin_drawer->GetKind() == start_pin_drawer->GetKind()) &&
-                 !new_link.rebind.has_value()) {
-        Tooltip{"x Incompatible Pin Kind", {45, 32, 32, 180}}.Draw(state);
-        ne::RejectNewItem(ImColor{255, 0, 0}, 2.0F);
-      } else if (start_node == end_node) {
-        Tooltip{"x Cannot connect to self", {45, 32, 32, 180}}.Draw(state);
-        ne::RejectNewItem(ImColor{255, 0, 0}, 1.0F);
+      if (!state.CanConnectFromPinToPin(new_link.pin_dragged_from,
+                                        *new_link.pin_hovered_over)) {
+        auto alpha = 255;
+
+        if (new_link.rebind.has_value()) {
+          alpha = 0;
+        }
+
+        ne::RejectNewItem(ImColor{255, 0, 0, alpha}, 2.0F);
       } else {
         if (new_link.rebind.has_value()) {
           Tooltip{"+ Move Link", {32, 45, 32, 180}}.Draw(state);
@@ -95,23 +95,25 @@ void LinkConnectionProcess::Draw(State& state) {
           }
         }
       }
+    } else {
+      state.drawing_.new_link->pin_hovered_over.reset();
     }
 
-    if (ne::QueryNewNode(&end_pin_id)) {
-      auto& new_link =
-          state.drawing_.new_link.emplace(State::NewLink{end_pin_id});
+    // if (ne::QueryNewNode(&end_pin_id)) {
+    //   auto& new_link =
+    //       state.drawing_.new_link.emplace(State::NewLink{end_pin_id});
 
-      UpdateNewLink(state, new_link);
+    //   UpdateNewLink(state, new_link);
 
-      Tooltip{"+ Create Node", {32, 45, 32, 180}}.Draw(state);
+    //   Tooltip{"+ Create Node", {32, 45, 32, 180}}.Draw(state);
 
-      if (ne::AcceptNewItem()) {
-        const auto suspend_scope =
-            cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
+    //   if (ne::AcceptNewItem()) {
+    //     const auto suspend_scope =
+    //         cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
 
-        ImGui::OpenPopup("Create New Node");
-      }
-    }
+    //     ImGui::OpenPopup("Create New Node");
+    //   }
+    // }
   } else {
     state.drawing_.new_link.reset();
   }

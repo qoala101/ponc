@@ -9,9 +9,12 @@
 #include "core_app.h"
 #include "core_diagram.h"
 #include "core_flow.h"
+#include "core_i_node.h"
 #include "core_id_generator.h"
+#include "core_link.h"
 #include "core_placeholder_family.h"
 #include "crude_json.h"
+#include "draw_i_node_drawer.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 #include "impl_attenuator_node.h"
@@ -289,6 +292,86 @@ auto State::GetColorForFlowValue(float value) const -> ImColor {
                      percentage * (end_color.Value.y - start_color.Value.y),
                  start_color.Value.z +
                      percentage * (end_color.Value.z - start_color.Value.z)};
+}
+
+auto State::CanConnectFromPinToPin(ne::PinId start_pin, ne::PinId end_pin)
+    -> bool {
+  if (start_pin == end_pin) {
+    return false;
+  }
+
+  const auto rebind =
+      drawing_.new_link.has_value() && drawing_.new_link->rebind.has_value();
+  const auto &families = app_.GetDiagram().GetFamilies();
+  const auto &links = app_.GetDiagram().GetLinks();
+
+  auto *start_node = static_cast<core::INode *>(nullptr);
+  auto *end_node = static_cast<core::INode *>(nullptr);
+
+  for (const auto &family : families) {
+    for (const auto &node : family->GetNodes()) {
+      for (const auto pin : node->GetPinIds()) {
+        if (pin == start_pin) {
+          start_node = &*node;
+        } else if (pin == end_pin) {
+          end_node = &*node;
+        }
+      }
+    }
+  }
+
+  if (start_node == end_node) {
+    std::cout << "r0\n";
+    return false;
+  }
+
+  const auto start_drawer =
+      start_node->CreateDrawer(*this)->CreatePinDrawer(start_pin);
+  const auto end_drawer =
+      end_node->CreateDrawer(*this)->CreatePinDrawer(end_pin);
+
+  if (rebind) {
+    if (start_drawer->GetKind() != end_drawer->GetKind()) {
+      std::cout << "r1\n";
+      return false;
+    }
+  } else {
+    if (start_drawer->GetKind() == end_drawer->GetKind()) {
+      std::cout << "r2\n";
+      return false;
+    }
+  }
+
+  auto *start_link = static_cast<const core::Link *>(nullptr);
+  auto *end_link = static_cast<const core::Link *>(nullptr);
+
+  for (const auto &link : links) {
+    if (link.start_pin_id == start_pin || link.end_pin_id == start_pin) {
+      start_link = &link;
+    } else if (link.start_pin_id == end_pin || link.end_pin_id == end_pin) {
+      end_link = &link;
+    }
+  }
+
+  if (rebind) {
+    std::cout << "rebind1\n";
+    if (start_link != nullptr && end_link != nullptr) {
+      std::cout << "rebind2\n";
+      if (start_link != end_link) {
+        std::cout << "rebind3\n";
+        return false;
+      }
+
+      // return f
+    }
+  } else {
+    if (start_link != nullptr || end_link != nullptr) {
+      std::cout << "r3\n";
+      return false;
+    }
+  }
+
+  return true;
 }
 
 void State::OnFrame() {

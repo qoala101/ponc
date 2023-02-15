@@ -202,13 +202,6 @@ auto IsPinLinked(State& state, ne::PinId id) -> bool {
 
   return false;
 }
-
-// vh: ok
-auto CanCreateLink(State& state, ne::PinId left, ne::PinId right) -> bool {
-  return (left != right) &&
-         (state.app_.GetDiagram().FindPin(left, state)->GetKind() !=
-          state.app_.GetDiagram().FindPin(right, state)->GetKind());
-}
 // vh: bad
 auto CalculateAlphaForPin(State& state, ne::PinId pin_id) {
   auto alpha = ImGui::GetStyle().Alpha;
@@ -220,6 +213,14 @@ auto CalculateAlphaForPin(State& state, ne::PinId pin_id) {
   //     {
   //   alpha = alpha * (48.0F / 255.0F);
   // }
+
+  // if (state.drawing_.new_link.has_value()) {
+  //   if (!state.CanConnectFromPinToPin(state.drawing_.new_link->pin_dragged_from,
+  //                                     pin_id)) {
+  //     alpha = alpha * (48.0F / 255.0F);
+  //   }
+  // }
+      // alpha = alpha * (48.0F / 255.0F);
 
   // if (state.drawing_.not_yet_connected_pin_of_new_link_id.has_value() &&
   //     (pin_id != *state.drawing_.not_yet_connected_pin_of_new_link_id)) {
@@ -262,8 +263,6 @@ void DrawNode(State& state, TexturesHandle& textures, core::INode& node) {
     auto drawer = state.app_.GetDiagram().FindPin(pin_id, state);
     const auto kind = drawer->GetKind();
     const auto alpha = CalculateAlphaForPin(state, pin_id);
-
-    auto* drawList = ImGui::GetWindowDrawList();
 
     if (kind == ne::PinKind::Input) {
       const auto input_scope = node_builder.AddPin(pin_id, kind);

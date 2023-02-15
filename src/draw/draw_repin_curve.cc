@@ -62,9 +62,19 @@ void RepinCurve::Draw(State& state) {
                      ImGui::GetMousePos(),
                      state.drawing_.new_link->rebind->fixed_pin_kind);
 
+        auto color = ImColor{255, 255, 255};
+
+        if (state.drawing_.new_link->pin_hovered_over.has_value()) {
+          if (!state.CanConnectFromPinToPin(
+                  state.drawing_.new_link->pin_dragged_from,
+                  *state.drawing_.new_link->pin_hovered_over)) {
+            color = ImColor{255, 0, 0};
+          }
+        }
+
         auto* drawList = ImGui::GetWindowDrawList();
-        drawList->AddBezierCubic(curve.P0, curve.P1, curve.P2, curve.P3,
-                                 ImColor{255, 255, 255, 255}, 2.0F);
+        drawList->AddBezierCubic(curve.P0, curve.P1, curve.P2, curve.P3, color,
+                                 2.0F);
       }
     }
   }
