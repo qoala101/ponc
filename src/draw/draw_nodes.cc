@@ -99,27 +99,27 @@ void Icon(const ImVec2& size, bool filled,
 void DrawPinIcon(State& state, core::INode& node, ne::PinId pin_id,
                  draw::IPinDrawer& pin_drawer, bool connectable, bool connected,
                  float alpha) {
-  const auto& new_link = state.drawing_.new_link;
-  if (new_link.has_value()) {
-    if (pin_id == new_link->pin_dragged_from) {
-      ImGui::GetWindowDrawList()->AddCircle(ImGui::GetCursorPos(), 5.0F,
-                                            ImColor{255, 0, 0}, 0, 3.0F);
-    }
+  // const auto& new_link = state.drawing_.new_link;
+  // if (new_link.has_value()) {
+  //   if (pin_id == new_link->pin_dragged_from) {
+  //     ImGui::GetWindowDrawList()->AddCircle(ImGui::GetCursorPos(), 5.0F,
+  //                                           ImColor{255, 0, 0}, 0, 3.0F);
+  //   }
 
-    if (new_link->pin_hovered_over.has_value()) {
-      if (pin_id == *new_link->pin_hovered_over) {
-        ImGui::GetWindowDrawList()->AddCircle(ImGui::GetCursorPos(), 7.0F,
-                                              ImColor{0, 255, 0}, 0, 3.0F);
-      }
-    }
+  //   if (new_link->pin_hovered_over.has_value()) {
+  //     if (pin_id == *new_link->pin_hovered_over) {
+  //       ImGui::GetWindowDrawList()->AddCircle(ImGui::GetCursorPos(), 7.0F,
+  //                                             ImColor{0, 255, 0}, 0, 3.0F);
+  //     }
+  //   }
 
-    if (new_link->rebind.has_value()) {
-      if (pin_id == new_link->rebind->fixed_pin) {
-        ImGui::GetWindowDrawList()->AddCircle(ImGui::GetCursorPos(), 7.0F,
-                                              ImColor{0, 0, 255}, 0, 3.0F);
-      }
-    }
-  }
+  //   if (new_link->rebind.has_value()) {
+  //     if (pin_id == new_link->rebind->fixed_pin) {
+  //       ImGui::GetWindowDrawList()->AddCircle(ImGui::GetCursorPos(), 7.0F,
+  //                                             ImColor{0, 0, 255}, 0, 3.0F);
+  //     }
+  //   }
+  // }
 
   if (!connectable) {
     if (pin_drawer.IsEditable()) {

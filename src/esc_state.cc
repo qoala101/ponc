@@ -84,7 +84,7 @@ void State::OpenDiagramFromFile(State &state, const std::string &file_path) {
   auto max_id = FindMaxId(diagram);
 
   state.app_.SetDiagram(std::move(diagram));
-  state.id_generator_ = core::IdGenerator{max_id};
+  state.id_generator_ = core::IdGenerator{max_id + 1};
 }
 
 void State::SaveDiagramToFile(const State &state,

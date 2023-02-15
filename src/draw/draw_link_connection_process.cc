@@ -29,8 +29,14 @@ void UpdateNewLink(State& state, State::NewLink& new_link) {
 
 void LinkConnectionProcess::Draw(State& state) {
   const auto create_scope = cpp::Scope{[]() { ne::EndCreate(); }};
+  auto alpha = 255;
 
-  if (ne::BeginCreate(ImColor{255, 255, 255, 0}, 2.0F)) {
+  if (state.drawing_.new_link.has_value() &
+      state.drawing_.new_link->rebind.has_value()) {
+    alpha = 0;
+  }
+
+  if (ne::BeginCreate(ImColor{255, 255, 255, alpha}, 2.0F)) {
     auto start_pin_id = ne::PinId{};
     auto end_pin_id = ne::PinId{};
 
@@ -83,16 +89,9 @@ void LinkConnectionProcess::Draw(State& state) {
           Tooltip{"+ Create Link", {32, 45, 32, 180}}.Draw(state);
 
           if (ne::AcceptNewItem(ImColor{127, 255, 127}, 4.0F)) {
-            if (start_pin_drawer->GetKind() == ne::PinKind::Input) {
-              using std::swap;
-
-              swap(start_pin_drawer, end_pin_drawer);
-              swap(start_pin_id, end_pin_id);
-            }
-
-            state.app_.GetDiagram().EmplaceLink(
-                core::Link{state.id_generator_.GetNext<ne::LinkId>(),
-                           start_pin_id, end_pin_id});
+            state.app_.GetDiagram().EmplaceLink(core::Link{
+                state.id_generator_.GetNext<ne::LinkId>(),
+                new_link.pin_dragged_from, *new_link.pin_hovered_over});
           }
         }
       }
