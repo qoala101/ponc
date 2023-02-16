@@ -55,7 +55,7 @@ auto Diagram::FindNode(ne::NodeId id) -> INode& {
     }
   }
 
-  cpp::Expects(false);
+  Expects(false);
 }
 
 auto Diagram::FindNodePTR(ne::NodeId id) -> const std::shared_ptr<INode>& {
@@ -67,7 +67,7 @@ auto Diagram::FindNodePTR(ne::NodeId id) -> const std::shared_ptr<INode>& {
     }
   }
 
-  cpp::Expects(false);
+  Expects(false);
 }
 
 auto Diagram::FindPin(ne::PinId id, const State& state)
@@ -86,7 +86,7 @@ auto Diagram::FindPinNode(ne::PinId id) -> const std::shared_ptr<INode>& {
     }
   }
 
-  cpp::Expects(false);
+  Expects(false);
 }
 
 auto Diagram::FindLink(ne::LinkId id) -> Link& {
@@ -96,7 +96,7 @@ auto Diagram::FindLink(ne::LinkId id) -> Link& {
     }
   }
 
-  cpp::Expects(false);
+  Expects(false);
 }
 
 auto Diagram::FindLinkFromPin(ne::PinId pin_id) -> const Link* {

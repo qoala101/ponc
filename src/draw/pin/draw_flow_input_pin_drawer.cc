@@ -5,7 +5,7 @@
 
 namespace esc::draw {
 FlowInputPinDrawer::FlowInputPinDrawer(const core::Flow& flow)
-    : value_{(cpp::Expects(flow.input_pin_flow.has_value()),
+    : value_{(Expects(flow.input_pin_flow.has_value()),
               flow.input_pin_flow->second)} {}
 
 auto FlowInputPinDrawer::GetLabel() const -> std::string { return {}; }

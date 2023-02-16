@@ -1,11 +1,12 @@
 #ifndef VH_CPP_ASSERT_H_
 #define VH_CPP_ASSERT_H_
 
-namespace esc::cpp {
 // ---
-void Expects(bool condition);
+// NOLINTNEXTLINE(*-no-array-decay, *-array-to-pointer-decay)
+#define Expects(condition) (assert(condition))
+
 // ---
-void Ensures(bool condition);
-}  // namespace esc::cpp
+// NOLINTNEXTLINE(*-no-array-decay, *-array-to-pointer-decay)
+#define Ensures(condition) (assert(condition))
 
 #endif  // VH_CPP_ASSERT_H_

@@ -8,13 +8,13 @@ namespace esc::draw {
 // ---
 class Nodes : public IDrawable {
  public:
-  explicit Nodes(esc::TexturesHandle textures);
+  // explicit Nodes(esc::TexturesHandle textures);
 
   // ---
   void Draw(State &state) override;
 
  private:
-  TexturesHandle textures_;
+  // TexturesHandle textures_;
 };
 }  // namespace esc::draw
 

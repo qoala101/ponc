@@ -230,33 +230,37 @@ auto CalculateAlphaForPin(State& state, ne::PinId pin_id) {
   return alpha;
 }
 
-void DrawNode(State& state, TexturesHandle& textures, core::INode& node) {
+void DrawNode(State& state,
+              // TexturesHandle& textures,
+              core::INode& node) {
   auto node_builder = esc::NodeDrawer{node.GetId()};
   auto drawer = node.CreateDrawer(state);
 
   if (drawer->HasHeader()) {
-    const auto header_texture =
-        textures.GetTextureWithDims(textures.GetTextureIds().node_header);
+    // const auto header_texture =
+    //     textures.GetTextureWithDims(textures.GetTextureIds().node_header);
 
-    {
-      auto color = drawer->GetColor();
+    // {
+    //   auto color = drawer->GetColor();
 
-      if (state.drawing_.link_colors.color_flow) {
-        const auto node_flow = state.flow_calculator_.GetCalculatedFlow(node);
+    //   if (state.drawing_.link_colors.color_flow) {
+    //     const auto node_flow =
+    //     state.flow_calculator_.GetCalculatedFlow(node);
 
-        if (node_flow.input_pin_flow.has_value()) {
-          const auto flow =
-              GetPinFlow(node_flow, node_flow.input_pin_flow->first);
-          color = state.GetColorForFlowValue(flow);
-        } else {
-          color = ImColor{255, 255, 255};
-        }
-      }
+    //     if (node_flow.input_pin_flow.has_value()) {
+    //       const auto flow =
+    //           GetPinFlow(node_flow, node_flow.input_pin_flow->first);
+    //       color = state.GetColorForFlowValue(flow);
+    //     } else {
+    //       color = ImColor{255, 255, 255};
+    //     }
+    //   }
 
-      const auto header_scope = node_builder.AddHeader(header_texture, color);
+    //   const auto header_scope = node_builder.AddHeader(header_texture,
+    //   color);
 
-      DrawNodeHeader(*node.CreateDrawer(state));
-    }
+    //   DrawNodeHeader(*node.CreateDrawer(state));
+    // }
   }
 
   for (const auto pin_id : node.GetPinIds()) {
@@ -317,12 +321,14 @@ void DrawNode(State& state, TexturesHandle& textures, core::INode& node) {
 }
 }  // namespace
 
-Nodes::Nodes(TexturesHandle textures) : textures_{std::move(textures)} {}
+// Nodes::Nodes(TexturesHandle textures) : textures_{std::move(textures)} {}
 
 void Nodes::Draw(State& state) {
   for (const auto& family : state.app_.GetDiagram().GetFamilies()) {
     for (const auto& node : family->GetNodes()) {
-      DrawNode(state, textures_, *node);
+      DrawNode(state,
+               // textures_,
+               *node);
     }
   }
 }

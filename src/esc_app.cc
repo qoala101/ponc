@@ -1,25 +1,35 @@
 #include "esc_app.h"
 
 #include <application.h>
-#include <ranges>
 #include <imgui_node_editor.h>
 #include <sys/types.h>
 
 #include <chrono>
 #include <ios>
 #include <memory>
+#include <ranges>
 #include <unordered_map>
 
+#include "core_app.h"
 #include "core_diagram.h"
 #include "core_i_family.h"
 #include "core_i_node.h"
 #include "core_id_generator.h"
 #include "cpp_assert.h"
 #include "cpp_scope.h"
+#include "draw_delete_items_process.h"
+#include "draw_groups.h"
 #include "draw_i_family_drawer.h"
 #include "draw_i_node_drawer.h"
 #include "draw_i_pin_drawer.h"
+#include "draw_link_connection_process.h"
+#include "draw_links.h"
+#include "draw_main_window.h"
+#include "draw_nodes.h"
+#include "draw_popups.h"
+#include "draw_repin_curve.h"
 #include "draw_tooltip.h"
+#include "esc_editor_context_handle.h"
 #include "esc_node_drawer.h"
 #include "esc_state.h"
 #include "esc_textures_handle.h"
@@ -36,70 +46,49 @@
 #include <utility>
 #include <vector>
 
-namespace ne = ax::NodeEditor;
-
 namespace esc {
-namespace {}  // namespace
-// vh: norm
+// ---
 App::App(const char* name, int argc, char** argv)
     : Application{name, argc, argv} {}
-// vh: norm
-void App::OnStart() {
-  state_.emplace(std::make_shared<State>());
-  editor_context_.emplace();
-  repin_curve_.emplace();
-  groups_.emplace();
-  nodes_.emplace(std::move(TexturesHandle{shared_from_this()}));
-  main_window_.emplace();
-  popups_.emplace();
-  links_.emplace();
-  link_connection_process_.emplace();
-  delete_items_process_.emplace();
-}
-// vh: norm
-void App::OnStop() {
-  delete_items_process_.reset();
-  link_connection_process_.reset();
-  links_.reset();
-  popups_.reset();
-  main_window_.reset();
-  nodes_.reset();
-  repin_curve_.reset();
-  groups_.reset();
-  editor_context_.reset();
-  state_.reset();
-}
 
+// ---
 auto App::GetWindowFlags() const -> ImGuiWindowFlags {
+  // NOLINTNEXTLINE(*-signed-bitwise)
   return Application::GetWindowFlags() | ImGuiWindowFlags_MenuBar;
 }
 
-// vh: ok
+// ---
+void App::OnStart() {
+  Expects(!impl_.has_value());
+  impl_.emplace();
+  Ensures(impl_.has_value());
+}
+
+// ---
+void App::OnStop() {
+  Expects(impl_.has_value());
+  impl_.reset();
+  Ensures(!impl_.has_value());
+}
+
 void App::OnFrame(float /*unused*/) {
-  (*state_)->OnFrame();
-  DrawFrame();
-}
-// vh: norm
-void App::DrawDeleteItemsProcess() {
-}
-// vh: norm
-void App::DrawNodeEditor() {
-  const auto node_editor_scope =
-      cpp::Scope{[]() { ne::Begin("Node editor"); }, []() { ne::End(); }};
+  // assert(impl_.has_value());
+  Expects(impl_.has_value());
+  (*impl_).state_->OnFrame();
+  (*impl_).main_window_.Draw(*(*impl_).state_);
 
-  groups_->Draw(**state_);
-  nodes_->Draw(**state_);
-  links_->Draw(**state_);
-  repin_curve_->Draw(**state_);
-  link_connection_process_->Draw(**state_);
-  delete_items_process_->Draw(**state_);
-  popups_->Draw(**state_);
-}
-// vh: bad
-void App::DrawFrame() {
-  main_window_->Draw(**state_);
-  DrawNodeEditor();
+  {
+    const auto node_editor_scope =
+        cpp::Scope{[]() { ne::Begin("Node editor"); }, []() { ne::End(); }};
 
+    (*impl_).groups_.Draw(*(*impl_).state_);
+    (*impl_).nodes_.Draw(*(*impl_).state_);
+    (*impl_).links_.Draw(*(*impl_).state_);
+    (*impl_).repin_curve_.Draw(*(*impl_).state_);
+    (*impl_).link_connection_process_.Draw(*(*impl_).state_);
+    (*impl_).delete_items_process_.Draw(*(*impl_).state_);
+    (*impl_).popups_.Draw(*(*impl_).state_);
+  }
   // ImGui::ShowDemoWindow();
   // ImGui::ShowMetricsWindow();
 }

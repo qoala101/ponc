@@ -69,7 +69,7 @@ void NodeDrawer::ProcessOldStage(Stage old_stage) {
     case Stage::kHeader:
       ImGui::EndHorizontal();
 
-      cpp::Expects(header_.has_value());
+      Expects(header_.has_value());
       header_->rect = ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
 
       ImGui::Spring(0, ImGui::GetStyle().ItemSpacing.y * 2.0f);

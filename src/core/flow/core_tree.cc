@@ -8,8 +8,8 @@ namespace esc::core {
 void TraverseDepthFirst(const TreeNode &tree_node,
                         const std::optional<Visitor> &visit_before_children,
                         const std::optional<Visitor> &visit_after_children) {
-  cpp::Expects(visit_before_children.has_value() ||
-               visit_after_children.has_value());
+  Expects(visit_before_children.has_value() ||
+          visit_after_children.has_value());
 
   if (visit_before_children.has_value()) {
     (*visit_before_children)(tree_node);

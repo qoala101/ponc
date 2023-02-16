@@ -1,8 +1,7 @@
 #include "core_free_pin_family.h"
 
-#include <ranges>
-
 #include <memory>
+#include <ranges>
 #include <string>
 #include <vector>
 
@@ -163,7 +162,7 @@ FreePinFamily::FreePinFamily(std::vector<std::shared_ptr<INode>> nodes)
 
 auto FreePinFamily::CreateNode(IdGenerator& id_generator)
     -> std::shared_ptr<INode> {
-  cpp::Expects(false);
+  Expects(false);
   return {};
 }
 

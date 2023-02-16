@@ -1,8 +1,7 @@
 #include "core_placeholder_family.h"
 
-#include <ranges>
-
 #include <memory>
+#include <ranges>
 #include <string>
 #include <vector>
 
@@ -152,7 +151,7 @@ PlaceholderFamily::PlaceholderFamily(std::vector<std::shared_ptr<INode>> nodes)
 
 auto PlaceholderFamily::CreateNode(IdGenerator& id_generator)
     -> std::shared_ptr<INode> {
-  cpp::Expects(false);
+  Expects(false);
   return {};
 }
 

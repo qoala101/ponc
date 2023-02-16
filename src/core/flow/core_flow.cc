@@ -11,7 +11,7 @@ auto operator+(Flow &left, const Flow &right) -> Flow & {
   if (left.input_pin_flow.has_value()) {
     auto &left_input = left.input_pin_flow->second;
 
-    cpp::Expects(right.input_pin_flow.has_value());
+    Expects(right.input_pin_flow.has_value());
     const auto right_input = right.input_pin_flow->second;
 
     left_input += right_input;

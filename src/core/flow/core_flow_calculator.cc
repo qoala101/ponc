@@ -1,10 +1,9 @@
 #include "core_flow_calculator.h"
 
-#include <ranges>
-
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <ranges>
 #include <unordered_set>
 #include <vector>
 
@@ -26,7 +25,7 @@ auto HasInputPin [[nodiscard]] (const Flow &node_flow) {
 // ---
 auto HasLinkFromParent
     [[nodiscard]] (const Flow &node_flow, const std::vector<Link> &links) {
-  cpp::Expects(node_flow.input_pin_flow.has_value());
+  Expects(node_flow.input_pin_flow.has_value());
 
   return std::ranges::any_of(links, [&node_flow](const auto &link) {
     return link.end_pin_id.Get() == node_flow.input_pin_flow->first;
@@ -104,7 +103,7 @@ auto FlowCalculator::GetFlowTree() const -> const Tree & { return flow_tree_; }
 auto FlowCalculator::GetCalculatedFlow(const INode &node) const
     -> const Flow & {
   const auto node_id = node.GetId().Get();
-  cpp::Expects(node_flows_.contains(node_id));
+  Expects(node_flows_.contains(node_id));
   return node_flows_.at(node_id);
 }
 
@@ -132,7 +131,7 @@ void FlowCalculator::RebuildFlowTree(
         }
 
         const auto &node_input_pin = node->GetInitialFlow().input_pin_flow;
-        cpp::Expects(node_input_pin.has_value());
+        Expects(node_input_pin.has_value());
 
         for (const auto &possible_parent : previous_level_tree_nodes) {
           const auto parent_output_pins =
