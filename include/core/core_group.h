@@ -1,7 +1,9 @@
 #ifndef VH_CORE_GROUP_H_
 #define VH_CORE_GROUP_H_
 
+#include <array>
 #include <memory>
+#include <string>
 
 #include "core_i_node.h"
 #include "imgui.h"

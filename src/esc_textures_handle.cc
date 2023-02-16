@@ -1,6 +1,8 @@
 #include "esc_textures_handle.h"
 
-#include <bits/ranges_algo.h>
+#include <algorithm>
+#include <array>
+#include <ranges>
 
 #include "cpp_assert.h"
 
@@ -11,7 +13,7 @@ auto TexturesHandle::GetTextureIdsAsArray() {
 
 auto TexturesHandle::AreTexturesLoaded() {
   return std::ranges::all_of(GetTextureIdsAsArray(), [](auto* texture_id) {
-    return *texture_id != nullptr;
+    return *texture_id != ImTextureID{};
   });
 }
 
@@ -42,8 +44,8 @@ TexturesHandle::~TexturesHandle() {
   }
 
   for (auto* texture_id : GetTextureIdsAsArray()) {
-    app_->DestroyTexture(texture_id);
-    *texture_id = nullptr;
+    app_->DestroyTexture(*texture_id);
+    *texture_id = ImTextureID{};
   }
 }
 }  // namespace esc

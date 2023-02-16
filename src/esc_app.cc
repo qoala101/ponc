@@ -1,7 +1,7 @@
 #include "esc_app.h"
 
 #include <application.h>
-#include <bits/ranges_algo.h>
+#include <ranges>
 #include <imgui_node_editor.h>
 #include <sys/types.h>
 

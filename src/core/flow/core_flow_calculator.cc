@@ -1,6 +1,6 @@
 #include "core_flow_calculator.h"
 
-#include <bits/ranges_algo.h>
+#include <ranges>
 
 #include <algorithm>
 #include <cstddef>

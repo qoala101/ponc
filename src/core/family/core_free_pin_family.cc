@@ -1,6 +1,6 @@
 #include "core_free_pin_family.h"
 
-#include <bits/ranges_algo.h>
+#include <ranges>
 
 #include <memory>
 #include <string>
@@ -164,6 +164,7 @@ FreePinFamily::FreePinFamily(std::vector<std::shared_ptr<INode>> nodes)
 auto FreePinFamily::CreateNode(IdGenerator& id_generator)
     -> std::shared_ptr<INode> {
   cpp::Expects(false);
+  return {};
 }
 
 auto FreePinFamily::CreateNodeParser() -> std::unique_ptr<json::INodeParser> {

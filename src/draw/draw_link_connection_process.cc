@@ -31,7 +31,7 @@ void LinkConnectionProcess::Draw(State& state) {
   const auto create_scope = cpp::Scope{[]() { ne::EndCreate(); }};
   auto alpha = 255;
 
-  if (state.drawing_.new_link.has_value() &
+  if (state.drawing_.new_link.has_value() &&
       state.drawing_.new_link->rebind.has_value()) {
     alpha = 0;
   }

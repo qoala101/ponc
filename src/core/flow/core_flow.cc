@@ -1,6 +1,7 @@
 #include "core_flow.h"
 
-#include <bits/ranges_algo.h>
+#include <algorithm>
+#include <ranges>
 
 #include "cpp_assert.h"
 

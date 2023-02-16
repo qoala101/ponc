@@ -1,6 +1,6 @@
 #include "draw_background_popup.h"
 
-#include <bits/ranges_algo.h>
+#include <ranges>
 
 #include "core_i_family.h"
 #include "cpp_scope.h"

@@ -1,6 +1,6 @@
 #include "core_placeholder_family.h"
 
-#include <bits/ranges_algo.h>
+#include <ranges>
 
 #include <memory>
 #include <string>
@@ -153,6 +153,7 @@ PlaceholderFamily::PlaceholderFamily(std::vector<std::shared_ptr<INode>> nodes)
 auto PlaceholderFamily::CreateNode(IdGenerator& id_generator)
     -> std::shared_ptr<INode> {
   cpp::Expects(false);
+  return {};
 }
 
 auto PlaceholderFamily::CreateNodeParser()

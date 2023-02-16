@@ -1,6 +1,7 @@
 #include "core_i_family.h"
 
-#include <bits/ranges_algo.h>
+#include <ranges>
+#include <algorithm>
 
 namespace esc::core {
 // ---

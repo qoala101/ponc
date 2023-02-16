@@ -4,7 +4,13 @@
 #include <utility>
 
 namespace esc::cpp {
-template <typename End, typename Start = decltype([]() {})>
+namespace detail {
+struct EmptyFunction {
+  void operator()() {}
+};
+}  // namespace detail
+
+template <typename End, typename Start = detail::EmptyFunction>
 class Scope {
  public:
   explicit Scope(End end) : end_{std::move(end)} {}

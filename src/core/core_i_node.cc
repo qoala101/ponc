@@ -1,7 +1,7 @@
 #include "core_i_node.h"
 
-#include <bits/ranges_algo.h>
-
+#include <algorithm>
+#include <ranges>
 #include <vector>
 
 namespace esc::core {

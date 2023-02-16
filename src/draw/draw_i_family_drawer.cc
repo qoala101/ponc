@@ -1,6 +1,7 @@
 #include "draw_i_family_drawer.h"
 
-#include <bits/ranges_algo.h>
+#include <algorithm>
+#include <ranges>
 
 namespace esc::draw {
 auto IFamilyDrawer::GetGroupLabel() const -> std::string { return GetLabel(); }
