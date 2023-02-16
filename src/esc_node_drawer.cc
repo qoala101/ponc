@@ -1,5 +1,9 @@
+
+
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "esc_node_drawer.h"
 
+#include <imgui.h>
 #include <imgui_internal.h>
 
 #include "cpp_assert.h"

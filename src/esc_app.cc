@@ -23,7 +23,6 @@
 #include "esc_node_drawer.h"
 #include "esc_state.h"
 #include "esc_textures_handle.h"
-#include "esc_types.h"
 #include "imgui.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -55,9 +54,11 @@ void App::OnStart() {
   popups_.emplace();
   links_.emplace();
   link_connection_process_.emplace();
+  delete_items_process_.emplace();
 }
 // vh: norm
 void App::OnStop() {
+  delete_items_process_.reset();
   link_connection_process_.reset();
   links_.reset();
   popups_.reset();
@@ -80,23 +81,6 @@ void App::OnFrame(float /*unused*/) {
 }
 // vh: norm
 void App::DrawDeleteItemsProcess() {
-  const auto delete_scope = cpp::Scope{[]() { ne::EndDelete(); }};
-
-  if (ne::BeginDelete()) {
-    auto link_id = ne::LinkId{};
-
-    while (ne::QueryDeletedLink(&link_id)) {
-      if (ne::AcceptDeletedItem()) {
-      }
-    }
-
-    auto node_id = ne::NodeId{};
-
-    while (ne::QueryDeletedNode(&node_id)) {
-      if (ne::AcceptDeletedItem()) {
-      }
-    }
-  }
 }
 // vh: norm
 void App::DrawNodeEditor() {
@@ -108,7 +92,7 @@ void App::DrawNodeEditor() {
   links_->Draw(**state_);
   repin_curve_->Draw(**state_);
   link_connection_process_->Draw(**state_);
-  DrawDeleteItemsProcess();
+  delete_items_process_->Draw(**state_);
   popups_->Draw(**state_);
 }
 // vh: bad

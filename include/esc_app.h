@@ -9,6 +9,7 @@
 
 #include "core_app.h"
 #include "core_diagram.h"
+#include "draw_delete_items_process.h"
 #include "draw_groups.h"
 #include "draw_link_connection_process.h"
 #include "draw_links.h"
@@ -73,6 +74,7 @@ class App : public Application, public std::enable_shared_from_this<App> {
   std::optional<draw::Popups> popups_{};
   std::optional<draw::Links> links_{};
   std::optional<draw::LinkConnectionProcess> link_connection_process_{};
+  std::optional<draw::DeleteItemsProcess> delete_items_process_{};
 };
 }  // namespace esc
 

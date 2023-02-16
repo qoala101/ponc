@@ -1,13 +1,14 @@
 ﻿#ifndef VH_ESC_NODE_DRAWER_H_
 #define VH_ESC_NODE_DRAWER_H_
 
+#include <imgui.h>
+#include <imgui_internal.h>
 #include <imgui_node_editor.h>
 
 #include <optional>
 
 #include "cpp_scope_function.h"
-#include "esc_types.h"
-#include "imgui.h"
+#include "esc_textures_handle.h"
 
 namespace ne = ax::NodeEditor;
 

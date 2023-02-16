@@ -10,6 +10,8 @@
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
+namespace ne = ax::NodeEditor;
+
 namespace esc::draw {
 // ---
 class INodeDrawer : public cpp::Interface {

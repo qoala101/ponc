@@ -7,9 +7,13 @@
 #include <functional>
 #include <memory>
 
-#include "esc_types.h"
-
 namespace esc {
+struct TextureWithDims {
+  ImTextureID id{};
+  int width{};
+  int height{};
+};
+
 class TexturesHandle {
  public:
   struct TextureIds {

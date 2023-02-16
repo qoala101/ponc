@@ -1,5 +1,5 @@
 # TEMPORARY SOLUTION FOR WINDOWS
-if (WIN32)
+if(WIN32)
   set(IMGUI_NODE_EDITOR_ROOT_DIR C:/Users/qoala/source/repos/esc/build/_deps/imgui-node-editor-src/)
 endif()
 
@@ -142,6 +142,7 @@ add_example_executable(esc
   draw/popup/draw_popups.cc
 
   draw/draw_constants.cc
+  draw/draw_delete_items_process.cc
   draw/draw_families_view.cc
   draw/draw_flow_tree_view.cc
   draw/draw_group_settings_view.cc
@@ -182,7 +183,6 @@ add_example_executable(esc
   esc_node_drawer.cc
   esc_state.cc
   esc_textures_handle.cc
-  esc_types.cc
 
   main.cc
 )

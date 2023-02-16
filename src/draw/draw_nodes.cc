@@ -1,16 +1,15 @@
 #include "draw_nodes.h"
 
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include <imgui_internal.h>
+
 #include "cpp_scope.h"
 #include "draw_i_node_drawer.h"
 #include "esc_node_drawer.h"
 #include "esc_textures_handle.h"
+#include "imgui.h"
 #include "imgui_bezier_math.h"
 #include "imgui_node_editor.h"
-
-#define IMGUI_DEFINE_MATH_OPERATORS
-#include <imgui_internal.h>
-
-#include "imgui.h"
 
 namespace esc::draw {
 namespace {
@@ -215,12 +214,13 @@ auto CalculateAlphaForPin(State& state, ne::PinId pin_id) {
   // }
 
   // if (state.drawing_.new_link.has_value()) {
-  //   if (!state.CanConnectFromPinToPin(state.drawing_.new_link->pin_dragged_from,
+  //   if
+  //   (!state.CanConnectFromPinToPin(state.drawing_.new_link->pin_dragged_from,
   //                                     pin_id)) {
   //     alpha = alpha * (48.0F / 255.0F);
   //   }
   // }
-      // alpha = alpha * (48.0F / 255.0F);
+  // alpha = alpha * (48.0F / 255.0F);
 
   // if (state.drawing_.not_yet_connected_pin_of_new_link_id.has_value() &&
   //     (pin_id != *state.drawing_.not_yet_connected_pin_of_new_link_id)) {
