@@ -18,10 +18,9 @@ namespace esc::draw {
 class IFileDialog : public cpp::Interface {
  public:
   // ---
-  void Draw(State &state);
-
-  // ---
   void Show();
+  // ---
+  void Draw(State &state);
 
  protected:
   // ---

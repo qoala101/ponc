@@ -35,47 +35,47 @@ namespace {
 // }
 }  // namespace
 
-void DrawBackgroundPopup(State& state) {
-  if (ImGui::BeginPopup("Create New Node")) {
-    const auto popup_scope = cpp::Scope{[]() { ImGui::EndPopup(); }};
+void BackgroundPopup::SetPosition(const ImVec2& position) {
+  position_ = position;
+}
 
-    ImGui::TextUnformatted("Create New Node");
-    ImGui::Separator();
+auto BackgroundPopup::GetLabel() const -> std::string {
+  return "Create New Node";
+}
 
-    const auto& families = state.core_state->diagram_.GetFamilies();
-    const auto family_groups = coreui::GroupByLabels(families);
+void BackgroundPopup::DrawContent(State& state) {
+  const auto& families = state.core_state->diagram_.GetFamilies();
+  const auto family_groups = coreui::GroupByLabels(families);
 
-    for (const auto& [group_label, families] : family_groups) {
-      auto draw_items = true;
-      const auto is_group = families.size() > 1;
+  for (const auto& [group_label, families] : family_groups) {
+    auto draw_items = true;
+    const auto is_group = families.size() > 1;
 
-      if (is_group) {
-        draw_items = ImGui::BeginMenu(group_label.c_str());
+    if (is_group) {
+      draw_items = ImGui::BeginMenu(group_label.c_str());
+    }
+
+    if (draw_items) {
+      for (const auto& family : families) {
+        if (ImGui::MenuItem(family->CreateDrawer()->GetLabel().c_str())) {
+          state.event_queue->PostEvent(
+              event::CreateNode{.family = family, .position = position_});
+
+          // if (const auto node_created_by_link_from_existing_one =
+          //         drawing_state_.connect_new_node_to_existing_pin_id
+          //             .has_value()) {
+          //   AddLinkFromPinToNode(
+          //       (*state_)->id_generator_.GetNext<ne::LinkId>(),
+          //       *drawing_state_.connect_new_node_to_existing_pin_id,
+          //       new_node);
+          // }
+
+          // break;
+        }
       }
 
-      if (draw_items) {
-        for (const auto& family : families) {
-          if (ImGui::MenuItem(family->CreateDrawer()->GetLabel().c_str())) {
-            state.event_queue->PostEvent(event::CreateNode{
-                .family = family,
-                .position = state.draw_state->popup_position});
-
-            // if (const auto node_created_by_link_from_existing_one =
-            //         drawing_state_.connect_new_node_to_existing_pin_id
-            //             .has_value()) {
-            //   AddLinkFromPinToNode(
-            //       (*state_)->id_generator_.GetNext<ne::LinkId>(),
-            //       *drawing_state_.connect_new_node_to_existing_pin_id,
-            //       new_node);
-            // }
-
-            // break;
-          }
-        }
-
-        if (is_group) {
-          ImGui::EndMenu();
-        }
+      if (is_group) {
+        ImGui::EndMenu();
       }
     }
   }

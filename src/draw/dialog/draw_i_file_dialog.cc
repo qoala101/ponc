@@ -1,6 +1,8 @@
 #include "draw_i_file_dialog.h"
 
 namespace esc::draw {
+void IFileDialog::Show() { dialog_.Open(); }
+
 void IFileDialog::Draw(State &state) {
   dialog_.Display();
 
@@ -11,8 +13,6 @@ void IFileDialog::Draw(State &state) {
   OnFileSelected(state, dialog_.GetSelected().string());
   dialog_.ClearSelected();
 }
-
-void IFileDialog::Show() { dialog_.Open(); }
 
 IFileDialog::IFileDialog(const ImGui::FileBrowser &dialog) : dialog_{dialog} {}
 }  // namespace esc::draw

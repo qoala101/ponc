@@ -13,10 +13,14 @@
 
 #include "app_textures.h"
 #include "core_state.h"
+#include "draw_background_popup.h"
 #include "draw_families_view.h"
 #include "draw_flow_tree_view.h"
 #include "draw_group_settings_view.h"
 #include "draw_groups_view.h"
+#include "draw_link_popup.h"
+#include "draw_link_popup.h"
+#include "draw_node_popup.h"
 #include "draw_open_file_dialog.h"
 #include "draw_save_as_file_dialog.h"
 #include "draw_settings_view.h"
@@ -48,15 +52,18 @@ struct DrawState {
   OpenFileDialog open_file_dialog{};
   SaveAsFileDialog save_as_file_dialog{};
 
+  BackgroundPopup background_popup{};
+  NodePopup node_popup{};
+  LinkPopup link_popup{};
 
 
 
-
-
+  
 
 
 
   std::optional<ne::NodeId> popup_node_{};
+  std::array<char, 100> popup_group_name{};
 
   bool color_flow{};
   float min{-27};
@@ -67,11 +74,6 @@ struct DrawState {
   std::optional<NewLink> new_link{};
 
   std::unordered_map<uintptr_t, ImVec2> pin_poses_{};
-
-  ImVec2 popup_position{};
-  ne::NodeId popup_node_id{};
-  ne::LinkId popup_link_id{};
-  std::array<char, 100> popup_group_name{};
 
   Texture node_header_texture{};
 

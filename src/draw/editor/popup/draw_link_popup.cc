@@ -1,20 +1,16 @@
 #include "draw_link_popup.h"
 
 #include "app_events.h"
-#include "cpp_scope.h"
+#include "imgui_node_editor.h"
 
 namespace esc::draw {
-void DrawLinkPopup(State& state) {
-  if (ImGui::BeginPopup("Link")) {
-    const auto popup_scope = cpp::Scope{[]() { ImGui::EndPopup(); }};
+void LinkPopup::SetLinkId(ne::LinkId link_id) { link_id_ = link_id; }
 
-    ImGui::TextUnformatted("Link");
-    ImGui::Separator();
+auto LinkPopup::GetLabel() const -> std::string { return "Link"; }
 
-    if (ImGui::MenuItem("Delete")) {
-      state.event_queue->PostEvent(
-          event::DeleteLink{.link_id = state.draw_state->popup_link_id});
-    }
+void LinkPopup::DrawContent(State& state) {
+  if (ImGui::MenuItem("Delete")) {
+    state.event_queue->PostEvent(event::DeleteLink{.link_id = link_id_});
   }
 }
 }  // namespace esc::draw

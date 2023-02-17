@@ -152,6 +152,7 @@ add_example_executable(esc
   draw/dialog/draw_save_as_file_dialog.cc
 
   draw/editor/popup/draw_background_popup.cc
+  draw/editor/popup/draw_i_popup.cc
   draw/editor/popup/draw_link_popup.cc
   draw/editor/popup/draw_node_popup.cc
 
@@ -170,10 +171,10 @@ add_example_executable(esc
   draw/view/draw_flow_tree_view.cc
   draw/view/draw_group_settings_view.cc
   draw/view/draw_groups_view.cc
+  draw/view/draw_i_hideable.cc
   draw/view/draw_settings_view.cc
 
   draw/app_node_drawer.cc
-  draw/draw_i_hideable.cc
   draw/draw_main_menu_bar.cc
   draw/draw_main_window.cc
   draw/draw_state.cc
