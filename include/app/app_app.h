@@ -7,22 +7,15 @@
 
 #include <application.h>
 
-#include <memory>
 #include <optional>
 
 #include "app_app_impl.h"
-#include "imgui.h"
-
-namespace ax::NodeEditor {
-using Application = Application;
-}  // namespace ax::NodeEditor
-
-namespace ne = ax::NodeEditor;
+#include "app_textures.h"
 
 namespace esc {
 // ---
 // NOLINTNEXTLINE(*-virtual-class-destructor)
-class App : public ne::Application {
+class App : public Application {
  public:
   // ---
   App(const char* name, int argc, char** argv);
@@ -37,6 +30,11 @@ class App : public ne::Application {
   void OnFrame(float delta_time) override;
 
  private:
+  // ---
+  auto LoadTexture [[nodiscard]] (std::string_view file_path);
+
+  // ---
+  std::optional<Textures> textures_{};
   // ---
   std::optional<AppImpl> impl_{};
 };

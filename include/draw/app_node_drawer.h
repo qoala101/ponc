@@ -1,5 +1,5 @@
-﻿#ifndef VH_ESC_NODE_DRAWER_H_
-#define VH_ESC_NODE_DRAWER_H_
+﻿#ifndef VH_APP_NODE_DRAWER_H_
+#define VH_APP_NODE_DRAWER_H_
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -7,7 +7,7 @@
 
 #include <optional>
 
-#include "app_textures_handle.h"
+#include "app_textures.h"
 #include "cpp_scope_function.h"
 
 namespace ne = ax::NodeEditor;
@@ -25,7 +25,7 @@ class NodeDrawer {
 
   ~NodeDrawer();
 
-  auto AddHeader(const TextureWithDims& header_texture,
+  auto AddHeader(const draw::Texture& header_texture,
                  const ImColor& header_color) -> cpp::ScopeFunction;
 
   auto AddPin(ne::PinId id, ne::PinKind kind) -> cpp::ScopeFunction;
@@ -42,7 +42,7 @@ class NodeDrawer {
   };
 
   struct Header {
-    TextureWithDims texture{};
+    draw::Texture texture{};
     ImColor color{};
     ImRect rect{};
   };
@@ -59,4 +59,4 @@ class NodeDrawer {
 };
 }  // namespace esc
 
-#endif  // VH_ESC_NODE_DRAWER_H_
+#endif  // VH_APP_NODE_DRAWER_H_

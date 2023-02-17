@@ -3,7 +3,10 @@
  */
 
 #include "app_app.h"
+
+#include "app_textures.h"
 #include "cpp_assert.h"
+#include "draw_texture.h"
 
 namespace esc {
 // ---
@@ -17,22 +20,45 @@ auto App::GetWindowFlags() const -> ImGuiWindowFlags {
 }
 
 // ---
+auto App::LoadTexture(std::string_view file_path) {
+  auto texture =
+      draw::Texture{.id = Application::LoadTexture(file_path.data())};
+  texture.width = GetTextureWidth(texture.id);
+  texture.height = GetTextureHeight(texture.id);
+  return texture;
+}
+
+// ---
 void App::OnStart() {
+  Expects(!textures_.has_value());
   Expects(!impl_.has_value());
-  impl_.emplace();
+
+  textures_ =
+      Textures{.node_header = LoadTexture("data/node_header_texture.png")};
+  impl_.emplace(*textures_);
+
+  Ensures(textures_.has_value());
   Ensures(impl_.has_value());
 }
 
 // ---
 void App::OnStop() {
   Expects(impl_.has_value());
+  Expects(textures_.has_value());
+
   impl_.reset();
+
+  DestroyTexture(textures_->node_header.id);
+  textures_.reset();
+
   Ensures(!impl_.has_value());
+  Ensures(!textures_.has_value());
 }
 
 // ---
 void App::OnFrame(float /*unused*/) {
   Expects(impl_.has_value());
+
   impl_->OnFrame();
 }
 }  // namespace esc

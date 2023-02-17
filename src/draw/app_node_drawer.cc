@@ -31,7 +31,7 @@ NodeDrawer::~NodeDrawer() {
   SetStage(Stage::kInvalid);
 }
 // vh: norm
-auto NodeDrawer::AddHeader(const TextureWithDims& header_texture,
+auto NodeDrawer::AddHeader(const draw::Texture& header_texture,
                            const ImColor& header_color) -> cpp::ScopeFunction {
   header_ = Header{.texture = header_texture, .color = header_color};
 

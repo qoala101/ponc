@@ -117,10 +117,7 @@ endmacro()
 add_example_executable(esc
   app/app_app_impl.cc
   app/app_app.cc
-  app/app_editor_context_handle.cc
-  app/app_node_drawer.cc
   app/app_state.cc
-  app/app_textures_handle.cc
 
   core/family/core_free_pin_family.cc
   core/family/core_placeholder_family.cc
@@ -170,6 +167,7 @@ add_example_executable(esc
   draw/view/draw_groups_view.cc
   draw/view/draw_settings_view.cc
 
+  draw/app_node_drawer.cc
   draw/draw_main_menu_bar.cc
   draw/draw_main_window.cc
 

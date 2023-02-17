@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <functional>
 
+#include "app_textures.h"
 #include "core_diagram.h"
 #include "core_flow_calculator.h"
 #include "core_id_generator.h"
@@ -102,6 +103,8 @@ class State {
     ne::LinkId popup_link_id{};
     std::array<char, 100> popup_group_name{};
   } DRAW_{};
+  
+  Textures textures_{};
 
   //  private:
   core::Diagram diagram_{};
