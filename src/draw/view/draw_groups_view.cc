@@ -8,6 +8,7 @@
 #include "cpp_scope.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
+#include "app_state.h"
 
 namespace esc::draw {
 namespace {
@@ -126,15 +127,17 @@ void DisplayGroup(State& state, core::Group& group) {
 }
 }  // namespace
 
-void DrawGroupsView(State& state) {
-  if (!state.draw_state->groups_view_visible) {
+auto GroupsView::GetLabel() const -> std::string { return "Groups"; }
+
+void GroupsView::Draw(State& state) {
+  if (!IsVisible()) {
     return;
   }
 
   {
     const auto window_scope = cpp::Scope{[]() { ImGui::End(); }};
 
-    if (ImGui::Begin("Groups", &state.draw_state->groups_view_visible)) {
+    if (ImGui::Begin("Groups", &GetVisible())) {
       const auto table_flags =
           ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
           ImGuiTableFlags_Hideable | ImGuiTableFlags_ContextMenuInBody |

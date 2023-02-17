@@ -1,11 +1,20 @@
 #ifndef VH_DRAW_SETTINGS_VIEW_H_
 #define VH_DRAW_SETTINGS_VIEW_H_
 
-#include "app_state.h"
+#include <string>
+
+#include "draw_i_hidable.h"
+
+namespace esc {
+class State;
+}  // namespace esc
 
 namespace esc::draw {
-// ---
-void DrawSettingsView(State &state);
+class SettingsView : public IHidable {
+ public:
+  auto GetLabel [[nodiscard]] () const -> std::string;
+  void Draw(State &state);
+};
 }  // namespace esc::draw
 
 #endif  // VH_DRAW_SETTINGS_VIEW_H_

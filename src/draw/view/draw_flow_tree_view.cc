@@ -106,15 +106,17 @@ void DisplayNode(
 }
 }  // namespace
 
-void DrawFlowTreeView(State& state) {
-  if (!state.draw_state->flow_tree_view_visible) {
+auto FlowTreeView::GetLabel() const -> std::string { return "Flow Tree"; }
+
+void FlowTreeView::Draw(State& state) {
+  if (!IsVisible()) {
     return;
   }
 
   {
     const auto window_scope = cpp::Scope{[]() { ImGui::End(); }};
 
-    if (ImGui::Begin("Flow Tree", &state.draw_state->flow_tree_view_visible)) {
+    if (ImGui::Begin("Flow Tree", &GetVisible())) {
       const auto& families = state.core_state->diagram_.GetFamilies();
       const auto table_flags =
           ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |

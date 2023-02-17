@@ -10,15 +10,17 @@
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
-void DrawSettingsView(State& state) {
-  if (!state.draw_state->settings_view_visible) {
+auto SettingsView::GetLabel() const -> std::string { return "Settings"; }
+
+void SettingsView::Draw(State& state) {
+  if (!IsVisible()) {
     return;
   }
 
   {
     const auto window_scope = cpp::Scope{[]() { ImGui::End(); }};
 
-    if (ImGui::Begin("Settings", &state.draw_state->settings_view_visible)) {
+    if (ImGui::Begin("Settings", &GetVisible())) {
       const auto low_high_mid =
           state.draw_state->low +
           (state.draw_state->high - state.draw_state->low) / 2;

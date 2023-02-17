@@ -2,6 +2,7 @@
 
 #include <unordered_set>
 
+#include "app_state.h"
 #include "core_group.h"
 #include "core_i_node.h"
 #include "coreui_i_family_drawer.h"
@@ -12,16 +13,17 @@
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
-void DrawGroupSettingsView(State& state) {
-  if (!state.draw_state->group_settings_view_visible) {
+auto GroupSettingsView::GetLabel() const -> std::string { return "Group Settings"; }
+
+void GroupSettingsView::Draw(State& state) {
+  if (!IsVisible()) {
     return;
   }
 
   {
     const auto window_scope = cpp::Scope{[]() { ImGui::End(); }};
 
-    if (ImGui::Begin("Group Settings",
-                     &state.draw_state->group_settings_view_visible)) {
+    if (ImGui::Begin("Group Settings", &GetVisible())) {
       auto& groups = state.core_state->diagram_.GetGroups();
 
       {
@@ -30,12 +32,9 @@ void DrawGroupSettingsView(State& state) {
         auto group_index = 0;
 
         for (auto& group : groups) {
-          if (ImGui::Selectable(
-                  group.name_.c_str(),
-                  state.draw_state->group_setings_view_selected_group_index ==
-                      group_index)) {
-            state.draw_state->group_setings_view_selected_group_index =
-                group_index;
+          if (ImGui::Selectable(group.name_.c_str(),
+                                group_index_ == group_index)) {
+            group_index_ = group_index;
           }
 
           ++group_index;
@@ -50,8 +49,7 @@ void DrawGroupSettingsView(State& state) {
         ImGui::BeginGroup();  // 1 line below us
 
         if (!groups.empty()) {
-          auto& group =
-              groups[state.draw_state->group_setings_view_selected_group_index];
+          auto& group = groups[group_index_];
 
           ImGui::Checkbox("Fill##asdas", &group.fill_background_);
           ImGui::Checkbox("Unite##hhhh", &group.unite_);

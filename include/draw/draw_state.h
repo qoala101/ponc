@@ -13,6 +13,11 @@
 
 #include "app_textures.h"
 #include "core_state.h"
+#include "draw_families_view.h"
+#include "draw_flow_tree_view.h"
+#include "draw_group_settings_view.h"
+#include "draw_groups_view.h"
+#include "draw_settings_view.h"
 #include "flow_calculator.h"
 
 namespace ne = ax::NodeEditor;
@@ -32,6 +37,20 @@ struct NewLink {
 };
 
 struct DrawState {
+  FamiliesView families_view_{};
+  FlowTreeView flow_tree_view_{};
+  GroupsView groups_view_{};
+  GroupSettingsView group_settings_view_{};
+  SettingsView settings_view_{};
+
+
+
+
+
+
+
+
+
   std::optional<ne::NodeId> popup_node_{};
 
   bool color_flow{};
@@ -43,13 +62,6 @@ struct DrawState {
   std::optional<NewLink> new_link{};
 
   std::unordered_map<uintptr_t, ImVec2> pin_poses_{};
-
-  bool families_view_visible{};
-  bool flow_tree_view_visible{};
-  bool group_settings_view_visible{};
-  int group_setings_view_selected_group_index{};
-  bool groups_view_visible{};
-  bool settings_view_visible{};
 
   bool open_file_dialog_visible{};
   ImGui::FileBrowser open_file_dialog{[]() {

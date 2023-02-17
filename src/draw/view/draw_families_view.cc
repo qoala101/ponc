@@ -137,15 +137,17 @@ void DisplayFamily(State& state, core::IFamily& family) {
 }
 }  // namespace
 
-void DrawFamiliesView(State& state) {
-  if (!state.draw_state->families_view_visible) {
+auto FamiliesView::GetLabel() const -> std::string { return "Families"; }
+
+void FamiliesView::Draw(State& state) {
+  if (!IsVisible()) {
     return;
   }
 
   {
     const auto window_scope = cpp::Scope{[]() { ImGui::End(); }};
 
-    if (ImGui::Begin("Families", &state.draw_state->families_view_visible)) {
+    if (ImGui::Begin("Families", &GetVisible())) {
       const auto& families = state.core_state->diagram_.GetFamilies();
       const auto table_flags =
           ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |

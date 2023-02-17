@@ -1,11 +1,23 @@
 #ifndef VH_DRAW_GROUP_SETTINGS_VIEW_H_
 #define VH_DRAW_GROUP_SETTINGS_VIEW_H_
 
-#include "app_state.h"
+#include <string>
+
+#include "draw_i_hidable.h"
+
+namespace esc {
+class State;
+}  // namespace esc
 
 namespace esc::draw {
-// ---
-void DrawGroupSettingsView(State &state);
+class GroupSettingsView : public IHidable {
+ public:
+  auto GetLabel [[nodiscard]] () const -> std::string;
+  void Draw(State &state);
+
+ private:
+  int group_index_{};
+};
 }  // namespace esc::draw
 
 #endif  // VH_DRAW_GROUP_SETTINGS_VIEW_H_

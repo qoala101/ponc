@@ -31,6 +31,8 @@ void DrawFileMenu(State& state) {
       state.draw_state->save_as_file_dialog.Open();
     }
 
+    ImGui::Separator();
+
     if (ImGui::MenuItem("Reset")) {
       state.event_queue->PostEvent(event::ResetDiagram{});
     }
@@ -41,26 +43,31 @@ void DrawFileMenu(State& state) {
 }
 
 // ---
+void DrawViewMenuItem(auto& view) {
+  const auto visible = view.IsVisible();
+
+  if (ImGui::MenuItem(view.GetLabel().c_str(), nullptr, visible)) {
+    view.SetVisible(!visible);
+  }
+}
+
+// ---
 void DrawViewsMenu(State& state) {
   if (ImGui::BeginMenu("Views")) {
     const auto menu_scope = cpp::Scope{[]() { ImGui::EndMenu(); }};
 
-    ImGui::MenuItem("Objects", nullptr,
-                    state.draw_state->families_view_visible);
-    ImGui::MenuItem("Flow Tree", nullptr,
-                    state.draw_state->families_view_visible);
-    ImGui::MenuItem("Groups", nullptr, state.draw_state->families_view_visible);
-    ImGui::MenuItem("Group Settings", nullptr,
-                    state.draw_state->families_view_visible);
-    ImGui::MenuItem("Settings", nullptr,
-                    state.draw_state->families_view_visible);
+    DrawViewMenuItem(state.draw_state->families_view_);
+    DrawViewMenuItem(state.draw_state->flow_tree_view_);
+    DrawViewMenuItem(state.draw_state->groups_view_);
+    DrawViewMenuItem(state.draw_state->group_settings_view_);
+    DrawViewMenuItem(state.draw_state->settings_view_);
   }
 
-  DrawFamiliesView(state);
-  DrawFlowTreeView(state);
-  DrawGroupsView(state);
-  DrawGroupSettingsView(state);
-  DrawSettingsView(state);
+  state.draw_state->families_view_.Draw(state);
+  state.draw_state->flow_tree_view_.Draw(state);
+  state.draw_state->groups_view_.Draw(state);
+  state.draw_state->group_settings_view_.Draw(state);
+  state.draw_state->settings_view_.Draw(state);
 }
 }  // namespace
 
