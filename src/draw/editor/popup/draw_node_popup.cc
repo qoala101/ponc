@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "app_events.h"
 #include "coreui_i_node_drawer.h"
 #include "cpp_scope.h"
 #include "imgui.h"
@@ -15,34 +16,17 @@ void DrawNodePopup(State& state) {
     ImGui::Separator();
 
     if (ImGui::MenuItem("Delete With Links")) {
-      state.PostEvent([](auto& state) {
-        State::EraseNodeAndConnectedLinks(state, state.DRAW_.popup_node_id);
-      });
+      state.event_queue->PostEvent(event::DeleteNodeWithLinks{
+          .node_id = state.draw_state->popup_node_id});
     }
 
     if (ImGui::MenuItem("Delete")) {
-      state.PostEvent([](auto& state) {
-        State::ReplaceWithFreePins(state, state.DRAW_.popup_node_id);
-      });
+      state.event_queue->PostEvent(
+          event::DeleteNode{.node_id = state.draw_state->popup_node_id});
     }
 
-    if (ImGui::BeginMenu("Group")) {
-      const auto menu_scope = cpp::Scope{[]() { ImGui::EndMenu(); }};
-
-      ImGui::InputTextWithHint("", "Enter group name...",
-                               state.DRAW_.popup_group_name.data(),
-                               state.DRAW_.popup_group_name.size());
-      ImGui::SameLine();
-
-      if (ImGui::SmallButton("Add")) {
-        state.PostEvent([](auto& state) {
-          State::MakeGroupFromSelectedNodes(
-              state, std::string{state.DRAW_.popup_group_name.begin(),
-                                 state.DRAW_.popup_group_name.end()});
-        });
-
-        // ImGui::CloseCurrentPopup();
-      }
+    if (ImGui::MenuItem("Group")) {
+      state.event_queue->PostEvent(event::CreateGroup{});
     }
   }
 }

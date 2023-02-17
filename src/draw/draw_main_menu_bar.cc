@@ -4,6 +4,7 @@
 
 #include "draw_main_menu_bar.h"
 
+#include "app_events.h"
 #include "app_state.h"
 #include "cpp_scope.h"
 #include "imgui.h"
@@ -16,15 +17,15 @@ void DrawFileMenu(State& state) {
     const auto menu_scope = cpp::Scope{[]() { ImGui::EndMenu(); }};
 
     if (ImGui::MenuItem("Open...", nullptr)) {
-      state.DRAW_.open_file_dialog.Open();
+      state.draw_state->open_file_dialog.Open();
     }
 
     if (ImGui::MenuItem("Save As...")) {
-      state.DRAW_.save_as_file_dialog.Open();
+      state.draw_state->save_as_file_dialog.Open();
     }
 
     if (ImGui::MenuItem("Reset")) {
-      state.PostEvent([](auto& state) { State::ResetDiagram(state); });
+      state.event_queue->PostEvent(event::ResetDiagram{});
     }
   }
 }
@@ -34,12 +35,15 @@ void DrawViewsMenu(State& state) {
   if (ImGui::BeginMenu("Views")) {
     const auto menu_scope = cpp::Scope{[]() { ImGui::EndMenu(); }};
 
-    ImGui::MenuItem("Objects", nullptr, state.DRAW_.families_view_visible);
-    ImGui::MenuItem("Flow Tree", nullptr, state.DRAW_.families_view_visible);
-    ImGui::MenuItem("Groups", nullptr, state.DRAW_.families_view_visible);
+    ImGui::MenuItem("Objects", nullptr,
+                    state.draw_state->families_view_visible);
+    ImGui::MenuItem("Flow Tree", nullptr,
+                    state.draw_state->families_view_visible);
+    ImGui::MenuItem("Groups", nullptr, state.draw_state->families_view_visible);
     ImGui::MenuItem("Group Settings", nullptr,
-                    state.DRAW_.families_view_visible);
-    ImGui::MenuItem("Settings", nullptr, state.DRAW_.families_view_visible);
+                    state.draw_state->families_view_visible);
+    ImGui::MenuItem("Settings", nullptr,
+                    state.draw_state->families_view_visible);
   }
 }
 }  // namespace
@@ -58,7 +62,7 @@ void DrawMainMenuBar(State& state) {
     }
 
     if (ImGui::MenuItem("Show Flow")) {
-      for (const auto& link : state.diagram_.GetLinks()) {
+      for (const auto& link : state.core_state->diagram_.GetLinks()) {
         ne::Flow(link.id);
       }
     }

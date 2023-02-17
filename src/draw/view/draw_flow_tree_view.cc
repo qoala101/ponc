@@ -24,7 +24,7 @@ void DisplayNode(
   ImGui::TableNextRow();
 
   ImGui::TableNextColumn();
-  const auto drawer = tree_node.node->CreateDrawer(state);
+  const auto drawer = tree_node.node->CreateDrawer(state.ToStateNoQueue());
 
   const auto node_id = tree_node.node->GetId();
   const auto has_children = !tree_node.child_nodes.empty();
@@ -38,7 +38,7 @@ void DisplayNode(
 
   ImGui::SameLine();
 
-  const auto selectedNodes = state.diagram_.GetSelectedNodeIds();
+  const auto selectedNodes = state.core_state->diagram_.GetSelectedNodeIds();
 
   bool isSelected = std::find(selectedNodes.begin(), selectedNodes.end(),
                               node_id) != selectedNodes.end();
@@ -61,11 +61,13 @@ void DisplayNode(
   }
 
   ImGui::TableNextColumn();
-  const auto flow = state.flow_calculator_.GetCalculatedFlow(*tree_node.node);
+  const auto flow =
+      state.core_state->flow_calculator_.GetCalculatedFlow(*tree_node.node);
 
   if (flow.input_pin_flow.has_value()) {
-    ImGui::TextColored(state.GetColorForFlowValue(flow.input_pin_flow->second),
-                       "%.3f", flow.input_pin_flow->second);
+    ImGui::TextColored(
+        state.draw_state->GetColorForFlowValue(flow.input_pin_flow->second),
+        "%.3f", flow.input_pin_flow->second);
   }
 
   const auto& child_cout_per_family =
@@ -73,7 +75,7 @@ void DisplayNode(
 
   auto index = 0;
 
-  for (const auto& family : state.diagram_.GetFamilies()) {
+  for (const auto& family : state.core_state->diagram_.GetFamilies()) {
     ImGui::TableNextColumn();
 
     auto child_count = child_cout_per_family[index++].second;
@@ -105,15 +107,15 @@ void DisplayNode(
 }  // namespace
 
 void DrawFlowTreeView(State& state) {
-  if (!state.DRAW_.flow_tree_view_visible) {
+  if (!state.draw_state->flow_tree_view_visible) {
     return;
   }
 
   {
     const auto window_scope = cpp::Scope{[]() { ImGui::End(); }};
 
-    if (ImGui::Begin("Flow Tree", &state.DRAW_.flow_tree_view_visible)) {
-      const auto& families = state.diagram_.GetFamilies();
+    if (ImGui::Begin("Flow Tree", &state.draw_state->flow_tree_view_visible)) {
+      const auto& families = state.core_state->diagram_.GetFamilies();
       const auto table_flags =
           ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
           ImGuiTableFlags_Hideable | ImGuiTableFlags_ContextMenuInBody |
@@ -134,7 +136,7 @@ void DrawFlowTreeView(State& state) {
         ImGui::TableHeadersRow();
 
         for (const auto& root_node :
-             state.flow_calculator_.GetFlowTree().root_nodes) {
+             state.core_state->flow_calculator_.GetFlowTree().root_nodes) {
           auto child_count_per_family_per_tree_node = std::unordered_map<
               const core::TreeNode*,
               std::vector<std::pair<const core::IFamily*, int>>>{};

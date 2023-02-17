@@ -1,10 +1,11 @@
+#include "app_state.h"
+
 #include <algorithm>
 #include <iostream>
 #include <memory>
 #include <utility>
 #include <vector>
 
-#include "app_state.h"
 #include "core_diagram.h"
 #include "core_flow.h"
 #include "core_i_node.h"
@@ -85,7 +86,7 @@ void State::OpenDiagramFromFile(State &state, std::string_view file_path) {
   auto max_id = FindMaxId(diagram);
 
   state.diagram_ = std::move(diagram);
-  state.id_generator_ = core::IdGenerator{max_id + 1};
+  state.core_state->id_generator_ = core::IdGenerator{max_id + 1};
 }
 
 void State::SaveDiagramToFile(const State &state, std::string_view file_path) {
@@ -110,15 +111,15 @@ void State::ResetDiagram(State &state) {
     }
   }
 
-  state.drawing_.new_link.reset();
+  state.draw_state->new_link.reset();
 
-  state.id_generator_ = core::IdGenerator{};
+  state.core_state->id_generator_ = core::IdGenerator{};
   state.diagram_ = core::Diagram{CreateFamilies()};
 }
 
 void State::EraseLink(State &state, ne::LinkId link_id) {
   ne::DeleteLink(link_id);
-  state.diagram_.EraseLink(link_id);
+  state.core_state->diagram_.EraseLink(link_id);
 }
 
 void State::EraseNodeAndConnectedLinks(State &state, ne::NodeId node_id) {
@@ -149,7 +150,7 @@ void State::EraseNodeAndConnectedLinks(State &state, ne::NodeId node_id) {
   }
 
   ne::DeleteNode(node_id);
-  state.diagram_.EraseNode(node_id);
+  state.core_state->diagram_.EraseNode(node_id);
 }
 
 void State::ReplaceWithPlaceholder(State &state, ne::NodeId node_id) {
@@ -161,8 +162,8 @@ void State::ReplaceWithPlaceholder(State &state, ne::NodeId node_id) {
   EraseNodeAndConnectedLinks(state, node_id);
 
   auto &placeholder_family = diagram.GetPlaceholderFamily();
-  auto &placeholder =
-      placeholder_family.EmplaceNodeFromFlow(state.id_generator_, node_flow);
+  auto &placeholder = placeholder_family.EmplaceNodeFromFlow(
+      state.core_state->id_generator_, node_flow);
 
   placeholder.SetPosition(node_position);
 }
@@ -191,30 +192,30 @@ void State::ReplaceWithFreePins(State &state, ne::NodeId node_id) {
   }
 
   ne::DeleteNode(node_id);
-  state.diagram_.EraseNode(node_id);
+  state.core_state->diagram_.EraseNode(node_id);
 
   auto &free_pin_family = diagram.GetFreePinFamily();
 
   if (connected_node_input_pin.has_value()) {
     auto &free_pin = free_pin_family.EmplaceNodeFromFlow(
-        state.id_generator_, *connected_node_input_pin, true);
+        state.core_state->id_generator_, *connected_node_input_pin, true);
 
     free_pin.SetPosition(
-        state.drawing_.pin_poses_.at(connected_node_input_pin->Get()));
+        state.draw_state->pin_poses_.at(connected_node_input_pin->Get()));
   }
 
   for (const auto pin : connected_node_output_pins) {
-    auto &free_pin =
-        free_pin_family.EmplaceNodeFromFlow(state.id_generator_, pin, false);
-    free_pin.SetPosition(state.drawing_.pin_poses_.at(pin.Get()));
+    auto &free_pin = free_pin_family.EmplaceNodeFromFlow(
+        state.core_state->id_generator_, pin, false);
+    free_pin.SetPosition(state.draw_state->pin_poses_.at(pin.Get()));
   }
 }
 
 void State::MakeGroupFromSelectedNodes(State &state, std::string group_name) {
-  auto selectedNodes = state.diagram_.GetSelectedNodeIds();
+  auto selectedNodes = state.core_state->diagram_.GetSelectedNodeIds();
 
-  if (state.drawing_.popup_node_.has_value()) {
-    const auto popup_node = *state.drawing_.popup_node_;
+  if (state.draw_state->popup_node_.has_value()) {
+    const auto popup_node = *state.draw_state->popup_node_;
 
     if (std::ranges::none_of(selectedNodes, [popup_node](const auto node) {
           return node == popup_node;
@@ -222,15 +223,15 @@ void State::MakeGroupFromSelectedNodes(State &state, std::string group_name) {
       selectedNodes.emplace_back(popup_node);
     }
 
-    state.drawing_.popup_node_.reset();
+    state.draw_state->popup_node_.reset();
   }
 
-  auto &group = state.diagram_.EmplaceGroup(selectedNodes);
+  auto &group = state.core_state->diagram_.EmplaceGroup(selectedNodes);
   group.name_ = std::move(group_name);
 }
 
 auto State::GetColorForFlowValue(float value) const -> ImColor {
-  if (!drawing_.link_colors.color_flow) {
+  if (!draw_state->color_flow) {
     return ImColor{255, 255, 255};
   }
 
@@ -240,20 +241,18 @@ auto State::GetColorForFlowValue(float value) const -> ImColor {
   const auto green_red = ImColor{255, 255, 0};
   const auto red = ImColor{255, 0, 0};
 
-  if (value < drawing_.link_colors.min) {
+  if (value < draw_state->min) {
     return blue;
   }
 
-  if (value >= drawing_.link_colors.max) {
+  if (value >= draw_state->max) {
     return red;
   }
 
-  const auto range = (drawing_.link_colors.max - drawing_.link_colors.min);
-  const auto value_percentage = (value - drawing_.link_colors.min) / range;
-  const auto low_percentage =
-      (drawing_.link_colors.low - drawing_.link_colors.min) / range;
-  const auto high_percentage =
-      (drawing_.link_colors.high - drawing_.link_colors.min) / range;
+  const auto range = (draw_state->max - draw_state->min);
+  const auto value_percentage = (value - draw_state->min) / range;
+  const auto low_percentage = (draw_state->low - draw_state->min) / range;
+  const auto high_percentage = (draw_state->high - draw_state->min) / range;
 
   auto percentage = 0.0F;
   auto start_color = ImColor{};
@@ -297,8 +296,8 @@ auto State::CanConnectFromPinToPin(ne::PinId start_pin, ne::PinId end_pin)
     return false;
   }
 
-  const auto rebind =
-      drawing_.new_link.has_value() && drawing_.new_link->rebind.has_value();
+  const auto rebind = draw_state->new_link.has_value() &&
+                      draw_state->new_link->rebind.has_value();
   const auto &families = diagram_.GetFamilies();
   const auto &links = diagram_.GetLinks();
 
@@ -374,17 +373,5 @@ auto State::CanConnectFromPinToPin(ne::PinId start_pin, ne::PinId end_pin)
 void State::OnFrame() {
   ExecuteEvents();
   flow_calculator_.OnFrame(*this);
-}
-
-void State::PostEvent(std::function<void(State &state)> event) {
-  events_.emplace_back(std::move(event));
-}
-
-void State::ExecuteEvents() {
-  for (const auto &event : events_) {
-    event(*this);
-  }
-
-  events_.clear();
 }
 }  // namespace esc

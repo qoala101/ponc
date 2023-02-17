@@ -13,7 +13,7 @@
 
 namespace esc::draw {
 void DrawGroupSettingsView(State& state) {
-  if (!state.DRAW_.group_settings_view_visible) {
+  if (!state.draw_state->group_settings_view_visible) {
     return;
   }
 
@@ -21,8 +21,8 @@ void DrawGroupSettingsView(State& state) {
     const auto window_scope = cpp::Scope{[]() { ImGui::End(); }};
 
     if (ImGui::Begin("Group Settings",
-                     &state.DRAW_.group_settings_view_visible)) {
-      auto& groups = state.diagram_.GetGroups();
+                     &state.draw_state->group_settings_view_visible)) {
+      auto& groups = state.core_state->diagram_.GetGroups();
 
       {
         ImGui::BeginChild("left pane", ImVec2(200, 0), true);
@@ -32,9 +32,10 @@ void DrawGroupSettingsView(State& state) {
         for (auto& group : groups) {
           if (ImGui::Selectable(
                   group.name_.c_str(),
-                  state.DRAW_.group_setings_view_selected_group_index ==
+                  state.draw_state->group_setings_view_selected_group_index ==
                       group_index)) {
-            state.DRAW_.group_setings_view_selected_group_index = group_index;
+            state.draw_state->group_setings_view_selected_group_index =
+                group_index;
           }
 
           ++group_index;
@@ -50,7 +51,7 @@ void DrawGroupSettingsView(State& state) {
 
         if (!groups.empty()) {
           auto& group =
-              groups[state.DRAW_.group_setings_view_selected_group_index];
+              groups[state.draw_state->group_setings_view_selected_group_index];
 
           ImGui::Checkbox("Fill##asdas", &group.fill_background_);
           ImGui::Checkbox("Unite##hhhh", &group.unite_);

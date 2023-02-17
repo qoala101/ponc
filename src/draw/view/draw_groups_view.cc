@@ -15,7 +15,7 @@ void DisplayNode(State& state, core::INode& node) {
   ImGui::TableNextRow();
   ImGui::TableNextColumn();
 
-  const auto drawer = node.CreateDrawer(state);
+  const auto drawer = node.CreateDrawer(state.ToStateNoQueue());
 
   const auto node_id = node.GetId();
   const auto draw_flags = ImGuiTreeNodeFlags_Leaf;
@@ -27,7 +27,7 @@ void DisplayNode(State& state, core::INode& node) {
 
   ImGui::SameLine();
 
-  const auto selectedNodes = state.diagram_.GetSelectedNodeIds();
+  const auto selectedNodes = state.core_state->diagram_.GetSelectedNodeIds();
   auto isSelected = std::find(selectedNodes.begin(), selectedNodes.end(),
                               node_id) != selectedNodes.end();
   if (ImGui::Selectable(
@@ -77,7 +77,7 @@ void DisplayGroup(State& state, core::Group& group) {
     return group_node_ids;
   }();
 
-  const auto selectedNodes = state.diagram_.GetSelectedNodeIds();
+  const auto selectedNodes = state.core_state->diagram_.GetSelectedNodeIds();
   const auto selected_node_ids = [&selectedNodes]() {
     auto selected_node_ids = std::unordered_set<uintptr_t>{};
 
@@ -127,14 +127,14 @@ void DisplayGroup(State& state, core::Group& group) {
 }  // namespace
 
 void DrawGroupsView(State& state) {
-  if (!state.DRAW_.groups_view_visible) {
+  if (!state.draw_state->groups_view_visible) {
     return;
   }
 
   {
     const auto window_scope = cpp::Scope{[]() { ImGui::End(); }};
 
-    if (ImGui::Begin("Groups", &state.DRAW_.groups_view_visible)) {
+    if (ImGui::Begin("Groups", &state.draw_state->groups_view_visible)) {
       const auto table_flags =
           ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
           ImGuiTableFlags_Hideable | ImGuiTableFlags_ContextMenuInBody |
@@ -147,7 +147,7 @@ void DrawGroupsView(State& state) {
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableHeadersRow();
 
-        auto& groups = state.diagram_.GetGroups();
+        auto& groups = state.core_state->diagram_.GetGroups();
 
         for (auto& group : groups) {
           DisplayGroup(state, group);

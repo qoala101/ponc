@@ -13,21 +13,20 @@
 #include "core_link.h"
 #include "core_tree.h"
 
-namespace esc {
-class State;
+namespace esc::core {
+struct CoreState;
 
-namespace core {
 // ---
 class FlowCalculator {
  public:
   // ---
-  void OnFrame(const State &state);
+  void OnFrame(const CoreState &core_state);
   // ---
   auto GetFlowTree() const -> const Tree &;
   // ---
   auto GetCalculatedFlow(const INode &node) const -> const Flow &;
 
- private:  
+ private:
   // ---
   void RebuildFlowTree(const std::vector<std::shared_ptr<IFamily>> &families,
                        const std::vector<Link> &links);
@@ -42,7 +41,6 @@ class FlowCalculator {
   // ---
   std::unordered_map<uintptr_t, Flow> node_flows_{};
 };
-}  // namespace core
-}  // namespace esc
+}  // namespace esc::core
 
 #endif  // VH_CORE_FLOW_CALCULATOR_H_

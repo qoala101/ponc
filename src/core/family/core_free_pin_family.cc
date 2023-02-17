@@ -30,7 +30,7 @@ constexpr auto kTypeName = "FreePinNode";
 
 auto CreateNodeWriter(std::shared_ptr<Node> node)
     -> std::unique_ptr<json::INodeWriter>;
-auto CreateNodeDrawer(std::shared_ptr<Node> node, const State& state)
+auto CreateNodeDrawer(std::shared_ptr<Node> node, const StateNoQueue& state)
     -> std::unique_ptr<coreui::INodeDrawer>;
 auto CreateFamilyWriter(std::shared_ptr<FreePinFamily> family)
     -> std::unique_ptr<json::IFamilyWriter>;
@@ -47,7 +47,7 @@ class Node : public INode, public std::enable_shared_from_this<Node> {
     return CreateNodeWriter(shared_from_this());
   }
 
-  auto CreateDrawer(const State& state)
+  auto CreateDrawer(const StateNoQueue& state)
       -> std::unique_ptr<coreui::INodeDrawer> override {
     return CreateNodeDrawer(shared_from_this(), state);
   }
@@ -123,9 +123,10 @@ class PinDrawer : public coreui::IPinDrawer {
 
 class NodeDrawer : public coreui::INodeDrawer {
  public:
-  explicit NodeDrawer(std::shared_ptr<Node> node, const State& state)
+  explicit NodeDrawer(std::shared_ptr<Node> node, const StateNoQueue& state)
       : node_{std::move(node)},
-        flow_pin_values_{state.flow_calculator_.GetCalculatedFlow(*node_)} {}
+        flow_pin_values_{
+            state.core_state->flow_calculator_.GetCalculatedFlow(*node_)} {}
 
   auto GetLabel() const -> std::string override {
     return std::make_shared<FreePinFamily>()->CreateDrawer()->GetLabel();
@@ -151,7 +152,7 @@ class NodeDrawer : public coreui::INodeDrawer {
   Flow flow_pin_values_{};
 };
 
-auto CreateNodeDrawer(std::shared_ptr<Node> node, const State& state)
+auto CreateNodeDrawer(std::shared_ptr<Node> node, const StateNoQueue& state)
     -> std::unique_ptr<coreui::INodeDrawer> {
   return std::make_unique<NodeDrawer>(std::move(node), state);
 }

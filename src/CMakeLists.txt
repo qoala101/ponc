@@ -115,9 +115,16 @@ macro(add_example_executable name)
 endmacro()
 
 add_example_executable(esc
-  app/app_app_impl.cc
+  app/node/impl_attenuator_node.cc
+  app/node/impl_client_node.cc
+  app/node/impl_coupler_node.cc
+  app/node/impl_input_node.cc
+  app/node/impl_splitter_node.cc
+
   app/app_app.cc
-  app/app_state.cc
+  app/app_events.cc
+  app/app_impl.cc
+  app/app_event_queue.cc
 
   core/family/core_free_pin_family.cc
   core/family/core_placeholder_family.cc
@@ -131,6 +138,7 @@ add_example_executable(esc
   core/core_i_family.cc
   core/core_i_node.cc
   core/core_id_generator.cc
+  core/core_state.cc
 
   coreui/pin/coreui_empty_pin_drawer.cc
   coreui/pin/coreui_flow_input_pin_drawer.cc
@@ -170,6 +178,7 @@ add_example_executable(esc
   draw/app_node_drawer.cc
   draw/draw_main_menu_bar.cc
   draw/draw_main_window.cc
+  draw/draw_state.cc
 
   json/json_diagram_serializer.cc
   json/json_i_family_parser.cc
@@ -178,18 +187,13 @@ add_example_executable(esc
   json/json_i_node_writer.cc
   json/json_link_serializer.cc
 
-  impl/impl_attenuator_node.cc
-  impl/impl_client_node.cc
-  impl/impl_coupler_node.cc
-  impl/impl_input_node.cc
-  impl/impl_splitter_node.cc
-
   main.cc
 )
 
 target_include_directories(esc
   PUBLIC ${PROJECT_SOURCE_DIR}/include
   PUBLIC ${PROJECT_SOURCE_DIR}/include/app
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/app/node
   PUBLIC ${PROJECT_SOURCE_DIR}/include/core
   PUBLIC ${PROJECT_SOURCE_DIR}/include/coreui
   PUBLIC ${PROJECT_SOURCE_DIR}/include/coreui/pin

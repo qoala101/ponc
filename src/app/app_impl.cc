@@ -1,6 +1,6 @@
-#include "app_app_impl.h"
+#include "app_impl.h"
 
-#include "app_state.h"
+#include "core_i_node.h"
 #include "cpp_scope.h"
 #include "draw_delete_items_process.h"
 #include "draw_groups.h"
@@ -16,15 +16,23 @@
 namespace esc {
 AppImpl::AppImpl(const Textures &textures)
     : editor_context_{ne::CreateEditor()} {
-  state_.textures_ = textures;
+  draw_state.node_header_texture = textures.node_header;
   ne::SetCurrentEditor(editor_context_);
 }
 
 AppImpl::~AppImpl() { ne::DestroyEditor(editor_context_); }
 
 void AppImpl::OnFrame() {
-  state_.OnFrame();
-  draw::DrawMainWindow(state_);
-  draw::DrawNodeEditor(state_);
+  auto state_no_queue =
+      StateNoQueue{.core_state = &core_state_, .draw_state = &draw_state};
+  event_queue_.ExecuteEvents(state_no_queue);
+  core_state_.flow_calculator_.OnFrame(core_state_);
+
+  auto state = State{.core_state = &core_state_,
+                     .draw_state = &draw_state,
+                     .event_queue = &event_queue_};
+
+  draw::DrawMainWindow(state);
+  draw::DrawNodeEditor(state);
 }
 }  // namespace esc

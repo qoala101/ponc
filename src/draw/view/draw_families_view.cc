@@ -15,7 +15,7 @@ void DisplayNode(State& state, core::INode& node) {
   ImGui::TableNextRow();
   ImGui::TableNextColumn();
 
-  const auto drawer = node.CreateDrawer(state);
+  const auto drawer = node.CreateDrawer(state.ToStateNoQueue());
 
   const auto node_id = node.GetId();
   const auto draw_flags = ImGuiTreeNodeFlags_Leaf;
@@ -27,7 +27,7 @@ void DisplayNode(State& state, core::INode& node) {
 
   ImGui::SameLine();
 
-  const auto selectedNodes = state.diagram_.GetSelectedNodeIds();
+  const auto selectedNodes = state.core_state->diagram_.GetSelectedNodeIds();
   auto isSelected = std::find(selectedNodes.begin(), selectedNodes.end(),
                               node_id) != selectedNodes.end();
   if (ImGui::Selectable(
@@ -49,11 +49,12 @@ void DisplayNode(State& state, core::INode& node) {
   }
 
   ImGui::TableNextColumn();
-  const auto flow = state.flow_calculator_.GetCalculatedFlow(node);
+  const auto flow = state.core_state->flow_calculator_.GetCalculatedFlow(node);
 
   if (flow.input_pin_flow.has_value()) {
-    ImGui::TextColored(state.GetColorForFlowValue(flow.input_pin_flow->second),
-                       "%.3f", flow.input_pin_flow->second);
+    ImGui::TextColored(
+        state.draw_state->GetColorForFlowValue(flow.input_pin_flow->second),
+        "%.3f", flow.input_pin_flow->second);
   }
 
   if (node_is_open) {
@@ -86,7 +87,7 @@ void DisplayFamily(State& state, core::IFamily& family) {
     return group_node_ids;
   }();
 
-  const auto selectedNodes = state.diagram_.GetSelectedNodeIds();
+  const auto selectedNodes = state.core_state->diagram_.GetSelectedNodeIds();
   const auto selected_node_ids = [&selectedNodes]() {
     auto selected_node_ids = std::unordered_set<uintptr_t>{};
 
@@ -137,15 +138,15 @@ void DisplayFamily(State& state, core::IFamily& family) {
 }  // namespace
 
 void DrawFamiliesView(State& state) {
-  if (!state.DRAW_.families_view_visible) {
+  if (!state.draw_state->families_view_visible) {
     return;
   }
 
   {
     const auto window_scope = cpp::Scope{[]() { ImGui::End(); }};
 
-    if (ImGui::Begin("Families", &state.DRAW_.families_view_visible)) {
-      const auto& families = state.diagram_.GetFamilies();
+    if (ImGui::Begin("Families", &state.draw_state->families_view_visible)) {
+      const auto& families = state.core_state->diagram_.GetFamilies();
       const auto table_flags =
           ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
           ImGuiTableFlags_Hideable | ImGuiTableFlags_ContextMenuInBody |
@@ -159,7 +160,7 @@ void DrawFamiliesView(State& state) {
         ImGui::TableSetupColumn("Input");
         ImGui::TableHeadersRow();
 
-        for (const auto& family : state.diagram_.GetFamilies()) {
+        for (const auto& family : state.core_state->diagram_.GetFamilies()) {
           if (!family->GetNodes().empty()) {
             DisplayFamily(state, *family);
           }

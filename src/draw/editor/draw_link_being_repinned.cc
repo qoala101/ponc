@@ -54,20 +54,21 @@ auto GetCurve(const ImVec2& m_Start, const ImVec2& m_End, ne::PinKind kind) {
 }  // namespace
 
 void DrawLinkBeingRepinned(State& state) {
-  if (state.drawing_.new_link.has_value()) {
-    if (state.drawing_.new_link->rebind.has_value()) {
-      if (state.drawing_.new_link->rebind->fixed_pin_pos.has_value()) {
+  if (state.draw_state->new_link.has_value()) {
+    if (state.draw_state->new_link->rebind.has_value()) {
+      if (state.draw_state->new_link->rebind->fixed_pin_pos.has_value()) {
         const auto curve =
-            GetCurve(*state.drawing_.new_link->rebind->fixed_pin_pos,
+            GetCurve(*state.draw_state->new_link->rebind->fixed_pin_pos,
                      ImGui::GetMousePos(),
-                     state.drawing_.new_link->rebind->fixed_pin_kind);
+                     state.draw_state->new_link->rebind->fixed_pin_kind);
 
         auto color = ImColor{255, 255, 255};
 
-        if (state.drawing_.new_link->pin_hovered_over.has_value()) {
-          if (!state.CanConnectFromPinToPin(
-                  state.drawing_.new_link->pin_dragged_from,
-                  *state.drawing_.new_link->pin_hovered_over)) {
+        if (state.draw_state->new_link->pin_hovered_over.has_value()) {
+          if (!state.draw_state->CanConnectFromPinToPin(
+                  *state.core_state,
+                  state.draw_state->new_link->pin_dragged_from,
+                  *state.draw_state->new_link->pin_hovered_over)) {
             color = ImColor{255, 0, 0};
           }
         }

@@ -5,22 +5,23 @@
 #include "core_link.h"
 #include "coreui_i_node_drawer.h"
 #include "cpp_scope.h"
+#include "draw_state.h"
 #include "draw_tooltip.h"
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
 namespace {
-void UpdateNewLink(State& state, State::NewLink& new_link) {
-  for (const auto& link : state.diagram_.GetLinks()) {
+void UpdateNewLink(State& state, NewLink& new_link) {
+  for (const auto& link : state.core_state->diagram_.GetLinks()) {
     if (link.start_pin_id == new_link.pin_dragged_from) {
       new_link.rebind.emplace(
-          State::Rebind{link.end_pin_id, ne::PinKind::Input, link.id});
+          Rebind{link.end_pin_id, ne::PinKind::Input, link.id});
       break;
     }
 
     if (link.end_pin_id == new_link.pin_dragged_from) {
       new_link.rebind.emplace(
-          State::Rebind{link.start_pin_id, ne::PinKind::Output, link.id});
+          Rebind{link.start_pin_id, ne::PinKind::Output, link.id});
       break;
     }
   }
@@ -31,8 +32,8 @@ void DrawLinkConnectionProcess(State& state) {
   const auto create_scope = cpp::Scope{[]() { ne::EndCreate(); }};
   auto alpha = 255;
 
-  if (state.drawing_.new_link.has_value() &&
-      state.drawing_.new_link->rebind.has_value()) {
+  if (state.draw_state->new_link.has_value() &&
+      state.draw_state->new_link->rebind.has_value()) {
     alpha = 0;
   }
 
@@ -41,21 +42,23 @@ void DrawLinkConnectionProcess(State& state) {
     auto end_pin_id = ne::PinId{};
 
     if (ne::QueryNewLink(&start_pin_id, &end_pin_id)) {
-      auto& new_link = state.drawing_.new_link.emplace(
-          State::NewLink{start_pin_id, end_pin_id});
+      auto& new_link =
+          state.draw_state->new_link.emplace(NewLink{start_pin_id, end_pin_id});
 
       UpdateNewLink(state, new_link);
 
-      const auto& start_node = state.diagram_.FindPinNode(start_pin_id);
-      const auto& end_node = state.diagram_.FindPinNode(end_pin_id);
+      const auto& start_node =
+          state.core_state->diagram_.FindPinNode(start_pin_id);
+      const auto& end_node = state.core_state->diagram_.FindPinNode(end_pin_id);
 
-      auto start_pin_drawer =
-          start_node->CreateDrawer(state)->CreatePinDrawer(start_pin_id);
-      auto end_pin_drawer =
-          end_node->CreateDrawer(state)->CreatePinDrawer(end_pin_id);
+      auto start_pin_drawer = start_node->CreateDrawer(state.ToStateNoQueue())
+                                  ->CreatePinDrawer(start_pin_id);
+      auto end_pin_drawer = end_node->CreateDrawer(state.ToStateNoQueue())
+                                ->CreatePinDrawer(end_pin_id);
 
-      if (!state.CanConnectFromPinToPin(new_link.pin_dragged_from,
-                                        *new_link.pin_hovered_over)) {
+      if (!state.draw_state->CanConnectFromPinToPin(
+              *state.core_state, new_link.pin_dragged_from,
+              *new_link.pin_hovered_over)) {
         auto alpha = 255;
 
         if (new_link.rebind.has_value()) {
@@ -69,37 +72,38 @@ void DrawLinkConnectionProcess(State& state) {
 
           if (ne::AcceptNewItem(ImColor{0, 0, 0, 0})) {
             ne::DeleteLink(new_link.rebind->rebinding_link_id);
-            state.diagram_.EraseLink(new_link.rebind->rebinding_link_id);
+            state.core_state->diagram_.EraseLink(
+                new_link.rebind->rebinding_link_id);
 
             if (new_link.rebind->fixed_pin_kind == ne::PinKind::Input) {
-              state.diagram_.EmplaceLink(
-                  core::Link{state.id_generator_.GetNext<ne::LinkId>(),
-                             new_link.pin_hovered_over->Get(),
-                             new_link.rebind->fixed_pin});
+              state.core_state->diagram_.EmplaceLink(core::Link{
+                  state.core_state->id_generator_.GetNext<ne::LinkId>(),
+                  new_link.pin_hovered_over->Get(),
+                  new_link.rebind->fixed_pin});
             } else {
-              state.diagram_.EmplaceLink(
-                  core::Link{state.id_generator_.GetNext<ne::LinkId>(),
-                             new_link.rebind->fixed_pin,
-                             new_link.pin_hovered_over->Get()});
+              state.core_state->diagram_.EmplaceLink(core::Link{
+                  state.core_state->id_generator_.GetNext<ne::LinkId>(),
+                  new_link.rebind->fixed_pin,
+                  new_link.pin_hovered_over->Get()});
             }
           }
         } else {
           DrawTooltip("+ Create Link", {32, 45, 32, 180});
 
           if (ne::AcceptNewItem(ImColor{127, 255, 127}, 4.0F)) {
-            state.diagram_.EmplaceLink(core::Link{
-                state.id_generator_.GetNext<ne::LinkId>(),
+            state.core_state->diagram_.EmplaceLink(core::Link{
+                state.core_state->id_generator_.GetNext<ne::LinkId>(),
                 new_link.pin_dragged_from, *new_link.pin_hovered_over});
           }
         }
       }
     } else {
-      state.drawing_.new_link->pin_hovered_over.reset();
+      state.draw_state->new_link->pin_hovered_over.reset();
     }
 
     // if (ne::QueryNewNode(&end_pin_id)) {
     //   auto& new_link =
-    //       state.drawing_.new_link.emplace(State::NewLink{end_pin_id});
+    //       state.draw_state->new_link.emplace(State::NewLink{end_pin_id});
 
     //   UpdateNewLink(state, new_link);
 
@@ -113,7 +117,7 @@ void DrawLinkConnectionProcess(State& state) {
     //   }
     // }
   } else {
-    state.drawing_.new_link.reset();
+    state.draw_state->new_link.reset();
   }
 }
 }  // namespace esc::draw

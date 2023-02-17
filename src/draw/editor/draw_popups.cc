@@ -17,7 +17,7 @@ void DrawOpenPopupProcess(State& state) {
         cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
 
     if (ne::ShowBackgroundContextMenu()) {
-      state.DRAW_.popup_position = popup_position;
+      state.draw_state->popup_position = popup_position;
       ImGui::OpenPopup("Create New Node",
                        ImGuiPopupFlags_NoOpenOverExistingPopup);
       return;
@@ -26,7 +26,7 @@ void DrawOpenPopupProcess(State& state) {
     auto selected_node_id = ne::NodeId{};
 
     if (ne::ShowNodeContextMenu(&selected_node_id)) {
-      state.DRAW_.popup_node_id = selected_node_id;
+      state.draw_state->popup_node_id = selected_node_id;
       ImGui::OpenPopup("Node", ImGuiPopupFlags_NoOpenOverExistingPopup);
       return;
     }
@@ -34,7 +34,7 @@ void DrawOpenPopupProcess(State& state) {
     auto selected_link_id = ne::LinkId{};
 
     if (ne::ShowLinkContextMenu(&selected_link_id)) {
-      state.DRAW_.popup_link_id = selected_link_id;
+      state.draw_state->popup_link_id = selected_link_id;
       ImGui::OpenPopup("Link", ImGuiPopupFlags_NoOpenOverExistingPopup);
       return;
     }

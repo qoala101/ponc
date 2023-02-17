@@ -97,7 +97,7 @@ void Icon(const ImVec2& size, bool filled,
 void DrawPinIcon(State& state, core::INode& node, ne::PinId pin_id,
                  coreui::IPinDrawer& pin_drawer, bool connectable,
                  bool connected, float alpha) {
-  // const auto& new_link = state.drawing_.new_link;
+  // const auto& new_link = state.draw_state->new_link;
   // if (new_link.has_value()) {
   //   if (pin_id == new_link->pin_dragged_from) {
   //     ImGui::GetWindowDrawList()->AddCircle(ImGui::GetCursorPos(), 5.0F,
@@ -131,13 +131,15 @@ void DrawPinIcon(State& state, core::INode& node, ne::PinId pin_id,
 
   const auto size = ImVec2{24, 24};
 
-  const auto node_flow = state.flow_calculator_.GetCalculatedFlow(node);
+  const auto node_flow =
+      state.core_state->flow_calculator_.GetCalculatedFlow(node);
   auto color = ImColor{255, 255, 255};
 
-  if (state.drawing_.link_colors.color_flow) {
-    const auto node_flow = state.flow_calculator_.GetCalculatedFlow(node);
+  if (state.draw_state->color_flow) {
+    const auto node_flow =
+        state.core_state->flow_calculator_.GetCalculatedFlow(node);
     const auto flow = GetPinFlow(node_flow, pin_id);
-    color = state.GetColorForFlowValue(flow);
+    color = state.draw_state->GetColorForFlowValue(flow);
   }
 
   color.Value.w = static_cast<int>(alpha * 255);
@@ -195,7 +197,7 @@ auto IsFlowPin(ne::PinId id, const core::INode& node) -> bool {
 auto IsPinLinked(State& state, ne::PinId id) -> bool {
   if (!id) return false;
 
-  for (const auto& link : state.diagram_.GetLinks())
+  for (const auto& link : state.core_state->diagram_.GetLinks())
     if (link.start_pin_id == id || link.end_pin_id == id) return true;
 
   return false;
@@ -204,25 +206,25 @@ auto IsPinLinked(State& state, ne::PinId id) -> bool {
 auto CalculateAlphaForPin(State& state, ne::PinId pin_id) {
   auto alpha = ImGui::GetStyle().Alpha;
 
-  // if (state.drawing_.not_yet_connected_pin_of_new_link_id.has_value() &&
-  //     !CanCreateLink(*state.drawing_.not_yet_connected_pin_of_new_link_id,
+  // if (state.draw_state->not_yet_connected_pin_of_new_link_id.has_value() &&
+  //     !CanCreateLink(*state.draw_state->not_yet_connected_pin_of_new_link_id,
   //                    pin_id) &&
-  //     (pin_id != *state.drawing_.not_yet_connected_pin_of_new_link_id))
+  //     (pin_id != *state.draw_state->not_yet_connected_pin_of_new_link_id))
   //     {
   //   alpha = alpha * (48.0F / 255.0F);
   // }
 
-  // if (state.drawing_.new_link.has_value()) {
+  // if (state.draw_state->new_link.has_value()) {
   //   if
-  //   (!state.CanConnectFromPinToPin(state.drawing_.new_link->pin_dragged_from,
+  //   (!state.CanConnectFromPinToPin(state.draw_state->new_link->pin_dragged_from,
   //                                     pin_id)) {
   //     alpha = alpha * (48.0F / 255.0F);
   //   }
   // }
   // alpha = alpha * (48.0F / 255.0F);
 
-  // if (state.drawing_.not_yet_connected_pin_of_new_link_id.has_value() &&
-  //     (pin_id != *state.drawing_.not_yet_connected_pin_of_new_link_id)) {
+  // if (state.draw_state->not_yet_connected_pin_of_new_link_id.has_value() &&
+  //     (pin_id != *state.draw_state->not_yet_connected_pin_of_new_link_id)) {
   //   alpha = alpha * (48.0F / 255.0F);
   // }
 
@@ -231,7 +233,7 @@ auto CalculateAlphaForPin(State& state, ne::PinId pin_id) {
 
 void DrawNode(State& state, const Texture& texture, core::INode& node) {
   auto node_builder = esc::NodeDrawer{node.GetId()};
-  auto drawer = node.CreateDrawer(state);
+  auto drawer = node.CreateDrawer(state.ToStateNoQueue());
 
   if (drawer->HasHeader()) {
     const auto header_texture = texture;
@@ -239,13 +241,14 @@ void DrawNode(State& state, const Texture& texture, core::INode& node) {
     {
       auto color = drawer->GetColor();
 
-      if (state.drawing_.link_colors.color_flow) {
-        const auto node_flow = state.flow_calculator_.GetCalculatedFlow(node);
+      if (state.draw_state->color_flow) {
+        const auto node_flow =
+            state.core_state->flow_calculator_.GetCalculatedFlow(node);
 
         if (node_flow.input_pin_flow.has_value()) {
           const auto flow =
               GetPinFlow(node_flow, node_flow.input_pin_flow->first);
-          color = state.GetColorForFlowValue(flow);
+          color = state.draw_state->GetColorForFlowValue(flow);
         } else {
           color = ImColor{255, 255, 255};
         }
@@ -253,12 +256,12 @@ void DrawNode(State& state, const Texture& texture, core::INode& node) {
 
       const auto header_scope = node_builder.AddHeader(header_texture, color);
 
-      DrawNodeHeader(*node.CreateDrawer(state));
+      DrawNodeHeader(*node.CreateDrawer(state.ToStateNoQueue()));
     }
   }
 
   for (const auto pin_id : node.GetPinIds()) {
-    auto drawer = state.diagram_.FindPin(pin_id, state);
+    auto drawer = state.core_state->diagram_.FindPin(pin_id, state);
     const auto kind = drawer->GetKind();
     const auto alpha = CalculateAlphaForPin(state, pin_id);
 
@@ -289,11 +292,11 @@ void DrawNode(State& state, const Texture& texture, core::INode& node) {
       }
     }
 
-    state.drawing_.pin_poses_[pin_id.Get()] = ImGui::GetItemRectMin();
+    state.draw_state->pin_poses_[pin_id.Get()] = ImGui::GetItemRectMin();
 
-    if (state.drawing_.new_link.has_value()) {
-      if (state.drawing_.new_link->rebind.has_value()) {
-        if (state.drawing_.new_link->rebind->fixed_pin == pin_id) {
+    if (state.draw_state->new_link.has_value()) {
+      if (state.draw_state->new_link->rebind.has_value()) {
+        if (state.draw_state->new_link->rebind->fixed_pin == pin_id) {
           const auto rect =
               ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
 
@@ -302,7 +305,7 @@ void DrawNode(State& state, const Texture& texture, core::INode& node) {
                   ? ImVec2{rect.Min.x, (rect.Min.y + rect.Max.y) * 0.5f}
                   : ImVec2{rect.Max.x, (rect.Min.y + rect.Max.y) * 0.5f};
 
-          state.drawing_.new_link->rebind->fixed_pin_pos = end_pos;
+          state.draw_state->new_link->rebind->fixed_pin_pos = end_pos;
         }
       }
     }
@@ -318,9 +321,9 @@ void DrawNode(State& state, const Texture& texture, core::INode& node) {
 // Nodes::Nodes(TexturesHandle textures) : textures_{std::move(textures)} {}
 
 void DrawNodes(State& state) {
-  for (const auto& family : state.diagram_.GetFamilies()) {
+  for (const auto& family : state.core_state->diagram_.GetFamilies()) {
     for (const auto& node : family->GetNodes()) {
-      DrawNode(state, state.textures_.node_header, *node);
+      DrawNode(state, state.draw_state->node_header_texture, *node);
     }
   }
 }

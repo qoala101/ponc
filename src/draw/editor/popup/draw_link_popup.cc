@@ -1,5 +1,6 @@
 #include "draw_link_popup.h"
 
+#include "app_events.h"
 #include "cpp_scope.h"
 
 namespace esc::draw {
@@ -11,9 +12,8 @@ void DrawLinkPopup(State& state) {
     ImGui::Separator();
 
     if (ImGui::MenuItem("Delete")) {
-      state.PostEvent([](auto& state) {
-        State::EraseLink(state, state.DRAW_.popup_link_id);
-      });
+      state.event_queue->PostEvent(
+          event::DeleteLink{.link_id = state.draw_state->popup_link_id});
     }
   }
 }

@@ -1,11 +1,10 @@
-#ifndef VH_APP_APP_IMPL_H_
-#define VH_APP_APP_IMPL_H_
+#ifndef VH_APP_IMPL_H_
+#define VH_APP_IMPL_H_
 
 #include <application.h>
 
-#include "app_state.h"
+#include "app_event_queue.h"
 #include "app_textures.h"
-#include "imgui.h"
 
 namespace esc {
 class AppImpl {
@@ -28,9 +27,11 @@ class AppImpl {
   void OnFrame();
 
  private:
-  State state_{};
   ne::EditorContext *editor_context_{};
+  core::CoreState core_state_{};
+  draw::DrawState draw_state{};
+  EventQueue event_queue_{};
 };
 }  // namespace esc
 
-#endif  // VH_APP_APP_IMPL_H_
+#endif  // VH_APP_IMPL_H_

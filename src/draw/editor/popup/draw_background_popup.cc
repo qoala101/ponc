@@ -2,6 +2,7 @@
 
 #include <ranges>
 
+#include "app_events.h"
 #include "core_i_family.h"
 #include "coreui_i_family_drawer.h"
 #include "cpp_scope.h"
@@ -41,7 +42,7 @@ void DrawBackgroundPopup(State& state) {
     ImGui::TextUnformatted("Create New Node");
     ImGui::Separator();
 
-    const auto& families = state.diagram_.GetFamilies();
+    const auto& families = state.core_state->diagram_.GetFamilies();
     const auto family_groups = coreui::GroupByLabels(families);
 
     for (const auto& [group_label, families] : family_groups) {
@@ -55,9 +56,9 @@ void DrawBackgroundPopup(State& state) {
       if (draw_items) {
         for (const auto& family : families) {
           if (ImGui::MenuItem(family->CreateDrawer()->GetLabel().c_str())) {
-            auto& new_node = family->EmplaceNode(state.id_generator_);
-
-            new_node.SetPosition(state.DRAW_.popup_position);
+            state.event_queue->PostEvent(event::CreateNode{
+                .family = family,
+                .position = state.draw_state->popup_position});
 
             // if (const auto node_created_by_link_from_existing_one =
             //         drawing_state_.connect_new_node_to_existing_pin_id
