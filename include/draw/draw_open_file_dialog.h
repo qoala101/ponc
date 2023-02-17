@@ -1,21 +1,11 @@
 #ifndef VH_DRAW_OPEN_FILE_DIALOG_H_
 #define VH_DRAW_OPEN_FILE_DIALOG_H_
 
-#include <memory>
-
-#include "draw_i_file_dialog.h"
+#include "esc_state.h"
 
 namespace esc::draw {
 // ---
-class OpenFileDialog : public IFileDialog {
- public:
-  // ---
-  OpenFileDialog();
-
- private:
-  // ---
-  void OnFileSelected(State &state, std::string file_path) const override;
-};
+void DrawOpenFileDialog(State &state);
 }  // namespace esc::draw
 
 #endif  // VH_DRAW_OPEN_FILE_DIALOG_H_

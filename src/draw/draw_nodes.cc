@@ -323,7 +323,7 @@ void DrawNode(State& state,
 
 // Nodes::Nodes(TexturesHandle textures) : textures_{std::move(textures)} {}
 
-void Nodes::Draw(State& state) {
+void DrawNodes(State& state) {
   for (const auto& family : state.app_.GetDiagram().GetFamilies()) {
     for (const auto& node : family->GetNodes()) {
       DrawNode(state,

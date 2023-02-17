@@ -6,12 +6,7 @@
 #include <utility>
 
 namespace esc::draw {
-// ---
-Tooltip::Tooltip(std::string text, const ImColor& color)
-    : text_{std::move(text)}, color_{color} {}
-
-// ---
-void Tooltip::Draw(State& state) {
+void DrawTooltip(std::string_view text, const ImColor& color) {
   const auto& style = ImGui::GetStyle();
   const auto spacing = style.ItemSpacing;
   const auto padding = style.FramePadding;
@@ -21,13 +16,13 @@ void Tooltip::Draw(State& state) {
       ImVec2{spacing.x, -spacing.y - ImGui::GetTextLineHeight()});
 
   const auto cursor_screen_pos = ImGui::GetCursorScreenPos();
-  const auto text_size = ImGui::CalcTextSize(text_.c_str());
+  const auto text_size = ImGui::CalcTextSize(text.data());
   const auto rect = ImRect{cursor_screen_pos - padding,
                            cursor_screen_pos + text_size + padding};
 
   auto* drawList = ImGui::GetWindowDrawList();
-  drawList->AddRectFilled(rect.Min, rect.Max, color_, text_size.y * 0.2F);
+  drawList->AddRectFilled(rect.Min, rect.Max, color, text_size.y * 0.2F);
 
-  ImGui::TextUnformatted(text_.c_str());
+  ImGui::TextUnformatted(text.data());
 }
 }  // namespace esc::draw

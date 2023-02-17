@@ -77,10 +77,10 @@ auto FindMaxId(const core::Diagram &diagram) {
 
 State::State() { ResetDiagram(*this); }
 
-void State::OpenDiagramFromFile(State &state, const std::string &file_path) {
+void State::OpenDiagramFromFile(State &state, std::string_view file_path) {
   ResetDiagram(state);
 
-  const auto json = crude_json::value::load(file_path).first;
+  const auto json = crude_json::value::load(file_path.data()).first;
 
   auto diagram =
       json::DiagramSerializer::ParseFromJson(json, CreateFamilyParsers());
@@ -90,11 +90,10 @@ void State::OpenDiagramFromFile(State &state, const std::string &file_path) {
   state.id_generator_ = core::IdGenerator{max_id + 1};
 }
 
-void State::SaveDiagramToFile(const State &state,
-                              const std::string &file_path) {
+void State::SaveDiagramToFile(const State &state, std::string_view file_path) {
   const auto &diagram = state.app_.GetDiagram();
   const auto json = json::DiagramSerializer::WriteToJson(diagram);
-  json.save(file_path);
+  json.save(file_path.data());
 }
 
 void State::ResetDiagram(State &state) {

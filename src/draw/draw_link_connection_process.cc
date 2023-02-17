@@ -27,7 +27,7 @@ void UpdateNewLink(State& state, State::NewLink& new_link) {
 }
 }  // namespace
 
-void LinkConnectionProcess::Draw(State& state) {
+void DrawLinkConnectionProcess(State& state) {
   const auto create_scope = cpp::Scope{[]() { ne::EndCreate(); }};
   auto alpha = 255;
 
@@ -66,7 +66,7 @@ void LinkConnectionProcess::Draw(State& state) {
         ne::RejectNewItem(ImColor{255, 0, 0, alpha}, 2.0F);
       } else {
         if (new_link.rebind.has_value()) {
-          Tooltip{"+ Move Link", {32, 45, 32, 180}}.Draw(state);
+          DrawTooltip("+ Move Link", {32, 45, 32, 180});
 
           if (ne::AcceptNewItem(ImColor{0, 0, 0, 0})) {
             ne::DeleteLink(new_link.rebind->rebinding_link_id);
@@ -86,7 +86,7 @@ void LinkConnectionProcess::Draw(State& state) {
             }
           }
         } else {
-          Tooltip{"+ Create Link", {32, 45, 32, 180}}.Draw(state);
+          DrawTooltip("+ Create Link", {32, 45, 32, 180});
 
           if (ne::AcceptNewItem(ImColor{127, 255, 127}, 4.0F)) {
             state.app_.GetDiagram().EmplaceLink(core::Link{

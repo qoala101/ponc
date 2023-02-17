@@ -1,7 +1,5 @@
 #include "draw_save_as_file_dialog.h"
 
-#include "draw_i_file_dialog.h"
-
 namespace esc::draw {
 namespace {
 auto AsLowerCase(std::string text) {
@@ -13,18 +11,15 @@ auto AsLowerCase(std::string text) {
 }
 }  // namespace
 
-SaveAsFileDialog::SaveAsFileDialog()
-    : IFileDialog{[]() {
-        auto dialog =
-            ImGui::FileBrowser{ImGuiFileBrowserFlags_EnterNewFilename |
-                               ImGuiFileBrowserFlags_CreateNewDir |
-                               ImGuiFileBrowserFlags_CloseOnEsc};
-        dialog.SetTitle("Save Diagram As JSON");
-        return dialog;
-      }()} {}
+void DrawSaveAsFileDialog(State& state) {
+  state.DRAW_.open_file_dialog.Display();
 
-void SaveAsFileDialog::OnFileSelected(State& state,
-                                      std::string file_path) const {
+  if (!state.DRAW_.open_file_dialog.HasSelected()) {
+    return;
+  }
+
+  auto file_path = state.DRAW_.open_file_dialog.GetSelected().string();
+
   if (const auto not_json_extension =
           !AsLowerCase(file_path).ends_with(".json")) {
     file_path += ".json";
@@ -33,5 +28,7 @@ void SaveAsFileDialog::OnFileSelected(State& state,
   state.PostEvent([file_path = std::move(file_path)](auto& state) {
     State::SaveDiagramToFile(state, file_path);
   });
+
+  state.DRAW_.open_file_dialog.ClearSelected();
 }
 }  // namespace esc::draw

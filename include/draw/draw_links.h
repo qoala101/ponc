@@ -1,15 +1,11 @@
 #ifndef VH_DRAW_LINKS_H_
 #define VH_DRAW_LINKS_H_
 
-#include "draw_i_drawable.h"
+#include "esc_state.h"
 
 namespace esc::draw {
 // ---
-class Links : public IDrawable {
- public:
-  // ---
-  void Draw(State &state) override;
-};
+void DrawLinks(State &state);
 }  // namespace esc::draw
 
 #endif  // VH_DRAW_LINKS_H_

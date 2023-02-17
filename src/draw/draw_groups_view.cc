@@ -126,15 +126,15 @@ void DisplayGroup(State& state, core::Group& group) {
 }
 }  // namespace
 
-void GroupsView::Draw(State& state) {
-  if (!IsVisible()) {
+void DrawGroupsView(State& state) {
+  if (!state.DRAW_.groups_view_visible) {
     return;
   }
 
   {
     const auto window_scope = cpp::Scope{[]() { ImGui::End(); }};
 
-    if (ImGui::Begin("Groups", &GetVisible())) {
+    if (ImGui::Begin("Groups", &state.DRAW_.groups_view_visible)) {
       const auto table_flags =
           ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
           ImGuiTableFlags_Hideable | ImGuiTableFlags_ContextMenuInBody |

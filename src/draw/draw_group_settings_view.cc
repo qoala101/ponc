@@ -12,15 +12,16 @@
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
-void GroupSettingsView::Draw(State& state) {
-  if (!IsVisible()) {
+void DrawGroupSettingsView(State& state) {
+  if (!state.DRAW_.group_settings_view_visible) {
     return;
   }
 
   {
     const auto window_scope = cpp::Scope{[]() { ImGui::End(); }};
 
-    if (ImGui::Begin("Group Settings", &GetVisible())) {
+    if (ImGui::Begin("Group Settings",
+                     &state.DRAW_.group_settings_view_visible)) {
       auto& groups = state.app_.GetDiagram().GetGroups();
 
       {
@@ -29,9 +30,11 @@ void GroupSettingsView::Draw(State& state) {
         auto group_index = 0;
 
         for (auto& group : groups) {
-          if (ImGui::Selectable(group.name_.c_str(),
-                                selected_group_index_ == group_index)) {
-            selected_group_index_ = group_index;
+          if (ImGui::Selectable(
+                  group.name_.c_str(),
+                  state.DRAW_.group_setings_view_selected_group_index ==
+                      group_index)) {
+            state.DRAW_.group_setings_view_selected_group_index = group_index;
           }
 
           ++group_index;
@@ -46,7 +49,8 @@ void GroupSettingsView::Draw(State& state) {
         ImGui::BeginGroup();  // 1 line below us
 
         if (!groups.empty()) {
-          auto& group = groups[selected_group_index_];
+          auto& group =
+              groups[state.DRAW_.group_setings_view_selected_group_index];
 
           ImGui::Checkbox("Fill##asdas", &group.fill_background_);
           ImGui::Checkbox("Unite##hhhh", &group.unite_);

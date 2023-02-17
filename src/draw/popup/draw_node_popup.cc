@@ -7,45 +7,42 @@
 #include "imgui.h"
 
 namespace esc::draw {
-NodePopup::NodePopup(std::shared_ptr<core::INode> node)
-    : node_{std::move(node)} {}
+void DrawNodePopup(State& state) {
+  if (ImGui::BeginPopup("Node")) {
+    const auto popup_scope = cpp::Scope{[]() { ImGui::EndPopup(); }};
 
-auto NodePopup::GetLabel(State& state) const -> std::string {
-  return node_->CreateDrawer(state)->GetLabel();
-}
+    ImGui::TextUnformatted("Node");
+    ImGui::Separator();
 
-void NodePopup::DrawContent(State& state) {
-  if (ImGui::MenuItem("Delete With Links")) {
-    SetVisible(false);
+    if (ImGui::MenuItem("Delete With Links")) {
+      state.PostEvent([](auto& state) {
+        State::EraseNodeAndConnectedLinks(state, state.DRAW_.popup_node_id);
+      });
+    }
 
-    state.PostEvent([node_id = node_->GetId()](auto& state) {
-      State::EraseNodeAndConnectedLinks(state, node_id);
-    });
-  }
+    if (ImGui::MenuItem("Delete")) {
+      state.PostEvent([](auto& state) {
+        State::ReplaceWithFreePins(state, state.DRAW_.popup_node_id);
+      });
+    }
 
-  if (ImGui::MenuItem("Delete")) {
-    SetVisible(false);
+    if (ImGui::BeginMenu("Group")) {
+      const auto menu_scope = cpp::Scope{[]() { ImGui::EndMenu(); }};
 
-    state.PostEvent([node_id = node_->GetId()](auto& state) {
-      State::ReplaceWithFreePins(state, node_id);
-    });
-  }
+      ImGui::InputTextWithHint("", "Enter group name...",
+                               state.DRAW_.popup_group_name.data(),
+                               state.DRAW_.popup_group_name.size());
+      ImGui::SameLine();
 
-  if (ImGui::BeginMenu("Group")) {
-    const auto menu_scope = cpp::Scope{[]() { ImGui::EndMenu(); }};
+      if (ImGui::SmallButton("Add")) {
+        state.PostEvent([](auto& state) {
+          State::MakeGroupFromSelectedNodes(
+              state, std::string{state.DRAW_.popup_group_name.begin(),
+                                 state.DRAW_.popup_group_name.end()});
+        });
 
-    ImGui::InputTextWithHint("", "Enter group name...", group_name_.data(),
-                             group_name_.size());
-    ImGui::SameLine();
-
-    if (ImGui::SmallButton("Add")) {
-      SetVisible(false);
-
-      state.PostEvent(
-          [group_name = std::string{group_name_.begin(), group_name_.end()}](
-              auto& state) {
-            State::MakeGroupFromSelectedNodes(state, group_name);
-          });
+        // ImGui::CloseCurrentPopup();
+      }
     }
   }
 }

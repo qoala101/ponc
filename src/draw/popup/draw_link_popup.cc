@@ -1,20 +1,20 @@
 #include "draw_link_popup.h"
 
 #include "cpp_scope.h"
-#include "draw_i_family_drawer.h"
 
 namespace esc::draw {
-LinkPopup::LinkPopup(core::Link link) : link_{link} {}
+void DrawLinkPopup(State& state) {
+  if (ImGui::BeginPopup("Link")) {
+    const auto popup_scope = cpp::Scope{[]() { ImGui::EndPopup(); }};
 
-auto LinkPopup::GetLabel(State& state) const -> std::string { return "Link"; }
+    ImGui::TextUnformatted("Link");
+    ImGui::Separator();
 
-void LinkPopup::DrawContent(State& state) {
-  if (ImGui::MenuItem("Delete")) {
-    SetVisible(false);
-
-    state.PostEvent([link_id = link_.id](auto& state) {
-      State::EraseLink(state, link_id);
-    });
+    if (ImGui::MenuItem("Delete")) {
+      state.PostEvent([](auto& state) {
+        State::EraseLink(state, state.DRAW_.popup_link_id);
+      });
+    }
   }
 }
 }  // namespace esc::draw

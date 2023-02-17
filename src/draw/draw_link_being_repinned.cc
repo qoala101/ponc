@@ -8,8 +8,8 @@
 
 #include "cpp_scope.h"
 #include "draw_i_node_drawer.h"
+#include "draw_link_being_repinned.h"
 #include "draw_link_connection_process.h"
-#include "draw_repin_curve.h"
 #include "draw_tooltip.h"
 #include "imgui_bezier_math.h"
 #include "imgui_node_editor.h"
@@ -53,7 +53,7 @@ auto GetCurve(const ImVec2& m_Start, const ImVec2& m_End, ne::PinKind kind) {
 }
 }  // namespace
 
-void RepinCurve::Draw(State& state) {
+void DrawLinkBeingRepinned(State& state) {
   if (state.drawing_.new_link.has_value()) {
     if (state.drawing_.new_link->rebind.has_value()) {
       if (state.drawing_.new_link->rebind->fixed_pin_pos.has_value()) {

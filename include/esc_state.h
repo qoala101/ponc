@@ -1,6 +1,11 @@
 #ifndef VH_ESC_STATE_H_
 #define VH_ESC_STATE_H_
 
+// clang-format off
+#include <imgui.h>
+#include <imfilebrowser.h>
+// clang-format on
+
 #include <imgui_node_editor.h>
 #include <sys/types.h>
 
@@ -10,7 +15,6 @@
 #include "core_app.h"
 #include "core_flow_calculator.h"
 #include "core_id_generator.h"
-#include "imgui.h"
 
 namespace esc {
 // ---
@@ -20,10 +24,9 @@ class State {
   State();
 
   // ---
-  static void OpenDiagramFromFile(State &state, const std::string &file_path);
+  static void OpenDiagramFromFile(State &state, std::string_view file_path);
   // ---
-  static void SaveDiagramToFile(const State &state,
-                                const std::string &file_path);
+  static void SaveDiagramToFile(const State &state, std::string_view file_path);
   // ---
   static void ResetDiagram(State &state);
   // ---
@@ -73,6 +76,37 @@ class State {
 
     std::unordered_map<uintptr_t, ImVec2> pin_poses_{};
   } drawing_{};
+
+  struct {
+    bool families_view_visible{};
+    bool flow_tree_view_visible{};
+    bool group_settings_view_visible{};
+    int group_setings_view_selected_group_index{};
+    bool groups_view_visible{};
+    bool settings_view_visible{};
+
+    bool open_file_dialog_visible{};
+    ImGui::FileBrowser open_file_dialog{[]() {
+      auto dialog = ImGui::FileBrowser{ImGuiFileBrowserFlags_CloseOnEsc};
+      dialog.SetTitle("Open Diagram JSON");
+      dialog.SetTypeFilters({".json"});
+      return dialog;
+    }()};
+
+    bool save_as_file_dialog_visible{};
+    ImGui::FileBrowser save_as_file_dialog{[]() {
+      auto dialog = ImGui::FileBrowser{ImGuiFileBrowserFlags_EnterNewFilename |
+                                       ImGuiFileBrowserFlags_CreateNewDir |
+                                       ImGuiFileBrowserFlags_CloseOnEsc};
+      dialog.SetTitle("Save Diagram As JSON");
+      return dialog;
+    }()};
+
+    ImVec2 popup_position{};
+    ne::NodeId popup_node_id{};
+    ne::LinkId popup_link_id{};
+    std::array<char, 100> popup_group_name{};
+  } DRAW_{};
 
   auto GetColorForFlowValue(float value) const -> ImColor;
 

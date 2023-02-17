@@ -1,21 +1,19 @@
 #include "draw_open_file_dialog.h"
 
-#include "draw_i_file_dialog.h"
 #include "esc_state.h"
-#include "json_diagram_serializer.h"
 
 namespace esc::draw {
-OpenFileDialog::OpenFileDialog()
-    : IFileDialog{[]() {
-        auto dialog = ImGui::FileBrowser{ImGuiFileBrowserFlags_CloseOnEsc};
-        dialog.SetTitle("Open Diagram JSON");
-        dialog.SetTypeFilters({".json"});
-        return dialog;
-      }()} {}
+void DrawOpenFileDialog(State &state) {
+  state.DRAW_.open_file_dialog.Display();
 
-void OpenFileDialog::OnFileSelected(State &state, std::string file_path) const {
-  state.PostEvent([file_path = std::move(file_path)](auto &state) {
-    State::OpenDiagramFromFile(state, file_path);
-  });
+  if (!state.DRAW_.open_file_dialog.HasSelected()) {
+    return;
+  }
+
+  state.PostEvent(
+      [file_path = state.DRAW_.open_file_dialog.GetSelected().string()](
+          auto &state) { State::OpenDiagramFromFile(state, file_path); });
+
+  state.DRAW_.open_file_dialog.ClearSelected();
 }
 }  // namespace esc::draw

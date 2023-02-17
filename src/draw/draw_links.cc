@@ -4,7 +4,7 @@
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
-void Links::Draw(State& state) {
+void DrawLinks(State& state) {
   // const auto* existing_link_from_same_pin =
   // state.GetExistingLinkFromSamePin();
 

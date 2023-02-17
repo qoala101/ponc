@@ -8,64 +8,49 @@
 #include "draw_node_popup.h"
 
 namespace esc::draw {
-// ---
-void Popups::Draw(State& state) {
-  UpdateCurrentPopup(state);
-  DrawCurrentPopup(state);
-}
-
-// ---
-void Popups::UpdateCurrentPopup(State& state) {
-  const auto popup_position = ImGui::GetMousePos();
-
-  {
-    const auto suspend_scope =
-        cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
-
-    if (ne::ShowBackgroundContextMenu()) {
-      current_popup_.emplace(std::make_unique<BackgroundPopup>(popup_position))
-          ->Open(state);
-
-      return;
-    }
-
-    auto selected_node_id = ne::NodeId{};
-
-    if (ne::ShowNodeContextMenu(&selected_node_id)) {
-      state.drawing_.popup_node_ = selected_node_id;
-
-      const auto& selected_node =
-          state.app_.GetDiagram().FindNodePTR(selected_node_id);
-
-      current_popup_.emplace(std::make_unique<NodePopup>(selected_node))
-          ->Open(state);
-
-      return;
-    }
-
-    auto selected_link_id = ne::LinkId{};
-
-    if (ne::ShowLinkContextMenu(&selected_link_id)) {
-      const auto& selected_link =
-          state.app_.GetDiagram().FindLink(selected_link_id);
-
-      current_popup_.emplace(std::make_unique<LinkPopup>(selected_link))
-          ->Open(state);
-    }
-  }
-}
-
-// ---
-void Popups::DrawCurrentPopup(State& state) {
+namespace {
+void DrawOpenPopupProcess(State& state) {
   const auto suspend_scope =
       cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
 
-  if (current_popup_.has_value()) {
-    (*current_popup_)->Draw(state);
+  const auto popup_position = ImGui::GetMousePos();
 
-    if (!(*current_popup_)->IsVisible()) {
-      current_popup_.reset();
-    }
+  if (ne::ShowBackgroundContextMenu()) {
+    state.DRAW_.popup_position = popup_position;
+    ImGui::OpenPopup("Create New Node",
+                     ImGuiPopupFlags_NoOpenOverExistingPopup);
+    return;
   }
+
+  auto selected_node_id = ne::NodeId{};
+
+  if (ne::ShowNodeContextMenu(&selected_node_id)) {
+    state.DRAW_.popup_node_id = selected_node_id;
+    ImGui::OpenPopup("Node", ImGuiPopupFlags_NoOpenOverExistingPopup);
+    return;
+  }
+
+  auto selected_link_id = ne::LinkId{};
+
+  if (ne::ShowLinkContextMenu(&selected_link_id)) {
+    state.DRAW_.popup_link_id = selected_link_id;
+    ImGui::OpenPopup("Link", ImGuiPopupFlags_NoOpenOverExistingPopup);
+    return;
+  }
+}
+
+void DrawPopupContents(State& state) {
+  const auto suspend_scope =
+      cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
+
+  DrawBackgroundPopup(state);
+  DrawNodePopup(state);
+  DrawLinkPopup(state);
+}
+}  // namespace
+
+void DrawPopups(State& state) {
+  DrawOpenPopupProcess(state);
+  DrawPopupContents(state);
 }
 }  // namespace esc::draw

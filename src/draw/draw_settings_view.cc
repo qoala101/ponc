@@ -10,15 +10,15 @@
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
-void SettingsView::Draw(State& state) {
-  if (!IsVisible()) {
+void DrawSettingsView(State& state) {
+  if (!state.DRAW_.settings_view_visible) {
     return;
   }
 
   {
     const auto window_scope = cpp::Scope{[]() { ImGui::End(); }};
 
-    if (ImGui::Begin("Settings", &GetVisible())) {
+    if (ImGui::Begin("Settings", &state.DRAW_.settings_view_visible)) {
       const auto low_high_mid =
           state.drawing_.link_colors.low +
           (state.drawing_.link_colors.high - state.drawing_.link_colors.low) / 2;

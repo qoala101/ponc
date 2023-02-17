@@ -1,4 +1,5 @@
 #include "draw_families_view.h"
+
 #include <unordered_set>
 
 #include "core_i_family.h"
@@ -69,8 +70,9 @@ void DisplayFamily(State& state, core::IFamily& family) {
   const auto draw_flags =
       has_children ? (ImGuiTreeNodeFlags_DefaultOpen) : ImGuiTreeNodeFlags_Leaf;
 
-  const auto node_is_open =
-      ImGui::TreeNodeEx(std::string{"##" + family.CreateDrawer()->GetLabel()}.c_str(), draw_flags);
+  const auto node_is_open = ImGui::TreeNodeEx(
+      std::string{"##" + family.CreateDrawer()->GetLabel()}.c_str(),
+      draw_flags);
 
   ImGui::SameLine();
 
@@ -97,7 +99,8 @@ void DisplayFamily(State& state, core::IFamily& family) {
 
   auto isSelected = group_node_ids == selected_node_ids;
 
-  if (ImGui::Selectable(family.CreateDrawer()->GetLabel().c_str(), &isSelected)) {
+  if (ImGui::Selectable(family.CreateDrawer()->GetLabel().c_str(),
+                        &isSelected)) {
     auto& io = ImGui::GetIO();
 
     if (io.KeyCtrl) {
@@ -133,15 +136,15 @@ void DisplayFamily(State& state, core::IFamily& family) {
 }
 }  // namespace
 
-void FamiliesView::Draw(State& state) {
-  if (!IsVisible()) {
+void DrawFamiliesView(State& state) {
+  if (!state.DRAW_.families_view_visible) {
     return;
   }
 
   {
     const auto window_scope = cpp::Scope{[]() { ImGui::End(); }};
 
-    if (ImGui::Begin("Families", &GetVisible())) {
+    if (ImGui::Begin("Families", &state.DRAW_.families_view_visible)) {
       const auto& families = state.app_.GetDiagram().GetFamilies();
       const auto table_flags =
           ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |

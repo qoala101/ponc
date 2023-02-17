@@ -1,24 +1,11 @@
 #ifndef VH_DRAW_NODE_POPUP_H_
 #define VH_DRAW_NODE_POPUP_H_
 
-#include "draw_i_popup.h"
-#include "imgui_node_editor.h"
+#include "esc_state.h"
 
 namespace esc::draw {
 // ---
-class NodePopup : public IPopup {
- public:
-  explicit NodePopup(std::shared_ptr<core::INode> node);
-
- private:
-  // ---
-  auto GetLabel [[nodiscard]] (State &state) const -> std::string override;
-  // ---
-  void DrawContent(State &state) override;
-
-  std::shared_ptr<core::INode> node_{};
-  std::array<char, 100> group_name_{};
-};
+void DrawNodePopup(State &state);
 }  // namespace esc::draw
 
 #endif  // VH_DRAW_NODE_POPUP_H_

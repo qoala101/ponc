@@ -1,15 +1,11 @@
 #ifndef VH_DRAW_DELETE_ITEMS_PROCESS_H_
 #define VH_DRAW_DELETE_ITEMS_PROCESS_H_
 
-#include "draw_i_drawable.h"
+#include "esc_state.h"
 
 namespace esc::draw {
 // ---
-class DeleteItemsProcess : public IDrawable {
- public:
-  // ---
-  void Draw(State &state) override;
-};
+void DrawDeleteItemsProcess(State &state);
 }  // namespace esc::draw
 
 #endif  // VH_DRAW_DELETE_ITEMS_PROCESS_H_
