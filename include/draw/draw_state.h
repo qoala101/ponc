@@ -17,6 +17,8 @@
 #include "draw_flow_tree_view.h"
 #include "draw_group_settings_view.h"
 #include "draw_groups_view.h"
+#include "draw_open_file_dialog.h"
+#include "draw_save_as_file_dialog.h"
 #include "draw_settings_view.h"
 #include "flow_calculator.h"
 
@@ -42,6 +44,9 @@ struct DrawState {
   GroupsView groups_view_{};
   GroupSettingsView group_settings_view_{};
   SettingsView settings_view_{};
+  
+  OpenFileDialog open_file_dialog{};
+  SaveAsFileDialog save_as_file_dialog{};
 
 
 
@@ -62,23 +67,6 @@ struct DrawState {
   std::optional<NewLink> new_link{};
 
   std::unordered_map<uintptr_t, ImVec2> pin_poses_{};
-
-  bool open_file_dialog_visible{};
-  ImGui::FileBrowser open_file_dialog{[]() {
-    auto dialog = ImGui::FileBrowser{ImGuiFileBrowserFlags_CloseOnEsc};
-    dialog.SetTitle("Open Diagram JSON");
-    dialog.SetTypeFilters({".json"});
-    return dialog;
-  }()};
-
-  bool save_as_file_dialog_visible{};
-  ImGui::FileBrowser save_as_file_dialog{[]() {
-    auto dialog = ImGui::FileBrowser{ImGuiFileBrowserFlags_EnterNewFilename |
-                                     ImGuiFileBrowserFlags_CreateNewDir |
-                                     ImGuiFileBrowserFlags_CloseOnEsc};
-    dialog.SetTitle("Save Diagram As JSON");
-    return dialog;
-  }()};
 
   ImVec2 popup_position{};
   ne::NodeId popup_node_id{};

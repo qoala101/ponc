@@ -1,11 +1,16 @@
 #ifndef VH_DRAW_SAVE_AS_FILE_DIALOG_H_
 #define VH_DRAW_SAVE_AS_FILE_DIALOG_H_
 
-#include "app_state.h"
+#include "draw_i_file_dialog.h"
 
 namespace esc::draw {
-// ---
-void DrawSaveAsFileDialog(State &state);
+class SaveAsFileDialog : public IFileDialog {
+ public:
+  SaveAsFileDialog();
+
+ private:
+  void OnFileSelected(State &state, std::string file_path) const override;
+};
 }  // namespace esc::draw
 
 #endif  // VH_DRAW_SAVE_AS_FILE_DIALOG_H_

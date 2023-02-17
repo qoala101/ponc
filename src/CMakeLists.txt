@@ -147,6 +147,7 @@ add_example_executable(esc
   cpp/cpp_assert.cc
   cpp/cpp_scope_function.cc
 
+  draw/dialog/draw_i_file_dialog.cc
   draw/dialog/draw_open_file_dialog.cc
   draw/dialog/draw_save_as_file_dialog.cc
 

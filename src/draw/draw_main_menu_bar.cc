@@ -24,11 +24,11 @@ void DrawFileMenu(State& state) {
     const auto menu_scope = cpp::Scope{[]() { ImGui::EndMenu(); }};
 
     if (ImGui::MenuItem("Open...", nullptr)) {
-      state.draw_state->open_file_dialog.Open();
+      state.draw_state->open_file_dialog.Show();
     }
 
     if (ImGui::MenuItem("Save As...")) {
-      state.draw_state->save_as_file_dialog.Open();
+      state.draw_state->save_as_file_dialog.Show();
     }
 
     ImGui::Separator();
@@ -38,8 +38,8 @@ void DrawFileMenu(State& state) {
     }
   }
 
-  DrawOpenFileDialog(state);
-  DrawSaveAsFileDialog(state);
+  state.draw_state->open_file_dialog.Draw(state);
+  state.draw_state->save_as_file_dialog.Draw(state);
 }
 
 // ---
