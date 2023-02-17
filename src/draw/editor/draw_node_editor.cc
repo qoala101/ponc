@@ -1,5 +1,6 @@
 #include "draw_node_editor.h"
 
+#include "app_state.h"
 #include "cpp_scope.h"
 #include "draw_delete_items_process.h"
 #include "draw_groups.h"
@@ -8,7 +9,6 @@
 #include "draw_links.h"
 #include "draw_nodes.h"
 #include "draw_popups.h"
-#include "esc_state.h"
 
 namespace esc::draw {
 void DrawNodeEditor(State &state) {

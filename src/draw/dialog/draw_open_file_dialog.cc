@@ -1,6 +1,6 @@
 #include "draw_open_file_dialog.h"
 
-#include "esc_state.h"
+#include "app_state.h"
 
 namespace esc::draw {
 void DrawOpenFileDialog(State &state) {

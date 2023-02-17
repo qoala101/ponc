@@ -4,8 +4,8 @@
 
 #include "draw_main_menu_bar.h"
 
+#include "app_state.h"
 #include "cpp_scope.h"
-#include "esc_state.h"
 #include "imgui.h"
 
 namespace esc::draw {

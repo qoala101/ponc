@@ -115,6 +115,13 @@ macro(add_example_executable name)
 endmacro()
 
 add_example_executable(esc
+  app/app_app_impl.cc
+  app/app_app.cc
+  app/app_editor_context_handle.cc
+  app/app_node_drawer.cc
+  app/app_state.cc
+  app/app_textures_handle.cc
+
   core/family/core_free_pin_family.cc
   core/family/core_placeholder_family.cc
 
@@ -179,18 +186,12 @@ add_example_executable(esc
   impl/impl_input_node.cc
   impl/impl_splitter_node.cc
 
-  esc_app_impl.cc
-  esc_app.cc
-  esc_editor_context_handle.cc
-  esc_node_drawer.cc
-  esc_state.cc
-  esc_textures_handle.cc
-
   main.cc
 )
 
 target_include_directories(esc
   PUBLIC ${PROJECT_SOURCE_DIR}/include
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/app
   PUBLIC ${PROJECT_SOURCE_DIR}/include/core
   PUBLIC ${PROJECT_SOURCE_DIR}/include/coreui
   PUBLIC ${PROJECT_SOURCE_DIR}/include/coreui/pin

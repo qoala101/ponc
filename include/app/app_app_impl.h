@@ -1,8 +1,8 @@
 #ifndef VH_ESC_APP_IMPL_H_
 #define VH_ESC_APP_IMPL_H_
 
-#include "esc_editor_context_handle.h"
-#include "esc_state.h"
+#include "app_editor_context_handle.h"
+#include "app_state.h"
 
 namespace esc {
 class AppImpl {
