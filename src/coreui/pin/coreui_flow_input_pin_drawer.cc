@@ -1,9 +1,10 @@
-#include "core_flow.h"
 #include "coreui_flow_input_pin_drawer.h"
+
 #include "cpp_assert.h"
+#include "flow_node_flow.h"
 
 namespace esc::coreui {
-FlowInputPinDrawer::FlowInputPinDrawer(const core::Flow& flow)
+FlowInputPinDrawer::FlowInputPinDrawer(const flow::NodeFlow& flow)
     : value_{(Expects(flow.input_pin_flow.has_value()),
               flow.input_pin_flow->second)} {}
 
@@ -16,4 +17,4 @@ auto FlowInputPinDrawer::GetKind() const -> ne::PinKind {
 auto FlowInputPinDrawer::GetFloat() -> float* { return &value_; }
 
 auto FlowInputPinDrawer::IsEditable() const -> bool { return false; }
-}  // namespace esc::draw
+}  // namespace esc::coreui

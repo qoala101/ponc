@@ -1,5 +1,5 @@
-#ifndef VH_CORE_FLOW_CALCULATOR_H_
-#define VH_CORE_FLOW_CALCULATOR_H_
+#ifndef VH_FLOW_CALCULATOR_H_
+#define VH_FLOW_CALCULATOR_H_
 
 #include <imgui_node_editor.h>
 
@@ -7,29 +7,32 @@
 #include <unordered_map>
 #include <vector>
 
-#include "core_flow.h"
 #include "core_i_family.h"
 #include "core_i_node.h"
 #include "core_link.h"
-#include "core_tree.h"
+#include "flow_node_flow.h"
+#include "flow_tree.h"
 
 namespace esc::core {
 struct CoreState;
+}
 
+namespace esc::flow {
 // ---
 class FlowCalculator {
  public:
   // ---
-  void OnFrame(const CoreState &core_state);
+  void OnFrame(const core::CoreState &core_state);
   // ---
   auto GetFlowTree() const -> const Tree &;
   // ---
-  auto GetCalculatedFlow(const INode &node) const -> const Flow &;
+  auto GetCalculatedFlow(const core::INode &node) const -> const NodeFlow &;
 
  private:
   // ---
-  void RebuildFlowTree(const std::vector<std::shared_ptr<IFamily>> &families,
-                       const std::vector<Link> &links);
+  void RebuildFlowTree(
+      const std::vector<std::shared_ptr<core::IFamily>> &families,
+      const std::vector<core::Link> &links);
   // ---
   void RecalculateFlowValues();
   // ---
@@ -39,8 +42,8 @@ class FlowCalculator {
   // ---
   Tree flow_tree_{};
   // ---
-  std::unordered_map<uintptr_t, Flow> node_flows_{};
+  std::unordered_map<uintptr_t, NodeFlow> node_flows_{};
 };
-}  // namespace esc::core
+}  // namespace esc::flow
 
-#endif  // VH_CORE_FLOW_CALCULATOR_H_
+#endif  // VH_FLOW_CALCULATOR_H_

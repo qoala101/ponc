@@ -29,7 +29,8 @@ class PlaceholderFamily
   -> std::unique_ptr<coreui::IFamilyDrawer> override;
 
   auto EmplaceNodeFromFlow [[nodiscard]] (IdGenerator& id_generator,
-                                          const Flow& connected_flow) -> INode&;
+                                          const flow::NodeFlow& connected_flow)
+  -> INode&;
 
  private:
   // ---

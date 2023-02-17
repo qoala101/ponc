@@ -12,6 +12,7 @@
 #include "draw_nodes.h"
 #include "draw_popups.h"
 #include "imgui_node_editor.h"
+#include "core_state.h"
 
 namespace esc {
 AppImpl::AppImpl(const Textures &textures)

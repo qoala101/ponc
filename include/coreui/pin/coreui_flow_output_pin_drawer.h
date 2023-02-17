@@ -3,15 +3,15 @@
 
 #include <imgui_node_editor.h>
 
-#include "core_flow.h"
 #include "coreui_i_pin_drawer.h"
+#include "flow_node_flow.h"
 
 namespace esc::coreui {
 // ---
 class FlowOutputPinDrawer : public IPinDrawer {
  public:
   // ---
-  explicit FlowOutputPinDrawer(const core::Flow& flow, ne::PinId pin_id);
+  explicit FlowOutputPinDrawer(const flow::NodeFlow& flow, ne::PinId pin_id);
 
   // ---
   auto GetLabel [[nodiscard]] () const -> std::string override;
@@ -25,6 +25,6 @@ class FlowOutputPinDrawer : public IPinDrawer {
  private:
   float value_{};
 };
-}  // namespace esc::draw
+}  // namespace esc::coreui
 
 #endif  // VH_DRAW_FLOW_OUTPUT_PIN_DRAWER_H_

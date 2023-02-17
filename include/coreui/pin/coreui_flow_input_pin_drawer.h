@@ -1,15 +1,15 @@
 #ifndef VH_DRAW_FLOW_INPUT_PIN_DRAWER_H_
 #define VH_DRAW_FLOW_INPUT_PIN_DRAWER_H_
 
-#include "core_flow.h"
 #include "coreui_i_pin_drawer.h"
+#include "flow_node_flow.h"
 
 namespace esc::coreui {
 // ---
 class FlowInputPinDrawer : public IPinDrawer {
  public:
   // ---
-  explicit FlowInputPinDrawer(const core::Flow& flow);
+  explicit FlowInputPinDrawer(const flow::NodeFlow& flow);
 
   // ---
   auto GetLabel [[nodiscard]] () const -> std::string override;
@@ -23,6 +23,6 @@ class FlowInputPinDrawer : public IPinDrawer {
  private:
   float value_{};
 };
-}  // namespace esc::draw
+}  // namespace esc::coreui
 
 #endif  // VH_DRAW_FLOW_INPUT_PIN_DRAWER_H_

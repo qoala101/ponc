@@ -12,8 +12,8 @@
 #include <unordered_map>
 
 #include "app_textures.h"
-#include "core_flow_calculator.h"
 #include "core_state.h"
+#include "flow_calculator.h"
 
 namespace ne = ax::NodeEditor;
 
@@ -77,8 +77,8 @@ struct DrawState {
 
   auto GetColorForFlowValue(float value) const -> ImColor;
 
-  auto CanConnectFromPinToPin(core::CoreState &core_state,
-                              ne::PinId start_pin, ne::PinId end_pin) -> bool;
+  auto CanConnectFromPinToPin(core::CoreState &core_state, ne::PinId start_pin,
+                              ne::PinId end_pin) -> bool;
 };
 }  // namespace esc::draw
 

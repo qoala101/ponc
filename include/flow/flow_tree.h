@@ -7,14 +7,14 @@
 
 #include "core_i_node.h"
 
-namespace esc::core {
+namespace esc::flow {
 struct TreeNode;
 
 using Visitor = std::function<void(const TreeNode &)>;
 
 // ---
 struct TreeNode {
-  std::shared_ptr<INode> node{};
+  std::shared_ptr<core::INode> node{};
   std::map<uintptr_t, TreeNode> child_nodes{};
 
  private:
@@ -28,6 +28,6 @@ struct TreeNode {
 struct Tree {
   std::vector<TreeNode> root_nodes{};
 };
-}  // namespace esc::core
+}  // namespace esc::flow
 
 #endif  // VH_CORE_TREE_H_

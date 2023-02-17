@@ -129,10 +129,6 @@ add_example_executable(esc
   core/family/core_free_pin_family.cc
   core/family/core_placeholder_family.cc
 
-  core/flow/core_flow_calculator.cc
-  core/flow/core_flow.cc
-  core/flow/core_tree.cc
-
   core/core_diagram.cc
   core/core_group.cc
   core/core_i_family.cc
@@ -180,6 +176,10 @@ add_example_executable(esc
   draw/draw_main_window.cc
   draw/draw_state.cc
 
+  flow/flow_calculator.cc
+  flow/flow_node_flow.cc
+  flow/flow_tree.cc
+
   json/json_diagram_serializer.cc
   json/json_i_family_parser.cc
   json/json_i_family_writer.cc
@@ -198,7 +198,6 @@ target_include_directories(esc
   PUBLIC ${PROJECT_SOURCE_DIR}/include/coreui
   PUBLIC ${PROJECT_SOURCE_DIR}/include/coreui/pin
   PUBLIC ${PROJECT_SOURCE_DIR}/include/core/family
-  PUBLIC ${PROJECT_SOURCE_DIR}/include/core/flow
   PUBLIC ${PROJECT_SOURCE_DIR}/include/cpp
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/dialog
@@ -206,6 +205,7 @@ target_include_directories(esc
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/editor/popup
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/editor/process
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/view
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/flow
   PUBLIC ${PROJECT_SOURCE_DIR}/include/impl
   PUBLIC ${PROJECT_SOURCE_DIR}/include/json
 )

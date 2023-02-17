@@ -1,10 +1,10 @@
-#include "core_tree.h"
+#include "flow_tree.h"
 
 #include <iostream>
 
 #include "cpp_assert.h"
 
-namespace esc::core {
+namespace esc::flow {
 void TraverseDepthFirst(const TreeNode &tree_node,
                         const std::optional<Visitor> &visit_before_children,
                         const std::optional<Visitor> &visit_after_children) {
@@ -26,4 +26,4 @@ void TraverseDepthFirst(const TreeNode &tree_node,
 
   (*visit_after_children)(tree_node);
 }
-}  // namespace esc::core
+}  // namespace esc::flow

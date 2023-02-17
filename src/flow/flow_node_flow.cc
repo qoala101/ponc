@@ -1,13 +1,13 @@
-#include "core_flow.h"
+#include "flow_node_flow.h"
 
 #include <algorithm>
 #include <ranges>
 
 #include "cpp_assert.h"
 
-namespace esc::core {
+namespace esc::flow {
 // ---
-auto operator+(Flow &left, const Flow &right) -> Flow & {
+auto operator+(NodeFlow &left, const NodeFlow &right) -> NodeFlow & {
   if (left.input_pin_flow.has_value()) {
     auto &left_input = left.input_pin_flow->second;
 
@@ -26,7 +26,7 @@ auto operator+(Flow &left, const Flow &right) -> Flow & {
 }
 
 // ---
-auto operator+(Flow &left, float right) -> Flow & {
+auto operator+(NodeFlow &left, float right) -> NodeFlow & {
   if (left.input_pin_flow.has_value()) {
     auto &left_input = left.input_pin_flow->second;
     left_input += right;
@@ -40,13 +40,13 @@ auto operator+(Flow &left, float right) -> Flow & {
 }
 
 // ---
-void operator+=(Flow &left, const Flow &right) { left = left + right; }
+void operator+=(NodeFlow &left, const NodeFlow &right) { left = left + right; }
 
 // ---
-void operator+=(Flow &left, float right) { left = left + right; }
+void operator+=(NodeFlow &left, float right) { left = left + right; }
 
 // ---
-auto GetPinFlow(const Flow &flow, ne::PinId pin_id) -> float {
+auto GetPinFlow(const NodeFlow &flow, ne::PinId pin_id) -> float {
   const auto pin_id_as_number = pin_id.Get();
 
   if (flow.input_pin_flow.has_value() &&
@@ -60,4 +60,4 @@ auto GetPinFlow(const Flow &flow, ne::PinId pin_id) -> float {
                               })
       ->second;
 }
-}  // namespace esc::core
+}  // namespace esc::flow

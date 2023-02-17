@@ -6,19 +6,19 @@
 #include "app_state.h"
 #include "core_i_family.h"
 #include "core_i_node.h"
-#include "core_tree.h"
 #include "coreui_i_family_drawer.h"
 #include "coreui_i_node_drawer.h"
 #include "cpp_scope.h"
 #include "draw_families_view.h"
+#include "flow_tree.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
 namespace {
 void DisplayNode(
-    State& state, const core::TreeNode& tree_node,
-    const std::unordered_map<const core::TreeNode*,
+    State& state, const flow::TreeNode& tree_node,
+    const std::unordered_map<const flow::TreeNode*,
                              std::vector<std::pair<const core::IFamily*, int>>>&
         child_count_per_family_per_tree_node) {
   ImGui::TableNextRow();
@@ -138,13 +138,13 @@ void DrawFlowTreeView(State& state) {
         for (const auto& root_node :
              state.core_state->flow_calculator_.GetFlowTree().root_nodes) {
           auto child_count_per_family_per_tree_node = std::unordered_map<
-              const core::TreeNode*,
+              const flow::TreeNode*,
               std::vector<std::pair<const core::IFamily*, int>>>{};
 
           TraverseDepthFirst(
               root_node, {},
               [&families, &child_count_per_family_per_tree_node](
-                  const core::TreeNode& tree_node) {
+                  const flow::TreeNode& tree_node) {
                 auto child_count_per_family =
                     std::vector<std::pair<const core::IFamily*, int>>{};
 

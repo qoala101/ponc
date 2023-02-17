@@ -8,8 +8,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "core_flow.h"
 #include "cpp_interface.h"
+#include "flow_node_flow.h"
 #include "imgui.h"
 
 namespace ne = ax::NodeEditor;
@@ -27,11 +27,10 @@ class INodeDrawer;
 }  // namespace coreui
 
 namespace core {
-
 class INode : public cpp::Interface {
  public:
   // ---
-  virtual auto GetInitialFlow [[nodiscard]] () const -> Flow = 0;
+  virtual auto GetInitialFlow [[nodiscard]] () const -> flow::NodeFlow = 0;
   // ---
   virtual auto CreateWriter [[nodiscard]] ()
   -> std::unique_ptr<json::INodeWriter> = 0;

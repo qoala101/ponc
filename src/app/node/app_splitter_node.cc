@@ -1,8 +1,9 @@
+#include "app_splitter_node.h"
+
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "app_splitter_node.h"
 #include "app_state.h"
 #include "core_i_node.h"
 #include "core_id_generator.h"
@@ -67,10 +68,10 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
     };
   }
 
-  auto GetInitialFlow [[nodiscard]] () const -> core::Flow override {
+  auto GetInitialFlow [[nodiscard]] () const -> flow::NodeFlow override {
     const auto& pin_ids = GetPinIds();
     auto flow_values =
-        core::Flow{.input_pin_flow = std::pair{pin_ids[0].Get(), float{}}};
+        flow::NodeFlow{.input_pin_flow = std::pair{pin_ids[0].Get(), float{}}};
     const auto drop = GetDrop();
 
     for (auto i = 0; i < static_cast<int>(pin_ids.size() - 2); ++i) {
@@ -163,7 +164,7 @@ class NodeDrawer : public coreui::INodeDrawer {
 
  private:
   std::shared_ptr<Node> node_{};
-  core::Flow flow_pin_values_{};
+  flow::NodeFlow flow_pin_values_{};
 };
 
 auto CreateNodeDrawer(std::shared_ptr<Node> node, const StateNoQueue& state)

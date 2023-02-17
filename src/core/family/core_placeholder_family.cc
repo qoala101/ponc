@@ -52,10 +52,10 @@ class Node : public INode, public std::enable_shared_from_this<Node> {
     return CreateNodeDrawer(shared_from_this(), state);
   }
 
-  auto GetInitialFlow [[nodiscard]] () const -> Flow override {
+  auto GetInitialFlow [[nodiscard]] () const -> flow::NodeFlow override {
     const auto& pin_ids = GetPinIds();
 
-    auto flow_values = Flow{};
+    auto flow_values = flow::NodeFlow{};
 
     if (has_input_pin_) {
       flow_values.input_pin_flow = std::pair{pin_ids[0].Get(), float{}};
@@ -138,7 +138,7 @@ class NodeDrawer : public coreui::INodeDrawer {
 
  private:
   std::shared_ptr<Node> node_{};
-  Flow flow_pin_values_{};
+  flow::NodeFlow flow_pin_values_{};
 };
 
 auto CreateNodeDrawer(std::shared_ptr<Node> node, const StateNoQueue& state)
@@ -171,7 +171,7 @@ auto PlaceholderFamily::CreateDrawer()
 }
 
 auto PlaceholderFamily::EmplaceNodeFromFlow(IdGenerator& id_generator,
-                                            const Flow& connected_flow)
+                                            const flow::NodeFlow& connected_flow)
     -> INode& {
   // auto pin_ids = std::vector<ne::PinId>{};
   const auto has_input_pin = connected_flow.input_pin_flow.has_value();

@@ -1,4 +1,4 @@
-#include "core_flow_calculator.h"
+#include "flow_calculator.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -9,22 +9,22 @@
 
 #include "app_state.h"
 #include "core_diagram.h"
-#include "core_flow.h"
 #include "core_i_node.h"
 #include "core_link.h"
 #include "cpp_assert.h"
+#include "flow_node_flow.h"
 #include "imgui_node_editor.h"
 
-namespace esc::core {
+namespace esc::flow {
 namespace {
 // ---
-auto HasInputPin [[nodiscard]] (const Flow &node_flow) {
+auto HasInputPin [[nodiscard]] (const NodeFlow &node_flow) {
   return node_flow.input_pin_flow.has_value();
 }
 
 // ---
 auto HasLinkFromParent
-    [[nodiscard]] (const Flow &node_flow, const std::vector<Link> &links) {
+    [[nodiscard]] (const NodeFlow &node_flow, const std::vector<core::Link> &links) {
   Expects(node_flow.input_pin_flow.has_value());
 
   return std::ranges::any_of(links, [&node_flow](const auto &link) {
@@ -34,8 +34,8 @@ auto HasLinkFromParent
 
 // ---
 auto FindRootNodes
-    [[nodiscard]] (const std::vector<std::shared_ptr<IFamily>> &families,
-                   const std::vector<Link> &links) {
+    [[nodiscard]] (const std::vector<std::shared_ptr<core::IFamily>> &families,
+                   const std::vector<core::Link> &links) {
   auto root_nodes = std::vector<TreeNode>{};
 
   for (const auto &family : families) {
@@ -56,7 +56,7 @@ auto FindRootNodes
 // ---
 auto FindLinkConnectingPins
     [[nodiscard]] (ne::PinId start_pin, ne::PinId end_pin,
-                   const std::vector<Link> &links) -> const Link * {
+                   const std::vector<core::Link> &links) -> const core::Link * {
   const auto link =
       std::ranges::find_if(links, [start_pin, end_pin](const auto &link) {
         return (link.start_pin_id == start_pin) && (link.end_pin_id == end_pin);
@@ -72,8 +72,8 @@ auto FindLinkConnectingPins
 // ---
 auto FindLinkFromParentToChild
     [[nodiscard]] (const std::map<uintptr_t, float> &parent_output_pins,
-                   ne::PinId child_input_pin, const std::vector<Link> &links)
-    -> const Link * {
+                   ne::PinId child_input_pin, const std::vector<core::Link> &links)
+    -> const core::Link * {
   for (const auto &[parent_output_pin, value] : parent_output_pins) {
     const auto *const link =
         FindLinkConnectingPins(parent_output_pin, child_input_pin, links);
@@ -88,7 +88,7 @@ auto FindLinkFromParentToChild
 }  // namespace
 
 // ---
-void FlowCalculator::OnFrame(const CoreState &core_state) {
+void FlowCalculator::OnFrame(const core::CoreState &core_state) {
   const auto &diagram = core_state.diagram_;
   const auto &families = diagram.GetFamilies();
   const auto &links = diagram.GetLinks();
@@ -100,8 +100,8 @@ void FlowCalculator::OnFrame(const CoreState &core_state) {
 auto FlowCalculator::GetFlowTree() const -> const Tree & { return flow_tree_; }
 
 // ---
-auto FlowCalculator::GetCalculatedFlow(const INode &node) const
-    -> const Flow & {
+auto FlowCalculator::GetCalculatedFlow(const core::INode &node) const
+    -> const NodeFlow & {
   const auto node_id = node.GetId().Get();
   Expects(node_flows_.contains(node_id));
   return node_flows_.at(node_id);
@@ -109,11 +109,11 @@ auto FlowCalculator::GetCalculatedFlow(const INode &node) const
 
 // ---
 void FlowCalculator::RebuildFlowTree(
-    const std::vector<std::shared_ptr<IFamily>> &families,
-    const std::vector<Link> &links) {
+    const std::vector<std::shared_ptr<core::IFamily>> &families,
+    const std::vector<core::Link> &links) {
   flow_tree_.root_nodes = FindRootNodes(families, links);
 
-  auto visited_nodes = std::unordered_set<const INode *>{};
+  auto visited_nodes = std::unordered_set<const core::INode *>{};
   auto current_level_tree_nodes = std::vector<TreeNode *>{};
 
   for (auto &root_node : flow_tree_.root_nodes) {

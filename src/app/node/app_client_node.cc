@@ -1,6 +1,7 @@
+#include "app_client_node.h"
+
 #include <memory>
 
-#include "app_client_node.h"
 #include "app_state.h"
 #include "core_i_node.h"
 #include "core_id_generator.h"
@@ -46,7 +47,7 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
     return CreateNodeDrawer(shared_from_this(), state);
   }
 
-  auto GetInitialFlow [[nodiscard]] () const -> core::Flow override {
+  auto GetInitialFlow [[nodiscard]] () const -> flow::NodeFlow override {
     return {.input_pin_flow = std::pair{GetPinIds()[0].Get(), float{}}};
   }
 };
@@ -100,7 +101,7 @@ class NodeDrawer : public coreui::INodeDrawer {
 
  private:
   std::shared_ptr<Node> node_{};
-  core::Flow flow_pin_values_{};
+  flow::NodeFlow flow_pin_values_{};
 };
 
 auto CreateNodeDrawer(std::shared_ptr<Node> node, const StateNoQueue& state)
