@@ -115,11 +115,11 @@ macro(add_example_executable name)
 endmacro()
 
 add_example_executable(esc
-  app/node/impl_attenuator_node.cc
-  app/node/impl_client_node.cc
-  app/node/impl_coupler_node.cc
-  app/node/impl_input_node.cc
-  app/node/impl_splitter_node.cc
+  app/node/app_attenuator_node.cc
+  app/node/app_client_node.cc
+  app/node/app_coupler_node.cc
+  app/node/app_input_node.cc
+  app/node/app_splitter_node.cc
 
   app/app_app.cc
   app/app_events.cc

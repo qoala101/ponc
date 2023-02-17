@@ -6,6 +6,11 @@
 #include <utility>
 #include <vector>
 
+#include "app_attenuator_node.h"
+#include "app_client_node.h"
+#include "app_coupler_node.h"
+#include "app_input_node.h"
+#include "app_splitter_node.h"
 #include "core_diagram.h"
 #include "core_flow.h"
 #include "core_i_node.h"
@@ -16,39 +21,34 @@
 #include "crude_json.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
-#include "impl_attenuator_node.h"
-#include "impl_client_node.h"
-#include "impl_coupler_node.h"
-#include "impl_input_node.h"
-#include "impl_splitter_node.h"
 #include "json_diagram_serializer.h"
 
 namespace esc {
 namespace {
 auto CreateFamilies() {
   auto families = std::vector<std::shared_ptr<core::IFamily>>{
-      impl::InputNode::CreateFamily(), impl::ClientNode::CreateFamily()};
+      InputNode::CreateFamily(), ClientNode::CreateFamily()};
 
   for (auto percentage_index = 0; percentage_index < 10; ++percentage_index) {
-    families.emplace_back(impl::CouplerNode::CreateFamily(percentage_index));
+    families.emplace_back(CouplerNode::CreateFamily(percentage_index));
   }
 
   for (auto num_outputs : {2, 4, 8, 16}) {
-    families.emplace_back(impl::SplitterNode::CreateFamily(num_outputs));
+    families.emplace_back(SplitterNode::CreateFamily(num_outputs));
   }
 
-  families.emplace_back(impl::AttenuatorNode::CreateFamily());
+  families.emplace_back(AttenuatorNode::CreateFamily());
 
   return families;
 }
 
 auto CreateFamilyParsers() {
   auto family_parsers = std::vector<std::unique_ptr<json::IFamilyParser>>{};
-  family_parsers.emplace_back(impl::InputNode::CreateFamilyParser());
-  family_parsers.emplace_back(impl::ClientNode::CreateFamilyParser());
-  family_parsers.emplace_back(impl::CouplerNode::CreateFamilyParser());
-  family_parsers.emplace_back(impl::SplitterNode::CreateFamilyParser());
-  family_parsers.emplace_back(impl::AttenuatorNode::CreateFamilyParser());
+  family_parsers.emplace_back(InputNode::CreateFamilyParser());
+  family_parsers.emplace_back(ClientNode::CreateFamilyParser());
+  family_parsers.emplace_back(CouplerNode::CreateFamilyParser());
+  family_parsers.emplace_back(SplitterNode::CreateFamilyParser());
+  family_parsers.emplace_back(AttenuatorNode::CreateFamilyParser());
   family_parsers.emplace_back(core::PlaceholderFamily::CreateParser());
   return family_parsers;
 }

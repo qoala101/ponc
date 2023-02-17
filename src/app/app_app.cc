@@ -31,34 +31,34 @@ auto App::LoadTexture(std::string_view file_path) {
 // ---
 void App::OnStart() {
   Expects(!textures_.has_value());
-  Expects(!impl_.has_value());
+  Expects(!app_.has_value());
 
   textures_ =
       Textures{.node_header = LoadTexture("data/node_header_texture.png")};
-  impl_.emplace(*textures_);
+  app_.emplace(*textures_);
 
   Ensures(textures_.has_value());
-  Ensures(impl_.has_value());
+  Ensures(app_.has_value());
 }
 
 // ---
 void App::OnStop() {
-  Expects(impl_.has_value());
+  Expects(app_.has_value());
   Expects(textures_.has_value());
 
-  impl_.reset();
+  app_.reset();
 
   DestroyTexture(textures_->node_header.id);
   textures_.reset();
 
-  Ensures(!impl_.has_value());
+  Ensures(!app_.has_value());
   Ensures(!textures_.has_value());
 }
 
 // ---
 void App::OnFrame(float /*unused*/) {
-  Expects(impl_.has_value());
+  Expects(app_.has_value());
 
-  impl_->OnFrame();
+  app_->OnFrame();
 }
 }  // namespace esc

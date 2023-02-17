@@ -6,7 +6,7 @@
 #include "core_i_family.h"
 #include "json_i_family_parser.h"
 
-namespace esc::impl {
+namespace esc {
 // ---
 struct ClientNode {
   // ---
@@ -15,6 +15,6 @@ struct ClientNode {
   static auto CreateFamilyParser [[nodiscard]] ()
   -> std::unique_ptr<json::IFamilyParser>;
 };
-}  // namespace esc::impl
+}  // namespace esc
 
 #endif  // VH_IMPL_CLIENT_NODE_H_

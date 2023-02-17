@@ -1,7 +1,6 @@
-#include "impl_client_node.h"
-
 #include <memory>
 
+#include "app_client_node.h"
 #include "app_state.h"
 #include "core_i_node.h"
 #include "core_id_generator.h"
@@ -16,7 +15,7 @@
 #include "json_i_node_parser.h"
 #include "json_i_node_writer.h"
 
-namespace esc::impl {
+namespace esc {
 namespace {
 class Node;
 class Family;
@@ -190,4 +189,4 @@ auto ClientNode::CreateFamily() -> std::shared_ptr<core::IFamily> {
 auto ClientNode::CreateFamilyParser() -> std::unique_ptr<json::IFamilyParser> {
   return std::make_unique<FamilyParser>();
 }
-}  // namespace esc::impl
+}  // namespace esc

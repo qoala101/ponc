@@ -36,7 +36,7 @@ class App : public Application {
   // ---
   std::optional<Textures> textures_{};
   // ---
-  std::optional<AppImpl> impl_{};
+  std::optional<AppImpl> app_{};
 };
 }  // namespace esc
 
