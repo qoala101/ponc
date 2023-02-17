@@ -27,7 +27,7 @@ void DisplayNode(State& state, core::INode& node) {
 
   ImGui::SameLine();
 
-  const auto selectedNodes = state.app_.GetDiagram().GetSelectedNodeIds();
+  const auto selectedNodes = state.diagram_.GetSelectedNodeIds();
   auto isSelected = std::find(selectedNodes.begin(), selectedNodes.end(),
                               node_id) != selectedNodes.end();
   if (ImGui::Selectable(
@@ -86,7 +86,7 @@ void DisplayFamily(State& state, core::IFamily& family) {
     return group_node_ids;
   }();
 
-  const auto selectedNodes = state.app_.GetDiagram().GetSelectedNodeIds();
+  const auto selectedNodes = state.diagram_.GetSelectedNodeIds();
   const auto selected_node_ids = [&selectedNodes]() {
     auto selected_node_ids = std::unordered_set<uintptr_t>{};
 
@@ -145,7 +145,7 @@ void DrawFamiliesView(State& state) {
     const auto window_scope = cpp::Scope{[]() { ImGui::End(); }};
 
     if (ImGui::Begin("Families", &state.DRAW_.families_view_visible)) {
-      const auto& families = state.app_.GetDiagram().GetFamilies();
+      const auto& families = state.diagram_.GetFamilies();
       const auto table_flags =
           ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
           ImGuiTableFlags_Hideable | ImGuiTableFlags_ContextMenuInBody |
@@ -159,7 +159,7 @@ void DrawFamiliesView(State& state) {
         ImGui::TableSetupColumn("Input");
         ImGui::TableHeadersRow();
 
-        for (const auto& family : state.app_.GetDiagram().GetFamilies()) {
+        for (const auto& family : state.diagram_.GetFamilies()) {
           if (!family->GetNodes().empty()) {
             DisplayFamily(state, *family);
           }

@@ -10,7 +10,7 @@
 
 namespace esc::draw {
 void DrawGroups(State& state) {
-  const auto& groups = state.app_.GetDiagram().GetGroups();
+  const auto& groups = state.diagram_.GetGroups();
 
   for (const auto& group : groups) {
     const auto color =

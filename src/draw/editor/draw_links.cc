@@ -8,11 +8,11 @@ void DrawLinks(State& state) {
   // const auto* existing_link_from_same_pin =
   // state.GetExistingLinkFromSamePin();
 
-  for (const auto& link : state.app_.GetDiagram().GetLinks()) {
+  for (const auto& link : state.diagram_.GetLinks()) {
     // if (state.drawing_.not_yet_connected_pin_of_new_link_id.has_value()) {
     //   const auto pin_id =
     //   *state.drawing_.not_yet_connected_pin_of_new_link_id; const auto& node
-    //   = state.app_.GetDiagram().FindPinNode(pin_id);
+    //   = state.diagram_.FindPinNode(pin_id);
 
     //   // std::cout << node->GetId().Get() << "\n";
 
@@ -35,7 +35,7 @@ void DrawLinks(State& state) {
     }
 
     // if (&link != existing_link_from_same_pin) {
-    const auto& node = state.app_.GetDiagram().FindPinNode(link.start_pin_id);
+    const auto& node = state.diagram_.FindPinNode(link.start_pin_id);
     const auto node_flow = state.flow_calculator_.GetCalculatedFlow(*node);
     const auto flow = GetPinFlow(node_flow, link.start_pin_id);
 

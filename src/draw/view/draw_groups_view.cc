@@ -27,7 +27,7 @@ void DisplayNode(State& state, core::INode& node) {
 
   ImGui::SameLine();
 
-  const auto selectedNodes = state.app_.GetDiagram().GetSelectedNodeIds();
+  const auto selectedNodes = state.diagram_.GetSelectedNodeIds();
   auto isSelected = std::find(selectedNodes.begin(), selectedNodes.end(),
                               node_id) != selectedNodes.end();
   if (ImGui::Selectable(
@@ -77,7 +77,7 @@ void DisplayGroup(State& state, core::Group& group) {
     return group_node_ids;
   }();
 
-  const auto selectedNodes = state.app_.GetDiagram().GetSelectedNodeIds();
+  const auto selectedNodes = state.diagram_.GetSelectedNodeIds();
   const auto selected_node_ids = [&selectedNodes]() {
     auto selected_node_ids = std::unordered_set<uintptr_t>{};
 
@@ -147,7 +147,7 @@ void DrawGroupsView(State& state) {
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableHeadersRow();
 
-        auto& groups = state.app_.GetDiagram().GetGroups();
+        auto& groups = state.diagram_.GetGroups();
 
         for (auto& group : groups) {
           DisplayGroup(state, group);

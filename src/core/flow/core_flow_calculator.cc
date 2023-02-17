@@ -89,7 +89,7 @@ auto FindLinkFromParentToChild
 
 // ---
 void FlowCalculator::OnFrame(const State &state) {
-  const auto &diagram = state.app_.GetDiagram();
+  const auto &diagram = state.diagram_;
   const auto &families = diagram.GetFamilies();
   const auto &links = diagram.GetLinks();
   RebuildFlowTree(families, links);

@@ -196,7 +196,7 @@ auto IsFlowPin(ne::PinId id, const core::INode& node) -> bool {
 auto IsPinLinked(State& state, ne::PinId id) -> bool {
   if (!id) return false;
 
-  for (const auto& link : state.app_.GetDiagram().GetLinks())
+  for (const auto& link : state.diagram_.GetLinks())
     if (link.start_pin_id == id || link.end_pin_id == id) return true;
 
   return false;
@@ -264,7 +264,7 @@ void DrawNode(State& state,
   }
 
   for (const auto pin_id : node.GetPinIds()) {
-    auto drawer = state.app_.GetDiagram().FindPin(pin_id, state);
+    auto drawer = state.diagram_.FindPin(pin_id, state);
     const auto kind = drawer->GetKind();
     const auto alpha = CalculateAlphaForPin(state, pin_id);
 
@@ -324,7 +324,7 @@ void DrawNode(State& state,
 // Nodes::Nodes(TexturesHandle textures) : textures_{std::move(textures)} {}
 
 void DrawNodes(State& state) {
-  for (const auto& family : state.app_.GetDiagram().GetFamilies()) {
+  for (const auto& family : state.diagram_.GetFamilies()) {
     for (const auto& node : family->GetNodes()) {
       DrawNode(state,
                // textures_,

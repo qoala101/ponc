@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <functional>
 
-#include "core_app.h"
+#include "core_diagram.h"
 #include "core_flow_calculator.h"
 #include "core_id_generator.h"
 
@@ -42,11 +42,6 @@ class State {
   void OnFrame();
   // ---
   void PostEvent(std::function<void(State &state)> event);
-
-  //  private:
-  core::App app_{};
-  core::IdGenerator id_generator_{};
-  core::FlowCalculator flow_calculator_{};
 
   struct Rebind {
     ne::PinId fixed_pin{};
@@ -107,6 +102,11 @@ class State {
     ne::LinkId popup_link_id{};
     std::array<char, 100> popup_group_name{};
   } DRAW_{};
+
+  //  private:
+  core::Diagram diagram_{};
+  core::IdGenerator id_generator_{};
+  core::FlowCalculator flow_calculator_{};
 
   auto GetColorForFlowValue(float value) const -> ImColor;
 

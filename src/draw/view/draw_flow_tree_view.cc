@@ -38,7 +38,7 @@ void DisplayNode(
 
   ImGui::SameLine();
 
-  const auto selectedNodes = state.app_.GetDiagram().GetSelectedNodeIds();
+  const auto selectedNodes = state.diagram_.GetSelectedNodeIds();
 
   bool isSelected = std::find(selectedNodes.begin(), selectedNodes.end(),
                               node_id) != selectedNodes.end();
@@ -73,7 +73,7 @@ void DisplayNode(
 
   auto index = 0;
 
-  for (const auto& family : state.app_.GetDiagram().GetFamilies()) {
+  for (const auto& family : state.diagram_.GetFamilies()) {
     ImGui::TableNextColumn();
 
     auto child_count = child_cout_per_family[index++].second;
@@ -113,7 +113,7 @@ void DrawFlowTreeView(State& state) {
     const auto window_scope = cpp::Scope{[]() { ImGui::End(); }};
 
     if (ImGui::Begin("Flow Tree", &state.DRAW_.flow_tree_view_visible)) {
-      const auto& families = state.app_.GetDiagram().GetFamilies();
+      const auto& families = state.diagram_.GetFamilies();
       const auto table_flags =
           ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
           ImGuiTableFlags_Hideable | ImGuiTableFlags_ContextMenuInBody |

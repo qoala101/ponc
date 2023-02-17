@@ -122,7 +122,6 @@ add_example_executable(esc
   core/flow/core_flow.cc
   core/flow/core_tree.cc
 
-  core/core_app.cc
   core/core_diagram.cc
   core/core_group.cc
   core/core_i_family.cc

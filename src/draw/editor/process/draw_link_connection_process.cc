@@ -11,7 +11,7 @@
 namespace esc::draw {
 namespace {
 void UpdateNewLink(State& state, State::NewLink& new_link) {
-  for (const auto& link : state.app_.GetDiagram().GetLinks()) {
+  for (const auto& link : state.diagram_.GetLinks()) {
     if (link.start_pin_id == new_link.pin_dragged_from) {
       new_link.rebind.emplace(
           State::Rebind{link.end_pin_id, ne::PinKind::Input, link.id});
@@ -46,9 +46,8 @@ void DrawLinkConnectionProcess(State& state) {
 
       UpdateNewLink(state, new_link);
 
-      const auto& start_node =
-          state.app_.GetDiagram().FindPinNode(start_pin_id);
-      const auto& end_node = state.app_.GetDiagram().FindPinNode(end_pin_id);
+      const auto& start_node = state.diagram_.FindPinNode(start_pin_id);
+      const auto& end_node = state.diagram_.FindPinNode(end_pin_id);
 
       auto start_pin_drawer =
           start_node->CreateDrawer(state)->CreatePinDrawer(start_pin_id);
@@ -70,16 +69,15 @@ void DrawLinkConnectionProcess(State& state) {
 
           if (ne::AcceptNewItem(ImColor{0, 0, 0, 0})) {
             ne::DeleteLink(new_link.rebind->rebinding_link_id);
-            state.app_.GetDiagram().EraseLink(
-                new_link.rebind->rebinding_link_id);
+            state.diagram_.EraseLink(new_link.rebind->rebinding_link_id);
 
             if (new_link.rebind->fixed_pin_kind == ne::PinKind::Input) {
-              state.app_.GetDiagram().EmplaceLink(
+              state.diagram_.EmplaceLink(
                   core::Link{state.id_generator_.GetNext<ne::LinkId>(),
                              new_link.pin_hovered_over->Get(),
                              new_link.rebind->fixed_pin});
             } else {
-              state.app_.GetDiagram().EmplaceLink(
+              state.diagram_.EmplaceLink(
                   core::Link{state.id_generator_.GetNext<ne::LinkId>(),
                              new_link.rebind->fixed_pin,
                              new_link.pin_hovered_over->Get()});
@@ -89,7 +87,7 @@ void DrawLinkConnectionProcess(State& state) {
           DrawTooltip("+ Create Link", {32, 45, 32, 180});
 
           if (ne::AcceptNewItem(ImColor{127, 255, 127}, 4.0F)) {
-            state.app_.GetDiagram().EmplaceLink(core::Link{
+            state.diagram_.EmplaceLink(core::Link{
                 state.id_generator_.GetNext<ne::LinkId>(),
                 new_link.pin_dragged_from, *new_link.pin_hovered_over});
           }

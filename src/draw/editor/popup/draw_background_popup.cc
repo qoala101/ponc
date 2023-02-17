@@ -21,7 +21,7 @@ namespace {
 //   }
 
 //   const auto is_link_starts_on_existing_node =
-//       (*state_)->app_.GetDiagram().FindPin(pin_id, **state_)->GetKind() ==
+//       (*state_)->diagram_.FindPin(pin_id, **state_)->GetKind() ==
 //       ne::PinKind::Output;
 //   const auto link = core::Link{
 //       .id = link_id,
@@ -30,7 +30,7 @@ namespace {
 //       .end_pin_id =
 //           is_link_starts_on_existing_node ? *matching_node_pin_id : pin_id};
 
-//   (*state_)->app_.GetDiagram().EmplaceLink(link);
+//   (*state_)->diagram_.EmplaceLink(link);
 // }
 }  // namespace
 
@@ -41,7 +41,7 @@ void DrawBackgroundPopup(State& state) {
     ImGui::TextUnformatted("Create New Node");
     ImGui::Separator();
 
-    const auto& families = state.app_.GetDiagram().GetFamilies();
+    const auto& families = state.diagram_.GetFamilies();
     const auto family_groups = coreui::GroupByLabels(families);
 
     for (const auto& [group_label, families] : family_groups) {

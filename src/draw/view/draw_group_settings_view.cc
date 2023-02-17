@@ -22,7 +22,7 @@ void DrawGroupSettingsView(State& state) {
 
     if (ImGui::Begin("Group Settings",
                      &state.DRAW_.group_settings_view_visible)) {
-      auto& groups = state.app_.GetDiagram().GetGroups();
+      auto& groups = state.diagram_.GetGroups();
 
       {
         ImGui::BeginChild("left pane", ImVec2(200, 0), true);

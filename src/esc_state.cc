@@ -6,7 +6,6 @@
 #include <utility>
 #include <vector>
 
-#include "core_app.h"
 #include "core_diagram.h"
 #include "core_flow.h"
 #include "core_i_node.h"
@@ -86,18 +85,18 @@ void State::OpenDiagramFromFile(State &state, std::string_view file_path) {
       json::DiagramSerializer::ParseFromJson(json, CreateFamilyParsers());
   auto max_id = FindMaxId(diagram);
 
-  state.app_.SetDiagram(std::move(diagram));
+  state.diagram_ = std::move(diagram);
   state.id_generator_ = core::IdGenerator{max_id + 1};
 }
 
 void State::SaveDiagramToFile(const State &state, std::string_view file_path) {
-  const auto &diagram = state.app_.GetDiagram();
+  const auto &diagram = state.diagram_;
   const auto json = json::DiagramSerializer::WriteToJson(diagram);
   json.save(file_path.data());
 }
 
 void State::ResetDiagram(State &state) {
-  const auto &diagram = state.app_.GetDiagram();
+  const auto &diagram = state.diagram_;
   const auto &links = diagram.GetLinks();
 
   for (const auto &link : links) {
@@ -115,16 +114,16 @@ void State::ResetDiagram(State &state) {
   state.drawing_.new_link.reset();
 
   state.id_generator_ = core::IdGenerator{};
-  state.app_.SetDiagram(core::Diagram{CreateFamilies()});
+  state.diagram_ = core::Diagram{CreateFamilies()};
 }
 
 void State::EraseLink(State &state, ne::LinkId link_id) {
   ne::DeleteLink(link_id);
-  state.app_.GetDiagram().EraseLink(link_id);
+  state.diagram_.EraseLink(link_id);
 }
 
 void State::EraseNodeAndConnectedLinks(State &state, ne::NodeId node_id) {
-  auto &diagram = state.app_.GetDiagram();
+  auto &diagram = state.diagram_;
   const auto &links = diagram.GetLinks();
   const auto &node = diagram.FindNode(node_id);
   const auto &node_pins = node.GetPinIds();
@@ -151,11 +150,11 @@ void State::EraseNodeAndConnectedLinks(State &state, ne::NodeId node_id) {
   }
 
   ne::DeleteNode(node_id);
-  state.app_.GetDiagram().EraseNode(node_id);
+  state.diagram_.EraseNode(node_id);
 }
 
 void State::ReplaceWithPlaceholder(State &state, ne::NodeId node_id) {
-  auto &diagram = state.app_.GetDiagram();
+  auto &diagram = state.diagram_;
   const auto &node = diagram.FindNode(node_id);
   const auto node_flow = node.GetInitialFlow();
   const auto node_position = node.GetPosition();
@@ -170,7 +169,7 @@ void State::ReplaceWithPlaceholder(State &state, ne::NodeId node_id) {
 }
 
 void State::ReplaceWithFreePins(State &state, ne::NodeId node_id) {
-  auto &diagram = state.app_.GetDiagram();
+  auto &diagram = state.diagram_;
   const auto &node = diagram.FindNode(node_id);
   const auto node_flow = node.GetInitialFlow();
   const auto node_position = node.GetPosition();
@@ -193,7 +192,7 @@ void State::ReplaceWithFreePins(State &state, ne::NodeId node_id) {
   }
 
   ne::DeleteNode(node_id);
-  state.app_.GetDiagram().EraseNode(node_id);
+  state.diagram_.EraseNode(node_id);
 
   auto &free_pin_family = diagram.GetFreePinFamily();
 
@@ -213,7 +212,7 @@ void State::ReplaceWithFreePins(State &state, ne::NodeId node_id) {
 }
 
 void State::MakeGroupFromSelectedNodes(State &state, std::string group_name) {
-  auto selectedNodes = state.app_.GetDiagram().GetSelectedNodeIds();
+  auto selectedNodes = state.diagram_.GetSelectedNodeIds();
 
   if (state.drawing_.popup_node_.has_value()) {
     const auto popup_node = *state.drawing_.popup_node_;
@@ -227,7 +226,7 @@ void State::MakeGroupFromSelectedNodes(State &state, std::string group_name) {
     state.drawing_.popup_node_.reset();
   }
 
-  auto &group = state.app_.GetDiagram().EmplaceGroup(selectedNodes);
+  auto &group = state.diagram_.EmplaceGroup(selectedNodes);
   group.name_ = std::move(group_name);
 }
 
@@ -301,8 +300,8 @@ auto State::CanConnectFromPinToPin(ne::PinId start_pin, ne::PinId end_pin)
 
   const auto rebind =
       drawing_.new_link.has_value() && drawing_.new_link->rebind.has_value();
-  const auto &families = app_.GetDiagram().GetFamilies();
-  const auto &links = app_.GetDiagram().GetLinks();
+  const auto &families = diagram_.GetFamilies();
+  const auto &links = diagram_.GetLinks();
 
   auto *start_node = static_cast<core::INode *>(nullptr);
   auto *end_node = static_cast<core::INode *>(nullptr);
