@@ -102,7 +102,16 @@ void ResetDiagram::operator()(StateNoQueue &state) const {
   state.core_state->diagram_ = core::Diagram{CreateFamilies()};
 }
 
-void CreateNode::operator()(StateNoQueue &state) const {}
+void CreateNode::operator()(StateNoQueue &state) const {
+  auto family_lock = family.lock();
+
+  if (family_lock == nullptr) {
+    return;
+  }
+
+  auto &new_node = family_lock->EmplaceNode(state.core_state->id_generator_);
+  new_node.SetPosition(position);
+}
 
 void DeleteNode::operator()(StateNoQueue &state) const {
   auto &diagram = state.core_state->diagram_;

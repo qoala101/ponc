@@ -1,6 +1,8 @@
 #include "app_impl.h"
 
+#include "app_events.h"
 #include "core_i_node.h"
+#include "core_state.h"
 #include "cpp_scope.h"
 #include "draw_delete_items_process.h"
 #include "draw_groups.h"
@@ -12,12 +14,17 @@
 #include "draw_nodes.h"
 #include "draw_popups.h"
 #include "imgui_node_editor.h"
-#include "core_state.h"
 
 namespace esc {
 AppImpl::AppImpl(const Textures &textures)
     : editor_context_{ne::CreateEditor()} {
   draw_state.node_header_texture = textures.node_header;
+
+  auto state_no_queue =
+      StateNoQueue{.core_state = &core_state_, .draw_state = &draw_state};
+
+  event::ResetDiagram{}(state_no_queue);
+
   ne::SetCurrentEditor(editor_context_);
 }
 

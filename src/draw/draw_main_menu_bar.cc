@@ -7,6 +7,13 @@
 #include "app_events.h"
 #include "app_state.h"
 #include "cpp_scope.h"
+#include "draw_families_view.h"
+#include "draw_flow_tree_view.h"
+#include "draw_group_settings_view.h"
+#include "draw_groups_view.h"
+#include "draw_open_file_dialog.h"
+#include "draw_save_as_file_dialog.h"
+#include "draw_settings_view.h"
 #include "imgui.h"
 
 namespace esc::draw {
@@ -28,6 +35,9 @@ void DrawFileMenu(State& state) {
       state.event_queue->PostEvent(event::ResetDiagram{});
     }
   }
+
+  DrawOpenFileDialog(state);
+  DrawSaveAsFileDialog(state);
 }
 
 // ---
@@ -45,6 +55,12 @@ void DrawViewsMenu(State& state) {
     ImGui::MenuItem("Settings", nullptr,
                     state.draw_state->families_view_visible);
   }
+
+  DrawFamiliesView(state);
+  DrawFlowTreeView(state);
+  DrawGroupsView(state);
+  DrawGroupSettingsView(state);
+  DrawSettingsView(state);
 }
 }  // namespace
 

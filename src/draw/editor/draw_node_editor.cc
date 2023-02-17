@@ -15,10 +15,10 @@ void DrawNodeEditor(State &state) {
   const auto node_editor_scope =
       cpp::Scope{[]() { ne::Begin("Node editor"); }, []() { ne::End(); }};
 
-  draw::DrawGroups(state);
-  draw::DrawNodes(state);
-  draw::DrawLinks(state);
   draw::DrawLinkBeingRepinned(state);
+  draw::DrawGroups(state);
+  draw::DrawLinks(state);
+  draw::DrawNodes(state);
   draw::DrawLinkConnectionProcess(state);
   draw::DrawDeleteItemsProcess(state);
   draw::DrawPopups(state);
