@@ -14,8 +14,8 @@
 
 namespace esc {
 void AppImpl::OnFrame() {
-  state_->OnFrame();
-  draw::DrawMainWindow(*state_);
-  draw::DrawNodeEditor(*state_);
+  state_.OnFrame();
+  draw::DrawMainWindow(state_);
+  draw::DrawNodeEditor(state_);
 }
 }  // namespace esc

@@ -9,13 +9,13 @@
 #include "core_i_node.h"
 #include "core_id_generator.h"
 #include "core_link.h"
+#include "coreui_flow_input_pin_drawer.h"
+#include "coreui_flow_output_pin_drawer.h"
+#include "coreui_i_family_drawer.h"
+#include "coreui_i_node_drawer.h"
+#include "coreui_i_pin_drawer.h"
 #include "cpp_assert.h"
 #include "crude_json.h"
-#include "draw_flow_input_pin_drawer.h"
-#include "draw_flow_output_pin_drawer.h"
-#include "draw_i_family_drawer.h"
-#include "draw_i_node_drawer.h"
-#include "draw_i_pin_drawer.h"
 #include "esc_state.h"
 #include "imgui_node_editor.h"
 #include "json_i_family_writer.h"
@@ -31,11 +31,11 @@ constexpr auto kTypeName = "PlaceholderNode";
 auto CreateNodeWriter(std::shared_ptr<Node> node)
     -> std::unique_ptr<json::INodeWriter>;
 auto CreateNodeDrawer(std::shared_ptr<Node> node, const State& state)
-    -> std::unique_ptr<draw::INodeDrawer>;
+    -> std::unique_ptr<coreui::INodeDrawer>;
 auto CreateFamilyWriter(std::shared_ptr<PlaceholderFamily> family)
     -> std::unique_ptr<json::IFamilyWriter>;
 auto CreateFamilyDrawer(std::shared_ptr<PlaceholderFamily> family)
-    -> std::unique_ptr<draw::IFamilyDrawer>;
+    -> std::unique_ptr<coreui::IFamilyDrawer>;
 
 // NOLINTNEXTLINE(*-multiple-inheritance)
 class Node : public INode, public std::enable_shared_from_this<Node> {
@@ -48,7 +48,7 @@ class Node : public INode, public std::enable_shared_from_this<Node> {
   }
 
   auto CreateDrawer(const State& state)
-      -> std::unique_ptr<draw::INodeDrawer> override {
+      -> std::unique_ptr<coreui::INodeDrawer> override {
     return CreateNodeDrawer(shared_from_this(), state);
   }
 
@@ -109,7 +109,7 @@ auto CreateNodeWriter(std::shared_ptr<Node> node)
   return std::make_unique<NodeWriter>(std::move(node));
 }
 
-class NodeDrawer : public draw::INodeDrawer {
+class NodeDrawer : public coreui::INodeDrawer {
  public:
   explicit NodeDrawer(std::shared_ptr<Node> node, const State& state)
       : node_{std::move(node)},
@@ -124,15 +124,15 @@ class NodeDrawer : public draw::INodeDrawer {
   }
 
   auto CreatePinDrawer(ne::PinId pin_id) const
-      -> std::unique_ptr<draw::IPinDrawer> override {
+      -> std::unique_ptr<coreui::IPinDrawer> override {
     const auto pin_index = node_->GetPinIndex(pin_id);
 
     if (node_->has_input_pin_ && (pin_index == 0)) {
-      return std::make_unique<draw::FlowInputPinDrawer>(flow_pin_values_);
+      return std::make_unique<coreui::FlowInputPinDrawer>(flow_pin_values_);
     }
 
-    return std::make_unique<draw::FlowOutputPinDrawer>(flow_pin_values_,
-                                                       pin_id);
+    return std::make_unique<coreui::FlowOutputPinDrawer>(flow_pin_values_,
+                                                         pin_id);
   }
 
  private:
@@ -141,7 +141,7 @@ class NodeDrawer : public draw::INodeDrawer {
 };
 
 auto CreateNodeDrawer(std::shared_ptr<Node> node, const State& state)
-    -> std::unique_ptr<draw::INodeDrawer> {
+    -> std::unique_ptr<coreui::INodeDrawer> {
   return std::make_unique<NodeDrawer>(std::move(node), state);
 }
 }  // namespace
@@ -164,7 +164,8 @@ auto PlaceholderFamily::CreateWriter() -> std::unique_ptr<json::IFamilyWriter> {
   return CreateFamilyWriter(shared_from_this());
 }
 
-auto PlaceholderFamily::CreateDrawer() -> std::unique_ptr<draw::IFamilyDrawer> {
+auto PlaceholderFamily::CreateDrawer()
+    -> std::unique_ptr<coreui::IFamilyDrawer> {
   return CreateFamilyDrawer(shared_from_this());
 }
 
@@ -214,7 +215,7 @@ auto CreateFamilyWriter(std::shared_ptr<PlaceholderFamily> family)
   return std::make_unique<FamilyWriter>(std::move(family));
 }
 
-class FamilyDrawer : public draw::IFamilyDrawer {
+class FamilyDrawer : public coreui::IFamilyDrawer {
  public:
   explicit FamilyDrawer(std::shared_ptr<PlaceholderFamily> family)
       : family_{std::move(family)} {}
@@ -230,7 +231,7 @@ class FamilyDrawer : public draw::IFamilyDrawer {
 };
 
 auto CreateFamilyDrawer(std::shared_ptr<PlaceholderFamily> family)
-    -> std::unique_ptr<draw::IFamilyDrawer> {
+    -> std::unique_ptr<coreui::IFamilyDrawer> {
   return std::make_unique<FamilyDrawer>(std::move(family));
 }
 }  // namespace

@@ -18,8 +18,8 @@
 #include "core_i_node.h"
 #include "core_link.h"
 #include "core_placeholder_family.h"
+#include "coreui_i_node_drawer.h"
 #include "cpp_assert.h"
-#include "draw_i_node_drawer.h"
 
 namespace esc::core {
 Diagram::Diagram(std::vector<std::shared_ptr<IFamily>> families,
@@ -71,7 +71,7 @@ auto Diagram::FindNodePTR(ne::NodeId id) -> const std::shared_ptr<INode>& {
 }
 
 auto Diagram::FindPin(ne::PinId id, const State& state)
-    -> std::unique_ptr<draw::IPinDrawer> {
+    -> std::unique_ptr<coreui::IPinDrawer> {
   return FindPinNode(id)->CreateDrawer(state)->CreatePinDrawer(id);
 }
 

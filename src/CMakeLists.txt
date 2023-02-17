@@ -129,40 +129,43 @@ add_example_executable(esc
   core/core_i_node.cc
   core/core_id_generator.cc
 
+  coreui/pin/coreui_empty_pin_drawer.cc
+  coreui/pin/coreui_flow_input_pin_drawer.cc
+  coreui/pin/coreui_flow_output_pin_drawer.cc
+
+  coreui/coreui_i_family_drawer.cc
+  coreui/coreui_i_node_drawer.cc
+  coreui/coreui_i_pin_drawer.cc
+
   cpp/cpp_assert.cc
   cpp/cpp_scope_function.cc
 
-  draw/pin/draw_empty_pin_drawer.cc
-  draw/pin/draw_flow_input_pin_drawer.cc
-  draw/pin/draw_flow_output_pin_drawer.cc
+  draw/dialog/draw_open_file_dialog.cc
+  draw/dialog/draw_save_as_file_dialog.cc
 
-  draw/popup/draw_background_popup.cc
-  draw/popup/draw_link_popup.cc
-  draw/popup/draw_node_popup.cc
-  draw/popup/draw_popups.cc
+  draw/editor/popup/draw_background_popup.cc
+  draw/editor/popup/draw_link_popup.cc
+  draw/editor/popup/draw_node_popup.cc
 
-  draw/draw_constants.cc
-  draw/draw_delete_items_process.cc
-  draw/draw_families_view.cc
-  draw/draw_flow_tree_view.cc
-  draw/draw_group_settings_view.cc
-  draw/draw_groups_view.cc
-  draw/draw_groups.cc
-  draw/draw_i_drawable.cc
-  draw/draw_i_family_drawer.cc
-  draw/draw_i_node_drawer.cc
-  draw/draw_i_pin_drawer.cc
-  draw/draw_link_being_repinned.cc
-  draw/draw_link_connection_process.cc
-  draw/draw_links.cc
+  draw/editor/process/draw_delete_items_process.cc
+  draw/editor/process/draw_link_connection_process.cc
+
+  draw/editor/draw_groups.cc
+  draw/editor/draw_link_being_repinned.cc
+  draw/editor/draw_links.cc
+  draw/editor/draw_node_editor.cc
+  draw/editor/draw_nodes.cc
+  draw/editor/draw_popups.cc
+  draw/editor/draw_tooltip.cc
+
+  draw/view/draw_families_view.cc
+  draw/view/draw_flow_tree_view.cc
+  draw/view/draw_group_settings_view.cc
+  draw/view/draw_groups_view.cc
+  draw/view/draw_settings_view.cc
+
   draw/draw_main_menu_bar.cc
   draw/draw_main_window.cc
-  draw/draw_node_editor.cc
-  draw/draw_nodes.cc
-  draw/draw_open_file_dialog.cc
-  draw/draw_save_as_file_dialog.cc
-  draw/draw_settings_view.cc
-  draw/draw_tooltip.cc
 
   json/json_diagram_serializer.cc
   json/json_i_family_parser.cc
@@ -190,12 +193,17 @@ add_example_executable(esc
 target_include_directories(esc
   PUBLIC ${PROJECT_SOURCE_DIR}/include
   PUBLIC ${PROJECT_SOURCE_DIR}/include/core
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/coreui
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/coreui/pin
   PUBLIC ${PROJECT_SOURCE_DIR}/include/core/family
   PUBLIC ${PROJECT_SOURCE_DIR}/include/core/flow
   PUBLIC ${PROJECT_SOURCE_DIR}/include/cpp
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw
-  PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/pin
-  PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/popup
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/dialog
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/editor
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/editor/popup
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/editor/process
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/view
   PUBLIC ${PROJECT_SOURCE_DIR}/include/impl
   PUBLIC ${PROJECT_SOURCE_DIR}/include/json
 )

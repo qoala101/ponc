@@ -15,9 +15,9 @@ class INodeParser;
 class IFamilyWriter;
 }  // namespace json
 
-namespace draw {
+namespace coreui {
 class IFamilyDrawer;
-}  // namespace draw
+}  // namespace coreui
 
 namespace core {
 // ---
@@ -31,7 +31,7 @@ class IFamily : public cpp::Interface {
   -> std::unique_ptr<json::IFamilyWriter> = 0;
   // ---
   virtual auto CreateDrawer [[nodiscard]] ()
-  -> std::unique_ptr<draw::IFamilyDrawer> = 0;
+  -> std::unique_ptr<coreui::IFamilyDrawer> = 0;
 
   // ---
   auto GetNodes [[nodiscard]] () const

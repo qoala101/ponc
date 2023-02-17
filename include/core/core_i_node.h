@@ -21,9 +21,9 @@ namespace json {
 class INodeWriter;
 }  // namespace json
 
-namespace draw {
+namespace coreui {
 class INodeDrawer;
-}  // namespace draw
+}  // namespace coreui
 
 namespace core {
 
@@ -36,7 +36,7 @@ class INode : public cpp::Interface {
   -> std::unique_ptr<json::INodeWriter> = 0;
   // ---
   virtual auto CreateDrawer [[nodiscard]] (const State &state)
-  -> std::unique_ptr<draw::INodeDrawer> = 0;
+  -> std::unique_ptr<coreui::INodeDrawer> = 0;
 
   // ---
   auto GetId [[nodiscard]] () const -> ne::NodeId;

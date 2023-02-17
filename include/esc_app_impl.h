@@ -10,7 +10,7 @@ class AppImpl {
   void OnFrame();
 
  private:
-  std::shared_ptr<State> state_{};
+  State state_{};
   esc::EditorContextHandle editor_context_{};
 };
 }  // namespace esc

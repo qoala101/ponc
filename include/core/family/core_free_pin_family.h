@@ -26,7 +26,7 @@ class FreePinFamily : public IFamily,
   -> std::unique_ptr<json::IFamilyWriter> override;
   // ---
   auto CreateDrawer [[nodiscard]] ()
-  -> std::unique_ptr<draw::IFamilyDrawer> override;
+  -> std::unique_ptr<coreui::IFamilyDrawer> override;
 
   auto EmplaceNodeFromFlow [[nodiscard]] (IdGenerator& id_generator,
                                           ne::PinId pin_id, bool has_input_pin)

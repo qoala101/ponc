@@ -26,7 +26,7 @@ class PlaceholderFamily
   -> std::unique_ptr<json::IFamilyWriter> override;
   // ---
   auto CreateDrawer [[nodiscard]] ()
-  -> std::unique_ptr<draw::IFamilyDrawer> override;
+  -> std::unique_ptr<coreui::IFamilyDrawer> override;
 
   auto EmplaceNodeFromFlow [[nodiscard]] (IdGenerator& id_generator,
                                           const Flow& connected_flow) -> INode&;

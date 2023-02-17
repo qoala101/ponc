@@ -10,7 +10,7 @@
 #include "core_i_node.h"
 #include "core_link.h"
 #include "core_placeholder_family.h"
-#include "draw_i_pin_drawer.h"
+#include "coreui_i_pin_drawer.h"
 #include "imgui_node_editor.h"
 
 namespace esc::core {
@@ -22,7 +22,7 @@ class Diagram {
   auto GetFamilies() const -> const std::vector<std::shared_ptr<IFamily>> &;
   auto GetLinks() const -> const std::vector<Link> &;
   auto GetGroups() -> std::vector<Group> &;
-  
+
   auto GetPlaceholderFamily() const -> PlaceholderFamily &;
   auto GetFreePinFamily() const -> FreePinFamily &;
 
@@ -36,7 +36,7 @@ class Diagram {
   auto FindNode(ne::NodeId id) -> INode &;
   auto FindNodePTR(ne::NodeId id) -> const std::shared_ptr<INode> &;
   auto FindPin(ne::PinId id, const State &state)
-      -> std::unique_ptr<draw::IPinDrawer>;
+      -> std::unique_ptr<coreui::IPinDrawer>;
   auto FindPinNode(ne::PinId id) -> const std::shared_ptr<INode> &;
   auto FindLink(ne::LinkId id) -> Link &;
   auto FindLinkFromPin(ne::PinId pin_id) -> const Link *;
