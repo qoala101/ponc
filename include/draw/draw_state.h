@@ -1,11 +1,6 @@
 #ifndef VH_DRAW_STATE_H_
 #define VH_DRAW_STATE_H_
 
-// clang-format off
-#include <imgui.h>
-#include <imfilebrowser.h>
-// clang-format on
-
 #include <imgui_node_editor.h>
 
 #include <optional>
@@ -18,30 +13,20 @@
 #include "draw_flow_tree_view.h"
 #include "draw_group_settings_view.h"
 #include "draw_groups_view.h"
+#include "draw_link_being_repinned.h"
+#include "draw_link_connection_process.h"
 #include "draw_link_popup.h"
+#include "draw_links.h"
 #include "draw_node_popup.h"
+#include "draw_nodes.h"
 #include "draw_open_file_dialog.h"
 #include "draw_save_as_file_dialog.h"
 #include "draw_settings_view.h"
 #include "flow_calculator.h"
-#include "draw_nodes.h"
 
 namespace ne = ax::NodeEditor;
 
 namespace esc::draw {
-struct Rebind {
-  ne::PinId fixed_pin{};
-  ne::PinKind fixed_pin_kind{};
-  ne::LinkId rebinding_link_id{};
-  std::optional<ImVec2> fixed_pin_pos{};
-};
-
-struct NewLink {
-  ne::PinId pin_dragged_from{};
-  std::optional<ne::PinId> pin_hovered_over{};
-  std::optional<Rebind> rebind{};
-};
-
 struct DrawState {
   explicit DrawState(const Texture &node_header_texture);
 
@@ -59,12 +44,15 @@ struct DrawState {
   LinkPopup link_popup{};
 
   Nodes nodes;
+  Links links;
+  LinkBeingRepinned link_being_repinned;
+  LinkConnectionProcess link_connection_process;
 
-  std::optional<NewLink> new_link{};
   std::unordered_map<uintptr_t, ImVec2> pin_poses_{};
 
-  auto CanConnectFromPinToPin(core::CoreState &core_state, ne::PinId start_pin,
-                              ne::PinId end_pin) -> bool;
+ private:
+  DrawState(const Texture &node_header_texture,
+            std::shared_ptr<std::optional<NewLink>> new_link);
 };
 }  // namespace esc::draw
 

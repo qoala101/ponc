@@ -1,16 +1,17 @@
 #include "draw_nodes.h"
+
 #include "core_i_node.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
 
 #include "app_node_drawer.h"
+#include "app_state.h"
 #include "coreui_i_node_drawer.h"
 #include "cpp_scope.h"
 #include "imgui.h"
 #include "imgui_bezier_math.h"
 #include "imgui_node_editor.h"
-#include "app_state.h"
 
 namespace esc::draw {
 namespace {
@@ -216,9 +217,9 @@ auto CalculateAlphaForPin(State& state, ne::PinId pin_id) {
   //   alpha = alpha * (48.0F / 255.0F);
   // }
 
-  // if (state.draw_state->new_link.has_value()) {
+  // if (new_link_->has_value()) {
   //   if
-  //   (!state.CanConnectFromPinToPin(state.draw_state->new_link->pin_dragged_from,
+  //   (!state.CanConnectFromPinToPin((*new_link_)->pin_dragged_from,
   //                                     pin_id)) {
   //     alpha = alpha * (48.0F / 255.0F);
   //   }
@@ -232,13 +233,27 @@ auto CalculateAlphaForPin(State& state, ne::PinId pin_id) {
 
   return alpha;
 }
+}  // namespace
 
-void DrawNode(State& state, const Texture& texture, core::INode& node) {
+Nodes::Nodes(const Texture& node_header_texture,
+             std::shared_ptr<std::optional<NewLink>> new_link)
+    : node_header_texture_{node_header_texture},
+      new_link_{std::move(new_link)} {}
+
+void Nodes::Draw(State& state) {
+  for (const auto& family : state.core_state->diagram_.GetFamilies()) {
+    for (const auto& node : family->GetNodes()) {
+      DrawNode(state, *node);
+    }
+  }
+}
+
+void Nodes::DrawNode(State& state, core::INode& node) {
   auto node_builder = esc::NodeDrawer{node.GetId()};
   auto drawer = node.CreateDrawer(state.ToStateNoQueue());
 
   if (drawer->HasHeader()) {
-    const auto header_texture = texture;
+    const auto header_texture = node_header_texture_;
 
     {
       auto color = drawer->GetColor();
@@ -296,9 +311,9 @@ void DrawNode(State& state, const Texture& texture, core::INode& node) {
 
     state.draw_state->pin_poses_[pin_id.Get()] = ImGui::GetItemRectMin();
 
-    if (state.draw_state->new_link.has_value()) {
-      if (state.draw_state->new_link->rebind.has_value()) {
-        if (state.draw_state->new_link->rebind->fixed_pin == pin_id) {
+    if (new_link_->has_value()) {
+      if ((*new_link_)->rebind.has_value()) {
+        if ((*new_link_)->rebind->fixed_pin == pin_id) {
           const auto rect =
               ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
 
@@ -307,7 +322,7 @@ void DrawNode(State& state, const Texture& texture, core::INode& node) {
                   ? ImVec2{rect.Min.x, (rect.Min.y + rect.Max.y) * 0.5f}
                   : ImVec2{rect.Max.x, (rect.Min.y + rect.Max.y) * 0.5f};
 
-          state.draw_state->new_link->rebind->fixed_pin_pos = end_pos;
+          (*new_link_)->rebind->fixed_pin_pos = end_pos;
         }
       }
     }
@@ -316,18 +331,6 @@ void DrawNode(State& state, const Texture& texture, core::INode& node) {
     //                   ImColor{55, 0, 255}, 2);
     // drawList->AddLine(ImGui::GetItemRectMax(), ImGui::GetMousePos(),
     //                   ImColor{77, 0, 255}, 2);
-  }
-}
-}  // namespace
-
-Nodes::Nodes(const Texture& node_header_texture)
-    : node_header_texture_{node_header_texture} {}
-
-void Nodes::Draw(State& state) {
-  for (const auto& family : state.core_state->diagram_.GetFamilies()) {
-    for (const auto& node : family->GetNodes()) {
-      DrawNode(state, node_header_texture_, *node);
-    }
   }
 }
 }  // namespace esc::draw

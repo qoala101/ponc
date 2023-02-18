@@ -15,12 +15,12 @@ void DrawNodeEditor(State &state) {
   const auto node_editor_scope =
       cpp::Scope{[]() { ne::Begin("Node editor"); }, []() { ne::End(); }};
 
-  draw::DrawLinkBeingRepinned(state);
-  draw::DrawGroups(state);
-  draw::DrawLinks(state);
+  // state.draw_state->link_being_repinned.Draw(state);
+  // draw::DrawGroups(state);
+  state.draw_state->links.Draw(state);
   state.draw_state->nodes.Draw(state);
-  draw::DrawLinkConnectionProcess(state);
-  draw::DrawDeleteItemsProcess(state);
-  draw::DrawPopups(state);
+  // state.draw_state->link_connection_process.Draw(state);
+  // draw::DrawDeleteItemsProcess(state);
+  // draw::DrawPopups(state);
 }
 }  // namespace esc::draw

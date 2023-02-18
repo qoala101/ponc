@@ -96,8 +96,6 @@ void ResetDiagram::operator()(StateNoQueue &state) const {
     }
   }
 
-  state.draw_state->new_link.reset();
-
   state.core_state->id_generator_ = core::IdGenerator{};
   state.core_state->diagram_ = core::Diagram{CreateFamilies()};
 }

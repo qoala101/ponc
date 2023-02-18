@@ -6,6 +6,7 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
 
+#include "app_state.h"
 #include "coreui_i_node_drawer.h"
 #include "cpp_scope.h"
 #include "draw_link_being_repinned.h"
@@ -53,22 +54,24 @@ auto GetCurve(const ImVec2& m_Start, const ImVec2& m_End, ne::PinKind kind) {
 }
 }  // namespace
 
-void DrawLinkBeingRepinned(State& state) {
-  if (state.draw_state->new_link.has_value()) {
-    if (state.draw_state->new_link->rebind.has_value()) {
-      if (state.draw_state->new_link->rebind->fixed_pin_pos.has_value()) {
+LinkBeingRepinned::LinkBeingRepinned(
+    std::shared_ptr<std::optional<NewLink>> new_link)
+    : new_link_{std::move(new_link)} {}
+
+void LinkBeingRepinned::Draw(State& state) {
+  if (new_link_->has_value()) {
+    if ((*new_link_)->rebind.has_value()) {
+      if ((*new_link_)->rebind->fixed_pin_pos.has_value()) {
         const auto curve =
-            GetCurve(*state.draw_state->new_link->rebind->fixed_pin_pos,
-                     ImGui::GetMousePos(),
-                     state.draw_state->new_link->rebind->fixed_pin_kind);
+            GetCurve(*(*new_link_)->rebind->fixed_pin_pos, ImGui::GetMousePos(),
+                     (*new_link_)->rebind->fixed_pin_kind);
 
         auto color = ImColor{255, 255, 255};
 
-        if (state.draw_state->new_link->pin_hovered_over.has_value()) {
-          if (!state.draw_state->CanConnectFromPinToPin(
-                  *state.core_state,
-                  state.draw_state->new_link->pin_dragged_from,
-                  *state.draw_state->new_link->pin_hovered_over)) {
+        if ((*new_link_)->pin_hovered_over.has_value()) {
+          if (!CanConnectFromPinToPin(
+                  *state.core_state, *new_link_, (*new_link_)->pin_dragged_from,
+                  *(*new_link_)->pin_hovered_over)) {
             color = ImColor{255, 0, 0};
           }
         }

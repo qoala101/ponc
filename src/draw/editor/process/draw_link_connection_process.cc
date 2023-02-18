@@ -1,7 +1,9 @@
 #include "draw_link_connection_process.h"
 
 #include <iostream>
+#include <utility>
 
+#include "app_state.h"
 #include "core_link.h"
 #include "coreui_i_node_drawer.h"
 #include "cpp_scope.h"
@@ -28,12 +30,15 @@ void UpdateNewLink(State& state, NewLink& new_link) {
 }
 }  // namespace
 
-void DrawLinkConnectionProcess(State& state) {
+LinkConnectionProcess::LinkConnectionProcess(
+    std::shared_ptr<std::optional<NewLink>> new_link)
+    : new_link_{std::move(new_link)} {}
+
+void LinkConnectionProcess::Draw(State& state) {
   const auto create_scope = cpp::Scope{[]() { ne::EndCreate(); }};
   auto alpha = 255;
 
-  if (state.draw_state->new_link.has_value() &&
-      state.draw_state->new_link->rebind.has_value()) {
+  if (new_link_->has_value() && (*new_link_)->rebind.has_value()) {
     alpha = 0;
   }
 
@@ -42,8 +47,7 @@ void DrawLinkConnectionProcess(State& state) {
     auto end_pin_id = ne::PinId{};
 
     if (ne::QueryNewLink(&start_pin_id, &end_pin_id)) {
-      auto& new_link =
-          state.draw_state->new_link.emplace(NewLink{start_pin_id, end_pin_id});
+      auto& new_link = new_link_->emplace(NewLink{start_pin_id, end_pin_id});
 
       UpdateNewLink(state, new_link);
 
@@ -56,9 +60,9 @@ void DrawLinkConnectionProcess(State& state) {
       auto end_pin_drawer = end_node->CreateDrawer(state.ToStateNoQueue())
                                 ->CreatePinDrawer(end_pin_id);
 
-      if (!state.draw_state->CanConnectFromPinToPin(
-              *state.core_state, new_link.pin_dragged_from,
-              *new_link.pin_hovered_over)) {
+      if (!CanConnectFromPinToPin(*state.core_state, *new_link_,
+                                  new_link.pin_dragged_from,
+                                  *new_link.pin_hovered_over)) {
         auto alpha = 255;
 
         if (new_link.rebind.has_value()) {
@@ -98,12 +102,12 @@ void DrawLinkConnectionProcess(State& state) {
         }
       }
     } else {
-      state.draw_state->new_link->pin_hovered_over.reset();
+      (*new_link_)->pin_hovered_over.reset();
     }
 
     // if (ne::QueryNewNode(&end_pin_id)) {
     //   auto& new_link =
-    //       state.draw_state->new_link.emplace(State::NewLink{end_pin_id});
+    //       new_link_->emplace(State::NewLink{end_pin_id});
 
     //   UpdateNewLink(state, new_link);
 
@@ -117,7 +121,7 @@ void DrawLinkConnectionProcess(State& state) {
     //   }
     // }
   } else {
-    state.draw_state->new_link.reset();
+    new_link_->reset();
   }
 }
 }  // namespace esc::draw
