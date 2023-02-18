@@ -52,26 +52,6 @@ class Node : public INode, public std::enable_shared_from_this<Node> {
     return CreateNodeDrawer(shared_from_this(), state);
   }
 
-  auto GetInitialFlow [[nodiscard]] () const -> flow::NodeFlow override {
-    const auto& pin_ids = GetPinIds();
-
-    auto flow_values = flow::NodeFlow{};
-
-    if (has_input_pin_) {
-      flow_values.input_pin_flow = std::pair{pin_ids[0].Get(), float{}};
-
-      for (auto i = 0; i < static_cast<int>(pin_ids.size() - 1); ++i) {
-        flow_values.output_pin_flows.emplace(pin_ids[i + 1], float{});
-      }
-    } else {
-      for (auto pin_id : pin_ids) {
-        flow_values.output_pin_flows.emplace(pin_id, float{});
-      }
-    }
-
-    return flow_values;
-  }
-
   bool has_input_pin_{};
 };
 
@@ -124,16 +104,21 @@ class NodeDrawer : public coreui::INodeDrawer {
     return std::make_shared<PlaceholderFamily>()->CreateDrawer()->GetColor();
   }
 
-  auto CreatePinDrawer(ne::PinId pin_id) const
-      -> std::unique_ptr<coreui::IPinDrawer> override {
-    const auto pin_index = node_->GetPinIndex(pin_id);
+  auto CreatePinDrawers() const
+      -> std::vector<std::unique_ptr<coreui::IPinDrawer>> override {
+    auto pin_drawers = std::vector<std::unique_ptr<coreui::IPinDrawer>>{};
 
-    if (node_->has_input_pin_ && (pin_index == 0)) {
-      return std::make_unique<coreui::FlowInputPinDrawer>(flow_pin_values_);
+    if (node_->has_input_pin_) {
+      pin_drawers.emplace_back(
+          std::make_unique<coreui::FlowInputPinDrawer>(flow_pin_values_));
     }
 
-    return std::make_unique<coreui::FlowOutputPinDrawer>(flow_pin_values_,
-                                                         pin_id);
+    for (const auto pin_id : node_->GetOutputPinIds()) {
+      pin_drawers.emplace_back(std::make_unique<coreui::FlowOutputPinDrawer>(
+          flow_pin_values_, pin_id));
+    }
+
+    return pin_drawers;
   }
 
  private:
@@ -170,9 +155,9 @@ auto PlaceholderFamily::CreateDrawer()
   return CreateFamilyDrawer(shared_from_this());
 }
 
-auto PlaceholderFamily::EmplaceNodeFromFlow(IdGenerator& id_generator,
-                                            const flow::NodeFlow& connected_flow)
-    -> INode& {
+auto PlaceholderFamily::EmplaceNodeFromFlow(
+    IdGenerator& id_generator, const flow::NodeFlow& connected_flow)
+    -> const std::shared_ptr<INode>& {
   // auto pin_ids = std::vector<ne::PinId>{};
   const auto has_input_pin = connected_flow.input_pin_flow.has_value();
   auto num_pins = static_cast<int>(connected_flow.output_pin_flows.size());

@@ -1,3 +1,7 @@
+/**
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ */
+
 #ifndef VH_CORE_I_FAMILY_H_
 #define VH_CORE_I_FAMILY_H_
 
@@ -37,16 +41,20 @@ class IFamily : public cpp::Interface {
   auto GetNodes [[nodiscard]] () const
       -> const std::vector<std::shared_ptr<INode>> &;
   // ---
-  auto EmplaceNode [[nodiscard]] (IdGenerator &id_generator) -> INode &;
+  auto FindNode [[nodiscard]] (ne::NodeId node_id) const
+      -> const std::shared_ptr<INode> *;
   // ---
-  void EraseNode(ne::NodeId &id);
+  auto EmplaceNode(IdGenerator &id_generator) -> const std::shared_ptr<INode> &;
+  // ---
+  void EraseNode(ne::NodeId node_id);
 
  protected:
   // ---
   explicit IFamily(std::vector<std::shared_ptr<core::INode>> nodes);
 
   // ---
-  auto EmplaceNode [[nodiscard]] (std::shared_ptr<core::INode> node) -> INode &;
+  auto EmplaceNode(std::shared_ptr<core::INode> node)
+      -> const std::shared_ptr<INode> &;
 
  private:
   // ---
@@ -58,7 +66,8 @@ class IFamily : public cpp::Interface {
 };
 
 // ---
-auto IsChildOf(const INode &node, const IFamily &family) -> bool;
+auto IsChildOf [[nodiscard]] (ne::NodeId node_id, const IFamily &family)
+-> bool;
 }  // namespace core
 }  // namespace esc
 

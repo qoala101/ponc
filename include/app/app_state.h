@@ -9,7 +9,7 @@ namespace esc {
 class StateNoQueue {
  public:
   core::CoreState *core_state{};
-  draw::DrawState *draw_state{};
+  // draw::DrawState *draw_state{};
 };
 
 class State {
@@ -20,7 +20,10 @@ class State {
   EventQueue *event_queue{};
 
   auto ToStateNoQueue() const {
-    return StateNoQueue{core_state, draw_state};
+    return StateNoQueue{
+        core_state
+        // , draw_state
+    };
   }
 };
 }  // namespace esc

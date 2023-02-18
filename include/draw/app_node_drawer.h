@@ -28,7 +28,7 @@ class NodeDrawer {
   auto AddHeader(const draw::Texture& header_texture,
                  const ImColor& header_color) -> cpp::ScopeFunction;
 
-  auto AddPin(ne::PinId id, ne::PinKind kind) -> cpp::ScopeFunction;
+  auto AddPin(std::optional<ne::PinId> id, ne::PinKind kind) -> cpp::ScopeFunction;
 
  private:
   enum class Stage {

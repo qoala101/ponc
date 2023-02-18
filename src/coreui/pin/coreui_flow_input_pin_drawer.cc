@@ -2,10 +2,13 @@
 
 #include "cpp_assert.h"
 #include "flow_node_flow.h"
+#include "imgui_node_editor.h"
 
 namespace esc::coreui {
 FlowInputPinDrawer::FlowInputPinDrawer(const flow::NodeFlow& flow)
-    : value_{(Expects(flow.input_pin_flow.has_value()),
+    : pin_id_{(Expects(flow.input_pin_flow.has_value()),
+               flow.input_pin_flow->first)},
+      value_{(Expects(flow.input_pin_flow.has_value()),
               flow.input_pin_flow->second)} {}
 
 auto FlowInputPinDrawer::GetLabel() const -> std::string { return {}; }

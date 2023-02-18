@@ -1,7 +1,8 @@
+#include "app_attenuator_node.h"
+
 #include <cstdint>
 #include <memory>
 
-#include "app_attenuator_node.h"
 #include "app_state.h"
 #include "core_i_node.h"
 #include "core_id_generator.h"
@@ -48,11 +49,10 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
     return CreateNodeDrawer(shared_from_this(), state);
   }
 
-  auto GetInitialFlow [[nodiscard]] () const -> flow::NodeFlow override {
-    const auto& pin_ids = GetPinIds();
-
-    return {.input_pin_flow = std::pair{pin_ids[0].Get(), float{}},
-            .output_pin_flows = {{pin_ids[2].Get(), drop_}}};
+  void SetInitialFlowValues(flow::NodeFlow& node_flow) const override {
+    for (const auto output_pin_id : GetOutputPinIds()) {
+      node_flow.output_pin_flows.at(output_pin_id.Get()) = drop_;
+    }
   }
 
   float drop_{};
@@ -121,20 +121,17 @@ class NodeDrawer : public coreui::INodeDrawer {
     return AttenuatorNode::CreateFamily()->CreateDrawer()->GetColor();
   }
 
-  auto CreatePinDrawer(ne::PinId pin_id) const
-      -> std::unique_ptr<coreui::IPinDrawer> override {
-    const auto pin_index = node_->GetPinIndex(pin_id);
+  auto CreatePinDrawers() const
+      -> std::vector<std::unique_ptr<coreui::IPinDrawer>> override {
+    auto pin_drawers = std::vector<std::unique_ptr<coreui::IPinDrawer>>{};
 
-    if (pin_index == 0) {
-      return std::make_unique<coreui::FlowInputPinDrawer>(flow_pin_values_);
-    }
+    pin_drawers.emplace_back(
+        std::make_unique<coreui::FlowInputPinDrawer>(flow_pin_values_));
+    pin_drawers.emplace_back(std::make_unique<DropPinDrawer>(node_));
+    pin_drawers.emplace_back(std::make_unique<coreui::FlowOutputPinDrawer>(
+        flow_pin_values_, node_->GetOutputPinIds()[0]));
 
-    if (pin_index == 1) {
-      return std::make_unique<DropPinDrawer>(node_);
-    }
-
-    return std::make_unique<coreui::FlowOutputPinDrawer>(flow_pin_values_,
-                                                         pin_id);
+    return pin_drawers;
   }
 
  private:

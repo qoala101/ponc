@@ -1,3 +1,7 @@
+/**
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ */
+
 #ifndef VH_CORE_PLACEHOLDER_FAMILY_H_
 #define VH_CORE_PLACEHOLDER_FAMILY_H_
 
@@ -30,7 +34,7 @@ class PlaceholderFamily
 
   auto EmplaceNodeFromFlow [[nodiscard]] (IdGenerator& id_generator,
                                           const flow::NodeFlow& connected_flow)
-  -> INode&;
+  -> const std::shared_ptr<INode>&;
 
  private:
   // ---

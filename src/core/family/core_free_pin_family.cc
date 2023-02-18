@@ -52,20 +52,6 @@ class Node : public INode, public std::enable_shared_from_this<Node> {
     return CreateNodeDrawer(shared_from_this(), state);
   }
 
-  auto GetInitialFlow [[nodiscard]] () const -> flow::NodeFlow override {
-    const auto& pin_ids = GetPinIds();
-
-    auto flow_values = flow::NodeFlow{};
-
-    if (has_input_pin_) {
-      flow_values.input_pin_flow = std::pair{pin_ids[0].Get(), float{}};
-    } else {
-      flow_values.output_pin_flows.emplace(pin_ids[0].Get(), float{});
-    }
-
-    return flow_values;
-  }
-
   bool has_input_pin_{};
 };
 
@@ -138,13 +124,14 @@ class NodeDrawer : public coreui::INodeDrawer {
 
   auto HasHeader() const -> bool override { return false; }
 
-  auto CreatePinDrawer(ne::PinId pin_id) const
-      -> std::unique_ptr<coreui::IPinDrawer> override {
-    if (node_->has_input_pin_) {
-      return std::make_unique<PinDrawer>(ne::PinKind::Input);
-    }
+  auto CreatePinDrawers() const
+      -> std::vector<std::unique_ptr<coreui::IPinDrawer>> override {
+    auto pin_drawers = std::vector<std::unique_ptr<coreui::IPinDrawer>>{};
 
-    return std::make_unique<PinDrawer>(ne::PinKind::Output);
+    pin_drawers.emplace_back(std::make_unique<PinDrawer>(ne::PinKind::Input));
+    pin_drawers.emplace_back(std::make_unique<PinDrawer>(ne::PinKind::Output));
+
+    return pin_drawers;
   }
 
  private:
@@ -181,7 +168,7 @@ auto FreePinFamily::CreateDrawer() -> std::unique_ptr<coreui::IFamilyDrawer> {
 
 auto FreePinFamily::EmplaceNodeFromFlow(IdGenerator& id_generator,
                                         ne::PinId pin_id, bool has_input_pin)
-    -> INode& {
+    -> const std::shared_ptr<INode>& {
   return EmplaceNode(std::make_shared<Node>(id_generator.GetNext<ne::NodeId>(),
                                             std::vector<ne::PinId>{pin_id},
                                             has_input_pin));

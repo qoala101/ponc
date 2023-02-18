@@ -3,6 +3,7 @@
 
 #include <imgui_node_editor.h>
 
+#include <optional>
 #include <string>
 
 #include "cpp_interface.h"
@@ -21,6 +22,8 @@ class IPinDrawer : public cpp::Interface {
   virtual auto GetFloat [[nodiscard]] () -> float*;
   // ---
   virtual auto IsEditable [[nodiscard]] () const -> bool;
+  // ---
+  virtual auto GetPinId [[nodiscard]] () const -> std::optional<ne::PinId>;
 };
 }  // namespace esc::coreui
 

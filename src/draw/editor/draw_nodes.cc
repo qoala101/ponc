@@ -96,10 +96,17 @@ void Icon(const ImVec2& size, bool filled,
 
   ImGui::Dummy(size);
 }
+auto IsPinLinked(State& state, ne::PinId id) -> bool {
+  if (!id) return false;
+
+  for (const auto& link : state.core_state->diagram_.GetLinks())
+    if (link.start_pin_id == id || link.end_pin_id == id) return true;
+
+  return false;
+}
 // vh: norm
-void DrawPinIcon(State& state, core::INode& node, ne::PinId pin_id,
-                 coreui::IPinDrawer& pin_drawer, bool connectable,
-                 bool connected, float alpha) {
+void DrawPinIcon(State& state, core::INode& node,
+                 coreui::IPinDrawer& pin_drawer, float alpha) {
   // const auto& new_link = state.draw_state->new_link;
   // if (new_link.has_value()) {
   //   if (pin_id == new_link->pin_dragged_from) {
@@ -122,7 +129,9 @@ void DrawPinIcon(State& state, core::INode& node, ne::PinId pin_id,
   //   }
   // }
 
-  if (!connectable) {
+  const auto pin_id = pin_drawer.GetPinId();
+
+  if (!pin_id.has_value()) {
     if (pin_drawer.IsEditable()) {
       ImGui::Dummy(ImVec2{20, 24});
     } else {
@@ -141,7 +150,7 @@ void DrawPinIcon(State& state, core::INode& node, ne::PinId pin_id,
   if (state.core_state->flow_colors_.color_flow) {
     const auto node_flow =
         state.core_state->flow_calculator_.GetCalculatedFlow(node);
-    const auto flow = GetPinFlow(node_flow, pin_id);
+    const auto flow = GetPinFlow(node_flow, *pin_id);
     color = state.core_state->flow_colors_.GetColorForFlowValue(flow);
   }
 
@@ -149,6 +158,8 @@ void DrawPinIcon(State& state, core::INode& node, ne::PinId pin_id,
 
   const auto stroke_color = color;
   const auto fill_color = ImColor{32, 32, 32, static_cast<int>(alpha * 255)};
+
+  const auto connected = IsPinLinked(state, *pin_id);
 
   Icon(size, connected, stroke_color, fill_color);
 }
@@ -197,16 +208,8 @@ auto IsFlowPin(ne::PinId id, const core::INode& node) -> bool {
                               }) != flow_values.output_pin_flows.end();
 }
 
-auto IsPinLinked(State& state, ne::PinId id) -> bool {
-  if (!id) return false;
-
-  for (const auto& link : state.core_state->diagram_.GetLinks())
-    if (link.start_pin_id == id || link.end_pin_id == id) return true;
-
-  return false;
-}
 // vh: bad
-auto CalculateAlphaForPin(State& state, ne::PinId pin_id) {
+auto CalculateAlphaForPin(State& state, std::optional<ne::PinId> pin_id) {
   auto alpha = ImGui::GetStyle().Alpha;
 
   // if (state.draw_state->not_yet_connected_pin_of_new_link_id.has_value() &&
@@ -277,39 +280,22 @@ void Nodes::DrawNode(State& state, core::INode& node) {
     }
   }
 
-  for (const auto pin_id : node.GetPinIds()) {
-    auto drawer = state.core_state->diagram_.FindPin(pin_id, state);
-    const auto kind = drawer->GetKind();
+  for (const auto& pin_drawer :
+       node.CreateDrawer(state.ToStateNoQueue())->CreatePinDrawers()) {
+    const auto pin_id = pin_drawer->GetPinId();
+    const auto pin_kind = pin_drawer->GetKind();
+    const auto input_scope = node_builder.AddPin(pin_id, pin_kind);
     const auto alpha = CalculateAlphaForPin(state, pin_id);
 
-    if (kind == ne::PinKind::Input) {
-      const auto input_scope = node_builder.AddPin(pin_id, kind);
-
-      {
-        const auto style_var_scope = cpp::Scope{
-            [alpha]() { ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha); },
-            []() { ImGui::PopStyleVar(); }};
-
-        DrawPinIcon(state, node, pin_id, *drawer, IsFlowPin(pin_id, node),
-                    IsPinLinked(state, pin_id), alpha);
-        DrawPinField(*drawer);
-      }
+    if (pin_kind == ne::PinKind::Input) {
+      DrawPinIcon(state, node, *pin_drawer, alpha);
+      DrawPinField(*pin_drawer);
     } else {
-      const auto style_var_scope = cpp::Scope{
-          [alpha]() { ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha); },
-          []() { ImGui::PopStyleVar(); }};
-
-      {
-        const auto input_scope =
-            node_builder.AddPin(pin_id, ne::PinKind::Output);
-
-        DrawPinField(*drawer);
-        DrawPinIcon(state, node, pin_id, *drawer, IsFlowPin(pin_id, node),
-                    IsPinLinked(state, pin_id), alpha);
-      }
+      DrawPinField(*pin_drawer);
+      DrawPinIcon(state, node, *pin_drawer, alpha);
     }
 
-    state.draw_state->pin_poses_[pin_id.Get()] = ImGui::GetItemRectMin();
+    // state.draw_state->pin_poses_[pin_id.Get()] = ImGui::GetItemRectMin();
 
     if (new_link_->has_value()) {
       if ((*new_link_)->rebind.has_value()) {
@@ -318,7 +304,7 @@ void Nodes::DrawNode(State& state, core::INode& node) {
               ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
 
           const auto end_pos =
-              (kind == ax::NodeEditor::PinKind::Input)
+              (pin_kind == ax::NodeEditor::PinKind::Input)
                   ? ImVec2{rect.Min.x, (rect.Min.y + rect.Max.y) * 0.5f}
                   : ImVec2{rect.Max.x, (rect.Min.y + rect.Max.y) * 0.5f};
 

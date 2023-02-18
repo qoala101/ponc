@@ -24,8 +24,6 @@
 #include "draw_settings_view.h"
 #include "flow_calculator.h"
 
-namespace ne = ax::NodeEditor;
-
 namespace esc::draw {
 struct DrawState {
   explicit DrawState(const Texture &node_header_texture);
@@ -47,8 +45,6 @@ struct DrawState {
   Links links;
   LinkBeingRepinned link_being_repinned;
   LinkConnectionProcess link_connection_process;
-
-  std::unordered_map<uintptr_t, ImVec2> pin_poses_{};
 
  private:
   DrawState(const Texture &node_header_texture,

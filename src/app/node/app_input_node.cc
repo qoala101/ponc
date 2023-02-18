@@ -47,8 +47,8 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
     return CreateNodeDrawer(shared_from_this(), state);
   }
 
-  auto GetInitialFlow [[nodiscard]] () const -> flow::NodeFlow override {
-    return {.output_pin_flows = {{GetPinIds()[0].Get(), value_}}};
+  void SetInitialFlowValues(flow::NodeFlow& node_flow) const {
+    node_flow.output_pin_flows.at(0) = value_;
   }
 
   float value_{};
@@ -119,9 +119,13 @@ class NodeDrawer : public coreui::INodeDrawer {
     return InputNode::CreateFamily()->CreateDrawer()->GetColor();
   }
 
-  auto CreatePinDrawer(ne::PinId pin_id) const
-      -> std::unique_ptr<coreui::IPinDrawer> override {
-    return std::make_unique<PinDrawer>(node_);
+  auto CreatePinDrawers() const
+      -> std::vector<std::unique_ptr<coreui::IPinDrawer>> override {
+    auto pin_drawers = std::vector<std::unique_ptr<coreui::IPinDrawer>>{};
+
+    pin_drawers.emplace_back(std::make_unique<PinDrawer>(node_));
+
+    return pin_drawers;
   }
 
  private:

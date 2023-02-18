@@ -3,6 +3,7 @@
 
 #include "coreui_i_pin_drawer.h"
 #include "flow_node_flow.h"
+#include "imgui_node_editor.h"
 
 namespace esc::coreui {
 // ---
@@ -20,7 +21,12 @@ class FlowInputPinDrawer : public IPinDrawer {
   // ---
   auto IsEditable [[nodiscard]] () const -> bool override;
 
+  auto GetPinId [[nodiscard]] () const -> std::optional<ne::PinId> override {
+    return pin_id_;
+  }
+
  private:
+  ne::PinId pin_id_{};
   float value_{};
 };
 }  // namespace esc::coreui

@@ -1,10 +1,11 @@
 
 
 #define IMGUI_DEFINE_MATH_OPERATORS
+#include "app_node_drawer.h"
+
 #include <imgui.h>
 #include <imgui_internal.h>
 
-#include "app_node_drawer.h"
 #include "cpp_assert.h"
 #include "imgui_node_editor.h"
 
@@ -39,7 +40,8 @@ auto NodeDrawer::AddHeader(const draw::Texture& header_texture,
   return cpp::ScopeFunction{[this]() { SetStage(Stage::kContent); }};
 }
 // vh: norm
-auto NodeDrawer::AddPin(ne::PinId id, ne::PinKind kind) -> cpp::ScopeFunction {
+auto NodeDrawer::AddPin(std::optional<ne::PinId> id, ne::PinKind kind)
+    -> cpp::ScopeFunction {
   if (stage_ == Stage::kBegin) {
     SetStage(Stage::kContent);
   }
@@ -54,12 +56,21 @@ auto NodeDrawer::AddPin(ne::PinId id, ne::PinKind kind) -> cpp::ScopeFunction {
     ImGui::Spring(0);
   }
 
-  ne::BeginPin(id, kind);
-  ImGui::BeginHorizontal(id.AsPointer());
+  if (id.has_value()) {
+    ne::BeginPin(*id, kind);
+    ImGui::BeginHorizontal(id->AsPointer());
+  } else {
+    static auto SOME_ID = 10000;
 
-  return cpp::ScopeFunction{[]() {
+    ImGui::BeginHorizontal(SOME_ID++);
+  }
+
+  return cpp::ScopeFunction{[id]() {
     ImGui::EndHorizontal();
-    ne::EndPin();
+
+    if (id.has_value()) {
+      ne::EndPin();
+    }
   }};
 }
 // vh: norm

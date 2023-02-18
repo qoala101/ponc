@@ -1,3 +1,7 @@
+/**
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ */
+
 #ifndef VH_CORE_FREE_PIN_FAMILY_H_
 #define VH_CORE_FREE_PIN_FAMILY_H_
 
@@ -30,7 +34,7 @@ class FreePinFamily : public IFamily,
 
   auto EmplaceNodeFromFlow [[nodiscard]] (IdGenerator& id_generator,
                                           ne::PinId pin_id, bool has_input_pin)
-  -> INode&;
+  -> const std::shared_ptr<INode>&;
 
  private:
   // ---

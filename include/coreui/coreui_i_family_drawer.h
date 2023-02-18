@@ -21,6 +21,7 @@ class IFamilyDrawer : public cpp::Interface {
   virtual auto IsUserAccessible [[nodiscard]] () -> bool;
 };
 
+// ---
 auto GroupByLabels(const std::vector<std::shared_ptr<core::IFamily>> &families)
     -> std::vector<
         std::pair<std::string, std::vector<std::shared_ptr<core::IFamily>>>>;

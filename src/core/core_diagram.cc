@@ -5,150 +5,158 @@
 #include <imgui_node_editor_internal.h>
 #include <sys/types.h>
 
+#include <algorithm>
 #include <cstring>
 #include <iostream>
 #include <memory>
 #include <optional>
+#include <ranges>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
+#include "app_state.h"
 #include "core_free_pin_family.h"
+#include "core_group.h"
 #include "core_i_node.h"
 #include "core_link.h"
 #include "core_placeholder_family.h"
 #include "coreui_i_node_drawer.h"
 #include "cpp_assert.h"
-#include "app_state.h"
 
 namespace esc::core {
+// ---
 Diagram::Diagram(std::vector<std::shared_ptr<IFamily>> families,
-                 std::vector<Link> links)
-    : families_{std::move(families)}, links_{std::move(links)} {
-  auto placeholder_family = std::make_shared<PlaceholderFamily>();
-  placeholder_family_ = placeholder_family;
-  families_.emplace_back(std::move(placeholder_family));
+                 std::vector<Link> links, std::vector<Group> groups)
+    : families_{std::move(families)},
+      links_{std::move(links)},
+      groups_{std::move(groups)} {
+  if (!families_.empty()) {
+    return;
+  }
 
   auto free_pin_family = std::make_shared<FreePinFamily>();
   free_pin_family_ = free_pin_family;
   families_.emplace_back(std::move(free_pin_family));
+
+  auto placeholder_family = std::make_shared<PlaceholderFamily>();
+  placeholder_family_ = placeholder_family;
+  families_.emplace_back(std::move(placeholder_family));
 }
 
+// ---
+auto Diagram::GetFamilies() const
+    -> const std::vector<std::shared_ptr<IFamily>>& {
+  return families_;
+}
+
+// ---
+auto Diagram::GetFreePinFamily() const -> FreePinFamily& {
+  auto lock = free_pin_family_.lock();
+  Expects(lock != nullptr);
+  return *lock;
+}
+
+// ---
+auto Diagram::GetPlaceholderFamily() const -> PlaceholderFamily& {
+  auto lock = placeholder_family_.lock();
+  Expects(lock != nullptr);
+  return *lock;
+}
+
+// ---
 auto Diagram::GetLinks() const -> const std::vector<Link>& { return links_; }
 
-auto Diagram::GetPlaceholderFamily() const -> PlaceholderFamily& {
-  return *placeholder_family_.lock();
-}
-
-auto Diagram::GetFreePinFamily() const -> FreePinFamily& {
-  return *free_pin_family_.lock();
-}
-
-auto Diagram::GetGroups() -> std::vector<Group>& { return groups_; }
-
-auto Diagram::FindNode(ne::NodeId id) -> INode& {
-  for (const auto& family : families_) {
-    for (const auto& node : family->GetNodes()) {
-      if (node->GetId() == id) {
-        return *node;
-      }
-    }
-  }
-
-  Expects(false);
-}
-
-auto Diagram::FindNodePTR(ne::NodeId id) -> const std::shared_ptr<INode>& {
-  for (const auto& family : families_) {
-    for (const auto& node : family->GetNodes()) {
-      if (node->GetId() == id) {
-        return node;
-      }
-    }
-  }
-
-  Expects(false);
-}
-
-auto Diagram::FindPin(ne::PinId id, const State& state)
-    -> std::unique_ptr<coreui::IPinDrawer> {
-  return FindPinNode(id)->CreateDrawer(state.ToStateNoQueue())->CreatePinDrawer(id);
-}
-
-auto Diagram::FindPinNode(ne::PinId id) -> const std::shared_ptr<INode>& {
-  for (const auto& family : families_) {
-    for (const auto& node : family->GetNodes()) {
-      for (const auto pin_id : node->GetPinIds()) {
-        if (pin_id == id) {
-          return node;
-        }
-      }
-    }
-  }
-
-  Expects(false);
-}
-
-auto Diagram::FindLink(ne::LinkId id) -> Link& {
-  for (auto& link : links_) {
-    if (link.id == id) {
-      return link;
-    }
-  }
-
-  Expects(false);
-}
-
-auto Diagram::FindLinkFromPin(ne::PinId pin_id) -> const Link* {
-  for (const auto& link : links_) {
-    if ((link.start_pin_id == pin_id) || (link.end_pin_id == pin_id)) {
-      return &link;
-    }
-  }
-
-  return nullptr;
-}
-
+// ---
 auto Diagram::EmplaceLink(const Link& link) -> Link& {
   return links_.emplace_back(link);
 }
 
-auto Diagram::EmplaceGroup(std::vector<ne::NodeId> node_ids) -> Group& {
-  auto nodes = std::vector<std::shared_ptr<INode>>{};
+// ---
+void Diagram::EraseLink(ne::LinkId link_id) {
+  const auto found_link = std::ranges::find_if(
+      links_, [link_id](const auto& link) { return link.id == link_id; });
 
-  for (const auto node_id : node_ids) {
-    nodes.emplace_back(FindNodePTR(node_id));
+  Expects(found_link != links_.end());
+  links_.erase(found_link);
+}
+
+// ---
+auto Diagram::GetGroups() -> const std::vector<Group>& { return groups_; }
+
+// ---
+auto Diagram::EmplaceGroup(Group group) -> Group& {
+  return groups_.emplace_back(std::move(group));
+}
+
+// ---
+void Diagram::EraseGroup(const Group& group) {
+  const auto found_group = std::ranges::find_if(
+      groups_,
+      [&group](const auto& other_group) { return &other_group == &group; });
+
+  Expects(found_group != groups_.end());
+  groups_.erase(found_group);
+}
+
+// ---
+auto FindNode(const Diagram& diagram, ne::NodeId node_id)
+    -> const std::shared_ptr<INode>& {
+  for (const auto& family : diagram.GetFamilies()) {
+    if (const auto* node = family->FindNode(node_id)) {
+      return *node;
+    }
   }
 
-  return groups_.emplace_back(std::move(nodes));
+  Expects(false);
 }
 
-void Diagram::EraseGroup(Group* group) {
-  auto id = std::find_if(
-      groups_.begin(), groups_.end(),
-      [group](auto& owned_group) { return &owned_group == group; });
-  if (id != groups_.end()) groups_.erase(id);
-}
-
-void Diagram::EraseLink(ne::LinkId linkId) {
-  auto id = std::find_if(links_.begin(), links_.end(),
-                         [linkId](auto& link) { return link.id == linkId; });
-  if (id != links_.end()) links_.erase(id);
-}
-
-void Diagram::EraseNode(ne::NodeId id) {
-  for (const auto& family : families_) {
-    for (const auto& node : family->GetNodes()) {
-      if (node->GetId() == id) {
-        family->EraseNode(id);
-        return;
-      }
+// ---
+void EraseNode(Diagram& diagram, ne::NodeId node_id) {
+  for (const auto& family : diagram.GetFamilies()) {
+    if (const auto* node = family->FindNode(node_id)) {
+      family->EraseNode(node_id);
+      return;
     }
   }
 }
 
-auto Diagram::GetSelectedNodeIds() -> std::vector<ne::NodeId> {
+// auto Diagram::FindPinNode(ne::PinId id) -> const std::shared_ptr<INode>& {
+//   for (const auto& family : families_) {
+//     for (const auto& node : family->GetNodes()) {
+//       for (const auto pin_id : node->GetPinIds()) {
+//         if (pin_id == id) {
+//           return node;
+//         }
+//       }
+//     }
+//   }
+
+//   Expects(false);
+// }
+
+// auto Diagram::FindLink(ne::LinkId id) -> Link& {
+//   for (auto& link : links_) {
+//     if (link.id == id) {
+//       return link;
+//     }
+//   }
+
+//   Expects(false);
+// }
+
+// auto Diagram::FindLinkFromPin(ne::PinId pin_id) -> const Link* {
+//   for (const auto& link : links_) {
+//     if ((link.start_pin_id == pin_id) || (link.end_pin_id == pin_id)) {
+//       return &link;
+//     }
+//   }
+
+//   return nullptr;
+// }
+
+auto GetSelectedNodeIds() -> std::vector<ne::NodeId> {
   const auto num_selected_objects = ne::GetSelectedObjectCount();
 
   auto selected_ids = std::vector<ne::NodeId>{};
@@ -161,7 +169,7 @@ auto Diagram::GetSelectedNodeIds() -> std::vector<ne::NodeId> {
   return selected_ids;
 }
 
-auto Diagram::GetSelectedLinkIds() -> std::vector<ne::LinkId> {
+auto GetSelectedLinkIds() -> std::vector<ne::LinkId> {
   const auto num_selected_objects = ne::GetSelectedObjectCount();
 
   auto selected_ids = std::vector<ne::LinkId>{};
@@ -172,10 +180,5 @@ auto Diagram::GetSelectedLinkIds() -> std::vector<ne::LinkId> {
   selected_ids.resize(num_selected_links);
 
   return selected_ids;
-}
-
-auto Diagram::GetFamilies() const
-    -> const std::vector<std::shared_ptr<IFamily>>& {
-  return families_;
 }
 }  // namespace esc::core

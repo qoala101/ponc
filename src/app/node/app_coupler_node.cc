@@ -99,12 +99,9 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
     };
   }
 
-  auto GetInitialFlow [[nodiscard]] () const -> flow::NodeFlow override {
-    const auto& pin_ids = GetPinIds();
-
-    return {.input_pin_flow = std::pair{pin_ids[0].Get(), float{}},
-            .output_pin_flows = {{pin_ids[4].Get(), GetSmallDrop()},
-                                 {pin_ids[5].Get(), GetBigDrop()}}};
+  void SetInitialFlowValues(flow::NodeFlow& node_flow) const {
+    node_flow.output_pin_flows.at(0) = GetSmallDrop();
+    node_flow.output_pin_flows.at(1) = GetBigDrop();
   }
 
   int percentage_index_{};
@@ -195,28 +192,22 @@ class NodeDrawer : public coreui::INodeDrawer {
         ->GetColor();
   }
 
-  auto CreatePinDrawer(ne::PinId pin_id) const
-      -> std::unique_ptr<coreui::IPinDrawer> override {
-    const auto pin_index = node_->GetPinIndex(pin_id);
+  auto CreatePinDrawers() const
+      -> std::vector<std::unique_ptr<coreui::IPinDrawer>> override {
+    auto pin_drawers = std::vector<std::unique_ptr<coreui::IPinDrawer>>{};
 
-    if (pin_index == 0) {
-      return std::make_unique<coreui::FlowInputPinDrawer>(flow_pin_values_);
-    }
+    pin_drawers.emplace_back(
+        std::make_unique<coreui::FlowInputPinDrawer>(flow_pin_values_));
+    pin_drawers.emplace_back(
+        std::make_unique<SmallDropPinDrawer>(node_->GetSmallDrop()));
+    pin_drawers.emplace_back(
+        std::make_unique<BigDropPinDrawer>(node_->GetBigDrop()));
+    pin_drawers.emplace_back(
+        std::make_unique<coreui::EmptyPinDrawer>(ne::PinKind::Output));
+    pin_drawers.emplace_back(std::make_unique<coreui::FlowOutputPinDrawer>(
+        flow_pin_values_, node_->GetOutputPinIds()[0]));
 
-    if (pin_index == 1) {
-      return std::make_unique<SmallDropPinDrawer>(node_->GetSmallDrop());
-    }
-
-    if (pin_index == 2) {
-      return std::make_unique<BigDropPinDrawer>(node_->GetBigDrop());
-    }
-
-    if (pin_index == 3) {
-      return std::make_unique<coreui::EmptyPinDrawer>(ne::PinKind::Output);
-    }
-
-    return std::make_unique<coreui::FlowOutputPinDrawer>(flow_pin_values_,
-                                                         pin_id);
+    return pin_drawers;
   }
 
  private:

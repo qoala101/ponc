@@ -83,6 +83,7 @@ auto DiagramSerializer::WriteToJson(const core::Diagram& diagram)
   auto json = crude_json::value{};
   WriteFamilies(diagram.GetFamilies(), json);
   WriteLinks(diagram.GetLinks(), json);
+  // WritePositions
   return json;
 }
 }  // namespace esc::json

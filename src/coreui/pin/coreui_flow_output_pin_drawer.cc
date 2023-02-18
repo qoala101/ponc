@@ -5,7 +5,8 @@
 namespace esc::coreui {
 FlowOutputPinDrawer::FlowOutputPinDrawer(const flow::NodeFlow& flow,
                                          ne::PinId pin_id)
-    : value_{(Expects(flow.output_pin_flows.contains(pin_id.Get())),
+    : pin_id_{pin_id},
+      value_{(Expects(flow.output_pin_flows.contains(pin_id.Get())),
               flow.output_pin_flows.at(pin_id.Get()))} {}
 
 auto FlowOutputPinDrawer::GetLabel() const -> std::string { return {}; }

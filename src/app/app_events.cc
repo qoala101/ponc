@@ -6,6 +6,7 @@
 #include "app_input_node.h"
 #include "app_splitter_node.h"
 #include "app_state.h"
+#include "core_i_node.h"
 #include "core_state.h"
 #include "draw_state.h"
 #include "json_diagram_serializer.h"
@@ -47,7 +48,7 @@ auto FindMaxId(const core::Diagram &diagram) {
     for (const auto &node : family->GetNodes()) {
       max_id = std::max(node->GetId().Get(), max_id);
 
-      for (const auto pin_id : node->GetPinIds()) {
+      for (const auto pin_id : core::GetAllPinIds(*node)) {
         max_id = std::max(pin_id.Get(), max_id);
       }
     }
@@ -107,13 +108,14 @@ void CreateNode::operator()(StateNoQueue &state) const {
     return;
   }
 
-  auto &new_node = family_lock->EmplaceNode(state.core_state->id_generator_);
-  new_node.SetPosition(position);
+  const auto &new_node =
+      family_lock->EmplaceNode(state.core_state->id_generator_);
+  new_node->SetPosition(position);
 }
 
 void DeleteNode::operator()(StateNoQueue &state) const {
   auto &diagram = state.core_state->diagram_;
-  const auto &node = diagram.FindNode(node_id);
+  const auto node = FindNode(diagram, node_id);
   const auto node_flow = node.GetInitialFlow();
   const auto node_position = node.GetPosition();
 
@@ -143,14 +145,14 @@ void DeleteNode::operator()(StateNoQueue &state) const {
     auto &free_pin = free_pin_family.EmplaceNodeFromFlow(
         state.core_state->id_generator_, *connected_node_input_pin, true);
 
-    free_pin.SetPosition(
-        state.draw_state->pin_poses_.at(connected_node_input_pin->Get()));
+    // free_pin.SetPosition(
+    //     state.draw_state->pin_poses_.at(connected_node_input_pin->Get()));
   }
 
   for (const auto pin : connected_node_output_pins) {
     auto &free_pin = free_pin_family.EmplaceNodeFromFlow(
         state.core_state->id_generator_, pin, false);
-    free_pin.SetPosition(state.draw_state->pin_poses_.at(pin.Get()));
+    // free_pin.SetPosition(state.draw_state->pin_poses_.at(pin.Get()));
   }
 }
 
@@ -158,7 +160,7 @@ void DeleteNodeWithLinks::operator()(StateNoQueue &state) const {
   auto &diagram = state.core_state->diagram_;
   const auto &links = diagram.GetLinks();
   const auto &node = diagram.FindNode(node_id);
-  const auto &node_pins = node.GetPinIds();
+  const auto node_pins = core::GetAllPinIds(node);
 
   const auto links_to_erase = [&links, &node_pins]() {
     auto links_to_erase = std::vector<ne::LinkId>{};
@@ -191,7 +193,16 @@ void DeleteLink::operator()(StateNoQueue &state) const {
 }
 
 void CreateGroup::operator()(StateNoQueue &state) const {
-  auto &group = state.core_state->diagram_.EmplaceGroup(node_ids);
-  group.name_ = "TEMP_NAME";
+  // auto nodes = std::vector<std::shared_ptr<INode>>{};
+
+  // for (const auto node_id : node_ids) {
+  //   nodes.emplace_back(FindNodePTR(node_id));
+  // }
+
+  // return groups_.emplace_back(std::move(nodes));
+
+  // group.name_ = "TEMP_NAME";
+
+  // auto &group = state.core_state->diagram_.EmplaceGroup(node_ids);
 }
 }  // namespace esc::event

@@ -1,5 +1,5 @@
-#ifndef VH_DRAW_I_NODE_DRAWER_H_
-#define VH_DRAW_I_NODE_DRAWER_H_
+#ifndef VH_COREUI_I_NODE_DRAWER_H_
+#define VH_COREUI_I_NODE_DRAWER_H_
 
 #include <memory>
 #include <string>
@@ -8,9 +8,6 @@
 #include "coreui_i_pin_drawer.h"
 #include "cpp_interface.h"
 #include "imgui.h"
-#include "imgui_node_editor.h"
-
-namespace ne = ax::NodeEditor;
 
 namespace esc::coreui {
 // ---
@@ -23,9 +20,9 @@ class INodeDrawer : public cpp::Interface {
   // ---
   virtual auto HasHeader [[nodiscard]] () const -> bool;
   // ---
-  virtual auto CreatePinDrawer [[nodiscard]] (ne::PinId pin_id) const
-      -> std::unique_ptr<IPinDrawer> = 0;
+  virtual auto CreatePinDrawers [[nodiscard]] () const
+      -> std::vector<std::unique_ptr<IPinDrawer>>;
 };
-}  // namespace esc::draw
+}  // namespace esc::coreui
 
-#endif  // VH_DRAW_I_NODE_DRAWER_H_
+#endif  // VH_COREUI_I_NODE_DRAWER_H_

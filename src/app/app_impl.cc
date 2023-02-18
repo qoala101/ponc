@@ -22,7 +22,9 @@ AppImpl::AppImpl(const Textures &textures)
   ne::SetCurrentEditor(editor_context_);
 
   auto state_no_queue =
-      StateNoQueue{.core_state = &core_state_, .draw_state = &draw_state};
+      StateNoQueue{.core_state = &core_state_
+      // , .draw_state = &draw_state
+      };
 
   event::ResetDiagram{}(state_no_queue);
 }
@@ -31,7 +33,9 @@ AppImpl::~AppImpl() { ne::DestroyEditor(editor_context_); }
 
 void AppImpl::OnFrame() {
   auto state_no_queue =
-      StateNoQueue{.core_state = &core_state_, .draw_state = &draw_state};
+      StateNoQueue{.core_state = &core_state_
+      // , .draw_state = &draw_state
+      };
   event_queue_.ExecuteEvents(state_no_queue);
   core_state_.flow_calculator_.OnFrame(core_state_);
 

@@ -1,5 +1,5 @@
-#ifndef VH_DRAW_FLOW_OUTPUT_PIN_DRAWER_H_
-#define VH_DRAW_FLOW_OUTPUT_PIN_DRAWER_H_
+#ifndef VH_COREUI_FLOW_OUTPUT_PIN_DRAWER_H_
+#define VH_COREUI_FLOW_OUTPUT_PIN_DRAWER_H_
 
 #include <imgui_node_editor.h>
 
@@ -22,9 +22,14 @@ class FlowOutputPinDrawer : public IPinDrawer {
   // ---
   auto IsEditable [[nodiscard]] () const -> bool override;
 
+  auto GetPinId [[nodiscard]] () const -> std::optional<ne::PinId> override {
+    return pin_id_;
+  }
+
  private:
+  ne::PinId pin_id_{};
   float value_{};
 };
 }  // namespace esc::coreui
 
-#endif  // VH_DRAW_FLOW_OUTPUT_PIN_DRAWER_H_
+#endif  // VH_COREUI_FLOW_OUTPUT_PIN_DRAWER_H_
