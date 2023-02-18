@@ -66,7 +66,7 @@ void DisplayNode(
 
   if (flow.input_pin_flow.has_value()) {
     ImGui::TextColored(
-        state.draw_state->GetColorForFlowValue(flow.input_pin_flow->second),
+        state.core_state->flow_colors_.GetColorForFlowValue(flow.input_pin_flow->second),
         "%.3f", flow.input_pin_flow->second);
   }
 

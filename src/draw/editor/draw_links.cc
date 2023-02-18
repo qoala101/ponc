@@ -40,7 +40,7 @@ void DrawLinks(State& state) {
     const auto node_flow = state.core_state->flow_calculator_.GetCalculatedFlow(*node);
     const auto flow = GetPinFlow(node_flow, link.start_pin_id);
 
-    auto color = state.draw_state->GetColorForFlowValue(flow);
+    auto color = state.core_state->flow_colors_.GetColorForFlowValue(flow);
     color.Value.w = alpha;
 
     ne::Link(link.id, link.start_pin_id, link.end_pin_id, color, 2.0F);

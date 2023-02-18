@@ -19,12 +19,12 @@
 #include "draw_group_settings_view.h"
 #include "draw_groups_view.h"
 #include "draw_link_popup.h"
-#include "draw_link_popup.h"
 #include "draw_node_popup.h"
 #include "draw_open_file_dialog.h"
 #include "draw_save_as_file_dialog.h"
 #include "draw_settings_view.h"
 #include "flow_calculator.h"
+#include "draw_nodes.h"
 
 namespace ne = ax::NodeEditor;
 
@@ -43,12 +43,14 @@ struct NewLink {
 };
 
 struct DrawState {
+  explicit DrawState(const Texture &node_header_texture);
+
   FamiliesView families_view_{};
   FlowTreeView flow_tree_view_{};
   GroupsView groups_view_{};
   GroupSettingsView group_settings_view_{};
   SettingsView settings_view_{};
-  
+
   OpenFileDialog open_file_dialog{};
   SaveAsFileDialog save_as_file_dialog{};
 
@@ -56,28 +58,10 @@ struct DrawState {
   NodePopup node_popup{};
   LinkPopup link_popup{};
 
-
-
-  
-
-
-
-  std::optional<ne::NodeId> popup_node_{};
-  std::array<char, 100> popup_group_name{};
-
-  bool color_flow{};
-  float min{-27};
-  float low{-22};
-  float high{-18};
-  float max{6};
+  Nodes nodes;
 
   std::optional<NewLink> new_link{};
-
   std::unordered_map<uintptr_t, ImVec2> pin_poses_{};
-
-  Texture node_header_texture{};
-
-  auto GetColorForFlowValue(float value) const -> ImColor;
 
   auto CanConnectFromPinToPin(core::CoreState &core_state, ne::PinId start_pin,
                               ne::PinId end_pin) -> bool;

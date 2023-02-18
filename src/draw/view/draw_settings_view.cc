@@ -22,39 +22,39 @@ void SettingsView::Draw(State& state) {
 
     if (ImGui::Begin("Settings", &GetVisible())) {
       const auto low_high_mid =
-          state.draw_state->low +
-          (state.draw_state->high - state.draw_state->low) / 2;
+          state.core_state->flow_colors_.low +
+          (state.core_state->flow_colors_.high - state.core_state->flow_colors_.low) / 2;
 
-      ImGui::Checkbox("Color Flow", &state.draw_state->color_flow);
+      ImGui::Checkbox("Color Flow", &state.core_state->flow_colors_.color_flow);
 
-      ImGui::ColorButton("MyColor##1", state.draw_state->GetColorForFlowValue(
-                                           state.draw_state->min));
+      ImGui::ColorButton("MyColor##1", state.core_state->flow_colors_.GetColorForFlowValue(
+                                           state.core_state->flow_colors_.min));
       ImGui::SameLine();
-      ImGui::DragFloat("Very Low##link_color", &state.draw_state->min, 0.01F,
-                       -FLT_MAX, state.draw_state->low, "%.3f");
+      ImGui::DragFloat("Very Low##link_color", &state.core_state->flow_colors_.min, 0.01F,
+                       -FLT_MAX, state.core_state->flow_colors_.low, "%.3f");
 
-      ImGui::ColorButton("MyColor##2", state.draw_state->GetColorForFlowValue(
-                                           state.draw_state->low));
+      ImGui::ColorButton("MyColor##2", state.core_state->flow_colors_.GetColorForFlowValue(
+                                           state.core_state->flow_colors_.low));
       ImGui::SameLine();
-      ImGui::SliderFloat("Low##link_color", &state.draw_state->low,
-                         state.draw_state->min, state.draw_state->high);
+      ImGui::SliderFloat("Low##link_color", &state.core_state->flow_colors_.low,
+                         state.core_state->flow_colors_.min, state.core_state->flow_colors_.high);
 
       ImGui::ColorButton("MyColor##5",
-                         state.draw_state->GetColorForFlowValue(low_high_mid));
+                         state.core_state->flow_colors_.GetColorForFlowValue(low_high_mid));
       ImGui::SameLine();
       ImGui::Text("%.3f Good", low_high_mid);
 
-      ImGui::ColorButton("MyColor##3", state.draw_state->GetColorForFlowValue(
-                                           state.draw_state->high));
+      ImGui::ColorButton("MyColor##3", state.core_state->flow_colors_.GetColorForFlowValue(
+                                           state.core_state->flow_colors_.high));
       ImGui::SameLine();
-      ImGui::SliderFloat("High##link_color", &state.draw_state->high,
-                         state.draw_state->low, state.draw_state->max);
+      ImGui::SliderFloat("High##link_color", &state.core_state->flow_colors_.high,
+                         state.core_state->flow_colors_.low, state.core_state->flow_colors_.max);
 
-      ImGui::ColorButton("MyColor##4", state.draw_state->GetColorForFlowValue(
-                                           state.draw_state->max));
+      ImGui::ColorButton("MyColor##4", state.core_state->flow_colors_.GetColorForFlowValue(
+                                           state.core_state->flow_colors_.max));
       ImGui::SameLine();
-      ImGui::DragFloat("Very High##link_color", &state.draw_state->max, 0.01F,
-                       state.draw_state->high, +FLT_MAX, "%.3f");
+      ImGui::DragFloat("Very High##link_color", &state.core_state->flow_colors_.max, 0.01F,
+                       state.core_state->flow_colors_.high, +FLT_MAX, "%.3f");
     }
   }
 }

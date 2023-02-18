@@ -29,7 +29,7 @@ class AppImpl {
  private:
   ne::EditorContext *editor_context_{};
   core::CoreState core_state_{};
-  draw::DrawState draw_state{};
+  draw::DrawState draw_state;
   EventQueue event_queue_{};
 };
 }  // namespace esc

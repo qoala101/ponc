@@ -193,21 +193,7 @@ void DeleteLink::operator()(StateNoQueue &state) const {
 }
 
 void CreateGroup::operator()(StateNoQueue &state) const {
-  auto selectedNodes = state.core_state->diagram_.GetSelectedNodeIds();
-
-  if (state.draw_state->popup_node_.has_value()) {
-    const auto popup_node = *state.draw_state->popup_node_;
-
-    if (std::ranges::none_of(selectedNodes, [popup_node](const auto node) {
-          return node == popup_node;
-        })) {
-      selectedNodes.emplace_back(popup_node);
-    }
-
-    state.draw_state->popup_node_.reset();
-  }
-
-  auto &group = state.core_state->diagram_.EmplaceGroup(selectedNodes);
+  auto &group = state.core_state->diagram_.EmplaceGroup(node_ids);
   group.name_ = "TEMP_NAME";
 }
 }  // namespace esc::event

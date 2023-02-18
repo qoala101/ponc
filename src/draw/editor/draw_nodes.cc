@@ -1,4 +1,5 @@
 #include "draw_nodes.h"
+#include "core_i_node.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
@@ -9,6 +10,7 @@
 #include "imgui.h"
 #include "imgui_bezier_math.h"
 #include "imgui_node_editor.h"
+#include "app_state.h"
 
 namespace esc::draw {
 namespace {
@@ -135,11 +137,11 @@ void DrawPinIcon(State& state, core::INode& node, ne::PinId pin_id,
       state.core_state->flow_calculator_.GetCalculatedFlow(node);
   auto color = ImColor{255, 255, 255};
 
-  if (state.draw_state->color_flow) {
+  if (state.core_state->flow_colors_.color_flow) {
     const auto node_flow =
         state.core_state->flow_calculator_.GetCalculatedFlow(node);
     const auto flow = GetPinFlow(node_flow, pin_id);
-    color = state.draw_state->GetColorForFlowValue(flow);
+    color = state.core_state->flow_colors_.GetColorForFlowValue(flow);
   }
 
   color.Value.w = static_cast<int>(alpha * 255);
@@ -241,14 +243,14 @@ void DrawNode(State& state, const Texture& texture, core::INode& node) {
     {
       auto color = drawer->GetColor();
 
-      if (state.draw_state->color_flow) {
+      if (state.core_state->flow_colors_.color_flow) {
         const auto node_flow =
             state.core_state->flow_calculator_.GetCalculatedFlow(node);
 
         if (node_flow.input_pin_flow.has_value()) {
           const auto flow =
               GetPinFlow(node_flow, node_flow.input_pin_flow->first);
-          color = state.draw_state->GetColorForFlowValue(flow);
+          color = state.core_state->flow_colors_.GetColorForFlowValue(flow);
         } else {
           color = ImColor{255, 255, 255};
         }
@@ -318,12 +320,13 @@ void DrawNode(State& state, const Texture& texture, core::INode& node) {
 }
 }  // namespace
 
-// Nodes::Nodes(TexturesHandle textures) : textures_{std::move(textures)} {}
+Nodes::Nodes(const Texture& node_header_texture)
+    : node_header_texture_{node_header_texture} {}
 
-void DrawNodes(State& state) {
+void Nodes::Draw(State& state) {
   for (const auto& family : state.core_state->diagram_.GetFamilies()) {
     for (const auto& node : family->GetNodes()) {
-      DrawNode(state, state.draw_state->node_header_texture, *node);
+      DrawNode(state, node_header_texture_, *node);
     }
   }
 }

@@ -74,6 +74,9 @@ struct DeleteLink {
 struct CreateGroup {
   // ---
   void operator()(StateNoQueue &state) const;
+
+  // ---
+  std::vector<ne::NodeId> node_ids{};
 };
 }  // namespace esc::event
 

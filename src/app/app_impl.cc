@@ -13,19 +13,18 @@
 #include "draw_node_editor.h"
 #include "draw_nodes.h"
 #include "draw_popups.h"
+#include "draw_state.h"
 #include "imgui_node_editor.h"
 
 namespace esc {
 AppImpl::AppImpl(const Textures &textures)
-    : editor_context_{ne::CreateEditor()} {
-  draw_state.node_header_texture = textures.node_header;
+    : editor_context_{ne::CreateEditor()}, draw_state{textures.node_header} {
+  ne::SetCurrentEditor(editor_context_);
 
   auto state_no_queue =
       StateNoQueue{.core_state = &core_state_, .draw_state = &draw_state};
 
   event::ResetDiagram{}(state_no_queue);
-
-  ne::SetCurrentEditor(editor_context_);
 }
 
 AppImpl::~AppImpl() { ne::DestroyEditor(editor_context_); }

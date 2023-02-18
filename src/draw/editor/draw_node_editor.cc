@@ -18,7 +18,7 @@ void DrawNodeEditor(State &state) {
   draw::DrawLinkBeingRepinned(state);
   draw::DrawGroups(state);
   draw::DrawLinks(state);
-  draw::DrawNodes(state);
+  state.draw_state->nodes.Draw(state);
   draw::DrawLinkConnectionProcess(state);
   draw::DrawDeleteItemsProcess(state);
   draw::DrawPopups(state);
