@@ -4,8 +4,6 @@
 
 #include "app_event_queue.h"
 
-#include "core_project.h"
-
 namespace esc {
 // ---
 void EventQueue::PostEvent(Event event) {
@@ -13,9 +11,9 @@ void EventQueue::PostEvent(Event event) {
 }
 
 // ---
-void EventQueue::ExecuteEvents(core::Project &project) {
+void EventQueue::ExecuteEvents(const AppState &app_state) {
   for (const auto &event : events_) {
-    event(project);
+    event(app_state);
   }
 
   events_.clear();

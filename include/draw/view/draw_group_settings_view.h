@@ -13,7 +13,7 @@ namespace esc::draw {
 class GroupSettingsView : public IHidable {
  public:
   auto GetLabel [[nodiscard]] () const -> std::string;
-  void Draw(State &state);
+  void Draw(const AppState &app_state);
 
  private:
   int group_index_{};

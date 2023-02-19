@@ -7,11 +7,11 @@
 
 #include <functional>
 
-#include "core_project.h"
+#include "app_state.h"
 
 namespace esc {
 // ---
-using Event = std::function<void(core::Project &)>;
+using Event = std::function<void(const AppState &)>;
 
 // ---
 class EventQueue {
@@ -19,7 +19,7 @@ class EventQueue {
   // ---
   void PostEvent(Event event);
   // ---
-  void ExecuteEvents(core::Project &project);
+  void ExecuteEvents(const AppState &app_state);
 
  private:
   // ---

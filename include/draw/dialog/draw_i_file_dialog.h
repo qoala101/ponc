@@ -20,7 +20,7 @@ class IFileDialog : public cpp::Interface {
   // ---
   void Show();
   // ---
-  void Draw(State &state);
+  void Draw(const AppState &app_state);
 
  protected:
   // ---
@@ -28,7 +28,8 @@ class IFileDialog : public cpp::Interface {
 
  private:
   // ---
-  virtual void OnFileSelected(State &state, std::string file_path) const = 0;
+  virtual void OnFileSelected(const AppState &app_state,
+                              std::string file_path) const = 0;
 
   ImGui::FileBrowser dialog_{};
 };

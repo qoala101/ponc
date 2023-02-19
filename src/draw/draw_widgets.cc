@@ -7,10 +7,8 @@ Widgets::Widgets(const Texture &node_header_texture)
 // : nodes{node_header_texture}
 {}
 
-void Widgets::Draw(core::Project &project, core::IdGenerator &id_generator,
-                   flow::FlowCalculator &flow_calculator,
-                   EventQueue &event_queue) {
+void Widgets::Draw(const AppState &app_state) {
   // draw::DrawMainWindow();
-  node_editor.Draw();
+  node_editor.Draw(app_state);
 }
 }  // namespace esc::draw

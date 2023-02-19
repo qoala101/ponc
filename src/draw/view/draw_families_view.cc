@@ -11,7 +11,7 @@
 
 namespace esc::draw {
 namespace {
-void DisplayNode(State& state, core::INode& node) {
+void DisplayNode(AppState& app_state, core::INode& node) {
   ImGui::TableNextRow();
   ImGui::TableNextColumn();
 
@@ -52,9 +52,9 @@ void DisplayNode(State& state, core::INode& node) {
   const auto flow = state.core_state->flow_calculator_.GetCalculatedFlow(node);
 
   if (flow.input_pin_flow.has_value()) {
-    ImGui::TextColored(
-        state.core_state->flow_colors_.GetColorForFlowValue(flow.input_pin_flow->second),
-        "%.3f", flow.input_pin_flow->second);
+    ImGui::TextColored(state.core_state->flow_colors_.GetColorForFlowValue(
+                           flow.input_pin_flow->second),
+                       "%.3f", flow.input_pin_flow->second);
   }
 
   if (node_is_open) {
@@ -62,7 +62,7 @@ void DisplayNode(State& state, core::INode& node) {
   }
 }
 
-void DisplayFamily(State& state, core::IFamily& family) {
+void DisplayFamily(AppState& app_state, core::IFamily& family) {
   ImGui::TableNextRow();
   ImGui::TableNextColumn();
 
@@ -139,7 +139,7 @@ void DisplayFamily(State& state, core::IFamily& family) {
 
 auto FamiliesView::GetLabel() const -> std::string { return "Families"; }
 
-void FamiliesView::Draw(State& state) {
+void FamiliesView::Draw(AppState& app_state) {
   if (!IsVisible()) {
     return;
   }

@@ -1,3 +1,7 @@
+/**
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ */
+
 #ifndef VH_DRAW_LINK_POPUP_H_
 #define VH_DRAW_LINK_POPUP_H_
 
@@ -11,13 +15,14 @@ namespace esc::draw {
 // ---
 class LinkPopup : public IPopup {
  public:
+  // ---
   void SetLinkId(ne::LinkId link_id);
 
  private:
   // ---
   auto GetLabel [[nodiscard]] () const -> std::string override;
   // ---
-  void DrawContent(State &state) override;
+  void DrawItems(const AppState &app_state) override;
 
   // ---
   ne::LinkId link_id_{};

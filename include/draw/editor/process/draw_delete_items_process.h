@@ -5,7 +5,7 @@
 
 namespace esc::draw {
 // ---
-void DrawDeleteItemsProcess(State &state);
+void DrawDeleteItemsProcess(const AppState &app_state);
 }  // namespace esc::draw
 
 #endif  // VH_DRAW_DELETE_ITEMS_PROCESS_H_

@@ -14,7 +14,7 @@ namespace esc::draw {
 class SettingsView : public IHidable {
  public:
   auto GetLabel [[nodiscard]] () const -> std::string;
-  void Draw(State &state);
+  void Draw(const AppState &app_state);
 
   bool color_flow{};
 

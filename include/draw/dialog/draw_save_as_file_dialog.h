@@ -9,7 +9,8 @@ class SaveAsFileDialog : public IFileDialog {
   SaveAsFileDialog();
 
  private:
-  void OnFileSelected(State &state, std::string file_path) const override;
+  void OnFileSelected(const AppState &app_state,
+                      std::string file_path) const override;
 };
 }  // namespace esc::draw
 

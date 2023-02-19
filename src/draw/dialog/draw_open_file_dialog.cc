@@ -13,7 +13,8 @@ OpenFileDialog::OpenFileDialog()
         return dialog;
       }()} {}
 
-void OpenFileDialog::OnFileSelected(State &state, std::string file_path) const {
+void OpenFileDialog::OnFileSelected(const AppState &app_state,
+                                    std::string file_path) const {
   state.event_queue->PostEvent(
       event::OpenDiagramFromFile{.file_path = std::move(file_path)});
 }

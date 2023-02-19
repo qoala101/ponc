@@ -9,7 +9,7 @@
 
 namespace esc::draw {
 // ---
-void DrawMainMenuBar(State &state);
+void DrawMainMenuBar(const AppState &app_state);
 }  // namespace esc::draw
 
 #endif  // VH_DRAW_MAIN_MENU_BAR_H_

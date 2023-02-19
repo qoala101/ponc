@@ -1,15 +1,20 @@
+/**
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ */
+
 #include "draw_popups.h"
 
-#include <iostream>
-
+#include "app_state.h"
 #include "cpp_scope.h"
 #include "draw_background_popup.h"
 #include "draw_link_popup.h"
 #include "draw_node_popup.h"
+#include "draw_widgets.h"
 
 namespace esc::draw {
 namespace {
-void DrawOpenPopupProcess(State& state) {
+// ---
+void DrawShowPopupProcess(const AppState &app_state) {
   const auto popup_position = ImGui::GetMousePos();
 
   {
@@ -17,41 +22,43 @@ void DrawOpenPopupProcess(State& state) {
         cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
 
     if (ne::ShowBackgroundContextMenu()) {
-      state.draw_state->background_popup.SetPosition(popup_position);
-      state.draw_state->background_popup.Show();
+      app_state.widgets->background_popup.SetPosition(popup_position);
+      app_state.widgets->background_popup.Show();
       return;
     }
 
-    auto selected_node_id = ne::NodeId{};
+    auto popup_node_id = ne::NodeId{};
 
-    if (ne::ShowNodeContextMenu(&selected_node_id)) {
-      state.draw_state->node_popup.SetNodeId(selected_node_id);
-      state.draw_state->node_popup.Show();
+    if (ne::ShowNodeContextMenu(&popup_node_id)) {
+      app_state.widgets->node_popup.SetNodeId(popup_node_id);
+      app_state.widgets->node_popup.Show();
       return;
     }
 
-    auto selected_link_id = ne::LinkId{};
+    auto popup_link_id = ne::LinkId{};
 
-    if (ne::ShowLinkContextMenu(&selected_link_id)) {
-      state.draw_state->link_popup.SetLinkId(selected_link_id);
-      state.draw_state->link_popup.Show();
+    if (ne::ShowLinkContextMenu(&popup_link_id)) {
+      app_state.widgets->link_popup.SetLinkId(popup_link_id);
+      app_state.widgets->link_popup.Show();
       return;
     }
   }
 }
 
-void DrawPopupContents(State& state) {
+// ---
+void DrawPopupContents(const AppState &app_state) {
   const auto suspend_scope =
       cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
 
-  state.draw_state->background_popup.Draw(state);
-  state.draw_state->node_popup.Draw(state);
-  state.draw_state->link_popup.Draw(state);
+  app_state.widgets->background_popup.Draw(app_state);
+  app_state.widgets->node_popup.Draw(app_state);
+  app_state.widgets->link_popup.Draw(app_state);
 }
 }  // namespace
 
-void DrawPopups(State& state) {
-  DrawOpenPopupProcess(state);
-  DrawPopupContents(state);
+// ---
+void DrawPopups(const AppState &app_state) {
+  DrawShowPopupProcess(app_state);
+  DrawPopupContents(app_state);
 }
 }  // namespace esc::draw

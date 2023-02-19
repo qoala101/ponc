@@ -17,25 +17,26 @@ class IdGenerator {
   explicit IdGenerator(uintptr_t next_value = 1);
 
   // ---
-  template <typename T>
+  template <typename Id>
   auto GetNext() {
-    return T{next_value_++};
+    return Id{next_value_++};
   }
 
   // ---
-  template <typename T>
+  template <typename Id>
   auto GetNextN(int n) {
-    auto ids = std::vector<T>{};
+    auto ids = std::vector<Id>{};
     ids.reserve(n);
 
     for (auto i = 0; i < n; ++i) {
-      ids.emplace_back(GetNext<T>());
+      ids.emplace_back(GetNext<Id>());
     }
 
     return ids;
   }
 
  private:
+  // ---
   uintptr_t next_value_{};
 };
 }  // namespace esc::core

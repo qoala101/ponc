@@ -19,7 +19,7 @@
 namespace esc::draw {
 namespace {
 // ---
-void DrawFileMenu(State& state) {
+void DrawFileMenu(AppState& app_state) {
   if (ImGui::BeginMenu("File")) {
     const auto menu_scope = cpp::Scope{[]() { ImGui::EndMenu(); }};
 
@@ -52,7 +52,7 @@ void DrawViewMenuItem(auto& view) {
 }
 
 // ---
-void DrawViewsMenu(State& state) {
+void DrawViewsMenu(AppState& app_state) {
   if (ImGui::BeginMenu("Views")) {
     const auto menu_scope = cpp::Scope{[]() { ImGui::EndMenu(); }};
 
@@ -72,7 +72,7 @@ void DrawViewsMenu(State& state) {
 }  // namespace
 
 // ---
-void DrawMainMenuBar(State& state) {
+void DrawMainMenuBar(AppState& app_state) {
   if (ImGui::BeginMainMenuBar()) {
     const auto main_menu_bar_scope =
         cpp::Scope{[]() { ImGui::EndMainMenuBar(); }};

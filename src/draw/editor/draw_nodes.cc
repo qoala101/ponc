@@ -96,7 +96,7 @@ void Icon(const ImVec2& size, bool filled,
 
   ImGui::Dummy(size);
 }
-auto IsPinLinked(State& state, ne::PinId id) -> bool {
+auto IsPinLinked(AppState& app_state, ne::PinId id) -> bool {
   if (!id) return false;
 
   for (const auto& link : state.core_state->diagram_.GetLinks())
@@ -105,7 +105,7 @@ auto IsPinLinked(State& state, ne::PinId id) -> bool {
   return false;
 }
 // vh: norm
-void DrawPinIcon(State& state, core::INode& node,
+void DrawPinIcon(AppState& app_state, core::INode& node,
                  coreui::IPinDrawer& pin_drawer, float alpha) {
   // const auto& new_link = state.draw_state->new_link;
   // if (new_link.has_value()) {
@@ -209,7 +209,8 @@ auto IsFlowPin(ne::PinId id, const core::INode& node) -> bool {
 }
 
 // vh: bad
-auto CalculateAlphaForPin(State& state, std::optional<ne::PinId> pin_id) {
+auto CalculateAlphaForPin(AppState& app_state,
+                          std::optional<ne::PinId> pin_id) {
   auto alpha = ImGui::GetStyle().Alpha;
 
   // if (state.draw_state->not_yet_connected_pin_of_new_link_id.has_value() &&
@@ -243,7 +244,7 @@ Nodes::Nodes(const Texture& node_header_texture,
     : node_header_texture_{node_header_texture},
       new_link_{std::move(new_link)} {}
 
-void Nodes::Draw(State& state) {
+void Nodes::Draw(AppState& app_state) {
   for (const auto& family : state.core_state->diagram_.GetFamilies()) {
     for (const auto& node : family->GetNodes()) {
       DrawNode(state, *node);
@@ -251,7 +252,7 @@ void Nodes::Draw(State& state) {
   }
 }
 
-void Nodes::DrawNode(State& state, core::INode& node) {
+void Nodes::DrawNode(AppState& app_state, core::INode& node) {
   auto node_builder = esc::NodeDrawer{node.GetId()};
   auto drawer = node.CreateDrawer(state.ToStateNoQueue());
 

@@ -7,8 +7,12 @@
 #include <unordered_map>
 
 #include "app_event_queue.h"
+#include "app_state.h"
 #include "core_id_generator.h"
 #include "core_project.h"
+#include "draw_background_popup.h"
+#include "draw_node_popup.h"
+#include "draw_link_popup.h"
 #include "draw_node_editor.h"
 #include "draw_texture.h"
 #include "flow_calculator.h"
@@ -32,8 +36,7 @@ struct Widgets {
   explicit Widgets(const Texture &node_header_texture);
 
   // ---
-  void Draw(core::Project &project, core::IdGenerator &id_generator,
-            flow::FlowCalculator &flow_calculator, EventQueue &event_queue);
+  void Draw(const AppState &app_state);
 
   // // ---
   // OpenFileDialog open_file_dialog{};
@@ -62,12 +65,12 @@ struct Widgets {
   // // ---
   // LinkConnectionProcess link_connection_process;
 
-  // // ---
-  // BackgroundPopup background_popup{};
-  // // ---
-  // NodePopup node_popup{};
-  // // ---
-  // LinkPopup link_popup{};
+  // ---
+  BackgroundPopup background_popup{};
+  // ---
+  NodePopup node_popup{};
+  // ---
+  LinkPopup link_popup{};
 };
 }  // namespace draw
 }  // namespace esc

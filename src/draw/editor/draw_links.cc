@@ -1,15 +1,15 @@
 #include "draw_links.h"
 
+#include "app_state.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
-#include "app_state.h"
 
 namespace esc::draw {
 
 Links::Links(std::shared_ptr<std::optional<NewLink>> new_link)
     : new_link_{std::move(new_link)} {}
 
-void Links::Draw(State& state) {
+void Links::Draw(AppState& app_state) {
   // const auto* existing_link_from_same_pin =
   // state.GetExistingLinkFromSamePin();
 

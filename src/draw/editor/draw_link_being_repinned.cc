@@ -58,7 +58,7 @@ LinkBeingRepinned::LinkBeingRepinned(
     std::shared_ptr<std::optional<NewLink>> new_link)
     : new_link_{std::move(new_link)} {}
 
-void LinkBeingRepinned::Draw(State& state) {
+void LinkBeingRepinned::Draw(AppState& app_state) {
   if (new_link_->has_value()) {
     if ((*new_link_)->rebind.has_value()) {
       if ((*new_link_)->rebind->fixed_pin_pos.has_value()) {
@@ -69,9 +69,9 @@ void LinkBeingRepinned::Draw(State& state) {
         auto color = ImColor{255, 255, 255};
 
         if ((*new_link_)->pin_hovered_over.has_value()) {
-          if (!CanConnectFromPinToPin(
-                  *state.core_state, *new_link_, (*new_link_)->pin_dragged_from,
-                  *(*new_link_)->pin_hovered_over)) {
+          if (!CanConnectFromPinToPin(*state.core_state, *new_link_,
+                                      (*new_link_)->pin_dragged_from,
+                                      *(*new_link_)->pin_hovered_over)) {
             color = ImColor{255, 0, 0};
           }
         }

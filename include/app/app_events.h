@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "app_state.h"
 #include "core_i_family.h"
 #include "core_project.h"
 #include "imgui.h"
@@ -36,16 +37,16 @@ namespace esc::event {
 //   void operator()(core::Project &project) const;
 // };
 
-// // ---
-// struct CreateNode {
-//   // ---
-//   void operator()(core::Project &project) const;
+// ---
+struct CreateNode {
+  // ---
+  void operator()(const AppState &app_state) const;
 
-//   // ---
-//   std::weak_ptr<core::IFamily> family{};
-//   // ---
-//   ImVec2 position{};
-// };
+  // ---
+  std::weak_ptr<core::IFamily> family{};
+  // ---
+  ImVec2 position{};
+};
 
 // // ---
 // struct DeleteNode {

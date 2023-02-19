@@ -22,11 +22,6 @@ class Project {
   // ---
   auto GetFamilies [[nodiscard]] () const
       -> const std::vector<std::shared_ptr<IFamily>> &;
-  // // ---
-  // auto GetFreePinFamily [[nodiscard]] () const -> FreePinFamily &;
-  // // ---
-  // auto GetPlaceholderFamily [[nodiscard]] () const -> PlaceholderFamily &;
-
   // ---
   auto GetDiagram [[nodiscard]] () const -> const Diagram &;
   // ---
@@ -35,10 +30,6 @@ class Project {
  private:
   // ---
   std::vector<std::shared_ptr<IFamily>> families_{};
-  // // ---
-  // std::weak_ptr<FreePinFamily> free_pin_family_{};
-  // // ---
-  // std::weak_ptr<PlaceholderFamily> placeholder_family_{};
   // ---
   Diagram diagram_{};
   // ---

@@ -5,6 +5,8 @@
 
 #include <memory>
 
+#include "app_state.h"
+
 namespace ne = ax::NodeEditor;
 
 namespace esc::draw {
@@ -27,7 +29,8 @@ class NodeEditor {
   // ---
   ~NodeEditor();
 
-  void Draw();
+  // ---
+  void Draw(const AppState &app_state);
 
  private:
   // ---

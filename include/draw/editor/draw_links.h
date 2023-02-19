@@ -12,10 +12,9 @@ class State;
 namespace esc::draw {
 class Links {
  public:
-  explicit Links(
-      std::shared_ptr<std::optional<NewLink>> new_link);
+  explicit Links(std::shared_ptr<std::optional<NewLink>> new_link);
 
-  void Draw(State &state);
+  void Draw(const AppState &app_state);
 
  private:
   std::shared_ptr<std::optional<NewLink>> new_link_{};

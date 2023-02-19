@@ -3,7 +3,7 @@
 namespace esc::draw {
 void IFileDialog::Show() { dialog_.Open(); }
 
-void IFileDialog::Draw(State &state) {
+void IFileDialog::Draw(const AppState &app_state) {
   dialog_.Display();
 
   if (!dialog_.HasSelected()) {

@@ -5,7 +5,7 @@
 
 namespace esc::draw {
 // ---
-void DrawGroups(State &state);
+void DrawGroups(const AppState &app_state);
 }  // namespace esc::draw
 
 #endif  // VH_DRAW_GROUPS_H_

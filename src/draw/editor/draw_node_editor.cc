@@ -1,6 +1,7 @@
 #include "draw_node_editor.h"
 
 #include "cpp_scope.h"
+#include "draw_popups.h"
 
 namespace esc::draw {
 NodeEditor::NodeEditor() : editor_context_{ne::CreateEditor()} {
@@ -9,7 +10,7 @@ NodeEditor::NodeEditor() : editor_context_{ne::CreateEditor()} {
 
 NodeEditor::~NodeEditor() { ne::DestroyEditor(editor_context_); }
 
-void NodeEditor::Draw() {
+void NodeEditor::Draw(const AppState &app_state) {
   const auto node_editor_scope =
       cpp::Scope{[]() { ne::Begin("Node editor"); }, []() { ne::End(); }};
 
@@ -19,6 +20,6 @@ void NodeEditor::Draw() {
   // widgets.nodes.Draw(state);
   // widgets.link_connection_process.Draw(state);
   // draw::DrawDeleteItemsProcess(state);
-  // draw::DrawPopups(state);
+  draw::DrawPopups(app_state);
 }
 }  // namespace esc::draw

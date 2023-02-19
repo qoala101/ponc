@@ -17,10 +17,10 @@ class Nodes {
   explicit Nodes(const Texture& node_header_texture,
                  std::shared_ptr<std::optional<NewLink>> new_link);
 
-  void Draw(State& state);
+  void Draw(AppState& app_state);
 
  private:
-  void DrawNode(State& state, core::INode& node);
+  void DrawNode(AppState& app_state, core::INode& node);
 
   Texture node_header_texture_{};
   std::shared_ptr<std::optional<NewLink>> new_link_{};

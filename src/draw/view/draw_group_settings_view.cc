@@ -13,9 +13,11 @@
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
-auto GroupSettingsView::GetLabel() const -> std::string { return "Group Settings"; }
+auto GroupSettingsView::GetLabel() const -> std::string {
+  return "Group Settings";
+}
 
-void GroupSettingsView::Draw(State& state) {
+void GroupSettingsView::Draw(AppState& app_state) {
   if (!IsVisible()) {
     return;
   }

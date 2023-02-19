@@ -23,6 +23,11 @@ class AppImpl {
   // ---
   void OnFrame();
 
+  // // ---
+  // auto GetFreePinFamily [[nodiscard]] () const -> FreePinFamily &;
+  // // ---
+  // auto GetPlaceholderFamily [[nodiscard]] () const -> PlaceholderFamily &;
+
  private:
   // ---
   core::Project project_{};
@@ -34,6 +39,10 @@ class AppImpl {
   draw::Widgets widgets_;
   // ---
   EventQueue event_queue_{};
+  // // ---
+  // std::weak_ptr<FreePinFamily> free_pin_family_{};
+  // // ---
+  // std::weak_ptr<PlaceholderFamily> placeholder_family_{};
 };
 }  // namespace esc
 

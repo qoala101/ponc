@@ -1,17 +1,16 @@
-// #include "app_events.h"
+#include "app_events.h"
 
-// #include "app_attenuator_node.h"
-// #include "app_client_node.h"
-// #include "app_coupler_node.h"
-// #include "app_input_node.h"
-// #include "app_splitter_node.h"
-// #include "app_state.h"
-// #include "core_i_node.h"
-// #include "core_state.h"
-// #include "draw_widgets.h"
-// #include "json_diagram_serializer.h"
+#include "app_attenuator_node.h"
+#include "app_client_node.h"
+#include "app_coupler_node.h"
+#include "app_input_node.h"
+#include "app_splitter_node.h"
+#include "app_state.h"
+#include "core_i_node.h"
+#include "draw_widgets.h"
+#include "json_diagram_serializer.h"
 
-// namespace esc::event {
+namespace esc::event {
 // namespace {
 // auto CreateFamilies() {
 //   auto families = std::vector<std::shared_ptr<core::IFamily>>{
@@ -101,17 +100,19 @@
 //   state.core_state->diagram_ = core::Diagram{CreateFamilies()};
 // }
 
-// void CreateNode::operator()(StateNoQueue &state) const {
-//   auto family_lock = family.lock();
+// ---
+void CreateNode::operator()(const AppState &app_state) const {
+  auto family_lock = family.lock();
 
-//   if (family_lock == nullptr) {
-//     return;
-//   }
+  if (family_lock == nullptr) {
+    return;
+  }
 
-//   const auto &new_node =
-//       family_lock->EmplaceNode(state.core_state->id_generator_);
-//   new_node->SetPosition(position);
-// }
+  auto new_node = family_lock->CreateNode(*app_state.id_generator);
+  new_node->SetPosition(position);
+
+  app_state.project->GetDiagram().EmplaceNode(std::move(new_node));
+}
 
 // void DeleteNode::operator()(StateNoQueue &state) const {
 //   auto &diagram = state.core_state->diagram_;
@@ -205,4 +206,4 @@
 
 //   // auto &group = state.core_state->diagram_.EmplaceGroup(node_ids);
 // }
-// }  // namespace esc::event
+}  // namespace esc::event

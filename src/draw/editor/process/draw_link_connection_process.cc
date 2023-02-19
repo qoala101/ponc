@@ -13,7 +13,7 @@
 
 namespace esc::draw {
 namespace {
-void UpdateNewLink(State& state, NewLink& new_link) {
+void UpdateNewLink(AppState& app_state, NewLink& new_link) {
   for (const auto& link : state.core_state->diagram_.GetLinks()) {
     if (link.start_pin_id == new_link.pin_dragged_from) {
       new_link.rebind.emplace(
@@ -34,7 +34,7 @@ LinkConnectionProcess::LinkConnectionProcess(
     std::shared_ptr<std::optional<NewLink>> new_link)
     : new_link_{std::move(new_link)} {}
 
-void LinkConnectionProcess::Draw(State& state) {
+void LinkConnectionProcess::Draw(AppState& app_state) {
   const auto create_scope = cpp::Scope{[]() { ne::EndCreate(); }};
   auto alpha = 255;
 

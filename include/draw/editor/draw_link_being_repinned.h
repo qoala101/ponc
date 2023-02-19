@@ -12,10 +12,9 @@ class State;
 namespace esc::draw {
 class LinkBeingRepinned {
  public:
-  explicit LinkBeingRepinned(
-      std::shared_ptr<std::optional<NewLink>> new_link);
+  explicit LinkBeingRepinned(std::shared_ptr<std::optional<NewLink>> new_link);
 
-  void Draw(State &state);
+  void Draw(const AppState &app_state);
 
  private:
   std::shared_ptr<std::optional<NewLink>> new_link_{};

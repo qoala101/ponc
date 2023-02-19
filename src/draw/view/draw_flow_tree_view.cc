@@ -17,7 +17,7 @@
 namespace esc::draw {
 namespace {
 void DisplayNode(
-    State& state, const flow::TreeNode& tree_node,
+    AppState& app_state, const flow::TreeNode& tree_node,
     const std::unordered_map<const flow::TreeNode*,
                              std::vector<std::pair<const core::IFamily*, int>>>&
         child_count_per_family_per_tree_node) {
@@ -65,9 +65,9 @@ void DisplayNode(
       state.core_state->flow_calculator_.GetCalculatedFlow(*tree_node.node);
 
   if (flow.input_pin_flow.has_value()) {
-    ImGui::TextColored(
-        state.core_state->flow_colors_.GetColorForFlowValue(flow.input_pin_flow->second),
-        "%.3f", flow.input_pin_flow->second);
+    ImGui::TextColored(state.core_state->flow_colors_.GetColorForFlowValue(
+                           flow.input_pin_flow->second),
+                       "%.3f", flow.input_pin_flow->second);
   }
 
   const auto& child_cout_per_family =
@@ -108,7 +108,7 @@ void DisplayNode(
 
 auto FlowTreeView::GetLabel() const -> std::string { return "Flow Tree"; }
 
-void FlowTreeView::Draw(State& state) {
+void FlowTreeView::Draw(AppState& app_state) {
   if (!IsVisible()) {
     return;
   }

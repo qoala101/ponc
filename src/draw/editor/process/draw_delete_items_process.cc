@@ -9,7 +9,7 @@
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
-void DrawDeleteItemsProcess(State& state) {
+void DrawDeleteItemsProcess(AppState& app_state) {
   const auto delete_scope = cpp::Scope{[]() { ne::EndDelete(); }};
 
   if (ne::BeginDelete()) {

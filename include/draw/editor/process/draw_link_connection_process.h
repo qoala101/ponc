@@ -15,7 +15,7 @@ class LinkConnectionProcess {
   explicit LinkConnectionProcess(
       std::shared_ptr<std::optional<NewLink>> new_link);
 
-  void Draw(State &state);
+  void Draw(const AppState &app_state);
 
  private:
   std::shared_ptr<std::optional<NewLink>> new_link_{};

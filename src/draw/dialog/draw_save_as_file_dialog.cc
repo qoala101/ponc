@@ -23,7 +23,7 @@ SaveAsFileDialog::SaveAsFileDialog()
         return dialog;
       }()} {}
 
-void SaveAsFileDialog::OnFileSelected(State& state,
+void SaveAsFileDialog::OnFileSelected(AppState& app_state,
                                       std::string file_path) const {
   if (const auto not_json_extension =
           !AsLowerCase(file_path).ends_with(".json")) {

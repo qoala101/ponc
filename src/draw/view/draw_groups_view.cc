@@ -2,17 +2,17 @@
 
 #include <unordered_set>
 
+#include "app_state.h"
 #include "core_group.h"
 #include "core_i_node.h"
 #include "coreui_i_node_drawer.h"
 #include "cpp_scope.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
-#include "app_state.h"
 
 namespace esc::draw {
 namespace {
-void DisplayNode(State& state, core::INode& node) {
+void DisplayNode(AppState& app_state, core::INode& node) {
   ImGui::TableNextRow();
   ImGui::TableNextColumn();
 
@@ -54,7 +54,7 @@ void DisplayNode(State& state, core::INode& node) {
   }
 }
 
-void DisplayGroup(State& state, core::Group& group) {
+void DisplayGroup(AppState& app_state, core::Group& group) {
   ImGui::TableNextRow();
   ImGui::TableNextColumn();
 
@@ -129,7 +129,7 @@ void DisplayGroup(State& state, core::Group& group) {
 
 auto GroupsView::GetLabel() const -> std::string { return "Groups"; }
 
-void GroupsView::Draw(State& state) {
+void GroupsView::Draw(AppState& app_state) {
   if (!IsVisible()) {
     return;
   }

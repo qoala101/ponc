@@ -13,7 +13,7 @@ namespace esc::draw {
 class GroupsView : public IHidable {
  public:
   auto GetLabel [[nodiscard]] () const -> std::string;
-  void Draw(State &state);
+  void Draw(const AppState &app_state);
 };
 }  // namespace esc::draw
 
