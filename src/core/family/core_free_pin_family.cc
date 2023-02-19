@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "app_state.h"
 #include "core_i_family.h"
 #include "core_i_node.h"
 #include "core_id_generator.h"
@@ -30,7 +29,7 @@ constexpr auto kTypeName = "FreePinNode";
 
 auto CreateNodeWriter(std::shared_ptr<Node> node)
     -> std::unique_ptr<json::INodeWriter>;
-auto CreateNodeDrawer(std::shared_ptr<Node> node, const StateNoQueue& state)
+auto CreateNodeDrawer(std::shared_ptr<Node> node)
     -> std::unique_ptr<coreui::INodeDrawer>;
 auto CreateFamilyWriter(std::shared_ptr<FreePinFamily> family)
     -> std::unique_ptr<json::IFamilyWriter>;
@@ -40,16 +39,17 @@ auto CreateFamilyDrawer(std::shared_ptr<FreePinFamily> family)
 // NOLINTNEXTLINE(*-multiple-inheritance)
 class Node : public INode, public std::enable_shared_from_this<Node> {
  public:
-  Node(ne::NodeId id, std::vector<ne::PinId> pin_ids, bool has_input_pin)
-      : INode{id, std::move(pin_ids)}, has_input_pin_{has_input_pin} {}
+  Node(ne::NodeId id, FamilyId family_id, std::vector<ne::PinId> pin_ids,
+       bool has_input_pin)
+      : INode{id, family_id, std::move(pin_ids)},
+        has_input_pin_{has_input_pin} {}
 
   auto CreateWriter() -> std::unique_ptr<json::INodeWriter> override {
     return CreateNodeWriter(shared_from_this());
   }
 
-  auto CreateDrawer(const StateNoQueue& state)
-      -> std::unique_ptr<coreui::INodeDrawer> override {
-    return CreateNodeDrawer(shared_from_this(), state);
+  auto CreateDrawer() -> std::unique_ptr<coreui::INodeDrawer> override {
+    return CreateNodeDrawer(shared_from_this());
   }
 
   bool has_input_pin_{};
@@ -145,11 +145,10 @@ auto CreateNodeDrawer(std::shared_ptr<Node> node, const StateNoQueue& state)
 }
 }  // namespace
 
-FreePinFamily::FreePinFamily(std::vector<std::shared_ptr<INode>> nodes)
-    : IFamily{std::move(nodes)} {}
+FreePinFamily::FreePinFamily(FamilyId id) : IFamily{id} {}
 
 auto FreePinFamily::CreateNode(IdGenerator& id_generator)
-    -> std::shared_ptr<INode> {
+    -> std::unique_ptr<INode> {
   Expects(false);
   return {};
 }
@@ -166,12 +165,11 @@ auto FreePinFamily::CreateDrawer() -> std::unique_ptr<coreui::IFamilyDrawer> {
   return CreateFamilyDrawer(shared_from_this());
 }
 
-auto FreePinFamily::EmplaceNodeFromFlow(IdGenerator& id_generator,
-                                        ne::PinId pin_id, bool has_input_pin)
-    -> const std::shared_ptr<INode>& {
-  return EmplaceNode(std::make_shared<Node>(id_generator.GetNext<ne::NodeId>(),
-                                            std::vector<ne::PinId>{pin_id},
-                                            has_input_pin));
+auto FreePinFamily::CreateNodeFromFlow(IdGenerator& id_generator,
+                                       ne::PinId pin_id, bool has_input_pin)
+    -> std::unique_ptr<INode> {
+  return std::make_shared<Node>(id_generator.GetNext<ne::NodeId>(), GetId(),
+                                std::vector<ne::PinId>{pin_id}, has_input_pin);
 }
 
 namespace {

@@ -1,22 +1,28 @@
+/**
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ */
+
 #ifndef VH_APP_EVENT_QUEUE_H_
 #define VH_APP_EVENT_QUEUE_H_
 
 #include <functional>
 
-#include "core_state.h"
-#include "draw_state.h"
+#include "core_project.h"
 
 namespace esc {
-class StateNoQueue;
+// ---
+using Event = std::function<void(core::Project &)>;
 
-using Event = std::function<void(StateNoQueue &)>;
-
+// ---
 class EventQueue {
  public:
-  void PostEvent(const Event &event);
-  void ExecuteEvents(StateNoQueue &state);
+  // ---
+  void PostEvent(Event event);
+  // ---
+  void ExecuteEvents(core::Project &project);
 
  private:
+  // ---
   std::vector<Event> events_{};
 };
 }  // namespace esc

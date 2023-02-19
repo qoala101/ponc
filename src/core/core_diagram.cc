@@ -1,68 +1,46 @@
+/**
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ */
+
 #include "core_diagram.h"
 
-#include <crude_json.h>
 #include <imgui_node_editor.h>
 #include <imgui_node_editor_internal.h>
-#include <sys/types.h>
 
 #include <algorithm>
-#include <cstring>
-#include <iostream>
-#include <memory>
-#include <optional>
 #include <ranges>
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
 
-#include "app_state.h"
-#include "core_free_pin_family.h"
 #include "core_group.h"
 #include "core_i_node.h"
 #include "core_link.h"
-#include "core_placeholder_family.h"
-#include "coreui_i_node_drawer.h"
 #include "cpp_assert.h"
 
 namespace esc::core {
 // ---
-Diagram::Diagram(std::vector<std::shared_ptr<IFamily>> families,
+Diagram::Diagram(std::vector<std::shared_ptr<INode>> nodes,
                  std::vector<Link> links, std::vector<Group> groups)
-    : families_{std::move(families)},
+    : nodes_{std::move(nodes)},
       links_{std::move(links)},
-      groups_{std::move(groups)} {
-  if (!families_.empty()) {
-    return;
-  }
+      groups_{std::move(groups)} {}
 
-  auto free_pin_family = std::make_shared<FreePinFamily>();
-  free_pin_family_ = free_pin_family;
-  families_.emplace_back(std::move(free_pin_family));
-
-  auto placeholder_family = std::make_shared<PlaceholderFamily>();
-  placeholder_family_ = placeholder_family;
-  families_.emplace_back(std::move(placeholder_family));
+// ---
+auto Diagram::GetNodes() const -> const std::vector<std::shared_ptr<INode>>& {
+  return nodes_;
 }
 
 // ---
-auto Diagram::GetFamilies() const
-    -> const std::vector<std::shared_ptr<IFamily>>& {
-  return families_;
+auto Diagram::EmplaceNode(std::unique_ptr<INode> node)
+    -> const std::shared_ptr<INode>& {
+  return nodes_.emplace_back(std::move(node));
 }
 
 // ---
-auto Diagram::GetFreePinFamily() const -> FreePinFamily& {
-  auto lock = free_pin_family_.lock();
-  Expects(lock != nullptr);
-  return *lock;
-}
+void Diagram::EraseNode(ne::NodeId node_id) {
+  const auto found_node = std::ranges::find_if(
+      nodes_, [node_id](const auto& node) { return node->GetId() == node_id; });
 
-// ---
-auto Diagram::GetPlaceholderFamily() const -> PlaceholderFamily& {
-  auto lock = placeholder_family_.lock();
-  Expects(lock != nullptr);
-  return *lock;
+  Expects(found_node != nodes_.end());
+  nodes_.erase(found_node);
 }
 
 // ---
@@ -100,27 +78,27 @@ void Diagram::EraseGroup(const Group& group) {
   groups_.erase(found_group);
 }
 
-// ---
-auto FindNode(const Diagram& diagram, ne::NodeId node_id)
-    -> const std::shared_ptr<INode>& {
-  for (const auto& family : diagram.GetFamilies()) {
-    if (const auto* node = family->FindNode(node_id)) {
-      return *node;
-    }
-  }
+// // ---
+// auto FindNode(const Diagram& diagram, ne::NodeId node_id)
+//     -> const std::shared_ptr<INode>& {
+//   for (const auto& family : diagram.GetFamilies()) {
+//     if (const auto* node = family->FindNode(node_id)) {
+//       return *node;
+//     }
+//   }
 
-  Expects(false);
-}
+//   Expects(false);
+// }
 
-// ---
-void EraseNode(Diagram& diagram, ne::NodeId node_id) {
-  for (const auto& family : diagram.GetFamilies()) {
-    if (const auto* node = family->FindNode(node_id)) {
-      family->EraseNode(node_id);
-      return;
-    }
-  }
-}
+// // ---
+// void EraseNode(Diagram& diagram, ne::NodeId node_id) {
+//   for (const auto& family : diagram.GetFamilies()) {
+//     if (const auto* node = family->FindNode(node_id)) {
+//       family->EraseNode(node_id);
+//       return;
+//     }
+//   }
+// }
 
 // auto Diagram::FindPinNode(ne::PinId id) -> const std::shared_ptr<INode>& {
 //   for (const auto& family : families_) {

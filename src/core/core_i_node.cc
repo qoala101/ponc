@@ -8,9 +8,14 @@
 #include <ranges>
 #include <vector>
 
+#include "core_family_id.h"
+
 namespace esc::core {
 // ---
 auto INode::GetId() const -> ne::NodeId { return id_; }
+
+// ---
+auto INode::GetFamilyId() const -> FamilyId { return family_id_; }
 
 // ---
 auto INode::GetInputPinId() const -> const std::optional<ne::PinId>& {
@@ -46,13 +51,17 @@ auto INode::GetInitialFlow() const -> flow::NodeFlow {
 }
 
 // ---
-INode::INode(ne::NodeId id, std::vector<ne::PinId> output_pin_ids)
-    : id_{id}, output_pin_ids_{std::move(output_pin_ids)} {}
-
-// ---
-INode::INode(ne::NodeId id, ne::PinId input_pin_id,
+INode::INode(ne::NodeId id, FamilyId family_id,
              std::vector<ne::PinId> output_pin_ids)
     : id_{id},
+      family_id_{family_id},
+      output_pin_ids_{std::move(output_pin_ids)} {}
+
+// ---
+INode::INode(ne::NodeId id, FamilyId family_id, ne::PinId input_pin_id,
+             std::vector<ne::PinId> output_pin_ids)
+    : id_{id},
+      family_id_{family_id},
       input_pin_id_{input_pin_id},
       output_pin_ids_{std::move(output_pin_ids)} {}
 

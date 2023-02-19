@@ -10,19 +10,16 @@
 #include "core_i_family.h"
 #include "core_i_node.h"
 #include "core_link.h"
+#include "core_project.h"
 #include "flow_node_flow.h"
 #include "flow_tree.h"
-
-namespace esc::core {
-struct CoreState;
-}
 
 namespace esc::flow {
 // ---
 class FlowCalculator {
  public:
   // ---
-  void OnFrame(const core::CoreState &core_state);
+  void Recalculate(core::Project &project);
   // ---
   auto GetFlowTree() const -> const Tree &;
   // ---
@@ -30,9 +27,8 @@ class FlowCalculator {
 
  private:
   // ---
-  void RebuildFlowTree(
-      const std::vector<std::shared_ptr<core::IFamily>> &families,
-      const std::vector<core::Link> &links);
+  void RebuildFlowTree(const std::vector<std::shared_ptr<core::INode>> &nodes,
+                       const std::vector<core::Link> &links);
   // ---
   void RecalculateFlowValues();
   // ---

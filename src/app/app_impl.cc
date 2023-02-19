@@ -1,49 +1,17 @@
+/**
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ */
+
 #include "app_impl.h"
 
-#include "app_events.h"
-#include "core_i_node.h"
-#include "core_state.h"
-#include "cpp_scope.h"
-#include "draw_delete_items_process.h"
-#include "draw_groups.h"
-#include "draw_link_being_repinned.h"
-#include "draw_link_connection_process.h"
-#include "draw_links.h"
-#include "draw_main_window.h"
-#include "draw_node_editor.h"
-#include "draw_nodes.h"
-#include "draw_popups.h"
-#include "draw_state.h"
-#include "imgui_node_editor.h"
+#include "draw_widgets.h"
 
 namespace esc {
-AppImpl::AppImpl(const Textures &textures)
-    : editor_context_{ne::CreateEditor()}, draw_state{textures.node_header} {
-  ne::SetCurrentEditor(editor_context_);
-
-  auto state_no_queue =
-      StateNoQueue{.core_state = &core_state_
-      // , .draw_state = &draw_state
-      };
-
-  event::ResetDiagram{}(state_no_queue);
-}
-
-AppImpl::~AppImpl() { ne::DestroyEditor(editor_context_); }
+AppImpl::AppImpl(const Textures &textures) : widgets_{textures.node_header} {}
 
 void AppImpl::OnFrame() {
-  auto state_no_queue =
-      StateNoQueue{.core_state = &core_state_
-      // , .draw_state = &draw_state
-      };
-  event_queue_.ExecuteEvents(state_no_queue);
-  core_state_.flow_calculator_.OnFrame(core_state_);
-
-  auto state = State{.core_state = &core_state_,
-                     .draw_state = &draw_state,
-                     .event_queue = &event_queue_};
-
-  draw::DrawMainWindow(state);
-  draw::DrawNodeEditor(state);
+  event_queue_.ExecuteEvents(project_);
+  flow_calculator_.Recalculate(project_);
+  widgets_.Draw(project_, id_generator_, flow_calculator_, event_queue_);
 }
 }  // namespace esc

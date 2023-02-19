@@ -16,12 +16,16 @@ class PlaceholderFamily
       public std::enable_shared_from_this<PlaceholderFamily> {
  public:
   // ---
-  explicit PlaceholderFamily(std::vector<std::shared_ptr<INode>> nodes = {});
+  explicit PlaceholderFamily(FamilyId id,
+                             std::vector<std::shared_ptr<INode>> nodes = {});
 
   // ---
   static auto CreateParser [[nodiscard]] ()
   -> std::unique_ptr<json::IFamilyParser>;
 
+  // ---
+  auto CreateNode [[noreturn]] (IdGenerator& id_generator)
+  -> std::unique_ptr<INode> override;
   // ---
   auto CreateNodeParser [[nodiscard]] ()
   -> std::unique_ptr<json::INodeParser> override;
@@ -35,11 +39,6 @@ class PlaceholderFamily
   auto EmplaceNodeFromFlow [[nodiscard]] (IdGenerator& id_generator,
                                           const flow::NodeFlow& connected_flow)
   -> const std::shared_ptr<INode>&;
-
- private:
-  // ---
-  auto CreateNode [[noreturn]] (IdGenerator& id_generator)
-  -> std::shared_ptr<INode> override;
 };
 }  // namespace esc::core
 

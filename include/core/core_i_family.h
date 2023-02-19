@@ -8,10 +8,10 @@
 #include <memory>
 #include <vector>
 
+#include "core_family_id.h"
 #include "core_i_node.h"
 #include "core_id_generator.h"
 #include "cpp_interface.h"
-#include "imgui_node_editor.h"
 
 namespace esc {
 namespace json {
@@ -28,6 +28,9 @@ namespace core {
 class IFamily : public cpp::Interface {
  public:
   // ---
+  virtual auto CreateNode [[nodiscard]] (IdGenerator &id_generator)
+  -> std::unique_ptr<INode> = 0;
+  // ---
   virtual auto CreateNodeParser [[nodiscard]] ()
   -> std::unique_ptr<json::INodeParser> = 0;
   // ---
@@ -38,36 +41,20 @@ class IFamily : public cpp::Interface {
   -> std::unique_ptr<coreui::IFamilyDrawer> = 0;
 
   // ---
-  auto GetNodes [[nodiscard]] () const
-      -> const std::vector<std::shared_ptr<INode>> &;
-  // ---
-  auto FindNode [[nodiscard]] (ne::NodeId node_id) const
-      -> const std::shared_ptr<INode> *;
-  // ---
-  auto EmplaceNode(IdGenerator &id_generator) -> const std::shared_ptr<INode> &;
-  // ---
-  void EraseNode(ne::NodeId node_id);
+  auto GetId [[nodiscard]] () const -> FamilyId;
 
  protected:
   // ---
-  explicit IFamily(std::vector<std::shared_ptr<core::INode>> nodes);
-
-  // ---
-  auto EmplaceNode(std::shared_ptr<core::INode> node)
-      -> const std::shared_ptr<INode> &;
+  explicit IFamily(FamilyId id);
 
  private:
   // ---
-  virtual auto CreateNode [[nodiscard]] (IdGenerator &id_generator)
-  -> std::shared_ptr<INode> = 0;
-
-  // ---
-  std::vector<std::shared_ptr<INode>> nodes_{};
+  FamilyId id_{};
 };
 
 // ---
-auto IsChildOf [[nodiscard]] (ne::NodeId node_id, const IFamily &family)
--> bool;
+// auto IsChildOf [[nodiscard]] (ne::NodeId node_id, const IFamily &family)
+// -> bool;
 }  // namespace core
 }  // namespace esc
 

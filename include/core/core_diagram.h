@@ -8,12 +8,9 @@
 #include <memory>
 #include <vector>
 
-#include "core_free_pin_family.h"
 #include "core_group.h"
-#include "core_i_family.h"
 #include "core_i_node.h"
 #include "core_link.h"
-#include "core_placeholder_family.h"
 #include "imgui_node_editor.h"
 
 namespace esc::core {
@@ -21,17 +18,18 @@ namespace esc::core {
 class Diagram {
  public:
   // ---
-  explicit Diagram(std::vector<std::shared_ptr<IFamily>> families = {},
+  explicit Diagram(std::vector<std::shared_ptr<INode>> nodes = {},
                    std::vector<Link> links = {},
                    std::vector<Group> groups = {});
 
   // ---
-  auto GetFamilies [[nodiscard]] () const
-      -> const std::vector<std::shared_ptr<IFamily>> &;
+  auto GetNodes [[nodiscard]] () const
+      -> const std::vector<std::shared_ptr<INode>> &;
   // ---
-  auto GetFreePinFamily [[nodiscard]] () const -> FreePinFamily &;
+  auto EmplaceNode(std::unique_ptr<INode> node)
+      -> const std::shared_ptr<INode> &;
   // ---
-  auto GetPlaceholderFamily [[nodiscard]] () const -> PlaceholderFamily &;
+  void EraseNode(ne::NodeId node_id);
 
   // ---
   auto GetLinks [[nodiscard]] () const -> const std::vector<Link> &;
@@ -49,22 +47,16 @@ class Diagram {
 
  private:
   // ---
-  std::vector<std::shared_ptr<IFamily>> families_{};
+  std::vector<std::shared_ptr<INode>> nodes_{};
   // ---
   std::vector<Link> links_{};
   // ---
   std::vector<Group> groups_{};
-  // ---
-  std::weak_ptr<FreePinFamily> free_pin_family_{};
-  // ---
-  std::weak_ptr<PlaceholderFamily> placeholder_family_{};
 };
 
-// ---
-auto FindNode [[nodiscard]] (const Diagram &diagram, ne::NodeId node_id)
--> const std::shared_ptr<INode> &;
-// ---
-void EraseNode(Diagram &diagram, ne::NodeId node_id);
+// // ---
+// auto FindNode [[nodiscard]] (const Diagram &diagram, ne::NodeId node_id)
+// -> const std::shared_ptr<INode> &;
 
 // auto FindPinNode(ne::PinId id) -> const std::shared_ptr<INode> &;
 // auto FindLink(ne::LinkId id) -> Link &;

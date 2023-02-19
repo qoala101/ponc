@@ -7,8 +7,8 @@
 #include "core_link.h"
 #include "coreui_i_node_drawer.h"
 #include "cpp_scope.h"
-#include "draw_state.h"
 #include "draw_tooltip.h"
+#include "draw_widgets.h"
 #include "imgui_node_editor.h"
 
 namespace esc::draw {

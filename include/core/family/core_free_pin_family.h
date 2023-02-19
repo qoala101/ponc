@@ -16,12 +16,15 @@ class FreePinFamily : public IFamily,
                       public std::enable_shared_from_this<FreePinFamily> {
  public:
   // ---
-  explicit FreePinFamily(std::vector<std::shared_ptr<INode>> nodes = {});
+  explicit FreePinFamily(FamilyId id);
 
   // ---
   static auto CreateParser [[nodiscard]] ()
   -> std::unique_ptr<json::IFamilyParser>;
 
+  // ---
+  auto CreateNode [[noreturn]] (IdGenerator& id_generator)
+  -> std::unique_ptr<INode> override;
   // ---
   auto CreateNodeParser [[nodiscard]] ()
   -> std::unique_ptr<json::INodeParser> override;
@@ -32,14 +35,9 @@ class FreePinFamily : public IFamily,
   auto CreateDrawer [[nodiscard]] ()
   -> std::unique_ptr<coreui::IFamilyDrawer> override;
 
-  auto EmplaceNodeFromFlow [[nodiscard]] (IdGenerator& id_generator,
-                                          ne::PinId pin_id, bool has_input_pin)
-  -> const std::shared_ptr<INode>&;
-
- private:
-  // ---
-  auto CreateNode [[noreturn]] (IdGenerator& id_generator)
-  -> std::shared_ptr<INode> override;
+  auto CreateNodeFromFlow [[nodiscard]] (IdGenerator& id_generator,
+                                         ne::PinId pin_id, bool has_input_pin)
+  -> std::unique_ptr<INode>;
 };
 }  // namespace esc::core
 
