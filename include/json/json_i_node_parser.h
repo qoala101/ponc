@@ -5,6 +5,7 @@
 
 #include <memory>
 
+#include "core_family_id.h"
 #include "core_i_node.h"
 #include "cpp_interface.h"
 #include "crude_json.h"
@@ -22,8 +23,9 @@ class INodeParser : public cpp::Interface {
  private:
   // ---
   virtual auto ParseFromJson
-      [[nodiscard]] (ne::NodeId parsed_node_id,
-                     std::vector<ne::PinId> parsed_pin_ids,
+      [[nodiscard]] (ne::NodeId parsed_id, core::FamilyId parsed_family_id,
+                     const std::optional<ne::PinId> &parsed_input_pin_id,
+                     std::vector<ne::PinId> parsed_output_pin_ids,
                      const crude_json::value &json) const
       -> std::shared_ptr<core::INode> = 0;
 };

@@ -20,8 +20,6 @@
 namespace ne = ax::NodeEditor;
 
 namespace esc {
-class StateNoQueue;
-
 namespace json {
 class INodeWriter;
 }  // namespace json

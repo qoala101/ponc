@@ -27,7 +27,7 @@ constexpr auto kTypeName = "CouplerNode";
 
 auto CreateNodeWriter(std::shared_ptr<Node> node)
     -> std::unique_ptr<json::INodeWriter>;
-auto CreateNodeDrawer(std::shared_ptr<Node> node, const StateNoQueue& state)
+auto CreateNodeDrawer(std::shared_ptr<Node> node)
     -> std::unique_ptr<coreui::INodeDrawer>;
 auto CreateFamilyWriter(std::shared_ptr<Family> family)
     -> std::unique_ptr<json::IFamilyWriter>;
@@ -113,11 +113,11 @@ class NodeParser : public json::INodeParser {
       : percentage_index_{percentage_index} {}
 
  private:
-  auto ParseFromJson(ne::NodeId parsed_node_id,
+  auto ParseFromJson(ne::NodeId parsed_id,
                      std::vector<ne::PinId> parsed_pin_ids,
                      const crude_json::value& json) const
       -> std::shared_ptr<core::INode> override {
-    return std::make_shared<Node>(parsed_node_id, std::move(parsed_pin_ids),
+    return std::make_shared<Node>(parsed_id, std::move(parsed_pin_ids),
                                   percentage_index_);
   }
 
@@ -175,7 +175,7 @@ class BigDropPinDrawer : public coreui::IPinDrawer {
 
 class NodeDrawer : public coreui::INodeDrawer {
  public:
-  explicit NodeDrawer(std::shared_ptr<Node> node, const StateNoQueue& state)
+  explicit NodeDrawer(std::shared_ptr<Node> node)
       : node_{std::move(node)},
         flow_pin_values_{
             state.core_state->flow_calculator_.GetCalculatedFlow(*node_)} {}
@@ -215,7 +215,7 @@ class NodeDrawer : public coreui::INodeDrawer {
   flow::NodeFlow flow_pin_values_{};
 };
 
-auto CreateNodeDrawer(std::shared_ptr<Node> node, const StateNoQueue& state)
+auto CreateNodeDrawer(std::shared_ptr<Node> node)
     -> std::unique_ptr<coreui::INodeDrawer> {
   return std::make_unique<NodeDrawer>(std::move(node), state);
 }

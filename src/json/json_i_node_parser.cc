@@ -24,11 +24,10 @@ auto ParsePinIds [[nodiscard]] (const crude_json::value& json) {
 
 auto INodeParser::ParseFromJson(const crude_json::value& json) const
     -> std::shared_ptr<core::INode> {
-  const auto parsed_node_id =
-      IdSerializer::ParseFromJson<ne::NodeId>(json["id"]);
+  const auto parsed_id = IdSerializer::ParseFromJson<ne::NodeId>(json["id"]);
   auto parsed_pin_ids = ParsePinIds(json);
   auto parsed_node =
-      ParseFromJson(parsed_node_id, std::move(parsed_pin_ids), json["data"]);
+      ParseFromJson(parsed_id, std::move(parsed_pin_ids), json["data"]);
 
   const auto parsed_position =
       ImVec2{static_cast<float>(json["pos_x"].get<crude_json::number>()),

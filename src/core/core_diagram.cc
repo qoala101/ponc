@@ -8,6 +8,7 @@
 #include <imgui_node_editor_internal.h>
 
 #include <algorithm>
+#include <memory>
 #include <ranges>
 
 #include "core_group.h"
@@ -29,7 +30,7 @@ auto Diagram::GetNodes() const -> const std::vector<std::shared_ptr<INode>>& {
 }
 
 // ---
-auto Diagram::EmplaceNode(std::unique_ptr<INode> node)
+auto Diagram::EmplaceNode(std::shared_ptr<INode> node)
     -> const std::shared_ptr<INode>& {
   return nodes_.emplace_back(std::move(node));
 }

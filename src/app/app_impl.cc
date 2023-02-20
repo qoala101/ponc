@@ -1,5 +1,6 @@
 #include "app_impl.h"
 
+#include "app_input_node.h"
 #include "app_state.h"
 #include "draw_widgets.h"
 
@@ -7,7 +8,8 @@ namespace esc {
 AppImpl::AppImpl(const Textures &textures)
     : project_{[]() {
         auto families = std::vector<std::shared_ptr<core::IFamily>>{
-            // InputNode::CreateFamily(), ClientNode::CreateFamily()
+            InputNode::CreateFamily(0)
+            // , ClientNode::CreateFamily()
         };
 
         // for (auto percentage_index = 0; percentage_index < 10;

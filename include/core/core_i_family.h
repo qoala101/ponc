@@ -29,7 +29,7 @@ class IFamily : public cpp::Interface {
  public:
   // ---
   virtual auto CreateNode [[nodiscard]] (IdGenerator &id_generator)
-  -> std::unique_ptr<INode> = 0;
+  -> std::shared_ptr<INode> = 0;
   // ---
   virtual auto CreateNodeParser [[nodiscard]] ()
   -> std::unique_ptr<json::INodeParser> = 0;

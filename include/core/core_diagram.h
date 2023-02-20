@@ -26,7 +26,7 @@ class Diagram {
   auto GetNodes [[nodiscard]] () const
       -> const std::vector<std::shared_ptr<INode>> &;
   // ---
-  auto EmplaceNode(std::unique_ptr<INode> node)
+  auto EmplaceNode(std::shared_ptr<INode> node)
       -> const std::shared_ptr<INode> &;
   // ---
   void EraseNode(ne::NodeId node_id);

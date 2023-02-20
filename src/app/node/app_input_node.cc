@@ -1,6 +1,7 @@
 #include "app_input_node.h"
 
 #include <memory>
+#include <vector>
 
 #include "app_state.h"
 #include "core_i_node.h"
@@ -25,7 +26,7 @@ constexpr auto kTypeName = "InputNode";
 
 auto CreateNodeWriter(std::shared_ptr<Node> node)
     -> std::unique_ptr<json::INodeWriter>;
-auto CreateNodeDrawer(std::shared_ptr<Node> node, const StateNoQueue& state)
+auto CreateNodeDrawer(std::shared_ptr<Node> node)
     -> std::unique_ptr<coreui::INodeDrawer>;
 auto CreateFamilyWriter(std::shared_ptr<Family> family)
     -> std::unique_ptr<json::IFamilyWriter>;
@@ -35,19 +36,20 @@ auto CreateFamilyDrawer(std::shared_ptr<Family> family)
 // NOLINTNEXTLINE(*-multiple-inheritance)
 class Node : public core::INode, public std::enable_shared_from_this<Node> {
  public:
-  Node(ne::NodeId id, std::vector<ne::PinId> pin_ids, float value = 6.0F)
-      : INode{id, std::move(pin_ids)}, value_{value} {}
+  Node(ne::NodeId id, core::FamilyId family_id, ne::PinId output_pin_id,
+       float value = {6.F})
+      : INode{id, family_id, std::vector<ne::PinId>{output_pin_id}},
+        value_{value} {}
 
   auto CreateWriter() -> std::unique_ptr<json::INodeWriter> override {
     return CreateNodeWriter(shared_from_this());
   }
 
-  auto CreateDrawer(const StateNoQueue& state)
-      -> std::unique_ptr<coreui::INodeDrawer> override {
-    return CreateNodeDrawer(shared_from_this(), state);
+  auto CreateDrawer() -> std::unique_ptr<coreui::INodeDrawer> override {
+    return CreateNodeDrawer(shared_from_this());
   }
 
-  void SetInitialFlowValues(flow::NodeFlow& node_flow) const {
+  void SetInitialFlowValues(flow::NodeFlow& node_flow) const override {
     node_flow.output_pin_flows.at(0) = value_;
   }
 
@@ -56,11 +58,14 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
 
 class NodeParser : public json::INodeParser {
  private:
-  auto ParseFromJson(ne::NodeId parsed_node_id,
-                     std::vector<ne::PinId> parsed_pin_ids,
+  auto ParseFromJson(ne::NodeId parsed_id, core::FamilyId parsed_family_id,
+                     const std::optional<ne::PinId>& parsed_input_pin_id,
+                     std::vector<ne::PinId> parsed_output_pin_ids,
                      const crude_json::value& json) const
       -> std::shared_ptr<core::INode> override {
-    return std::make_shared<Node>(parsed_node_id, std::move(parsed_pin_ids),
+    Expects(!parsed_output_pin_ids.empty());
+    return std::make_shared<Node>(parsed_id, parsed_family_id,
+                                  parsed_output_pin_ids[0],
                                   json["value"].get<crude_json::number>());
   }
 };
@@ -106,18 +111,11 @@ class PinDrawer : public coreui::IPinDrawer {
 
 class NodeDrawer : public coreui::INodeDrawer {
  public:
-  explicit NodeDrawer(std::shared_ptr<Node> node, const StateNoQueue& state)
-      : node_{std::move(node)},
-        flow_pin_values_{
-            state.core_state->flow_calculator_.GetCalculatedFlow(*node_)} {}
+  explicit NodeDrawer(std::shared_ptr<Node> node) : node_{std::move(node)} {}
 
-  auto GetLabel() const -> std::string override {
-    return InputNode::CreateFamily()->CreateDrawer()->GetLabel();
-  }
+  auto GetLabel() const -> std::string override { return "Input"; }
 
-  auto GetColor() const -> ImColor override {
-    return InputNode::CreateFamily()->CreateDrawer()->GetColor();
-  }
+  auto GetColor() const -> ImColor override { return {255, 0, 0}; }
 
   auto CreatePinDrawers() const
       -> std::vector<std::unique_ptr<coreui::IPinDrawer>> override {
@@ -130,25 +128,23 @@ class NodeDrawer : public coreui::INodeDrawer {
 
  private:
   std::shared_ptr<Node> node_{};
-  flow::NodeFlow flow_pin_values_{};
 };
 
-auto CreateNodeDrawer(std::shared_ptr<Node> node, const StateNoQueue& state)
+auto CreateNodeDrawer(std::shared_ptr<Node> node)
     -> std::unique_ptr<coreui::INodeDrawer> {
-  return std::make_unique<NodeDrawer>(std::move(node), state);
+  return std::make_unique<NodeDrawer>(std::move(node));
 }
 
 // NOLINTNEXTLINE(*-multiple-inheritance)
 class Family : public core::IFamily,
                public std::enable_shared_from_this<Family> {
  public:
-  explicit Family(std::vector<std::shared_ptr<core::INode>> nodes = {})
-      : IFamily{std::move(nodes)} {}
+  explicit Family(core::FamilyId id) : IFamily{id} {}
 
   auto CreateNode(core::IdGenerator& id_generator)
       -> std::shared_ptr<core::INode> override {
-    return std::make_shared<Node>(id_generator.GetNext<ne::NodeId>(),
-                                  id_generator.GetNextN<ne::PinId>(1));
+    return std::make_shared<Node>(id_generator.GetNext<ne::NodeId>(), GetId(),
+                                  id_generator.GetNext<ne::PinId>());
   }
 
   auto CreateNodeParser() -> std::unique_ptr<json::INodeParser> override {
@@ -168,10 +164,10 @@ class FamilyParser : public json::IFamilyParser {
  public:
   auto GetTypeName() const -> std::string override { return kTypeName; }
 
-  auto ParseFromJson(std::vector<std::shared_ptr<core::INode>> parsed_nodes,
+  auto ParseFromJson(core::FamilyId parsed_id,
                      const crude_json::value& json) const
       -> std::shared_ptr<core::IFamily> override {
-    return std::make_shared<Family>(std::move(parsed_nodes));
+    return std::make_shared<Family>(parsed_id);
   }
 };
 
@@ -212,8 +208,9 @@ auto CreateFamilyDrawer(std::shared_ptr<Family> family)
 }
 }  // namespace
 
-auto InputNode::CreateFamily() -> std::shared_ptr<core::IFamily> {
-  return std::make_unique<Family>();
+auto InputNode::CreateFamily(core::FamilyId id)
+    -> std::shared_ptr<core::IFamily> {
+  return std::make_shared<Family>(id);
 }
 
 auto InputNode::CreateFamilyParser() -> std::unique_ptr<json::IFamilyParser> {

@@ -118,7 +118,7 @@ add_example_executable(esc
   # app/node/app_attenuator_node.cc
   # app/node/app_client_node.cc
   # app/node/app_coupler_node.cc
-  # app/node/app_input_node.cc
+  app/node/app_input_node.cc
   # app/node/app_splitter_node.cc
 
   app/app_app.cc

@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include "core_family_id.h"
 #include "core_i_family.h"
 #include "core_i_node.h"
 #include "cpp_interface.h"
@@ -20,9 +21,8 @@ class IFamilyParser : public cpp::Interface {
   // ---
   virtual auto GetTypeName [[nodiscard]] () const -> std::string = 0;
   // ---
-  virtual auto ParseFromJson
-      [[nodiscard]] (std::vector<std::shared_ptr<core::INode>> parsed_nodes,
-                     const crude_json::value &json) const
+  virtual auto ParseFromJson [[nodiscard]] (core::FamilyId parsed_id,
+                                            const crude_json::value &json) const
       -> std::shared_ptr<core::IFamily> = 0;
 };
 }  // namespace esc::json
