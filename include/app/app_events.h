@@ -9,27 +9,26 @@
 
 #include "app_state.h"
 #include "core_i_family.h"
-#include "core_project.h"
 #include "imgui.h"
 
 namespace esc::event {
-// // ---
-// struct OpenDiagramFromFile {
-//   // ---
-//   void operator()(core::Project &project) const;
+// ---
+struct OpenProjectFromFile {
+  // ---
+  void operator()(const AppState &app_state) const;
 
-//   // ---
-//   std::string file_path{};
-// };
+  // ---
+  std::string file_path{};
+};
 
-// // ---
-// struct SaveDiagramToFile {
-//   // ---
-//   void operator()(core::Project &project) const;
+// ---
+struct SaveProjectToFile {
+  // ---
+  void operator()(const AppState &app_state) const;
 
-//   // ---
-//   std::string file_path{};
-// };
+  // ---
+  std::string file_path{};
+};
 
 // // ---
 // struct ResetDiagram {

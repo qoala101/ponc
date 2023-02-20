@@ -6,6 +6,7 @@
 #include "app_event_queue.h"
 #include "app_events.h"
 #include "core_i_family.h"
+#include "core_project.h"
 #include "coreui_i_family_drawer.h"
 #include "draw_id_label.h"
 
@@ -76,14 +77,12 @@ void BackgroundPopup::DrawItems(const AppState& app_state) {
     }
 
     for (const auto& family : families) {
-      if (!ImGui::MenuItem(
+      if (ImGui::MenuItem(
               IdLabel(family->CreateDrawer()->GetLabel(), family->GetId())
                   .c_str())) {
-        continue;
+        app_state.event_queue->PostEvent(
+            event::CreateNode{.family = family, .position = position_});
       }
-
-      app_state.event_queue->PostEvent(
-          event::CreateNode{.family = family, .position = position_});
     }
 
     if (!is_group) {

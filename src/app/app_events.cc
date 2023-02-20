@@ -16,7 +16,8 @@ namespace esc::event {
 //   auto families = std::vector<std::shared_ptr<core::IFamily>>{
 //       InputNode::CreateFamily(), ClientNode::CreateFamily()};
 
-//   for (auto percentage_index = 0; percentage_index < 10; ++percentage_index) {
+//   for (auto percentage_index = 0; percentage_index < 10; ++percentage_index)
+//   {
 //     families.emplace_back(CouplerNode::CreateFamily(percentage_index));
 //   }
 
@@ -61,26 +62,26 @@ namespace esc::event {
 // }
 // }  // namespace
 
-// void OpenDiagramFromFile::operator()(StateNoQueue &state) const {
-//   ResetDiagram{}(state);
+void OpenProjectFromFile::operator()(const AppState &state) const {
+  // ResetDiagram{}(state);
 
-//   const auto json = crude_json::value::load(file_path.data()).first;
+  // const auto json = crude_json::value::load(file_path.data()).first;
 
-//   auto diagram =
-//       json::DiagramSerializer::ParseFromJson(json, CreateFamilyParsers());
-//   auto max_id = FindMaxId(diagram);
+  // auto diagram =
+  //     json::DiagramSerializer::ParseFromJson(json, CreateFamilyParsers());
+  // auto max_id = FindMaxId(diagram);
 
-//   state.core_state->diagram_ = std::move(diagram);
-//   state.core_state->id_generator_ = core::IdGenerator{max_id + 1};
-// }
+  // state.core_state->diagram_ = std::move(diagram);
+  // state.core_state->id_generator_ = core::IdGenerator{max_id + 1};
+}
 
-// void SaveDiagramToFile::operator()(StateNoQueue &state) const {
-//   const auto &diagram = state.core_state->diagram_;
-//   const auto json = json::DiagramSerializer::WriteToJson(diagram);
-//   json.save(file_path.data());
-// }
+void SaveProjectToFile::operator()(const AppState &state) const {
+  // const auto &diagram = state.core_state->diagram_;
+  // const auto json = json::DiagramSerializer::WriteToJson(diagram);
+  // json.save(file_path.data());
+}
 
-// void ResetDiagram::operator()(StateNoQueue &state) const {
+// void ResetDiagram::operator()(const AppState &state) const {
 //   const auto &diagram = state.core_state->diagram_;
 //   const auto &links = diagram.GetLinks();
 
@@ -114,7 +115,7 @@ void CreateNode::operator()(const AppState &app_state) const {
   app_state.project->GetDiagram().EmplaceNode(std::move(new_node));
 }
 
-// void DeleteNode::operator()(StateNoQueue &state) const {
+// void DeleteNode::operator()(const AppState &state) const {
 //   auto &diagram = state.core_state->diagram_;
 //   const auto node = FindNode(diagram, node_id);
 //   const auto node_flow = node.GetInitialFlow();
@@ -126,7 +127,8 @@ void CreateNode::operator()(const AppState &app_state) const {
 //   auto connected_node_output_pins = std::vector<ne::PinId>{};
 
 //   if (node_flow.input_pin_flow.has_value()) {
-//     if (diagram.FindLinkFromPin(node_flow.input_pin_flow->first) != nullptr) {
+//     if (diagram.FindLinkFromPin(node_flow.input_pin_flow->first) != nullptr)
+//     {
 //       connected_node_input_pin = node_flow.input_pin_flow->first;
 //     }
 //   }
@@ -157,7 +159,7 @@ void CreateNode::operator()(const AppState &app_state) const {
 //   }
 // }
 
-// void DeleteNodeWithLinks::operator()(StateNoQueue &state) const {
+// void DeleteNodeWithLinks::operator()(const AppState &state) const {
 //   auto &diagram = state.core_state->diagram_;
 //   const auto &links = diagram.GetLinks();
 //   const auto &node = diagram.FindNode(node_id);
@@ -168,7 +170,8 @@ void CreateNode::operator()(const AppState &app_state) const {
 
 //     for (const auto &link : links) {
 //       for (const auto node_pin : node_pins) {
-//         if ((link.start_pin_id == node_pin) || (link.end_pin_id == node_pin)) {
+//         if ((link.start_pin_id == node_pin) || (link.end_pin_id == node_pin))
+//         {
 //           links_to_erase.emplace_back(link.id);
 //         }
 //       }
@@ -188,12 +191,12 @@ void CreateNode::operator()(const AppState &app_state) const {
 //   state.core_state->diagram_.EraseNode(node_id);
 // }
 
-// void DeleteLink::operator()(StateNoQueue &state) const {
+// void DeleteLink::operator()(const AppState &state) const {
 //   ne::DeleteLink(link_id);
 //   state.core_state->diagram_.EraseLink(link_id);
 // }
 
-// void CreateGroup::operator()(StateNoQueue &state) const {
+// void CreateGroup::operator()(const AppState &state) const {
 //   // auto nodes = std::vector<std::shared_ptr<INode>>{};
 
 //   // for (const auto node_id : node_ids) {

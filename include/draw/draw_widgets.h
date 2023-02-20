@@ -11,10 +11,13 @@
 #include "core_id_generator.h"
 #include "core_project.h"
 #include "draw_background_popup.h"
-#include "draw_node_popup.h"
 #include "draw_link_popup.h"
+#include "draw_links.h"
 #include "draw_node_editor.h"
+#include "draw_node_popup.h"
 #include "draw_nodes.h"
+#include "draw_open_file_dialog.h"
+#include "draw_save_as_file_dialog.h"
 #include "draw_texture.h"
 #include "flow_calculator.h"
 
@@ -39,10 +42,10 @@ struct Widgets {
   // ---
   void Draw(const AppState &app_state);
 
-  // // ---
-  // OpenFileDialog open_file_dialog{};
-  // // ---
-  // SaveAsFileDialog save_as_file_dialog{};
+  // ---
+  OpenFileDialog open_file_dialog{};
+  // ---
+  SaveAsFileDialog save_as_file_dialog{};
 
   // // ---
   // FamiliesView families_view{};
@@ -59,8 +62,8 @@ struct Widgets {
   NodeEditor node_editor{};
   // ---
   Nodes nodes;
-  // // ---
-  // Links links;
+  // ---
+  Links links{};
   // // ---
   // LinkBeingRepinned link_being_repinned;
   // // ---
