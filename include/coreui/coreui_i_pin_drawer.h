@@ -1,11 +1,12 @@
-#ifndef VH_DRAW_I_PIN_DRAWER_H_
-#define VH_DRAW_I_PIN_DRAWER_H_
+#ifndef VH_COREUI_I_PIN_DRAWER_H_
+#define VH_COREUI_I_PIN_DRAWER_H_
 
 #include <imgui_node_editor.h>
 
 #include <optional>
 #include <string>
 
+#include "core_i_node.h"
 #include "cpp_interface.h"
 
 namespace ne = ax::NodeEditor;
@@ -17,9 +18,9 @@ class IPinDrawer : public cpp::Interface {
   // ---
   virtual auto GetLabel [[nodiscard]] () const -> std::string;
   // ---
-  virtual auto GetKind [[nodiscard]] () const -> ne::PinKind = 0;
+  virtual auto GetKind [[nodiscard]] () const -> std::optional<ne::PinKind>;
   // ---
-  virtual auto GetFloat [[nodiscard]] () -> float*;
+  virtual auto GetFloat [[nodiscard]] () -> std::optional<float *>;
   // ---
   virtual auto IsEditable [[nodiscard]] () const -> bool;
   // ---
@@ -27,4 +28,4 @@ class IPinDrawer : public cpp::Interface {
 };
 }  // namespace esc::coreui
 
-#endif  // VH_DRAW_I_PIN_DRAWER_H_
+#endif  // VH_COREUI_I_PIN_DRAWER_H_

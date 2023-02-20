@@ -23,7 +23,9 @@ class FlowCalculator {
   // ---
   auto GetFlowTree() const -> const Tree &;
   // ---
-  auto GetCalculatedFlow(const core::INode &node) const -> const NodeFlow &;
+  auto GetCalculatedFlow(ne::NodeId node_id) const -> const NodeFlow &;
+  // ---
+  auto GetCalculatedFlow(ne::NodeId node_id) -> NodeFlow &;
 
  private:
   // ---

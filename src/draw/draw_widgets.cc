@@ -4,8 +4,7 @@
 
 namespace esc::draw {
 Widgets::Widgets(const Texture &node_header_texture)
-// : nodes{node_header_texture}
-{}
+    : nodes{node_header_texture} {}
 
 void Widgets::Draw(const AppState &app_state) {
   // draw::DrawMainWindow();

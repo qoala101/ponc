@@ -45,8 +45,7 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
     return CreateNodeWriter(shared_from_this());
   }
 
-  auto CreateDrawer(const StateNoQueue& state)
-      -> std::unique_ptr<coreui::INodeDrawer> override {
+  auto CreateDrawer() -> std::unique_ptr<coreui::INodeDrawer> override {
     return CreateNodeDrawer(shared_from_this(), state);
   }
 
@@ -108,11 +107,13 @@ class DropPinDrawer : public coreui::IPinDrawer {
 
   auto GetLabel [[nodiscard]] () const -> std::string override { return {}; }
 
-  auto GetKind [[nodiscard]] () const -> ne::PinKind override {
+  auto GetKind [[nodiscard]] () const -> std::optional<ne::PinKind> override {
     return ne::PinKind::Input;
   }
 
-  auto GetFloat [[nodiscard]] () -> float* override { return &drop_; }
+  auto GetFloat [[nodiscard]] () -> std::optional<float*> override {
+    return &drop_;
+  }
 
   auto IsEditable [[nodiscard]] () const -> bool override { return false; }
 

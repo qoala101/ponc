@@ -1,5 +1,9 @@
-#ifndef VH_IMPL_ATTENUATOR_NODE_H_
-#define VH_IMPL_ATTENUATOR_NODE_H_
+/**
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ */
+
+#ifndef VH_APP_ATTENUATOR_NODE_H_
+#define VH_APP_ATTENUATOR_NODE_H_
 
 #include <memory>
 
@@ -10,11 +14,12 @@ namespace esc {
 // ---
 struct AttenuatorNode {
   // ---
-  static auto CreateFamily [[nodiscard]] () -> std::shared_ptr<core::IFamily>;
+  static auto CreateFamily [[nodiscard]] (core::FamilyId id)
+  -> std::shared_ptr<core::IFamily>;
   // ---
   static auto CreateFamilyParser [[nodiscard]] ()
   -> std::unique_ptr<json::IFamilyParser>;
 };
 }  // namespace esc
 
-#endif  // VH_IMPL_ATTENUATOR_NODE_H_
+#endif  // VH_APP_ATTENUATOR_NODE_H_

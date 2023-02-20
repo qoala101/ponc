@@ -56,6 +56,7 @@ class NodeDrawer {
   ne::NodeId node_id_{};
   Stage stage_{};
   std::optional<Header> header_{};
+  int layout_id_{};
 };
 }  // namespace esc
 

@@ -47,8 +47,7 @@ class Node : public INode, public std::enable_shared_from_this<Node> {
     return CreateNodeWriter(shared_from_this());
   }
 
-  auto CreateDrawer(const StateNoQueue& state)
-      -> std::unique_ptr<coreui::INodeDrawer> override {
+  auto CreateDrawer() -> std::unique_ptr<coreui::INodeDrawer> override {
     return CreateNodeDrawer(shared_from_this(), state);
   }
 

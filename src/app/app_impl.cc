@@ -1,14 +1,16 @@
 #include "app_impl.h"
 
+#include "app_attenuator_node.h"
 #include "app_input_node.h"
 #include "app_state.h"
+#include "core_family_id.h"
 #include "draw_widgets.h"
 
 namespace esc {
 AppImpl::AppImpl(const Textures &textures)
-    : project_{[]() {
+    : project_{[&id_generator = id_generator_]() {
         auto families = std::vector<std::shared_ptr<core::IFamily>>{
-            InputNode::CreateFamily(0)
+            InputNode::CreateFamily(id_generator.GetNext<core::FamilyId>())
             // , ClientNode::CreateFamily()
         };
 
@@ -21,15 +23,16 @@ AppImpl::AppImpl(const Textures &textures)
         //   families.emplace_back(SplitterNode::CreateFamily(num_outputs));
         // }
 
-        // families.emplace_back(AttenuatorNode::CreateFamily());
+        families.emplace_back(AttenuatorNode::CreateFamily(
+            id_generator.GetNext<core::FamilyId>()));
 
         return families;
       }()},
       widgets_{textures.node_header} {}
 
 void AppImpl::OnFrame() {
-  const auto app_state = AppState{.project = &project_,
-                                  .id_generator = &id_generator_,
+  const auto app_state = AppState{.id_generator = &id_generator_,
+                                  .project = &project_,
                                   .flow_calculator = &flow_calculator_,
                                   .widgets = &widgets_,
                                   .event_queue = &event_queue_};

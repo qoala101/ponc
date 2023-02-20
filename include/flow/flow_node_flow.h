@@ -26,10 +26,10 @@ struct NodeFlow {
   friend void operator+=(NodeFlow &left, const NodeFlow &right);
   // ---
   friend void operator+=(NodeFlow &left, float right);
-
-  // ---
-  friend auto GetPinFlow(const NodeFlow &flow, ne::PinId pin_id) -> float;
 };
+
+// ---
+auto GetPinFlow(NodeFlow &flow, ne::PinId pin_id) -> float &;
 }  // namespace esc::flow
 
 #endif  // VH_CORE_FLOW_H_

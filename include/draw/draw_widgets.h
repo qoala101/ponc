@@ -14,6 +14,7 @@
 #include "draw_node_popup.h"
 #include "draw_link_popup.h"
 #include "draw_node_editor.h"
+#include "draw_nodes.h"
 #include "draw_texture.h"
 #include "flow_calculator.h"
 
@@ -56,8 +57,8 @@ struct Widgets {
 
   // ---
   NodeEditor node_editor{};
-  // // ---
-  // Nodes nodes;
+  // ---
+  Nodes nodes;
   // // ---
   // Links links;
   // // ---

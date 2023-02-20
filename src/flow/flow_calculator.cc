@@ -94,11 +94,16 @@ void FlowCalculator::Recalculate(core::Project &project) {
 auto FlowCalculator::GetFlowTree() const -> const Tree & { return flow_tree_; }
 
 // ---
-auto FlowCalculator::GetCalculatedFlow(const core::INode &node) const
+auto FlowCalculator::GetCalculatedFlow(ne::NodeId node_id) const
     -> const NodeFlow & {
-  const auto node_id = node.GetId().Get();
-  Expects(node_flows_.contains(node_id));
-  return node_flows_.at(node_id);
+  // NOLINTNEXTLINE(*-const-cast)
+  return const_cast<FlowCalculator *>(this)->GetCalculatedFlow(node_id);
+}
+
+// ---
+auto FlowCalculator::GetCalculatedFlow(ne::NodeId node_id) -> NodeFlow & {
+  Expects(node_flows_.contains(node_id.Get()));
+  return node_flows_.at(node_id.Get());
 }
 
 // ---

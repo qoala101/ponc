@@ -5,12 +5,9 @@
 
 #include <memory>
 
-#include "core_family_id.h"
 #include "core_i_node.h"
 #include "cpp_interface.h"
 #include "crude_json.h"
-
-namespace ne = ax::NodeEditor;
 
 namespace esc::json {
 // ---
@@ -23,9 +20,7 @@ class INodeParser : public cpp::Interface {
  private:
   // ---
   virtual auto ParseFromJson
-      [[nodiscard]] (ne::NodeId parsed_id, core::FamilyId parsed_family_id,
-                     const std::optional<ne::PinId> &parsed_input_pin_id,
-                     std::vector<ne::PinId> parsed_output_pin_ids,
+      [[nodiscard]] (core::INode::ConstructorArgs parsed_args,
                      const crude_json::value &json) const
       -> std::shared_ptr<core::INode> = 0;
 };

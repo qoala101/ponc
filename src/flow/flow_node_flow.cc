@@ -46,7 +46,7 @@ void operator+=(NodeFlow &left, const NodeFlow &right) { left = left + right; }
 void operator+=(NodeFlow &left, float right) { left = left + right; }
 
 // ---
-auto GetPinFlow(const NodeFlow &flow, ne::PinId pin_id) -> float {
+auto GetPinFlow(NodeFlow &flow, ne::PinId pin_id) -> float & {
   const auto pin_id_as_number = pin_id.Get();
 
   if (flow.input_pin_flow.has_value() &&

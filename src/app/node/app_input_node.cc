@@ -6,7 +6,7 @@
 #include "app_state.h"
 #include "core_i_node.h"
 #include "core_id_generator.h"
-#include "coreui_flow_input_pin_drawer.h"
+#include "coreui_flow_pin_drawer.h"
 #include "coreui_i_family_drawer.h"
 #include "coreui_i_node_drawer.h"
 #include "coreui_i_pin_drawer.h"
@@ -36,10 +36,8 @@ auto CreateFamilyDrawer(std::shared_ptr<Family> family)
 // NOLINTNEXTLINE(*-multiple-inheritance)
 class Node : public core::INode, public std::enable_shared_from_this<Node> {
  public:
-  Node(ne::NodeId id, core::FamilyId family_id, ne::PinId output_pin_id,
-       float value = {6.F})
-      : INode{id, family_id, std::vector<ne::PinId>{output_pin_id}},
-        value_{value} {}
+  Node(ConstructorArgs args, float value = {6.F})
+      : INode{std::move(args)}, value_{value} {}
 
   auto CreateWriter() -> std::unique_ptr<json::INodeWriter> override {
     return CreateNodeWriter(shared_from_this());
@@ -58,14 +56,10 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
 
 class NodeParser : public json::INodeParser {
  private:
-  auto ParseFromJson(ne::NodeId parsed_id, core::FamilyId parsed_family_id,
-                     const std::optional<ne::PinId>& parsed_input_pin_id,
-                     std::vector<ne::PinId> parsed_output_pin_ids,
+  auto ParseFromJson(core::INode::ConstructorArgs parsed_args,
                      const crude_json::value& json) const
       -> std::shared_ptr<core::INode> override {
-    Expects(!parsed_output_pin_ids.empty());
-    return std::make_shared<Node>(parsed_id, parsed_family_id,
-                                  parsed_output_pin_ids[0],
+    return std::make_shared<Node>(std::move(parsed_args),
                                   json["value"].get<crude_json::number>());
   }
 };
@@ -97,13 +91,19 @@ class PinDrawer : public coreui::IPinDrawer {
 
   auto GetLabel [[nodiscard]] () const -> std::string override { return {}; }
 
-  auto GetKind [[nodiscard]] () const -> ne::PinKind override {
+  auto GetKind [[nodiscard]] () const -> std::optional<ne::PinKind> override {
     return ne::PinKind::Output;
   }
 
-  auto GetFloat [[nodiscard]] () -> float* override { return &node_->value_; }
+  auto GetFloat [[nodiscard]] () -> std::optional<float*> override {
+    return &node_->value_;
+  }
 
   auto IsEditable [[nodiscard]] () const -> bool override { return true; }
+
+  auto GetPinId [[nodiscard]] () const -> std::optional<ne::PinId> {
+    return node_->GetOutputPinIds()[0];
+  }
 
  private:
   std::shared_ptr<Node> node_{};
@@ -143,8 +143,10 @@ class Family : public core::IFamily,
 
   auto CreateNode(core::IdGenerator& id_generator)
       -> std::shared_ptr<core::INode> override {
-    return std::make_shared<Node>(id_generator.GetNext<ne::NodeId>(), GetId(),
-                                  id_generator.GetNext<ne::PinId>());
+    return std::make_shared<Node>(core::INode::ConstructorArgs{
+        .id = id_generator.GetNext<ne::NodeId>(),
+        .family_id = GetId(),
+        .output_pin_ids = id_generator.GetNextN<ne::PinId>(1)});
   }
 
   auto CreateNodeParser() -> std::unique_ptr<json::INodeParser> override {

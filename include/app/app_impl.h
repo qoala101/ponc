@@ -30,9 +30,9 @@ class AppImpl {
 
  private:
   // ---
-  core::Project project_{};
-  // ---
   core::IdGenerator id_generator_{};
+  // ---
+  core::Project project_{};
   // ---
   flow::FlowCalculator flow_calculator_{};
   // ---

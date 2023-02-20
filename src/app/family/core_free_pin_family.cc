@@ -95,11 +95,9 @@ class PinDrawer : public coreui::IPinDrawer {
 
   auto GetLabel [[nodiscard]] () const -> std::string override { return {}; }
 
-  auto GetKind [[nodiscard]] () const -> ne::PinKind override {
+  auto GetKind [[nodiscard]] () const -> std::optional<ne::PinKind> override {
     return pin_kind_;
   }
-
-  auto GetFloat [[nodiscard]] () -> float* override { return nullptr; }
 
   auto IsEditable [[nodiscard]] () const -> bool override { return false; }
 

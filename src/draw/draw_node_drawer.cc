@@ -1,7 +1,7 @@
 
 
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include "app_node_drawer.h"
+#include "draw_node_drawer.h"
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -60,9 +60,7 @@ auto NodeDrawer::AddPin(std::optional<ne::PinId> id, ne::PinKind kind)
     ne::BeginPin(*id, kind);
     ImGui::BeginHorizontal(id->AsPointer());
   } else {
-    static auto SOME_ID = 10000;
-
-    ImGui::BeginHorizontal(SOME_ID++);
+    ImGui::BeginHorizontal(layout_id_++);
   }
 
   return cpp::ScopeFunction{[id]() {

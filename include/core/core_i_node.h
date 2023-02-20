@@ -32,6 +32,18 @@ namespace core {
 class INode : public cpp::Interface {
  public:
   // ---
+  struct ConstructorArgs {
+    // ---
+    ne::NodeId id{};
+    // ---
+    FamilyId family_id{};
+    // ---
+    ne::PinId input_pin_id{};
+    // ---
+    std::vector<ne::PinId> output_pin_ids{};
+  };
+
+  // ---
   virtual auto CreateWriter [[nodiscard]] ()
   -> std::unique_ptr<json::INodeWriter> = 0;
 
@@ -55,11 +67,7 @@ class INode : public cpp::Interface {
 
  protected:
   // ---
-  INode(ne::NodeId id, FamilyId family_id,
-        std::vector<ne::PinId> output_pin_ids = {});
-  // ---
-  INode(ne::NodeId id, FamilyId family_id, ne::PinId input_pin_id,
-        std::vector<ne::PinId> output_pin_ids = {});
+  explicit INode(ConstructorArgs args);
 
  private:
   // ---
@@ -77,6 +85,10 @@ class INode : public cpp::Interface {
 
 // ---
 auto GetAllPinIds [[nodiscard]] (const INode &node) -> std::vector<ne::PinId>;
+
+// ---
+auto GetPinKind [[nodiscard]] (const INode &node, ne::PinId pin_id)
+-> ne::PinKind;
 }  // namespace core
 }  // namespace esc
 

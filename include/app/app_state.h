@@ -9,8 +9,8 @@ namespace esc {
 class EventQueue;
 
 namespace core {
-class Project;
 class IdGenerator;
+class Project;
 }  // namespace core
 
 namespace flow {
@@ -24,9 +24,9 @@ struct Widgets;
 // ---
 struct AppState {
   // ---
-  core::Project *project{};
-  // ---
   core::IdGenerator *id_generator{};
+  // ---
+  core::Project *project{};
   // ---
   flow::FlowCalculator *flow_calculator{};
   // ---

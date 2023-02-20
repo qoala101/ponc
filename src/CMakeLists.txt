@@ -115,12 +115,13 @@ macro(add_example_executable name)
 endmacro()
 
 add_example_executable(esc
-  # app/node/app_attenuator_node.cc
+  app/node/app_attenuator_node.cc
+
   # app/node/app_client_node.cc
   # app/node/app_coupler_node.cc
   app/node/app_input_node.cc
-  # app/node/app_splitter_node.cc
 
+  # app/node/app_splitter_node.cc
   app/app_app.cc
   app/app_events.cc
   app/app_impl.cc
@@ -128,7 +129,6 @@ add_example_executable(esc
 
   # core/family/core_free_pin_family.cc
   # core/family/core_placeholder_family.cc
-
   core/core_diagram.cc
   core/core_group.cc
   core/core_i_family.cc
@@ -136,9 +136,7 @@ add_example_executable(esc
   core/core_id_generator.cc
   core/core_project.cc
 
-  coreui/pin/coreui_empty_pin_drawer.cc
-  coreui/pin/coreui_flow_input_pin_drawer.cc
-  coreui/pin/coreui_flow_output_pin_drawer.cc
+  coreui/pin/coreui_flow_pin_drawer.cc
 
   coreui/coreui_i_family_drawer.cc
   coreui/coreui_i_node_drawer.cc
@@ -150,7 +148,6 @@ add_example_executable(esc
   # draw/dialog/draw_i_file_dialog.cc
   # draw/dialog/draw_open_file_dialog.cc
   # draw/dialog/draw_save_as_file_dialog.cc
-
   draw/editor/popup/draw_background_popup.cc
   draw/editor/popup/draw_i_popup.cc
   draw/editor/popup/draw_link_popup.cc
@@ -158,13 +155,15 @@ add_example_executable(esc
 
   # draw/editor/process/draw_delete_items_process.cc
   # draw/editor/process/draw_link_connection_process.cc
+  draw/editor/draw_flow_icon.cc
 
   # draw/editor/draw_groups.cc
   # draw/editor/draw_link_being_repinned.cc
   # draw/editor/draw_links.cc
   draw/editor/draw_node_editor.cc
-  # draw/editor/draw_nodes.cc
+  draw/editor/draw_nodes.cc
   draw/editor/draw_popups.cc
+
   # draw/editor/draw_tooltip.cc
 
   # draw/view/draw_families_view.cc
@@ -174,9 +173,9 @@ add_example_executable(esc
   # draw/view/draw_i_hideable.cc
   # draw/view/draw_settings_view.cc
 
-  # draw/app_node_drawer.cc
   # draw/draw_main_menu_bar.cc
   # draw/draw_main_window.cc
+  draw/draw_node_drawer.cc
   draw/draw_widgets.cc
 
   flow/flow_calculator.cc
@@ -189,7 +188,6 @@ add_example_executable(esc
   # json/json_i_node_parser.cc
   # json/json_i_node_writer.cc
   # json/json_link_serializer.cc
-
   main.cc
 )
 

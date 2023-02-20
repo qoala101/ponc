@@ -4,6 +4,8 @@
 
 #include "core_i_node.h"
 
+#include <imgui_node_editor.h>
+
 #include <algorithm>
 #include <ranges>
 #include <vector>
@@ -51,19 +53,11 @@ auto INode::GetInitialFlow() const -> flow::NodeFlow {
 }
 
 // ---
-INode::INode(ne::NodeId id, FamilyId family_id,
-             std::vector<ne::PinId> output_pin_ids)
-    : id_{id},
-      family_id_{family_id},
-      output_pin_ids_{std::move(output_pin_ids)} {}
-
-// ---
-INode::INode(ne::NodeId id, FamilyId family_id, ne::PinId input_pin_id,
-             std::vector<ne::PinId> output_pin_ids)
-    : id_{id},
-      family_id_{family_id},
-      input_pin_id_{input_pin_id},
-      output_pin_ids_{std::move(output_pin_ids)} {}
+INode::INode(ConstructorArgs args)
+    : id_{args.id},
+      family_id_{args.family_id},
+      input_pin_id_{args.input_pin_id},
+      output_pin_ids_{std::move(args.output_pin_ids)} {}
 
 // ---
 void INode::SetInitialFlowValues(flow::NodeFlow& /*unused*/) const {}
@@ -82,5 +76,16 @@ auto GetAllPinIds(const INode& node) -> std::vector<ne::PinId> {
   }
 
   return pin_ids;
+}
+
+// ---
+auto GetPinKind(const INode& node, ne::PinId pin_id) -> ne::PinKind {
+  const auto& input_pin_id = node.GetInputPinId();
+
+  if (input_pin_id.has_value() && (*input_pin_id == pin_id)) {
+    return ne::PinKind::Input;
+  }
+
+  return ne::PinKind::Output;
 }
 }  // namespace esc::core
