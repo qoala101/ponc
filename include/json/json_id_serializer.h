@@ -1,3 +1,7 @@
+/**
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ */
+
 #ifndef VH_JSON_ID_SERIALIZER_H_
 #define VH_JSON_ID_SERIALIZER_H_
 
@@ -9,7 +13,7 @@ struct IdSerializer {
   // ---
   template <typename Id>
   static auto ParseFromJson [[nodiscard]] (const crude_json::value &json) {
-    return Id{static_cast<uint64_t>(json.get<crude_json::number>())};
+    return Id{static_cast<uintptr_t>(json.get<crude_json::number>())};
   }
 
   // ---

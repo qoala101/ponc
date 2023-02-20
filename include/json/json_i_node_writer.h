@@ -1,3 +1,7 @@
+/**
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ */
+
 #ifndef VH_JSON_I_NODE_WRITER_H_
 #define VH_JSON_I_NODE_WRITER_H_
 

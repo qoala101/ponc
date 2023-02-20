@@ -1,3 +1,7 @@
+/**
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ */
+
 #ifndef VH_JSON_I_FAMILY_PARSER_H_
 #define VH_JSON_I_FAMILY_PARSER_H_
 
@@ -5,7 +9,6 @@
 
 #include "core_family_id.h"
 #include "core_i_family.h"
-#include "core_i_node.h"
 #include "cpp_interface.h"
 #include "crude_json.h"
 

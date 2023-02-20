@@ -1,89 +1,76 @@
+/**
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ */
+
 #include "json_diagram_serializer.h"
 
 #include <memory>
 
 #include "core_diagram.h"
+#include "core_family_id.h"
+#include "core_group.h"
+#include "core_i_node.h"
 #include "core_link.h"
+#include "cpp_assert.h"
 #include "crude_json.h"
-#include "json_i_family_writer.h"
+#include "json_container_serializer.h"
+#include "json_group_serializer.h"
+#include "json_i_node_parser.h"
+#include "json_i_node_writer.h"
+#include "json_id_serializer.h"
 #include "json_link_serializer.h"
 
 namespace esc::json {
 namespace {
-auto ParseFamilies [[nodiscard]] (
+// ---
+auto FindFamily
+    [[nodiscard]] (const std::vector<std::shared_ptr<core::IFamily>>& families,
+                   core::FamilyId family_id) -> auto& {
+  const auto family = std::ranges::find_if(
+      families,
+      [family_id](const auto& family) { return family->GetId() == family_id; });
+  Expects(family != families.end());
+  return *family;
+}
+
+// ---
+auto ParseNode [[nodiscard]] (
     const crude_json::value& json,
-    const std::vector<std::unique_ptr<IFamilyParser>>& family_parsers) {
-  const auto families_size = json["families_size"].get<crude_json::number>();
-  const auto& families_json = json["families"];
-
-  auto parsed_families = std::vector<std::shared_ptr<core::IFamily>>{};
-
-  for (auto i = 0; i < families_size; ++i) {
-    const auto& family_json = families_json[i];
-
-    for (const auto& parser : family_parsers) {
-      auto parsed_family = parser->TryToParseFromJson(family_json);
-
-      if (!parsed_family.has_value()) {
-        continue;
-      }
-
-      parsed_families.emplace_back(std::move(*parsed_family));
-    }
-  }
-
-  return parsed_families;
-}
-
-auto ParseLinks [[nodiscard]] (const crude_json::value& json) {
-  const auto links_size = json["links_size"].get<crude_json::number>();
-  const auto& links_json = json["links"];
-
-  auto parsed_links = std::vector<core::Link>{};
-
-  for (auto i = 0; i < links_size; ++i) {
-    parsed_links.emplace_back(LinkSerializer::ParseFromJson(links_json[i]));
-  }
-
-  return parsed_links;
-}
-
-void WriteFamilies(const std::vector<std::shared_ptr<core::IFamily>>& families,
-                   crude_json::value& json) {
-  json["families_size"] = static_cast<crude_json::number>(families.size());
-  auto& families_json = json["families"];
-
-  for (auto i = 0; i < static_cast<int>(families.size()); ++i) {
-    const auto& family = families[i];
-    families_json[i] = family->CreateWriter()->WriteToJson(*family);
-  }
-}
-
-void WriteLinks(const std::vector<core::Link>& links, crude_json::value& json) {
-  json["links_size"] = static_cast<crude_json::number>(links.size());
-  auto& links_json = json["links"];
-
-  for (auto i = 0; i < static_cast<int>(links.size()); ++i) {
-    links_json[i] = LinkSerializer::WriteToJson(links[i]);
-  }
+    const std::vector<std::shared_ptr<core::IFamily>>& families) {
+  const auto family_id =
+      IdSerializer::ParseFromJson<core::FamilyId>(json["family_id"]);
+  const auto& family = FindFamily(families, family_id);
+  return family->CreateNodeParser()->ParseFromJson(json);
 }
 }  // namespace
 
+// ---
 auto DiagramSerializer::ParseFromJson(
     const crude_json::value& json,
-    const std::vector<std::unique_ptr<IFamilyParser>>& family_parsers)
+    const std::vector<std::shared_ptr<core::IFamily>>& families)
     -> core::Diagram {
-  auto parsed_families = ParseFamilies(json, family_parsers);
-  auto parsed_links = ParseLinks(json);
-  return core::Diagram{std::move(parsed_families), std::move(parsed_links)};
+  auto nodes = ContainerSerializer::ParseFromJson<std::shared_ptr<core::INode>>(
+      json, "nodes",
+      [&families](const auto& json) { return ParseNode(json, families); });
+  auto links = ContainerSerializer::ParseFromJson<core::Link>(
+      json, "links", &LinkSerializer::ParseFromJson);
+  auto groups = ContainerSerializer::ParseFromJson<core::Group>(
+      json, "groups", &GroupSerializer::ParseFromJson);
+  return core::Diagram{std::move(nodes), std::move(links), std::move(groups)};
 }
 
+// ---
 auto DiagramSerializer::WriteToJson(const core::Diagram& diagram)
     -> crude_json::value {
   auto json = crude_json::value{};
-  WriteFamilies(diagram.GetFamilies(), json);
-  WriteLinks(diagram.GetLinks(), json);
-  // WritePositions
+  ContainerSerializer::WriteToJson(
+      json, diagram.GetNodes(), "nodes", [](const auto& node) {
+        return node->CreateWriter()->WriteToJson(*node);
+      });
+  ContainerSerializer::WriteToJson(json, diagram.GetLinks(), "links",
+                                   &LinkSerializer::WriteToJson);
+  ContainerSerializer::WriteToJson(json, diagram.GetGroups(), "groups",
+                                   &GroupSerializer::WriteToJson);
   return json;
 }
 }  // namespace esc::json

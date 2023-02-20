@@ -1,3 +1,7 @@
+/**
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ */
+
 #include "json_i_node_writer.h"
 
 #include "core_i_node.h"
@@ -6,24 +10,29 @@
 #include "json_id_serializer.h"
 
 namespace esc::json {
-namespace {
-void WritePinIds(const std::vector<ne::PinId>& pin_ids,
-                 crude_json::value& json) {
-  json["pin_ids_size"] = static_cast<crude_json::number>(pin_ids.size());
-  auto& pin_ids_json = json["pin_ids"];
-
-  for (auto i = 0; i < static_cast<int>(pin_ids.size()); ++i) {
-    pin_ids_json[i] = IdSerializer::WriteToJson(pin_ids[i]);
-  }
-}
-}  // namespace
-
+// ---
 auto INodeWriter::WriteToJson(const core::INode& node) const
     -> crude_json::value {
   auto json = crude_json::value{};
 
   json["id"] = IdSerializer::WriteToJson(node.GetId());
-  WritePinIds(node.GetPinIds(), json);
+  json["family_id"] = IdSerializer::WriteToJson(node.GetFamilyId());
+
+  const auto input_pin_id = node.GetInputPinId();
+  auto& input_pin_id_json = json["input_pin_id"];
+
+  if (input_pin_id.has_value()) {
+    input_pin_id_json = IdSerializer::WriteToJson(*input_pin_id);
+  }
+
+  const auto& output_pin_ids = node.GetOutputPinIds();
+  json["output_pin_ids_size"] =
+      static_cast<crude_json::number>(output_pin_ids.size());
+  auto& output_pin_ids_json = json["output_pin_ids"];
+
+  for (auto i = 0; i < static_cast<int>(output_pin_ids.size()); ++i) {
+    output_pin_ids_json[i] = IdSerializer::WriteToJson(output_pin_ids[i]);
+  }
 
   const auto position = node.GetPosition();
   json["pos_x"] = position.x;

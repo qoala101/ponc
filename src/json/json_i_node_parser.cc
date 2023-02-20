@@ -1,33 +1,39 @@
+/**
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ */
+
 #include "json_i_node_parser.h"
 
+#include "core_family_id.h"
 #include "core_i_node.h"
 #include "crude_json.h"
 #include "imgui_node_editor.h"
 #include "json_id_serializer.h"
 
 namespace esc::json {
-namespace {
-auto ParsePinIds [[nodiscard]] (const crude_json::value& json) {
-  const auto pin_ids_size = json["pin_ids_size"].get<crude_json::number>();
-  const auto& pin_ids_json = json["pin_ids"];
-
-  auto parsed_pin_ids = std::vector<ne::PinId>{};
-
-  for (auto i = 0; i < pin_ids_size; ++i) {
-    parsed_pin_ids.emplace_back(
-        IdSerializer::ParseFromJson<ne::PinId>(pin_ids_json[i]));
-  }
-
-  return parsed_pin_ids;
-}
-}  // namespace
-
+// ---
 auto INodeParser::ParseFromJson(const crude_json::value& json) const
     -> std::shared_ptr<core::INode> {
-  const auto parsed_id = IdSerializer::ParseFromJson<ne::NodeId>(json["id"]);
-  auto parsed_pin_ids = ParsePinIds(json);
-  auto parsed_node =
-      ParseFromJson(parsed_id, std::move(parsed_pin_ids), json["data"]);
+  auto parsed_args = core::INode::ConstructorArgs{
+      .id = IdSerializer::ParseFromJson<ne::NodeId>(json["id"]),
+      .family_id =
+          IdSerializer::ParseFromJson<core::FamilyId>(json["family_id"])};
+
+  if (json.contains("input_pin_id")) {
+    parsed_args.input_pin_id =
+        IdSerializer::ParseFromJson<ne::PinId>(json["input_pin_id"]);
+  }
+
+  const auto output_pin_ids_size =
+      json["output_pin_ids_size"].get<crude_json::number>();
+  const auto& output_pin_ids_json = json["output_pin_ids"];
+
+  for (auto i = 0; i < output_pin_ids_size; ++i) {
+    parsed_args.output_pin_ids.emplace_back(
+        IdSerializer::ParseFromJson<ne::PinId>(output_pin_ids_json[i]));
+  }
+
+  auto parsed_node = ParseFromJson(std::move(parsed_args), json["data"]);
 
   const auto parsed_position =
       ImVec2{static_cast<float>(json["pos_x"].get<crude_json::number>()),
