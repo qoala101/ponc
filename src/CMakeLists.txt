@@ -145,26 +145,25 @@ add_example_executable(esc
   cpp/cpp_assert.cc
   cpp/cpp_scope_function.cc
 
-  # draw/dialog/draw_i_file_dialog.cc
-  # draw/dialog/draw_open_file_dialog.cc
-  # draw/dialog/draw_save_as_file_dialog.cc
+  draw/dialog/draw_i_file_dialog.cc
+  draw/dialog/draw_open_file_dialog.cc
+  draw/dialog/draw_save_as_file_dialog.cc
   draw/editor/popup/draw_background_popup.cc
   draw/editor/popup/draw_i_popup.cc
   draw/editor/popup/draw_link_popup.cc
   draw/editor/popup/draw_node_popup.cc
 
   # draw/editor/process/draw_delete_items_process.cc
-  # draw/editor/process/draw_link_connection_process.cc
   draw/editor/draw_flow_icon.cc
 
   # draw/editor/draw_groups.cc
-  # draw/editor/draw_link_being_repinned.cc
-  # draw/editor/draw_links.cc
+  draw/editor/draw_links.cc
+  draw/editor/draw_new_link.cc
   draw/editor/draw_node_editor.cc
   draw/editor/draw_nodes.cc
   draw/editor/draw_popups.cc
 
-  # draw/editor/draw_tooltip.cc
+  draw/editor/draw_tooltip.cc
 
   # draw/view/draw_families_view.cc
   # draw/view/draw_flow_tree_view.cc
@@ -172,9 +171,7 @@ add_example_executable(esc
   # draw/view/draw_groups_view.cc
   # draw/view/draw_i_hideable.cc
   # draw/view/draw_settings_view.cc
-
-  # draw/draw_main_menu_bar.cc
-  # draw/draw_main_window.cc
+  draw/draw_main_menu_bar.cc
   draw/draw_node_drawer.cc
   draw/draw_widgets.cc
 
@@ -182,12 +179,16 @@ add_example_executable(esc
   flow/flow_node_flow.cc
   flow/flow_tree.cc
 
-  # json/json_diagram_serializer.cc
-  # json/json_i_family_parser.cc
-  # json/json_i_family_writer.cc
-  # json/json_i_node_parser.cc
-  # json/json_i_node_writer.cc
-  # json/json_link_serializer.cc
+  json/json_diagram_serializer.cc
+  json/json_group_serializer.cc
+  json/json_i_family_parser.cc
+  json/json_i_family_writer.cc
+  json/json_i_node_parser.cc
+  json/json_i_node_writer.cc
+  json/json_link_serializer.cc
+  json/json_project_serializer.cc
+  json/json_settings_serializer.cc
+
   main.cc
 )
 

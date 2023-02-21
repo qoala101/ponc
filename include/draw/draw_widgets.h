@@ -13,6 +13,7 @@
 #include "draw_background_popup.h"
 #include "draw_link_popup.h"
 #include "draw_links.h"
+#include "draw_new_link.h"
 #include "draw_node_editor.h"
 #include "draw_node_popup.h"
 #include "draw_nodes.h"
@@ -61,11 +62,11 @@ struct Widgets {
   // ---
   NodeEditor node_editor{};
   // ---
+  NewLink new_link{};
+  // ---
   Nodes nodes;
   // ---
   Links links{};
-  // // ---
-  // LinkBeingRepinned link_being_repinned;
   // // ---
   // LinkConnectionProcess link_connection_process;
 

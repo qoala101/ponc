@@ -10,7 +10,8 @@ auto LinkPopup::GetLabel() const -> std::string { return "Link"; }
 
 void LinkPopup::DrawItems(const AppState& app_state) {
   if (ImGui::MenuItem("Delete")) {
-    // app_state.event_queue->PostEvent(event::DeleteLink{.link_id = link_id_});
+    // app_state.event_queue->PostEvent(Events::DeleteLink{.link_id =
+    // link_id_});
   }
 }
 }  // namespace esc::draw

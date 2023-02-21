@@ -33,7 +33,6 @@ AppImpl::AppImpl(const Textures &textures)
 void AppImpl::OnFrame() {
   const auto app_state = AppState{.id_generator = &id_generator_,
                                   .project = &project_,
-                                  .flow_calculator = &flow_calculator_,
                                   .widgets = &widgets_,
                                   .event_queue = &event_queue_};
 

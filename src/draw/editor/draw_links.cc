@@ -1,59 +1,111 @@
+/**
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ */
+
 #include "draw_links.h"
 
-#include "app_state.h"
-#include "imgui.h"
+#include <imgui.h>
+
+#include "app_events.h"
+#include "core_diagram.h"
+#include "core_i_node.h"
+#include "cpp_assert.h"
+#include "flow_tree.h"
 #include "imgui_node_editor.h"
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include <imgui_internal.h>
+
+#include "app_state.h"
+#include "core_project.h"
+#include "cpp_scope.h"
+#include "draw_tooltip.h"
+#include "draw_widgets.h"
+#include "imgui_bezier_math.h"
 
 namespace esc::draw {
+namespace {
+auto GetCurve(const ImVec2& m_Start, const ImVec2& m_End, ne::PinKind kind) {
+  const auto strength = ne::GetStyle().LinkStrength;
+  const auto start_dir = kind == ne::PinKind::Output
+                             ? ne::GetStyle().SourceDirection
+                             : ne::GetStyle().TargetDirection;
+  const auto end_dir = kind == ne::PinKind::Input
+                           ? ne::GetStyle().SourceDirection
+                           : ne::GetStyle().TargetDirection;
 
-Links::Links(std::shared_ptr<std::optional<NewLink>> new_link)
-    : new_link_{std::move(new_link)} {}
+  auto easeLinkStrength = [](const ImVec2& a, const ImVec2& b, float strength) {
+    const auto distanceX = b.x - a.x;
+    const auto distanceY = b.y - a.y;
+    const auto distance = ImSqrt(distanceX * distanceX + distanceY * distanceY);
+    const auto halfDistance = distance * 0.5f;
 
-void Links::Draw(AppState& app_state) {
-  // const auto* existing_link_from_same_pin =
-  // state.GetExistingLinkFromSamePin();
+    if (halfDistance < strength)
+      strength = strength * ImSin(IM_PI * 0.5f * halfDistance / strength);
 
-  for (const auto& link : state.core_state->diagram_.GetLinks()) {
-    // if (state.draw_state->not_yet_connected_pin_of_new_link_id.has_value())
-    // {
-    //   const auto pin_id =
-    //   *state.draw_state->not_yet_connected_pin_of_new_link_id; const auto&
-    //   node = state.core_state->diagram_.FindPinNode(pin_id);
+    return strength;
+  };
 
-    //   // std::cout << node->GetId().Get() << "\n";
+  const auto startStrength = easeLinkStrength(m_Start, m_End, strength);
+  const auto endStrength = easeLinkStrength(m_Start, m_End, strength);
+  const auto cp0 = m_Start + start_dir * startStrength;
+  const auto cp1 = m_End + end_dir * endStrength;
 
-    //   if (pin_id == link.start_pin_id || pin_id == link.end_pin_id) {
-    //     ne::Link(link.id, link.start_pin_id, link.end_pin_id,
-    //              ImColor{255, 0, 0}, 0.0F);
+  ImCubicBezierPoints result;
+  result.P0 = m_Start;
+  result.P1 = cp0;
+  result.P2 = cp1;
+  result.P3 = m_End;
 
-    //     continue;
-    //   }
-    // }
+  return result;
+}
+}  // namespace
 
-    auto alpha = 1.0F;
-
-    if (new_link_->has_value()) {
-      if ((*new_link_)->rebind.has_value()) {
-        if ((*new_link_)->rebind->rebinding_link_id == link.id) {
-          alpha = 0.25F;
-        }
-      }
-    }
-
-    // if (&link != existing_link_from_same_pin) {
-    const auto& node =
-        state.core_state->diagram_.FindPinNode(link.start_pin_id);
-    const auto node_flow =
-        state.core_state->flow_calculator_.GetCalculatedFlow(*node);
-    const auto flow = GetPinFlow(node_flow, link.start_pin_id);
-
-    auto color = state.core_state->flow_colors_.GetColorForFlowValue(flow);
-    color.Value.w = alpha;
-
-    ne::Link(link.id, link.start_pin_id, link.end_pin_id, color, 2.0F);
-
-    // ne::Flow(link.id);
-    // }
+// ---
+void Links::Draw(const AppState& app_state) {
+  for (const auto& link : app_state.project->GetDiagram().GetLinks()) {
+    const auto color = ImColor{255, 255, 255};
+    ne::Link(link.id, link.start_pin_id, link.end_pin_id, color, 2.F);
   }
+
+  DrawLinkBeingRepinned(app_state);
+}
+
+void Links::DrawLinkBeingRepinned(const AppState& app_state) {
+  if (!app_state.widgets->new_link.IsVisible()) {
+    return;
+  }
+
+  const auto dragged_from_pin = app_state.widgets->new_link.GetDraggedFromPin();
+  const auto link_to_repin =
+      FindPinLink(app_state.project->GetDiagram(), dragged_from_pin);
+
+  if (!link_to_repin.has_value()) {
+    return;
+  }
+
+  const auto fixed_pin_id = (dragged_from_pin == (*link_to_repin)->start_pin_id)
+                                ? (*link_to_repin)->end_pin_id
+                                : (*link_to_repin)->start_pin_id;
+  const auto fixed_pin_kind = (fixed_pin_id == (*link_to_repin)->start_pin_id)
+                                  ? ne::PinKind::Output
+                                  : ne::PinKind::Input;
+  const auto fixed_pin_position =
+      app_state.widgets->nodes.GetPinPosition(fixed_pin_id);
+
+  const auto curve =
+      GetCurve(fixed_pin_position, ImGui::GetMousePos(), fixed_pin_kind);
+
+  auto color = ImColor{255, 255, 255};
+
+  // if (new_link_->pin_hovered_over.has_value()) {
+  //   // if (!CanConnectFromPinToPin(*state.core_state, *new_link_,
+  //   //                             new_link_->pin_dragged_from,
+  //   //                             *new_link_->pin_hovered_over)) {
+  //   //   color = ImColor{255, 0, 0};
+  //   // }
+  // }
+
+  auto* drawList = ImGui::GetWindowDrawList();
+  drawList->AddBezierCubic(curve.P0, curve.P1, curve.P2, curve.P3, color, 2.0F);
 }
 }  // namespace esc::draw

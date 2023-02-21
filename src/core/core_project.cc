@@ -5,7 +5,6 @@
 #include "core_project.h"
 
 #include "core_diagram.h"
-#include "cpp_assert.h"
 
 namespace esc::core {
 // ---
@@ -28,7 +27,7 @@ Project::Project(std::vector<std::shared_ptr<IFamily>> families,
 }
 
 // ---
-auto Project::GetFamilies [[nodiscard]] () const
+auto Project::GetFamilies() const
     -> const std::vector<std::shared_ptr<IFamily>>& {
   return families_;
 }
@@ -48,11 +47,20 @@ auto Project::GetFamilies [[nodiscard]] () const
 // }
 
 // ---
-auto Project::GetDiagram [[nodiscard]] () const -> const Diagram& {
+auto Project::GetDiagram() const -> const Diagram& {
   // NOLINTNEXTLINE(*-const-cast)
   return const_cast<Project*>(this)->GetDiagram();
 }
 
 // ---
-auto Project::GetDiagram [[nodiscard]] () -> Diagram& { return diagram_; }
+auto Project::GetDiagram() -> Diagram& { return diagram_; }
+
+// ---
+auto Project::GetSettings() const -> const Settings& {
+  // NOLINTNEXTLINE(*-const-cast)
+  return const_cast<Project*>(this)->GetSettings();
+}
+
+// ---
+auto Project::GetSettings() -> Settings& { return settings_; }
 }  // namespace esc::core

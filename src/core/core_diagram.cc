@@ -62,7 +62,7 @@ void Diagram::EraseLink(ne::LinkId link_id) {
 }
 
 // ---
-auto Diagram::GetGroups() -> const std::vector<Group>& { return groups_; }
+auto Diagram::GetGroups() const -> const std::vector<Group>& { return groups_; }
 
 // ---
 auto Diagram::EmplaceGroup(Group group) -> Group& {
@@ -77,6 +77,32 @@ void Diagram::EraseGroup(const Group& group) {
 
   Expects(found_group != groups_.end());
   groups_.erase(found_group);
+}
+
+// ---
+auto FindPinNode(const Diagram& diagram, ne::PinId pin_id)
+    -> const std::shared_ptr<INode>& {
+  for (const auto& node : diagram.GetNodes()) {
+    for (const auto node_pin_id : GetAllPinIds(*node)) {
+      if (node_pin_id == pin_id) {
+        return node;
+      }
+    }
+  }
+
+  Expects(false);
+}
+
+// ---
+auto FindPinLink(const Diagram& diagram, ne::PinId pin_id)
+    -> std::optional<const Link*> {
+  for (const auto& link : diagram.GetLinks()) {
+    if ((link.start_pin_id == pin_id) || (link.end_pin_id == pin_id)) {
+      return &link;
+    }
+  }
+
+  return std::nullopt;
 }
 
 // // ---
@@ -99,20 +125,6 @@ void Diagram::EraseGroup(const Group& group) {
 //       return;
 //     }
 //   }
-// }
-
-// auto Diagram::FindPinNode(ne::PinId id) -> const std::shared_ptr<INode>& {
-//   for (const auto& family : families_) {
-//     for (const auto& node : family->GetNodes()) {
-//       for (const auto pin_id : node->GetPinIds()) {
-//         if (pin_id == id) {
-//           return node;
-//         }
-//       }
-//     }
-//   }
-
-//   Expects(false);
 // }
 
 // auto Diagram::FindLink(ne::LinkId id) -> Link& {

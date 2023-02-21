@@ -13,10 +13,6 @@ class IdGenerator;
 class Project;
 }  // namespace core
 
-namespace flow {
-class FlowCalculator;
-}  // namespace flow
-
 namespace draw {
 struct Widgets;
 }  // namespace draw
@@ -27,8 +23,6 @@ struct AppState {
   core::IdGenerator *id_generator{};
   // ---
   core::Project *project{};
-  // ---
-  flow::FlowCalculator *flow_calculator{};
   // ---
   draw::Widgets *widgets{};
   // ---

@@ -39,6 +39,6 @@ void SaveAsFileDialog::OnFileSelected(const AppState& app_state,
   }
 
   app_state.event_queue->PostEvent(
-      event::SaveProjectToFile{.file_path = std::move(file_path)});
+      Events::SaveProjectToFile{.file_path = std::move(file_path)});
 }
 }  // namespace esc::draw

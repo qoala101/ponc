@@ -4,6 +4,9 @@
 
 #include "draw_nodes.h"
 
+#include <iostream>
+#include <optional>
+
 #include "app_state.h"
 #include "core_i_node.h"
 #include "core_project.h"
@@ -11,7 +14,9 @@
 #include "coreui_i_pin_drawer.h"
 #include "cpp_assert.h"
 #include "draw_flow_icon.h"
+#include "draw_new_link.h"
 #include "draw_node_drawer.h"
+#include "draw_widgets.h"
 #include "flow_calculator.h"
 #include "flow_node_flow.h"
 #include "imgui.h"
@@ -29,33 +34,33 @@ void DrawHeader(const coreui::INodeDrawer& node_drawer) {
 }
 
 // ---
-auto IsFlowPin [[nodiscard]] (const coreui::IPinDrawer& pin_drawer) {
-  return pin_drawer.GetPinId().has_value();
+void DrawEmptyPinArea(ImVec2 area_size, bool pin_editable) {
+  if (pin_editable) {
+    area_size.x -= 4;
+  }
+
+  ImGui::Dummy(area_size);
 }
 
 // ---
-auto GetPinIconAreaSize [[nodiscard]] (const coreui::IPinDrawer& pin_drawer) {
-  if (IsFlowPin(pin_drawer)) {
-    return ImVec2{24, 24};
-  }
+auto GetPinIconAlpha [[nodiscard]] (const std::optional<NewLink>& new_link) {
+  auto alpha = 255;
 
-  if (pin_drawer.IsEditable()) {
-    return ImVec2{20, 24};
-  }
+  // if (new_link.has_value()) {
+  //   if (!new_link
+  //            ->CanConnectToPin(app_state.project->GetDiagram(),
+  //                              *pin_drawer.GetPinId())
+  //            .valid) {
+  //     alpha /= 2;
+  //   }
+  // }
 
-  return ImVec2{24, 24};
+  return alpha;
 }
 
 // ---
-void DrawPinIconArea(const coreui::IPinDrawer& pin_drawer) {
-  const auto size = GetPinIconAreaSize(pin_drawer);
-
-  if (IsFlowPin(pin_drawer) && ImGui::IsRectVisible(size)) {
-    const auto stroke_color = ImColor{255, 255, 255};
-    DrawFlowIcon(size, stroke_color, false);
-  }
-
-  ImGui::Dummy(size);
+auto GetPinIconColor [[nodiscard]] (const std::optional<NewLink>& new_link) {
+  const auto color = ImColor{255, 255, 255, GetPinIconAlpha(new_link)};
 }
 
 // ---
@@ -126,14 +131,23 @@ Nodes::Nodes(const Texture& node_header_texture)
 // ---
 void Nodes::Draw(const AppState& app_state) {
   for (const auto& node : app_state.project->GetDiagram().GetNodes()) {
-    auto& node_flow =
-        app_state.flow_calculator->GetCalculatedFlow(node->GetId());
-    DrawNode(*node, node_flow);
+    DrawNode(app_state, *node);
   }
 }
 
 // ---
-void Nodes::DrawNode(core::INode& node, flow::NodeFlow& node_flow) {
+auto Nodes::GetPinPosition(ne::PinId pin_id) const -> const ImVec2& {
+  std::cout << "pin_positions_.size() " << pin_positions_.size() << "\n";
+
+  for (const auto &a : pin_positions_) {
+    std::cout << pin_id.Get() << " " << a.first << "\n";
+  }
+
+  return pin_positions_.at(pin_id.Get());
+}
+
+// ---
+void Nodes::DrawNode(const AppState& app_state, core::INode& node) {
   const auto node_drawer = node.CreateDrawer();
   auto node_builder = esc::NodeDrawer{node.GetId()};
 
@@ -144,6 +158,10 @@ void Nodes::DrawNode(core::INode& node, flow::NodeFlow& node_flow) {
     DrawHeader(*node_drawer);
   }
 
+  auto flow_calculator = flow::FlowCalculator{};
+  flow_calculator.Recalculate(*app_state.project);
+  auto node_flow = flow_calculator.GetCalculatedFlow(node.GetId());
+
   for (const auto& pin_drawer : node_drawer->CreatePinDrawers()) {
     const auto pin_kind = GetPinKind(*pin_drawer, node);
 
@@ -152,13 +170,65 @@ void Nodes::DrawNode(core::INode& node, flow::NodeFlow& node_flow) {
           node_builder.AddPin(pin_drawer->GetPinId(), pin_kind);
 
       if (pin_kind == ne::PinKind::Input) {
-        DrawPinIconArea(*pin_drawer);
+        DrawPinIconArea(app_state, *pin_drawer);
         DrawPinField(*pin_drawer, node_flow);
       } else {
         DrawPinField(*pin_drawer, node_flow);
-        DrawPinIconArea(*pin_drawer);
+        DrawPinIconArea(app_state, *pin_drawer);
       }
     }
   }
+}
+
+// ---
+void Nodes::DrawPinIconArea(const AppState& app_state,
+                            const coreui::IPinDrawer& pin_drawer) {
+  const auto pin_id = pin_drawer.GetPinId();
+  const auto area_size = ImVec2{24, 24};
+
+  if (!pin_id.has_value()) {
+    DrawEmptyPinArea(area_size, pin_drawer.IsEditable());
+    return;
+  }
+
+  pin_positions_[pin_id->Get()] = ImGui::GetItemRectMin();
+
+  if (!ImGui::IsRectVisible(area_size)) {
+    return;
+  }
+
+  auto alpha = 255;
+
+  if (app_state.widgets->new_link.IsVisible()) {
+    if (!app_state.widgets->new_link.CanConnectToPin(app_state,
+                                                     *pin_drawer.GetPinId())) {
+      alpha /= 2;
+    }
+  }
+
+  const auto color = ImColor{255, 255, 255, alpha};
+  const auto filled =
+      FindPinLink(app_state.project->GetDiagram(), *pin_drawer.GetPinId())
+          .has_value();
+  DrawFlowIcon(area_size, color, filled);
+  ImGui::Dummy(area_size);
+
+  // pin_positions_[pin_id->Get()] = ImGui::GetItemRectMin();
+
+  // if (new_link_->has_value()) {
+  //   if ((*new_link_)->rebind.has_value()) {
+  //     if ((*new_link_)->rebind->fixed_pin == pin_id) {
+  //       const auto rect =
+  //           ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
+
+  //       const auto end_pos =
+  //           (pin_kind == ax::NodeEditor::PinKind::Input)
+  //               ? ImVec2{rect.Min.x, (rect.Min.y + rect.Max.y) * 0.5f}
+  //               : ImVec2{rect.Max.x, (rect.Min.y + rect.Max.y) * 0.5f};
+
+  //       (*new_link_)->rebind->fixed_pin_pos = end_pos;
+  //     }
+  //   }
+  // }
 }
 }  // namespace esc::draw

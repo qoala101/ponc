@@ -1,23 +1,26 @@
+/**
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ */
+
 #ifndef VH_DRAW_LINKS_H_
 #define VH_DRAW_LINKS_H_
 
-#include <memory>
+#include <imgui_node_editor.h>
 
-#include "draw_new_link.h"
+#include <optional>
+#include <string_view>
 
-namespace esc {
-class State;
-}  // namespace esc
+#include "app_state.h"
 
 namespace esc::draw {
+// ---
 class Links {
  public:
-  explicit Links(std::shared_ptr<std::optional<NewLink>> new_link);
-
-  void Draw(const AppState &app_state);
+  // ---
+  void Draw(const AppState& app_state);
 
  private:
-  std::shared_ptr<std::optional<NewLink>> new_link_{};
+  void DrawLinkBeingRepinned(const AppState& app_state);
 };
 }  // namespace esc::draw
 

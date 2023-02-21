@@ -19,6 +19,7 @@ void NodeEditor::Draw(const AppState &app_state) {
   // widgets.link_being_repinned.Draw(state);
   // draw::DrawGroups(state);
   // widgets.links.Draw(state);
+  app_state.widgets->new_link.Draw(app_state);
   app_state.widgets->nodes.Draw(app_state);
   app_state.widgets->links.Draw(app_state);
   // widgets.link_connection_process.Draw(state);

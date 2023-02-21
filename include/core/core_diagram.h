@@ -39,7 +39,7 @@ class Diagram {
   void EraseLink(ne::LinkId link_id);
 
   // ---
-  auto GetGroups [[nodiscard]] () -> const std::vector<Group> &;
+  auto GetGroups [[nodiscard]] () const -> const std::vector<Group> &;
   // ---
   auto EmplaceGroup(Group group) -> Group &;
   // ---
@@ -54,11 +54,18 @@ class Diagram {
   std::vector<Group> groups_{};
 };
 
+// ---
+auto FindPinNode [[nodiscard]] (const Diagram &diagram, ne::PinId pin_id)
+-> const std::shared_ptr<INode> &;
+
+// ---
+auto FindPinLink [[nodiscard]] (const Diagram &diagram, ne::PinId pin_id)
+-> std::optional<const Link *>;
+
 // // ---
 // auto FindNode [[nodiscard]] (const Diagram &diagram, ne::NodeId node_id)
 // -> const std::shared_ptr<INode> &;
 
-// auto FindPinNode(ne::PinId id) -> const std::shared_ptr<INode> &;
 // auto FindLink(ne::LinkId id) -> Link &;
 // auto FindLinkFromPin(ne::PinId pin_id) -> const Link *;
 

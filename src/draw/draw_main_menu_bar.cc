@@ -36,7 +36,7 @@ void DrawFileMenu(const AppState& app_state) {
     ImGui::Separator();
 
     if (ImGui::MenuItem("Reset")) {
-      // app_state.event_queue->PostEvent(event::ResetDiagram{});
+      // app_state.event_queue->PostEvent(Events::ResetDiagram{});
     }
   }
 

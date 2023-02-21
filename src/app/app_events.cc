@@ -7,10 +7,12 @@
 #include "app_splitter_node.h"
 #include "app_state.h"
 #include "core_i_node.h"
+#include "core_project.h"
 #include "draw_widgets.h"
-#include "json_diagram_serializer.h"
+#include "imgui_node_editor.h"
+#include "json_project_serializer.h"
 
-namespace esc::event {
+namespace esc {
 // namespace {
 // auto CreateFamilies() {
 //   auto families = std::vector<std::shared_ptr<core::IFamily>>{
@@ -30,58 +32,63 @@ namespace esc::event {
 //   return families;
 // }
 
-// auto CreateFamilyParsers() {
-//   auto family_parsers = std::vector<std::unique_ptr<json::IFamilyParser>>{};
-//   family_parsers.emplace_back(InputNode::CreateFamilyParser());
-//   family_parsers.emplace_back(ClientNode::CreateFamilyParser());
-//   family_parsers.emplace_back(CouplerNode::CreateFamilyParser());
-//   family_parsers.emplace_back(SplitterNode::CreateFamilyParser());
-//   family_parsers.emplace_back(AttenuatorNode::CreateFamilyParser());
-//   family_parsers.emplace_back(core::PlaceholderFamily::CreateParser());
-//   return family_parsers;
-// }
+// ---
+auto CreateFamilyParsers [[nodiscard]] () {
+  auto family_parsers = std::vector<std::unique_ptr<json::IFamilyParser>>{};
+  family_parsers.emplace_back(InputNode::CreateFamilyParser());
+  // family_parsers.emplace_back(ClientNode::CreateFamilyParser());
+  // family_parsers.emplace_back(CouplerNode::CreateFamilyParser());
+  // family_parsers.emplace_back(SplitterNode::CreateFamilyParser());
+  family_parsers.emplace_back(AttenuatorNode::CreateFamilyParser());
+  // family_parsers.emplace_back(core::PlaceholderFamily::CreateParser());
+  return family_parsers;
+}
 
-// auto FindMaxId(const core::Diagram &diagram) {
-//   auto max_id = uintptr_t{1};
+// ---
+auto FindMaxId [[nodiscard]] (const core::Project &project) {
+  auto max_id = uintptr_t{1};
 
-//   for (const auto &family : diagram.GetFamilies()) {
-//     for (const auto &node : family->GetNodes()) {
-//       max_id = std::max(node->GetId().Get(), max_id);
+  for (const auto &family : project.GetFamilies()) {
+    max_id = std::max(family->GetId().Get(), max_id);
+  }
 
-//       for (const auto pin_id : core::GetAllPinIds(*node)) {
-//         max_id = std::max(pin_id.Get(), max_id);
-//       }
-//     }
-//   }
+  const auto &diagram = project.GetDiagram();
 
-//   for (const auto &link : diagram.GetLinks()) {
-//     max_id = std::max(link.id.Get(), max_id);
-//   }
+  for (const auto &node : diagram.GetNodes()) {
+    max_id = std::max(node->GetId().Get(), max_id);
 
-//   return max_id;
-// }
+    for (const auto pin_id : core::GetAllPinIds(*node)) {
+      max_id = std::max(pin_id.Get(), max_id);
+    }
+  }
+
+  for (const auto &link : diagram.GetLinks()) {
+    max_id = std::max(link.id.Get(), max_id);
+  }
+
+  return max_id;
+}
 // }  // namespace
 
-void OpenProjectFromFile::operator()(const AppState &state) const {
+void Events::OpenProjectFromFile::operator()(const AppState &app_state) const {
   // ResetDiagram{}(state);
 
-  // const auto json = crude_json::value::load(file_path.data()).first;
+  const auto json = crude_json::value::load(file_path).first;
 
-  // auto diagram =
-  //     json::DiagramSerializer::ParseFromJson(json, CreateFamilyParsers());
-  // auto max_id = FindMaxId(diagram);
+  auto project =
+      json::ProjectSerializer::ParseFromJson(json, CreateFamilyParsers());
+  auto max_id = FindMaxId(project);
 
-  // state.core_state->diagram_ = std::move(diagram);
-  // state.core_state->id_generator_ = core::IdGenerator{max_id + 1};
+  *app_state.project = std::move(project);
+  *app_state.id_generator = core::IdGenerator{max_id + 1};
 }
 
-void SaveProjectToFile::operator()(const AppState &state) const {
-  // const auto &diagram = state.core_state->diagram_;
-  // const auto json = json::DiagramSerializer::WriteToJson(diagram);
-  // json.save(file_path.data());
+void Events::SaveProjectToFile::operator()(const AppState &app_state) const {
+  const auto json = json::ProjectSerializer::WriteToJson(*app_state.project);
+  json.save(file_path);
 }
 
-// void ResetDiagram::operator()(const AppState &state) const {
+// void ResetDiagram::operator()(const AppState &app_state) const {
 //   const auto &diagram = state.core_state->diagram_;
 //   const auto &links = diagram.GetLinks();
 
@@ -102,7 +109,7 @@ void SaveProjectToFile::operator()(const AppState &state) const {
 // }
 
 // ---
-void CreateNode::operator()(const AppState &app_state) const {
+void Events::CreateNode::operator()(const AppState &app_state) const {
   auto family_lock = family.lock();
 
   if (family_lock == nullptr) {
@@ -115,7 +122,15 @@ void CreateNode::operator()(const AppState &app_state) const {
   app_state.project->GetDiagram().EmplaceNode(std::move(new_node));
 }
 
-// void DeleteNode::operator()(const AppState &state) const {
+// ---
+void Events::CreateLink::operator()(const AppState &app_state) const {
+  app_state.project->GetDiagram().EmplaceLink(
+      {.id = app_state.id_generator->GetNext<ne::LinkId>(),
+       .start_pin_id = start_pin_id,
+       .end_pin_id = end_pin_id});
+}
+
+// void DeleteNode::operator()(const AppState &app_state) const {
 //   auto &diagram = state.core_state->diagram_;
 //   const auto node = FindNode(diagram, node_id);
 //   const auto node_flow = node.GetInitialFlow();
@@ -159,7 +174,7 @@ void CreateNode::operator()(const AppState &app_state) const {
 //   }
 // }
 
-// void DeleteNodeWithLinks::operator()(const AppState &state) const {
+// void DeleteNodeWithLinks::operator()(const AppState &app_state) const {
 //   auto &diagram = state.core_state->diagram_;
 //   const auto &links = diagram.GetLinks();
 //   const auto &node = diagram.FindNode(node_id);
@@ -191,12 +206,12 @@ void CreateNode::operator()(const AppState &app_state) const {
 //   state.core_state->diagram_.EraseNode(node_id);
 // }
 
-// void DeleteLink::operator()(const AppState &state) const {
+// void DeleteLink::operator()(const AppState &app_state) const {
 //   ne::DeleteLink(link_id);
 //   state.core_state->diagram_.EraseLink(link_id);
 // }
 
-// void CreateGroup::operator()(const AppState &state) const {
+// void CreateGroup::operator()(const AppState &app_state) const {
 //   // auto nodes = std::vector<std::shared_ptr<INode>>{};
 
 //   // for (const auto node_id : node_ids) {
@@ -209,4 +224,4 @@ void CreateNode::operator()(const AppState &app_state) const {
 
 //   // auto &group = state.core_state->diagram_.EmplaceGroup(node_ids);
 // }
-}  // namespace esc::event
+}  // namespace esc

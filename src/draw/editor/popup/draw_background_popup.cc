@@ -81,7 +81,7 @@ void BackgroundPopup::DrawItems(const AppState& app_state) {
               IdLabel(family->CreateDrawer()->GetLabel(), family->GetId())
                   .c_str())) {
         app_state.event_queue->PostEvent(
-            event::CreateNode{.family = family, .position = position_});
+            Events::CreateNode{.family = family, .position = position_});
       }
     }
 

@@ -6,9 +6,7 @@
 #define VH_CORE_PROJECT_H_
 
 #include "core_diagram.h"
-// #include "core_free_pin_family.h"
 #include "core_i_family.h"
-// #include "core_placeholder_family.h"
 #include "core_settings.h"
 
 namespace esc::core {
@@ -26,6 +24,10 @@ class Project {
   auto GetDiagram [[nodiscard]] () const -> const Diagram &;
   // ---
   auto GetDiagram [[nodiscard]] () -> Diagram &;
+  // ---
+  auto GetSettings [[nodiscard]] () const -> const Settings &;
+  // ---
+  auto GetSettings [[nodiscard]] () -> Settings &;
 
  private:
   // ---

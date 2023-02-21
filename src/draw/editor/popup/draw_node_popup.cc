@@ -15,11 +15,11 @@ auto NodePopup::GetLabel() const -> std::string { return "Node"; }
 void NodePopup::DrawItems(const AppState& app_state) {
   if (ImGui::MenuItem("Delete With Links")) {
     // state.event_queue->PostEvent(
-    //     event::DeleteNodeWithLinks{.node_id = node_id_});
+    //     Events::DeleteNodeWithLinks{.node_id = node_id_});
   }
 
   if (ImGui::MenuItem("Delete")) {
-    // state.event_queue->PostEvent(event::DeleteNode{.node_id = node_id_});
+    // state.event_queue->PostEvent(Events::DeleteNode{.node_id = node_id_});
   }
 
   if (ImGui::MenuItem("Group")) {
@@ -33,7 +33,7 @@ void NodePopup::DrawItems(const AppState& app_state) {
     // }
 
     // state.event_queue->PostEvent(
-    //     event::CreateGroup{.node_ids = std::move(selected_node_ids)});
+    //     Events::CreateGroup{.node_ids = std::move(selected_node_ids)});
   }
 }
 }  // namespace esc::draw
