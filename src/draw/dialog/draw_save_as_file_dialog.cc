@@ -38,7 +38,7 @@ void SaveAsFileDialog::OnFileSelected(const AppState& app_state,
     file_path += ".json";
   }
 
-  app_state.event_queue->PostEvent(
+  app_state.event_queue.PostEvent(
       Events::SaveProjectToFile{.file_path = std::move(file_path)});
 }
 }  // namespace esc::draw

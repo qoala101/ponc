@@ -20,13 +20,13 @@ struct Widgets;
 // ---
 struct AppState {
   // ---
-  core::IdGenerator *id_generator{};
+  core::IdGenerator &id_generator;
   // ---
-  core::Project *project{};
+  core::Project &project;
   // ---
-  draw::Widgets *widgets{};
+  draw::Widgets &widgets;
   // ---
-  EventQueue *event_queue{};
+  EventQueue &event_queue;
 };
 }  // namespace esc
 

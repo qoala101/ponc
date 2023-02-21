@@ -62,7 +62,7 @@ auto GetCurve(const ImVec2& m_Start, const ImVec2& m_End, ne::PinKind kind) {
 
 // ---
 void Links::Draw(const AppState& app_state) {
-  for (const auto& link : app_state.project->GetDiagram().GetLinks()) {
+  for (const auto& link : app_state.project.GetDiagram().GetLinks()) {
     const auto color = ImColor{255, 255, 255};
     ne::Link(link.id, link.start_pin_id, link.end_pin_id, color, 2.F);
   }
@@ -71,13 +71,13 @@ void Links::Draw(const AppState& app_state) {
 }
 
 void Links::DrawLinkBeingRepinned(const AppState& app_state) {
-  if (!app_state.widgets->new_link.IsVisible()) {
+  if (!app_state.widgets.new_link.IsVisible()) {
     return;
   }
 
-  const auto dragged_from_pin = app_state.widgets->new_link.GetDraggedFromPin();
+  const auto dragged_from_pin = app_state.widgets.new_link.GetDraggedFromPin();
   const auto link_to_repin =
-      FindPinLink(app_state.project->GetDiagram(), dragged_from_pin);
+      FindPinLink(app_state.project.GetDiagram(), dragged_from_pin);
 
   if (!link_to_repin.has_value()) {
     return;
@@ -90,7 +90,7 @@ void Links::DrawLinkBeingRepinned(const AppState& app_state) {
                                   ? ne::PinKind::Output
                                   : ne::PinKind::Input;
   const auto fixed_pin_position =
-      app_state.widgets->nodes.GetPinPosition(fixed_pin_id);
+      app_state.widgets.nodes.GetPinPosition(fixed_pin_id);
 
   const auto curve =
       GetCurve(fixed_pin_position, ImGui::GetMousePos(), fixed_pin_kind);

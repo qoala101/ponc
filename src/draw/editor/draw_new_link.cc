@@ -43,7 +43,7 @@ void NewLink::Draw(const AppState& app_state) {
 
       if (ne::QueryNewLink(&*dragged_from_pin_, &*hovering_over_pin_)) {
         const auto& [can_connect, reason] = GetCanConnectToPinReason(
-            app_state.project->GetDiagram(), *hovering_over_pin_);
+            app_state.project.GetDiagram(), *hovering_over_pin_);
 
         if (can_connect) {
           if (!reason.empty()) {
@@ -61,8 +61,8 @@ void NewLink::Draw(const AppState& app_state) {
           const auto suspend_scope =
               cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
 
-          app_state.widgets->background_popup.SetPosition(popup_position);
-          app_state.widgets->background_popup.Show();
+          app_state.widgets.background_popup.SetPosition(popup_position);
+          app_state.widgets.background_popup.Show();
         }
       } else {
         dragged_from_pin_.reset();
@@ -83,8 +83,7 @@ auto NewLink::IsVisible() const -> bool {
 // ---
 auto NewLink::CanConnectToPin(const AppState& app_state, ne::PinId pin_id) const
     -> bool {
-  return GetCanConnectToPinReason(app_state.project->GetDiagram(), pin_id)
-      .first;
+  return GetCanConnectToPinReason(app_state.project.GetDiagram(), pin_id).first;
 }
 
 // ---
@@ -186,7 +185,7 @@ void NewLink::AcceptNewLink(const AppState& app_state,
   DrawTooltip(tooltip.data(), ImColor{0.F, 1.F / 3, 0.F, 1.F * 3 / 4});
 
   if (ne::AcceptNewItem(ImColor{1.F / 2, 1.F, 1.F / 2}, 4.F)) {
-    app_state.event_queue->PostEvent(Events::CreateLink{
+    app_state.event_queue.PostEvent(Events::CreateLink{
         .start_pin_id = *dragged_from_pin_, .end_pin_id = *hovering_over_pin_});
   }
 }

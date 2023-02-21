@@ -22,7 +22,7 @@ OpenFileDialog::OpenFileDialog()
 // ---
 void OpenFileDialog::OnFileSelected(const AppState &app_state,
                                     std::string file_path) const {
-  app_state.event_queue->PostEvent(
+  app_state.event_queue.PostEvent(
       Events::OpenProjectFromFile{.file_path = std::move(file_path)});
 }
 }  // namespace esc::draw

@@ -31,10 +31,10 @@ AppImpl::AppImpl(const Textures &textures)
       widgets_{textures.node_header} {}
 
 void AppImpl::OnFrame() {
-  const auto app_state = AppState{.id_generator = &id_generator_,
-                                  .project = &project_,
-                                  .widgets = &widgets_,
-                                  .event_queue = &event_queue_};
+  const auto app_state = AppState{.id_generator = id_generator_,
+                                  .project = project_,
+                                  .widgets = widgets_,
+                                  .event_queue = event_queue_};
 
   event_queue_.ExecuteEvents(app_state);
   flow_calculator_.Recalculate(project_);

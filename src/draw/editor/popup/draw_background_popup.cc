@@ -62,7 +62,7 @@ auto BackgroundPopup::GetLabel() const -> std::string {
 // ---
 void BackgroundPopup::DrawItems(const AppState& app_state) {
   const auto family_groups =
-      coreui::GroupByLabels(app_state.project->GetFamilies());
+      coreui::GroupByLabels(app_state.project.GetFamilies());
 
   for (const auto& [group_label, families] : family_groups) {
     const auto is_group = families.size() > 1;
@@ -80,7 +80,7 @@ void BackgroundPopup::DrawItems(const AppState& app_state) {
       if (ImGui::MenuItem(
               IdLabel(family->CreateDrawer()->GetLabel(), family->GetId())
                   .c_str())) {
-        app_state.event_queue->PostEvent(
+        app_state.event_queue.PostEvent(
             Events::CreateNode{.family = family, .position = position_});
       }
     }

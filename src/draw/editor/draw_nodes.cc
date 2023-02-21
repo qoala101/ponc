@@ -48,7 +48,7 @@ auto GetPinIconAlpha [[nodiscard]] (const std::optional<NewLink>& new_link) {
 
   // if (new_link.has_value()) {
   //   if (!new_link
-  //            ->CanConnectToPin(app_state.project->GetDiagram(),
+  //            ->CanConnectToPin(app_state.project.GetDiagram(),
   //                              *pin_drawer.GetPinId())
   //            .valid) {
   //     alpha /= 2;
@@ -130,7 +130,7 @@ Nodes::Nodes(const Texture& node_header_texture)
 
 // ---
 void Nodes::Draw(const AppState& app_state) {
-  for (const auto& node : app_state.project->GetDiagram().GetNodes()) {
+  for (const auto& node : app_state.project.GetDiagram().GetNodes()) {
     DrawNode(app_state, *node);
   }
 }
@@ -139,7 +139,7 @@ void Nodes::Draw(const AppState& app_state) {
 auto Nodes::GetPinPosition(ne::PinId pin_id) const -> const ImVec2& {
   std::cout << "pin_positions_.size() " << pin_positions_.size() << "\n";
 
-  for (const auto &a : pin_positions_) {
+  for (const auto& a : pin_positions_) {
     std::cout << pin_id.Get() << " " << a.first << "\n";
   }
 
@@ -159,7 +159,7 @@ void Nodes::DrawNode(const AppState& app_state, core::INode& node) {
   }
 
   auto flow_calculator = flow::FlowCalculator{};
-  flow_calculator.Recalculate(*app_state.project);
+  flow_calculator.Recalculate(app_state.project);
   auto node_flow = flow_calculator.GetCalculatedFlow(node.GetId());
 
   for (const auto& pin_drawer : node_drawer->CreatePinDrawers()) {
@@ -199,16 +199,16 @@ void Nodes::DrawPinIconArea(const AppState& app_state,
 
   auto alpha = 255;
 
-  if (app_state.widgets->new_link.IsVisible()) {
-    if (!app_state.widgets->new_link.CanConnectToPin(app_state,
-                                                     *pin_drawer.GetPinId())) {
+  if (app_state.widgets.new_link.IsVisible()) {
+    if (!app_state.widgets.new_link.CanConnectToPin(app_state,
+                                                    *pin_drawer.GetPinId())) {
       alpha /= 2;
     }
   }
 
   const auto color = ImColor{255, 255, 255, alpha};
   const auto filled =
-      FindPinLink(app_state.project->GetDiagram(), *pin_drawer.GetPinId())
+      FindPinLink(app_state.project.GetDiagram(), *pin_drawer.GetPinId())
           .has_value();
   DrawFlowIcon(area_size, color, filled);
   ImGui::Dummy(area_size);

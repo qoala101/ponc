@@ -26,22 +26,22 @@ void DrawFileMenu(const AppState& app_state) {
     const auto menu_scope = cpp::Scope{[]() { ImGui::EndMenu(); }};
 
     if (ImGui::MenuItem("Open...", nullptr)) {
-      app_state.widgets->open_file_dialog.Show();
+      app_state.widgets.open_file_dialog.Show();
     }
 
     if (ImGui::MenuItem("Save As...")) {
-      app_state.widgets->save_as_file_dialog.Show();
+      app_state.widgets.save_as_file_dialog.Show();
     }
 
     ImGui::Separator();
 
     if (ImGui::MenuItem("Reset")) {
-      // app_state.event_queue->PostEvent(Events::ResetDiagram{});
+      // app_state.event_queue.PostEvent(Events::ResetDiagram{});
     }
   }
 
-  app_state.widgets->open_file_dialog.Draw(app_state);
-  app_state.widgets->save_as_file_dialog.Draw(app_state);
+  app_state.widgets.open_file_dialog.Draw(app_state);
+  app_state.widgets.save_as_file_dialog.Draw(app_state);
 }
 
 // ---
@@ -87,7 +87,7 @@ void DrawMainMenuBar(const AppState& app_state) {
     }
 
     if (ImGui::MenuItem("Show Flow")) {
-      for (const auto& link : app_state.project->GetDiagram().GetLinks()) {
+      for (const auto& link : app_state.project.GetDiagram().GetLinks()) {
         ne::Flow(link.id);
       }
     }

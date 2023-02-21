@@ -79,12 +79,12 @@ void Events::OpenProjectFromFile::operator()(const AppState &app_state) const {
       json::ProjectSerializer::ParseFromJson(json, CreateFamilyParsers());
   auto max_id = FindMaxId(project);
 
-  *app_state.project = std::move(project);
-  *app_state.id_generator = core::IdGenerator{max_id + 1};
+  app_state.project = std::move(project);
+  app_state.id_generator = core::IdGenerator{max_id + 1};
 }
 
 void Events::SaveProjectToFile::operator()(const AppState &app_state) const {
-  const auto json = json::ProjectSerializer::WriteToJson(*app_state.project);
+  const auto json = json::ProjectSerializer::WriteToJson(app_state.project);
   json.save(file_path);
 }
 
@@ -116,16 +116,16 @@ void Events::CreateNode::operator()(const AppState &app_state) const {
     return;
   }
 
-  auto new_node = family_lock->CreateNode(*app_state.id_generator);
+  auto new_node = family_lock->CreateNode(app_state.id_generator);
   new_node->SetPosition(position);
 
-  app_state.project->GetDiagram().EmplaceNode(std::move(new_node));
+  app_state.project.GetDiagram().EmplaceNode(std::move(new_node));
 }
 
 // ---
 void Events::CreateLink::operator()(const AppState &app_state) const {
-  app_state.project->GetDiagram().EmplaceLink(
-      {.id = app_state.id_generator->GetNext<ne::LinkId>(),
+  app_state.project.GetDiagram().EmplaceLink(
+      {.id = app_state.id_generator.GetNext<ne::LinkId>(),
        .start_pin_id = start_pin_id,
        .end_pin_id = end_pin_id});
 }

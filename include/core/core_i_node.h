@@ -38,7 +38,7 @@ class INode : public cpp::Interface {
     // ---
     FamilyId family_id{};
     // ---
-    ne::PinId input_pin_id{};
+    std::optional<ne::PinId> input_pin_id{};
     // ---
     std::vector<ne::PinId> output_pin_ids{};
   };
