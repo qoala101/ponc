@@ -62,14 +62,14 @@ void DrawViewsMenu(const AppState& app_state) {
     // DrawViewMenuItem(state.draw_state->flow_tree_view_);
     // DrawViewMenuItem(state.draw_state->groups_view_);
     // DrawViewMenuItem(state.draw_state->group_settings_view_);
-    // DrawViewMenuItem(state.draw_state->settings_view_);
+    DrawViewMenuItem(app_state.widgets.settings_view);
   }
 
   // state.draw_state->families_view_.Draw(state);
   // state.draw_state->flow_tree_view_.Draw(state);
   // state.draw_state->groups_view_.Draw(state);
   // state.draw_state->group_settings_view_.Draw(state);
-  // state.draw_state->settings_view_.Draw(state);
+  app_state.widgets.settings_view.Draw(app_state);
 }
 }  // namespace
 

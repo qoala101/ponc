@@ -37,8 +37,6 @@ void AppImpl::OnFrame() {
                                   .event_queue = event_queue_};
 
   event_queue_.ExecuteEvents(app_state);
-  flow_calculator_.Recalculate(project_);
-
   widgets_.Draw(app_state);
 }
 }  // namespace esc

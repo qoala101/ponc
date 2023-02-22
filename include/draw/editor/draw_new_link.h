@@ -22,21 +22,24 @@ class NewLink {
   // ---
   void Draw(const AppState &app_state);
   // ---
-  auto IsVisible [[nodiscard]] () const -> bool;
+  auto GetDraggedFromPin [[nodiscard]] () const
+      -> const std::optional<ne::PinId> &;
+  // ---
+  auto FindFixedPin [[nodiscard]] (const core::Diagram &diagram) const
+      -> std::optional<ne::PinId>;
   // ---
   auto CanConnectToPin
-      [[nodiscard]] (const AppState &app_state, ne::PinId pin_id) const -> bool;
-  // ---
-  auto GetDraggedFromPin [[nodiscard]] () const -> ne::PinId;
+      [[nodiscard]] (ne::PinId pin_id, const core::Diagram &diagram) const
+      -> bool;
 
  private:
   // ---
   auto GetCanConnectToPinReason
-      [[nodiscard]] (const core::Diagram &diagram, ne::PinId pin_id) const
+      [[nodiscard]] (ne::PinId pin_id, const core::Diagram &diagram) const
       -> std::pair<bool, std::string>;
 
   // ---
-  void AcceptNewLink(const AppState &app_state, std::string_view tooltip);
+  void AcceptNewLink(EventQueue &event_queue, std::string_view tooltip);
 
   // ---
   std::optional<ne::PinId> dragged_from_pin_{};

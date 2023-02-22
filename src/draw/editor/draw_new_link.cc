@@ -1,5 +1,6 @@
 #include "draw_new_link.h"
 
+#include "app_event_queue.h"
 #include "app_events.h"
 #include "core_project.h"
 #include "cpp_assert.h"
@@ -37,17 +38,17 @@ void NewLink::Draw(const AppState& app_state) {
   {
     const auto create_scope = cpp::Scope{[]() { ne::EndCreate(); }};
 
-    if (ne::BeginCreate(ImColor{1.F, 1.F, 1.F}, 2.F)) {
+    if (ne::BeginCreate(ImColor{1.F, 1.F, 1.F}, 3.F)) {
       dragged_from_pin_.emplace();
       hovering_over_pin_.emplace();
 
       if (ne::QueryNewLink(&*dragged_from_pin_, &*hovering_over_pin_)) {
         const auto& [can_connect, reason] = GetCanConnectToPinReason(
-            app_state.project.GetDiagram(), *hovering_over_pin_);
+            *hovering_over_pin_, app_state.project.GetDiagram());
 
         if (can_connect) {
           if (!reason.empty()) {
-            AcceptNewLink(app_state, reason);
+            AcceptNewLink(app_state.event_queue, reason);
           }
         } else {
           RejectNewLink(reason);
@@ -76,24 +77,38 @@ void NewLink::Draw(const AppState& app_state) {
 }
 
 // ---
-auto NewLink::IsVisible() const -> bool {
-  return dragged_from_pin_.has_value();
+auto NewLink::GetDraggedFromPin() const -> const std::optional<ne::PinId>& {
+  return dragged_from_pin_;
 }
 
 // ---
-auto NewLink::CanConnectToPin(const AppState& app_state, ne::PinId pin_id) const
-    -> bool {
-  return GetCanConnectToPinReason(app_state.project.GetDiagram(), pin_id).first;
+auto NewLink::FindFixedPin(const core::Diagram& diagram) const
+    -> std::optional<ne::PinId> {
+  if (!dragged_from_pin_.has_value()) {
+    return std::nullopt;
+  }
+
+  const auto link_to_repin = FindPinLink(diagram, *dragged_from_pin_);
+
+  if (!link_to_repin.has_value()) {
+    return std::nullopt;
+  }
+
+  if (*dragged_from_pin_ == (*link_to_repin)->start_pin_id) {
+    return (*link_to_repin)->end_pin_id;
+  }
+
+  return (*link_to_repin)->start_pin_id;
 }
 
 // ---
-auto NewLink::GetDraggedFromPin() const -> ne::PinId {
-  Expects(dragged_from_pin_.has_value());
-  return *dragged_from_pin_;
+auto NewLink::CanConnectToPin(ne::PinId pin_id,
+                              const core::Diagram& diagram) const -> bool {
+  return GetCanConnectToPinReason(pin_id, diagram).first;
 }
 
-auto NewLink::GetCanConnectToPinReason(const core::Diagram& diagram,
-                                       ne::PinId pin_id) const
+auto NewLink::GetCanConnectToPinReason(ne::PinId pin_id,
+                                       const core::Diagram& diagram) const
     -> std::pair<bool, std::string> {
   Expects(dragged_from_pin_.has_value());
 
@@ -177,15 +192,14 @@ auto NewLink::GetCanConnectToPinReason(const core::Diagram& diagram,
 }
 
 // ---
-void NewLink::AcceptNewLink(const AppState& app_state,
-                            std::string_view tooltip) {
+void NewLink::AcceptNewLink(EventQueue& event_queue, std::string_view tooltip) {
   Expects(dragged_from_pin_.has_value());
   Expects(hovering_over_pin_.has_value());
 
   DrawTooltip(tooltip.data(), ImColor{0.F, 1.F / 3, 0.F, 1.F * 3 / 4});
 
   if (ne::AcceptNewItem(ImColor{1.F / 2, 1.F, 1.F / 2}, 4.F)) {
-    app_state.event_queue.PostEvent(Events::CreateLink{
+    event_queue.PostEvent(Events::CreateLink{
         .start_pin_id = *dragged_from_pin_, .end_pin_id = *hovering_over_pin_});
   }
 }

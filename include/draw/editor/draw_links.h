@@ -5,22 +5,20 @@
 #ifndef VH_DRAW_LINKS_H_
 #define VH_DRAW_LINKS_H_
 
-#include <imgui_node_editor.h>
-
-#include <optional>
-#include <string_view>
-
 #include "app_state.h"
+#include "draw_new_link.h"
+#include "draw_nodes.h"
 
 namespace esc::draw {
 // ---
 class Links {
  public:
   // ---
-  void Draw(const AppState& app_state);
+  void Draw(const AppState &app_state);
 
  private:
-  void DrawLinkBeingRepinned(const AppState& app_state);
+  void DrawLinkBeingRepinned(const core::Diagram &diagram,
+                             const NewLink &new_link, const Nodes &nodes);
 };
 }  // namespace esc::draw
 

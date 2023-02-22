@@ -20,7 +20,6 @@
 #include "draw_open_file_dialog.h"
 #include "draw_save_as_file_dialog.h"
 #include "draw_texture.h"
-#include "flow_calculator.h"
 
 namespace esc {
 class EventQueue;
@@ -56,8 +55,8 @@ struct Widgets {
   // GroupsView groups_view{};
   // // ---
   // GroupSettingsView group_settings_view{};
-  // // ---
-  // SettingsView settings_view{};
+  // ---
+  SettingsView settings_view{};
 
   // ---
   NodeEditor node_editor{};

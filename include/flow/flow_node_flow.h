@@ -6,10 +6,13 @@
 #include <cstdint>
 #include <map>
 #include <optional>
+#include <unordered_map>
 
 namespace ne = ax::NodeEditor;
 
 namespace esc::flow {
+struct Tree;
+
 // ---
 struct NodeFlow {
   // ---
@@ -29,7 +32,11 @@ struct NodeFlow {
 };
 
 // ---
-auto GetPinFlow(NodeFlow &flow, ne::PinId pin_id) -> float &;
+auto CalculateNodeFlows [[nodiscard]] (const Tree &flow_tree)
+-> std::unordered_map<uintptr_t, NodeFlow>;
+
+// ---
+auto GetPinFlow [[nodiscard]] (const NodeFlow &flow, ne::PinId pin_id) -> float;
 }  // namespace esc::flow
 
 #endif  // VH_CORE_FLOW_H_

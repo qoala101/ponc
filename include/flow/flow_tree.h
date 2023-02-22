@@ -7,8 +7,8 @@
 #include <optional>
 #include <vector>
 
+#include "core_diagram.h"
 #include "core_i_node.h"
-#include "cpp_assert.h"
 #include "imgui_node_editor.h"
 
 namespace esc::flow {
@@ -80,6 +80,9 @@ auto FindTreeNode
 
   return std::nullopt;
 }
+
+// ---
+auto BuildFlowTree [[nodiscard]] (const core::Diagram &diagram) -> Tree;
 }  // namespace esc::flow
 
 #endif  // VH_CORE_TREE_H_

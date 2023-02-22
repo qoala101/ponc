@@ -2,25 +2,25 @@
  * @author Volodymyr Hromakov (4y5t6r@gmail.com)
  */
 
-#include "draw_links.h"
-
-#include <imgui.h>
-
-#include "app_events.h"
-#include "core_diagram.h"
-#include "core_i_node.h"
-#include "cpp_assert.h"
-#include "flow_tree.h"
-#include "imgui_node_editor.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
+#include <imgui.h>
 #include <imgui_internal.h>
 
+#include "draw_links.h"
+
+
+#include "app_events.h"
 #include "app_state.h"
+#include "core_diagram.h"
+#include "core_i_node.h"
 #include "core_project.h"
+#include "cpp_assert.h"
 #include "cpp_scope.h"
 #include "draw_tooltip.h"
 #include "draw_widgets.h"
+#include "flow_tree.h"
 #include "imgui_bezier_math.h"
+#include "imgui_node_editor.h"
 
 namespace esc::draw {
 namespace {
@@ -67,30 +67,27 @@ void Links::Draw(const AppState& app_state) {
     ne::Link(link.id, link.start_pin_id, link.end_pin_id, color, 2.F);
   }
 
-  DrawLinkBeingRepinned(app_state);
+  DrawLinkBeingRepinned(app_state.project.GetDiagram(),
+                        app_state.widgets.new_link, app_state.widgets.nodes);
 }
 
-void Links::DrawLinkBeingRepinned(const AppState& app_state) {
-  if (!app_state.widgets.new_link.IsVisible()) {
+void Links::DrawLinkBeingRepinned(const core::Diagram& diagram,
+                                  const NewLink& new_link, const Nodes& nodes) {
+  const auto fixed_pin = new_link.FindFixedPin(diagram);
+
+  if (!fixed_pin.has_value()) {
     return;
   }
 
-  const auto dragged_from_pin = app_state.widgets.new_link.GetDraggedFromPin();
-  const auto link_to_repin =
-      FindPinLink(app_state.project.GetDiagram(), dragged_from_pin);
-
-  if (!link_to_repin.has_value()) {
-    return;
-  }
-
-  const auto fixed_pin_id = (dragged_from_pin == (*link_to_repin)->start_pin_id)
-                                ? (*link_to_repin)->end_pin_id
-                                : (*link_to_repin)->start_pin_id;
-  const auto fixed_pin_kind = (fixed_pin_id == (*link_to_repin)->start_pin_id)
-                                  ? ne::PinKind::Output
-                                  : ne::PinKind::Input;
+  const auto fixed_pin_rect = nodes.GetDrawnPinIconRect(*fixed_pin);
+  const auto fixed_pin_node = FindPinNode(diagram, *fixed_pin);
+  const auto fixed_pin_kind = core::GetPinKind(*fixed_pin_node, *fixed_pin);
   const auto fixed_pin_position =
-      app_state.widgets.nodes.GetPinPosition(fixed_pin_id);
+      (fixed_pin_kind == ax::NodeEditor::PinKind::Input)
+          ? ImVec2{fixed_pin_rect.Min.x,
+                   (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y) / 2}
+          : ImVec2{fixed_pin_rect.Max.x,
+                   (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y) / 2};
 
   const auto curve =
       GetCurve(fixed_pin_position, ImGui::GetMousePos(), fixed_pin_kind);
@@ -106,6 +103,6 @@ void Links::DrawLinkBeingRepinned(const AppState& app_state) {
   // }
 
   auto* drawList = ImGui::GetWindowDrawList();
-  drawList->AddBezierCubic(curve.P0, curve.P1, curve.P2, curve.P3, color, 2.0F);
+  drawList->AddBezierCubic(curve.P0, curve.P1, curve.P2, curve.P3, color, 4.F);
 }
 }  // namespace esc::draw

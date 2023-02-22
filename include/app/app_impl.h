@@ -11,7 +11,6 @@
 #include "app_textures.h"
 #include "core_project.h"
 #include "draw_widgets.h"
-#include "flow_calculator.h"
 
 namespace esc {
 // ---
@@ -33,8 +32,6 @@ class AppImpl {
   core::IdGenerator id_generator_{};
   // ---
   core::Project project_{};
-  // ---
-  flow::FlowCalculator flow_calculator_{};
   // ---
   draw::Widgets widgets_;
   // ---
