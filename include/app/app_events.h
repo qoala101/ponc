@@ -61,6 +61,15 @@ struct Events {
     ne::PinId end_pin_id{};
   };
 
+  // ---
+  struct DeleteLink {
+    // ---
+    void operator()(const AppState &app_state) const;
+
+    // ---
+    ne::LinkId link_id{};
+  };
+
   // // ---
   // struct DeleteNode {
   //   // ---

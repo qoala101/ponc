@@ -3,11 +3,10 @@
  */
 
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include <imgui.h>
-#include <imgui_internal.h>
-
 #include "draw_links.h"
 
+#include <imgui.h>
+#include <imgui_internal.h>
 
 #include "app_events.h"
 #include "app_state.h"
@@ -58,17 +57,33 @@ auto GetCurve(const ImVec2& m_Start, const ImVec2& m_End, ne::PinKind kind) {
 
   return result;
 }
+
+// ---
+auto GetLinkAlpha [[nodiscard]] (const core::Link& link,
+                                 const std::optional<ne::PinId>& fixed_pin) {
+  if (fixed_pin.has_value() &&
+      ((link.start_pin_id == *fixed_pin) || (link.end_pin_id == *fixed_pin))) {
+    return 1.F / 2;
+  }
+
+  return 1.F;
+}
 }  // namespace
 
 // ---
 void Links::Draw(const AppState& app_state) {
-  for (const auto& link : app_state.project.GetDiagram().GetLinks()) {
-    const auto color = ImColor{255, 255, 255};
+  const auto& diagram = app_state.project.GetDiagram();
+  const auto fixed_pin = app_state.widgets.new_link.FindFixedPin(diagram);
+
+  for (const auto& link : diagram.GetLinks()) {
+    const auto alpha = GetLinkAlpha(link, fixed_pin);
+    const auto color = ImColor{1.F, 1.F, 1.F, alpha};
+
     ne::Link(link.id, link.start_pin_id, link.end_pin_id, color, 2.F);
   }
 
-  DrawLinkBeingRepinned(app_state.project.GetDiagram(),
-                        app_state.widgets.new_link, app_state.widgets.nodes);
+  DrawLinkBeingRepinned(diagram, app_state.widgets.new_link,
+                        app_state.widgets.nodes);
 }
 
 void Links::DrawLinkBeingRepinned(const core::Diagram& diagram,
@@ -92,17 +107,18 @@ void Links::DrawLinkBeingRepinned(const core::Diagram& diagram,
   const auto curve =
       GetCurve(fixed_pin_position, ImGui::GetMousePos(), fixed_pin_kind);
 
-  auto color = ImColor{255, 255, 255};
+  auto color = ImColor{1.F, 1.F, 1.F};
 
-  // if (new_link_->pin_hovered_over.has_value()) {
-  //   // if (!CanConnectFromPinToPin(*state.core_state, *new_link_,
-  //   //                             new_link_->pin_dragged_from,
-  //   //                             *new_link_->pin_hovered_over)) {
-  //   //   color = ImColor{255, 0, 0};
-  //   // }
-  // }
+  if (const auto hovering_over_pin = new_link.GetHoveringOverPin()) {
+    if (new_link.CanConnectToPin(*hovering_over_pin, diagram)) {
+      color = ImColor{1.F / 2, 1.F, 1.F / 2};
+    } else {
+      color = ImColor{1.F, 1.F / 2, 1.F / 2};
+    }
+  }
 
-  auto* drawList = ImGui::GetWindowDrawList();
-  drawList->AddBezierCubic(curve.P0, curve.P1, curve.P2, curve.P3, color, 4.F);
+  auto* draw_list = ImGui::GetWindowDrawList();
+  Expects(draw_list != nullptr);
+  draw_list->AddBezierCubic(curve.P0, curve.P1, curve.P2, curve.P3, color, 4.F);
 }
 }  // namespace esc::draw

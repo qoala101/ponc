@@ -26,31 +26,26 @@ void SettingsView::Draw(const AppState& app_state) {
 
       ImGui::Checkbox("Color Flow", &color_flow);
 
-      ImGui::ColorButton("MyColor##1",
-                         GetColorForFlowValue(settings.min, settings));
+      ImGui::ColorButton("##1", GetColorForFlowValue(settings.min, settings));
       ImGui::SameLine();
       ImGui::DragFloat("Very Low##link_color", &settings.min, 0.01F, -FLT_MAX,
                        settings.low, "%.3f");
 
-      ImGui::ColorButton("MyColor##2",
-                         GetColorForFlowValue(settings.low, settings));
+      ImGui::ColorButton("##2", GetColorForFlowValue(settings.low, settings));
       ImGui::SameLine();
       ImGui::SliderFloat("Low##link_color", &settings.low, settings.min,
                          settings.high);
 
-      ImGui::ColorButton("MyColor##5",
-                         GetColorForFlowValue(low_high_mid, settings));
+      ImGui::ColorButton("##5", GetColorForFlowValue(low_high_mid, settings));
       ImGui::SameLine();
       ImGui::Text("%.3f Good", low_high_mid);
 
-      ImGui::ColorButton("MyColor##3",
-                         GetColorForFlowValue(settings.high, settings));
+      ImGui::ColorButton("##3", GetColorForFlowValue(settings.high, settings));
       ImGui::SameLine();
       ImGui::SliderFloat("High##link_color", &settings.high, settings.low,
                          settings.max);
 
-      ImGui::ColorButton("MyColor##4",
-                         GetColorForFlowValue(settings.max, settings));
+      ImGui::ColorButton("##4", GetColorForFlowValue(settings.max, settings));
       ImGui::SameLine();
       ImGui::DragFloat("Very High##link_color", &settings.max, 0.01F,
                        settings.high, +FLT_MAX, "%.3f");

@@ -25,6 +25,10 @@ class NewLink {
   auto GetDraggedFromPin [[nodiscard]] () const
       -> const std::optional<ne::PinId> &;
   // ---
+  auto GetHoveringOverPin [[nodiscard]] () const
+      -> const std::optional<ne::PinId> &;
+
+  // ---
   auto FindFixedPin [[nodiscard]] (const core::Diagram &diagram) const
       -> std::optional<ne::PinId>;
   // ---
@@ -39,7 +43,11 @@ class NewLink {
       -> std::pair<bool, std::string>;
 
   // ---
-  void AcceptNewLink(EventQueue &event_queue, std::string_view tooltip);
+  void AcceptNewLink(const core::Diagram &diagram, EventQueue &event_queue,
+                     std::string_view tooltip, float alpha);
+
+  auto GetAlphaForNewLink [[nodiscard]] (const core::Diagram &diagram) const
+      -> float;
 
   // ---
   std::optional<ne::PinId> dragged_from_pin_{};

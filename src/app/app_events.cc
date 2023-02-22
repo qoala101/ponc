@@ -130,6 +130,12 @@ void Events::CreateLink::operator()(const AppState &app_state) const {
        .end_pin_id = end_pin_id});
 }
 
+// ---
+void Events::DeleteLink::operator()(const AppState &app_state) const {
+  ne::DeleteLink(link_id);
+  app_state.project.GetDiagram().EraseLink(link_id);
+}
+
 // void DeleteNode::operator()(const AppState &app_state) const {
 //   auto &diagram = state.core_state->diagram_;
 //   const auto node = FindNode(diagram, node_id);
