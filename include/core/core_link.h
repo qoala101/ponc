@@ -23,6 +23,9 @@ struct Link {
   // ---
   friend auto operator==(const Link &, const Link &) -> bool = default;
 };
+
+//
+auto HasPin [[nodiscard]] (const Link &link, ne::PinId pin_id) -> bool;
 }  // namespace esc::core
 
 #endif  // VH_CORE_LINK_H_

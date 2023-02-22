@@ -9,6 +9,7 @@
 
 #include "app_state.h"
 #include "core_i_family.h"
+#include "core_i_node.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
@@ -40,12 +41,12 @@ struct Events {
   // };
 
   // ---
-  struct CreateNode {
+  struct EmplaceNode {
     // ---
-    void operator()(const AppState &app_state) const;
+    void operator()(const AppState &app_state);
 
     // ---
-    std::weak_ptr<core::IFamily> family{};
+    std::shared_ptr<core::INode> node{};
     // ---
     ImVec2 position{};
   };

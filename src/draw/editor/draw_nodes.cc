@@ -47,29 +47,6 @@ void DrawEmptyPinArea(ImVec2 area_size, bool pin_editable) {
 }
 
 // ---
-auto GetPinIconAlpha [[nodiscard]] (const std::optional<NewLink>& new_link) {
-  auto alpha = 255;
-
-  // if (new_link.has_value()) {
-  //   if (!new_link
-  //            ->CanConnectToPin(app_state.project.GetDiagram(),
-  //                              *pin_drawer.GetPinId())
-  //            .valid) {
-  //     alpha /= 2;
-  //   }
-  // }
-
-  return alpha;
-}
-
-// ---
-auto GetPinIconColor [[nodiscard]] (const core::Settings& settings,
-                                    const SettingsView& settings_view) {
-  // settings_view.
-  const auto color = ImColor{255, 255, 255};
-}
-
-// ---
 void DrawPinField(coreui::IPinDrawer& pin_drawer,
                   const flow::NodeFlow& node_flow) {
   const auto spring_scope =
@@ -120,7 +97,7 @@ auto GetPinIconAlpha
 
   if (const auto creating_new_link = new_link.GetDraggedFromPin().has_value()) {
     if (!new_link.CanConnectToPin(pin_id, diagram)) {
-      alpha /= 2;
+      alpha /= 4;
     }
   }
 

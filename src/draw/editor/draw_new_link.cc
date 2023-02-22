@@ -14,19 +14,6 @@
 
 namespace esc::draw {
 namespace {
-struct RebindingLink {
-  ne::PinId fixed_pin{};
-  ne::PinKind fixed_pin_kind{};
-  ne::LinkId link_id{};
-  std::optional<ImVec2> fixed_pin_pos{};
-};
-
-struct HoveredOverLink {
-  ne::PinId fixed_pin{};
-  ne::PinKind fixed_pin_kind{};
-  ne::LinkId link_id{};
-};
-
 // ---
 void RejectNewLink(std::string_view tooltip, float alpha) {
   DrawTooltip(tooltip, ImColor{1.F / 3, 0.F, 0.F, 1.F * 3 / 4});
@@ -43,12 +30,10 @@ void NewLink::Draw(const AppState& app_state) {
     const auto create_scope = cpp::Scope{[]() { ne::EndCreate(); }};
 
     if (ne::BeginCreate(ImColor{1.F, 1.F, 1.F, alpha}, 3.F)) {
-      std::cout << "BeginCreate ";
       auto dragged_from_pin = ne::PinId{};
       auto hovering_over_pin = ne::PinId{};
 
       if (ne::QueryNewLink(&dragged_from_pin, &hovering_over_pin)) {
-        std::cout << "QueryNewLink ";
         dragged_from_pin_ = dragged_from_pin;
         hovering_over_pin_ = hovering_over_pin;
 
@@ -64,7 +49,6 @@ void NewLink::Draw(const AppState& app_state) {
           RejectNewLink(reason, alpha);
         }
       } else if (ne::QueryNewNode(&dragged_from_pin)) {
-        std::cout << "QueryNewNode ";
         dragged_from_pin_ = dragged_from_pin;
         hovering_over_pin_.reset();
 
@@ -74,20 +58,17 @@ void NewLink::Draw(const AppState& app_state) {
           const auto suspend_scope =
               cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
 
-          app_state.widgets.background_popup.SetPosition(popup_position);
-          app_state.widgets.background_popup.Show();
+          app_state.widgets.new_link_popup.SetPosition(popup_position);
+          app_state.widgets.new_link_popup.SetDraggedFromPin(*dragged_from_pin_);
+          app_state.widgets.new_link_popup.Show();
         }
       } else {
-        std::cout << "neither ";
         hovering_over_pin_.reset();
       }
     } else {
-      std::cout << "false ";
       dragged_from_pin_.reset();
       hovering_over_pin_.reset();
     }
-
-    std::cout << "\n";
   }
 }
 
@@ -127,57 +108,31 @@ auto NewLink::CanConnectToPin(ne::PinId pin_id,
   return GetCanConnectToPinReason(pin_id, diagram).first;
 }
 
+struct RebindingLink {
+  ne::PinId fixed_pin{};
+  ne::PinKind fixed_pin_kind{};
+  ne::LinkId link_id{};
+  std::optional<ImVec2> fixed_pin_pos{};
+};
+
+struct HoveredOverLink {
+  ne::PinId fixed_pin{};
+  ne::PinKind fixed_pin_kind{};
+  ne::LinkId link_id{};
+};
+
 auto NewLink::GetCanConnectToPinReason(ne::PinId pin_id,
                                        const core::Diagram& diagram) const
     -> std::pair<bool, std::string> {
   Expects(dragged_from_pin_.has_value());
 
-  auto rebinding_link = std::optional<RebindingLink>{};
-  auto hovered_over_link = std::optional<HoveredOverLink>{};
-
-  for (const auto& link : diagram.GetLinks()) {
-    if (link.start_pin_id == *dragged_from_pin_) {
-      rebinding_link.emplace(RebindingLink{.fixed_pin = link.end_pin_id,
-                                           .fixed_pin_kind = ne::PinKind::Input,
-                                           .link_id = link.id});
-      break;
-    }
-
-    if (link.end_pin_id == *dragged_from_pin_) {
-      rebinding_link.emplace(
-          RebindingLink{.fixed_pin = link.start_pin_id,
-                        .fixed_pin_kind = ne::PinKind::Output,
-                        .link_id = link.id});
-      break;
-    }
-  }
-
-  if (hovering_over_pin_.has_value()) {
-    for (const auto& link : diagram.GetLinks()) {
-      if (link.start_pin_id == *hovering_over_pin_) {
-        hovered_over_link.emplace(
-            HoveredOverLink{.fixed_pin = link.end_pin_id,
-                            .fixed_pin_kind = ne::PinKind::Input,
-                            .link_id = link.id});
-        break;
-      }
-
-      if (link.end_pin_id == *hovering_over_pin_) {
-        hovered_over_link.emplace(
-            HoveredOverLink{.fixed_pin = link.start_pin_id,
-                            .fixed_pin_kind = ne::PinKind::Output,
-                            .link_id = link.id});
-        break;
-      }
-    }
-  }
+  const auto rebinding_link = core::FindPinLink(diagram, *dragged_from_pin_);
+  const auto hovered_over_link = core::FindPinLink(diagram, pin_id);
 
   if (hovered_over_link.has_value()) {
     if (rebinding_link.has_value() &&
-        (hovered_over_link->link_id == rebinding_link->link_id)) {
-      if (pin_id == *hovering_over_pin_) {
-        return {true, {}};
-      }
+        ((*hovered_over_link)->id == (*rebinding_link)->id)) {
+      return {true, {}};
     }
 
     return {false, "Pin Is Occupied"};
@@ -188,6 +143,14 @@ auto NewLink::GetCanConnectToPinReason(ne::PinId pin_id,
 
   if (dragged_from_node->GetId() == hovered_over_node->GetId()) {
     return {false, "Self"};
+  }
+
+  if (const auto fixed_pin = FindFixedPin(diagram)) {
+    const auto fixed_pin_node = FindPinNode(diagram, *fixed_pin);
+
+    if (fixed_pin_node->GetId() == hovered_over_node->GetId()) {
+      return {false, "Self"};
+    }
   }
 
   const auto dragged_from_kind =

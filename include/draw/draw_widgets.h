@@ -14,6 +14,7 @@
 #include "draw_link_popup.h"
 #include "draw_links.h"
 #include "draw_new_link.h"
+#include "draw_new_link_popup.h"
 #include "draw_node_editor.h"
 #include "draw_node_popup.h"
 #include "draw_nodes.h"
@@ -66,11 +67,11 @@ struct Widgets {
   Nodes nodes;
   // ---
   Links links{};
-  // // ---
-  // LinkConnectionProcess link_connection_process;
 
   // ---
   BackgroundPopup background_popup{};
+  // ---
+  NewLinkPopup new_link_popup{};
   // ---
   NodePopup node_popup{};
   // ---

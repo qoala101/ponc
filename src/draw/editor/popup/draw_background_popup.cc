@@ -80,8 +80,9 @@ void BackgroundPopup::DrawItems(const AppState& app_state) {
       if (ImGui::MenuItem(
               IdLabel(family->CreateDrawer()->GetLabel(), family->GetId())
                   .c_str())) {
-        app_state.event_queue.PostEvent(
-            Events::CreateNode{.family = family, .position = position_});
+        app_state.event_queue.PostEvent(Events::EmplaceNode{
+            .node = family->CreateNode(app_state.id_generator),
+            .position = position_});
       }
     }
 

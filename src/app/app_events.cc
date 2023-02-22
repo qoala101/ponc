@@ -109,17 +109,10 @@ void Events::SaveProjectToFile::operator()(const AppState &app_state) const {
 // }
 
 // ---
-void Events::CreateNode::operator()(const AppState &app_state) const {
-  auto family_lock = family.lock();
-
-  if (family_lock == nullptr) {
-    return;
-  }
-
-  auto new_node = family_lock->CreateNode(app_state.id_generator);
+void Events::EmplaceNode::operator()(const AppState &app_state) {
+  const auto &new_node =
+      app_state.project.GetDiagram().EmplaceNode(std::move(node));
   new_node->SetPosition(position);
-
-  app_state.project.GetDiagram().EmplaceNode(std::move(new_node));
 }
 
 // ---

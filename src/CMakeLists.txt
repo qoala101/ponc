@@ -134,6 +134,7 @@ add_example_executable(esc
   core/core_i_family.cc
   core/core_i_node.cc
   core/core_id_generator.cc
+  core/core_link.cc
   core/core_project.cc
 
   coreui/pin/coreui_flow_pin_drawer.cc
@@ -151,6 +152,7 @@ add_example_executable(esc
   draw/editor/popup/draw_background_popup.cc
   draw/editor/popup/draw_i_popup.cc
   draw/editor/popup/draw_link_popup.cc
+  draw/editor/popup/draw_new_link_popup.cc
   draw/editor/popup/draw_node_popup.cc
 
   # draw/editor/process/draw_delete_items_process.cc

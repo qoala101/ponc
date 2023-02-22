@@ -51,6 +51,7 @@ void DrawPopupContents(const AppState &app_state) {
       cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
 
   app_state.widgets.background_popup.Draw(app_state);
+  app_state.widgets.new_link_popup.Draw(app_state);
   app_state.widgets.node_popup.Draw(app_state);
   app_state.widgets.link_popup.Draw(app_state);
 }
