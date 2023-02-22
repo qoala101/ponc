@@ -48,7 +48,7 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
   }
 
   void SetInitialFlowValues(flow::NodeFlow& node_flow) const override {
-    node_flow.output_pin_flows.at(0) = value_;
+    node_flow.output_pin_flows.at(GetOutputPinIds()[0].Get()) = value_;
   }
 
   float value_{};
