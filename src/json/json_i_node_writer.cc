@@ -19,10 +19,9 @@ auto INodeWriter::WriteToJson(const core::INode& node) const
   json["family_id"] = IdSerializer::WriteToJson(node.GetFamilyId());
 
   const auto input_pin_id = node.GetInputPinId();
-  auto& input_pin_id_json = json["input_pin_id"];
 
   if (input_pin_id.has_value()) {
-    input_pin_id_json = IdSerializer::WriteToJson(*input_pin_id);
+    json["input_pin_id"] = IdSerializer::WriteToJson(*input_pin_id);
   }
 
   const auto& output_pin_ids = node.GetOutputPinIds();

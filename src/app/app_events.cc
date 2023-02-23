@@ -1,10 +1,7 @@
 #include "app_events.h"
 
 #include "app_attenuator_node.h"
-#include "app_client_node.h"
-#include "app_coupler_node.h"
 #include "app_input_node.h"
-#include "app_splitter_node.h"
 #include "app_state.h"
 #include "core_i_node.h"
 #include "core_project.h"

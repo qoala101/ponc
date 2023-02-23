@@ -11,6 +11,7 @@
 
 #include "app_state.h"
 #include "core_i_node.h"
+#include "core_settings.h"
 #include "coreui_i_pin_drawer.h"
 #include "draw_new_link.h"
 #include "draw_settings_view.h"
@@ -37,11 +38,14 @@ class Nodes {
   // ---
   void DrawNode(core::INode& node, const flow::NodeFlow& node_flow,
                 const core::Diagram& diagram, const NewLink& new_link,
-                const SettingsView& settings_view);
+                const SettingsView& settings_view,
+                const core::Settings& settings);
   // ---
   void DrawPinIconArea(const coreui::IPinDrawer& pin_drawer,
+                       const flow::NodeFlow& node_flow,
                        const core::Diagram& diagram, const NewLink& new_link,
-                       const SettingsView& settings_view);
+                       const SettingsView& settings_view,
+                       const core::Settings& settings);
 
   // ---
   Texture node_header_texture_{};

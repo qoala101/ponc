@@ -105,14 +105,20 @@ auto GetPinIconAlpha
 }
 
 void DrawFlowIconPinArea(ne::PinId pin_id, ImVec2 area_size,
+                         const flow::NodeFlow& node_flow,
                          const core::Diagram& diagram, const NewLink& new_link,
-                         const SettingsView& settings_view) {
+                         const SettingsView& settings_view,
+                         const core::Settings& settings) {
   if (!ImGui::IsRectVisible(area_size)) {
     return;
   }
 
   const auto alpha = GetPinIconAlpha(pin_id, diagram, new_link);
-  const auto color = ImColor{1.F, 1.F, 1.F, alpha};
+
+  const auto start_pin_flow = flow::GetPinFlow(node_flow, pin_id);
+  auto color = settings_view.GetColorForFlowValue(start_pin_flow, settings);
+  color.Value.w = alpha;
+
   const auto filled = FindPinLink(diagram, pin_id).has_value();
   DrawFlowIcon(area_size, color, filled);
   ImGui::Dummy(area_size);
@@ -135,7 +141,7 @@ void Nodes::Draw(const AppState& app_state) {
   for (const auto& node : nodes) {
     const auto& node_flow = node_flows.at(node->GetId().Get());
     DrawNode(*node, node_flow, diagram, new_link,
-             app_state.widgets.settings_view);
+             app_state.widgets.settings_view, app_state.project.GetSettings());
   }
 }
 
@@ -147,13 +153,25 @@ auto Nodes::GetDrawnPinIconRect(ne::PinId pin_id) const -> const ImRect& {
 // ---
 void Nodes::DrawNode(core::INode& node, const flow::NodeFlow& node_flow,
                      const core::Diagram& diagram, const NewLink& new_link,
-                     const SettingsView& settings_view) {
+                     const SettingsView& settings_view,
+                     const core::Settings& settings) {
   const auto node_drawer = node.CreateDrawer();
   auto node_builder = esc::NodeDrawer{node.GetId()};
 
   if (node_drawer->HasHeader()) {
+    auto color = node_drawer->GetColor();
+
+    if (settings_view.IsColorFlow()) {
+      if (const auto input_flow = node_flow.input_pin_flow) {
+        color =
+            settings_view.GetColorForFlowValue(input_flow->second, settings);
+      } else {
+        color = ImColor{1.F, 1.F, 1.F};
+      }
+    }
+
     const auto header_scope =
-        node_builder.AddHeader(node_header_texture_, node_drawer->GetColor());
+        node_builder.AddHeader(node_header_texture_, color);
 
     DrawHeader(*node_drawer);
   }
@@ -166,11 +184,13 @@ void Nodes::DrawNode(core::INode& node, const flow::NodeFlow& node_flow,
           node_builder.AddPin(pin_drawer->GetPinId(), pin_kind);
 
       if (pin_kind == ne::PinKind::Input) {
-        DrawPinIconArea(*pin_drawer, diagram, new_link, settings_view);
+        DrawPinIconArea(*pin_drawer, node_flow, diagram, new_link,
+                        settings_view, settings);
         DrawPinField(*pin_drawer, node_flow);
       } else {
         DrawPinField(*pin_drawer, node_flow);
-        DrawPinIconArea(*pin_drawer, diagram, new_link, settings_view);
+        DrawPinIconArea(*pin_drawer, node_flow, diagram, new_link,
+                        settings_view, settings);
       }
     }
   }
@@ -178,9 +198,11 @@ void Nodes::DrawNode(core::INode& node, const flow::NodeFlow& node_flow,
 
 // ---
 void Nodes::DrawPinIconArea(const coreui::IPinDrawer& pin_drawer,
+                            const flow::NodeFlow& node_flow,
                             const core::Diagram& diagram,
                             const NewLink& new_link,
-                            const SettingsView& settings_view) {
+                            const SettingsView& settings_view,
+                            const core::Settings& settings) {
   const auto pin_id = pin_drawer.GetPinId();
   const auto area_size = ImVec2{24, 24};
 
@@ -189,7 +211,8 @@ void Nodes::DrawPinIconArea(const coreui::IPinDrawer& pin_drawer,
     return;
   }
 
-  DrawFlowIconPinArea(*pin_id, area_size, diagram, new_link, settings_view);
+  DrawFlowIconPinArea(*pin_id, area_size, node_flow, diagram, new_link,
+                      settings_view, settings);
 
   drawn_pin_icon_rects_[pin_id->Get()] =
       ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};

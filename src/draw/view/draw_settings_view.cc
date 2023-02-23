@@ -53,6 +53,8 @@ void SettingsView::Draw(const AppState& app_state) {
   }
 }
 
+auto SettingsView::IsColorFlow() const -> bool { return color_flow; }
+
 auto SettingsView::GetColorForFlowValue(float value,
                                         const core::Settings& settings) const
     -> ImColor {

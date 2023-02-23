@@ -15,6 +15,8 @@ class SettingsView : public IHidable {
 
   void Draw(const AppState &app_state);
 
+  auto IsColorFlow [[nodiscard]] () const -> bool;
+
   auto GetColorForFlowValue
       [[nodiscard]] (float value, const core::Settings &settings) const
       -> ImColor;

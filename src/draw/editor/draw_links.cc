@@ -2,9 +2,8 @@
  * @author Volodymyr Hromakov (4y5t6r@gmail.com)
  */
 
+#include "flow_node_flow.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include "draw_links.h"
-
 #include <imgui.h>
 #include <imgui_internal.h>
 
@@ -15,6 +14,7 @@
 #include "core_project.h"
 #include "cpp_assert.h"
 #include "cpp_scope.h"
+#include "draw_links.h"
 #include "draw_tooltip.h"
 #include "draw_widgets.h"
 #include "flow_tree.h"
@@ -75,9 +75,18 @@ void Links::Draw(const AppState& app_state) {
   const auto& diagram = app_state.project.GetDiagram();
   const auto fixed_pin = app_state.widgets.new_link.FindFixedPin(diagram);
 
+  const auto flow_tree = flow::BuildFlowTree(diagram);
+  const auto node_flows = flow::CalculateNodeFlows(flow_tree);
+
   for (const auto& link : diagram.GetLinks()) {
     const auto alpha = GetLinkAlpha(link, fixed_pin);
-    const auto color = ImColor{1.F, 1.F, 1.F, alpha};
+
+    const auto start_pin_node = core::FindPinNode(diagram, link.start_pin_id);
+    const auto node_flow = node_flows.at(start_pin_node->GetId().Get());
+    const auto start_pin_flow = flow::GetPinFlow(node_flow, link.start_pin_id);
+    auto color = app_state.widgets.settings_view.GetColorForFlowValue(
+        start_pin_flow, app_state.project.GetSettings());
+    color.Value.w = alpha;
 
     ne::Link(link.id, link.start_pin_id, link.end_pin_id, color, 2.F);
   }
