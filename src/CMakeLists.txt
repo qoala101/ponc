@@ -174,7 +174,6 @@ add_example_executable(esc
   draw/view/draw_i_hideable.cc
   draw/view/draw_settings_view.cc
   draw/draw_main_menu_bar.cc
-  draw/draw_node_drawer.cc
   draw/draw_widgets.cc
 
   flow/flow_node_flow.cc
