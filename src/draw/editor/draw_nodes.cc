@@ -10,36 +10,16 @@
 #include <optional>
 #include <string_view>
 
-#include "app_state.h"
-#include "core_diagram.h"
-#include "core_i_node.h"
-#include "core_project.h"
-#include "core_settings.h"
-#include "coreui_i_node_drawer.h"
-#include "coreui_i_pin_drawer.h"
 #include "cpp_assert.h"
 #include "cpp_scope.h"
 #include "draw_flow_icon.h"
-#include "draw_new_link.h"
 #include "draw_nodes.h"
-#include "draw_widgets.h"
-#include "flow_node_flow.h"
-#include "flow_tree.h"
 #include "frame_node.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
 namespace {
-// ---
-void DrawEmptyPinArea(ImVec2 area_size, bool pin_editable) {
-  if (pin_editable) {
-    area_size.x -= 4;
-  }
-
-  ImGui::Dummy(area_size);
-}
-
 // ---
 void DrawPinField_v2(const frame::Pin& pin) {
   const auto spring_scope =
@@ -64,25 +44,16 @@ void DrawPinField_v2(const frame::Pin& pin) {
   ImGui::SetNextItemWidth(100);
   ImGui::InputFloat(label.c_str(), float_value, 0.F, 0.F, "%.3f");
 }
-
-void DrawFlowIconPinArea_v2(const frame::Pin& pin, ImVec2 area_size) {
-  if (!ImGui::IsRectVisible(area_size)) {
-    return;
-  }
-
-  DrawFlowIcon(area_size, pin.color, pin.filled);
-  ImGui::Dummy(area_size);
-}
 }  // namespace
 
 // ---
 Nodes::Nodes(const Texture& node_header_texture)
     : node_header_texture_{node_header_texture} {}
 
-void Nodes::Draw(const AppState& app_state) {
+void Nodes::Draw(const frame::Frame& frame) {
   drawn_pin_icon_rects_.clear();
 
-  for (const auto& node : app_state.frame.nodes) {
+  for (const auto& node : frame.nodes) {
     DrawNode_v2(node);
   }
 }
@@ -251,14 +222,23 @@ void Nodes::DrawNode_v2(const frame::Node& node) {
 
 void Nodes::DrawPinIconArea_v2(const frame::Pin& pin) {
   const auto pin_id = pin.id;
-  const auto area_size = ImVec2{24, 24};
+  auto area_size = ImVec2{24, 24};
 
   if (!pin_id.has_value()) {
-    DrawEmptyPinArea(area_size, std::holds_alternative<float*>(pin.value));
+    if (std::holds_alternative<float*>(pin.value)) {
+      area_size.x -= 4;
+    }
+
+    ImGui::Dummy(area_size);
     return;
   }
 
-  DrawFlowIconPinArea_v2(pin, area_size);
+  if (!ImGui::IsRectVisible(area_size)) {
+    return;
+  }
+
+  DrawFlowIcon(area_size, pin.color, pin.filled);
+  ImGui::Dummy(area_size);
 
   drawn_pin_icon_rects_[pin_id->Get()] =
       ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};

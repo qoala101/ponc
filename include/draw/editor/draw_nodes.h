@@ -34,7 +34,7 @@ class Nodes {
   explicit Nodes(const Texture& node_header_texture);
 
   // ---
-  void Draw(const AppState& app_state);
+  void Draw(const frame::Frame& frame);
   // ---
   auto GetDrawnPinIconRect [[nodiscard]] (ne::PinId pin_id) const
       -> const ImRect&;

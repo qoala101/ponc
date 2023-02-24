@@ -6,6 +6,7 @@
 #include "coreui_i_node_drawer.h"
 #include "cpp_assert.h"
 #include "flow_tree.h"
+#include "imgui.h"
 
 namespace esc::frame {
 namespace {
@@ -40,7 +41,12 @@ auto GetLinks
         start_pin_flow, project.GetSettings());
     color.Value.w = alpha;
 
-    links.emplace_back(Link{.link = link, .color = color, .thickness = 2.F});
+    auto& link_data = links.emplace_back();
+    link_data.id = link.id;
+    link_data.start_pin_id = link.start_pin_id;
+    link_data.end_pin_id = link.end_pin_id;
+    link_data.color = color;
+    link_data.thickness = 2.F;
   }
 
   return links;
@@ -137,8 +143,47 @@ auto GetNodes
 
   return nodes;
 }
+
+auto GetCurve
+    [[nodiscard]] (const core::Project& project, const draw::Widgets& widgets)
+    -> std::optional<Curve> {
+  const auto& diagram = project.GetDiagram();
+  const auto fixed_pin = widgets.new_link.FindFixedPin(diagram);
+
+  if (!fixed_pin.has_value()) {
+    return std::nullopt;
+  }
+
+  auto curve = Curve{.color = ImColor{1.F, 1.F, 1.F}, .thickness = 4.F};
+
+  const auto fixed_pin_rect = widgets.nodes.GetDrawnPinIconRect(*fixed_pin);
+  const auto fixed_pin_node = FindPinNode(diagram, *fixed_pin);
+  const auto fixed_pin_kind = core::GetPinKind(*fixed_pin_node, *fixed_pin);
+
+  if (fixed_pin_kind == ax::NodeEditor::PinKind::Input) {
+    curve.end_position =
+        ImVec2{fixed_pin_rect.Min.x,
+               (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y) / 2};
+  } else {
+    curve.start_position =
+        ImVec2{fixed_pin_rect.Max.x,
+               (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y) / 2};
+  }
+
+  if (const auto hovering_over_pin = widgets.new_link.GetHoveringOverPin()) {
+    if (widgets.new_link.CanConnectToPin(*hovering_over_pin, diagram)) {
+      curve.color = ImColor{1.F / 2, 1.F, 1.F / 2};
+    } else {
+      curve.color = ImColor{1.F, 1.F / 2, 1.F / 2};
+    }
+  }
+
+  return curve;
+}
 }  // namespace
 
 Frame::Frame(const core::Project& project, const draw::Widgets& widgets)
-    : nodes{GetNodes(project, widgets)}, links{GetLinks(project, widgets)} {}
+    : nodes{GetNodes(project, widgets)},
+      links{GetLinks(project, widgets)},
+      curve{GetCurve(project, widgets)} {}
 }  // namespace esc::frame

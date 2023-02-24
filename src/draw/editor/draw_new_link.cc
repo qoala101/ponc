@@ -108,19 +108,6 @@ auto NewLink::CanConnectToPin(ne::PinId pin_id,
   return GetCanConnectToPinReason(pin_id, diagram).first;
 }
 
-struct RebindingLink {
-  ne::PinId fixed_pin{};
-  ne::PinKind fixed_pin_kind{};
-  ne::LinkId link_id{};
-  std::optional<ImVec2> fixed_pin_pos{};
-};
-
-struct HoveredOverLink {
-  ne::PinId fixed_pin{};
-  ne::PinKind fixed_pin_kind{};
-  ne::LinkId link_id{};
-};
-
 auto NewLink::GetCanConnectToPinReason(ne::PinId pin_id,
                                        const core::Diagram& diagram) const
     -> std::pair<bool, std::string> {

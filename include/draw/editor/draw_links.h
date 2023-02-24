@@ -14,11 +14,7 @@ namespace esc::draw {
 class Links {
  public:
   // ---
-  void Draw(const AppState &app_state);
-
- private:
-  void DrawLinkBeingRepinned(const core::Diagram &diagram,
-                             const NewLink &new_link, const Nodes &nodes);
+  void Draw(const frame::Frame &frame);
 };
 }  // namespace esc::draw
 

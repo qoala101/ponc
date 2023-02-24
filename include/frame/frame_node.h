@@ -23,7 +23,6 @@ struct Pin {
   bool filled{};
   std::string label{};
   std::variant<std::monostate, float, float *> value{};
-  ImRect drawn_rect{};
 };
 
 struct NodeHeader {
@@ -39,7 +38,16 @@ struct Node {
 };
 
 struct Link {
-  core::Link link{};
+  ne::LinkId id{};
+  ne::PinId start_pin_id{};
+  ne::PinId end_pin_id{};
+  ImColor color{};
+  float thickness{};
+};
+
+struct Curve {
+  std::optional<ImVec2> start_position{};
+  std::optional<ImVec2> end_position{};
   ImColor color{};
   float thickness{};
 };
@@ -49,6 +57,7 @@ struct Frame {
 
   std::vector<Node> nodes{};
   std::vector<Link> links{};
+  std::optional<Curve> curve{};
 };
 }  // namespace esc::frame
 

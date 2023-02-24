@@ -2,36 +2,22 @@
  * @author Volodymyr Hromakov (4y5t6r@gmail.com)
  */
 
-#include "flow_node_flow.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include <imgui_internal.h>
 
-#include "app_events.h"
-#include "app_state.h"
-#include "core_diagram.h"
-#include "core_i_node.h"
-#include "core_project.h"
 #include "cpp_assert.h"
-#include "cpp_scope.h"
 #include "draw_links.h"
-#include "draw_tooltip.h"
-#include "draw_widgets.h"
-#include "flow_tree.h"
 #include "frame_node.h"
 #include "imgui_bezier_math.h"
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
 namespace {
-auto GetCurve(const ImVec2& m_Start, const ImVec2& m_End, ne::PinKind kind) {
+auto GetCurve(const ImVec2& m_Start, const ImVec2& m_End) {
   const auto strength = ne::GetStyle().LinkStrength;
-  const auto start_dir = kind == ne::PinKind::Output
-                             ? ne::GetStyle().SourceDirection
-                             : ne::GetStyle().TargetDirection;
-  const auto end_dir = kind == ne::PinKind::Input
-                           ? ne::GetStyle().SourceDirection
-                           : ne::GetStyle().TargetDirection;
+  const auto start_dir = ne::GetStyle().SourceDirection;
+  const auto end_dir = ne::GetStyle().TargetDirection;
 
   auto easeLinkStrength = [](const ImVec2& a, const ImVec2& b, float strength) {
     const auto distanceX = b.x - a.x;
@@ -39,8 +25,9 @@ auto GetCurve(const ImVec2& m_Start, const ImVec2& m_End, ne::PinKind kind) {
     const auto distance = ImSqrt(distanceX * distanceX + distanceY * distanceY);
     const auto halfDistance = distance * 0.5f;
 
-    if (halfDistance < strength)
+    if (halfDistance < strength) {
       strength = strength * ImSin(IM_PI * 0.5f * halfDistance / strength);
+    }
 
     return strength;
   };
@@ -59,62 +46,27 @@ auto GetCurve(const ImVec2& m_Start, const ImVec2& m_End, ne::PinKind kind) {
   return result;
 }
 
-// ---
-auto GetLinkAlpha [[nodiscard]] (const core::Link& link,
-                                 const std::optional<ne::PinId>& fixed_pin) {
-  if (fixed_pin.has_value() &&
-      ((link.start_pin_id == *fixed_pin) || (link.end_pin_id == *fixed_pin))) {
-    return 1.F / 2;
-  }
+void DrawLinkBeingRepinned_v2(const frame::Curve& curve) {
+  const auto mouse_pos = ImGui::GetMousePos();
+  const auto bezier = GetCurve(curve.start_position.value_or(mouse_pos),
+                               curve.end_position.value_or(mouse_pos));
 
-  return 1.F;
+  auto* draw_list = ImGui::GetWindowDrawList();
+  Expects(draw_list != nullptr);
+  draw_list->AddBezierCubic(bezier.P0, bezier.P1, bezier.P2, bezier.P3,
+                            curve.color, curve.thickness);
 }
 }  // namespace
 
 // ---
-void Links::Draw(const AppState& app_state) {
-  for (const auto& link : app_state.frame.links) {
-    ne::Link(link.link.id, link.link.start_pin_id, link.link.end_pin_id,
-             link.color, link.thickness);
+void Links::Draw(const frame::Frame& frame) {
+  for (const auto& link : frame.links) {
+    ne::Link(link.id, link.start_pin_id, link.end_pin_id, link.color,
+             link.thickness);
   }
 
-  DrawLinkBeingRepinned(app_state.project.GetDiagram(),
-                        app_state.widgets.new_link, app_state.widgets.nodes);
-}
-
-void Links::DrawLinkBeingRepinned(const core::Diagram& diagram,
-                                  const NewLink& new_link, const Nodes& nodes) {
-  const auto fixed_pin = new_link.FindFixedPin(diagram);
-
-  if (!fixed_pin.has_value()) {
-    return;
+  if (frame.curve.has_value()) {
+    DrawLinkBeingRepinned_v2(*frame.curve);
   }
-
-  const auto fixed_pin_rect = nodes.GetDrawnPinIconRect(*fixed_pin);
-  const auto fixed_pin_node = FindPinNode(diagram, *fixed_pin);
-  const auto fixed_pin_kind = core::GetPinKind(*fixed_pin_node, *fixed_pin);
-  const auto fixed_pin_position =
-      (fixed_pin_kind == ax::NodeEditor::PinKind::Input)
-          ? ImVec2{fixed_pin_rect.Min.x,
-                   (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y) / 2}
-          : ImVec2{fixed_pin_rect.Max.x,
-                   (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y) / 2};
-
-  const auto curve =
-      GetCurve(fixed_pin_position, ImGui::GetMousePos(), fixed_pin_kind);
-
-  auto color = ImColor{1.F, 1.F, 1.F};
-
-  if (const auto hovering_over_pin = new_link.GetHoveringOverPin()) {
-    if (new_link.CanConnectToPin(*hovering_over_pin, diagram)) {
-      color = ImColor{1.F / 2, 1.F, 1.F / 2};
-    } else {
-      color = ImColor{1.F, 1.F / 2, 1.F / 2};
-    }
-  }
-
-  auto* draw_list = ImGui::GetWindowDrawList();
-  Expects(draw_list != nullptr);
-  draw_list->AddBezierCubic(curve.P0, curve.P1, curve.P2, curve.P3, color, 4.F);
 }
 }  // namespace esc::draw
