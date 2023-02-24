@@ -14,14 +14,6 @@ class SettingsView : public IHidable {
   auto GetLabel() const -> std::string;
 
   void Draw(const AppState &app_state);
-
-  auto IsColorFlow() const -> bool;
-
-  auto GetColorForFlowValue(float value, const core::Settings &settings) const
-      -> ImColor;
-
- private:
-  bool color_flow{};
 };
 }  // namespace esc::draw
 

@@ -5,7 +5,7 @@
 
 namespace esc::draw {
 void Widgets::Draw(const AppState &app_state) {
-  draw::DrawMainMenuBar(app_state);
+  main_menu_bar.Draw(app_state);
   node_editor.Draw(app_state);
 }
 }  // namespace esc::draw

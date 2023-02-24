@@ -21,6 +21,68 @@ auto GetLinkAlpha(const core::Link& link,
   return 1.F;
 }
 
+auto GetColorForFlowValue(float value, const core::Settings& settings)
+    -> ImColor {
+  if (!settings.color_flow) {
+    return ImColor{1.F, 1.F, 1.F};
+  }
+
+  const auto blue = ImColor{0.F, 0.F, 1.F};
+  const auto red = ImColor{1.F, 0.F, 0.F};
+
+  if (value < settings.min) {
+    return blue;
+  }
+
+  if (value >= settings.max) {
+    return red;
+  }
+
+  const auto range = (settings.max - settings.min);
+  const auto value_percentage = (value - settings.min) / range;
+  const auto low_percentage = (settings.low - settings.min) / range;
+  const auto high_percentage = (settings.high - settings.min) / range;
+
+  auto percentage = 0.0F;
+  auto start_color = ImColor{};
+  auto end_color = ImColor{};
+
+  const auto blue_green = ImColor{0.F, 1.F, 1.F};
+  const auto green = ImColor{0.F, 1.F, 0.F};
+  const auto green_red = ImColor{1.F, 1.F, 0.F};
+
+  if (value_percentage < low_percentage) {
+    percentage = value_percentage / low_percentage;
+    start_color = blue;
+    end_color = blue_green;
+  } else if (value_percentage >= high_percentage) {
+    percentage =
+        (value_percentage - high_percentage) / (1.0F - high_percentage);
+    start_color = green_red;
+    end_color = red;
+  } else {
+    const auto low_high_range = (high_percentage - low_percentage);
+    percentage = (value_percentage - low_percentage) / low_high_range;
+
+    if (percentage < 0.5F) {
+      percentage = percentage * 2;
+      start_color = blue_green;
+      end_color = green;
+    } else {
+      percentage = (percentage - 0.5F) * 2;
+      start_color = green;
+      end_color = green_red;
+    }
+  }
+
+  return ImColor{start_color.Value.x +
+                     percentage * (end_color.Value.x - start_color.Value.x),
+                 start_color.Value.y +
+                     percentage * (end_color.Value.y - start_color.Value.y),
+                 start_color.Value.z +
+                     percentage * (end_color.Value.z - start_color.Value.z)};
+}
+
 auto FindFixedPin(const core::Project& project, const draw::Widgets& widgets)
     -> std::optional<ne::PinId> {
   const auto& new_link = widgets.node_editor.GetNewLink();
@@ -59,8 +121,7 @@ auto GetLinks(const core::Project& project, const draw::Widgets& widgets) {
     const auto start_pin_node = core::FindPinNode(diagram, link.start_pin_id);
     const auto node_flow = node_flows.at(start_pin_node->GetId().Get());
     const auto start_pin_flow = flow::GetPinFlow(node_flow, link.start_pin_id);
-    auto color = widgets.settings_view.GetColorForFlowValue(
-        start_pin_flow, project.GetSettings());
+    auto color = GetColorForFlowValue(start_pin_flow, project.GetSettings());
     color.Value.w = alpha;
 
     auto& link_data = links.emplace_back();
@@ -181,10 +242,10 @@ auto GetNodes(const core::Project& project, const draw::Widgets& widgets) {
       node_data.header =
           NodeHeader{.color = drawer->GetColor(), .label = drawer->GetLabel()};
 
-      if (widgets.settings_view.IsColorFlow()) {
+      if (project.GetSettings().color_flow) {
         if (const auto input_flow = node_flow.input_pin_flow) {
-          node_data.header->color = widgets.settings_view.GetColorForFlowValue(
-              input_flow->second, settings);
+          node_data.header->color =
+              GetColorForFlowValue(input_flow->second, settings);
         } else {
           node_data.header->color = ImColor{1.F, 1.F, 1.F};
         }
@@ -209,8 +270,7 @@ auto GetNodes(const core::Project& project, const draw::Widgets& widgets) {
       }
 
       const auto pin_flow = flow::GetPinFlow(node_flow, *pin_data.id);
-      pin_data.color =
-          widgets.settings_view.GetColorForFlowValue(pin_flow, settings);
+      pin_data.color = GetColorForFlowValue(pin_flow, settings);
       pin_data.color.Value.w = GetPinIconAlpha(*pin_data.id, project, widgets);
       pin_data.filled = FindPinLink(diagram, *pin_data.id).has_value();
 

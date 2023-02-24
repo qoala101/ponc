@@ -59,7 +59,7 @@ void DrawLinkBeingRepinned_v2(const frame::Curve& curve) {
 }
 }  // namespace
 
-void Links::Draw(const frame::Frame& frame) {
+void DrawLinks(const frame::Frame& frame) {
   for (const auto& link : frame.links) {
     ne::Link(link.id, link.start_pin_id, link.end_pin_id, link.color,
              link.thickness);

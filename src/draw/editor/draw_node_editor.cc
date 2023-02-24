@@ -19,19 +19,10 @@ void NodeEditor::Draw(const AppState &app_state) {
   // draw::DrawGroups(state);
   new_link.Draw(app_state);
   nodes.Draw(app_state.frame);
-  links.Draw(app_state.frame);
+  DrawLinks(app_state.frame);
   // draw::DrawDeleteItemsProcess(state);
   DrawShowPopupProcess(app_state);
   DrawPopupContents(app_state);
-
-  {
-    const auto suspend_scope =
-        cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
-
-    background_popup.Draw(app_state);
-    node_popup.Draw(app_state);
-    link_popup.Draw(app_state);
-  }
 }
 
 auto NodeEditor::GetNewLink() const -> const NewLink & { return new_link; }

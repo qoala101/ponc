@@ -42,7 +42,6 @@ class NodeEditor {
 
   NewLink new_link{};
   Nodes nodes{};
-  Links links{};
 
   BackgroundPopup background_popup{};
   NodePopup node_popup{};

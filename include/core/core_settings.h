@@ -3,6 +3,7 @@
 
 namespace esc::core {
 struct Settings {
+  bool color_flow{};
   float min{-27.F};
   float low{-22.F};
   float high{-18.F};
