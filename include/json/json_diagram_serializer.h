@@ -12,16 +12,12 @@
 #include "crude_json.h"
 
 namespace esc::json {
-// ---
 struct DiagramSerializer {
-  // ---
-  static auto ParseFromJson [[nodiscard]] (
+  static auto ParseFromJson(
       const crude_json::value &json,
       const std::vector<std::shared_ptr<core::IFamily>> &families)
-  -> core::Diagram;
-  // ---
-  static auto WriteToJson [[nodiscard]] (const core::Diagram &diagram)
-  -> crude_json::value;
+      -> core::Diagram;
+  static auto WriteToJson(const core::Diagram &diagram) -> crude_json::value;
 };
 }  // namespace esc::json
 

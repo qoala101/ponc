@@ -10,12 +10,10 @@
 #include "cpp_scope.h"
 
 namespace esc::draw {
-// ---
 void IPopup::Show() {
   ImGui::OpenPopup(GetLabel().c_str(), ImGuiPopupFlags_NoOpenOverExistingPopup);
 }
 
-// ---
 void IPopup::Draw(const AppState &app_state) {
   const auto label = GetLabel();
   const auto *label_data = label.c_str();

@@ -11,7 +11,6 @@
 #include "json_id_serializer.h"
 
 namespace esc::json {
-// ---
 auto INodeParser::ParseFromJson(const crude_json::value& json) const
     -> std::shared_ptr<core::INode> {
   auto parsed_args = core::INode::ConstructorArgs{

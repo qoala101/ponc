@@ -8,9 +8,7 @@
 #include "draw_texture.h"
 
 namespace esc {
-// ---
 struct Textures {
-  // ---
   draw::Texture node_header{};
 };
 }  // namespace esc

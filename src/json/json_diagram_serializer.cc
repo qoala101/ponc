@@ -22,10 +22,8 @@
 
 namespace esc::json {
 namespace {
-// ---
-auto FindFamily
-    [[nodiscard]] (const std::vector<std::shared_ptr<core::IFamily>>& families,
-                   core::FamilyId family_id) -> auto& {
+auto FindFamily(const std::vector<std::shared_ptr<core::IFamily>>& families,
+                core::FamilyId family_id) -> auto& {
   const auto family = std::ranges::find_if(
       families,
       [family_id](const auto& family) { return family->GetId() == family_id; });
@@ -33,10 +31,8 @@ auto FindFamily
   return *family;
 }
 
-// ---
-auto ParseNode [[nodiscard]] (
-    const crude_json::value& json,
-    const std::vector<std::shared_ptr<core::IFamily>>& families) {
+auto ParseNode(const crude_json::value& json,
+               const std::vector<std::shared_ptr<core::IFamily>>& families) {
   const auto family_id =
       IdSerializer::ParseFromJson<core::FamilyId>(json["family_id"]);
   const auto& family = FindFamily(families, family_id);
@@ -44,7 +40,6 @@ auto ParseNode [[nodiscard]] (
 }
 }  // namespace
 
-// ---
 auto DiagramSerializer::ParseFromJson(
     const crude_json::value& json,
     const std::vector<std::shared_ptr<core::IFamily>>& families)
@@ -59,7 +54,6 @@ auto DiagramSerializer::ParseFromJson(
   return core::Diagram{std::move(nodes), std::move(links), std::move(groups)};
 }
 
-// ---
 auto DiagramSerializer::WriteToJson(const core::Diagram& diagram)
     -> crude_json::value {
   auto json = crude_json::value{};

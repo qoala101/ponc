@@ -8,13 +8,9 @@
 #include <imgui.h>
 
 namespace esc::draw {
-// ---
 struct Texture {
-  // ---
   ImTextureID id{};
-  // ---
   int width{};
-  // ---
   int height{};
 };
 }  // namespace esc::draw

@@ -144,15 +144,13 @@ class SmallDropPinDrawer : public coreui::IPinDrawer {
  public:
   explicit SmallDropPinDrawer(float drop) : drop_{drop} {}
 
-  auto GetKind [[nodiscard]] () const -> std::optional<ne::PinKind> override {
+  auto GetKind() const -> std::optional<ne::PinKind> override {
     return ne::PinKind::Input;
   }
 
-  auto GetFloat [[nodiscard]] () -> std::optional<float*> override {
-    return &drop_;
-  }
+  auto GetFloat() -> std::optional<float*> override { return &drop_; }
 
-  auto IsEditable [[nodiscard]] () const -> bool override { return false; }
+  auto IsEditable() const -> bool override { return false; }
 
  private:
   float drop_{};
@@ -162,15 +160,13 @@ class BigDropPinDrawer : public coreui::IPinDrawer {
  public:
   explicit BigDropPinDrawer(float drop) : drop_{drop} {}
 
-  auto GetKind [[nodiscard]] () const -> std::optional<ne::PinKind> override {
+  auto GetKind() const -> std::optional<ne::PinKind> override {
     return ne::PinKind::Input;
   }
 
-  auto GetFloat [[nodiscard]] () -> std::optional<float*> override {
-    return &drop_;
-  }
+  auto GetFloat() -> std::optional<float*> override { return &drop_; }
 
-  auto IsEditable [[nodiscard]] () const -> bool override { return false; }
+  auto IsEditable() const -> bool override { return false; }
 
  private:
   float drop_{};

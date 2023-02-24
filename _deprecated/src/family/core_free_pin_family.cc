@@ -93,13 +93,13 @@ class PinDrawer : public coreui::IPinDrawer {
  public:
   explicit PinDrawer(ne::PinKind pin_kind) : pin_kind_{pin_kind} {}
 
-  auto GetLabel [[nodiscard]] () const -> std::string override { return {}; }
+  auto GetLabel() const -> std::string override { return {}; }
 
-  auto GetKind [[nodiscard]] () const -> std::optional<ne::PinKind> override {
+  auto GetKind() const -> std::optional<ne::PinKind> override {
     return pin_kind_;
   }
 
-  auto IsEditable [[nodiscard]] () const -> bool override { return false; }
+  auto IsEditable() const -> bool override { return false; }
 
  private:
   ne::PinKind pin_kind_{};
@@ -209,7 +209,7 @@ class FamilyDrawer : public coreui::IFamilyDrawer {
 
   auto GetColor() const -> ImColor override { return {255, 255, 255}; }
 
-  auto IsUserAccessible [[nodiscard]] () -> bool { return false; }
+  auto IsUserAccessible() -> bool { return false; }
 
  private:
   std::shared_ptr<FreePinFamily> family_{};

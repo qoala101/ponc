@@ -29,8 +29,7 @@ namespace esc {
 //   return families;
 // }
 
-// ---
-auto CreateFamilyParsers [[nodiscard]] () {
+auto CreateFamilyParsers() {
   auto family_parsers = std::vector<std::unique_ptr<json::IFamilyParser>>{};
   family_parsers.emplace_back(InputNode::CreateFamilyParser());
   // family_parsers.emplace_back(ClientNode::CreateFamilyParser());
@@ -41,8 +40,7 @@ auto CreateFamilyParsers [[nodiscard]] () {
   return family_parsers;
 }
 
-// ---
-auto FindMaxId [[nodiscard]] (const core::Project &project) {
+auto FindMaxId(const core::Project &project) {
   auto max_id = uintptr_t{1};
 
   for (const auto &family : project.GetFamilies()) {
@@ -105,14 +103,12 @@ void Events::SaveProjectToFile::operator()(const AppState &app_state) const {
 //   state.core_state->diagram_ = core::Diagram{CreateFamilies()};
 // }
 
-// ---
 void Events::EmplaceNode::operator()(const AppState &app_state) {
   const auto &new_node =
       app_state.project.GetDiagram().EmplaceNode(std::move(node));
   new_node->SetPosition(position);
 }
 
-// ---
 void Events::CreateLink::operator()(const AppState &app_state) const {
   app_state.project.GetDiagram().EmplaceLink(
       {.id = app_state.id_generator.GetNext<ne::LinkId>(),
@@ -120,7 +116,6 @@ void Events::CreateLink::operator()(const AppState &app_state) const {
        .end_pin_id = end_pin_id});
 }
 
-// ---
 void Events::DeleteLink::operator()(const AppState &app_state) const {
   ne::DeleteLink(link_id);
   app_state.project.GetDiagram().EraseLink(link_id);

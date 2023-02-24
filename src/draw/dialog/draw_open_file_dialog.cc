@@ -10,7 +10,6 @@
 #include "draw_i_file_dialog.h"
 
 namespace esc::draw {
-// ---
 OpenFileDialog::OpenFileDialog()
     : IFileDialog{[]() {
         auto dialog = ImGui::FileBrowser{ImGuiFileBrowserFlags_CloseOnEsc};
@@ -19,7 +18,6 @@ OpenFileDialog::OpenFileDialog()
         return dialog;
       }()} {}
 
-// ---
 void OpenFileDialog::OnFileSelected(const AppState &app_state,
                                     std::string file_path) const {
   app_state.event_queue.PostEvent(

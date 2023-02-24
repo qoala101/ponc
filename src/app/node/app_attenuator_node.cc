@@ -91,15 +91,13 @@ class DropPinDrawer : public coreui::IPinDrawer {
  public:
   explicit DropPinDrawer(std::shared_ptr<Node> node) : node_{std::move(node)} {}
 
-  auto GetKind [[nodiscard]] () const -> std::optional<ne::PinKind> override {
+  auto GetKind() const -> std::optional<ne::PinKind> override {
     return ne::PinKind::Input;
   }
 
-  auto GetFloat [[nodiscard]] () -> std::optional<float*> override {
-    return &node_->drop_;
-  }
+  auto GetFloat() -> std::optional<float*> override { return &node_->drop_; }
 
-  auto IsEditable [[nodiscard]] () const -> bool override { return true; }
+  auto IsEditable() const -> bool override { return true; }
 
  private:
   std::shared_ptr<Node> node_{};

@@ -9,7 +9,6 @@
 
 namespace esc::draw {
 namespace {
-// ---
 auto AsLowerCase(std::string text) {
   for (auto& character : text) {
     character = static_cast<char>(std::tolower(character));
@@ -19,7 +18,6 @@ auto AsLowerCase(std::string text) {
 }
 }  // namespace
 
-// ---
 SaveAsFileDialog::SaveAsFileDialog()
     : IFileDialog{[]() {
         auto dialog =
@@ -30,7 +28,6 @@ SaveAsFileDialog::SaveAsFileDialog()
         return dialog;
       }()} {}
 
-// ---
 void SaveAsFileDialog::OnFileSelected(const AppState& app_state,
                                       std::string file_path) const {
   if (const auto not_json_extension =

@@ -8,7 +8,6 @@
 #include <imgui.h>
 
 namespace esc::draw {
-// ---
 void DrawFlowIcon(const ImVec2& size, const ImColor& color, bool filled);
 }  // namespace esc::draw
 

@@ -26,6 +26,7 @@ struct Pin {
 };
 
 struct NodeHeader {
+  draw::Texture texture{};
   ImColor color{};
   std::string label{};
 };
@@ -52,12 +53,23 @@ struct Curve {
   float thickness{};
 };
 
+struct Creation {
+  bool can_connect{};
+  std::string reason{};
+
+  std::optional<ne::LinkId> delete_link{};
+  ne::PinId start_pin_id{};
+  ne::PinId end_pin_id{};
+};
+
 struct Frame {
   Frame(const core::Project &project, const draw::Widgets &widgets);
 
   std::vector<Node> nodes{};
   std::vector<Link> links{};
   std::optional<Curve> curve{};
+  float creation_alpha{};
+  std::optional<Creation> creation{};
 };
 }  // namespace esc::frame
 

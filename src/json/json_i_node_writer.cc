@@ -10,7 +10,6 @@
 #include "json_id_serializer.h"
 
 namespace esc::json {
-// ---
 auto INodeWriter::WriteToJson(const core::INode& node) const
     -> crude_json::value {
   auto json = crude_json::value{};

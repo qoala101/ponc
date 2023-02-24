@@ -8,20 +8,15 @@
 #include "cpp_interface.h"
 
 namespace esc::draw {
-// ---
 class IHidable : public cpp::Interface {
  public:
-  // ---
-  auto IsVisible [[nodiscard]] () const -> bool;
-  // ---
+  auto IsVisible() const -> bool;
   void SetVisible(bool visible);
 
  protected:
-  // ---
-  auto GetVisible [[nodiscard]] () -> bool &;
+  auto GetVisible() -> bool &;
 
  private:
-  // ---
   bool visible_{};
 };
 }  // namespace esc::draw

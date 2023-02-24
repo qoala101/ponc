@@ -9,9 +9,8 @@
 #include <string_view>
 
 namespace esc::draw {
-// ---
 template <typename Id>
-auto IdLabel [[nodiscard]] (std::string_view label, Id id) {
+auto IdLabel(std::string_view label, Id id) {
   return label.data() + std::string{"##"} + std::to_string(id.Get());
 }
 }  // namespace esc::draw

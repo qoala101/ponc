@@ -8,7 +8,6 @@
 #include "json_id_serializer.h"
 
 namespace esc::json {
-// ---
 auto IFamilyParser::TryToParseFromJson(const crude_json::value& json) const
     -> std::optional<std::shared_ptr<core::IFamily>> {
   if (json["type"].get<crude_json::string>() != GetTypeName()) {

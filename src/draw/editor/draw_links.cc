@@ -3,11 +3,12 @@
  */
 
 #define IMGUI_DEFINE_MATH_OPERATORS
+#include "draw_links.h"
+
 #include <imgui.h>
 #include <imgui_internal.h>
 
 #include "cpp_assert.h"
-#include "draw_links.h"
 #include "frame_node.h"
 #include "imgui_bezier_math.h"
 #include "imgui_node_editor.h"
@@ -58,7 +59,6 @@ void DrawLinkBeingRepinned_v2(const frame::Curve& curve) {
 }
 }  // namespace
 
-// ---
 void Links::Draw(const frame::Frame& frame) {
   for (const auto& link : frame.links) {
     ne::Link(link.id, link.start_pin_id, link.end_pin_id, link.color,

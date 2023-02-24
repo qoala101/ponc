@@ -10,19 +10,15 @@
 #include <vector>
 
 namespace esc::core {
-// ---
 class IdGenerator {
  public:
-  // ---
   explicit IdGenerator(uintptr_t next_value = 1);
 
-  // ---
   template <typename Id>
   auto GetNext() {
     return Id{next_value_++};
   }
 
-  // ---
   template <typename Id>
   auto GetNextN(int n) {
     auto ids = std::vector<Id>{};
@@ -36,7 +32,6 @@ class IdGenerator {
   }
 
  private:
-  // ---
   uintptr_t next_value_{};
 };
 }  // namespace esc::core

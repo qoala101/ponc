@@ -4,7 +4,6 @@
 #include "app_state.h"
 
 namespace esc::draw {
-// ---
 void DrawDeleteItemsProcess(const AppState &app_state);
 }  // namespace esc::draw
 

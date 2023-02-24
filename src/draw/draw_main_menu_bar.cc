@@ -16,7 +16,6 @@
 
 namespace esc::draw {
 namespace {
-// ---
 void DrawFileMenu(const AppState& app_state) {
   if (ImGui::BeginMenu("File")) {
     const auto menu_scope = cpp::Scope{[]() { ImGui::EndMenu(); }};
@@ -40,7 +39,6 @@ void DrawFileMenu(const AppState& app_state) {
   app_state.widgets.save_as_file_dialog.Draw(app_state);
 }
 
-// ---
 void DrawViewMenuItem(auto& view) {
   const auto visible = view.IsVisible();
 
@@ -49,7 +47,6 @@ void DrawViewMenuItem(auto& view) {
   }
 }
 
-// ---
 void DrawViewsMenu(const AppState& app_state) {
   if (ImGui::BeginMenu("Views")) {
     const auto menu_scope = cpp::Scope{[]() { ImGui::EndMenu(); }};
@@ -69,7 +66,6 @@ void DrawViewsMenu(const AppState& app_state) {
 }
 }  // namespace
 
-// ---
 void DrawMainMenuBar(const AppState& app_state) {
   if (ImGui::BeginMainMenuBar()) {
     const auto main_menu_bar_scope =

@@ -21,18 +21,14 @@
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
-// ---
 void NewLinkPopup::SetPosition(const ImVec2& position) { position_ = position; }
 
-// ---
 auto NewLinkPopup::GetLabel() const -> std::string { return "Connect Node"; }
 
-// ---
 void NewLinkPopup::SetDraggedFromPin(ne::PinId pin_id) {
   dragged_from_pin_ = pin_id;
 }
 
-// ---
 void NewLinkPopup::DrawItems(const AppState& app_state) {
   const auto& families = app_state.project.GetFamilies();
 

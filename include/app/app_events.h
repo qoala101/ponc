@@ -14,97 +14,65 @@
 #include "imgui_node_editor.h"
 
 namespace esc {
-// ---
 struct Events {
-  // ---
   struct OpenProjectFromFile {
-    // ---
     void operator()(const AppState &app_state) const;
 
-    // ---
     std::string file_path{};
   };
 
-  // ---
   struct SaveProjectToFile {
-    // ---
     void operator()(const AppState &app_state) const;
 
-    // ---
     std::string file_path{};
   };
 
-  // // ---
-  // struct ResetDiagram {
-  //   // ---
-  //   void operator()(core::Project &project) const;
+  //   // struct ResetDiagram {
+  //     //   void operator()(core::Project &project) const;
   // };
 
-  // ---
   struct EmplaceNode {
-    // ---
     void operator()(const AppState &app_state);
 
-    // ---
     std::shared_ptr<core::INode> node{};
-    // ---
     ImVec2 position{};
   };
 
-  // ---
   struct CreateLink {
-    // ---
     void operator()(const AppState &app_state) const;
 
-    // ---
     ne::PinId start_pin_id{};
-    // ---
     ne::PinId end_pin_id{};
   };
 
-  // ---
   struct DeleteLink {
-    // ---
     void operator()(const AppState &app_state) const;
 
-    // ---
     ne::LinkId link_id{};
   };
 
-  // // ---
-  // struct DeleteNode {
-  //   // ---
-  //   void operator()(core::Project &project) const;
+  //   // struct DeleteNode {
+  //     //   void operator()(core::Project &project) const;
 
-  //   // ---
-  //   ne::NodeId node_id{};
+  //     //   ne::NodeId node_id{};
   // };
 
-  // // ---
-  // struct DeleteNodeWithLinks {
-  //   // ---
-  //   void operator()(core::Project &project) const;
+  //   // struct DeleteNodeWithLinks {
+  //     //   void operator()(core::Project &project) const;
 
-  //   // ---
-  //   ne::NodeId node_id{};
+  //     //   ne::NodeId node_id{};
   // };
 
-  // // ---
-  // struct DeleteLink {
-  //   // ---
-  //   void operator()(core::Project &project) const;
+  //   // struct DeleteLink {
+  //     //   void operator()(core::Project &project) const;
 
-  //   // ---
-  //   ne::LinkId link_id{};
+  //     //   ne::LinkId link_id{};
   // };
 
-  // // ---
-  // struct CreateGroup {
-  //   // ---
-  //   void operator()(core::Project &project) const;
+  //   // struct CreateGroup {
+  //     //   void operator()(core::Project &project) const;
 
-  //   // ---
-  //   std::vector<ne::NodeId> node_ids{};
+  //     //   std::vector<ne::NodeId> node_ids{};
   // };
 };
 }  // namespace esc

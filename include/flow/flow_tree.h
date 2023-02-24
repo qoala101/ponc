@@ -14,27 +14,21 @@
 namespace esc::flow {
 struct TreeNode;
 
-// ---
 struct TreeNode {
   std::shared_ptr<core::INode> node{};  // change to weak
   std::map<uintptr_t, TreeNode> child_nodes{};
 };
 
-// ---
 struct Tree {
   std::vector<TreeNode> root_nodes{};
 };
 
-// ---
 struct FindById {
-  // ---
   auto operator()(const TreeNode &tree_node) const -> bool;
 
-  // ---
   ne::NodeId node_id{};
 };
 
-// ---
 void TraverseDepthFirst(
     const TreeNode &tree_node,
     const std::invocable<const TreeNode &> auto &visitor_before_children,
@@ -49,10 +43,8 @@ void TraverseDepthFirst(
   (*visitor_after_children)(tree_node);
 }
 
-// ---
-auto FindTreeNode
-    [[nodiscard]] (const TreeNode &tree_node,
-                   const std::invocable<const TreeNode &> auto &predicate)
+auto FindTreeNode(const TreeNode &tree_node,
+                  const std::invocable<const TreeNode &> auto &predicate)
     -> std::optional<const TreeNode *> {
   if (const auto found = predicate(tree_node)) {
     return &tree_node;
@@ -67,10 +59,8 @@ auto FindTreeNode
   return std::nullopt;
 }
 
-// ---
-auto FindTreeNode
-    [[nodiscard]] (const Tree &tree,
-                   const std::invocable<const TreeNode &> auto &predicate)
+auto FindTreeNode(const Tree &tree,
+                  const std::invocable<const TreeNode &> auto &predicate)
     -> std::optional<const TreeNode *> {
   for (const auto &root : tree.root_nodes) {
     if (const auto found_node = FindTreeNode(root, predicate)) {
@@ -81,8 +71,7 @@ auto FindTreeNode
   return std::nullopt;
 }
 
-// ---
-auto BuildFlowTree [[nodiscard]] (const core::Diagram &diagram) -> Tree;
+auto BuildFlowTree(const core::Diagram &diagram) -> Tree;
 }  // namespace esc::flow
 
 #endif  // VH_CORE_TREE_H_

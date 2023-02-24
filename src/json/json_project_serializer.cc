@@ -11,8 +11,7 @@
 
 namespace esc::json {
 namespace {
-// ---
-auto ParseFamilies [[nodiscard]] (
+auto ParseFamilies(
     const crude_json::value& json,
     const std::vector<std::unique_ptr<IFamilyParser>>& family_parsers) {
   const auto families_size = json["families_size"].get<crude_json::number>();
@@ -37,7 +36,6 @@ auto ParseFamilies [[nodiscard]] (
   return parsed_families;
 }
 
-// ---
 void WriteFamilies(const std::vector<std::shared_ptr<core::IFamily>>& families,
                    crude_json::value& json) {
   json["families_size"] = static_cast<crude_json::number>(families.size());
@@ -50,7 +48,6 @@ void WriteFamilies(const std::vector<std::shared_ptr<core::IFamily>>& families,
 }
 }  // namespace
 
-// ---
 auto ProjectSerializer::ParseFromJson(
     const crude_json::value& json,
     const std::vector<std::unique_ptr<IFamilyParser>>& family_parsers)
@@ -61,7 +58,6 @@ auto ProjectSerializer::ParseFromJson(
   return core::Project{std::move(families), std::move(diagram), settings};
 }
 
-// ---
 auto ProjectSerializer::WriteToJson(const core::Project& project)
     -> crude_json::value {
   auto json = crude_json::value{};

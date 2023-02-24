@@ -1,7 +1,7 @@
+#include "coreui_i_family_drawer.h"
+
 #include <algorithm>
 #include <ranges>
-
-#include "coreui_i_family_drawer.h"
 
 namespace esc::coreui {
 auto IFamilyDrawer::GetGroupLabel() const -> std::string { return GetLabel(); }
@@ -38,4 +38,4 @@ auto GroupByLabels(const std::vector<std::shared_ptr<core::IFamily>>& families)
 
   return family_groups;
 }
-}  // namespace esc::draw
+}  // namespace esc::coreui

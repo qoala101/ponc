@@ -10,7 +10,6 @@
 namespace ne = ax::NodeEditor;
 
 namespace esc::core {
-// ---
 struct FamilyId : public ne::Details::SafePointerType<FamilyId> {
   using SafePointerType::SafePointerType;
 };

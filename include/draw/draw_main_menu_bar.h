@@ -8,7 +8,6 @@
 #include "app_state.h"
 
 namespace esc::draw {
-// ---
 void DrawMainMenuBar(const AppState &app_state);
 }  // namespace esc::draw
 

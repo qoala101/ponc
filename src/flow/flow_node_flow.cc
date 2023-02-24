@@ -9,7 +9,6 @@
 
 namespace esc::flow {
 namespace {
-// ---
 // NOLINTNEXTLINE(*-no-recursion)
 void CalculateNodeFlow(std::unordered_map<uintptr_t, NodeFlow> &node_flows_,
                        const TreeNode &node, float input_from_parent = 0.F) {
@@ -35,7 +34,6 @@ void CalculateNodeFlow(std::unordered_map<uintptr_t, NodeFlow> &node_flows_,
 }
 }  // namespace
 
-// ---
 auto operator+(NodeFlow &left, const NodeFlow &right) -> NodeFlow & {
   if (left.input_pin_flow.has_value()) {
     auto &left_input = left.input_pin_flow->second;
@@ -54,7 +52,6 @@ auto operator+(NodeFlow &left, const NodeFlow &right) -> NodeFlow & {
   return left;
 }
 
-// ---
 auto operator+(NodeFlow &left, float right) -> NodeFlow & {
   if (left.input_pin_flow.has_value()) {
     auto &left_input = left.input_pin_flow->second;
@@ -68,13 +65,10 @@ auto operator+(NodeFlow &left, float right) -> NodeFlow & {
   return left;
 }
 
-// ---
 void operator+=(NodeFlow &left, const NodeFlow &right) { left = left + right; }
 
-// ---
 void operator+=(NodeFlow &left, float right) { left = left + right; }
 
-// ---
 auto GetPinFlow(const NodeFlow &flow, ne::PinId pin_id) -> float {
   const auto pin_id_as_number = pin_id.Get();
 
@@ -90,7 +84,6 @@ auto GetPinFlow(const NodeFlow &flow, ne::PinId pin_id) -> float {
       ->second;
 }
 
-// ---
 auto CalculateNodeFlows(const Tree &flow_tree)
     -> std::unordered_map<uintptr_t, NodeFlow> {
   auto node_flows = std::unordered_map<uintptr_t, NodeFlow>{};

@@ -8,20 +8,14 @@
 #include "imgui.h"
 
 namespace esc::coreui {
-// ---
 class IFamilyDrawer : public cpp::Interface {
  public:
-  // ---
-  virtual auto GetLabel [[nodiscard]] () const -> std::string = 0;
-  // ---
-  virtual auto GetColor [[nodiscard]] () const -> ImColor = 0;
-  // ---
-  virtual auto GetGroupLabel [[nodiscard]] () const -> std::string;
-  // ---
-  virtual auto IsUserAccessible [[nodiscard]] () -> bool;
+  virtual auto GetLabel() const -> std::string = 0;
+  virtual auto GetColor() const -> ImColor = 0;
+  virtual auto GetGroupLabel() const -> std::string;
+  virtual auto IsUserAccessible() -> bool;
 };
 
-// ---
 auto GroupByLabels(const std::vector<std::shared_ptr<core::IFamily>> &families)
     -> std::vector<
         std::pair<std::string, std::vector<std::shared_ptr<core::IFamily>>>>;

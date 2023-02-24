@@ -7,7 +7,6 @@
 #include "core_diagram.h"
 
 namespace esc::core {
-// ---
 Project::Project(std::vector<std::shared_ptr<IFamily>> families,
                  Diagram diagram, const Settings& settings)
     : families_{std::move(families)},
@@ -26,41 +25,34 @@ Project::Project(std::vector<std::shared_ptr<IFamily>> families,
   // families_.emplace_back(std::move(placeholder_family));
 }
 
-// ---
 auto Project::GetFamilies() const
     -> const std::vector<std::shared_ptr<IFamily>>& {
   return families_;
 }
 
-// // ---
-// auto Project::GetFreePinFamily() const -> FreePinFamily& {
+// // auto Project::GetFreePinFamily() const -> FreePinFamily& {
 //   auto lock = free_pin_family_.lock();
 //   Expects(lock != nullptr);
 //   return *lock;
 // }
 
-// // ---
-// auto Project::GetPlaceholderFamily() const -> PlaceholderFamily& {
+// // auto Project::GetPlaceholderFamily() const -> PlaceholderFamily& {
 //   auto lock = placeholder_family_.lock();
 //   Expects(lock != nullptr);
 //   return *lock;
 // }
 
-// ---
 auto Project::GetDiagram() const -> const Diagram& {
   // NOLINTNEXTLINE(*-const-cast)
   return const_cast<Project*>(this)->GetDiagram();
 }
 
-// ---
 auto Project::GetDiagram() -> Diagram& { return diagram_; }
 
-// ---
 auto Project::GetSettings() const -> const Settings& {
   // NOLINTNEXTLINE(*-const-cast)
   return const_cast<Project*>(this)->GetSettings();
 }
 
-// ---
 auto Project::GetSettings() -> Settings& { return settings_; }
 }  // namespace esc::core

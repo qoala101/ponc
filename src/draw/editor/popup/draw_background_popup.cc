@@ -49,17 +49,14 @@ namespace {
 // break;
 }  // namespace
 
-// ---
 void BackgroundPopup::SetPosition(const ImVec2& position) {
   position_ = position;
 }
 
-// ---
 auto BackgroundPopup::GetLabel() const -> std::string {
   return "Create New Node";
 }
 
-// ---
 void BackgroundPopup::DrawItems(const AppState& app_state) {
   const auto family_groups =
       coreui::GroupByLabels(app_state.project.GetFamilies());

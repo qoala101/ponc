@@ -9,17 +9,14 @@
 #include "draw_texture.h"
 
 namespace esc {
-// ---
 App::App(const char* name, int argc, char** argv)
     : Application{name, argc, argv} {}
 
-// ---
 auto App::GetWindowFlags() const -> ImGuiWindowFlags {
   // NOLINTNEXTLINE(*-signed-bitwise)
   return Application::GetWindowFlags() | ImGuiWindowFlags_MenuBar;
 }
 
-// ---
 auto App::LoadTexture(std::string_view file_path) {
   auto texture =
       draw::Texture{.id = Application::LoadTexture(file_path.data())};
@@ -28,7 +25,6 @@ auto App::LoadTexture(std::string_view file_path) {
   return texture;
 }
 
-// ---
 void App::OnStart() {
   Expects(!textures_.has_value());
   Expects(!app_.has_value());
@@ -41,7 +37,6 @@ void App::OnStart() {
   Ensures(app_.has_value());
 }
 
-// ---
 void App::OnStop() {
   Expects(app_.has_value());
   Expects(textures_.has_value());
@@ -55,7 +50,6 @@ void App::OnStop() {
   Ensures(!textures_.has_value());
 }
 
-// ---
 void App::OnFrame(float /*unused*/) {
   Expects(app_.has_value());
 

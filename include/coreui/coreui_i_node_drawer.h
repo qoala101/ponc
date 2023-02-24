@@ -10,17 +10,12 @@
 #include "imgui.h"
 
 namespace esc::coreui {
-// ---
 class INodeDrawer : public cpp::Interface {
  public:
-  // ---
-  virtual auto GetLabel [[nodiscard]] () const -> std::string = 0;
-  // ---
-  virtual auto GetColor [[nodiscard]] () const -> ImColor = 0;
-  // ---
-  virtual auto HasHeader [[nodiscard]] () const -> bool;
-  // ---
-  virtual auto CreatePinDrawers [[nodiscard]] () const
+  virtual auto GetLabel() const -> std::string = 0;
+  virtual auto GetColor() const -> ImColor = 0;
+  virtual auto HasHeader() const -> bool;
+  virtual auto CreatePinDrawers() const
       -> std::vector<std::unique_ptr<IPinDrawer>>;
 };
 }  // namespace esc::coreui

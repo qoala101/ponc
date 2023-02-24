@@ -10,17 +10,13 @@
 #include "coreui_i_pin_drawer.h"
 
 namespace esc::coreui {
-// ---
 class FlowPinDrawer : public IPinDrawer {
  public:
-  // ---
   explicit FlowPinDrawer(ne::PinId pin_id);
 
-  // ---
-  auto GetPinId [[nodiscard]] () const -> std::optional<ne::PinId> override;
+  auto GetPinId() const -> std::optional<ne::PinId> override;
 
  private:
-  // ---
   ne::PinId pin_id_{};
 };
 }  // namespace esc::coreui

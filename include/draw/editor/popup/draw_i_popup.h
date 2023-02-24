@@ -11,18 +11,13 @@
 #include "cpp_interface.h"
 
 namespace esc::draw {
-// ---
 class IPopup : public cpp::Interface {
  public:
-  // ---
   void Show();
-  // ---
   void Draw(const AppState &app_state);
 
  private:
-  // ---
-  virtual auto GetLabel [[nodiscard]] () const -> std::string = 0;
-  // ---
+  virtual auto GetLabel() const -> std::string = 0;
   virtual void DrawItems(const AppState &app_state) = 0;
 };
 }  // namespace esc::draw

@@ -8,13 +8,11 @@
 #include "crude_json.h"
 
 namespace esc::json {
-// ---
 struct ContainerSerializer {
-  // ---
   template <typename Item>
-  static auto ParseFromJson
-      [[nodiscard]] (const crude_json::value& json,
-                     const std::string& items_name, const auto& item_parser) {
+  static auto ParseFromJson(const crude_json::value& json,
+                            const std::string& items_name,
+                            const auto& item_parser) {
     const auto items_size =
         json[items_name + "_size"].get<crude_json::number>();
     const auto& items_json = json[items_name];
@@ -28,11 +26,11 @@ struct ContainerSerializer {
     return parsed_items;
   }
 
-  // ---
   template <typename Item>
-  static auto WriteToJson
-      [[nodiscard]] (crude_json::value& json, const std::vector<Item>& items,
-                     const std::string& items_name, const auto& item_writer) {
+  static auto WriteToJson(crude_json::value& json,
+                          const std::vector<Item>& items,
+                          const std::string& items_name,
+                          const auto& item_writer) {
     const auto items_size = items.size();
 
     json[items_name + "_size"] = static_cast<crude_json::number>(items_size);

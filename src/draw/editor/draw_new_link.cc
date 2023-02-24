@@ -4,32 +4,21 @@
 
 #include "app_event_queue.h"
 #include "app_events.h"
-#include "core_diagram.h"
-#include "core_project.h"
-#include "cpp_assert.h"
 #include "cpp_scope.h"
 #include "draw_tooltip.h"
 #include "draw_widgets.h"
+#include "frame_node.h"
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
-namespace {
-// ---
-void RejectNewLink(std::string_view tooltip, float alpha) {
-  DrawTooltip(tooltip, ImColor{1.F / 3, 0.F, 0.F, 1.F * 3 / 4});
-  ne::RejectNewItem(ImColor{1.F, 1.F / 2, 1.F / 2, alpha}, 4.F);
-}
-}  // namespace
-
-// ---
 void NewLink::Draw(const AppState& app_state) {
   const auto popup_position = ImGui::GetMousePos();
-  const auto alpha = GetAlphaForNewLink(app_state.project.GetDiagram());
 
   {
     const auto create_scope = cpp::Scope{[]() { ne::EndCreate(); }};
 
-    if (ne::BeginCreate(ImColor{1.F, 1.F, 1.F, alpha}, 3.F)) {
+    if (ne::BeginCreate(ImColor{1.F, 1.F, 1.F, app_state.frame.creation_alpha},
+                        3.F)) {
       auto dragged_from_pin = ne::PinId{};
       auto hovering_over_pin = ne::PinId{};
 
@@ -37,16 +26,32 @@ void NewLink::Draw(const AppState& app_state) {
         dragged_from_pin_ = dragged_from_pin;
         hovering_over_pin_ = hovering_over_pin;
 
-        const auto& [can_connect, reason] = GetCanConnectToPinReason(
-            *hovering_over_pin_, app_state.project.GetDiagram());
+        if (app_state.frame.creation.has_value()) {
+          if (app_state.frame.creation->can_connect) {
+            if (!app_state.frame.creation->reason.empty()) {
+              DrawTooltip(app_state.frame.creation->reason.c_str(),
+                          ImColor{0.F, 1.F / 3, 0.F, 1.F * 3 / 4});
 
-        if (can_connect) {
-          if (!reason.empty()) {
-            AcceptNewLink(app_state.project.GetDiagram(), app_state.event_queue,
-                          reason, alpha);
+              if (ne::AcceptNewItem(ImColor{1.F / 2, 1.F, 1.F / 2,
+                                            app_state.frame.creation_alpha},
+                                    4.F)) {
+                if (app_state.frame.creation->delete_link.has_value()) {
+                  app_state.event_queue.PostEvent(Events::DeleteLink{
+                      .link_id = *app_state.frame.creation->delete_link});
+                }
+
+                app_state.event_queue.PostEvent(Events::CreateLink{
+                    .start_pin_id = app_state.frame.creation->start_pin_id,
+                    .end_pin_id = app_state.frame.creation->end_pin_id});
+              }
+            }
+          } else {
+            DrawTooltip(app_state.frame.creation->reason,
+                        ImColor{1.F / 3, 0.F, 0.F, 1.F * 3 / 4});
+            ne::RejectNewItem(
+                ImColor{1.F, 1.F / 2, 1.F / 2, app_state.frame.creation_alpha},
+                4.F);
           }
-        } else {
-          RejectNewLink(reason, alpha);
         }
       } else if (ne::QueryNewNode(&dragged_from_pin)) {
         dragged_from_pin_ = dragged_from_pin;
@@ -58,9 +63,9 @@ void NewLink::Draw(const AppState& app_state) {
           const auto suspend_scope =
               cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
 
-          app_state.widgets.new_link_popup.SetPosition(popup_position);
-          app_state.widgets.new_link_popup.SetDraggedFromPin(*dragged_from_pin_);
-          app_state.widgets.new_link_popup.Show();
+          new_link_popup.SetPosition(popup_position);
+          new_link_popup.SetDraggedFromPin(*dragged_from_pin_);
+          new_link_popup.Show();
         }
       } else {
         hovering_over_pin_.reset();
@@ -70,142 +75,15 @@ void NewLink::Draw(const AppState& app_state) {
       hovering_over_pin_.reset();
     }
   }
+
+  new_link_popup.Draw(app_state);
 }
 
-// ---
 auto NewLink::GetDraggedFromPin() const -> const std::optional<ne::PinId>& {
   return dragged_from_pin_;
 }
 
-// ---
 auto NewLink::GetHoveringOverPin() const -> const std::optional<ne::PinId>& {
   return hovering_over_pin_;
-}
-
-// ---
-auto NewLink::FindFixedPin(const core::Diagram& diagram) const
-    -> std::optional<ne::PinId> {
-  if (!dragged_from_pin_.has_value()) {
-    return std::nullopt;
-  }
-
-  const auto link_to_repin = FindPinLink(diagram, *dragged_from_pin_);
-
-  if (!link_to_repin.has_value()) {
-    return std::nullopt;
-  }
-
-  if (*dragged_from_pin_ == (*link_to_repin)->start_pin_id) {
-    return (*link_to_repin)->end_pin_id;
-  }
-
-  return (*link_to_repin)->start_pin_id;
-}
-
-// ---
-auto NewLink::CanConnectToPin(ne::PinId pin_id,
-                              const core::Diagram& diagram) const -> bool {
-  return GetCanConnectToPinReason(pin_id, diagram).first;
-}
-
-auto NewLink::GetCanConnectToPinReason(ne::PinId pin_id,
-                                       const core::Diagram& diagram) const
-    -> std::pair<bool, std::string> {
-  Expects(dragged_from_pin_.has_value());
-
-  const auto rebinding_link = core::FindPinLink(diagram, *dragged_from_pin_);
-  const auto hovered_over_link = core::FindPinLink(diagram, pin_id);
-
-  if (hovered_over_link.has_value()) {
-    if (rebinding_link.has_value() &&
-        ((*hovered_over_link)->id == (*rebinding_link)->id)) {
-      return {true, {}};
-    }
-
-    return {false, "Pin Is Occupied"};
-  }
-
-  const auto& dragged_from_node = FindPinNode(diagram, *dragged_from_pin_);
-  const auto& hovered_over_node = FindPinNode(diagram, pin_id);
-
-  if (dragged_from_node->GetId() == hovered_over_node->GetId()) {
-    return {false, "Self"};
-  }
-
-  if (const auto fixed_pin = FindFixedPin(diagram)) {
-    const auto fixed_pin_node = FindPinNode(diagram, *fixed_pin);
-
-    if (fixed_pin_node->GetId() == hovered_over_node->GetId()) {
-      return {false, "Self"};
-    }
-  }
-
-  const auto dragged_from_kind =
-      GetPinKind(*dragged_from_node, *dragged_from_pin_);
-  const auto hovered_over_kind = GetPinKind(*hovered_over_node, pin_id);
-
-  if (rebinding_link.has_value()) {
-    if (dragged_from_kind != hovered_over_kind) {
-      return {false, "Wrong Pin Kind"};
-    }
-  } else {
-    if (dragged_from_kind == hovered_over_kind) {
-      return {false, "Wrong Pin Kind"};
-    }
-  }
-
-  if (rebinding_link.has_value()) {
-    return {true, "Move Link"};
-  }
-
-  return {true, "Create Link"};
-}
-
-// ---
-void NewLink::AcceptNewLink(const core::Diagram& diagram,
-                            EventQueue& event_queue, std::string_view tooltip,
-                            float alpha) {
-  Expects(dragged_from_pin_.has_value());
-  Expects(hovering_over_pin_.has_value());
-
-  DrawTooltip(tooltip.data(), ImColor{0.F, 1.F / 3, 0.F, 1.F * 3 / 4});
-
-  if (ne::AcceptNewItem(ImColor{1.F / 2, 1.F, 1.F / 2, alpha}, 4.F)) {
-    const auto hovering_over_node = FindPinNode(diagram, *hovering_over_pin_);
-    const auto hovering_over_pin_kind =
-        core::GetPinKind(*hovering_over_node, *hovering_over_pin_);
-
-    if (const auto fixed_pin = FindFixedPin(diagram)) {
-      const auto link_to_repin = core::FindPinLink(diagram, *fixed_pin);
-      Expects(link_to_repin.has_value());
-
-      event_queue.PostEvent(
-          Events::DeleteLink{.link_id = (*link_to_repin)->id});
-
-      const auto event =
-          (hovering_over_pin_kind == ne::PinKind::Input)
-              ? Events::CreateLink{.start_pin_id = *fixed_pin,
-                                   .end_pin_id = *hovering_over_pin_}
-              : Events::CreateLink{.start_pin_id = *hovering_over_pin_,
-                                   .end_pin_id = *fixed_pin};
-      event_queue.PostEvent(event);
-    } else {
-      const auto event =
-          (hovering_over_pin_kind == ne::PinKind::Input)
-              ? Events::CreateLink{.start_pin_id = *dragged_from_pin_,
-                                   .end_pin_id = *hovering_over_pin_}
-              : Events::CreateLink{.start_pin_id = *hovering_over_pin_,
-                                   .end_pin_id = *dragged_from_pin_};
-      event_queue.PostEvent(event);
-    }
-  }
-}
-
-auto NewLink::GetAlphaForNewLink(const core::Diagram& diagram) const -> float {
-  if (FindFixedPin(diagram).has_value()) {
-    return 0.F;
-  }
-
-  return 1.F;
 }
 }  // namespace esc::draw

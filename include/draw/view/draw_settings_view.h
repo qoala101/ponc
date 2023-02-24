@@ -11,14 +11,13 @@
 namespace esc::draw {
 class SettingsView : public IHidable {
  public:
-  auto GetLabel [[nodiscard]] () const -> std::string;
+  auto GetLabel() const -> std::string;
 
   void Draw(const AppState &app_state);
 
-  auto IsColorFlow [[nodiscard]] () const -> bool;
+  auto IsColorFlow() const -> bool;
 
-  auto GetColorForFlowValue
-      [[nodiscard]] (float value, const core::Settings &settings) const
+  auto GetColorForFlowValue(float value, const core::Settings &settings) const
       -> ImColor;
 
  private:

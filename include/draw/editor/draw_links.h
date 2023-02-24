@@ -10,10 +10,8 @@
 #include "draw_nodes.h"
 
 namespace esc::draw {
-// ---
 class Links {
  public:
-  // ---
   void Draw(const frame::Frame &frame);
 };
 }  // namespace esc::draw

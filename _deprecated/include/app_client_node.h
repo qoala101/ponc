@@ -7,13 +7,9 @@
 #include "json_i_family_parser.h"
 
 namespace esc {
-// ---
 struct ClientNode {
-  // ---
-  static auto CreateFamily [[nodiscard]] () -> std::shared_ptr<core::IFamily>;
-  // ---
-  static auto CreateFamilyParser [[nodiscard]] ()
-  -> std::unique_ptr<json::IFamilyParser>;
+  static auto CreateFamily() -> std::shared_ptr<core::IFamily>;
+  static auto CreateFamilyParser() -> std::unique_ptr<json::IFamilyParser>;
 };
 }  // namespace esc
 

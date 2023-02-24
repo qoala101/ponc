@@ -9,14 +9,9 @@
 #include "crude_json.h"
 
 namespace esc::json {
-// ---
 struct LinkSerializer {
-  // ---
-  static auto ParseFromJson [[nodiscard]] (const crude_json::value &json)
-  -> core::Link;
-  // ---
-  static auto WriteToJson [[nodiscard]] (const core::Link &link)
-  -> crude_json::value;
+  static auto ParseFromJson(const crude_json::value &json) -> core::Link;
+  static auto WriteToJson(const core::Link &link) -> crude_json::value;
 };
 }  // namespace esc::json
 

@@ -11,47 +11,21 @@
 #include <string>
 
 #include "app_state.h"
-#include "core_diagram.h"
+#include "draw_new_link_popup.h"
 
 namespace ne = ax::NodeEditor;
 
 namespace esc::draw {
-// ---
 class NewLink {
  public:
-  // ---
   void Draw(const AppState &app_state);
-  // ---
-  auto GetDraggedFromPin [[nodiscard]] () const
-      -> const std::optional<ne::PinId> &;
-  // ---
-  auto GetHoveringOverPin [[nodiscard]] () const
-      -> const std::optional<ne::PinId> &;
-
-  // ---
-  auto FindFixedPin [[nodiscard]] (const core::Diagram &diagram) const
-      -> std::optional<ne::PinId>;
-  // ---
-  auto CanConnectToPin
-      [[nodiscard]] (ne::PinId pin_id, const core::Diagram &diagram) const
-      -> bool;
+  auto GetDraggedFromPin() const -> const std::optional<ne::PinId> &;
+  auto GetHoveringOverPin() const -> const std::optional<ne::PinId> &;
 
  private:
-  // ---
-  auto GetCanConnectToPinReason
-      [[nodiscard]] (ne::PinId pin_id, const core::Diagram &diagram) const
-      -> std::pair<bool, std::string>;
+  NewLinkPopup new_link_popup{};
 
-  // ---
-  void AcceptNewLink(const core::Diagram &diagram, EventQueue &event_queue,
-                     std::string_view tooltip, float alpha);
-
-  auto GetAlphaForNewLink [[nodiscard]] (const core::Diagram &diagram) const
-      -> float;
-
-  // ---
   std::optional<ne::PinId> dragged_from_pin_{};
-  // ---
   std::optional<ne::PinId> hovering_over_pin_{};
 };
 }  // namespace esc::draw

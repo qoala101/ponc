@@ -10,18 +10,13 @@
 #include "crude_json.h"
 
 namespace esc::json {
-// ---
 class IFamilyWriter : public cpp::Interface {
  public:
-  // ---
-  auto WriteToJson [[nodiscard]] (const core::IFamily &family) const
-      -> crude_json::value;
+  auto WriteToJson(const core::IFamily &family) const -> crude_json::value;
 
  private:
-  // ---
-  virtual auto GetTypeName [[nodiscard]] () const -> std::string = 0;
-  // ---
-  virtual auto WriteToJson [[nodiscard]] () const -> crude_json::value = 0;
+  virtual auto GetTypeName() const -> std::string = 0;
+  virtual auto WriteToJson() const -> crude_json::value = 0;
 };
 }  // namespace esc::json
 

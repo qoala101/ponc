@@ -10,19 +10,14 @@
 #include "app_state.h"
 
 namespace esc {
-// ---
 using Event = std::function<void(const AppState &)>;
 
-// ---
 class EventQueue {
  public:
-  // ---
   void PostEvent(Event event);
-  // ---
   void ExecuteEvents(const AppState &app_state);
 
  private:
-  // ---
   std::vector<Event> events_{};
 };
 }  // namespace esc

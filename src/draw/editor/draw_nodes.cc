@@ -20,7 +20,6 @@
 
 namespace esc::draw {
 namespace {
-// ---
 void DrawPinField_v2(const frame::Pin& pin) {
   const auto spring_scope =
       cpp::Scope{[]() { ImGui::Spring(0); }, []() { ImGui::Spring(0); }};
@@ -46,10 +45,6 @@ void DrawPinField_v2(const frame::Pin& pin) {
 }
 }  // namespace
 
-// ---
-Nodes::Nodes(const Texture& node_header_texture)
-    : node_header_texture_{node_header_texture} {}
-
 void Nodes::Draw(const frame::Frame& frame) {
   drawn_pin_icon_rects_.clear();
 
@@ -58,7 +53,6 @@ void Nodes::Draw(const frame::Frame& frame) {
   }
 }
 
-// ---
 auto Nodes::GetDrawnPinIconRect(ne::PinId pin_id) const -> const ImRect& {
   return drawn_pin_icon_rects_.at(pin_id.Get());
 }
@@ -84,7 +78,7 @@ void Nodes::DrawNode_v2(const frame::Node& node) {
   if (const auto header = node.header) {
     auto color = header->color;
 
-    header_ = Header{.texture = node_header_texture_, .color = color};
+    header_ = Header{.texture = header->texture, .color = color};
 
     ImGui::BeginHorizontal("header");
 

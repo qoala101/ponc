@@ -14,56 +14,38 @@
 #include "imgui_node_editor.h"
 
 namespace esc::core {
-// ---
 class Diagram {
  public:
-  // ---
   explicit Diagram(std::vector<std::shared_ptr<INode>> nodes = {},
                    std::vector<Link> links = {},
                    std::vector<Group> groups = {});
 
-  // ---
-  auto GetNodes [[nodiscard]] () const
-      -> const std::vector<std::shared_ptr<INode>> &;
-  // ---
+  auto GetNodes() const -> const std::vector<std::shared_ptr<INode>> &;
   auto EmplaceNode(std::shared_ptr<INode> node)
       -> const std::shared_ptr<INode> &;
-  // ---
   void EraseNode(ne::NodeId node_id);
 
-  // ---
-  auto GetLinks [[nodiscard]] () const -> const std::vector<Link> &;
-  // ---
+  auto GetLinks() const -> const std::vector<Link> &;
   auto EmplaceLink(const Link &link) -> Link &;
-  // ---
   void EraseLink(ne::LinkId link_id);
 
-  // ---
-  auto GetGroups [[nodiscard]] () const -> const std::vector<Group> &;
-  // ---
+  auto GetGroups() const -> const std::vector<Group> &;
   auto EmplaceGroup(Group group) -> Group &;
-  // ---
   void EraseGroup(const Group &group);
 
  private:
-  // ---
   std::vector<std::shared_ptr<INode>> nodes_{};
-  // ---
   std::vector<Link> links_{};
-  // ---
   std::vector<Group> groups_{};
 };
 
-// ---
-auto FindPinNode [[nodiscard]] (const Diagram &diagram, ne::PinId pin_id)
--> const std::shared_ptr<INode> &;
+auto FindPinNode(const Diagram &diagram, ne::PinId pin_id)
+    -> const std::shared_ptr<INode> &;
 
-// ---
-auto FindPinLink [[nodiscard]] (const Diagram &diagram, ne::PinId pin_id)
--> std::optional<const Link *>;
+auto FindPinLink(const Diagram &diagram, ne::PinId pin_id)
+    -> std::optional<const Link *>;
 
-// // ---
-// auto FindNode [[nodiscard]] (const Diagram &diagram, ne::NodeId node_id)
+// // auto FindNode  (const Diagram &diagram, ne::NodeId node_id)
 // -> const std::shared_ptr<INode> &;
 
 // auto FindLink(ne::LinkId id) -> Link &;

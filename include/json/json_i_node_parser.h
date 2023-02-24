@@ -12,18 +12,14 @@
 #include "crude_json.h"
 
 namespace esc::json {
-// ---
 class INodeParser : public cpp::Interface {
  public:
-  // ---
-  auto ParseFromJson [[nodiscard]] (const crude_json::value &json) const
+  auto ParseFromJson(const crude_json::value &json) const
       -> std::shared_ptr<core::INode>;
 
  private:
-  // ---
-  virtual auto ParseFromJson
-      [[nodiscard]] (core::INode::ConstructorArgs parsed_args,
-                     const crude_json::value &json) const
+  virtual auto ParseFromJson(core::INode::ConstructorArgs parsed_args,
+                             const crude_json::value &json) const
       -> std::shared_ptr<core::INode> = 0;
 };
 }  // namespace esc::json

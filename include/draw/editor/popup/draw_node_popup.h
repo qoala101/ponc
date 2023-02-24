@@ -12,19 +12,14 @@
 namespace ne = ax::NodeEditor;
 
 namespace esc::draw {
-// ---
 class NodePopup : public IPopup {
  public:
-  // ---
   void SetNodeId(ne::NodeId node_id);
 
  private:
-  // ---
-  auto GetLabel [[nodiscard]] () const -> std::string override;
-  // ---
+  auto GetLabel() const -> std::string override;
   void DrawItems(const AppState &app_state) override;
 
-  // ---
   ne::NodeId node_id_{};
 };
 }  // namespace esc::draw

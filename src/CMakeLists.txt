@@ -163,7 +163,6 @@ add_example_executable(esc
   draw/editor/draw_new_link.cc
   draw/editor/draw_node_editor.cc
   draw/editor/draw_nodes.cc
-  draw/editor/draw_popups.cc
 
   draw/editor/draw_tooltip.cc
 

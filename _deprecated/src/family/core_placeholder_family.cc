@@ -209,7 +209,7 @@ class FamilyDrawer : public coreui::IFamilyDrawer {
 
   auto GetColor() const -> ImColor override { return {255, 255, 255}; }
 
-  auto IsUserAccessible [[nodiscard]] () -> bool { return false; }
+  auto IsUserAccessible() -> bool { return false; }
 
  private:
   std::shared_ptr<PlaceholderFamily> family_{};

@@ -28,8 +28,7 @@ AppImpl::AppImpl(const Textures &textures)
             id_generator.GetNext<core::FamilyId>()));
 
         return families;
-      }()},
-      widgets_{textures.node_header} {}
+      }()} {}
 
 void AppImpl::OnFrame() {
   auto frame = frame::Frame{project_, widgets_};

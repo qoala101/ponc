@@ -9,14 +9,12 @@
 
 namespace esc::flow {
 namespace {
-// ---
-auto HasInputPin [[nodiscard]] (const NodeFlow &node_flow) {
+auto HasInputPin(const NodeFlow &node_flow) {
   return node_flow.input_pin_flow.has_value();
 }
 
-// ---
-auto HasLinkFromParent [[nodiscard]] (const NodeFlow &node_flow,
-                                      const std::vector<core::Link> &links) {
+auto HasLinkFromParent(const NodeFlow &node_flow,
+                       const std::vector<core::Link> &links) {
   Expects(node_flow.input_pin_flow.has_value());
 
   return std::ranges::any_of(links, [&node_flow](const auto &link) {
@@ -24,9 +22,7 @@ auto HasLinkFromParent [[nodiscard]] (const NodeFlow &node_flow,
   });
 }
 
-// ---
-auto FindRootNodes
-    [[nodiscard]] (const std::vector<std::shared_ptr<core::INode>> &nodes,
+auto FindRootNodes(const std::vector<std::shared_ptr<core::INode>> &nodes,
                    const std::vector<core::Link> &links) {
   auto root_nodes = std::vector<TreeNode>{};
 
@@ -43,10 +39,9 @@ auto FindRootNodes
   return root_nodes;
 }
 
-// ---
-auto FindLinkConnectingPins
-    [[nodiscard]] (ne::PinId start_pin, ne::PinId end_pin,
-                   const std::vector<core::Link> &links) -> const core::Link * {
+auto FindLinkConnectingPins(ne::PinId start_pin, ne::PinId end_pin,
+                            const std::vector<core::Link> &links)
+    -> const core::Link * {
   const auto link =
       std::ranges::find_if(links, [start_pin, end_pin](const auto &link) {
         return (link.start_pin_id == start_pin) && (link.end_pin_id == end_pin);
@@ -59,11 +54,10 @@ auto FindLinkConnectingPins
   return &*link;
 }
 
-// ---
-auto FindLinkFromParentToChild
-    [[nodiscard]] (const std::map<uintptr_t, float> &parent_output_pins,
-                   ne::PinId child_input_pin,
-                   const std::vector<core::Link> &links) -> const core::Link * {
+auto FindLinkFromParentToChild(
+    const std::map<uintptr_t, float> &parent_output_pins,
+    ne::PinId child_input_pin, const std::vector<core::Link> &links)
+    -> const core::Link * {
   for (const auto &[parent_output_pin, value] : parent_output_pins) {
     const auto *const link =
         FindLinkConnectingPins(parent_output_pin, child_input_pin, links);
@@ -77,12 +71,10 @@ auto FindLinkFromParentToChild
 }
 }  // namespace
 
-// ---
 auto FindById::operator()(const TreeNode &tree_node) const -> bool {
   return tree_node.node->GetId() == node_id;
 }
 
-// ---
 auto BuildFlowTree(const core::Diagram &diagram) -> Tree {
   const auto &links = diagram.GetLinks();
   const auto &nodes = diagram.GetNodes();

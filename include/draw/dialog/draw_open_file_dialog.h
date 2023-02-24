@@ -8,14 +8,11 @@
 #include "draw_i_file_dialog.h"
 
 namespace esc::draw {
-// ---
 class OpenFileDialog : public IFileDialog {
  public:
-  // ---
   OpenFileDialog();
 
  private:
-  // ---
   void OnFileSelected(const AppState &app_state,
                       std::string file_path) const override;
 };

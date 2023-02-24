@@ -105,17 +105,15 @@ class DropPinDrawer : public coreui::IPinDrawer {
  public:
   explicit DropPinDrawer(float drop) : drop_{drop} {}
 
-  auto GetLabel [[nodiscard]] () const -> std::string override { return {}; }
+  auto GetLabel() const -> std::string override { return {}; }
 
-  auto GetKind [[nodiscard]] () const -> std::optional<ne::PinKind> override {
+  auto GetKind() const -> std::optional<ne::PinKind> override {
     return ne::PinKind::Input;
   }
 
-  auto GetFloat [[nodiscard]] () -> std::optional<float*> override {
-    return &drop_;
-  }
+  auto GetFloat() -> std::optional<float*> override { return &drop_; }
 
-  auto IsEditable [[nodiscard]] () const -> bool override { return false; }
+  auto IsEditable() const -> bool override { return false; }
 
  private:
   float drop_{};
@@ -140,7 +138,7 @@ class NodeDrawer : public coreui::INodeDrawer {
         ->GetColor();
   }
 
-  auto CreatePinDrawers [[nodiscard]] () const
+  auto CreatePinDrawers() const
       -> std::vector<std::unique_ptr<coreui::IPinDrawer>> override {
     auto pin_drawers = std::vector<std::unique_ptr<coreui::IPinDrawer>>();
 

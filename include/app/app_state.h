@@ -21,15 +21,10 @@ namespace frame {
 struct Frame;
 }  // namespace frame
 
-// ---
 struct AppState {
-  // ---
   core::IdGenerator &id_generator;
-  // ---
   core::Project &project;
-  // ---
   draw::Widgets &widgets;
-  // ---
   EventQueue &event_queue;
 
   frame::Frame &frame;

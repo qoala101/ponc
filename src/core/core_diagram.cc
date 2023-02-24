@@ -17,25 +17,21 @@
 #include "cpp_assert.h"
 
 namespace esc::core {
-// ---
 Diagram::Diagram(std::vector<std::shared_ptr<INode>> nodes,
                  std::vector<Link> links, std::vector<Group> groups)
     : nodes_{std::move(nodes)},
       links_{std::move(links)},
       groups_{std::move(groups)} {}
 
-// ---
 auto Diagram::GetNodes() const -> const std::vector<std::shared_ptr<INode>>& {
   return nodes_;
 }
 
-// ---
 auto Diagram::EmplaceNode(std::shared_ptr<INode> node)
     -> const std::shared_ptr<INode>& {
   return nodes_.emplace_back(std::move(node));
 }
 
-// ---
 void Diagram::EraseNode(ne::NodeId node_id) {
   const auto found_node = std::ranges::find_if(
       nodes_, [node_id](const auto& node) { return node->GetId() == node_id; });
@@ -44,15 +40,12 @@ void Diagram::EraseNode(ne::NodeId node_id) {
   nodes_.erase(found_node);
 }
 
-// ---
 auto Diagram::GetLinks() const -> const std::vector<Link>& { return links_; }
 
-// ---
 auto Diagram::EmplaceLink(const Link& link) -> Link& {
   return links_.emplace_back(link);
 }
 
-// ---
 void Diagram::EraseLink(ne::LinkId link_id) {
   const auto found_link = std::ranges::find_if(
       links_, [link_id](const auto& link) { return link.id == link_id; });
@@ -61,15 +54,12 @@ void Diagram::EraseLink(ne::LinkId link_id) {
   links_.erase(found_link);
 }
 
-// ---
 auto Diagram::GetGroups() const -> const std::vector<Group>& { return groups_; }
 
-// ---
 auto Diagram::EmplaceGroup(Group group) -> Group& {
   return groups_.emplace_back(std::move(group));
 }
 
-// ---
 void Diagram::EraseGroup(const Group& group) {
   const auto found_group = std::ranges::find_if(
       groups_,
@@ -79,7 +69,6 @@ void Diagram::EraseGroup(const Group& group) {
   groups_.erase(found_group);
 }
 
-// ---
 auto FindPinNode(const Diagram& diagram, ne::PinId pin_id)
     -> const std::shared_ptr<INode>& {
   for (const auto& node : diagram.GetNodes()) {
@@ -93,7 +82,6 @@ auto FindPinNode(const Diagram& diagram, ne::PinId pin_id)
   Expects(false);
 }
 
-// ---
 auto FindPinLink(const Diagram& diagram, ne::PinId pin_id)
     -> std::optional<const Link*> {
   for (const auto& link : diagram.GetLinks()) {
@@ -105,8 +93,7 @@ auto FindPinLink(const Diagram& diagram, ne::PinId pin_id)
   return std::nullopt;
 }
 
-// // ---
-// auto FindNode(const Diagram& diagram, ne::NodeId node_id)
+// // auto FindNode(const Diagram& diagram, ne::NodeId node_id)
 //     -> const std::shared_ptr<INode>& {
 //   for (const auto& family : diagram.GetFamilies()) {
 //     if (const auto* node = family->FindNode(node_id)) {
@@ -117,8 +104,7 @@ auto FindPinLink(const Diagram& diagram, ne::PinId pin_id)
 //   Expects(false);
 // }
 
-// // ---
-// void EraseNode(Diagram& diagram, ne::NodeId node_id) {
+// // void EraseNode(Diagram& diagram, ne::NodeId node_id) {
 //   for (const auto& family : diagram.GetFamilies()) {
 //     if (const auto* node = family->FindNode(node_id)) {
 //       family->EraseNode(node_id);

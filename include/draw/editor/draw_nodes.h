@@ -27,27 +27,15 @@ struct Pin;
 }  // namespace esc::frame
 
 namespace esc::draw {
-// ---
 class Nodes {
  public:
-  // ---
-  explicit Nodes(const Texture& node_header_texture);
-
-  // ---
   void Draw(const frame::Frame& frame);
-  // ---
-  auto GetDrawnPinIconRect [[nodiscard]] (ne::PinId pin_id) const
-      -> const ImRect&;
+  auto GetDrawnPinIconRect(ne::PinId pin_id) const -> const ImRect&;
 
  private:
-  // ---
   void DrawNode_v2(const frame::Node& node);
-  // ---
   void DrawPinIconArea_v2(const frame::Pin& pin);
 
-  // ---
-  Texture node_header_texture_{};
-  // ---
   std::unordered_map<uintptr_t, ImRect> drawn_pin_icon_rects_{};
 };
 }  // namespace esc::draw

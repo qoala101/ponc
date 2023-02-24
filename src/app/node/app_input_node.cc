@@ -89,19 +89,17 @@ class PinDrawer : public coreui::IPinDrawer {
  public:
   explicit PinDrawer(std::shared_ptr<Node> node) : node_{std::move(node)} {}
 
-  auto GetLabel [[nodiscard]] () const -> std::string override { return {}; }
+  auto GetLabel() const -> std::string override { return {}; }
 
-  auto GetKind [[nodiscard]] () const -> std::optional<ne::PinKind> override {
+  auto GetKind() const -> std::optional<ne::PinKind> override {
     return ne::PinKind::Output;
   }
 
-  auto GetFloat [[nodiscard]] () -> std::optional<float*> override {
-    return &node_->value_;
-  }
+  auto GetFloat() -> std::optional<float*> override { return &node_->value_; }
 
-  auto IsEditable [[nodiscard]] () const -> bool override { return true; }
+  auto IsEditable() const -> bool override { return true; }
 
-  auto GetPinId [[nodiscard]] () const -> std::optional<ne::PinId> {
+  auto GetPinId() const -> std::optional<ne::PinId> {
     return node_->GetOutputPinIds()[0];
   }
 
