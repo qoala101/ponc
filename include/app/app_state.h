@@ -17,6 +17,10 @@ namespace draw {
 struct Widgets;
 }  // namespace draw
 
+namespace frame {
+struct Frame;
+}  // namespace frame
+
 // ---
 struct AppState {
   // ---
@@ -27,6 +31,8 @@ struct AppState {
   draw::Widgets &widgets;
   // ---
   EventQueue &event_queue;
+
+  frame::Frame &frame;
 };
 }  // namespace esc
 

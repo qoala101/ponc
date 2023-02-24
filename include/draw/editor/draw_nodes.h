@@ -21,6 +21,11 @@
 #include "imgui_internal.h"
 #include "imgui_node_editor.h"
 
+namespace esc::frame {
+struct Node;
+struct Pin;
+}  // namespace esc::frame
+
 namespace esc::draw {
 // ---
 class Nodes {
@@ -36,16 +41,9 @@ class Nodes {
 
  private:
   // ---
-  void DrawNode(core::INode& node, const flow::NodeFlow& node_flow,
-                const core::Diagram& diagram, const NewLink& new_link,
-                const SettingsView& settings_view,
-                const core::Settings& settings);
+  void DrawNode_v2(const frame::Node& node);
   // ---
-  void DrawPinIconArea(const coreui::IPinDrawer& pin_drawer,
-                       const flow::NodeFlow& node_flow,
-                       const core::Diagram& diagram, const NewLink& new_link,
-                       const SettingsView& settings_view,
-                       const core::Settings& settings);
+  void DrawPinIconArea_v2(const frame::Pin& pin);
 
   // ---
   Texture node_header_texture_{};

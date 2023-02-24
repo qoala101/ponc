@@ -179,6 +179,8 @@ add_example_executable(esc
   flow/flow_node_flow.cc
   flow/flow_tree.cc
 
+  frame/frame_node.cc
+
   json/json_diagram_serializer.cc
   json/json_group_serializer.cc
   json/json_i_family_parser.cc
@@ -208,6 +210,7 @@ target_include_directories(esc
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/editor/process
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/view
   PUBLIC ${PROJECT_SOURCE_DIR}/include/flow
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/frame
   PUBLIC ${PROJECT_SOURCE_DIR}/include/impl
   PUBLIC ${PROJECT_SOURCE_DIR}/include/json
 )

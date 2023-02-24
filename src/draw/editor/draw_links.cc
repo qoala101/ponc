@@ -18,6 +18,7 @@
 #include "draw_tooltip.h"
 #include "draw_widgets.h"
 #include "flow_tree.h"
+#include "frame_node.h"
 #include "imgui_bezier_math.h"
 #include "imgui_node_editor.h"
 
@@ -72,27 +73,13 @@ auto GetLinkAlpha [[nodiscard]] (const core::Link& link,
 
 // ---
 void Links::Draw(const AppState& app_state) {
-  const auto& diagram = app_state.project.GetDiagram();
-  const auto fixed_pin = app_state.widgets.new_link.FindFixedPin(diagram);
-
-  const auto flow_tree = flow::BuildFlowTree(diagram);
-  const auto node_flows = flow::CalculateNodeFlows(flow_tree);
-
-  for (const auto& link : diagram.GetLinks()) {
-    const auto alpha = GetLinkAlpha(link, fixed_pin);
-
-    const auto start_pin_node = core::FindPinNode(diagram, link.start_pin_id);
-    const auto node_flow = node_flows.at(start_pin_node->GetId().Get());
-    const auto start_pin_flow = flow::GetPinFlow(node_flow, link.start_pin_id);
-    auto color = app_state.widgets.settings_view.GetColorForFlowValue(
-        start_pin_flow, app_state.project.GetSettings());
-    color.Value.w = alpha;
-
-    ne::Link(link.id, link.start_pin_id, link.end_pin_id, color, 2.F);
+  for (const auto& link : app_state.frame.links) {
+    ne::Link(link.link.id, link.link.start_pin_id, link.link.end_pin_id,
+             link.color, link.thickness);
   }
 
-  DrawLinkBeingRepinned(diagram, app_state.widgets.new_link,
-                        app_state.widgets.nodes);
+  DrawLinkBeingRepinned(app_state.project.GetDiagram(),
+                        app_state.widgets.new_link, app_state.widgets.nodes);
 }
 
 void Links::DrawLinkBeingRepinned(const core::Diagram& diagram,

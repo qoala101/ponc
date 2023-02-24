@@ -5,6 +5,7 @@
 #include "app_state.h"
 #include "core_family_id.h"
 #include "draw_widgets.h"
+#include "frame_node.h"
 
 namespace esc {
 AppImpl::AppImpl(const Textures &textures)
@@ -31,10 +32,12 @@ AppImpl::AppImpl(const Textures &textures)
       widgets_{textures.node_header} {}
 
 void AppImpl::OnFrame() {
+  auto frame = frame::Frame{project_, widgets_};
   const auto app_state = AppState{.id_generator = id_generator_,
                                   .project = project_,
                                   .widgets = widgets_,
-                                  .event_queue = event_queue_};
+                                  .event_queue = event_queue_,
+                                  .frame = frame};
 
   event_queue_.ExecuteEvents(app_state);
   widgets_.Draw(app_state);
