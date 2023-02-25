@@ -1,7 +1,3 @@
-/**
- * @author Volodymyr Hromakov (4y5t6r@gmail.com)
- */
-
 #include "core_settings.h"
 #include "crude_json.h"
 #include "json_setings_serializer.h"

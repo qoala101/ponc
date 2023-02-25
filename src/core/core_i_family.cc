@@ -1,7 +1,3 @@
-/**
- * @author Volodymyr Hromakov (4y5t6r@gmail.com)
- */
-
 #include "core_i_family.h"
 
 namespace esc::core {

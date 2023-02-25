@@ -1,7 +1,3 @@
-/**
- * @author Volodymyr Hromakov (4y5t6r@gmail.com)
- */
-
 #ifndef VH_JSON_GROUP_SERIALIZER_H_
 #define VH_JSON_GROUP_SERIALIZER_H_
 

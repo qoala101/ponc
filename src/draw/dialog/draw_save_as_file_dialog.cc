@@ -1,7 +1,3 @@
-/**
- * @author Volodymyr Hromakov (4y5t6r@gmail.com)
- */
-
 #include "draw_save_as_file_dialog.h"
 
 #include "frame_node.h"

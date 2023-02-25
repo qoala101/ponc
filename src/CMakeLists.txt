@@ -140,6 +140,7 @@ add_example_executable(esc
   coreui/coreui_i_family_drawer.cc
   coreui/coreui_i_node_drawer.cc
   coreui/coreui_i_pin_drawer.cc
+  coreui/frame_node.cc
 
   cpp/cpp_assert.cc
   cpp/cpp_scope_function.cc
@@ -175,8 +176,6 @@ add_example_executable(esc
 
   flow/flow_node_flow.cc
   flow/flow_tree.cc
-
-  frame/frame_node.cc
 
   json/json_diagram_serializer.cc
   json/json_group_serializer.cc

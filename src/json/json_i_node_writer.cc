@@ -1,7 +1,3 @@
-/**
- * @author Volodymyr Hromakov (4y5t6r@gmail.com)
- */
-
 #include "json_i_node_writer.h"
 
 #include "core_i_node.h"

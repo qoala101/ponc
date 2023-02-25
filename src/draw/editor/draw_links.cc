@@ -1,7 +1,3 @@
-/**
- * @author Volodymyr Hromakov (4y5t6r@gmail.com)
- */
-
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "draw_links.h"
 

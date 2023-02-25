@@ -1,7 +1,3 @@
-/**
- * @author Volodymyr Hromakov (4y5t6r@gmail.com)
- */
-
 #ifndef VH_COREUI_FLOW_PIN_DRAWER_H_
 #define VH_COREUI_FLOW_PIN_DRAWER_H_
 

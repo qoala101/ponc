@@ -1,7 +1,3 @@
-/**
- * @author Volodymyr Hromakov (4y5t6r@gmail.com)
- */
-
 #include "draw_flow_icon.h"
 
 #include "cpp_assert.h"

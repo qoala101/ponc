@@ -1,7 +1,3 @@
-/**
- * @author Volodymyr Hromakov (4y5t6r@gmail.com)
- */
-
 #include "core_diagram.h"
 
 #include <imgui_node_editor.h>

@@ -1,7 +1,3 @@
-/**
- * @author Volodymyr Hromakov (4y5t6r@gmail.com)
- */
-
 #ifndef VH_CORE_I_NODE_H_
 #define VH_CORE_I_NODE_H_
 

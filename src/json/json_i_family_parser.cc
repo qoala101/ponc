@@ -1,7 +1,3 @@
-/**
- * @author Volodymyr Hromakov (4y5t6r@gmail.com)
- */
-
 #include "json_i_family_parser.h"
 
 #include "core_family_id.h"

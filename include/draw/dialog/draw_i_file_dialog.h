@@ -1,7 +1,3 @@
-/**
- * @author Volodymyr Hromakov (4y5t6r@gmail.com)
- */
-
 #ifndef VH_DRAW_I_FILE_DIALOG_H_
 #define VH_DRAW_I_FILE_DIALOG_H_
 

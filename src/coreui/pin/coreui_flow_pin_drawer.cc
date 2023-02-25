@@ -1,7 +1,3 @@
-/**
- * @author Volodymyr Hromakov (4y5t6r@gmail.com)
- */
-
 #include "coreui_flow_pin_drawer.h"
 
 #include "imgui_node_editor.h"
