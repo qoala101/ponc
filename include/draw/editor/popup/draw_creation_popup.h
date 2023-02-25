@@ -10,14 +10,14 @@
 namespace ne = ax::NodeEditor;
 
 namespace esc::draw {
-class NewLinkPopup : public IPopup {
+class CreationPopup : public IPopup {
  public:
   void SetPosition(const ImVec2 &position);
   void SetDraggedFromPin(ne::PinId pin_id);
 
  private:
   auto GetLabel() const -> std::string override;
-  void DrawItems(frame::Frame &frame) override;
+  void DrawItems(coreui::Frame &frame) override;
 
   ImVec2 position_{};
   ne::PinId dragged_from_pin_{};

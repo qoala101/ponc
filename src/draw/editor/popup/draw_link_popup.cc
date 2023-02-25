@@ -7,10 +7,9 @@ void LinkPopup::SetLinkId(ne::LinkId link_id) { link_id_ = link_id; }
 
 auto LinkPopup::GetLabel() const -> std::string { return "Link"; }
 
-void LinkPopup::DrawItems(frame::Frame &frame) {
+void LinkPopup::DrawItems(coreui::Frame &frame) {
   if (ImGui::MenuItem("Delete")) {
-    // frame.DeleteLink{.link_id =
-    // link_id_});
+    frame.DeleteLink(link_id_);
   }
 }
 }  // namespace esc::draw

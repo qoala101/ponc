@@ -4,7 +4,7 @@
 #include "frame_node.h"
 
 namespace esc::draw {
-void DrawDeleteItemsProcess(frame::Frame &frame);
+void DrawDeleteItemsProcess(coreui::Frame &frame);
 }  // namespace esc::draw
 
 #endif  // VH_DRAW_DELETE_ITEMS_PROCESS_H_

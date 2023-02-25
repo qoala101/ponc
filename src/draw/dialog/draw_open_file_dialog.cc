@@ -12,7 +12,7 @@ OpenFileDialog::OpenFileDialog()
         return dialog;
       }()} {}
 
-void OpenFileDialog::OnFileSelected(frame::Frame &frame,
+void OpenFileDialog::OnFileSelected(coreui::Frame &frame,
                                     std::string file_path) const {
   frame.OpenProjectFromFile(std::move(file_path));
 }

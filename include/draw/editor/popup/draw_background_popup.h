@@ -13,7 +13,7 @@ class BackgroundPopup : public IPopup {
 
  private:
   auto GetLabel() const -> std::string override;
-  void DrawItems(frame::Frame &frame) override;
+  void DrawItems(coreui::Frame &frame) override;
 
   ImVec2 position_{};
 };

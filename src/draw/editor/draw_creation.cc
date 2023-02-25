@@ -1,4 +1,4 @@
-#include "draw_new_link.h"
+#include "draw_creation.h"
 
 #include <iostream>
 
@@ -8,7 +8,7 @@
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
-void NewLink::Draw(frame::Frame& frame) {
+void Creation::Draw(coreui::Frame& frame) {
   const auto popup_position = ImGui::GetMousePos();
 
   {
@@ -56,9 +56,9 @@ void NewLink::Draw(frame::Frame& frame) {
           const auto suspend_scope =
               cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
 
-          new_link_popup.SetPosition(popup_position);
-          new_link_popup.SetDraggedFromPin(*frame.new_link.dragged_from_pin_);
-          new_link_popup.Show();
+          creation_popup.SetPosition(popup_position);
+          creation_popup.SetDraggedFromPin(*frame.new_link.dragged_from_pin_);
+          creation_popup.Show();
         }
       } else {
         frame.new_link.hovering_over_pin_.reset();
@@ -69,6 +69,11 @@ void NewLink::Draw(frame::Frame& frame) {
     }
   }
 
-  new_link_popup.Draw(frame);
+  {
+    const auto suspend_scope =
+        cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
+
+    creation_popup.Draw(frame);
+  }
 }
 }  // namespace esc::draw

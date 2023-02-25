@@ -1,5 +1,3 @@
-#include "draw_new_link_popup.h"
-
 #include <cstdint>
 #include <iostream>
 #include <limits>
@@ -15,20 +13,23 @@
 #include "core_project.h"
 #include "coreui_i_family_traits.h"
 #include "cpp_assert.h"
+#include "draw_creation_popup.h"
 #include "draw_id_label.h"
 #include "frame_node.h"
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
-void NewLinkPopup::SetPosition(const ImVec2& position) { position_ = position; }
+void CreationPopup::SetPosition(const ImVec2& position) {
+  position_ = position;
+}
 
-auto NewLinkPopup::GetLabel() const -> std::string { return "Connect Node"; }
+auto CreationPopup::GetLabel() const -> std::string { return "Connect Node"; }
 
-void NewLinkPopup::SetDraggedFromPin(ne::PinId pin_id) {
+void CreationPopup::SetDraggedFromPin(ne::PinId pin_id) {
   dragged_from_pin_ = pin_id;
 }
 
-void NewLinkPopup::DrawItems(frame::Frame& frame) {
+void CreationPopup::DrawItems(coreui::Frame& frame) {
   const auto& families = frame.GetProject().GetFamilies();
 
   const auto dragged_from_node =

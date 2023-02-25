@@ -6,9 +6,9 @@
 #include <memory>
 
 #include "draw_background_popup.h"
+#include "draw_creation.h"
 #include "draw_link_popup.h"
 #include "draw_links.h"
-#include "draw_new_link.h"
 #include "draw_node_popup.h"
 #include "draw_nodes.h"
 #include "frame_node.h"
@@ -28,19 +28,19 @@ class NodeEditor {
 
   ~NodeEditor();
 
-  void Draw(frame::Frame &frame);
+  void Draw(coreui::Frame &frame);
 
-  auto GetNewLink() const -> const NewLink &;
+  auto GetCreation() const -> const Creation &;
 
   auto GetNodes() const -> const Nodes &;
 
  private:
-  void DrawShowPopupProcess(frame::Frame &frame);
-  void DrawPopupContents(frame::Frame &frame);
+  void DrawShowPopupProcess(coreui::Frame &frame);
+  void DrawPopupContents(coreui::Frame &frame);
 
   ne::EditorContext *editor_context_{};
 
-  NewLink new_link{};
+  Creation creation{};
   Nodes nodes{};
 
   BackgroundPopup background_popup{};

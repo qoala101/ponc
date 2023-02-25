@@ -8,7 +8,7 @@
 #include "core_i_node.h"
 #include "core_settings.h"
 #include "coreui_i_pin_traits.h"
-#include "draw_new_link.h"
+#include "draw_creation.h"
 #include "draw_settings_view.h"
 #include "draw_texture.h"
 #include "flow_node_flow.h"
@@ -25,11 +25,11 @@ struct Pin;
 namespace esc::draw {
 class Nodes {
  public:
-  void Draw(frame::Frame& frame);
+  void Draw(coreui::Frame& frame);
 
  private:
-  void DrawNode_v2(frame::Frame& frame, const frame::Node& node);
-  void DrawPinIconArea_v2(frame::Frame& frame, const frame::Pin& pin);
+  void DrawNode_v2(coreui::Frame& frame, const coreui::Node& node);
+  void DrawPinIconArea_v2(coreui::Frame& frame, const coreui::Pin& pin);
 };
 }  // namespace esc::draw
 

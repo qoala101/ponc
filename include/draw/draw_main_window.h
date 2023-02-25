@@ -13,7 +13,7 @@
 namespace esc::draw {
 class MainWindow {
  public:
-  void Draw(frame::Frame &frame);
+  void Draw(coreui::Frame &frame);
 
  private:
   MainMenuBar main_menu_bar{};

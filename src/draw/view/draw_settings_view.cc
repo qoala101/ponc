@@ -10,7 +10,7 @@
 namespace esc::draw {
 auto SettingsView::GetLabel() const -> std::string { return "Settings"; }
 
-void SettingsView::Draw(frame::Frame& frame) {
+void SettingsView::Draw(coreui::Frame& frame) {
   if (!IsVisible()) {
     return;
   }

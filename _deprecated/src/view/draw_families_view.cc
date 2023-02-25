@@ -11,7 +11,7 @@
 
 namespace esc::draw {
 namespace {
-void DisplayNode(frame::Frame& frame, core::INode& node) {
+void DisplayNode(coreui::Frame& frame, core::INode& node) {
   ImGui::TableNextRow();
   ImGui::TableNextColumn();
 
@@ -62,7 +62,7 @@ void DisplayNode(frame::Frame& frame, core::INode& node) {
   }
 }
 
-void DisplayFamily(frame::Frame& frame, core::IFamily& family) {
+void DisplayFamily(coreui::Frame& frame, core::IFamily& family) {
   ImGui::TableNextRow();
   ImGui::TableNextColumn();
 
@@ -139,7 +139,7 @@ void DisplayFamily(frame::Frame& frame, core::IFamily& family) {
 
 auto FamiliesView::GetLabel() const -> std::string { return "Families"; }
 
-void FamiliesView::Draw(frame::Frame& frame) {
+void FamiliesView::Draw(coreui::Frame& frame) {
   if (!IsVisible()) {
     return;
   }

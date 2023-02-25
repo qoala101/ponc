@@ -4,7 +4,7 @@
 #include "draw_node_editor.h"
 
 namespace esc::draw {
-void MainWindow::Draw(frame::Frame &frame) {
+void MainWindow::Draw(coreui::Frame &frame) {
   main_menu_bar.Draw(frame);
   node_editor.Draw(frame);
 }

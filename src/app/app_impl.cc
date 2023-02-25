@@ -32,7 +32,7 @@ AppImpl::AppImpl(const Textures &textures)
       }()} {}
 
 void AppImpl::OnFrame() {
-  auto frame = frame::Frame{project_};
+  auto frame = coreui::Frame{project_};
   main_window_.Draw(frame);
 }
 }  // namespace esc

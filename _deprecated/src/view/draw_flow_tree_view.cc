@@ -17,7 +17,7 @@
 namespace esc::draw {
 namespace {
 void DisplayNode(
-    frame::Frame& frame, const flow::TreeNode& tree_node,
+    coreui::Frame& frame, const flow::TreeNode& tree_node,
     const std::unordered_map<const flow::TreeNode*,
                              std::vector<std::pair<const core::IFamily*, int>>>&
         child_count_per_family_per_tree_node) {
@@ -108,7 +108,7 @@ void DisplayNode(
 
 auto FlowTreeView::GetLabel() const -> std::string { return "Flow Tree"; }
 
-void FlowTreeView::Draw(frame::Frame& frame) {
+void FlowTreeView::Draw(coreui::Frame& frame) {
   if (!IsVisible()) {
     return;
   }

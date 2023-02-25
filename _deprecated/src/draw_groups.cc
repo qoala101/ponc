@@ -9,7 +9,7 @@
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
-void DrawGroups(frame::Frame& frame) {
+void DrawGroups(coreui::Frame& frame) {
   const auto& groups = state.core_state->diagram_.GetGroups();
 
   for (const auto& group : groups) {

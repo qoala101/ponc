@@ -15,11 +15,10 @@
 #include "draw_texture.h"
 #include "imgui.h"
 #include "imgui_internal.h"
-#include "core_id_generator.h"
 
 namespace ne = ax::NodeEditor;
 
-namespace esc::frame {
+namespace esc::coreui {
 struct Pin {
   std::optional<ne::PinId> id{};
   ImColor color{};
@@ -96,6 +95,6 @@ struct Frame {
   core::Project &project_;
   std::vector<std::function<void()>> events_{};
 };
-}  // namespace esc::frame
+}  // namespace esc::coreui
 
 #endif  // VH_FRAME_NODE_H_

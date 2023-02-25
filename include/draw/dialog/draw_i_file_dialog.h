@@ -13,13 +13,13 @@ namespace esc::draw {
 class IFileDialog : public cpp::Interface {
  public:
   void Show();
-  void Draw(frame::Frame &frame);
+  void Draw(coreui::Frame &frame);
 
  protected:
   explicit IFileDialog(const ImGui::FileBrowser &dialog);
 
  private:
-  virtual void OnFileSelected(frame::Frame &frame,
+  virtual void OnFileSelected(coreui::Frame &frame,
                               std::string file_path) const = 0;
 
   ImGui::FileBrowser dialog_{};

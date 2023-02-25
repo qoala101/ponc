@@ -43,7 +43,7 @@ auto GetCurve(const ImVec2& m_Start, const ImVec2& m_End) {
   return result;
 }
 
-void DrawLinkBeingRepinned_v2(const frame::Curve& curve) {
+void DrawLinkBeingRepinned_v2(const coreui::Curve& curve) {
   const auto mouse_pos = ImGui::GetMousePos();
   const auto bezier = GetCurve(curve.start_position.value_or(mouse_pos),
                                curve.end_position.value_or(mouse_pos));
@@ -55,14 +55,15 @@ void DrawLinkBeingRepinned_v2(const frame::Curve& curve) {
 }
 }  // namespace
 
-void DrawLinks(const frame::Frame& frame) {
-  for (const auto& link : frame.links) {
+void DrawLinks(const std::vector<coreui::Link>& links,
+               const std::optional<coreui::Curve>& curve) {
+  for (const auto& link : links) {
     ne::Link(link.id, link.start_pin_id, link.end_pin_id, link.color,
              link.thickness);
   }
 
-  if (frame.curve.has_value()) {
-    DrawLinkBeingRepinned_v2(*frame.curve);
+  if (curve.has_value()) {
+    DrawLinkBeingRepinned_v2(*curve);
   }
 }
 }  // namespace esc::draw

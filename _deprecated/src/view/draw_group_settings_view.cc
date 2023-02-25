@@ -17,7 +17,7 @@ auto GroupSettingsView::GetLabel() const -> std::string {
   return "Group Settings";
 }
 
-void GroupSettingsView::Draw(frame::Frame& frame) {
+void GroupSettingsView::Draw(coreui::Frame& frame) {
   if (!IsVisible()) {
     return;
   }

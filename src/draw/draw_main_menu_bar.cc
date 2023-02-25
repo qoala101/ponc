@@ -21,7 +21,7 @@ void DrawViewMenuItem(auto &view) {
 }
 }  // namespace
 
-void MainMenuBar::Draw(frame::Frame &frame) {
+void MainMenuBar::Draw(coreui::Frame &frame) {
   if (ImGui::BeginMainMenuBar()) {
     const auto main_menu_bar_scope =
         cpp::Scope{[]() { ImGui::EndMainMenuBar(); }};
@@ -41,7 +41,7 @@ void MainMenuBar::Draw(frame::Frame &frame) {
   }
 }
 
-void MainMenuBar::DrawFileMenu(frame::Frame &frame) {
+void MainMenuBar::DrawFileMenu(coreui::Frame &frame) {
   if (ImGui::BeginMenu("File")) {
     const auto menu_scope = cpp::Scope{[]() { ImGui::EndMenu(); }};
 
@@ -64,7 +64,7 @@ void MainMenuBar::DrawFileMenu(frame::Frame &frame) {
   save_as_file_dialog.Draw(frame);
 }
 
-void MainMenuBar::DrawViewsMenu(frame::Frame &frame) {
+void MainMenuBar::DrawViewsMenu(coreui::Frame &frame) {
   if (ImGui::BeginMenu("Views")) {
     const auto menu_scope = cpp::Scope{[]() { ImGui::EndMenu(); }};
 

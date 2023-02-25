@@ -4,7 +4,7 @@
 #include "frame_node.h"
 
 namespace esc::draw {
-void DrawGroups(frame::Frame &frame);
+void DrawGroups(coreui::Frame &frame);
 }  // namespace esc::draw
 
 #endif  // VH_DRAW_GROUPS_H_

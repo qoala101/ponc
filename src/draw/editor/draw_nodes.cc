@@ -16,7 +16,7 @@
 
 namespace esc::draw {
 namespace {
-void DrawPinField_v2(const frame::Pin& pin) {
+void DrawPinField_v2(const coreui::Pin& pin) {
   const auto spring_scope =
       cpp::Scope{[]() { ImGui::Spring(0); }, []() { ImGui::Spring(0); }};
 
@@ -41,13 +41,13 @@ void DrawPinField_v2(const frame::Pin& pin) {
 }
 }  // namespace
 
-void Nodes::Draw(frame::Frame& frame) {
+void Nodes::Draw(coreui::Frame& frame) {
   for (const auto& node : frame.nodes) {
     DrawNode_v2(frame, node);
   }
 }
 
-void Nodes::DrawNode_v2(frame::Frame& frame, const frame::Node& node) {
+void Nodes::DrawNode_v2(coreui::Frame& frame, const coreui::Node& node) {
   int layout_id_{};
 
   const auto node_id_ = node.id;
@@ -204,7 +204,7 @@ void Nodes::DrawNode_v2(frame::Frame& frame, const frame::Node& node) {
   ne::PopStyleVar();
 }
 
-void Nodes::DrawPinIconArea_v2(frame::Frame& frame, const frame::Pin& pin) {
+void Nodes::DrawPinIconArea_v2(coreui::Frame& frame, const coreui::Pin& pin) {
   const auto pin_id = pin.id;
   auto area_size = ImVec2{24, 24};
 

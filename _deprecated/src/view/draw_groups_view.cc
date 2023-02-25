@@ -12,7 +12,7 @@
 
 namespace esc::draw {
 namespace {
-void DisplayNode(frame::Frame& frame, core::INode& node) {
+void DisplayNode(coreui::Frame& frame, core::INode& node) {
   ImGui::TableNextRow();
   ImGui::TableNextColumn();
 
@@ -54,7 +54,7 @@ void DisplayNode(frame::Frame& frame, core::INode& node) {
   }
 }
 
-void DisplayGroup(frame::Frame& frame, core::Group& group) {
+void DisplayGroup(coreui::Frame& frame, core::Group& group) {
   ImGui::TableNextRow();
   ImGui::TableNextColumn();
 
@@ -129,7 +129,7 @@ void DisplayGroup(frame::Frame& frame, core::Group& group) {
 
 auto GroupsView::GetLabel() const -> std::string { return "Groups"; }
 
-void GroupsView::Draw(frame::Frame& frame) {
+void GroupsView::Draw(coreui::Frame& frame) {
   if (!IsVisible()) {
     return;
   }

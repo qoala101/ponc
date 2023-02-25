@@ -10,11 +10,11 @@ namespace esc::draw {
 class IPopup : public cpp::Interface {
  public:
   void Show();
-  void Draw(frame::Frame &frame);
+  void Draw(coreui::Frame &frame);
 
  private:
   virtual auto GetLabel() const -> std::string = 0;
-  virtual void DrawItems(frame::Frame &frame) = 0;
+  virtual void DrawItems(coreui::Frame &frame) = 0;
 };
 }  // namespace esc::draw
 

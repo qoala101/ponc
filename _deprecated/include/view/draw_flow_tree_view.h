@@ -13,7 +13,7 @@ namespace esc::draw {
 class FlowTreeView : public IHidable {
  public:
   auto GetLabel() const -> std::string;
-  void Draw(frame::Frame &frame);
+  void Draw(coreui::Frame &frame);
 };
 }  // namespace esc::draw
 

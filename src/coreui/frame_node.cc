@@ -13,7 +13,7 @@
 #include "json_i_family_parser.h"
 #include "json_project_serializer.h"
 
-namespace esc::frame {
+namespace esc::coreui {
 namespace {
 auto GetLinkAlpha(const core::Link& link,
                   const std::optional<ne::PinId>& fixed_pin) {
@@ -446,7 +446,7 @@ void Frame::SaveProjectToFile(std::string file_path) {
   });
 }
 
-// void ResetDiagram::operator()(frame::Frame &frame) const {
+// void ResetDiagram::operator()(coreui::Frame &frame) const {
 //   const auto &diagram = state.core_state->diagram_;
 //   const auto &links = diagram.GetLinks();
 
@@ -490,7 +490,7 @@ void Frame::DeleteLink(ne::LinkId link_id) {
   });
 }
 
-// void DeleteNode::operator()(frame::Frame &frame) const {
+// void DeleteNode::operator()(coreui::Frame &frame) const {
 //   auto &diagram = state.core_state->diagram_;
 //   const auto node = FindNode(diagram, node_id);
 //   const auto node_flow = node.GetInitialFlow();
@@ -534,7 +534,7 @@ void Frame::DeleteLink(ne::LinkId link_id) {
 //   }
 // }
 
-// void DeleteNodeWithLinks::operator()(frame::Frame &frame) const {
+// void DeleteNodeWithLinks::operator()(coreui::Frame &frame) const {
 //   auto &diagram = state.core_state->diagram_;
 //   const auto &links = diagram.GetLinks();
 //   const auto &node = diagram.FindNode(node_id);
@@ -566,12 +566,12 @@ void Frame::DeleteLink(ne::LinkId link_id) {
 //   state.core_state->diagram_.EraseNode(node_id);
 // }
 
-// void DeleteLink::operator()(frame::Frame &frame) const {
+// void DeleteLink::operator()(coreui::Frame &frame) const {
 //   ne::DeleteLink(link_id);
 //   state.core_state->diagram_.EraseLink(link_id);
 // }
 
-// void CreateGroup::operator()(frame::Frame &frame) const {
+// void CreateGroup::operator()(coreui::Frame &frame) const {
 //   // auto nodes = std::vector<std::shared_ptr<INode>>{};
 
 //   // for (const auto node_id : node_ids) {
@@ -584,4 +584,4 @@ void Frame::DeleteLink(ne::LinkId link_id) {
 
 //   // auto &group = state.core_state->diagram_.EmplaceGroup(node_ids);
 // }
-}  // namespace esc::frame
+}  // namespace esc::coreui

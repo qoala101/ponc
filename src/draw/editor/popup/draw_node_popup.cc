@@ -11,7 +11,7 @@ void NodePopup::SetNodeId(ne::NodeId node_id) { node_id_ = node_id; }
 
 auto NodePopup::GetLabel() const -> std::string { return "Node"; }
 
-void NodePopup::DrawItems(frame::Frame& frame) {
+void NodePopup::DrawItems(coreui::Frame& frame) {
   if (ImGui::MenuItem("Delete With Links")) {
     // state.event_queue.PostEvent(
     //     Events::DeleteNodeWithLinks{.node_id = node_id_});

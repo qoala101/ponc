@@ -9,11 +9,11 @@
 namespace esc::draw {
 class MainMenuBar {
  public:
-  void Draw(frame::Frame &frame);
+  void Draw(coreui::Frame &frame);
 
  private:
-  void DrawFileMenu(frame::Frame &frame);
-  void DrawViewsMenu(frame::Frame &frame);
+  void DrawFileMenu(coreui::Frame &frame);
+  void DrawViewsMenu(coreui::Frame &frame);
 
   OpenFileDialog open_file_dialog{};
   SaveAsFileDialog save_as_file_dialog{};

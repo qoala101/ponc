@@ -56,7 +56,7 @@ auto BackgroundPopup::GetLabel() const -> std::string {
   return "Create New Node";
 }
 
-void BackgroundPopup::DrawItems(frame::Frame& frame) {
+void BackgroundPopup::DrawItems(coreui::Frame& frame) {
   const auto family_groups =
       coreui::GroupByLabels(frame.GetProject().GetFamilies());
 
