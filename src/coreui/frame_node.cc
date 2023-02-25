@@ -409,39 +409,14 @@ auto CreateFamilyParsers() {
   // family_parsers.emplace_back(core::PlaceholderFamily::CreateParser());
   return family_parsers;
 }
-
-auto FindMaxId(const core::Project& project) {
-  auto max_id = uintptr_t{1};
-
-  for (const auto& family : project.GetFamilies()) {
-    max_id = std::max(family->GetId().Get(), max_id);
-  }
-
-  const auto& diagram = project.GetDiagram();
-
-  for (const auto& node : diagram.GetNodes()) {
-    max_id = std::max(node->GetId().Get(), max_id);
-
-    for (const auto pin_id : core::GetAllPinIds(*node)) {
-      max_id = std::max(pin_id.Get(), max_id);
-    }
-  }
-
-  for (const auto& link : diagram.GetLinks()) {
-    max_id = std::max(link.id.Get(), max_id);
-  }
-
-  return max_id;
-}
 }  // namespace
 
-Frame::Frame(core::IdGenerator& id_generator, core::Project& project)
+Frame::Frame(core::Project& project)
     : nodes{GetNodes(project, new_link)},
       links{GetLinks(project, new_link)},
       curve{GetCurve(project, new_link, drawn_pin_icon_rects_)},
       creation_alpha{GetAlphaForNewLink(project, new_link)},
       creation{GetCreation(project, new_link)},
-      id_generator_{id_generator},
       project_{project} {}
 
 Frame::~Frame() {
@@ -452,20 +427,15 @@ Frame::~Frame() {
 
 auto Frame::GetProject() -> core::Project& { return project_; }
 
-auto Frame::GetIdGenerator() -> core::IdGenerator& { return id_generator_; }
+auto Frame::GetIdGenerator() -> core::IdGenerator& {
+  return project_.GetIdGenerator();
+}
 
 void Frame::OpenProjectFromFile(std::string file_path) {
   events_.emplace_back([this, file_path = std::move(file_path)]() {
-    // ResetDiagram{}(state);
-
     const auto json = crude_json::value::load(file_path).first;
-
-    auto project =
+    project_ =
         json::ProjectSerializer::ParseFromJson(json, CreateFamilyParsers());
-    auto max_id = FindMaxId(project);
-
-    project_ = std::move(project);
-    id_generator_ = core::IdGenerator{max_id + 1};
   });
 }
 
@@ -507,7 +477,7 @@ void Frame::EmplaceNode(std::shared_ptr<core::INode> node,
 void Frame::CreateLink(ne::PinId start_pin_id, ne::PinId end_pin_id) {
   events_.emplace_back([this, start_pin_id, end_pin_id]() {
     project_.GetDiagram().EmplaceLink(
-        {.id = id_generator_.GetNext<ne::LinkId>(),
+        {.id = project_.GetIdGenerator().Generate<ne::LinkId>(),
          .start_pin_id = start_pin_id,
          .end_pin_id = end_pin_id});
   });

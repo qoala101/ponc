@@ -6,9 +6,9 @@
 #include "coreui_i_pin_traits.h"
 
 namespace esc::coreui {
-class FlowPinDrawer : public IPinTraits {
+class FlowPinTraits : public IPinTraits {
  public:
-  explicit FlowPinDrawer(ne::PinId pin_id);
+  explicit FlowPinTraits(ne::PinId pin_id);
 
   auto GetPinId() const -> std::optional<ne::PinId> override;
 

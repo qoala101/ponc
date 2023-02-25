@@ -116,10 +116,10 @@ class NodeDrawer : public coreui::INodeTraits {
     auto pin_drawers = std::vector<std::unique_ptr<coreui::IPinTraits>>{};
 
     pin_drawers.emplace_back(
-        std::make_unique<coreui::FlowPinDrawer>(*node_->GetInputPinId()));
+        std::make_unique<coreui::FlowPinTraits>(*node_->GetInputPinId()));
     pin_drawers.emplace_back(std::make_unique<DropPinDrawer>(node_));
     pin_drawers.emplace_back(
-        std::make_unique<coreui::FlowPinDrawer>(node_->GetOutputPinIds()[0]));
+        std::make_unique<coreui::FlowPinTraits>(node_->GetOutputPinIds()[0]));
 
     return pin_drawers;
   }
@@ -142,10 +142,10 @@ class Family : public core::IFamily,
   auto CreateNode(core::IdGenerator& id_generator)
       -> std::shared_ptr<core::INode> override {
     return std::make_shared<Node>(core::INode::ConstructorArgs{
-        .id = id_generator.GetNext<ne::NodeId>(),
+        .id = id_generator.Generate<ne::NodeId>(),
         .family_id = GetId(),
-        .input_pin_id = id_generator.GetNext<ne::PinId>(),
-        .output_pin_ids = id_generator.GetNextN<ne::PinId>(1)});
+        .input_pin_id = id_generator.Generate<ne::PinId>(),
+        .output_pin_ids = id_generator.GenerateN<ne::PinId>(1)});
   }
 
   auto CreateNodeParser() -> std::unique_ptr<json::INodeParser> override {

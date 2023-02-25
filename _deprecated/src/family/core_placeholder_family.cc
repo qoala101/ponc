@@ -166,8 +166,8 @@ auto PlaceholderFamily::EmplaceNodeFromFlow(
   }
 
   return EmplaceNode(std::make_shared<Node>(
-      id_generator.GetNext<ne::NodeId>(),
-      id_generator.GetNextN<ne::PinId>(num_pins), has_input_pin));
+      id_generator.Generate<ne::NodeId>(),
+      id_generator.GenerateN<ne::PinId>(num_pins), has_input_pin));
 }
 
 namespace {

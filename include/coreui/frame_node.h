@@ -71,7 +71,7 @@ struct NewLink {
 };
 
 struct Frame {
-  Frame(core::IdGenerator &id_generator, core::Project &project);
+  explicit Frame(core::Project &project);
 
   ~Frame();
 
@@ -93,7 +93,6 @@ struct Frame {
   void DeleteLink(ne::LinkId link_id);
 
  private:
-  core::IdGenerator &id_generator_;
   core::Project &project_;
   std::vector<std::function<void()>> events_{};
 };

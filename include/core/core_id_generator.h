@@ -8,27 +8,29 @@
 namespace esc::core {
 class IdGenerator {
  public:
-  explicit IdGenerator(uintptr_t next_value = 1);
+  explicit IdGenerator(uintptr_t next_id = 1);
 
   template <typename Id>
-  auto GetNext() {
-    return Id{next_value_++};
+  auto Generate() {
+    return Id{next_id_++};
   }
 
   template <typename Id>
-  auto GetNextN(int n) {
+  auto GenerateN(int n) {
     auto ids = std::vector<Id>{};
     ids.reserve(n);
 
     for (auto i = 0; i < n; ++i) {
-      ids.emplace_back(GetNext<Id>());
+      ids.emplace_back(Generate<Id>());
     }
 
     return ids;
   }
 
+  auto GetNextId() const { return next_id_; }
+
  private:
-  uintptr_t next_value_{};
+  uintptr_t next_id_{};
 };
 }  // namespace esc::core
 

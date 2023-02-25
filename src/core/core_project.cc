@@ -1,11 +1,38 @@
 #include "core_project.h"
 
 #include "core_diagram.h"
+#include "core_id_generator.h"
 
 namespace esc::core {
+namespace {
+auto FindMaxId(const std::vector<std::shared_ptr<IFamily>>& families,
+               const Diagram& diagram) {
+  auto max_id = uintptr_t{1};
+
+  for (const auto& family : families) {
+    max_id = std::max(family->GetId().Get(), max_id);
+  }
+
+  for (const auto& node : diagram.GetNodes()) {
+    max_id = std::max(node->GetId().Get(), max_id);
+
+    for (const auto pin_id : core::GetAllPinIds(*node)) {
+      max_id = std::max(pin_id.Get(), max_id);
+    }
+  }
+
+  for (const auto& link : diagram.GetLinks()) {
+    max_id = std::max(link.id.Get(), max_id);
+  }
+
+  return max_id;
+}
+}  // namespace
+
 Project::Project(std::vector<std::shared_ptr<IFamily>> families,
                  Diagram diagram, const Settings& settings)
-    : families_{std::move(families)},
+    : id_generator_{FindMaxId(families, diagram) + 1},
+      families_{std::move(families)},
       diagram_{std::move(diagram)},
       settings_{settings} {
   if (!families_.empty()) {
@@ -20,6 +47,13 @@ Project::Project(std::vector<std::shared_ptr<IFamily>> families,
   // placeholder_family_ = placeholder_family;
   // families_.emplace_back(std::move(placeholder_family));
 }
+
+auto Project::GetIdGenerator() const -> const IdGenerator& {
+  // NOLINTNEXTLINE(*-const-cast)
+  return const_cast<Project*>(this)->GetIdGenerator();
+}
+
+auto Project::GetIdGenerator() -> IdGenerator& { return id_generator_; }
 
 auto Project::GetFamilies() const
     -> const std::vector<std::shared_ptr<IFamily>>& {

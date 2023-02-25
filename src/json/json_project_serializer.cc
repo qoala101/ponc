@@ -1,6 +1,9 @@
 #include "json_project_serializer.h"
 
+#include <cstdint>
+
 #include "core_project.h"
+#include "crude_json.h"
 #include "json_diagram_serializer.h"
 #include "json_i_family_writer.h"
 #include "json_setings_serializer.h"
@@ -50,7 +53,7 @@ auto ProjectSerializer::ParseFromJson(
     -> core::Project {
   auto families = ParseFamilies(json, family_parsers);
   auto diagram = DiagramSerializer::ParseFromJson(json["diagram"], families);
-  auto settings = SettingsSerializer::ParseFromJson(json["settings"]);
+  const auto settings = SettingsSerializer::ParseFromJson(json["settings"]);
   return core::Project{std::move(families), std::move(diagram), settings};
 }
 

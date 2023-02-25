@@ -3,6 +3,7 @@
 
 #include "core_diagram.h"
 #include "core_i_family.h"
+#include "core_id_generator.h"
 #include "core_settings.h"
 
 namespace esc::core {
@@ -11,6 +12,8 @@ class Project {
   explicit Project(std::vector<std::shared_ptr<IFamily>> families = {},
                    Diagram diagram = Diagram{}, const Settings &settings = {});
 
+  auto GetIdGenerator() const -> const IdGenerator &;
+  auto GetIdGenerator() -> IdGenerator &;
   auto GetFamilies() const -> const std::vector<std::shared_ptr<IFamily>> &;
   auto GetDiagram() const -> const Diagram &;
   auto GetDiagram() -> Diagram &;
@@ -18,6 +21,7 @@ class Project {
   auto GetSettings() -> Settings &;
 
  private:
+  IdGenerator id_generator_;
   std::vector<std::shared_ptr<IFamily>> families_{};
   Diagram diagram_{};
   Settings settings_{};

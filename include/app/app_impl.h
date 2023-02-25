@@ -14,16 +14,9 @@ class AppImpl {
 
   void OnFrame();
 
-  //   // auto GetFreePinFamily  () const -> FreePinFamily &;
-  //   // auto GetPlaceholderFamily  () const -> PlaceholderFamily
-  //   &;
-
  private:
-  core::IdGenerator id_generator_{};
   core::Project project_{};
-  draw::MainWindow widgets_;
-  //   // std::weak_ptr<FreePinFamily> free_pin_family_{};
-  //   // std::weak_ptr<PlaceholderFamily> placeholder_family_{};
+  draw::MainWindow main_window_{};
 };
 }  // namespace esc
 

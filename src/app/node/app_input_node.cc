@@ -142,9 +142,9 @@ class Family : public core::IFamily,
   auto CreateNode(core::IdGenerator& id_generator)
       -> std::shared_ptr<core::INode> override {
     return std::make_shared<Node>(core::INode::ConstructorArgs{
-        .id = id_generator.GetNext<ne::NodeId>(),
+        .id = id_generator.Generate<ne::NodeId>(),
         .family_id = GetId(),
-        .output_pin_ids = id_generator.GetNextN<ne::PinId>(1)});
+        .output_pin_ids = id_generator.GenerateN<ne::PinId>(1)});
   }
 
   auto CreateNodeParser() -> std::unique_ptr<json::INodeParser> override {

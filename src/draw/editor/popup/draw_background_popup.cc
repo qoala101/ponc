@@ -40,7 +40,7 @@ namespace {
 //         drawing_state_.connect_new_node_to_existing_pin_id
 //             .has_value()) {
 //   AddLinkFromPinToNode(
-//       (*state_)->id_generator_.GetNext<ne::LinkId>(),
+//       (*state_)->id_generator_.Generate<ne::LinkId>(),
 //       *drawing_state_.connect_new_node_to_existing_pin_id,
 //       new_node);
 // }

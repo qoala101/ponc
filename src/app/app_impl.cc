@@ -3,14 +3,16 @@
 #include "app_attenuator_node.h"
 #include "app_input_node.h"
 #include "core_family_id.h"
+#include "core_id_generator.h"
 #include "draw_main_window.h"
 #include "frame_node.h"
 
 namespace esc {
 AppImpl::AppImpl(const Textures &textures)
-    : project_{[&id_generator = id_generator_]() {
+    : project_{[]() {
+        auto id_generator = core::IdGenerator{};
         auto families = std::vector<std::shared_ptr<core::IFamily>>{
-            InputNode::CreateFamily(id_generator.GetNext<core::FamilyId>())
+            InputNode::CreateFamily(id_generator.Generate<core::FamilyId>())
             // , ClientNode::CreateFamily()
         };
 
@@ -24,13 +26,13 @@ AppImpl::AppImpl(const Textures &textures)
         // }
 
         families.emplace_back(AttenuatorNode::CreateFamily(
-            id_generator.GetNext<core::FamilyId>()));
+            id_generator.Generate<core::FamilyId>()));
 
         return families;
       }()} {}
 
 void AppImpl::OnFrame() {
-  auto frame = frame::Frame{id_generator_, project_};
-  widgets_.Draw(frame);
+  auto frame = frame::Frame{project_};
+  main_window_.Draw(frame);
 }
 }  // namespace esc

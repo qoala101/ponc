@@ -166,7 +166,7 @@ auto FreePinFamily::CreateUiTraits() -> std::unique_ptr<coreui::IFamilyTraits> {
 auto FreePinFamily::CreateNodeFromFlow(IdGenerator& id_generator,
                                        ne::PinId pin_id, bool has_input_pin)
     -> std::unique_ptr<INode> {
-  return std::make_shared<Node>(id_generator.GetNext<ne::NodeId>(), GetId(),
+  return std::make_shared<Node>(id_generator.Generate<ne::NodeId>(), GetId(),
                                 std::vector<ne::PinId>{pin_id}, has_input_pin);
 }
 
