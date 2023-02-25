@@ -1,9 +1,12 @@
 #include "draw_node_editor.h"
 
+#include <functional>
+
 #include "cpp_scope.h"
 #include "draw_links.h"
 #include "draw_main_window.h"
 #include "draw_nodes.h"
+#include "imgui_node_editor.h"
 
 namespace esc::draw {
 NodeEditor::NodeEditor() : editor_context_{ne::CreateEditor()} {
@@ -13,59 +16,79 @@ NodeEditor::NodeEditor() : editor_context_{ne::CreateEditor()} {
 NodeEditor::~NodeEditor() { ne::DestroyEditor(editor_context_); }
 
 void NodeEditor::Draw(coreui::Frame &frame) {
-  const auto node_editor_scope =
-      cpp::Scope{[]() { ne::Begin("Node editor"); }, []() { ne::End(); }};
+  ne::Begin("Node editor");
 
   // draw::DrawGroups(state);
-  creation.Draw(frame);
-  nodes.Draw(frame);
-  DrawLinks(frame.links, frame.curve);
+  creation.Draw(frame.GetCreation1(),
+                std::bind_front(&NodeEditor::SlotCreateCurrentLink, this),
+                std::bind_front(&NodeEditor::SlotCreateConnectedNode, this));
+  DrawNodes(frame.GetNodes1());
+  DrawLinks(frame.GetLinks1());
   // draw::DrawDeleteItemsProcess(state);
   DrawShowPopupProcess(frame);
   DrawPopupContents(frame);
+
+  ne::End();
 }
-
-auto NodeEditor::GetCreation() const -> const Creation & { return creation; }
-
-auto NodeEditor::GetNodes() const -> const Nodes & { return nodes; }
 
 void NodeEditor::DrawShowPopupProcess(coreui::Frame &frame) {
   const auto popup_position = ImGui::GetMousePos();
 
-  {
-    const auto suspend_scope =
-        cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
+  ne::Suspend();
+  const auto resume_scope = cpp::Scope{[]() { ne::Resume(); }};
 
-    if (ne::ShowBackgroundContextMenu()) {
-      background_popup.SetPosition(popup_position);
-      background_popup.Show();
-      return;
-    }
+  if (ne::ShowBackgroundContextMenu()) {
+    background_popup.SetPosition(popup_position);
+    background_popup.Show();
+    return;
+  }
 
-    auto popup_node_id = ne::NodeId{};
+  auto popup_node_id = ne::NodeId{};
 
-    if (ne::ShowNodeContextMenu(&popup_node_id)) {
-      node_popup.SetNodeId(popup_node_id);
-      node_popup.Show();
-      return;
-    }
+  if (ne::ShowNodeContextMenu(&popup_node_id)) {
+    node_popup.SetNodeId(popup_node_id);
+    node_popup.Show();
+    return;
+  }
 
-    auto popup_link_id = ne::LinkId{};
+  auto popup_link_id = ne::LinkId{};
 
-    if (ne::ShowLinkContextMenu(&popup_link_id)) {
-      link_popup.SetLinkId(popup_link_id);
-      link_popup.Show();
-      return;
-    }
+  if (ne::ShowLinkContextMenu(&popup_link_id)) {
+    link_popup.SetLinkId(popup_link_id);
+    link_popup.Show();
+    return;
   }
 }
 
 void NodeEditor::DrawPopupContents(coreui::Frame &frame) {
-  const auto suspend_scope =
-      cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
+  background_popup.Draw(frame.GetProject().GetFamilies(),
+                        std::bind_front(&NodeEditor::SlotCreateNode, frame));
+  node_popup.Draw();
+  link_popup.Draw(std::bind_front(&NodeEditor::SlotDeleteLink, frame));
+  creation_popup.Draw(frame);
+}
 
-  background_popup.Draw(frame);
-  node_popup.Draw(frame);
-  link_popup.Draw(frame);
+void NodeEditor::SlotCreateCurrentLink() {}
+
+void NodeEditor::SlotCreateConnectedNode(const ImVec2 &new_node_pos,
+                                         ne::PinId connect_to_pin) {
+  ne::Suspend();
+
+  creation_popup.SetPosition(new_node_pos);
+  creation_popup.SetDraggedFromPin(connect_to_pin);
+  creation_popup.Show();
+
+  ne::Resume();
+}
+
+void NodeEditor::SlotCreateNode(coreui::Frame &frame,
+                                const std::shared_ptr<core::IFamily> &family,
+                                const ImVec2 &pos) {
+  frame.EmplaceNode(family->CreateNode(frame.GetProject().GetIdGenerator()),
+                    pos);
+}
+
+void NodeEditor::SlotDeleteLink(coreui::Frame &frame, ne::LinkId link_id) {
+  frame.DeleteLink(link_id);
 }
 }  // namespace esc::draw

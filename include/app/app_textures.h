@@ -1,11 +1,11 @@
 #ifndef VH_APP_TEXTURES_H_
 #define VH_APP_TEXTURES_H_
 
-#include "draw_texture.h"
+#include "coreui_texture.h"
 
 namespace esc {
 struct Textures {
-  draw::Texture node_header{};
+  coreui::Texture node_header{};
 };
 }  // namespace esc
 

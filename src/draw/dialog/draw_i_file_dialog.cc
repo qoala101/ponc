@@ -3,14 +3,14 @@
 namespace esc::draw {
 void IFileDialog::Show() { dialog_.Open(); }
 
-void IFileDialog::Draw(coreui::Frame &frame) {
+void IFileDialog::Draw(const SignalFileSelected &signal_file_selected) {
   dialog_.Display();
 
   if (!dialog_.HasSelected()) {
     return;
   }
 
-  OnFileSelected(frame, dialog_.GetSelected().string());
+  signal_file_selected(dialog_.GetSelected().string());
   dialog_.ClearSelected();
 }
 

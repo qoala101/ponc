@@ -7,9 +7,15 @@ void LinkPopup::SetLinkId(ne::LinkId link_id) { link_id_ = link_id; }
 
 auto LinkPopup::GetLabel() const -> std::string { return "Link"; }
 
-void LinkPopup::DrawItems(coreui::Frame &frame) {
+void LinkPopup::Draw(const SignalDeleteLink &signal_delete_link) {
+  const auto [is_visible, content_scope] = DrawContentScope();
+
+  if (!is_visible) {
+    return;
+  }
+
   if (ImGui::MenuItem("Delete")) {
-    frame.DeleteLink(link_id_);
+    signal_delete_link(link_id_);
   }
 }
 }  // namespace esc::draw

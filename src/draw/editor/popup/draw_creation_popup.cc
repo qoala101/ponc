@@ -1,3 +1,5 @@
+#include "draw_creation_popup.h"
+
 #include <cstdint>
 #include <iostream>
 #include <limits>
@@ -13,7 +15,6 @@
 #include "core_project.h"
 #include "coreui_i_family_traits.h"
 #include "cpp_assert.h"
-#include "draw_creation_popup.h"
 #include "draw_id_label.h"
 #include "frame_node.h"
 #include "imgui_node_editor.h"
@@ -29,7 +30,13 @@ void CreationPopup::SetDraggedFromPin(ne::PinId pin_id) {
   dragged_from_pin_ = pin_id;
 }
 
-void CreationPopup::DrawItems(coreui::Frame& frame) {
+void CreationPopup::Draw(coreui::Frame& frame) {
+  const auto [is_visible, content_scope] = DrawContentScope();
+
+  if (!is_visible) {
+    return;
+  }
+
   const auto& families = frame.GetProject().GetFamilies();
 
   const auto dragged_from_node =
@@ -75,7 +82,7 @@ void CreationPopup::DrawItems(coreui::Frame& frame) {
       if (ImGui::MenuItem(
               IdLabel(family->CreateUiTraits()->GetLabel(), family->GetId())
                   .c_str())) {
-        auto new_node = family->CreateNode(frame.GetIdGenerator());
+        auto new_node = family->CreateNode(frame.GetProject().GetIdGenerator());
         auto connect_to_pin_id = ne::PinId{};
 
         if (dragged_from_pin_kind == ne::PinKind::Input) {

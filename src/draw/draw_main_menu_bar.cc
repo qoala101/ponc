@@ -2,6 +2,8 @@
 
 #include <imgui.h>
 
+#include <functional>
+
 #include "core_project.h"
 #include "cpp_scope.h"
 #include "draw_main_window.h"
@@ -12,6 +14,14 @@
 
 namespace esc::draw {
 namespace {
+auto AsLowerCase(std::string text) {
+  for (auto &character : text) {
+    character = static_cast<char>(std::tolower(character));
+  }
+
+  return text;
+}
+
 void DrawViewMenuItem(auto &view) {
   const auto visible = view.IsVisible();
 
@@ -23,9 +33,6 @@ void DrawViewMenuItem(auto &view) {
 
 void MainMenuBar::Draw(coreui::Frame &frame) {
   if (ImGui::BeginMainMenuBar()) {
-    const auto main_menu_bar_scope =
-        cpp::Scope{[]() { ImGui::EndMainMenuBar(); }};
-
     DrawFileMenu(frame);
     DrawViewsMenu(frame);
 
@@ -38,13 +45,13 @@ void MainMenuBar::Draw(coreui::Frame &frame) {
         ne::Flow(link.id);
       }
     }
+
+    ImGui::EndMainMenuBar();
   }
 }
 
 void MainMenuBar::DrawFileMenu(coreui::Frame &frame) {
   if (ImGui::BeginMenu("File")) {
-    const auto menu_scope = cpp::Scope{[]() { ImGui::EndMenu(); }};
-
     if (ImGui::MenuItem("Open...", nullptr)) {
       open_file_dialog.Show();
     }
@@ -58,27 +65,45 @@ void MainMenuBar::DrawFileMenu(coreui::Frame &frame) {
     if (ImGui::MenuItem("Reset")) {
       // frame.ResetDiagram{});
     }
+
+    ImGui::EndMenu();
   }
 
-  open_file_dialog.Draw(frame);
-  save_as_file_dialog.Draw(frame);
+  open_file_dialog.Draw(
+      std::bind_front(&MainMenuBar::SlotOpenFileSelected, frame));
+  save_as_file_dialog.Draw(
+      std::bind_front(&MainMenuBar::SlotSaveAsFileSelected, frame));
 }
 
 void MainMenuBar::DrawViewsMenu(coreui::Frame &frame) {
   if (ImGui::BeginMenu("Views")) {
-    const auto menu_scope = cpp::Scope{[]() { ImGui::EndMenu(); }};
-
     // DrawViewMenuItem(state.draw_state->families_view_);
     // DrawViewMenuItem(state.draw_state->flow_tree_view_);
     // DrawViewMenuItem(state.draw_state->groups_view_);
     // DrawViewMenuItem(state.draw_state->group_settings_view_);
     DrawViewMenuItem(settings_view);
+    ImGui::EndMenu();
   }
 
   // state.draw_state->families_view_.Draw(state);
   // state.draw_state->flow_tree_view_.Draw(state);
   // state.draw_state->groups_view_.Draw(state);
   // state.draw_state->group_settings_view_.Draw(state);
-  settings_view.Draw(frame);
+  settings_view.Draw(frame.GetProject().GetSettings());
+}
+
+void MainMenuBar::SlotOpenFileSelected(coreui::Frame &frame,
+                                       std::string file_path) {
+  frame.OpenProjectFromFile(std::move(file_path));
+}
+
+void MainMenuBar::SlotSaveAsFileSelected(coreui::Frame &frame,
+                                         std::string file_path) {
+  if (const auto not_json_extension =
+          !AsLowerCase(file_path).ends_with(".json")) {
+    file_path += ".json";
+  }
+
+  frame.SaveProjectToFile(std::move(file_path));
 }
 }  // namespace esc::draw

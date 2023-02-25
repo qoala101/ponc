@@ -1,4 +1,6 @@
+#include <cstdint>
 #include <memory>
+#include <unordered_map>
 #include <variant>
 #include <vector>
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -16,11 +18,11 @@
 
 namespace esc::draw {
 namespace {
-void DrawPinField_v2(const coreui::Pin& pin) {
-  const auto spring_scope =
-      cpp::Scope{[]() { ImGui::Spring(0); }, []() { ImGui::Spring(0); }};
-
+void DrawPinField(const coreui::Pin& pin) {
   const auto label = pin.label;
+
+  ImGui::Spring(0);
+  const auto spring_scope = cpp::Scope{[]() { ImGui::Spring(0); }};
 
   if (std::holds_alternative<std::monostate>(pin.value)) {
     ImGui::TextUnformatted(label.c_str());
@@ -39,15 +41,32 @@ void DrawPinField_v2(const coreui::Pin& pin) {
   ImGui::SetNextItemWidth(100);
   ImGui::InputFloat(label.c_str(), float_value, 0.F, 0.F, "%.3f");
 }
-}  // namespace
 
-void Nodes::Draw(coreui::Frame& frame) {
-  for (const auto& node : frame.nodes) {
-    DrawNode_v2(frame, node);
+auto DrawPinIconArea(const coreui::Pin& pin) -> std::optional<ImRect> {
+  const auto pin_id = pin.id;
+  auto area_size = ImVec2{24, 24};
+
+  if (!pin_id.has_value()) {
+    if (std::holds_alternative<float*>(pin.value)) {
+      area_size.x -= 4;
+    }
+
+    ImGui::Dummy(area_size);
+    return std::nullopt;
   }
+
+  if (!ImGui::IsRectVisible(area_size)) {
+    return std::nullopt;
+  }
+
+  DrawFlowIcon(area_size, pin.color, pin.filled);
+  ImGui::Dummy(area_size);
+
+  return ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
 }
 
-void Nodes::DrawNode_v2(coreui::Frame& frame, const coreui::Node& node) {
+auto DrawNode(const coreui::Node& node) {
+  auto pin_rects = std::unordered_map<uintptr_t, ImRect>{};
   int layout_id_{};
 
   const auto node_id_ = node.id;
@@ -58,7 +77,7 @@ void Nodes::DrawNode_v2(coreui::Frame& frame, const coreui::Node& node) {
   ImGui::BeginVertical("node");
 
   struct Header {
-    draw::Texture texture{};
+    coreui::Texture texture{};
     ImColor color{};
     ImRect rect{};
   };
@@ -112,8 +131,13 @@ void Nodes::DrawNode_v2(coreui::Frame& frame, const coreui::Node& node) {
         ImGui::BeginHorizontal(layout_id_++);
       }
 
-      DrawPinIconArea_v2(frame, pin_drawer);
-      DrawPinField_v2(pin_drawer);
+      const auto pin_rect = DrawPinIconArea(pin_drawer);
+
+      if (id.has_value() && pin_rect.has_value()) {
+        pin_rects.emplace(*id, *pin_rect);
+      }
+
+      DrawPinField(pin_drawer);
 
       ImGui::EndHorizontal();
 
@@ -152,8 +176,13 @@ void Nodes::DrawNode_v2(coreui::Frame& frame, const coreui::Node& node) {
         ImGui::BeginHorizontal(layout_id_++);
       }
 
-      DrawPinField_v2(pin_drawer);
-      DrawPinIconArea_v2(frame, pin_drawer);
+      DrawPinField(pin_drawer);
+
+      const auto pin_rect = DrawPinIconArea(pin_drawer);
+
+      if (id.has_value() && pin_rect.has_value()) {
+        pin_rects.emplace(*id, *pin_rect);
+      }
 
       ImGui::EndHorizontal();
 
@@ -202,29 +231,22 @@ void Nodes::DrawNode_v2(coreui::Frame& frame, const coreui::Node& node) {
 
   ImGui::PopID();
   ne::PopStyleVar();
+
+  return pin_rects;
 }
+}  // namespace
 
-void Nodes::DrawPinIconArea_v2(coreui::Frame& frame, const coreui::Pin& pin) {
-  const auto pin_id = pin.id;
-  auto area_size = ImVec2{24, 24};
+void DrawNodes(coreui::Nodes& nodes) {
+  auto pin_rects = std::unordered_map<uintptr_t, ImRect>{};
 
-  if (!pin_id.has_value()) {
-    if (std::holds_alternative<float*>(pin.value)) {
-      area_size.x -= 4;
+  for (const auto& node : nodes.nodes) {
+    const auto node_pin_rects = DrawNode(node);
+
+    for (const auto& [pin, rect] : node_pin_rects) {
+      pin_rects.emplace(pin, rect);
     }
-
-    ImGui::Dummy(area_size);
-    return;
   }
 
-  if (!ImGui::IsRectVisible(area_size)) {
-    return;
-  }
-
-  DrawFlowIcon(area_size, pin.color, pin.filled);
-  ImGui::Dummy(area_size);
-
-  frame.drawn_pin_icon_rects_[pin_id->Get()] =
-      ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
+  nodes.pin_rects = std::move(pin_rects);
 }
 }  // namespace esc::draw

@@ -7,10 +7,6 @@ namespace esc::draw {
 class SaveAsFileDialog : public IFileDialog {
  public:
   SaveAsFileDialog();
-
- private:
-  void OnFileSelected(coreui::Frame &frame,
-                      std::string file_path) const override;
 };
 }  // namespace esc::draw
 

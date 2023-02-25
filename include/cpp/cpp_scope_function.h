@@ -3,10 +3,12 @@
 
 #include <functional>
 
+#include "cpp_scope.h"
+
 namespace esc::cpp {
 class ScopeFunction {
  public:
-  explicit ScopeFunction(std::function<void()> end);
+  explicit ScopeFunction(std::function<void()> end = detail::EmptyFunction{});
 
   ScopeFunction(const ScopeFunction&) = delete;
   ScopeFunction(ScopeFunction&&) noexcept = default;

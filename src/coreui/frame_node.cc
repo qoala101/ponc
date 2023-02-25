@@ -1,5 +1,6 @@
 #include "frame_node.h"
 
+#include <functional>
 #include <variant>
 #include <vector>
 
@@ -87,7 +88,7 @@ auto GetColorForFlowValue(float value, const core::Settings& settings)
                      percentage * (end_color.Value.z - start_color.Value.z)};
 }
 
-auto FindFixedPin(const core::Project& project, const NewLink& new_link)
+auto FindFixedPin(const core::Project& project, const Creation& new_link)
     -> std::optional<ne::PinId> {
   const auto dragged_from_pin_ = new_link.dragged_from_pin_;
 
@@ -109,7 +110,7 @@ auto FindFixedPin(const core::Project& project, const NewLink& new_link)
   return (*link_to_repin)->start_pin_id;
 }
 
-auto GetLinks(const core::Project& project, const NewLink& new_link) {
+auto GetLinks(const core::Project& project, const Creation& new_link) {
   const auto& diagram = project.GetDiagram();
   const auto fixed_pin = FindFixedPin(project, new_link);
 
@@ -129,8 +130,8 @@ auto GetLinks(const core::Project& project, const NewLink& new_link) {
 
     auto& link_data = links.emplace_back();
     link_data.id = link.id;
-    link_data.start_pin_id = link.start_pin_id;
-    link_data.end_pin_id = link.end_pin_id;
+    link_data.start_pin = link.start_pin_id;
+    link_data.end_pin = link.end_pin_id;
     link_data.color = color;
     link_data.thickness = 2.F;
   }
@@ -152,7 +153,7 @@ auto GetPinKind(const coreui::IPinTraits& pin_drawer, const core::INode& node) {
 }
 
 auto GetCanConnectToPinReason(ne::PinId pin_id, const core::Project& project,
-                              const NewLink& new_link)
+                              const Creation& new_link)
     -> std::pair<bool, std::string> {
   const auto& diagram = project.GetDiagram();
   const auto dragged_from_pin_ = new_link.dragged_from_pin_;
@@ -208,12 +209,12 @@ auto GetCanConnectToPinReason(ne::PinId pin_id, const core::Project& project,
 }
 
 auto CanConnectToPin(ne::PinId pin_id, const core::Project& project,
-                     const NewLink& new_link) -> bool {
+                     const Creation& new_link) -> bool {
   return GetCanConnectToPinReason(pin_id, project, new_link).first;
 }
 
 auto GetPinIconAlpha(ne::PinId pin_id, const core::Project& project,
-                     const NewLink& new_link) {
+                     const Creation& new_link) {
   auto alpha = 1.F;
 
   if (const auto creating_new_link = new_link.dragged_from_pin_.has_value()) {
@@ -225,7 +226,7 @@ auto GetPinIconAlpha(ne::PinId pin_id, const core::Project& project,
   return alpha;
 }
 
-auto GetNodes(const core::Project& project, const NewLink& new_link) {
+auto GetNodes(const core::Project& project, const Creation& new_link) {
   auto nodes = std::vector<Node>{};
   const auto& diagram = project.GetDiagram();
   const auto flow_tree = flow::BuildFlowTree(project.GetDiagram());
@@ -285,9 +286,9 @@ auto GetNodes(const core::Project& project, const NewLink& new_link) {
 }
 
 auto GetCurve(
-    const core::Project& project, const NewLink& new_link,
+    const core::Project& project, const Creation& new_link,
     const std::unordered_map<uintptr_t, ImRect>& drawn_pin_icon_rects_)
-    -> std::optional<Curve> {
+    -> std::optional<ArtificialLink> {
   const auto& diagram = project.GetDiagram();
   const auto fixed_pin = FindFixedPin(project, new_link);
 
@@ -295,20 +296,19 @@ auto GetCurve(
     return std::nullopt;
   }
 
-  auto curve = Curve{.color = ImColor{1.F, 1.F, 1.F}, .thickness = 4.F};
+  auto curve =
+      ArtificialLink{.color = ImColor{1.F, 1.F, 1.F}, .thickness = 4.F};
 
   const auto fixed_pin_rect = drawn_pin_icon_rects_.at(fixed_pin->Get());
   const auto fixed_pin_node = FindPinNode(diagram, *fixed_pin);
   const auto fixed_pin_kind = core::GetPinKind(*fixed_pin_node, *fixed_pin);
 
   if (fixed_pin_kind == ax::NodeEditor::PinKind::Input) {
-    curve.end_position =
-        ImVec2{fixed_pin_rect.Min.x,
-               (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y) / 2};
+    curve.end_pos = ImVec2{fixed_pin_rect.Min.x,
+                           (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y) / 2};
   } else {
-    curve.start_position =
-        ImVec2{fixed_pin_rect.Max.x,
-               (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y) / 2};
+    curve.start_pos = ImVec2{fixed_pin_rect.Max.x,
+                             (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y) / 2};
   }
 
   if (const auto hovering_over_pin = new_link.hovering_over_pin_) {
@@ -322,63 +322,13 @@ auto GetCurve(
   return curve;
 }
 
-auto GetAlphaForNewLink(const core::Project& project, const NewLink& new_link)
+auto GetAlphaForNewLink(const core::Project& project, const Creation& new_link)
     -> float {
   if (FindFixedPin(project, new_link).has_value()) {
     return 0.F;
   }
 
   return 1.F;
-}
-
-auto GetCreation(const core::Project& project, const NewLink& new_link)
-    -> std::optional<Creation> {
-  if (!new_link.dragged_from_pin_.has_value()) {
-    return std::nullopt;
-  }
-
-  const auto hovering_over_pin_ = new_link.hovering_over_pin_;
-
-  if (!hovering_over_pin_.has_value()) {
-    return std::nullopt;
-  }
-  const auto& [can_connect, reason] =
-      GetCanConnectToPinReason(*hovering_over_pin_, project, new_link);
-
-  auto creation = Creation{.can_connect = can_connect, .reason = reason};
-
-  const auto& diagram = project.GetDiagram();
-  const auto hovering_over_node = FindPinNode(diagram, *hovering_over_pin_);
-  const auto hovering_over_pin_kind =
-      core::GetPinKind(*hovering_over_node, *hovering_over_pin_);
-
-  if (const auto fixed_pin = FindFixedPin(project, new_link)) {
-    const auto link_to_repin = core::FindPinLink(diagram, *fixed_pin);
-    Expects(link_to_repin.has_value());
-
-    creation.delete_link = (*link_to_repin)->id;
-
-    if (hovering_over_pin_kind == ne::PinKind::Input) {
-      creation.start_pin_id = *fixed_pin;
-      creation.end_pin_id = *hovering_over_pin_;
-    } else {
-      creation.start_pin_id = *hovering_over_pin_;
-      creation.end_pin_id = *fixed_pin;
-    }
-  } else {
-    const auto dragged_from_pin_ = new_link.dragged_from_pin_;
-    Expects(dragged_from_pin_.has_value());  // why?
-
-    if (hovering_over_pin_kind == ne::PinKind::Input) {
-      creation.start_pin_id = *dragged_from_pin_;
-      creation.end_pin_id = *hovering_over_pin_;
-    } else {
-      creation.start_pin_id = *hovering_over_pin_;
-      creation.end_pin_id = *dragged_from_pin_;
-    }
-  }
-
-  return creation;
 }
 
 // auto CreateFamilies() {
@@ -411,13 +361,73 @@ auto CreateFamilyParsers() {
 }
 }  // namespace
 
-Frame::Frame(core::Project& project)
-    : nodes{GetNodes(project, new_link)},
-      links{GetLinks(project, new_link)},
-      curve{GetCurve(project, new_link, drawn_pin_icon_rects_)},
-      creation_alpha{GetAlphaForNewLink(project, new_link)},
-      creation{GetCreation(project, new_link)},
-      project_{project} {}
+void Creation::SetPins(ne::PinId dragged_from_pin,
+                       const std::optional<ne::PinId>& hovering_over_pin) {
+  Expects(!dragged_from_pin_.has_value());
+  Expects(!hovering_over_pin_.has_value());
+
+  dragged_from_pin_ = dragged_from_pin;
+  Ensures(dragged_from_pin_.has_value());
+
+  if (!hovering_over_pin_.has_value()) {
+    return;
+  }
+
+  hovering_over_pin_ = hovering_over_pin;
+
+  const auto& [can_connect, reason] =
+      GetCanConnectToPinReason(*hovering_over_pin_, frame_->GetProject(), *this);
+
+  this->can_connect = can_connect;
+  this->reason = reason;
+
+  const auto& diagram = frame_->GetProject().GetDiagram();
+  const auto hovering_over_node = FindPinNode(diagram, *hovering_over_pin_);
+  const auto hovering_over_pin_kind =
+      core::GetPinKind(*hovering_over_node, *hovering_over_pin_);
+
+  if (const auto fixed_pin = FindFixedPin(frame_->GetProject(), *this)) {
+    const auto link_to_repin = core::FindPinLink(diagram, *fixed_pin);
+    Expects(link_to_repin.has_value());
+
+    delete_link = (*link_to_repin)->id;
+
+    if (hovering_over_pin_kind == ne::PinKind::Input) {
+      start_pin_id = *fixed_pin;
+      end_pin_id = *hovering_over_pin_;
+    } else {
+      start_pin_id = *hovering_over_pin_;
+      end_pin_id = *fixed_pin;
+    }
+  } else {
+    Expects(dragged_from_pin_.has_value());  // why?
+
+    if (hovering_over_pin_kind == ne::PinKind::Input) {
+      start_pin_id = *dragged_from_pin_;
+      end_pin_id = *hovering_over_pin_;
+    } else {
+      start_pin_id = *hovering_over_pin_;
+      end_pin_id = *dragged_from_pin_;
+    }
+  }
+}
+
+void Creation::CreateCurrentLink() {
+  if (delete_link.has_value()) {
+    frame_->DeleteLink(*delete_link);
+  }
+
+  frame_->CreateLink(start_pin_id, end_pin_id);
+}
+
+// void Creation::CreateCurrentNode(std::shared_ptr<core::IFamily> family);
+
+Frame::Frame(core::Project* project)
+    : project_{project},
+      creation{.frame_ = this},
+      nodes{GetNodes(*project_, creation)},
+      links{GetLinks(*project_, creation),
+            GetCurve(*project_, creation, nodes.pin_rects)} {}
 
 Frame::~Frame() {
   for (const auto& event : events_) {
@@ -425,23 +435,34 @@ Frame::~Frame() {
   }
 }
 
-auto Frame::GetProject() -> core::Project& { return project_; }
-
-auto Frame::GetIdGenerator() -> core::IdGenerator& {
-  return project_.GetIdGenerator();
+auto Frame::GetCreation1() -> Creation & {
+  return creation;
 }
+
+auto Frame::GetNodes1() -> Nodes & {
+  nodes.nodes = GetNodes(*project_, creation);
+  return nodes;
+}
+
+auto Frame::GetLinks1() -> Links & {
+  links.links = GetLinks(*project_, creation);
+  links.artificial_link = GetCurve(*project_, creation, nodes.pin_rects);
+  return links;
+}
+
+auto Frame::GetProject() -> core::Project& { return *project_; }
 
 void Frame::OpenProjectFromFile(std::string file_path) {
   events_.emplace_back([this, file_path = std::move(file_path)]() {
     const auto json = crude_json::value::load(file_path).first;
-    project_ =
+    *project_ =
         json::ProjectSerializer::ParseFromJson(json, CreateFamilyParsers());
   });
 }
 
 void Frame::SaveProjectToFile(std::string file_path) {
   events_.emplace_back([this, file_path = std::move(file_path)]() {
-    const auto json = json::ProjectSerializer::WriteToJson(project_);
+    const auto json = json::ProjectSerializer::WriteToJson(*project_);
     json.save(file_path);
   });
 }
@@ -468,25 +489,26 @@ void Frame::SaveProjectToFile(std::string file_path) {
 
 void Frame::EmplaceNode(std::shared_ptr<core::INode> node,
                         const ImVec2& position) {
-  events_.emplace_back([this, node = std::move(node), position]() mutable {
-    const auto& new_node = project_.GetDiagram().EmplaceNode(std::move(node));
+  events_.emplace_back([project = project_, node = std::move(node),
+                        position]() mutable {
+    const auto& new_node = project->GetDiagram().EmplaceNode(std::move(node));
     new_node->SetPosition(position);
   });
 }
 
 void Frame::CreateLink(ne::PinId start_pin_id, ne::PinId end_pin_id) {
-  events_.emplace_back([this, start_pin_id, end_pin_id]() {
-    project_.GetDiagram().EmplaceLink(
-        {.id = project_.GetIdGenerator().Generate<ne::LinkId>(),
+  events_.emplace_back([project = project_, start_pin_id, end_pin_id]() {
+    project->GetDiagram().EmplaceLink(
+        {.id = project->GetIdGenerator().Generate<ne::LinkId>(),
          .start_pin_id = start_pin_id,
          .end_pin_id = end_pin_id});
   });
 }
 
 void Frame::DeleteLink(ne::LinkId link_id) {
-  events_.emplace_back([this, link_id]() {
+  events_.emplace_back([project = project_, link_id]() {
     ne::DeleteLink(link_id);
-    project_.GetDiagram().EraseLink(link_id);
+    project->GetDiagram().EraseLink(link_id);
   });
 }
 

@@ -8,72 +8,55 @@
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
-void Creation::Draw(coreui::Frame& frame) {
+void Creation::Draw(
+    coreui::Creation& creation,
+    const SignalCreateCurrentLink& signal_create_current_link,
+    const SignalCreateConnectedNode& signal_create_connected_node) {
   const auto popup_position = ImGui::GetMousePos();
 
   {
-    const auto create_scope = cpp::Scope{[]() { ne::EndCreate(); }};
-
-    if (ne::BeginCreate(ImColor{1.F, 1.F, 1.F, frame.creation_alpha}, 3.F)) {
+    if (ne::BeginCreate(ImColor{1.F, 1.F, 1.F, creation.creation_alpha}, 3.F)) {
       auto dragged_from_pin = ne::PinId{};
       auto hovering_over_pin = ne::PinId{};
 
       if (ne::QueryNewLink(&dragged_from_pin, &hovering_over_pin)) {
-        frame.new_link.dragged_from_pin_ = dragged_from_pin;
-        frame.new_link.hovering_over_pin_ = hovering_over_pin;
+        creation.dragged_from_pin_ = dragged_from_pin;
+        creation.hovering_over_pin_ = hovering_over_pin;
 
-        if (frame.creation.has_value()) {
-          if (frame.creation->can_connect) {
-            if (!frame.creation->reason.empty()) {
-              DrawTooltip(frame.creation->reason.c_str(),
-                          ImColor{0.F, 1.F / 3, 0.F, 1.F * 3 / 4});
+        const auto& reason = creation.reason;
 
-              if (ne::AcceptNewItem(
-                      ImColor{1.F / 2, 1.F, 1.F / 2, frame.creation_alpha},
-                      4.F)) {
-                if (frame.creation->delete_link.has_value()) {
-                  frame.DeleteLink(*frame.creation->delete_link);
-                }
+        if (creation.can_connect) {
+          if (!reason.empty()) {
+            DrawTooltip(reason.c_str(),
+                        ImColor{0.F, 1.F / 3, 0.F, 1.F * 3 / 4});
 
-                frame.CreateLink(frame.creation->start_pin_id,
-                                 frame.creation->end_pin_id);
-              }
+            if (ne::AcceptNewItem(
+                    ImColor{1.F / 2, 1.F, 1.F / 2, creation.creation_alpha},
+                    4.F)) {
+              signal_create_current_link();
             }
-          } else {
-            DrawTooltip(frame.creation->reason,
-                        ImColor{1.F / 3, 0.F, 0.F, 1.F * 3 / 4});
-            ne::RejectNewItem(
-                ImColor{1.F, 1.F / 2, 1.F / 2, frame.creation_alpha}, 4.F);
           }
+        } else {
+          DrawTooltip(reason, ImColor{1.F / 3, 0.F, 0.F, 1.F * 3 / 4});
+          ne::RejectNewItem(
+              ImColor{1.F, 1.F / 2, 1.F / 2, creation.creation_alpha}, 4.F);
         }
       } else if (ne::QueryNewNode(&dragged_from_pin)) {
-        frame.new_link.dragged_from_pin_ = dragged_from_pin;
-        frame.new_link.hovering_over_pin_.reset();
+        creation.dragged_from_pin_ = dragged_from_pin;
 
         DrawTooltip("Create Node", ImColor{0.F, 1.F / 3, 0.F, 1.F * 3 / 4});
 
         if (ne::AcceptNewItem()) {
-          const auto suspend_scope =
-              cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
-
-          creation_popup.SetPosition(popup_position);
-          creation_popup.SetDraggedFromPin(*frame.new_link.dragged_from_pin_);
-          creation_popup.Show();
+          signal_create_connected_node(popup_position,
+                                       *creation.dragged_from_pin_);
         }
-      } else {
-        frame.new_link.hovering_over_pin_.reset();
       }
-    } else {
-      frame.new_link.dragged_from_pin_.reset();
-      frame.new_link.hovering_over_pin_.reset();
     }
+
+    ne::EndCreate();
   }
 
-  {
-    const auto suspend_scope =
-        cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
-
-    creation_popup.Draw(frame);
-  }
+  dragged_from_pin_ = creation.dragged_from_pin_;
+  hovering_over_pin_ = creation.hovering_over_pin_;
 }
 }  // namespace esc::draw

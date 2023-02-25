@@ -1,7 +1,6 @@
 #include "draw_open_file_dialog.h"
 
 #include "draw_i_file_dialog.h"
-#include "frame_node.h"
 
 namespace esc::draw {
 OpenFileDialog::OpenFileDialog()
@@ -11,9 +10,4 @@ OpenFileDialog::OpenFileDialog()
         dialog.SetTypeFilters({".json"});
         return dialog;
       }()} {}
-
-void OpenFileDialog::OnFileSelected(coreui::Frame &frame,
-                                    std::string file_path) const {
-  frame.OpenProjectFromFile(std::move(file_path));
-}
 }  // namespace esc::draw

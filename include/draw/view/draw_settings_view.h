@@ -13,7 +13,7 @@ class SettingsView : public IHidable {
  public:
   auto GetLabel() const -> std::string;
 
-  void Draw(coreui::Frame &frame);
+  void Draw(core::Settings &settings);
 };
 }  // namespace esc::draw
 

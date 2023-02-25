@@ -1,26 +1,33 @@
 #include "draw_i_popup.h"
 
 #include <imgui.h>
+#include <imgui_node_editor.h>
 
-#include "cpp_scope.h"
-#include "frame_node.h"
+#include "cpp_scope_function.h"
+
+namespace ne = ax::NodeEditor;
 
 namespace esc::draw {
 void IPopup::Show() {
   ImGui::OpenPopup(GetLabel().c_str(), ImGuiPopupFlags_NoOpenOverExistingPopup);
 }
 
-void IPopup::Draw(coreui::Frame &frame) {
+auto IPopup::DrawContentScope() const -> std::pair<bool, cpp::ScopeFunction> {
   const auto label = GetLabel();
   const auto *label_data = label.c_str();
 
-  if (ImGui::BeginPopup(label_data)) {
-    const auto popup_scope = cpp::Scope{[]() { ImGui::EndPopup(); }};
+  ne::Suspend();
 
+  if (ImGui::BeginPopup(label_data)) {
     ImGui::TextUnformatted(label_data);
     ImGui::Separator();
 
-    DrawItems(frame);
+    return {true, cpp::ScopeFunction{[]() {
+              ImGui::EndPopup();
+              ne::Resume();
+            }}};
   }
+
+  return {false, cpp::ScopeFunction{[]() { ne::Resume(); }}};
 }
 }  // namespace esc::draw

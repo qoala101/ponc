@@ -4,24 +4,23 @@
 // clang-format off
 #include <imgui.h>
 #include <imfilebrowser.h>
+#include <functional>
 // clang-format on
 
 #include "cpp_interface.h"
-#include "frame_node.h"
 
 namespace esc::draw {
 class IFileDialog : public cpp::Interface {
  public:
+  using SignalFileSelected = std::function<void(std::string file_path)>;
+
+  void Draw(const SignalFileSelected &signal_file_selected);
   void Show();
-  void Draw(coreui::Frame &frame);
 
  protected:
   explicit IFileDialog(const ImGui::FileBrowser &dialog);
 
  private:
-  virtual void OnFileSelected(coreui::Frame &frame,
-                              std::string file_path) const = 0;
-
   ImGui::FileBrowser dialog_{};
 };
 }  // namespace esc::draw

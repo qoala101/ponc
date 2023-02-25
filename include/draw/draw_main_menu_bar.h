@@ -12,6 +12,9 @@ class MainMenuBar {
   void Draw(coreui::Frame &frame);
 
  private:
+  static void SlotOpenFileSelected(coreui::Frame &frame, std::string file_path);
+  static void SlotSaveAsFileSelected(coreui::Frame &frame, std::string file_path);
+
   void DrawFileMenu(coreui::Frame &frame);
   void DrawViewsMenu(coreui::Frame &frame);
 

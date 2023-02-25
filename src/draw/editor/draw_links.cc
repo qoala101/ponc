@@ -43,10 +43,10 @@ auto GetCurve(const ImVec2& m_Start, const ImVec2& m_End) {
   return result;
 }
 
-void DrawLinkBeingRepinned_v2(const coreui::Curve& curve) {
+void DrawLinkBeingRepinned_v2(const coreui::ArtificialLink& curve) {
   const auto mouse_pos = ImGui::GetMousePos();
-  const auto bezier = GetCurve(curve.start_position.value_or(mouse_pos),
-                               curve.end_position.value_or(mouse_pos));
+  const auto bezier = GetCurve(curve.start_pos.value_or(mouse_pos),
+                               curve.end_pos.value_or(mouse_pos));
 
   auto* draw_list = ImGui::GetWindowDrawList();
   Expects(draw_list != nullptr);
@@ -55,15 +55,13 @@ void DrawLinkBeingRepinned_v2(const coreui::Curve& curve) {
 }
 }  // namespace
 
-void DrawLinks(const std::vector<coreui::Link>& links,
-               const std::optional<coreui::Curve>& curve) {
-  for (const auto& link : links) {
-    ne::Link(link.id, link.start_pin_id, link.end_pin_id, link.color,
-             link.thickness);
+void DrawLinks(const coreui::Links& links) {
+  for (const auto& link : links.links) {
+    ne::Link(link.id, link.start_pin, link.end_pin, link.color, link.thickness);
   }
 
-  if (curve.has_value()) {
-    DrawLinkBeingRepinned_v2(*curve);
+  if (links.artificial_link.has_value()) {
+    DrawLinkBeingRepinned_v2(*links.artificial_link);
   }
 }
 }  // namespace esc::draw

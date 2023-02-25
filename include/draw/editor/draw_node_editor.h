@@ -30,20 +30,25 @@ class NodeEditor {
 
   void Draw(coreui::Frame &frame);
 
-  auto GetCreation() const -> const Creation &;
-
-  auto GetNodes() const -> const Nodes &;
-
  private:
+  static void SlotCreateNode(coreui::Frame &frame,
+                             const std::shared_ptr<core::IFamily> &family,
+                             const ImVec2 &pos);
+  static void SlotDeleteLink(coreui::Frame &frame, ne::LinkId link_id);
+
   void DrawShowPopupProcess(coreui::Frame &frame);
   void DrawPopupContents(coreui::Frame &frame);
+
+  void SlotCreateCurrentLink();
+  void SlotCreateConnectedNode(const ImVec2 &new_node_pos,
+                               ne::PinId connect_to_pin);
 
   ne::EditorContext *editor_context_{};
 
   Creation creation{};
-  Nodes nodes{};
 
   BackgroundPopup background_popup{};
+  CreationPopup creation_popup{};
   NodePopup node_popup{};
   LinkPopup link_popup{};
 };

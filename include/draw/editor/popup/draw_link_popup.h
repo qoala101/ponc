@@ -4,17 +4,20 @@
 #include <imgui_node_editor.h>
 
 #include "draw_i_popup.h"
+#include "frame_node.h"
 
 namespace ne = ax::NodeEditor;
 
 namespace esc::draw {
 class LinkPopup : public IPopup {
  public:
+  using SignalDeleteLink = std::function<void(ne::LinkId link_id)>;
+
+  void Draw(const SignalDeleteLink &signal_delete_link);
   void SetLinkId(ne::LinkId link_id);
 
  private:
   auto GetLabel() const -> std::string override;
-  void DrawItems(coreui::Frame &frame) override;
 
   ne::LinkId link_id_{};
 };

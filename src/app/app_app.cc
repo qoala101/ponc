@@ -1,8 +1,8 @@
 #include "app_app.h"
 
 #include "app_textures.h"
+#include "coreui_texture.h"
 #include "cpp_assert.h"
-#include "draw_texture.h"
 
 namespace esc {
 App::App(const char* name, int argc, char** argv)
@@ -15,7 +15,7 @@ auto App::GetWindowFlags() const -> ImGuiWindowFlags {
 
 auto App::LoadTexture(std::string_view file_path) {
   auto texture =
-      draw::Texture{.id = Application::LoadTexture(file_path.data())};
+      coreui::Texture{.id = Application::LoadTexture(file_path.data())};
   texture.width = GetTextureWidth(texture.id);
   texture.height = GetTextureHeight(texture.id);
   return texture;

@@ -4,17 +4,18 @@
 #include <string>
 
 #include "cpp_interface.h"
-#include "frame_node.h"
+#include "cpp_scope_function.h"
 
 namespace esc::draw {
 class IPopup : public cpp::Interface {
  public:
   void Show();
-  void Draw(coreui::Frame &frame);
+
+ protected:
+  auto DrawContentScope() const -> std::pair<bool, cpp::ScopeFunction>;
 
  private:
   virtual auto GetLabel() const -> std::string = 0;
-  virtual void DrawItems(coreui::Frame &frame) = 0;
 };
 }  // namespace esc::draw
 

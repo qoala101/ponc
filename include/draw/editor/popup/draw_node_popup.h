@@ -10,11 +10,11 @@ namespace ne = ax::NodeEditor;
 namespace esc::draw {
 class NodePopup : public IPopup {
  public:
+  void Draw();
   void SetNodeId(ne::NodeId node_id);
 
  private:
   auto GetLabel() const -> std::string override;
-  void DrawItems(coreui::Frame &frame) override;
 
   ne::NodeId node_id_{};
 };
