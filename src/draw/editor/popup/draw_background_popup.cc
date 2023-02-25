@@ -5,7 +5,7 @@
 
 #include "core_i_family.h"
 #include "core_project.h"
-#include "coreui_i_family_drawer.h"
+#include "coreui_i_family_traits.h"
 #include "draw_id_label.h"
 #include "frame_node.h"
 
@@ -74,7 +74,7 @@ void BackgroundPopup::DrawItems(frame::Frame& frame) {
 
     for (const auto& family : families) {
       if (ImGui::MenuItem(
-              IdLabel(family->CreateDrawer()->GetLabel(), family->GetId())
+              IdLabel(family->CreateUiTraits()->GetLabel(), family->GetId())
                   .c_str())) {
         frame.EmplaceNode(family->CreateNode(frame.GetIdGenerator()),
                           position_);

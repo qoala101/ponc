@@ -8,7 +8,7 @@
 #include "imgui.h"
 
 namespace esc::coreui {
-class IFamilyDrawer : public cpp::Interface {
+class IFamilyTraits : public cpp::Interface {
  public:
   virtual auto GetLabel() const -> std::string = 0;
   virtual auto GetColor() const -> ImColor = 0;

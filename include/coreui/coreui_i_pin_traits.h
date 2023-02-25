@@ -12,7 +12,7 @@
 namespace ne = ax::NodeEditor;
 
 namespace esc::coreui {
-class IPinDrawer : public cpp::Interface {
+class IPinTraits : public cpp::Interface {
  public:
   virtual auto GetLabel() const -> std::string;
   virtual auto GetKind() const -> std::optional<ne::PinKind>;

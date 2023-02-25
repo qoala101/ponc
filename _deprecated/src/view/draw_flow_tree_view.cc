@@ -5,8 +5,8 @@
 
 #include "core_i_family.h"
 #include "core_i_node.h"
-#include "coreui_i_family_drawer.h"
-#include "coreui_i_node_drawer.h"
+#include "coreui_i_family_traits.h"
+#include "coreui_i_node_traits.h"
 #include "cpp_scope.h"
 #include "draw_families_view.h"
 #include "flow_tree.h"
@@ -24,7 +24,7 @@ void DisplayNode(
   ImGui::TableNextRow();
 
   ImGui::TableNextColumn();
-  const auto drawer = tree_node.node->CreateDrawer(state.ToStateNoQueue());
+  const auto drawer = tree_node.node->CreateUiTraits(state.ToStateNoQueue());
 
   const auto node_id = tree_node.node->GetId();
   const auto has_children = !tree_node.child_nodes.empty();
@@ -132,7 +132,7 @@ void FlowTreeView::Draw(frame::Frame& frame) {
 
         for (const auto& family : families) {
           ImGui::TableSetupColumn(
-              std::string{family->CreateDrawer()->GetLabel() + " #"}.c_str());
+              std::string{family->CreateUiTraits()->GetLabel() + " #"}.c_str());
         }
 
         ImGui::TableHeadersRow();

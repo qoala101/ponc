@@ -21,7 +21,7 @@ class INodeWriter;
 }  // namespace json
 
 namespace coreui {
-class INodeDrawer;
+class INodeTraits;
 }  // namespace coreui
 
 namespace core {
@@ -36,7 +36,7 @@ class INode : public cpp::Interface {
 
   virtual auto CreateWriter() -> std::unique_ptr<json::INodeWriter> = 0;
 
-  virtual auto CreateDrawer() -> std::unique_ptr<coreui::INodeDrawer> = 0;
+  virtual auto CreateUiTraits() -> std::unique_ptr<coreui::INodeTraits> = 0;
 
   auto GetId() const -> ne::NodeId;
   auto GetFamilyId() const -> FamilyId;

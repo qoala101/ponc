@@ -7,9 +7,9 @@
 #include "coreui_empty_pin_drawer.h"
 #include "coreui_flow_input_pin_drawer.h"
 #include "coreui_flow_output_pin_drawer.h"
-#include "coreui_i_family_drawer.h"
-#include "coreui_i_node_drawer.h"
-#include "coreui_i_pin_drawer.h"
+#include "coreui_i_family_traits.h"
+#include "coreui_i_node_traits.h"
+#include "coreui_i_pin_traits.h"
 #include "cpp_assert.h"
 #include "crude_json.h"
 #include "frame_node.h"
@@ -28,11 +28,11 @@ constexpr auto kTypeName = "CouplerNode";
 auto CreateNodeWriter(std::shared_ptr<Node> node)
     -> std::unique_ptr<json::INodeWriter>;
 auto CreateNodeDrawer(std::shared_ptr<Node> node)
-    -> std::unique_ptr<coreui::INodeDrawer>;
+    -> std::unique_ptr<coreui::INodeTraits>;
 auto CreateFamilyWriter(std::shared_ptr<Family> family)
     -> std::unique_ptr<json::IFamilyWriter>;
 auto CreateFamilyDrawer(std::shared_ptr<Family> family)
-    -> std::unique_ptr<coreui::IFamilyDrawer>;
+    -> std::unique_ptr<coreui::IFamilyTraits>;
 
 // NOLINTNEXTLINE(*-multiple-inheritance)
 class Node : public core::INode, public std::enable_shared_from_this<Node> {
@@ -44,7 +44,7 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
     return CreateNodeWriter(shared_from_this());
   }
 
-  auto CreateDrawer() -> std::unique_ptr<coreui::INodeDrawer> override {
+  auto CreateUiTraits() -> std::unique_ptr<coreui::INodeTraits> override {
     return CreateNodeDrawer(shared_from_this(), state);
   }
 
@@ -140,7 +140,7 @@ auto CreateNodeWriter(std::shared_ptr<Node> node)
   return std::make_unique<NodeWriter>(std::move(node));
 }
 
-class SmallDropPinDrawer : public coreui::IPinDrawer {
+class SmallDropPinDrawer : public coreui::IPinTraits {
  public:
   explicit SmallDropPinDrawer(float drop) : drop_{drop} {}
 
@@ -156,7 +156,7 @@ class SmallDropPinDrawer : public coreui::IPinDrawer {
   float drop_{};
 };
 
-class BigDropPinDrawer : public coreui::IPinDrawer {
+class BigDropPinDrawer : public coreui::IPinTraits {
  public:
   explicit BigDropPinDrawer(float drop) : drop_{drop} {}
 
@@ -172,7 +172,7 @@ class BigDropPinDrawer : public coreui::IPinDrawer {
   float drop_{};
 };
 
-class NodeDrawer : public coreui::INodeDrawer {
+class NodeDrawer : public coreui::INodeTraits {
  public:
   explicit NodeDrawer(std::shared_ptr<Node> node)
       : node_{std::move(node)},
@@ -181,19 +181,19 @@ class NodeDrawer : public coreui::INodeDrawer {
 
   auto GetLabel() const -> std::string override {
     return CouplerNode::CreateFamily(node_->percentage_index_)
-        ->CreateDrawer()
+        ->CreateUiTraits()
         ->GetLabel();
   }
 
   auto GetColor() const -> ImColor override {
     return CouplerNode::CreateFamily(node_->percentage_index_)
-        ->CreateDrawer()
+        ->CreateUiTraits()
         ->GetColor();
   }
 
-  auto CreatePinDrawers() const
-      -> std::vector<std::unique_ptr<coreui::IPinDrawer>> override {
-    auto pin_drawers = std::vector<std::unique_ptr<coreui::IPinDrawer>>{};
+  auto CreatePinTraits() const
+      -> std::vector<std::unique_ptr<coreui::IPinTraits>> override {
+    auto pin_drawers = std::vector<std::unique_ptr<coreui::IPinTraits>>{};
 
     pin_drawers.emplace_back(
         std::make_unique<coreui::FlowInputPinDrawer>(flow_pin_values_));
@@ -215,7 +215,7 @@ class NodeDrawer : public coreui::INodeDrawer {
 };
 
 auto CreateNodeDrawer(std::shared_ptr<Node> node)
-    -> std::unique_ptr<coreui::INodeDrawer> {
+    -> std::unique_ptr<coreui::INodeTraits> {
   return std::make_unique<NodeDrawer>(std::move(node), state);
 }
 
@@ -242,7 +242,7 @@ class Family : public core::IFamily,
     return CreateFamilyWriter(shared_from_this());
   }
 
-  auto CreateDrawer() -> std::unique_ptr<coreui::IFamilyDrawer> override {
+  auto CreateUiTraits() -> std::unique_ptr<coreui::IFamilyTraits> override {
     return CreateFamilyDrawer(shared_from_this());
   }
 
@@ -288,7 +288,7 @@ auto CreateFamilyWriter(std::shared_ptr<Family> family)
   return std::make_unique<FamilyWriter>(std::move(family));
 }
 
-class FamilyDrawer : public coreui::IFamilyDrawer {
+class FamilyDrawer : public coreui::IFamilyTraits {
  public:
   explicit FamilyDrawer(std::shared_ptr<Family> family)
       : family_{std::move(family)} {}
@@ -308,7 +308,7 @@ class FamilyDrawer : public coreui::IFamilyDrawer {
 };
 
 auto CreateFamilyDrawer(std::shared_ptr<Family> family)
-    -> std::unique_ptr<coreui::IFamilyDrawer> {
+    -> std::unique_ptr<coreui::IFamilyTraits> {
   return std::make_unique<FamilyDrawer>(std::move(family));
 }
 }  // namespace

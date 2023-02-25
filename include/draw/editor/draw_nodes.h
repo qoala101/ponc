@@ -7,7 +7,7 @@
 
 #include "core_i_node.h"
 #include "core_settings.h"
-#include "coreui_i_pin_drawer.h"
+#include "coreui_i_pin_traits.h"
 #include "draw_new_link.h"
 #include "draw_settings_view.h"
 #include "draw_texture.h"

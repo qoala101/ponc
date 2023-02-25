@@ -4,7 +4,7 @@
 
 #include "core_group.h"
 #include "core_i_node.h"
-#include "coreui_i_node_drawer.h"
+#include "coreui_i_node_traits.h"
 #include "cpp_scope.h"
 #include "frame_node.h"
 #include "imgui.h"
@@ -16,7 +16,7 @@ void DisplayNode(frame::Frame& frame, core::INode& node) {
   ImGui::TableNextRow();
   ImGui::TableNextColumn();
 
-  const auto drawer = node.CreateDrawer(state.ToStateNoQueue());
+  const auto drawer = node.CreateUiTraits(state.ToStateNoQueue());
 
   const auto node_id = node.GetId();
   const auto draw_flags = ImGuiTreeNodeFlags_Leaf;

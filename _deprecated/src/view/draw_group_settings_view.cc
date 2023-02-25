@@ -4,8 +4,8 @@
 
 #include "core_group.h"
 #include "core_i_node.h"
-#include "coreui_i_family_drawer.h"
-#include "coreui_i_node_drawer.h"
+#include "coreui_i_family_traits.h"
+#include "coreui_i_node_traits.h"
 #include "cpp_scope.h"
 #include "draw_groups_view.h"
 #include "frame_node.h"

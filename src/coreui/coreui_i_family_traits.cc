@@ -1,12 +1,12 @@
-#include "coreui_i_family_drawer.h"
+#include "coreui_i_family_traits.h"
 
 #include <algorithm>
 #include <ranges>
 
 namespace esc::coreui {
-auto IFamilyDrawer::GetGroupLabel() const -> std::string { return GetLabel(); }
+auto IFamilyTraits::GetGroupLabel() const -> std::string { return GetLabel(); }
 
-auto IFamilyDrawer::IsUserAccessible() -> bool { return true; }
+auto IFamilyTraits::IsUserAccessible() -> bool { return true; }
 
 auto GroupByLabels(const std::vector<std::shared_ptr<core::IFamily>>& families)
     -> std::vector<
@@ -15,7 +15,7 @@ auto GroupByLabels(const std::vector<std::shared_ptr<core::IFamily>>& families)
       std::pair<std::string, std::vector<std::shared_ptr<core::IFamily>>>>{};
 
   for (const auto& family : families) {
-    const auto drawer = family->CreateDrawer();
+    const auto drawer = family->CreateUiTraits();
 
     if (!drawer->IsUserAccessible()) {
       continue;

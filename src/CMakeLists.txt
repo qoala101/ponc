@@ -135,11 +135,11 @@ add_example_executable(esc
   core/core_link.cc
   core/core_project.cc
 
-  coreui/pin/coreui_flow_pin_drawer.cc
+  coreui/pin/coreui_flow_pin_traits.cc
 
-  coreui/coreui_i_family_drawer.cc
-  coreui/coreui_i_node_drawer.cc
-  coreui/coreui_i_pin_drawer.cc
+  coreui/coreui_i_family_traits.cc
+  coreui/coreui_i_node_traits.cc
+  coreui/coreui_i_pin_traits.cc
   coreui/frame_node.cc
 
   cpp/cpp_assert.cc

@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "core_link.h"
-#include "coreui_i_node_drawer.h"
+#include "coreui_i_node_traits.h"
 #include "cpp_scope.h"
 #include "draw_tooltip.h"
 #include "imgui_node_editor.h"

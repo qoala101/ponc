@@ -5,7 +5,7 @@
 
 #include "app_attenuator_node.h"
 #include "app_input_node.h"
-#include "coreui_i_node_drawer.h"
+#include "coreui_i_node_traits.h"
 #include "cpp_assert.h"
 #include "draw_node_editor.h"
 #include "flow_tree.h"
@@ -138,7 +138,7 @@ auto GetLinks(const core::Project& project, const NewLink& new_link) {
   return links;
 }
 
-auto GetPinKind(const coreui::IPinDrawer& pin_drawer, const core::INode& node) {
+auto GetPinKind(const coreui::IPinTraits& pin_drawer, const core::INode& node) {
   const auto pin_kind = pin_drawer.GetKind();
 
   if (pin_kind.has_value()) {
@@ -236,7 +236,7 @@ auto GetNodes(const core::Project& project, const NewLink& new_link) {
     auto& node_data = nodes.emplace_back();
     node_data.id = node->GetId();
 
-    const auto drawer = node->CreateDrawer();
+    const auto drawer = node->CreateUiTraits();
     const auto& node_flow = node_flows.at(node_data.id.Get());
 
     if (drawer->HasHeader()) {
@@ -253,7 +253,7 @@ auto GetNodes(const core::Project& project, const NewLink& new_link) {
       }
     }
 
-    for (const auto& pin_drawer : drawer->CreatePinDrawers()) {
+    for (const auto& pin_drawer : drawer->CreatePinTraits()) {
       const auto pin_kind = GetPinKind(*pin_drawer, *node);
       auto& pin_data = (pin_kind == ne::PinKind::Input)
                            ? node_data.input_pins.emplace_back()

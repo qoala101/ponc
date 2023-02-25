@@ -3,8 +3,8 @@
 #include <unordered_set>
 
 #include "core_i_family.h"
-#include "coreui_i_family_drawer.h"
-#include "coreui_i_node_drawer.h"
+#include "coreui_i_family_traits.h"
+#include "coreui_i_node_traits.h"
 #include "cpp_scope.h"
 #include "frame_node.h"
 #include "imgui.h"
@@ -15,7 +15,7 @@ void DisplayNode(frame::Frame& frame, core::INode& node) {
   ImGui::TableNextRow();
   ImGui::TableNextColumn();
 
-  const auto drawer = node.CreateDrawer(state.ToStateNoQueue());
+  const auto drawer = node.CreateUiTraits(state.ToStateNoQueue());
 
   const auto node_id = node.GetId();
   const auto draw_flags = ImGuiTreeNodeFlags_Leaf;
@@ -72,7 +72,7 @@ void DisplayFamily(frame::Frame& frame, core::IFamily& family) {
       has_children ? (ImGuiTreeNodeFlags_DefaultOpen) : ImGuiTreeNodeFlags_Leaf;
 
   const auto node_is_open = ImGui::TreeNodeEx(
-      std::string{"##" + family.CreateDrawer()->GetLabel()}.c_str(),
+      std::string{"##" + family.CreateUiTraits()->GetLabel()}.c_str(),
       draw_flags);
 
   ImGui::SameLine();
@@ -100,7 +100,7 @@ void DisplayFamily(frame::Frame& frame, core::IFamily& family) {
 
   auto isSelected = group_node_ids == selected_node_ids;
 
-  if (ImGui::Selectable(family.CreateDrawer()->GetLabel().c_str(),
+  if (ImGui::Selectable(family.CreateUiTraits()->GetLabel().c_str(),
                         &isSelected)) {
     auto& io = ImGui::GetIO();
 

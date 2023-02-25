@@ -19,7 +19,7 @@ class PlaceholderFamily
   -> std::unique_ptr<INode> override;
   auto CreateNodeParser() -> std::unique_ptr<json::INodeParser> override;
   auto CreateWriter() -> std::unique_ptr<json::IFamilyWriter> override;
-  auto CreateDrawer() -> std::unique_ptr<coreui::IFamilyDrawer> override;
+  auto CreateUiTraits() -> std::unique_ptr<coreui::IFamilyTraits> override;
 
   auto EmplaceNodeFromFlow(IdGenerator& id_generator,
                            const flow::NodeFlow& connected_flow)

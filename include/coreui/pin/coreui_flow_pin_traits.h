@@ -3,10 +3,10 @@
 
 #include <imgui_node_editor.h>
 
-#include "coreui_i_pin_drawer.h"
+#include "coreui_i_pin_traits.h"
 
 namespace esc::coreui {
-class FlowPinDrawer : public IPinDrawer {
+class FlowPinDrawer : public IPinTraits {
  public:
   explicit FlowPinDrawer(ne::PinId pin_id);
 

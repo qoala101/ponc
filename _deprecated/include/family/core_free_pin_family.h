@@ -18,7 +18,7 @@ class FreePinFamily : public IFamily,
   -> std::unique_ptr<INode> override;
   auto CreateNodeParser() -> std::unique_ptr<json::INodeParser> override;
   auto CreateWriter() -> std::unique_ptr<json::IFamilyWriter> override;
-  auto CreateDrawer() -> std::unique_ptr<coreui::IFamilyDrawer> override;
+  auto CreateUiTraits() -> std::unique_ptr<coreui::IFamilyTraits> override;
 
   auto CreateNodeFromFlow(IdGenerator& id_generator, ne::PinId pin_id,
                           bool has_input_pin) -> std::unique_ptr<INode>;

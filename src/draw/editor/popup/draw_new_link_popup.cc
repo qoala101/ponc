@@ -13,7 +13,7 @@
 #include "core_i_node.h"
 #include "core_id_generator.h"
 #include "core_project.h"
-#include "coreui_i_family_drawer.h"
+#include "coreui_i_family_traits.h"
 #include "cpp_assert.h"
 #include "draw_id_label.h"
 #include "frame_node.h"
@@ -72,7 +72,7 @@ void NewLinkPopup::DrawItems(frame::Frame& frame) {
 
     for (const auto& family : families) {
       if (ImGui::MenuItem(
-              IdLabel(family->CreateDrawer()->GetLabel(), family->GetId())
+              IdLabel(family->CreateUiTraits()->GetLabel(), family->GetId())
                   .c_str())) {
         auto new_node = family->CreateNode(frame.GetIdGenerator());
         auto connect_to_pin_id = ne::PinId{};

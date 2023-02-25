@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "coreui_i_node_drawer.h"
+#include "coreui_i_node_traits.h"
 #include "cpp_scope.h"
 #include "imgui.h"
 

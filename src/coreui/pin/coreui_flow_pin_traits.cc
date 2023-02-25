@@ -1,4 +1,4 @@
-#include "coreui_flow_pin_drawer.h"
+#include "coreui_flow_pin_traits.h"
 
 #include "imgui_node_editor.h"
 
