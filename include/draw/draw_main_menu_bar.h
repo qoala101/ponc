@@ -5,19 +5,19 @@
 #ifndef VH_DRAW_MAIN_MENU_BAR_H_
 #define VH_DRAW_MAIN_MENU_BAR_H_
 
-#include "app_state.h"
 #include "draw_open_file_dialog.h"
 #include "draw_save_as_file_dialog.h"
 #include "draw_settings_view.h"
+#include "frame_node.h"
 
 namespace esc::draw {
 class MainMenuBar {
  public:
-  void Draw(const AppState& app_state);
+  void Draw(frame::Frame &frame);
 
  private:
-  void DrawFileMenu(const AppState& app_state);
-  void DrawViewsMenu(const AppState& app_state);
+  void DrawFileMenu(frame::Frame &frame);
+  void DrawViewsMenu(frame::Frame &frame);
 
   OpenFileDialog open_file_dialog{};
   SaveAsFileDialog save_as_file_dialog{};

@@ -2,8 +2,8 @@
 
 #include "cpp_scope.h"
 #include "draw_links.h"
+#include "draw_main_window.h"
 #include "draw_nodes.h"
-#include "draw_widgets.h"
 
 namespace esc::draw {
 NodeEditor::NodeEditor() : editor_context_{ne::CreateEditor()} {
@@ -12,24 +12,24 @@ NodeEditor::NodeEditor() : editor_context_{ne::CreateEditor()} {
 
 NodeEditor::~NodeEditor() { ne::DestroyEditor(editor_context_); }
 
-void NodeEditor::Draw(const AppState &app_state) {
+void NodeEditor::Draw(frame::Frame &frame) {
   const auto node_editor_scope =
       cpp::Scope{[]() { ne::Begin("Node editor"); }, []() { ne::End(); }};
 
   // draw::DrawGroups(state);
-  new_link.Draw(app_state.frame);
-  nodes.Draw(app_state.frame);
-  DrawLinks(app_state.frame);
+  new_link.Draw(frame);
+  nodes.Draw(frame);
+  DrawLinks(frame);
   // draw::DrawDeleteItemsProcess(state);
-  DrawShowPopupProcess(app_state);
-  DrawPopupContents(app_state);
+  DrawShowPopupProcess(frame);
+  DrawPopupContents(frame);
 }
 
 auto NodeEditor::GetNewLink() const -> const NewLink & { return new_link; }
 
 auto NodeEditor::GetNodes() const -> const Nodes & { return nodes; }
 
-void NodeEditor::DrawShowPopupProcess(const AppState &app_state) {
+void NodeEditor::DrawShowPopupProcess(frame::Frame &frame) {
   const auto popup_position = ImGui::GetMousePos();
 
   {
@@ -60,12 +60,12 @@ void NodeEditor::DrawShowPopupProcess(const AppState &app_state) {
   }
 }
 
-void NodeEditor::DrawPopupContents(const AppState &app_state) {
+void NodeEditor::DrawPopupContents(frame::Frame &frame) {
   const auto suspend_scope =
       cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
 
-  background_popup.Draw(app_state.frame);
-  node_popup.Draw(app_state.frame);
-  link_popup.Draw(app_state.frame);
+  background_popup.Draw(frame);
+  node_popup.Draw(frame);
+  link_popup.Draw(frame);
 }
 }  // namespace esc::draw

@@ -476,7 +476,7 @@ void Frame::SaveProjectToFile(std::string file_path) {
   });
 }
 
-// void ResetDiagram::operator()(const AppState &app_state) const {
+// void ResetDiagram::operator()(frame::Frame &frame) const {
 //   const auto &diagram = state.core_state->diagram_;
 //   const auto &links = diagram.GetLinks();
 
@@ -520,7 +520,7 @@ void Frame::DeleteLink(ne::LinkId link_id) {
   });
 }
 
-// void DeleteNode::operator()(const AppState &app_state) const {
+// void DeleteNode::operator()(frame::Frame &frame) const {
 //   auto &diagram = state.core_state->diagram_;
 //   const auto node = FindNode(diagram, node_id);
 //   const auto node_flow = node.GetInitialFlow();
@@ -564,7 +564,7 @@ void Frame::DeleteLink(ne::LinkId link_id) {
 //   }
 // }
 
-// void DeleteNodeWithLinks::operator()(const AppState &app_state) const {
+// void DeleteNodeWithLinks::operator()(frame::Frame &frame) const {
 //   auto &diagram = state.core_state->diagram_;
 //   const auto &links = diagram.GetLinks();
 //   const auto &node = diagram.FindNode(node_id);
@@ -596,12 +596,12 @@ void Frame::DeleteLink(ne::LinkId link_id) {
 //   state.core_state->diagram_.EraseNode(node_id);
 // }
 
-// void DeleteLink::operator()(const AppState &app_state) const {
+// void DeleteLink::operator()(frame::Frame &frame) const {
 //   ne::DeleteLink(link_id);
 //   state.core_state->diagram_.EraseLink(link_id);
 // }
 
-// void CreateGroup::operator()(const AppState &app_state) const {
+// void CreateGroup::operator()(frame::Frame &frame) const {
 //   // auto nodes = std::vector<std::shared_ptr<INode>>{};
 
 //   // for (const auto node_id : node_ids) {

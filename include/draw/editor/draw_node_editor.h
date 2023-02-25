@@ -5,13 +5,13 @@
 
 #include <memory>
 
-#include "app_state.h"
 #include "draw_background_popup.h"
 #include "draw_link_popup.h"
 #include "draw_links.h"
 #include "draw_new_link.h"
 #include "draw_node_popup.h"
 #include "draw_nodes.h"
+#include "frame_node.h"
 
 namespace ne = ax::NodeEditor;
 
@@ -28,15 +28,15 @@ class NodeEditor {
 
   ~NodeEditor();
 
-  void Draw(const AppState &app_state);
+  void Draw(frame::Frame &frame);
 
   auto GetNewLink() const -> const NewLink &;
 
   auto GetNodes() const -> const Nodes &;
 
  private:
-  void DrawShowPopupProcess(const AppState &app_state);
-  void DrawPopupContents(const AppState &app_state);
+  void DrawShowPopupProcess(frame::Frame &frame);
+  void DrawPopupContents(frame::Frame &frame);
 
   ne::EditorContext *editor_context_{};
 

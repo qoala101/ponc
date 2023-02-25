@@ -8,8 +8,8 @@
 #include <imgui.h>
 #include <imgui_node_editor.h>
 
-#include "app_state.h"
 #include "draw_i_popup.h"
+#include "frame_node.h"
 
 namespace ne = ax::NodeEditor;
 

@@ -2,9 +2,8 @@
 
 #include "app_attenuator_node.h"
 #include "app_input_node.h"
-#include "app_state.h"
 #include "core_family_id.h"
-#include "draw_widgets.h"
+#include "draw_main_window.h"
 #include "frame_node.h"
 
 namespace esc {
@@ -32,13 +31,6 @@ AppImpl::AppImpl(const Textures &textures)
 
 void AppImpl::OnFrame() {
   auto frame = frame::Frame{id_generator_, project_};
-  const auto app_state = AppState{.id_generator = id_generator_,
-                                  .project = project_,
-                                  .widgets = widgets_,
-                                  .event_queue = event_queue_,
-                                  .frame = frame};
-
-  event_queue_.ExecuteEvents(app_state);
-  widgets_.Draw(app_state);
+  widgets_.Draw(frame);
 }
 }  // namespace esc

@@ -3,7 +3,6 @@
 #include <iostream>
 #include <string>
 
-#include "app_state.h"
 #include "core_i_family.h"
 #include "core_i_node.h"
 #include "coreui_i_family_drawer.h"
@@ -11,13 +10,14 @@
 #include "cpp_scope.h"
 #include "draw_families_view.h"
 #include "flow_tree.h"
+#include "frame_node.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
 namespace {
 void DisplayNode(
-    AppState& app_state, const flow::TreeNode& tree_node,
+    frame::Frame& frame, const flow::TreeNode& tree_node,
     const std::unordered_map<const flow::TreeNode*,
                              std::vector<std::pair<const core::IFamily*, int>>>&
         child_count_per_family_per_tree_node) {
@@ -108,7 +108,7 @@ void DisplayNode(
 
 auto FlowTreeView::GetLabel() const -> std::string { return "Flow Tree"; }
 
-void FlowTreeView::Draw(AppState& app_state) {
+void FlowTreeView::Draw(frame::Frame& frame) {
   if (!IsVisible()) {
     return;
   }

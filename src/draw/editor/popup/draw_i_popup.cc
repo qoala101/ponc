@@ -6,8 +6,8 @@
 
 #include <imgui.h>
 
-#include "app_state.h"
 #include "cpp_scope.h"
+#include "frame_node.h"
 
 namespace esc::draw {
 void IPopup::Show() {

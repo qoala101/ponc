@@ -4,7 +4,6 @@
 
 #include "draw_save_as_file_dialog.h"
 
-#include "app_event_queue.h"
 #include "frame_node.h"
 
 namespace esc::draw {
@@ -28,13 +27,13 @@ SaveAsFileDialog::SaveAsFileDialog()
         return dialog;
       }()} {}
 
-void SaveAsFileDialog::OnFileSelected(const AppState& app_state,
+void SaveAsFileDialog::OnFileSelected(frame::Frame& frame,
                                       std::string file_path) const {
   if (const auto not_json_extension =
           !AsLowerCase(file_path).ends_with(".json")) {
     file_path += ".json";
   }
 
-  app_state.frame.SaveProjectToFile(std::move(file_path));
+  frame.SaveProjectToFile(std::move(file_path));
 }
 }  // namespace esc::draw

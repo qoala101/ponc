@@ -4,8 +4,6 @@
 
 #include "draw_open_file_dialog.h"
 
-#include "app_event_queue.h"
-#include "app_state.h"
 #include "draw_i_file_dialog.h"
 #include "frame_node.h"
 
@@ -18,8 +16,8 @@ OpenFileDialog::OpenFileDialog()
         return dialog;
       }()} {}
 
-void OpenFileDialog::OnFileSelected(const AppState &app_state,
+void OpenFileDialog::OnFileSelected(frame::Frame &frame,
                                     std::string file_path) const {
-  app_state.frame.OpenProjectFromFile(std::move(file_path));
+  frame.OpenProjectFromFile(std::move(file_path));
 }
 }  // namespace esc::draw

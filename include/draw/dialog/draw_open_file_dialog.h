@@ -13,7 +13,7 @@ class OpenFileDialog : public IFileDialog {
   OpenFileDialog();
 
  private:
-  void OnFileSelected(const AppState &app_state,
+  void OnFileSelected(frame::Frame &frame,
                       std::string file_path) const override;
 };
 }  // namespace esc::draw

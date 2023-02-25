@@ -7,14 +7,14 @@
 namespace esc::draw {
 void IFileDialog::Show() { dialog_.Open(); }
 
-void IFileDialog::Draw(const AppState &app_state) {
+void IFileDialog::Draw(frame::Frame &frame) {
   dialog_.Display();
 
   if (!dialog_.HasSelected()) {
     return;
   }
 
-  OnFileSelected(app_state, dialog_.GetSelected().string());
+  OnFileSelected(frame, dialog_.GetSelected().string());
   dialog_.ClearSelected();
 }
 

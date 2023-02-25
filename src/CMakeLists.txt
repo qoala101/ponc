@@ -124,7 +124,6 @@ add_example_executable(esc
   # app/node/app_splitter_node.cc
   app/app_app.cc
   app/app_impl.cc
-  app/app_event_queue.cc
 
   # core/family/core_free_pin_family.cc
   # core/family/core_placeholder_family.cc
@@ -172,7 +171,7 @@ add_example_executable(esc
   draw/view/draw_i_hideable.cc
   draw/view/draw_settings_view.cc
   draw/draw_main_menu_bar.cc
-  draw/draw_widgets.cc
+  draw/draw_main_window.cc
 
   flow/flow_node_flow.cc
   flow/flow_tree.cc

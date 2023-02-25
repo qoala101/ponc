@@ -3,19 +3,19 @@
 
 #include <imgui_node_editor.h>
 
+#include <functional>
 #include <optional>
 #include <string>
 #include <variant>
 #include <vector>
 
-#include "app_event_queue.h"
-#include "app_state.h"
 #include "core_id_generator.h"
 #include "core_link.h"
 #include "core_project.h"
 #include "draw_texture.h"
-#include "draw_widgets.h"
 #include "imgui.h"
+#include "imgui_internal.h"
+#include "core_id_generator.h"
 
 namespace ne = ax::NodeEditor;
 

@@ -10,8 +10,8 @@
 #include <optional>
 #include <string>
 
-#include "app_state.h"
 #include "draw_new_link_popup.h"
+#include "frame_node.h"
 
 namespace esc::draw {
 class NewLink {

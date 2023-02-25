@@ -13,7 +13,7 @@ namespace esc::draw {
 class FamiliesView : public IHidable {
  public:
   auto GetLabel() const -> std::string;
-  void Draw(const AppState &app_state);
+  void Draw(frame::Frame &frame);
 };
 }  // namespace esc::draw
 

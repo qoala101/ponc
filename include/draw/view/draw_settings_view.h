@@ -3,9 +3,9 @@
 
 #include <string>
 
-#include "app_state.h"
 #include "core_settings.h"
 #include "draw_i_hidable.h"
+#include "frame_node.h"
 #include "imgui.h"
 
 namespace esc::draw {
@@ -13,7 +13,7 @@ class SettingsView : public IHidable {
  public:
   auto GetLabel() const -> std::string;
 
-  void Draw(const AppState &app_state);
+  void Draw(frame::Frame &frame);
 };
 }  // namespace esc::draw
 

@@ -10,20 +10,20 @@
 #include <imfilebrowser.h>
 // clang-format on
 
-#include "app_state.h"
 #include "cpp_interface.h"
+#include "frame_node.h"
 
 namespace esc::draw {
 class IFileDialog : public cpp::Interface {
  public:
   void Show();
-  void Draw(const AppState &app_state);
+  void Draw(frame::Frame &frame);
 
  protected:
   explicit IFileDialog(const ImGui::FileBrowser &dialog);
 
  private:
-  virtual void OnFileSelected(const AppState &app_state,
+  virtual void OnFileSelected(frame::Frame &frame,
                               std::string file_path) const = 0;
 
   ImGui::FileBrowser dialog_{};

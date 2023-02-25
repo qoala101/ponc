@@ -2,13 +2,13 @@
 
 #include <unordered_set>
 
-#include "app_state.h"
 #include "core_group.h"
 #include "core_i_node.h"
 #include "coreui_i_family_drawer.h"
 #include "coreui_i_node_drawer.h"
 #include "cpp_scope.h"
 #include "draw_groups_view.h"
+#include "frame_node.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
@@ -17,7 +17,7 @@ auto GroupSettingsView::GetLabel() const -> std::string {
   return "Group Settings";
 }
 
-void GroupSettingsView::Draw(AppState& app_state) {
+void GroupSettingsView::Draw(frame::Frame& frame) {
   if (!IsVisible()) {
     return;
   }

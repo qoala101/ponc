@@ -3,7 +3,6 @@
 #include <ranges>
 #include <string>
 
-#include "app_event_queue.h"
 #include "core_i_family.h"
 #include "core_project.h"
 #include "coreui_i_family_drawer.h"

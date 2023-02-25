@@ -5,7 +5,7 @@
 #ifndef VH_DRAW_LINKS_H_
 #define VH_DRAW_LINKS_H_
 
-#include "app_state.h"
+#include "frame_node.h"
 
 namespace esc::draw {
 void DrawLinks(const frame::Frame &frame);

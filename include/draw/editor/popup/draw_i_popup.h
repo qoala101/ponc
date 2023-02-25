@@ -7,8 +7,8 @@
 
 #include <string>
 
-#include "app_state.h"
 #include "cpp_interface.h"
+#include "frame_node.h"
 
 namespace esc::draw {
 class IPopup : public cpp::Interface {

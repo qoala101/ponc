@@ -7,10 +7,9 @@
 
 #include <application.h>
 
-#include "app_event_queue.h"
 #include "app_textures.h"
 #include "core_project.h"
-#include "draw_widgets.h"
+#include "draw_main_window.h"
 
 namespace esc {
 class AppImpl {
@@ -26,8 +25,7 @@ class AppImpl {
  private:
   core::IdGenerator id_generator_{};
   core::Project project_{};
-  draw::Widgets widgets_;
-  EventQueue event_queue_{};
+  draw::MainWindow widgets_;
   //   // std::weak_ptr<FreePinFamily> free_pin_family_{};
   //   // std::weak_ptr<PlaceholderFamily> placeholder_family_{};
 };

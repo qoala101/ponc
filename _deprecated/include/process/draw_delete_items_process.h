@@ -1,10 +1,10 @@
 #ifndef VH_DRAW_DELETE_ITEMS_PROCESS_H_
 #define VH_DRAW_DELETE_ITEMS_PROCESS_H_
 
-#include "app_state.h"
+#include "frame_node.h"
 
 namespace esc::draw {
-void DrawDeleteItemsProcess(const AppState &app_state);
+void DrawDeleteItemsProcess(frame::Frame &frame);
 }  // namespace esc::draw
 
 #endif  // VH_DRAW_DELETE_ITEMS_PROCESS_H_

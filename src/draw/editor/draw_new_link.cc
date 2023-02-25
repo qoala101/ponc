@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-#include "app_event_queue.h"
 #include "cpp_scope.h"
 #include "draw_tooltip.h"
 #include "frame_node.h"

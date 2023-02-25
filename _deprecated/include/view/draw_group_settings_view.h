@@ -13,7 +13,7 @@ namespace esc::draw {
 class GroupSettingsView : public IHidable {
  public:
   auto GetLabel() const -> std::string;
-  void Draw(const AppState &app_state);
+  void Draw(frame::Frame &frame);
 
  private:
   int group_index_{};

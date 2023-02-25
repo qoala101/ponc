@@ -2,16 +2,16 @@
 
 #include <unordered_set>
 
-#include "app_state.h"
 #include "core_i_family.h"
 #include "coreui_i_family_drawer.h"
 #include "coreui_i_node_drawer.h"
 #include "cpp_scope.h"
+#include "frame_node.h"
 #include "imgui.h"
 
 namespace esc::draw {
 namespace {
-void DisplayNode(AppState& app_state, core::INode& node) {
+void DisplayNode(frame::Frame& frame, core::INode& node) {
   ImGui::TableNextRow();
   ImGui::TableNextColumn();
 
@@ -62,7 +62,7 @@ void DisplayNode(AppState& app_state, core::INode& node) {
   }
 }
 
-void DisplayFamily(AppState& app_state, core::IFamily& family) {
+void DisplayFamily(frame::Frame& frame, core::IFamily& family) {
   ImGui::TableNextRow();
   ImGui::TableNextColumn();
 
@@ -139,7 +139,7 @@ void DisplayFamily(AppState& app_state, core::IFamily& family) {
 
 auto FamiliesView::GetLabel() const -> std::string { return "Families"; }
 
-void FamiliesView::Draw(AppState& app_state) {
+void FamiliesView::Draw(frame::Frame& frame) {
   if (!IsVisible()) {
     return;
   }

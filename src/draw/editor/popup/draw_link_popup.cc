@@ -9,7 +9,7 @@ auto LinkPopup::GetLabel() const -> std::string { return "Link"; }
 
 void LinkPopup::DrawItems(frame::Frame &frame) {
   if (ImGui::MenuItem("Delete")) {
-    // app_state.DeleteLink{.link_id =
+    // frame.DeleteLink{.link_id =
     // link_id_});
   }
 }

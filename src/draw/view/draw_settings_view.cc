@@ -2,7 +2,6 @@
 
 #include <imgui.h>
 
-#include "app_state.h"
 #include "core_project.h"
 #include "core_settings.h"
 #include "cpp_scope.h"
@@ -11,12 +10,12 @@
 namespace esc::draw {
 auto SettingsView::GetLabel() const -> std::string { return "Settings"; }
 
-void SettingsView::Draw(const AppState& app_state) {
+void SettingsView::Draw(frame::Frame& frame) {
   if (!IsVisible()) {
     return;
   }
 
-  auto& settings = app_state.frame.GetProject().GetSettings();
+  auto& settings = frame.GetProject().GetSettings();
 
   {
     const auto window_scope = cpp::Scope{[]() { ImGui::End(); }};

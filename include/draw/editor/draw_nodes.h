@@ -9,7 +9,6 @@
 #include <memory>
 #include <unordered_map>
 
-#include "app_state.h"
 #include "core_i_node.h"
 #include "core_settings.h"
 #include "coreui_i_pin_drawer.h"
@@ -17,6 +16,7 @@
 #include "draw_settings_view.h"
 #include "draw_texture.h"
 #include "flow_node_flow.h"
+#include "frame_node.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "imgui_node_editor.h"

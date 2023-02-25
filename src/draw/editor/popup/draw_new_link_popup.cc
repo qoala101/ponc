@@ -8,7 +8,6 @@
 #include <string>
 #include <vector>
 
-#include "app_event_queue.h"
 #include "core_diagram.h"
 #include "core_i_family.h"
 #include "core_i_node.h"
