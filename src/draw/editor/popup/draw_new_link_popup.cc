@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "app_event_queue.h"
-#include "app_events.h"
 #include "core_diagram.h"
 #include "core_i_family.h"
 #include "core_i_node.h"
@@ -18,6 +17,7 @@
 #include "coreui_i_family_drawer.h"
 #include "cpp_assert.h"
 #include "draw_id_label.h"
+#include "frame_node.h"
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
@@ -29,11 +29,11 @@ void NewLinkPopup::SetDraggedFromPin(ne::PinId pin_id) {
   dragged_from_pin_ = pin_id;
 }
 
-void NewLinkPopup::DrawItems(const AppState& app_state) {
-  const auto& families = app_state.project.GetFamilies();
+void NewLinkPopup::DrawItems(frame::Frame& frame) {
+  const auto& families = frame.GetProject().GetFamilies();
 
   const auto dragged_from_node =
-      core::FindPinNode(app_state.project.GetDiagram(), dragged_from_pin_);
+      core::FindPinNode(frame.GetProject().GetDiagram(), dragged_from_pin_);
   const auto dragged_from_pin_kind =
       core::GetPinKind(*dragged_from_node, dragged_from_pin_);
 
@@ -75,7 +75,7 @@ void NewLinkPopup::DrawItems(const AppState& app_state) {
       if (ImGui::MenuItem(
               IdLabel(family->CreateDrawer()->GetLabel(), family->GetId())
                   .c_str())) {
-        auto new_node = family->CreateNode(app_state.id_generator);
+        auto new_node = family->CreateNode(frame.GetIdGenerator());
         auto connect_to_pin_id = ne::PinId{};
 
         if (dragged_from_pin_kind == ne::PinKind::Input) {
@@ -88,17 +88,13 @@ void NewLinkPopup::DrawItems(const AppState& app_state) {
           connect_to_pin_id = *input_pin_id;
         }
 
-        app_state.event_queue.PostEvent(Events::EmplaceNode{
-            .node = std::move(new_node), .position = position_});
+        frame.EmplaceNode(std::move(new_node), position_);
 
-        const auto new_link_event =
-            (dragged_from_pin_kind == ne::PinKind::Input)
-                ? Events::CreateLink{.start_pin_id = connect_to_pin_id,
-                                     .end_pin_id = dragged_from_pin_}
-                : Events::CreateLink{.start_pin_id = dragged_from_pin_,
-                                     .end_pin_id = connect_to_pin_id};
-
-        app_state.event_queue.PostEvent(new_link_event);
+        if (dragged_from_pin_kind == ne::PinKind::Input) {
+          frame.CreateLink(connect_to_pin_id, dragged_from_pin_);
+        } else {
+          frame.CreateLink(dragged_from_pin_, connect_to_pin_id);
+        }
       }
     }
 

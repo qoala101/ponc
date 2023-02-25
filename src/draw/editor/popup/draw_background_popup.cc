@@ -4,11 +4,11 @@
 #include <string>
 
 #include "app_event_queue.h"
-#include "app_events.h"
 #include "core_i_family.h"
 #include "core_project.h"
 #include "coreui_i_family_drawer.h"
 #include "draw_id_label.h"
+#include "frame_node.h"
 
 namespace esc::draw {
 namespace {
@@ -57,9 +57,9 @@ auto BackgroundPopup::GetLabel() const -> std::string {
   return "Create New Node";
 }
 
-void BackgroundPopup::DrawItems(const AppState& app_state) {
+void BackgroundPopup::DrawItems(frame::Frame& frame) {
   const auto family_groups =
-      coreui::GroupByLabels(app_state.project.GetFamilies());
+      coreui::GroupByLabels(frame.GetProject().GetFamilies());
 
   for (const auto& [group_label, families] : family_groups) {
     const auto is_group = families.size() > 1;
@@ -77,9 +77,8 @@ void BackgroundPopup::DrawItems(const AppState& app_state) {
       if (ImGui::MenuItem(
               IdLabel(family->CreateDrawer()->GetLabel(), family->GetId())
                   .c_str())) {
-        app_state.event_queue.PostEvent(Events::EmplaceNode{
-            .node = family->CreateNode(app_state.id_generator),
-            .position = position_});
+        frame.EmplaceNode(family->CreateNode(frame.GetIdGenerator()),
+                          position_);
       }
     }
 

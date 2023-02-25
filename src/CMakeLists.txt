@@ -123,7 +123,6 @@ add_example_executable(esc
 
   # app/node/app_splitter_node.cc
   app/app_app.cc
-  app/app_events.cc
   app/app_impl.cc
   app/app_event_queue.cc
 

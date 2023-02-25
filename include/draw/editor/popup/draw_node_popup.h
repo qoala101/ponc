@@ -18,7 +18,7 @@ class NodePopup : public IPopup {
 
  private:
   auto GetLabel() const -> std::string override;
-  void DrawItems(const AppState &app_state) override;
+  void DrawItems(frame::Frame &frame) override;
 
   ne::NodeId node_id_{};
 };

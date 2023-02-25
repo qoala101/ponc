@@ -14,7 +14,7 @@ void IPopup::Show() {
   ImGui::OpenPopup(GetLabel().c_str(), ImGuiPopupFlags_NoOpenOverExistingPopup);
 }
 
-void IPopup::Draw(const AppState &app_state) {
+void IPopup::Draw(frame::Frame &frame) {
   const auto label = GetLabel();
   const auto *label_data = label.c_str();
 
@@ -24,7 +24,7 @@ void IPopup::Draw(const AppState &app_state) {
     ImGui::TextUnformatted(label_data);
     ImGui::Separator();
 
-    DrawItems(app_state);
+    DrawItems(frame);
   }
 }
 }  // namespace esc::draw

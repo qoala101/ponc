@@ -29,14 +29,11 @@ struct Pin;
 namespace esc::draw {
 class Nodes {
  public:
-  void Draw(const frame::Frame& frame);
-  auto GetDrawnPinIconRect(ne::PinId pin_id) const -> const ImRect&;
+  void Draw(frame::Frame& frame);
 
  private:
-  void DrawNode_v2(const frame::Node& node);
-  void DrawPinIconArea_v2(const frame::Pin& pin);
-
-  std::unordered_map<uintptr_t, ImRect> drawn_pin_icon_rects_{};
+  void DrawNode_v2(frame::Frame& frame, const frame::Node& node);
+  void DrawPinIconArea_v2(frame::Frame& frame, const frame::Pin& pin);
 };
 }  // namespace esc::draw
 

@@ -31,7 +31,7 @@ AppImpl::AppImpl(const Textures &textures)
       }()} {}
 
 void AppImpl::OnFrame() {
-  auto frame = frame::Frame{project_, widgets_};
+  auto frame = frame::Frame{id_generator_, project_};
   const auto app_state = AppState{.id_generator = id_generator_,
                                   .project = project_,
                                   .widgets = widgets_,

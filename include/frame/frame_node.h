@@ -8,6 +8,9 @@
 #include <variant>
 #include <vector>
 
+#include "app_event_queue.h"
+#include "app_state.h"
+#include "core_id_generator.h"
 #include "core_link.h"
 #include "core_project.h"
 #include "draw_texture.h"
@@ -62,14 +65,37 @@ struct Creation {
   ne::PinId end_pin_id{};
 };
 
-struct Frame {
-  Frame(const core::Project &project, const draw::Widgets &widgets);
+struct NewLink {
+  std::optional<ne::PinId> dragged_from_pin_{};
+  std::optional<ne::PinId> hovering_over_pin_{};
+};
 
+struct Frame {
+  Frame(core::IdGenerator &id_generator, core::Project &project);
+
+  ~Frame();
+
+  NewLink new_link{};
   std::vector<Node> nodes{};
   std::vector<Link> links{};
   std::optional<Curve> curve{};
   float creation_alpha{};
   std::optional<Creation> creation{};
+  std::unordered_map<uintptr_t, ImRect> drawn_pin_icon_rects_{};
+
+  auto GetProject() -> core::Project &;
+  auto GetIdGenerator() -> core::IdGenerator &;
+
+  void OpenProjectFromFile(std::string file_path);
+  void SaveProjectToFile(std::string file_path);
+  void EmplaceNode(std::shared_ptr<core::INode> node, const ImVec2 &position);
+  void CreateLink(ne::PinId start_pin_id, ne::PinId end_pin_id);
+  void DeleteLink(ne::LinkId link_id);
+
+ private:
+  core::IdGenerator &id_generator_;
+  core::Project &project_;
+  std::vector<std::function<void()>> events_{};
 };
 }  // namespace esc::frame
 

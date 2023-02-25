@@ -3,11 +3,15 @@
 #include <variant>
 #include <vector>
 
+#include "app_attenuator_node.h"
+#include "app_input_node.h"
 #include "coreui_i_node_drawer.h"
 #include "cpp_assert.h"
 #include "draw_node_editor.h"
 #include "flow_tree.h"
 #include "imgui.h"
+#include "json_i_family_parser.h"
+#include "json_project_serializer.h"
 
 namespace esc::frame {
 namespace {
@@ -83,10 +87,9 @@ auto GetColorForFlowValue(float value, const core::Settings& settings)
                      percentage * (end_color.Value.z - start_color.Value.z)};
 }
 
-auto FindFixedPin(const core::Project& project, const draw::Widgets& widgets)
+auto FindFixedPin(const core::Project& project, const NewLink& new_link)
     -> std::optional<ne::PinId> {
-  const auto& new_link = widgets.node_editor.GetNewLink();
-  const auto dragged_from_pin_ = new_link.GetDraggedFromPin();
+  const auto dragged_from_pin_ = new_link.dragged_from_pin_;
 
   if (!dragged_from_pin_.has_value()) {
     return std::nullopt;
@@ -106,9 +109,9 @@ auto FindFixedPin(const core::Project& project, const draw::Widgets& widgets)
   return (*link_to_repin)->start_pin_id;
 }
 
-auto GetLinks(const core::Project& project, const draw::Widgets& widgets) {
+auto GetLinks(const core::Project& project, const NewLink& new_link) {
   const auto& diagram = project.GetDiagram();
-  const auto fixed_pin = FindFixedPin(project, widgets);
+  const auto fixed_pin = FindFixedPin(project, new_link);
 
   const auto flow_tree = flow::BuildFlowTree(diagram);
   const auto node_flows = flow::CalculateNodeFlows(flow_tree);
@@ -149,11 +152,10 @@ auto GetPinKind(const coreui::IPinDrawer& pin_drawer, const core::INode& node) {
 }
 
 auto GetCanConnectToPinReason(ne::PinId pin_id, const core::Project& project,
-                              const draw::Widgets& widgets)
+                              const NewLink& new_link)
     -> std::pair<bool, std::string> {
-  const auto& new_link = widgets.node_editor.GetNewLink();
   const auto& diagram = project.GetDiagram();
-  const auto dragged_from_pin_ = new_link.GetDraggedFromPin();
+  const auto dragged_from_pin_ = new_link.dragged_from_pin_;
 
   Expects(dragged_from_pin_.has_value());
 
@@ -176,7 +178,7 @@ auto GetCanConnectToPinReason(ne::PinId pin_id, const core::Project& project,
     return {false, "Self"};
   }
 
-  if (const auto fixed_pin = FindFixedPin(project, widgets)) {
+  if (const auto fixed_pin = FindFixedPin(project, new_link)) {
     const auto fixed_pin_node = FindPinNode(diagram, *fixed_pin);
 
     if (fixed_pin_node->GetId() == hovered_over_node->GetId()) {
@@ -206,17 +208,16 @@ auto GetCanConnectToPinReason(ne::PinId pin_id, const core::Project& project,
 }
 
 auto CanConnectToPin(ne::PinId pin_id, const core::Project& project,
-                     const draw::Widgets& widgets) -> bool {
-  return GetCanConnectToPinReason(pin_id, project, widgets).first;
+                     const NewLink& new_link) -> bool {
+  return GetCanConnectToPinReason(pin_id, project, new_link).first;
 }
 
 auto GetPinIconAlpha(ne::PinId pin_id, const core::Project& project,
-                     const draw::Widgets& widgets) {
-  const auto& new_link = widgets.node_editor.GetNewLink();
+                     const NewLink& new_link) {
   auto alpha = 1.F;
 
-  if (const auto creating_new_link = new_link.GetDraggedFromPin().has_value()) {
-    if (!CanConnectToPin(pin_id, project, widgets)) {
+  if (const auto creating_new_link = new_link.dragged_from_pin_.has_value()) {
+    if (!CanConnectToPin(pin_id, project, new_link)) {
       alpha /= 4;
     }
   }
@@ -224,7 +225,7 @@ auto GetPinIconAlpha(ne::PinId pin_id, const core::Project& project,
   return alpha;
 }
 
-auto GetNodes(const core::Project& project, const draw::Widgets& widgets) {
+auto GetNodes(const core::Project& project, const NewLink& new_link) {
   auto nodes = std::vector<Node>{};
   const auto& diagram = project.GetDiagram();
   const auto flow_tree = flow::BuildFlowTree(project.GetDiagram());
@@ -271,7 +272,7 @@ auto GetNodes(const core::Project& project, const draw::Widgets& widgets) {
 
       const auto pin_flow = flow::GetPinFlow(node_flow, *pin_data.id);
       pin_data.color = GetColorForFlowValue(pin_flow, settings);
-      pin_data.color.Value.w = GetPinIconAlpha(*pin_data.id, project, widgets);
+      pin_data.color.Value.w = GetPinIconAlpha(*pin_data.id, project, new_link);
       pin_data.filled = FindPinLink(diagram, *pin_data.id).has_value();
 
       if (std::holds_alternative<std::monostate>(pin_data.value)) {
@@ -283,11 +284,12 @@ auto GetNodes(const core::Project& project, const draw::Widgets& widgets) {
   return nodes;
 }
 
-auto GetCurve(const core::Project& project, const draw::Widgets& widgets)
+auto GetCurve(
+    const core::Project& project, const NewLink& new_link,
+    const std::unordered_map<uintptr_t, ImRect>& drawn_pin_icon_rects_)
     -> std::optional<Curve> {
-  const auto& new_link = widgets.node_editor.GetNewLink();
   const auto& diagram = project.GetDiagram();
-  const auto fixed_pin = FindFixedPin(project, widgets);
+  const auto fixed_pin = FindFixedPin(project, new_link);
 
   if (!fixed_pin.has_value()) {
     return std::nullopt;
@@ -295,8 +297,7 @@ auto GetCurve(const core::Project& project, const draw::Widgets& widgets)
 
   auto curve = Curve{.color = ImColor{1.F, 1.F, 1.F}, .thickness = 4.F};
 
-  const auto fixed_pin_rect =
-      widgets.node_editor.GetNodes().GetDrawnPinIconRect(*fixed_pin);
+  const auto fixed_pin_rect = drawn_pin_icon_rects_.at(fixed_pin->Get());
   const auto fixed_pin_node = FindPinNode(diagram, *fixed_pin);
   const auto fixed_pin_kind = core::GetPinKind(*fixed_pin_node, *fixed_pin);
 
@@ -310,8 +311,8 @@ auto GetCurve(const core::Project& project, const draw::Widgets& widgets)
                (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y) / 2};
   }
 
-  if (const auto hovering_over_pin = new_link.GetHoveringOverPin()) {
-    if (CanConnectToPin(*hovering_over_pin, project, widgets)) {
+  if (const auto hovering_over_pin = new_link.hovering_over_pin_) {
+    if (CanConnectToPin(*hovering_over_pin, project, new_link)) {
       curve.color = ImColor{1.F / 2, 1.F, 1.F / 2};
     } else {
       curve.color = ImColor{1.F, 1.F / 2, 1.F / 2};
@@ -321,30 +322,28 @@ auto GetCurve(const core::Project& project, const draw::Widgets& widgets)
   return curve;
 }
 
-auto GetAlphaForNewLink(const core::Project& project,
-                        const draw::Widgets& widgets) -> float {
-  if (FindFixedPin(project, widgets).has_value()) {
+auto GetAlphaForNewLink(const core::Project& project, const NewLink& new_link)
+    -> float {
+  if (FindFixedPin(project, new_link).has_value()) {
     return 0.F;
   }
 
   return 1.F;
 }
 
-auto GetCreation(const core::Project& project, const draw::Widgets& widgets)
+auto GetCreation(const core::Project& project, const NewLink& new_link)
     -> std::optional<Creation> {
-  const auto& new_link = widgets.node_editor.GetNewLink();
-
-  if (!new_link.GetDraggedFromPin().has_value()) {
+  if (!new_link.dragged_from_pin_.has_value()) {
     return std::nullopt;
   }
 
-  const auto hovering_over_pin_ = new_link.GetHoveringOverPin();
+  const auto hovering_over_pin_ = new_link.hovering_over_pin_;
 
   if (!hovering_over_pin_.has_value()) {
     return std::nullopt;
   }
   const auto& [can_connect, reason] =
-      GetCanConnectToPinReason(*hovering_over_pin_, project, widgets);
+      GetCanConnectToPinReason(*hovering_over_pin_, project, new_link);
 
   auto creation = Creation{.can_connect = can_connect, .reason = reason};
 
@@ -353,7 +352,7 @@ auto GetCreation(const core::Project& project, const draw::Widgets& widgets)
   const auto hovering_over_pin_kind =
       core::GetPinKind(*hovering_over_node, *hovering_over_pin_);
 
-  if (const auto fixed_pin = FindFixedPin(project, widgets)) {
+  if (const auto fixed_pin = FindFixedPin(project, new_link)) {
     const auto link_to_repin = core::FindPinLink(diagram, *fixed_pin);
     Expects(link_to_repin.has_value());
 
@@ -367,7 +366,7 @@ auto GetCreation(const core::Project& project, const draw::Widgets& widgets)
       creation.end_pin_id = *fixed_pin;
     }
   } else {
-    const auto dragged_from_pin_ = new_link.GetDraggedFromPin();
+    const auto dragged_from_pin_ = new_link.dragged_from_pin_;
     Expects(dragged_from_pin_.has_value());  // why?
 
     if (hovering_over_pin_kind == ne::PinKind::Input) {
@@ -381,12 +380,238 @@ auto GetCreation(const core::Project& project, const draw::Widgets& widgets)
 
   return creation;
 }
+
+// auto CreateFamilies() {
+//   auto families = std::vector<std::shared_ptr<core::IFamily>>{
+//       InputNode::CreateFamily(), ClientNode::CreateFamily()};
+
+//   for (auto percentage_index = 0; percentage_index < 10; ++percentage_index)
+//   {
+//     families.emplace_back(CouplerNode::CreateFamily(percentage_index));
+//   }
+
+//   for (auto num_outputs : {2, 4, 8, 16}) {
+//     families.emplace_back(SplitterNode::CreateFamily(num_outputs));
+//   }
+
+//   families.emplace_back(AttenuatorNode::CreateFamily());
+
+//   return families;
+// }
+
+auto CreateFamilyParsers() {
+  auto family_parsers = std::vector<std::unique_ptr<json::IFamilyParser>>{};
+  family_parsers.emplace_back(InputNode::CreateFamilyParser());
+  // family_parsers.emplace_back(ClientNode::CreateFamilyParser());
+  // family_parsers.emplace_back(CouplerNode::CreateFamilyParser());
+  // family_parsers.emplace_back(SplitterNode::CreateFamilyParser());
+  family_parsers.emplace_back(AttenuatorNode::CreateFamilyParser());
+  // family_parsers.emplace_back(core::PlaceholderFamily::CreateParser());
+  return family_parsers;
+}
+
+auto FindMaxId(const core::Project& project) {
+  auto max_id = uintptr_t{1};
+
+  for (const auto& family : project.GetFamilies()) {
+    max_id = std::max(family->GetId().Get(), max_id);
+  }
+
+  const auto& diagram = project.GetDiagram();
+
+  for (const auto& node : diagram.GetNodes()) {
+    max_id = std::max(node->GetId().Get(), max_id);
+
+    for (const auto pin_id : core::GetAllPinIds(*node)) {
+      max_id = std::max(pin_id.Get(), max_id);
+    }
+  }
+
+  for (const auto& link : diagram.GetLinks()) {
+    max_id = std::max(link.id.Get(), max_id);
+  }
+
+  return max_id;
+}
 }  // namespace
 
-Frame::Frame(const core::Project& project, const draw::Widgets& widgets)
-    : nodes{GetNodes(project, widgets)},
-      links{GetLinks(project, widgets)},
-      curve{GetCurve(project, widgets)},
-      creation_alpha{GetAlphaForNewLink(project, widgets)},
-      creation{GetCreation(project, widgets)} {}
+Frame::Frame(core::IdGenerator& id_generator, core::Project& project)
+    : nodes{GetNodes(project, new_link)},
+      links{GetLinks(project, new_link)},
+      curve{GetCurve(project, new_link, drawn_pin_icon_rects_)},
+      creation_alpha{GetAlphaForNewLink(project, new_link)},
+      creation{GetCreation(project, new_link)},
+      id_generator_{id_generator},
+      project_{project} {}
+
+Frame::~Frame() {
+  for (const auto& event : events_) {
+    event();
+  }
+}
+
+auto Frame::GetProject() -> core::Project& { return project_; }
+
+auto Frame::GetIdGenerator() -> core::IdGenerator& { return id_generator_; }
+
+void Frame::OpenProjectFromFile(std::string file_path) {
+  events_.emplace_back([this, file_path = std::move(file_path)]() {
+    // ResetDiagram{}(state);
+
+    const auto json = crude_json::value::load(file_path).first;
+
+    auto project =
+        json::ProjectSerializer::ParseFromJson(json, CreateFamilyParsers());
+    auto max_id = FindMaxId(project);
+
+    project_ = std::move(project);
+    id_generator_ = core::IdGenerator{max_id + 1};
+  });
+}
+
+void Frame::SaveProjectToFile(std::string file_path) {
+  events_.emplace_back([this, file_path = std::move(file_path)]() {
+    const auto json = json::ProjectSerializer::WriteToJson(project_);
+    json.save(file_path);
+  });
+}
+
+// void ResetDiagram::operator()(const AppState &app_state) const {
+//   const auto &diagram = state.core_state->diagram_;
+//   const auto &links = diagram.GetLinks();
+
+//   for (const auto &link : links) {
+//     ne::DeleteLink(link.id);
+//   }
+
+//   const auto &families = diagram.GetFamilies();
+
+//   for (const auto &family : families) {
+//     for (const auto &node : family->GetNodes()) {
+//       ne::DeleteNode(node->GetId());
+//     }
+//   }
+
+//   state.core_state->id_generator_ = core::IdGenerator{};
+//   state.core_state->diagram_ = core::Diagram{CreateFamilies()};
+// }
+
+void Frame::EmplaceNode(std::shared_ptr<core::INode> node,
+                        const ImVec2& position) {
+  events_.emplace_back([this, node = std::move(node), position]() mutable {
+    const auto& new_node = project_.GetDiagram().EmplaceNode(std::move(node));
+    new_node->SetPosition(position);
+  });
+}
+
+void Frame::CreateLink(ne::PinId start_pin_id, ne::PinId end_pin_id) {
+  events_.emplace_back([this, start_pin_id, end_pin_id]() {
+    project_.GetDiagram().EmplaceLink(
+        {.id = id_generator_.GetNext<ne::LinkId>(),
+         .start_pin_id = start_pin_id,
+         .end_pin_id = end_pin_id});
+  });
+}
+
+void Frame::DeleteLink(ne::LinkId link_id) {
+  events_.emplace_back([this, link_id]() {
+    ne::DeleteLink(link_id);
+    project_.GetDiagram().EraseLink(link_id);
+  });
+}
+
+// void DeleteNode::operator()(const AppState &app_state) const {
+//   auto &diagram = state.core_state->diagram_;
+//   const auto node = FindNode(diagram, node_id);
+//   const auto node_flow = node.GetInitialFlow();
+//   const auto node_position = node.GetPosition();
+
+//   const auto &links = diagram.GetLinks();
+
+//   auto connected_node_input_pin = std::optional<ne::PinId>{};
+//   auto connected_node_output_pins = std::vector<ne::PinId>{};
+
+//   if (node_flow.input_pin_flow.has_value()) {
+//     if (diagram.FindLinkFromPin(node_flow.input_pin_flow->first) != nullptr)
+//     {
+//       connected_node_input_pin = node_flow.input_pin_flow->first;
+//     }
+//   }
+
+//   for (const auto &[pin, value] : node_flow.output_pin_flows) {
+//     if (diagram.FindLinkFromPin(pin) != nullptr) {
+//       connected_node_output_pins.emplace_back(pin);
+//     }
+//   }
+
+//   ne::DeleteNode(node_id);
+//   state.core_state->diagram_.EraseNode(node_id);
+
+//   auto &free_pin_family = diagram.GetFreePinFamily();
+
+//   if (connected_node_input_pin.has_value()) {
+//     auto &free_pin = free_pin_family.EmplaceNodeFromFlow(
+//         state.core_state->id_generator_, *connected_node_input_pin, true);
+
+//     // free_pin.SetPosition(
+//     //     state.draw_state->pin_poses_.at(connected_node_input_pin->Get()));
+//   }
+
+//   for (const auto pin : connected_node_output_pins) {
+//     auto &free_pin = free_pin_family.EmplaceNodeFromFlow(
+//         state.core_state->id_generator_, pin, false);
+//     // free_pin.SetPosition(state.draw_state->pin_poses_.at(pin.Get()));
+//   }
+// }
+
+// void DeleteNodeWithLinks::operator()(const AppState &app_state) const {
+//   auto &diagram = state.core_state->diagram_;
+//   const auto &links = diagram.GetLinks();
+//   const auto &node = diagram.FindNode(node_id);
+//   const auto node_pins = core::GetAllPinIds(node);
+
+//   const auto links_to_erase = [&links, &node_pins]() {
+//     auto links_to_erase = std::vector<ne::LinkId>{};
+
+//     for (const auto &link : links) {
+//       for (const auto node_pin : node_pins) {
+//         if ((link.start_pin_id == node_pin) || (link.end_pin_id == node_pin))
+//         {
+//           links_to_erase.emplace_back(link.id);
+//         }
+//       }
+//     }
+//     return links_to_erase;
+//   }();
+
+//   for (const auto link : links_to_erase) {
+//     ne::DeleteLink(link);
+//   }
+
+//   for (const auto link : links_to_erase) {
+//     diagram.EraseLink(link);
+//   }
+
+//   ne::DeleteNode(node_id);
+//   state.core_state->diagram_.EraseNode(node_id);
+// }
+
+// void DeleteLink::operator()(const AppState &app_state) const {
+//   ne::DeleteLink(link_id);
+//   state.core_state->diagram_.EraseLink(link_id);
+// }
+
+// void CreateGroup::operator()(const AppState &app_state) const {
+//   // auto nodes = std::vector<std::shared_ptr<INode>>{};
+
+//   // for (const auto node_id : node_ids) {
+//   //   nodes.emplace_back(FindNodePTR(node_id));
+//   // }
+
+//   // return groups_.emplace_back(std::move(nodes));
+
+//   // group.name_ = "TEMP_NAME";
+
+//   // auto &group = state.core_state->diagram_.EmplaceGroup(node_ids);
+// }
 }  // namespace esc::frame

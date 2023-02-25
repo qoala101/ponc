@@ -6,6 +6,7 @@
 #include "core_project.h"
 #include "core_settings.h"
 #include "cpp_scope.h"
+#include "frame_node.h"
 
 namespace esc::draw {
 auto SettingsView::GetLabel() const -> std::string { return "Settings"; }
@@ -15,7 +16,7 @@ void SettingsView::Draw(const AppState& app_state) {
     return;
   }
 
-  auto& settings = app_state.project.GetSettings();
+  auto& settings = app_state.frame.GetProject().GetSettings();
 
   {
     const auto window_scope = cpp::Scope{[]() { ImGui::End(); }};

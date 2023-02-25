@@ -17,7 +17,7 @@ void NodeEditor::Draw(const AppState &app_state) {
       cpp::Scope{[]() { ne::Begin("Node editor"); }, []() { ne::End(); }};
 
   // draw::DrawGroups(state);
-  new_link.Draw(app_state);
+  new_link.Draw(app_state.frame);
   nodes.Draw(app_state.frame);
   DrawLinks(app_state.frame);
   // draw::DrawDeleteItemsProcess(state);
@@ -64,8 +64,8 @@ void NodeEditor::DrawPopupContents(const AppState &app_state) {
   const auto suspend_scope =
       cpp::Scope{[]() { ne::Suspend(); }, []() { ne::Resume(); }};
 
-  background_popup.Draw(app_state);
-  node_popup.Draw(app_state);
-  link_popup.Draw(app_state);
+  background_popup.Draw(app_state.frame);
+  node_popup.Draw(app_state.frame);
+  link_popup.Draw(app_state.frame);
 }
 }  // namespace esc::draw

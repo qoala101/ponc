@@ -5,9 +5,9 @@
 #include "draw_open_file_dialog.h"
 
 #include "app_event_queue.h"
-#include "app_events.h"
 #include "app_state.h"
 #include "draw_i_file_dialog.h"
+#include "frame_node.h"
 
 namespace esc::draw {
 OpenFileDialog::OpenFileDialog()
@@ -20,7 +20,6 @@ OpenFileDialog::OpenFileDialog()
 
 void OpenFileDialog::OnFileSelected(const AppState &app_state,
                                     std::string file_path) const {
-  app_state.event_queue.PostEvent(
-      Events::OpenProjectFromFile{.file_path = std::move(file_path)});
+  app_state.frame.OpenProjectFromFile(std::move(file_path));
 }
 }  // namespace esc::draw

@@ -45,19 +45,13 @@ void DrawPinField_v2(const frame::Pin& pin) {
 }
 }  // namespace
 
-void Nodes::Draw(const frame::Frame& frame) {
-  drawn_pin_icon_rects_.clear();
-
+void Nodes::Draw(frame::Frame& frame) {
   for (const auto& node : frame.nodes) {
-    DrawNode_v2(node);
+    DrawNode_v2(frame, node);
   }
 }
 
-auto Nodes::GetDrawnPinIconRect(ne::PinId pin_id) const -> const ImRect& {
-  return drawn_pin_icon_rects_.at(pin_id.Get());
-}
-
-void Nodes::DrawNode_v2(const frame::Node& node) {
+void Nodes::DrawNode_v2(frame::Frame& frame, const frame::Node& node) {
   int layout_id_{};
 
   const auto node_id_ = node.id;
@@ -122,7 +116,7 @@ void Nodes::DrawNode_v2(const frame::Node& node) {
         ImGui::BeginHorizontal(layout_id_++);
       }
 
-      DrawPinIconArea_v2(pin_drawer);
+      DrawPinIconArea_v2(frame, pin_drawer);
       DrawPinField_v2(pin_drawer);
 
       ImGui::EndHorizontal();
@@ -163,7 +157,7 @@ void Nodes::DrawNode_v2(const frame::Node& node) {
       }
 
       DrawPinField_v2(pin_drawer);
-      DrawPinIconArea_v2(pin_drawer);
+      DrawPinIconArea_v2(frame, pin_drawer);
 
       ImGui::EndHorizontal();
 
@@ -214,7 +208,7 @@ void Nodes::DrawNode_v2(const frame::Node& node) {
   ne::PopStyleVar();
 }
 
-void Nodes::DrawPinIconArea_v2(const frame::Pin& pin) {
+void Nodes::DrawPinIconArea_v2(frame::Frame& frame, const frame::Pin& pin) {
   const auto pin_id = pin.id;
   auto area_size = ImVec2{24, 24};
 
@@ -234,7 +228,7 @@ void Nodes::DrawPinIconArea_v2(const frame::Pin& pin) {
   DrawFlowIcon(area_size, pin.color, pin.filled);
   ImGui::Dummy(area_size);
 
-  drawn_pin_icon_rects_[pin_id->Get()] =
+  frame.drawn_pin_icon_rects_[pin_id->Get()] =
       ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
 }
 }  // namespace esc::draw

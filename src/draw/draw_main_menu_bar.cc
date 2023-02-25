@@ -6,7 +6,6 @@
 
 #include <imgui.h>
 
-#include "app_events.h"
 #include "app_state.h"
 #include "core_project.h"
 #include "cpp_scope.h"
@@ -14,6 +13,7 @@
 #include "draw_save_as_file_dialog.h"
 #include "draw_settings_view.h"
 #include "draw_widgets.h"
+#include "frame_node.h"
 
 namespace esc::draw {
 namespace {
@@ -39,7 +39,8 @@ void MainMenuBar::Draw(const AppState& app_state) {
     }
 
     if (ImGui::MenuItem("Show Flow")) {
-      for (const auto& link : app_state.project.GetDiagram().GetLinks()) {
+      for (const auto& link :
+           app_state.frame.GetProject().GetDiagram().GetLinks()) {
         ne::Flow(link.id);
       }
     }
@@ -61,7 +62,7 @@ void MainMenuBar::DrawFileMenu(const AppState& app_state) {
     ImGui::Separator();
 
     if (ImGui::MenuItem("Reset")) {
-      // app_state.event_queue.PostEvent(Events::ResetDiagram{});
+      // app_state.ResetDiagram{});
     }
   }
 

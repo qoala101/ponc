@@ -5,7 +5,7 @@
 #include "draw_save_as_file_dialog.h"
 
 #include "app_event_queue.h"
-#include "app_events.h"
+#include "frame_node.h"
 
 namespace esc::draw {
 namespace {
@@ -35,7 +35,6 @@ void SaveAsFileDialog::OnFileSelected(const AppState& app_state,
     file_path += ".json";
   }
 
-  app_state.event_queue.PostEvent(
-      Events::SaveProjectToFile{.file_path = std::move(file_path)});
+  app_state.frame.SaveProjectToFile(std::move(file_path));
 }
 }  // namespace esc::draw

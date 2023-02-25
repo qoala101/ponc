@@ -21,7 +21,7 @@ class NewLinkPopup : public IPopup {
 
  private:
   auto GetLabel() const -> std::string override;
-  void DrawItems(const AppState &app_state) override;
+  void DrawItems(frame::Frame &frame) override;
 
   ImVec2 position_{};
   ne::PinId dragged_from_pin_{};
