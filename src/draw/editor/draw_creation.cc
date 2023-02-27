@@ -9,19 +9,19 @@
 
 namespace esc::draw {
 void Creation::Draw(
-    coreui::Creation& creation,
+    const coreui::Creation& creation, std::optional<coreui::NewLink>& new_link,
     const SignalCreateCurrentLink& signal_create_current_link,
     const SignalCreateConnectedNode& signal_create_connected_node) {
   const auto popup_position = ImGui::GetMousePos();
 
   {
-    if (ne::BeginCreate(ImColor{1.F, 1.F, 1.F, creation.creation_alpha}, 3.F)) {
+    if (ne::BeginCreate(ImColor{1.F, 1.F, 1.F, creation.alpha}, 3.F)) {
       auto dragged_from_pin = ne::PinId{};
       auto hovering_over_pin = ne::PinId{};
 
       if (ne::QueryNewLink(&dragged_from_pin, &hovering_over_pin)) {
-        creation.dragged_from_pin_ = dragged_from_pin;
-        creation.hovering_over_pin_ = hovering_over_pin;
+        new_link = coreui::NewLink{.dragged_from_pin_ = dragged_from_pin,
+                                   .hovering_over_pin_ = hovering_over_pin};
 
         const auto& reason = creation.reason;
 
@@ -31,32 +31,27 @@ void Creation::Draw(
                         ImColor{0.F, 1.F / 3, 0.F, 1.F * 3 / 4});
 
             if (ne::AcceptNewItem(
-                    ImColor{1.F / 2, 1.F, 1.F / 2, creation.creation_alpha},
-                    4.F)) {
+                    ImColor{1.F / 2, 1.F, 1.F / 2, creation.alpha}, 4.F)) {
               signal_create_current_link();
             }
           }
         } else {
           DrawTooltip(reason, ImColor{1.F / 3, 0.F, 0.F, 1.F * 3 / 4});
-          ne::RejectNewItem(
-              ImColor{1.F, 1.F / 2, 1.F / 2, creation.creation_alpha}, 4.F);
+          ne::RejectNewItem(ImColor{1.F, 1.F / 2, 1.F / 2, creation.alpha},
+                            4.F);
         }
       } else if (ne::QueryNewNode(&dragged_from_pin)) {
-        creation.dragged_from_pin_ = dragged_from_pin;
+        new_link = coreui::NewLink{.dragged_from_pin_ = dragged_from_pin};
 
         DrawTooltip("Create Node", ImColor{0.F, 1.F / 3, 0.F, 1.F * 3 / 4});
 
         if (ne::AcceptNewItem()) {
-          signal_create_connected_node(popup_position,
-                                       *creation.dragged_from_pin_);
+          signal_create_connected_node(popup_position, dragged_from_pin);
         }
       }
     }
 
     ne::EndCreate();
   }
-
-  dragged_from_pin_ = creation.dragged_from_pin_;
-  hovering_over_pin_ = creation.hovering_over_pin_;
 }
 }  // namespace esc::draw

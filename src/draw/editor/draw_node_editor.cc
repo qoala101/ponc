@@ -19,11 +19,11 @@ void NodeEditor::Draw(coreui::Frame &frame) {
   ne::Begin("Node editor");
 
   // draw::DrawGroups(state);
-  creation.Draw(frame.GetCreation1(),
-                std::bind_front(&NodeEditor::SlotCreateCurrentLink, this),
+  creation.Draw(frame.creation, frame.new_link,
+                std::bind_front(&NodeEditor::SlotCreateCurrentLink, frame),
                 std::bind_front(&NodeEditor::SlotCreateConnectedNode, this));
-  DrawNodes(frame.GetNodes1());
-  DrawLinks(frame.GetLinks1());
+  DrawNodes(frame.nodes);
+  DrawLinks(frame.links);
   // draw::DrawDeleteItemsProcess(state);
   DrawShowPopupProcess(frame);
   DrawPopupContents(frame);
@@ -68,7 +68,7 @@ void NodeEditor::DrawPopupContents(coreui::Frame &frame) {
   creation_popup.Draw(frame);
 }
 
-void NodeEditor::SlotCreateCurrentLink() {}
+void NodeEditor::SlotCreateCurrentLink(coreui::Frame &frame) {}
 
 void NodeEditor::SlotCreateConnectedNode(const ImVec2 &new_node_pos,
                                          ne::PinId connect_to_pin) {

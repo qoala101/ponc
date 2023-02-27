@@ -19,14 +19,13 @@
 #include "coreui_texture.h"
 #include "imgui.h"
 #include "imgui_internal.h"
-#include "coreui_texture.h"
 
 namespace ne = ax::NodeEditor;
 
 namespace esc::coreui {
 struct Pin {
   std::optional<ne::PinId> id{};
-  std::variant<std::monostate, float, float *> value{};
+  std::variant<std::monostate, float, float*> value{};
   std::string label{};
   ImColor color{};
   bool filled{};
@@ -62,26 +61,25 @@ struct ArtificialLink {
 
 class Frame;
 
+struct NewLink {
+  ne::PinId dragged_from_pin_{};
+  std::optional<ne::PinId> hovering_over_pin_{};
+};
+
 struct Creation {
-  void SetPins(ne::PinId dragged_from_pin,
-               const std::optional<ne::PinId> &hovering_over_pin = {});
+  explicit Creation(Frame* frame, const std::optional<NewLink>& new_link);
 
-  void CreateCurrentLink();
-  void CreateCurrentNode(std::shared_ptr<core::IFamily> family);
-
+  float alpha{1.F};
   bool can_connect{};
   std::string reason{};
 
+ private:
+  friend class Frame;
+
+  std::optional<ne::PinId> fixed_pin{};
   std::optional<ne::LinkId> delete_link{};
   ne::PinId start_pin_id{};
   ne::PinId end_pin_id{};
-
-  std::optional<ne::PinId> dragged_from_pin_{};
-  std::optional<ne::PinId> hovering_over_pin_{};
-
-  float creation_alpha{};
-
-  Frame *frame_{};
 };
 
 struct Nodes {
@@ -95,30 +93,62 @@ struct Links {
 };
 
 class Frame {
+  friend struct Creation;
+
  public:
-  explicit Frame(core::Project *project);
+  explicit Frame(core::Project* project);
 
-  ~Frame();
+  auto GetProject() -> core::Project&;
 
-  auto GetProject() -> core::Project &;
-
- private:
-  core::Project *project_;
+ public:
+  core::Project* project_;
   std::vector<std::function<void()>> events_{};
+
+  std::optional<NewLink> new_link{};
   Creation creation;
   Nodes nodes{};
   Links links{};
 
  public:
-  auto GetCreation1() -> Creation &;
-  auto GetNodes1() -> Nodes &;
-  auto GetLinks1() -> Links &;
+  void OnFrame();
 
   void OpenProjectFromFile(std::string file_path);
   void SaveProjectToFile(std::string file_path);
-  void EmplaceNode(std::shared_ptr<core::INode> node, const ImVec2 &position);
+  void EmplaceNode(std::shared_ptr<core::INode> node, const ImVec2& position);
   void CreateLink(ne::PinId start_pin_id, ne::PinId end_pin_id);
   void DeleteLink(ne::LinkId link_id);
+
+  void CreateCurrentLink();
+
+ private:
+  void UpdateCreation();
+  void UpdateNodes();
+  void UpdateLinks();
+
+ private:
+  auto GetLinkAlpha(const core::Link& link);
+
+  auto GetColorForFlowValue(float value) -> ImColor;
+
+  auto FindFixedPin() -> std::optional<ne::PinId>;
+
+  auto GetLinks();
+
+  auto GetPinKind(const coreui::IPinTraits& pin_drawer,
+                  const core::INode& node);
+
+  auto GetCanConnectToPinReason(ne::PinId pin_id)
+      -> std::pair<bool, std::string>;
+
+  auto CanConnectToPin(ne::PinId pin_id) -> bool;
+
+  auto GetPinIconAlpha(ne::PinId pin_id);
+
+  auto GetNodes();
+
+  auto GetCurve() -> std::optional<ArtificialLink>;
+
+  auto GetAlphaForNewLink() -> float;
 };
 }  // namespace esc::coreui
 

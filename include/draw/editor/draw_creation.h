@@ -18,13 +18,10 @@ class Creation {
   using SignalCreateConnectedNode =
       std::function<void(const ImVec2 &new_node_pos, ne::PinId connect_to_pin)>;
 
-  void Draw(coreui::Creation &creation,
+  void Draw(const coreui::Creation &creation,
+            std::optional<coreui::NewLink> &new_link,
             const SignalCreateCurrentLink &signal_create_current_link,
             const SignalCreateConnectedNode &signal_create_connected_node);
-
- private:
-  std::optional<ne::PinId> dragged_from_pin_{};
-  std::optional<ne::PinId> hovering_over_pin_{};
 };
 }  // namespace esc::draw
 

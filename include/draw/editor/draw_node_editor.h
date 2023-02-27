@@ -35,11 +35,11 @@ class NodeEditor {
                              const std::shared_ptr<core::IFamily> &family,
                              const ImVec2 &pos);
   static void SlotDeleteLink(coreui::Frame &frame, ne::LinkId link_id);
+  static void SlotCreateCurrentLink(coreui::Frame &frame);
 
   void DrawShowPopupProcess(coreui::Frame &frame);
   void DrawPopupContents(coreui::Frame &frame);
 
-  void SlotCreateCurrentLink();
   void SlotCreateConnectedNode(const ImVec2 &new_node_pos,
                                ne::PinId connect_to_pin);
 

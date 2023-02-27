@@ -16,6 +16,7 @@ class AppImpl {
 
  private:
   core::Project project_{};
+  coreui::Frame controller_;
   draw::MainWindow main_window_{};
 };
 }  // namespace esc

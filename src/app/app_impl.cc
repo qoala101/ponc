@@ -29,10 +29,10 @@ AppImpl::AppImpl(const Textures &textures)
             id_generator.Generate<core::FamilyId>()));
 
         return families;
-      }()} {}
+      }()}, controller_{&project_} {}
 
 void AppImpl::OnFrame() {
-  auto frame = coreui::Frame{&project_};
-  main_window_.Draw(frame);
+  controller_.OnFrame();
+  main_window_.Draw(controller_);
 }
 }  // namespace esc
