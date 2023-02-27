@@ -137,7 +137,8 @@ add_example_executable(esc
 
   coreui/pin/coreui_flow_pin_traits.cc
 
-  coreui/coreui_creation.cc
+  coreui/coreui_link_creation.cc
+  coreui/coreui_handmade_link.cc
   coreui/coreui_i_family_traits.cc
   coreui/coreui_i_node_traits.cc
   coreui/coreui_i_pin_traits.cc

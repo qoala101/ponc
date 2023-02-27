@@ -7,6 +7,7 @@
 
 #include "draw_background_popup.h"
 #include "draw_creation.h"
+#include "draw_creation_popup.h"
 #include "draw_link_popup.h"
 #include "draw_links.h"
 #include "draw_node_popup.h"

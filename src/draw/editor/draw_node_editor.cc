@@ -19,7 +19,7 @@ void NodeEditor::Draw(coreui::Frame &frame) {
   ne::Begin("Node editor");
 
   // draw::DrawGroups(state);
-  creation.Draw(frame.creation, frame.new_link,
+  creation.Draw(frame.creation,
                 std::bind_front(&NodeEditor::SlotCreateCurrentLink, frame),
                 std::bind_front(&NodeEditor::SlotCreateConnectedNode, this));
   DrawNodes(frame.nodes);
