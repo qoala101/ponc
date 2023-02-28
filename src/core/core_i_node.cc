@@ -9,24 +9,53 @@
 #include "core_family_id.h"
 
 namespace esc::core {
+///
+auto GetAllPinIds(const INode& node) -> std::vector<ne::PinId> {
+  auto pin_ids = node.GetOutputPinIds();
+
+  if (const auto& input_pin_id = node.GetInputPinId()) {
+    pin_ids.insert(pin_ids.begin(), *input_pin_id);
+  }
+
+  return pin_ids;
+}
+
+///
+auto GetPinKind(const INode& node, ne::PinId pin_id) -> ne::PinKind {
+  const auto& input_pin_id = node.GetInputPinId();
+
+  if (input_pin_id.has_value() && (*input_pin_id == pin_id)) {
+    return ne::PinKind::Input;
+  }
+
+  return ne::PinKind::Output;
+}
+
+///
 auto INode::GetId() const -> ne::NodeId { return id_; }
 
+///
 auto INode::GetFamilyId() const -> FamilyId { return family_id_; }
 
+///
 auto INode::GetInputPinId() const -> const std::optional<ne::PinId>& {
   return input_pin_id_;
 }
 
+///
 auto INode::GetOutputPinIds() const -> const std::vector<ne::PinId>& {
   return output_pin_ids_;
 }
 
+///
 auto INode::GetPosition() const -> ImVec2 { return ne::GetNodePosition(id_); }
 
+///
 void INode::SetPosition(const ImVec2& position) {
   ne::SetNodePosition(id_, position);
 }
 
+///
 auto INode::GetInitialFlow() const -> flow::NodeFlow {
   auto initial_flow = flow::NodeFlow{};
 
@@ -42,36 +71,13 @@ auto INode::GetInitialFlow() const -> flow::NodeFlow {
   return initial_flow;
 }
 
+///
 INode::INode(ConstructorArgs args)
     : id_{args.id},
       family_id_{args.family_id},
       input_pin_id_{args.input_pin_id},
       output_pin_ids_{std::move(args.output_pin_ids)} {}
 
+///
 void INode::SetInitialFlowValues(flow::NodeFlow& /*unused*/) const {}
-
-auto GetAllPinIds(const INode& node) -> std::vector<ne::PinId> {
-  const auto& input_pin_id = node.GetInputPinId();
-  auto pin_ids = std::vector<ne::PinId>{};
-
-  if (input_pin_id.has_value()) {
-    pin_ids.emplace_back(*input_pin_id);
-  }
-
-  for (const auto pin_id : node.GetOutputPinIds()) {
-    pin_ids.emplace_back(pin_id);
-  }
-
-  return pin_ids;
-}
-
-auto GetPinKind(const INode& node, ne::PinId pin_id) -> ne::PinKind {
-  const auto& input_pin_id = node.GetInputPinId();
-
-  if (input_pin_id.has_value() && (*input_pin_id == pin_id)) {
-    return ne::PinKind::Input;
-  }
-
-  return ne::PinKind::Output;
-}
 }  // namespace esc::core

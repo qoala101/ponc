@@ -20,25 +20,30 @@ class IFamilyTraits;
 }  // namespace coreui
 
 namespace core {
+///
 class IFamily : public cpp::Interface {
  public:
+  ///
   virtual auto CreateNode(IdGenerator &id_generator)
-      -> std::shared_ptr<INode> = 0;
+      -> std::unique_ptr<INode> = 0;
+  ///
   virtual auto CreateNodeParser() -> std::unique_ptr<json::INodeParser> = 0;
+  ///
   virtual auto CreateWriter() -> std::unique_ptr<json::IFamilyWriter> = 0;
+  ///
   virtual auto CreateUiTraits() -> std::unique_ptr<coreui::IFamilyTraits> = 0;
 
+  ///
   auto GetId() const -> FamilyId;
 
  protected:
+  ///
   explicit IFamily(FamilyId id);
 
  private:
+  ///
   FamilyId id_{};
 };
-
-// auto IsChildOf  (ne::NodeId node_id, const IFamily &family)
-// -> bool;
 }  // namespace core
 }  // namespace esc
 

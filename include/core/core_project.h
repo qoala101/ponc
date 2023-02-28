@@ -7,23 +7,39 @@
 #include "core_settings.h"
 
 namespace esc::core {
+///
 class Project {
  public:
-  explicit Project(std::vector<std::shared_ptr<IFamily>> families = {},
+  ///
+  explicit Project(std::vector<std::unique_ptr<IFamily>> families = {},
                    Diagram diagram = Diagram{}, const Settings &settings = {});
 
+  ///
   auto GetIdGenerator() const -> const IdGenerator &;
+  ///
   auto GetIdGenerator() -> IdGenerator &;
-  auto GetFamilies() const -> const std::vector<std::shared_ptr<IFamily>> &;
+
+  ///
+  auto GetFamilies() const -> const std::vector<std::unique_ptr<IFamily>> &;
+
+  ///
   auto GetDiagram() const -> const Diagram &;
+  ///
   auto GetDiagram() -> Diagram &;
+
+  ///
   auto GetSettings() const -> const Settings &;
+  ///
   auto GetSettings() -> Settings &;
 
  private:
-  IdGenerator id_generator_;
-  std::vector<std::shared_ptr<IFamily>> families_{};
+  ///
+  IdGenerator id_generator_{};
+  ///
+  std::vector<std::unique_ptr<IFamily>> families_{};
+  ///
   Diagram diagram_{};
+  ///
   Settings settings_{};
 };
 }  // namespace esc::core

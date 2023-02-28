@@ -6,17 +6,22 @@
 namespace ne = ax::NodeEditor;
 
 namespace esc::core {
+///
 struct Link {
+  ///
+  static auto HasPin(const Link &link, ne::PinId pin_id) -> bool;
+
+  ///
   ne::LinkId id{};
+  ///
   ne::PinId start_pin_id{};
+  ///
   ne::PinId end_pin_id{};
 
  private:
+  ///
   friend auto operator==(const Link &, const Link &) -> bool = default;
 };
-
-//
-auto HasPin(const Link &link, ne::PinId pin_id) -> bool;
 }  // namespace esc::core
 
 #endif  // VH_CORE_LINK_H_

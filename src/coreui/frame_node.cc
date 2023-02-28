@@ -52,18 +52,18 @@ auto Frame::GetColorForFlowValue(float value) const {
   const auto blue = ImColor{0.F, 0.F, 1.F};
   const auto red = ImColor{1.F, 0.F, 0.F};
 
-  if (value < settings.min) {
+  if (value < settings.min_flow) {
     return blue;
   }
 
-  if (value >= settings.max) {
+  if (value >= settings.max_flow) {
     return red;
   }
 
-  const auto range = (settings.max - settings.min);
-  const auto value_percentage = (value - settings.min) / range;
-  const auto low_percentage = (settings.low - settings.min) / range;
-  const auto high_percentage = (settings.high - settings.min) / range;
+  const auto range = (settings.max_flow - settings.min_flow);
+  const auto value_percentage = (value - settings.min_flow) / range;
+  const auto low_percentage = (settings.low_flow - settings.min_flow) / range;
+  const auto high_percentage = (settings.high - settings.min_flow) / range;
 
   auto percentage = 0.0F;
   auto start_color = ImColor{};
@@ -159,10 +159,12 @@ auto Frame::GetCurve() -> std::optional<HandmadeLink> {
 
   // if (fixed_pin_kind == ax::NodeEditor::PinKind::Input) {
   //   curve.end_pos = ImVec2{fixed_pin_rect.Min.x,
-  //                          (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y) / 2};
+  //                          (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y) /
+  //                          2};
   // } else {
   //   curve.start_pos = ImVec2{fixed_pin_rect.Max.x,
-  //                            (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y) / 2};
+  //                            (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y) /
+  //                            2};
   // }
 
   // if (creation.IsHoveringOverPin()) {

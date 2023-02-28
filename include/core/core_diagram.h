@@ -9,33 +9,40 @@
 #include "imgui_node_editor.h"
 
 namespace esc::core {
+///
 class Diagram {
  public:
-  explicit Diagram(std::vector<std::shared_ptr<INode>> nodes = {},
+  ///
+  explicit Diagram(std::vector<std::unique_ptr<INode>> nodes = {},
                    std::vector<Link> links = {});
 
-  auto GetNodes() const -> const std::vector<std::shared_ptr<INode>> &;
-  auto EmplaceNode(std::shared_ptr<INode> node)
-      -> const std::shared_ptr<INode> &;
+  ///
+  static auto FindPinNode(const Diagram &diagram, ne::PinId pin_id)
+      -> const INode &;
+  ///
+  static auto FindPinLink(const Diagram &diagram, ne::PinId pin_id)
+      -> std::optional<const Link *>;
+
+  ///
+  auto GetNodes() const -> const std::vector<std::unique_ptr<INode>> &;
+  ///
+  auto EmplaceNode(std::unique_ptr<INode> node) -> INode &;
+  ///
   void EraseNode(ne::NodeId node_id);
 
+  ///
   auto GetLinks() const -> const std::vector<Link> &;
+  ///
   auto EmplaceLink(const Link &link) -> Link &;
+  ///
   void EraseLink(ne::LinkId link_id);
 
  private:
-  std::vector<std::shared_ptr<INode>> nodes_{};
+  ///
+  std::vector<std::unique_ptr<INode>> nodes_{};
+  ///
   std::vector<Link> links_{};
 };
-
-auto FindPinNode(const Diagram &diagram, ne::PinId pin_id)
-    -> const std::shared_ptr<INode> &;
-
-auto FindPinLink(const Diagram &diagram, ne::PinId pin_id)
-    -> std::optional<const Link *>;
-
-auto GetSelectedNodeIds() -> std::vector<ne::NodeId>;
-auto GetSelectedLinkIds() -> std::vector<ne::LinkId>;
 }  // namespace esc::core
 
 #endif  // VH_CORE_DIAGRAM_H_
