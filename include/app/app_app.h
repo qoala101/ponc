@@ -9,14 +9,20 @@
 #include "app_textures.h"
 
 namespace esc {
+///
 // NOLINTNEXTLINE(*-virtual-class-destructor)
 class App : public Application {
  public:
+  ///
   App(const char* name, int argc, char** argv);
 
+  ///
   auto GetWindowFlags() const -> ImGuiWindowFlags override;
+  ///
   void OnStart() override;
+  ///
   void OnStop() override;
+  ///
   void OnFrame(float delta_time) override;
 
  private:

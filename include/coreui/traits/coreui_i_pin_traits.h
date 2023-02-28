@@ -5,20 +5,22 @@
 
 #include <optional>
 #include <string>
+#include <variant>
 
-#include "core_i_node.h"
 #include "cpp_interface.h"
 
 namespace ne = ax::NodeEditor;
 
 namespace esc::coreui {
+///
 class IPinTraits : public cpp::Interface {
  public:
+  ///
+  virtual auto GetPin() const -> std::variant<ne::PinId, ne::PinKind> = 0;
+  ///
   virtual auto GetLabel() const -> std::string;
-  virtual auto GetKind() const -> std::optional<ne::PinKind>;
-  virtual auto GetFloat() -> std::optional<float *>;
-  virtual auto IsEditable() const -> bool;
-  virtual auto GetPinId() const -> std::optional<ne::PinId>;
+  ///
+  virtual auto GetValue() -> std::variant<std::monostate, float, float *>;
 };
 }  // namespace esc::coreui
 

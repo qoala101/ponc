@@ -4,9 +4,13 @@
 #include <imgui.h>
 
 namespace esc::coreui {
+///
 struct Texture {
+  ///
   ImTextureID id{};
+  ///
   int width{};
+  ///
   int height{};
 };
 }  // namespace esc::coreui

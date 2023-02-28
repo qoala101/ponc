@@ -5,9 +5,11 @@
 #include "cpp_assert.h"
 
 namespace esc {
+  ///
 App::App(const char* name, int argc, char** argv)
     : Application{name, argc, argv} {}
 
+  ///
 auto App::GetWindowFlags() const -> ImGuiWindowFlags {
   // NOLINTNEXTLINE(*-signed-bitwise)
   return Application::GetWindowFlags() | ImGuiWindowFlags_MenuBar;

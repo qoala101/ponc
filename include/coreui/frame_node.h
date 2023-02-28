@@ -27,20 +27,7 @@
 namespace ne = ax::NodeEditor;
 
 namespace esc::coreui {
-struct Link {
-  ne::LinkId id{};
-  ne::PinId start_pin{};
-  ne::PinId end_pin{};
-  ImColor color{};
-  float thickness{};
-};
 
-struct HandmadeLink {
-  std::optional<ImVec2> start_pos{};
-  std::optional<ImVec2> end_pos{};
-  ImColor color{};
-  float thickness{};
-};
 
 struct Links {};
 

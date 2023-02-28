@@ -1,5 +1,5 @@
-#ifndef VH_COREUI_HANDMADE_LINK_H_
-#define VH_COREUI_HANDMADE_LINK_H_
+#ifndef VH_COREUI_LINK_H_
+#define VH_COREUI_LINK_H_
 
 #include <imgui_node_editor.h>
 
@@ -23,14 +23,13 @@
 
 namespace esc::coreui {
 ///
-struct MousePos {};
-
-///
-struct HandmadeLink {
+struct Link {
   ///
-  std::variant<ImVec2, MousePos> start_pos{};
+  ne::LinkId id{};
   ///
-  std::variant<ImVec2, MousePos> end_pos{};
+  ne::PinId start_pin{};
+  ///
+  ne::PinId end_pin{};
   ///
   ImColor color{};
   ///
@@ -38,4 +37,4 @@ struct HandmadeLink {
 };
 }  // namespace esc::coreui
 
-#endif  // VH_COREUI_HANDMADE_LINK_H_
+#endif  // VH_COREUI_LINK_H_

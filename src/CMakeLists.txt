@@ -134,17 +134,16 @@ add_example_executable(esc
   core/core_link.cc
   core/core_project.cc
 
-  coreui/pin/coreui_flow_pin_traits.cc
+  coreui/traits/coreui_flow_pin_traits.cc
+  coreui/traits/coreui_i_family_traits.cc
+  coreui/traits/coreui_i_node_traits.cc
+  coreui/traits/coreui_i_pin_traits.cc
 
   coreui/coreui_link_creation.cc
   coreui/coreui_handmade_link.cc
-  coreui/coreui_i_family_traits.cc
-  coreui/coreui_i_node_traits.cc
-  coreui/coreui_i_pin_traits.cc
   coreui/coreui_node.cc
   coreui/frame_node.cc
 
-  cpp/cpp_assert.cc
   cpp/cpp_scope_function.cc
 
   draw/dialog/draw_i_file_dialog.cc
@@ -198,7 +197,7 @@ target_include_directories(esc
   PUBLIC ${PROJECT_SOURCE_DIR}/include/app/node
   PUBLIC ${PROJECT_SOURCE_DIR}/include/core
   PUBLIC ${PROJECT_SOURCE_DIR}/include/coreui
-  PUBLIC ${PROJECT_SOURCE_DIR}/include/coreui/pin
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/coreui/traits
   PUBLIC ${PROJECT_SOURCE_DIR}/include/core/family
   PUBLIC ${PROJECT_SOURCE_DIR}/include/cpp
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw

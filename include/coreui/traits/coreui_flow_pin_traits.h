@@ -6,13 +6,17 @@
 #include "coreui_i_pin_traits.h"
 
 namespace esc::coreui {
+///
 class FlowPinTraits : public IPinTraits {
  public:
+  ///
   explicit FlowPinTraits(ne::PinId pin_id);
 
-  auto GetPinId() const -> std::optional<ne::PinId> override;
+  ///
+  auto GetPin() const -> std::variant<ne::PinId, ne::PinKind> override;
 
  private:
+  ///
   ne::PinId pin_id_{};
 };
 }  // namespace esc::coreui

@@ -1,5 +1,5 @@
-#ifndef VH_COREUI_NODE_H_
-#define VH_COREUI_NODE_H_
+#ifndef VH_COREUI_PIN_H_
+#define VH_COREUI_PIN_H_
 
 #include <imgui_node_editor.h>
 
@@ -19,32 +19,50 @@
 #include "coreui_handmade_link.h"
 #include "coreui_i_pin_traits.h"
 #include "coreui_link_creation.h"
-#include "coreui_pin.h"
 #include "coreui_texture.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 
 namespace esc::coreui {
 ///
-struct NodeHeader {
+struct PinIconData {
   ///
-  std::string label{};
+  ne::PinId id{};
   ///
   ImColor color{};
   ///
-  Texture texture{};
+  bool filled{};
 };
 
-struct Node {
+class PinIcon {
+ public:
   ///
-  ne::NodeId id{};
+  explicit PinIcon(const PinIconData &data);
+
   ///
-  std::optional<NodeHeader> header{};
+  auto GetData() const -> const PinIconData &;
+
   ///
-  std::vector<Pin> input_pins{};
+  auto GetRect(ne::PinId pin_id) const -> ImRect;
   ///
-  std::vector<Pin> output_pins{};
+  void SetRect(ne::PinId pin_id, ImRect rect);
+
+ private:
+  ///
+  PinIconData data_{};
+  ///
+  std::optional<ImRect> rect{};
+};
+
+///
+struct Pin {
+  ///
+  std::optional<PinIcon> icon{};
+  ///
+  std::variant<std::monostate, float, float *> value{};
+  ///
+  std::string label{};
 };
 }  // namespace esc::coreui
 
-#endif  // VH_COREUI_NODE_H_
+#endif  // VH_COREUI_PIN_H_

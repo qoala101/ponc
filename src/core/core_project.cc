@@ -43,7 +43,8 @@ auto FindMaxId(const std::vector<std::unique_ptr<IFamily>>& families,
 ///
 Project::Project(std::vector<std::unique_ptr<IFamily>> families,
                  Diagram diagram, const Settings& settings)
-    : id_generator_{FindMaxId(families, diagram) + 1},
+    : EnableSafePointer{this},
+      id_generator_{FindMaxId(families, diagram) + 1},
       families_{std::move(families)},
       diagram_{std::move(diagram)},
       settings_{settings} {}

@@ -10,11 +10,16 @@
 #include "imgui.h"
 
 namespace esc::coreui {
+///
 class INodeTraits : public cpp::Interface {
  public:
+  ///
   virtual auto GetLabel() const -> std::string = 0;
+  ///
   virtual auto GetColor() const -> ImColor = 0;
+  ///
   virtual auto HasHeader() const -> bool;
+  ///
   virtual auto CreatePinTraits() const
       -> std::vector<std::unique_ptr<IPinTraits>>;
 };
