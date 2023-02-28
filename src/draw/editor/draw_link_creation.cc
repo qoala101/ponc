@@ -1,4 +1,4 @@
-#include "draw_creation.h"
+#include "draw_link_creation.h"
 
 #include <iostream>
 
@@ -8,7 +8,7 @@
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
-void Creation::Draw(
+void LinkCreation::Draw(
     coreui::LinkCreation& creation,
     const SignalCreateCurrentLink& signal_create_current_link,
     const SignalCreateConnectedNode& signal_create_connected_node) {

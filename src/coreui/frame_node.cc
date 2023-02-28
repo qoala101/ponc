@@ -42,7 +42,8 @@ auto Frame::GetLinkAlpha(ne::LinkId link_id) const {
 }
 
 auto Frame::GetColorForFlowValue(float value) const {
-  const auto& settings = project_->GetSettings();
+  const auto& project = signal_get_project_();
+  const auto& settings = project.GetSettings();
 
   if (!settings.color_flow) {
     return ImColor{1.F, 1.F, 1.F};
@@ -105,7 +106,8 @@ auto Frame::GetColorForFlowValue(float value) const {
 }
 
 auto Frame::GetLinks() {
-  const auto& diagram = project_->GetDiagram();
+  const auto& project = signal_get_project_();
+  const auto& diagram = project.GetDiagram();
 
   const auto flow_tree = flow::BuildFlowTree(diagram);
   const auto node_flows = flow::CalculateNodeFlows(flow_tree);
@@ -147,28 +149,29 @@ auto Frame::GetCurve() -> std::optional<HandmadeLink> {
 
   const auto fixed_pin = creation.GetFixedPinOfLinkBeingRepinned();
 
-  const auto& diagram = project_->GetDiagram();
+  const auto& project = signal_get_project_();
+  const auto& diagram = project.GetDiagram();
   auto curve = HandmadeLink{.color = ImColor{1.F, 1.F, 1.F}, .thickness = 4.F};
 
-  const auto fixed_pin_rect = nodes.pin_rects.at(fixed_pin.Get());
-  const auto fixed_pin_node = FindPinNode(diagram, fixed_pin);
-  const auto fixed_pin_kind = core::GetPinKind(*fixed_pin_node, fixed_pin);
+  // const auto fixed_pin_rect = nodes.pin_rects.at(fixed_pin.Get());
+  // const auto fixed_pin_node = FindPinNode(diagram, fixed_pin);
+  // const auto fixed_pin_kind = core::GetPinKind(*fixed_pin_node, fixed_pin);
 
-  if (fixed_pin_kind == ax::NodeEditor::PinKind::Input) {
-    curve.end_pos = ImVec2{fixed_pin_rect.Min.x,
-                           (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y) / 2};
-  } else {
-    curve.start_pos = ImVec2{fixed_pin_rect.Max.x,
-                             (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y) / 2};
-  }
+  // if (fixed_pin_kind == ax::NodeEditor::PinKind::Input) {
+  //   curve.end_pos = ImVec2{fixed_pin_rect.Min.x,
+  //                          (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y) / 2};
+  // } else {
+  //   curve.start_pos = ImVec2{fixed_pin_rect.Max.x,
+  //                            (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y) / 2};
+  // }
 
-  if (creation.IsHoveringOverPin()) {
-    if (creation.GetCanCreateLinkReason().first) {
-      curve.color = ImColor{1.F / 2, 1.F, 1.F / 2};
-    } else {
-      curve.color = ImColor{1.F, 1.F / 2, 1.F / 2};
-    }
-  }
+  // if (creation.IsHoveringOverPin()) {
+  //   if (creation.GetCanCreateLinkReason().first) {
+  //     curve.color = ImColor{1.F / 2, 1.F, 1.F / 2};
+  //   } else {
+  //     curve.color = ImColor{1.F, 1.F / 2, 1.F / 2};
+  //   }
+  // }
 
   return curve;
 }
@@ -202,9 +205,9 @@ auto CreateFamilyParsers() {
   return family_parsers;
 }
 
-Frame::Frame(core::Project* project)
-    : project_{project},
-      creation{[this]() { return project_->GetDiagram(); },
+Frame::Frame(SignalGetProject signal_get_project)
+    : signal_get_project_{std::move(signal_get_project)},
+      creation{[this]() { return signal_get_project_().GetDiagram(); },
                [this](ne::PinId start_pin_id, ne::PinId end_pin_id) {
                  CreateLink(start_pin_id, end_pin_id);
                },
@@ -222,16 +225,16 @@ void Frame::OnFrame() {
 }
 
 void Frame::UpdateNodes() {
-  nodes.nodes.clear();
-  nodes.pin_rects.clear();
-
-  const auto& diagram = project_->GetDiagram();
+  const auto& project = signal_get_project_();
+  const auto& diagram = project.GetDiagram();
   const auto flow_tree = flow::BuildFlowTree(diagram);
   const auto node_flows = flow::CalculateNodeFlows(flow_tree);
-  const auto& settings = project_->GetSettings();
+  const auto& settings = project.GetSettings();
+
+  auto nodes = std::vector<Node>();
 
   for (const auto& node : diagram.GetNodes()) {
-    auto& node_data = nodes.nodes.emplace_back();
+    auto& node_data = nodes.emplace_back();
     node_data.id = node->GetId();
 
     const auto traits = node->CreateUiTraits();
@@ -281,23 +284,26 @@ void Frame::UpdateNodes() {
 }
 
 void Frame::UpdateLinks() {
-  links.links = GetLinks();
-  links.handmade_link = GetCurve();
+  links = GetLinks();
+  handmade_link = GetCurve();
 }
 
-auto Frame::GetProject() const -> core::Project& { return *project_; }
+auto Frame::GetProject() const -> core::Project& {
+  return signal_get_project_();
+}
 
 void Frame::OpenProjectFromFile(std::string file_path) {
   events_.emplace_back([this, file_path = std::move(file_path)]() {
     const auto json = crude_json::value::load(file_path).first;
-    *project_ =
+    signal_get_project_() =
         json::ProjectSerializer::ParseFromJson(json, CreateFamilyParsers());
   });
 }
 
 void Frame::SaveProjectToFile(std::string file_path) {
   events_.emplace_back([this, file_path = std::move(file_path)]() {
-    const auto json = json::ProjectSerializer::WriteToJson(*project_);
+    const auto json =
+        json::ProjectSerializer::WriteToJson(signal_get_project_());
     json.save(file_path);
   });
 }
@@ -324,26 +330,28 @@ void Frame::SaveProjectToFile(std::string file_path) {
 
 void Frame::EmplaceNode(std::shared_ptr<core::INode> node,
                         const ImVec2& position) {
-  events_.emplace_back([project = project_, node = std::move(node),
-                        position]() mutable {
-    const auto& new_node = project->GetDiagram().EmplaceNode(std::move(node));
+  events_.emplace_back([this, node = std::move(node), position]() mutable {
+    const auto& new_node =
+        signal_get_project_().GetDiagram().EmplaceNode(std::move(node));
     new_node->SetPosition(position);
   });
 }
 
 void Frame::CreateLink(ne::PinId start_pin_id, ne::PinId end_pin_id) {
-  events_.emplace_back([project = project_, start_pin_id, end_pin_id]() {
-    project->GetDiagram().EmplaceLink(
-        {.id = project->GetIdGenerator().Generate<ne::LinkId>(),
+  events_.emplace_back([this, start_pin_id, end_pin_id]() {
+    auto& project = signal_get_project_();
+
+    project.GetDiagram().EmplaceLink(
+        {.id = project.GetIdGenerator().Generate<ne::LinkId>(),
          .start_pin_id = start_pin_id,
          .end_pin_id = end_pin_id});
   });
 }
 
 void Frame::DeleteLink(ne::LinkId link_id) {
-  events_.emplace_back([project = project_, link_id]() {
+  events_.emplace_back([this, link_id]() {
     ne::DeleteLink(link_id);
-    project->GetDiagram().EraseLink(link_id);
+    signal_get_project_().GetDiagram().EraseLink(link_id);
   });
 }
 

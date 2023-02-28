@@ -19,6 +19,7 @@
 #include "coreui_handmade_link.h"
 #include "coreui_i_pin_traits.h"
 #include "coreui_link_creation.h"
+#include "coreui_node.h"
 #include "coreui_texture.h"
 #include "imgui.h"
 #include "imgui_internal.h"
@@ -26,32 +27,6 @@
 namespace ne = ax::NodeEditor;
 
 namespace esc::coreui {
-struct NodeHeader {
-  std::string label{};
-  ImColor color{};
-  Texture texture{};
-};
-
-struct Pin {
-  std::optional<ne::PinId> id{};
-  std::variant<std::monostate, float, float*> value{};
-  std::string label{};
-  ImColor color{};
-  bool filled{};
-};
-
-struct Node {
-  ne::NodeId id{};
-  std::optional<NodeHeader> header{};
-  std::vector<Pin> input_pins{};
-  std::vector<Pin> output_pins{};
-};
-
-struct Nodes {
-  std::vector<Node> nodes{};
-  std::unordered_map<uintptr_t, ImRect> pin_rects{};
-};
-
 struct Link {
   ne::LinkId id{};
   ne::PinId start_pin{};
@@ -67,24 +42,26 @@ struct HandmadeLink {
   float thickness{};
 };
 
-struct Links {
-  std::vector<Link> links{};
-  std::optional<HandmadeLink> handmade_link{};
-};
+struct Links {};
 
 class Frame {
  public:
-  explicit Frame(core::Project* project);
+  using SignalGetProject = std::function<auto()->core::Project&>;
+
+  explicit Frame(SignalGetProject signal_get_project);
 
   auto GetProject() const -> core::Project&;
 
+ private:
+  SignalGetProject signal_get_project_{};
+
  public:
-  core::Project* project_;
   std::vector<std::function<void()>> events_{};
 
   LinkCreation creation;
-  Nodes nodes{};
-  Links links{};
+  std::vector<Node> nodes{};
+  std::vector<Link> links{};
+  std::optional<HandmadeLink> handmade_link{};
 
  public:
   void OnFrame();

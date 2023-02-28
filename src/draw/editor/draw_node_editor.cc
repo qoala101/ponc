@@ -3,9 +3,11 @@
 #include <functional>
 
 #include "cpp_scope.h"
-#include "draw_links.h"
+#include "draw_handmade_link.h"
+#include "draw_link.h"
+#include "draw_link_creation.h"
 #include "draw_main_window.h"
-#include "draw_nodes.h"
+#include "draw_node.h"
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
@@ -19,11 +21,23 @@ void NodeEditor::Draw(coreui::Frame &frame) {
   ne::Begin("Node editor");
 
   // draw::DrawGroups(state);
-  creation.Draw(frame.creation,
-                std::bind_front(&NodeEditor::SlotCreateCurrentLink, frame),
-                std::bind_front(&NodeEditor::SlotCreateConnectedNode, this));
-  DrawNodes(frame.nodes);
-  DrawLinks(frame.links);
+  LinkCreation::Draw(
+      frame.creation,
+      std::bind_front(&NodeEditor::SlotCreateCurrentLink, frame),
+      std::bind_front(&NodeEditor::SlotCreateConnectedNode, this));
+
+  for (auto &node : frame.nodes) {
+    DrawNode(node);
+  }
+
+  for (auto &link : frame.links) {
+    DrawLink(link);
+  }
+
+  if (frame.handmade_link.has_value()) {
+    DrawHandmadeLink(*frame.handmade_link);
+  }
+
   // draw::DrawDeleteItemsProcess(state);
   DrawShowPopupProcess(frame);
   DrawPopupContents(frame);

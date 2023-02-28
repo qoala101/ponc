@@ -29,7 +29,9 @@ AppImpl::AppImpl(const Textures &textures)
             id_generator.Generate<core::FamilyId>()));
 
         return families;
-      }()}, controller_{&project_} {}
+      }()}, controller_{[this]() -> auto & {
+        return project_;
+      }} {}
 
 void AppImpl::OnFrame() {
   controller_.OnFrame();

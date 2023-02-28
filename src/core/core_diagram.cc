@@ -7,17 +7,14 @@
 #include <memory>
 #include <ranges>
 
-#include "core_group.h"
 #include "core_i_node.h"
 #include "core_link.h"
 #include "cpp_assert.h"
 
 namespace esc::core {
 Diagram::Diagram(std::vector<std::shared_ptr<INode>> nodes,
-                 std::vector<Link> links, std::vector<Group> groups)
-    : nodes_{std::move(nodes)},
-      links_{std::move(links)},
-      groups_{std::move(groups)} {}
+                 std::vector<Link> links)
+    : nodes_{std::move(nodes)}, links_{std::move(links)} {}
 
 auto Diagram::GetNodes() const -> const std::vector<std::shared_ptr<INode>>& {
   return nodes_;
@@ -50,21 +47,6 @@ void Diagram::EraseLink(ne::LinkId link_id) {
   links_.erase(found_link);
 }
 
-auto Diagram::GetGroups() const -> const std::vector<Group>& { return groups_; }
-
-auto Diagram::EmplaceGroup(Group group) -> Group& {
-  return groups_.emplace_back(std::move(group));
-}
-
-void Diagram::EraseGroup(const Group& group) {
-  const auto found_group = std::ranges::find_if(
-      groups_,
-      [&group](const auto& other_group) { return &other_group == &group; });
-
-  Expects(found_group != groups_.end());
-  groups_.erase(found_group);
-}
-
 auto FindPinNode(const Diagram& diagram, ne::PinId pin_id)
     -> const std::shared_ptr<INode>& {
   for (const auto& node : diagram.GetNodes()) {
@@ -88,46 +70,6 @@ auto FindPinLink(const Diagram& diagram, ne::PinId pin_id)
 
   return std::nullopt;
 }
-
-// // auto FindNode(const Diagram& diagram, ne::NodeId node_id)
-//     -> const std::shared_ptr<INode>& {
-//   for (const auto& family : diagram.GetFamilies()) {
-//     if (const auto* node = family->FindNode(node_id)) {
-//       return *node;
-//     }
-//   }
-
-//   Expects(false);
-// }
-
-// // void EraseNode(Diagram& diagram, ne::NodeId node_id) {
-//   for (const auto& family : diagram.GetFamilies()) {
-//     if (const auto* node = family->FindNode(node_id)) {
-//       family->EraseNode(node_id);
-//       return;
-//     }
-//   }
-// }
-
-// auto Diagram::FindLink(ne::LinkId id) -> Link& {
-//   for (auto& link : links_) {
-//     if (link.id == id) {
-//       return link;
-//     }
-//   }
-
-//   Expects(false);
-// }
-
-// auto Diagram::FindLinkFromPin(ne::PinId pin_id) -> const Link* {
-//   for (const auto& link : links_) {
-//     if ((link.start_pin_id == pin_id) || (link.end_pin_id == pin_id)) {
-//       return &link;
-//     }
-//   }
-
-//   return nullptr;
-// }
 
 auto GetSelectedNodeIds() -> std::vector<ne::NodeId> {
   const auto num_selected_objects = ne::GetSelectedObjectCount();

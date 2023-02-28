@@ -4,13 +4,11 @@
 
 #include "core_diagram.h"
 #include "core_family_id.h"
-#include "core_group.h"
 #include "core_i_node.h"
 #include "core_link.h"
 #include "cpp_assert.h"
 #include "crude_json.h"
 #include "json_container_serializer.h"
-#include "json_group_serializer.h"
 #include "json_i_node_parser.h"
 #include "json_i_node_writer.h"
 #include "json_id_serializer.h"
@@ -45,9 +43,7 @@ auto DiagramSerializer::ParseFromJson(
       [&families](const auto& json) { return ParseNode(json, families); });
   auto links = ContainerSerializer::ParseFromJson<core::Link>(
       json, "links", &LinkSerializer::ParseFromJson);
-  auto groups = ContainerSerializer::ParseFromJson<core::Group>(
-      json, "groups", &GroupSerializer::ParseFromJson);
-  return core::Diagram{std::move(nodes), std::move(links), std::move(groups)};
+  return core::Diagram{std::move(nodes), std::move(links)};
 }
 
 auto DiagramSerializer::WriteToJson(const core::Diagram& diagram)
@@ -59,8 +55,6 @@ auto DiagramSerializer::WriteToJson(const core::Diagram& diagram)
       });
   ContainerSerializer::WriteToJson(json, diagram.GetLinks(), "links",
                                    &LinkSerializer::WriteToJson);
-  ContainerSerializer::WriteToJson(json, diagram.GetGroups(), "groups",
-                                   &GroupSerializer::WriteToJson);
   return json;
 }
 }  // namespace esc::json

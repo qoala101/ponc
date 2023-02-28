@@ -58,7 +58,7 @@ class LinkCreation {
   };
 
   struct Repinning {
-    const core::Link* link_to_repin{};
+    ne::LinkId link_to_repin{};
     ne::PinId fixed_pin{};
     const core::INode* fixed_pin_node{};
   };

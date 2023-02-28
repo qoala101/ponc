@@ -11,7 +11,7 @@
 #include "cpp_assert.h"
 #include "cpp_scope.h"
 #include "draw_flow_icon.h"
-#include "draw_nodes.h"
+#include "draw_node.h"
 #include "frame_node.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
@@ -64,8 +64,9 @@ auto DrawPinIconArea(const coreui::Pin& pin) -> std::optional<ImRect> {
 
   return ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
 }
+}  // namespace
 
-auto DrawNode(const coreui::Node& node) {
+void DrawNode(coreui::Node& node) {
   auto pin_rects = std::unordered_map<uintptr_t, ImRect>{};
   int layout_id_{};
 
@@ -232,21 +233,6 @@ auto DrawNode(const coreui::Node& node) {
   ImGui::PopID();
   ne::PopStyleVar();
 
-  return pin_rects;
-}
-}  // namespace
-
-void DrawNodes(coreui::Nodes& nodes) {
-  auto pin_rects = std::unordered_map<uintptr_t, ImRect>{};
-
-  for (const auto& node : nodes.nodes) {
-    const auto node_pin_rects = DrawNode(node);
-
-    for (const auto& [pin, rect] : node_pin_rects) {
-      pin_rects.emplace(pin, rect);
-    }
-  }
-
-  nodes.pin_rects = std::move(pin_rects);
+  node.SetPinRects(pin_rects);
 }
 }  // namespace esc::draw

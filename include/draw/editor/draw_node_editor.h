@@ -6,12 +6,9 @@
 #include <memory>
 
 #include "draw_background_popup.h"
-#include "draw_creation.h"
 #include "draw_creation_popup.h"
 #include "draw_link_popup.h"
-#include "draw_links.h"
 #include "draw_node_popup.h"
-#include "draw_nodes.h"
 #include "frame_node.h"
 
 namespace ne = ax::NodeEditor;
@@ -45,8 +42,6 @@ class NodeEditor {
                                ne::PinId connect_to_pin);
 
   ne::EditorContext *editor_context_{};
-
-  Creation creation{};
 
   BackgroundPopup background_popup{};
   CreationPopup creation_popup{};

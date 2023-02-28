@@ -34,7 +34,7 @@ void LinkCreation::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
                                ? (*link_to_repin)->end_pin_id
                                : (*link_to_repin)->start_pin_id;
     creating_->repinning =
-        Repinning{.link_to_repin = *link_to_repin,
+        Repinning{.link_to_repin = (*link_to_repin)->id,
                   .fixed_pin = fixed_pin,
                   .fixed_pin_node = &*FindPinNode(diagram, fixed_pin)};
   }
@@ -76,7 +76,7 @@ auto LinkCreation::IsRepinningLink() const -> bool {
 auto LinkCreation::IsLinkBeingRepinned(ne::LinkId link_id) const -> bool {
   Expects(creating_.has_value());
   Expects(creating_->repinning.has_value());
-  return creating_->repinning->link_to_repin->id == link_id;
+  return creating_->repinning->link_to_repin == link_id;
 }
 
 auto LinkCreation::GetFixedPinOfLinkBeingRepinned() const -> ne::PinId {
@@ -129,7 +129,7 @@ auto LinkCreation::GetCanConnectToPinReason(ne::PinId pin_id) const
   if (const auto pin_link = core::FindPinLink(diagram, pin_id)) {
     if (const auto pin_of_link_being_repinned =
             is_repinning &&
-            ((*pin_link)->id == creating_->repinning->link_to_repin->id)) {
+            ((*pin_link)->id == creating_->repinning->link_to_repin)) {
       return {true, {}};
     }
 

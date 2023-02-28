@@ -10,7 +10,7 @@
 #include "imgui.h"
 
 namespace esc::draw {
-struct Creation {
+struct LinkCreation {
   using SignalCreateCurrentLink = std::function<void()>;
   using SignalCreateConnectedNode =
       std::function<void(const ImVec2 &new_node_pos, ne::PinId connect_to_pin)>;

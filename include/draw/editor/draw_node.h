@@ -8,7 +8,7 @@
 #include "frame_node.h"
 
 namespace esc::draw {
-void DrawNodes(coreui::Nodes& nodes);
+void DrawNode(coreui::Node& node);
 }  // namespace esc::draw
 
 #endif  // VH_DRAW_NODES_H_

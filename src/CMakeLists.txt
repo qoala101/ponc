@@ -128,7 +128,6 @@ add_example_executable(esc
   # core/family/core_free_pin_family.cc
   # core/family/core_placeholder_family.cc
   core/core_diagram.cc
-  core/core_group.cc
   core/core_i_family.cc
   core/core_i_node.cc
   core/core_id_generator.cc
@@ -142,6 +141,7 @@ add_example_executable(esc
   coreui/coreui_i_family_traits.cc
   coreui/coreui_i_node_traits.cc
   coreui/coreui_i_pin_traits.cc
+  coreui/coreui_node.cc
   coreui/frame_node.cc
 
   cpp/cpp_assert.cc
@@ -158,14 +158,14 @@ add_example_executable(esc
   draw/editor/popup/draw_node_popup.cc
 
   # draw/editor/process/draw_delete_items_process.cc
-  draw/editor/draw_creation.cc
+  draw/editor/draw_link_creation.cc
   draw/editor/draw_flow_icon.cc
 
   # draw/editor/draw_groups.cc
-  draw/editor/draw_links.cc
+  draw/editor/draw_handmade_link.cc
+  draw/editor/draw_link.cc
   draw/editor/draw_node_editor.cc
-  draw/editor/draw_nodes.cc
-
+  draw/editor/draw_node.cc
   draw/editor/draw_tooltip.cc
 
   # draw/view/draw_families_view.cc
@@ -181,7 +181,6 @@ add_example_executable(esc
   flow/flow_tree.cc
 
   json/json_diagram_serializer.cc
-  json/json_group_serializer.cc
   json/json_i_family_parser.cc
   json/json_i_family_writer.cc
   json/json_i_node_parser.cc
