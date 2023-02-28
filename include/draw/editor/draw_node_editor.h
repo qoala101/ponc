@@ -21,7 +21,7 @@ class NodeEditor {
   NodeEditor(const NodeEditor &) = delete;
   NodeEditor(NodeEditor &&) noexcept = delete;
 
-  auto operator=(const NodeEditor &) noexcept -> NodeEditor & = delete;
+  auto operator=(const NodeEditor &) -> NodeEditor & = delete;
   auto operator=(NodeEditor &&) noexcept -> NodeEditor & = delete;
 
   ~NodeEditor();

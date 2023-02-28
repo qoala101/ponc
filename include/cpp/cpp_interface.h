@@ -11,7 +11,7 @@ class Interface {
   Interface(Interface &&) noexcept = delete;
 
   ///
-  auto operator=(const Interface &) noexcept -> Interface & = delete;
+  auto operator=(const Interface &) -> Interface & = delete;
   ///
   auto operator=(Interface &&) noexcept -> Interface & = delete;
 

@@ -3,23 +3,29 @@
 
 #include <functional>
 
-#include "cpp_scope.h"
-
 namespace esc::cpp {
+///
 class ScopeFunction {
  public:
-  explicit ScopeFunction(std::function<void()> end = detail::EmptyFunction{});
+  ///
+  explicit ScopeFunction(std::function<void()> destructor = []() {});
 
+  ///
   ScopeFunction(const ScopeFunction&) = delete;
+  ///
   ScopeFunction(ScopeFunction&&) noexcept = default;
 
-  auto operator=(const ScopeFunction&) noexcept -> ScopeFunction& = delete;
+  ///
+  auto operator=(const ScopeFunction&) -> ScopeFunction& = delete;
+  ///
   auto operator=(ScopeFunction&&) noexcept -> ScopeFunction& = default;
 
+  ///
   ~ScopeFunction();
 
  private:
-  std::function<void()> end_{};
+  ///
+  std::function<void()> destructor_{};
 };
 }  // namespace esc::cpp
 

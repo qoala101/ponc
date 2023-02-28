@@ -2,11 +2,11 @@
 
 namespace esc::cpp {
 ScopeFunction::ScopeFunction(std::function<void()> end)
-    : end_{std::move(end)} {}
+    : destructor_{std::move(end)} {}
 
 ScopeFunction::~ScopeFunction() {
-  if (end_) {
-    end_();
+  if (destructor_) {
+    destructor_();
   }
 }
 }  // namespace esc::cpp

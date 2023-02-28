@@ -1,32 +1,34 @@
 #ifndef VH_CPP_SCOPE_H_
 #define VH_CPP_SCOPE_H_
 
+#include <concepts>
 #include <utility>
 
 namespace esc::cpp {
-namespace detail {
-struct EmptyFunction {
-  void operator()() {}
-};
-}  // namespace detail
-
-template <typename End, typename Start = detail::EmptyFunction>
+///
+template <std::invocable Destructor>
+///
 class Scope {
  public:
-  explicit Scope(End end) : end_{std::move(end)} {}
+  ///
+  explicit Scope(Destructor destructor) : destructor_{std::move(destructor)} {}
 
-  Scope(const Start& start, End end) : Scope{std::move(end)} { start(); }
-
+  ///
   Scope(const Scope&) = delete;
+  ///
   Scope(Scope&&) noexcept = delete;
 
-  auto operator=(const Scope&) noexcept -> Scope& = delete;
+  ///
+  auto operator=(const Scope&) -> Scope& = delete;
+  ///
   auto operator=(Scope&&) noexcept -> Scope& = delete;
 
-  ~Scope() { end_(); }
+  ///
+  ~Scope() { destructor_(); }
 
  private:
-  End end_;
+  ///
+  Destructor destructor_;
 };
 }  // namespace esc::cpp
 
