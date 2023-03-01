@@ -4,14 +4,14 @@
 #include "app_input_node.h"
 #include "core_family_id.h"
 #include "core_id_generator.h"
+#include "coreui_project.h"
 #include "draw_main_window.h"
-#include "frame_node.h"
 
 namespace esc {
 AppImpl::AppImpl(const Textures &textures)
     : project_{[]() {
         auto id_generator = core::IdGenerator{};
-        auto families = std::vector<std::shared_ptr<core::IFamily>>{
+        auto families = std::vector{
             InputNode::CreateFamily(id_generator.Generate<core::FamilyId>())
             // , ClientNode::CreateFamily()
         };
@@ -29,12 +29,12 @@ AppImpl::AppImpl(const Textures &textures)
             id_generator.Generate<core::FamilyId>()));
 
         return families;
-      }()}, controller_{[this]() -> auto & {
-        return project_;
-      }} {}
+      }()},
+      project_ui_{project_.CreateSafePointer(),}
+{}
 
 void AppImpl::OnFrame() {
   controller_.OnFrame();
-  main_window_.Draw(controller_);
+  // main_window_.Draw(controller_);
 }
 }  // namespace esc

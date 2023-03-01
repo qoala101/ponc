@@ -23,13 +23,20 @@
 
 namespace esc::coreui {
 ///
+struct MousePos {};
+
+///
+struct HandmadeLink {
+  ///
+  std::variant<ImVec2, MousePos> start_pos{};
+  ///
+  std::variant<ImVec2, MousePos> end_pos{};
+};
+
+///
 struct Link {
   ///
-  ne::LinkId id{};
-  ///
-  ne::PinId start_pin{};
-  ///
-  ne::PinId end_pin{};
+  std::variant<core::Link, HandmadeLink> type{};
   ///
   ImColor color{};
   ///

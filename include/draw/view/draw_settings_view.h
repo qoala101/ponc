@@ -4,8 +4,8 @@
 #include <string>
 
 #include "core_settings.h"
+#include "coreui_project.h"
 #include "draw_i_hidable.h"
-#include "frame_node.h"
 #include "imgui.h"
 
 namespace esc::draw {

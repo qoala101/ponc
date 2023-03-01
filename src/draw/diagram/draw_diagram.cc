@@ -1,4 +1,4 @@
-#include "draw_node_editor.h"
+#include "draw_diagram.h"
 
 #include <functional>
 
@@ -17,12 +17,12 @@ NodeEditor::NodeEditor() : editor_context_{ne::CreateEditor()} {
 
 NodeEditor::~NodeEditor() { ne::DestroyEditor(editor_context_); }
 
-void NodeEditor::Draw(coreui::Frame &frame) {
+void NodeEditor::Draw(coreui::Project &frame) {
   ne::Begin("Node editor");
 
   // draw::DrawGroups(state);
   LinkCreation::Draw(
-      frame.creation,
+      frame.link_creation,
       std::bind_front(&NodeEditor::SlotCreateCurrentLink, frame),
       std::bind_front(&NodeEditor::SlotCreateConnectedNode, this));
 
@@ -45,7 +45,7 @@ void NodeEditor::Draw(coreui::Frame &frame) {
   ne::End();
 }
 
-void NodeEditor::DrawShowPopupProcess(coreui::Frame &frame) {
+void NodeEditor::DrawShowPopupProcess(coreui::Project &frame) {
   const auto popup_position = ImGui::GetMousePos();
 
   ne::Suspend();
@@ -74,7 +74,7 @@ void NodeEditor::DrawShowPopupProcess(coreui::Frame &frame) {
   }
 }
 
-void NodeEditor::DrawPopupContents(coreui::Frame &frame) {
+void NodeEditor::DrawPopupContents(coreui::Project &frame) {
   background_popup.Draw(frame.GetProject().GetFamilies(),
                         std::bind_front(&NodeEditor::SlotCreateNode, frame));
   node_popup.Draw();
@@ -82,7 +82,7 @@ void NodeEditor::DrawPopupContents(coreui::Frame &frame) {
   creation_popup.Draw(frame);
 }
 
-void NodeEditor::SlotCreateCurrentLink(coreui::Frame &frame) {}
+void NodeEditor::SlotCreateCurrentLink(coreui::Project &frame) {}
 
 void NodeEditor::SlotCreateConnectedNode(const ImVec2 &new_node_pos,
                                          ne::PinId connect_to_pin) {
@@ -95,14 +95,14 @@ void NodeEditor::SlotCreateConnectedNode(const ImVec2 &new_node_pos,
   ne::Resume();
 }
 
-void NodeEditor::SlotCreateNode(coreui::Frame &frame,
+void NodeEditor::SlotCreateNode(coreui::Project &frame,
                                 const std::shared_ptr<core::IFamily> &family,
                                 const ImVec2 &pos) {
   frame.EmplaceNode(family->CreateNode(frame.GetProject().GetIdGenerator()),
                     pos);
 }
 
-void NodeEditor::SlotDeleteLink(coreui::Frame &frame, ne::LinkId link_id) {
+void NodeEditor::SlotDeleteLink(coreui::Project &frame, ne::LinkId link_id) {
   frame.DeleteLink(link_id);
 }
 }  // namespace esc::draw

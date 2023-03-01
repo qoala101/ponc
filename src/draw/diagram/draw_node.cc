@@ -8,11 +8,11 @@
 #include <optional>
 #include <string_view>
 
+#include "coreui_project.h"
 #include "cpp_assert.h"
 #include "cpp_scope.h"
 #include "draw_flow_icon.h"
 #include "draw_node.h"
-#include "frame_node.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
@@ -101,7 +101,7 @@ void DrawNode(coreui::Node& node) {
     ImGui::EndHorizontal();
 
     Expects(header_.has_value());
-    header_->rect = ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
+    header_->rect = {ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
 
     ImGui::Spring(0, ImGui::GetStyle().ItemSpacing.y * 2.0f);
   } else {

@@ -4,19 +4,21 @@
 #include "draw_open_file_dialog.h"
 #include "draw_save_as_file_dialog.h"
 #include "draw_settings_view.h"
-#include "frame_node.h"
+#include "coreui_project.h"
 
 namespace esc::draw {
 class MainMenuBar {
  public:
-  void Draw(coreui::Frame &frame);
+  void Draw(coreui::Project &frame);
 
  private:
-  static void SlotOpenFileSelected(coreui::Frame &frame, std::string file_path);
-  static void SlotSaveAsFileSelected(coreui::Frame &frame, std::string file_path);
+  static void SlotOpenFileSelected(coreui::Project &frame,
+                                   std::string file_path);
+  static void SlotSaveAsFileSelected(coreui::Project &frame,
+                                     std::string file_path);
 
-  void DrawFileMenu(coreui::Frame &frame);
-  void DrawViewsMenu(coreui::Frame &frame);
+  void DrawFileMenu(coreui::Project &frame);
+  void DrawViewsMenu(coreui::Project &frame);
 
   OpenFileDialog open_file_dialog{};
   SaveAsFileDialog save_as_file_dialog{};

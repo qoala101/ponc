@@ -5,9 +5,9 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
+#include "coreui_project.h"
 #include "cpp_assert.h"
 #include "draw_link.h"
-#include "frame_node.h"
 #include "imgui_bezier_math.h"
 #include "imgui_node_editor.h"
 
@@ -58,6 +58,6 @@ void DrawLinkBeingRepinned_v2(const coreui::HandmadeLink& curve) {
 }  // namespace
 
 void DrawHandmadeLink(const coreui::HandmadeLink& handmade_link) {
-    DrawLinkBeingRepinned_v2(handmade_link);
+  DrawLinkBeingRepinned_v2(handmade_link);
 }
 }  // namespace esc::draw

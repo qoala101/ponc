@@ -7,10 +7,10 @@
 #include "core_i_node.h"
 #include "coreui_i_family_traits.h"
 #include "coreui_i_node_traits.h"
+#include "coreui_project.h"
 #include "cpp_scope.h"
 #include "draw_families_view.h"
 #include "flow_tree.h"
-#include "frame_node.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 

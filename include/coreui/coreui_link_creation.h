@@ -10,22 +10,24 @@
 #include <variant>
 #include <vector>
 
-#include "core_diagram.h"
 #include "core_i_node.h"
 #include "core_link.h"
-#include "cpp_safe_pointer.h"
 
 namespace esc::coreui {
+///
 class LinkCreation {
  public:
-  using SignalGetDiagram = std::function<auto()->const core::Diagram&>;
-  using SignalCreateLink =
-      std::function<void(ne::PinId start_pin_id, ne::PinId end_pin_id)>;
-  using SignalDeleteLink = std::function<void(ne::LinkId link_id)>;
+  ///
+  struct Hooks {
+    ///
+    std::function<auto(ne::PinId pin_id)->const core::INode&> find_pin_node{};
+    ///
+    std::function<auto(ne::PinId pin_id)->std::optional<const core::Link*>>
+        find_pin_link{};
+  };
 
-  LinkCreation(cpp::SafePointer<core::Diagram> diagram,
-               SignalCreateLink signal_create_link,
-               SignalDeleteLink signal_delete_link);
+  ///
+  explicit LinkCreation(Hooks hooks);
 
   ///
   void SetPins(const std::optional<ne::PinId>& dragged_from_pin,
@@ -47,9 +49,6 @@ class LinkCreation {
   auto IsLinkBeingRepinned(ne::LinkId link_id) const -> bool;
   ///
   auto GetFixedPinOfLinkBeingRepinned() const -> ne::PinId;
-
-  void AcceptCurrentLink();
-  void AcceptNewNode();
 
  private:
   ///
@@ -92,9 +91,8 @@ class LinkCreation {
       -> std::pair<bool, std::string>;
 
   ///
-  cpp::SafePointer<core::Diagram> diagram_;
-  SignalCreateLink signal_create_link_{};
-  SignalDeleteLink signal_delete_link_{};
+  Hooks hooks_{};
+  ///
   std::optional<CreatingData> creating_data_{};
 };
 }  // namespace esc::coreui

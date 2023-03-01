@@ -5,11 +5,11 @@
 
 #include <memory>
 
+#include "coreui_project.h"
 #include "draw_background_popup.h"
 #include "draw_creation_popup.h"
 #include "draw_link_popup.h"
 #include "draw_node_popup.h"
-#include "frame_node.h"
 
 namespace ne = ax::NodeEditor;
 
@@ -26,17 +26,17 @@ class NodeEditor {
 
   ~NodeEditor();
 
-  void Draw(coreui::Frame &frame);
+  void Draw(coreui::Project &frame);
 
  private:
-  static void SlotCreateNode(coreui::Frame &frame,
+  static void SlotCreateNode(coreui::Project &frame,
                              const std::shared_ptr<core::IFamily> &family,
                              const ImVec2 &pos);
-  static void SlotDeleteLink(coreui::Frame &frame, ne::LinkId link_id);
-  static void SlotCreateCurrentLink(coreui::Frame &frame);
+  static void SlotDeleteLink(coreui::Project &frame, ne::LinkId link_id);
+  static void SlotCreateCurrentLink(coreui::Project &frame);
 
-  void DrawShowPopupProcess(coreui::Frame &frame);
-  void DrawPopupContents(coreui::Frame &frame);
+  void DrawShowPopupProcess(coreui::Project &frame);
+  void DrawPopupContents(coreui::Project &frame);
 
   void SlotCreateConnectedNode(const ImVec2 &new_node_pos,
                                ne::PinId connect_to_pin);

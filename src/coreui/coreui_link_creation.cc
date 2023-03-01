@@ -5,12 +5,8 @@
 #include "cpp_assert.h"
 
 namespace esc::coreui {
-LinkCreation::LinkCreation(cpp::SafePointer<core::Diagram> diagram,
-                           SignalCreateLink signal_create_link,
-                           SignalDeleteLink signal_delete_link)
-    : diagram_{std::move(diagram)},
-      signal_create_link_{std::move(signal_create_link)},
-      signal_delete_link_{std::move(signal_delete_link)} {}
+///
+LinkCreation::LinkCreation(Hooks hooks) : hooks_{std::move(hooks)} {}
 
 ///
 void LinkCreation::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
@@ -21,8 +17,7 @@ void LinkCreation::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
     return;
   }
 
-  const auto& dragged_from_node =
-      core::Diagram::FindPinNode(*diagram_, *dragged_from_pin);
+  const auto& dragged_from_node = hooks_.find_pin_node(*dragged_from_pin);
 
   creating_data_ =
       CreatingData{.dragged_from_pin = *dragged_from_pin,
@@ -30,8 +25,7 @@ void LinkCreation::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
                    .dragged_from_pin_kind = core::INode::GetPinKind(
                        dragged_from_node, *dragged_from_pin)};
 
-  const auto link_to_repin =
-      core::Diagram::FindPinLink(*diagram_, *dragged_from_pin);
+  const auto link_to_repin = hooks_.find_pin_link(*dragged_from_pin);
 
   if (link_to_repin.has_value()) {
     const auto fixed_pin = (dragged_from_pin == (*link_to_repin)->start_pin_id)
@@ -40,8 +34,7 @@ void LinkCreation::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
     creating_data_->repinning_data = RepinningData{
         .link_to_repin = (*link_to_repin)->id,
         .fixed_pin = fixed_pin,
-        .fixed_pin_node =
-            core::Diagram::FindPinNode(*diagram_, fixed_pin).GetId()};
+        .fixed_pin_node = hooks_.find_pin_node(fixed_pin).GetId()};
   }
 
   if (!hovering_over_pin.has_value()) {
@@ -98,40 +91,6 @@ auto LinkCreation::GetFixedPinOfLinkBeingRepinned() const -> ne::PinId {
   return creating_data_->repinning_data->fixed_pin;
 }
 
-void LinkCreation::AcceptCurrentLink() {
-  // const auto hovering_over_node = FindPinNode(diagram,
-  // creating_->hovering->hovering_over_pin); const auto hovering_over_pin_kind
-  // =
-  //     core::GetPinKind(*hovering_over_node,
-  //     creating_->hovering->hovering_over_pin);
-
-  // if (creating_->repinning.has_value()) {
-  //   if (hovering_over_pin_kind == ne::PinKind::Input) {
-  //     start_pin_id = *fixed_pin;
-  //     end_pin_id = *hovering_over_pin_;
-  //   } else {
-  //     start_pin_id = *hovering_over_pin_;
-  //     end_pin_id = *fixed_pin;
-  //   }
-  // } else {
-  //   if (hovering_over_pin_kind == ne::PinKind::Input) {
-  //     start_pin_id = *dragged_from_pin_;
-  //     end_pin_id = *hovering_over_pin_;
-  //   } else {
-  //     start_pin_id = *hovering_over_pin_;
-  //     end_pin_id = *dragged_from_pin_;
-  //   }
-  // }
-
-  // if (delete_link.has_value()) {
-  //   signal_delete_link_(*delete_link);
-  // }
-
-  // signal_create_link_(start_pin_id, end_pin_id);
-}
-
-void LinkCreation::AcceptNewNode() {}
-
 ///
 auto LinkCreation::GetCanConnectToPinReason(ne::PinId pin_id) const
     -> std::pair<bool, std::string> {
@@ -139,7 +98,7 @@ auto LinkCreation::GetCanConnectToPinReason(ne::PinId pin_id) const
 
   const auto is_repinning = creating_data_->repinning_data.has_value();
 
-  if (const auto pin_link = core::Diagram::FindPinLink(**diagram_, pin_id)) {
+  if (const auto pin_link = hooks_.find_pin_link(pin_id)) {
     if (const auto pin_of_link_being_repinned =
             is_repinning && ((*pin_link)->id ==
                              creating_data_->repinning_data->link_to_repin)) {
@@ -149,7 +108,7 @@ auto LinkCreation::GetCanConnectToPinReason(ne::PinId pin_id) const
     return {false, "Pin Is Taken"};
   }
 
-  const auto& pin_node = core::Diagram::FindPinNode(**diagram_, pin_id);
+  const auto& pin_node = hooks_.find_pin_node(pin_id);
 
   if (const auto same_node =
           pin_node.GetId() == creating_data_->dragged_from_node) {

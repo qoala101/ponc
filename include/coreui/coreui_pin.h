@@ -16,7 +16,6 @@
 #include "core_id_generator.h"
 #include "core_link.h"
 #include "core_project.h"
-#include "coreui_handmade_link.h"
 #include "coreui_i_pin_traits.h"
 #include "coreui_link_creation.h"
 #include "coreui_texture.h"
@@ -43,15 +42,15 @@ class PinIcon {
   auto GetData() const -> const PinIconData &;
 
   ///
-  auto GetRect(ne::PinId pin_id) const -> ImRect;
+  auto GetRect() const -> const ImRect &;
   ///
-  void SetRect(ne::PinId pin_id, ImRect rect);
+  void SetRect(const ImRect &rect);
 
  private:
   ///
   PinIconData data_{};
   ///
-  std::optional<ImRect> rect{};
+  ImRect rect_{};
 };
 
 ///

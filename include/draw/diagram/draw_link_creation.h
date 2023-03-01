@@ -6,7 +6,7 @@
 #include <optional>
 #include <string>
 
-#include "frame_node.h"
+#include "coreui_project.h"
 #include "imgui.h"
 
 namespace esc::draw {

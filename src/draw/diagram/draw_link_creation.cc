@@ -2,9 +2,9 @@
 
 #include <iostream>
 
+#include "coreui_project.h"
 #include "cpp_scope.h"
 #include "draw_tooltip.h"
-#include "frame_node.h"
 #include "imgui_node_editor.h"
 
 namespace esc::draw {

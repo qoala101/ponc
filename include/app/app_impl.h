@@ -5,6 +5,7 @@
 
 #include "app_textures.h"
 #include "core_project.h"
+#include "coreui_event_loop.h"
 #include "draw_main_window.h"
 
 namespace esc {
@@ -16,8 +17,8 @@ class AppImpl {
 
  private:
   core::Project project_{};
-  coreui::Frame controller_;
-  draw::MainWindow main_window_{};
+  coreui::Project project_ui_;
+  // draw::MainWindow main_window_{};
 };
 }  // namespace esc
 

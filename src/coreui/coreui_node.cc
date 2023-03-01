@@ -4,17 +4,18 @@
 
 namespace esc::coreui {
 ///
-Node::Node(NodeData data) : data_{std::move(data)} {}
+auto Node::FindPin(const Node& node, ne::PinId pin_id) -> const Pin& {
+  for (const auto& pins : {&node.input_pins, &node.output_pins}) {
+    const auto pin =
+        std::find_if(pins->begin(), pins->end(), [pin_id](const auto& pin) {
+          return pin.icon.has_value() && (pin.icon->GetData().id == pin_id);
+        });
 
-///
-auto Node::GetPinRect(ne::PinId pin_id) const -> ImRect {
-  const auto pin_rect = pin_rects_.find(pin_id.Get());
-  Expects(pin_rect != pin_rects_.end());
-  return pin_rect->second;
-}
+    if (pin != pins->end()) {
+      return *pin;
+    }
+  }
 
-///
-void Node::SetPinRect(ne::PinId pin_id, ImRect rect) {
-  pin_rects_[pin_id.Get()] = rect;
+  Expects(false);
 }
 }  // namespace esc::coreui

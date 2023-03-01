@@ -9,7 +9,7 @@
 
 namespace esc {
 struct InputNode {
-  static auto CreateFamily(core::FamilyId id) -> std::shared_ptr<core::IFamily>;
+  static auto CreateFamily(core::FamilyId id) -> std::unique_ptr<core::IFamily>;
   static auto CreateFamilyParser() -> std::unique_ptr<json::IFamilyParser>;
 };
 }  // namespace esc

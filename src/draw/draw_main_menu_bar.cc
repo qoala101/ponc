@@ -5,12 +5,12 @@
 #include <functional>
 
 #include "core_project.h"
+#include "coreui_project.h"
 #include "cpp_scope.h"
 #include "draw_main_window.h"
 #include "draw_open_file_dialog.h"
 #include "draw_save_as_file_dialog.h"
 #include "draw_settings_view.h"
-#include "frame_node.h"
 
 namespace esc::draw {
 namespace {
@@ -31,7 +31,7 @@ void DrawViewMenuItem(auto &view) {
 }
 }  // namespace
 
-void MainMenuBar::Draw(coreui::Frame &frame) {
+void MainMenuBar::Draw(coreui::Project &frame) {
   if (ImGui::BeginMainMenuBar()) {
     DrawFileMenu(frame);
     DrawViewsMenu(frame);
@@ -50,7 +50,7 @@ void MainMenuBar::Draw(coreui::Frame &frame) {
   }
 }
 
-void MainMenuBar::DrawFileMenu(coreui::Frame &frame) {
+void MainMenuBar::DrawFileMenu(coreui::Project &frame) {
   if (ImGui::BeginMenu("File")) {
     if (ImGui::MenuItem("Open...", nullptr)) {
       open_file_dialog.Show();
@@ -75,7 +75,7 @@ void MainMenuBar::DrawFileMenu(coreui::Frame &frame) {
       std::bind_front(&MainMenuBar::SlotSaveAsFileSelected, frame));
 }
 
-void MainMenuBar::DrawViewsMenu(coreui::Frame &frame) {
+void MainMenuBar::DrawViewsMenu(coreui::Project &frame) {
   if (ImGui::BeginMenu("Views")) {
     // DrawViewMenuItem(state.draw_state->families_view_);
     // DrawViewMenuItem(state.draw_state->flow_tree_view_);
@@ -92,18 +92,18 @@ void MainMenuBar::DrawViewsMenu(coreui::Frame &frame) {
   settings_view.Draw(frame.GetProject().GetSettings());
 }
 
-void MainMenuBar::SlotOpenFileSelected(coreui::Frame &frame,
+void MainMenuBar::SlotOpenFileSelected(coreui::Project &frame,
                                        std::string file_path) {
-  frame.OpenProjectFromFile(std::move(file_path));
+  frame.OpenFromFile(std::move(file_path));
 }
 
-void MainMenuBar::SlotSaveAsFileSelected(coreui::Frame &frame,
+void MainMenuBar::SlotSaveAsFileSelected(coreui::Project &frame,
                                          std::string file_path) {
   if (const auto not_json_extension =
           !AsLowerCase(file_path).ends_with(".json")) {
     file_path += ".json";
   }
 
-  frame.SaveProjectToFile(std::move(file_path));
+  frame.SaveToFile(std::move(file_path));
 }
 }  // namespace esc::draw

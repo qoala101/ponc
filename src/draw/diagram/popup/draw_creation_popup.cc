@@ -14,9 +14,9 @@
 #include "core_id_generator.h"
 #include "core_project.h"
 #include "coreui_i_family_traits.h"
+#include "coreui_project.h"
 #include "cpp_assert.h"
 #include "draw_id_label.h"
-#include "frame_node.h"
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
@@ -30,7 +30,7 @@ void CreationPopup::SetDraggedFromPin(ne::PinId pin_id) {
   dragged_from_pin_ = pin_id;
 }
 
-void CreationPopup::Draw(coreui::Frame& frame) {
+void CreationPopup::Draw(coreui::Project& frame) {
   const auto [is_visible, content_scope] = DrawContentScope();
 
   if (!is_visible) {

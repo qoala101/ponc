@@ -5,8 +5,8 @@
 #include "core_i_family.h"
 #include "coreui_i_family_traits.h"
 #include "coreui_i_node_traits.h"
+#include "coreui_project.h"
 #include "cpp_scope.h"
-#include "frame_node.h"
 #include "imgui.h"
 
 namespace esc::draw {

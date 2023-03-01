@@ -5,7 +5,7 @@
 #include <memory>
 #include <unordered_map>
 
-#include "frame_node.h"
+#include "coreui_project.h"
 
 namespace esc::draw {
 void DrawNode(coreui::Node& node);

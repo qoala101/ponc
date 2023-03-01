@@ -1,19 +1,24 @@
 #ifndef VH_CORE_SETTINGS_H_
 #define VH_CORE_SETTINGS_H_
 
+#include "imgui.h"
+
 namespace esc::core {
 ///
 struct Settings {
   ///
+  static auto GetFlowColor(const Settings &settings, float flow) -> ImColor;
+
+  ///
   bool color_flow{};
   ///
-  float min_flow{-27.F};
+  float min_flow{};
   ///
-  float low_flow{-22.F};
+  float low_flow{};
   ///
-  float high_flow{-18.F};
+  float high_flow{};
   ///
-  float max_flow{6.F};
+  float max_flow{};
 };
 }  // namespace esc::core
 

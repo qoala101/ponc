@@ -4,8 +4,8 @@
 
 #include "core_project.h"
 #include "core_settings.h"
+#include "coreui_project.h"
 #include "cpp_scope.h"
-#include "frame_node.h"
 
 namespace esc::draw {
 auto SettingsView::GetLabel() const -> std::string { return "Settings"; }

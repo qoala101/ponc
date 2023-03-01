@@ -10,6 +10,7 @@
 
 #include "core_family_id.h"
 #include "cpp_interface.h"
+#include "cpp_safe_pointer.h"
 #include "flow_node_flow.h"
 #include "imgui.h"
 
@@ -26,7 +27,7 @@ class INodeTraits;
 
 namespace core {
 ///
-class INode : public cpp::Interface {
+class INode : public cpp::Interface, public cpp::EnableSafePointer<INode> {
  public:
   ///
   struct ConstructorArgs {

@@ -6,8 +6,8 @@
 #include <memory>
 
 #include "core_i_family.h"
+#include "coreui_project.h"
 #include "draw_i_popup.h"
-#include "frame_node.h"
 
 namespace esc::draw {
 class BackgroundPopup : public IPopup {

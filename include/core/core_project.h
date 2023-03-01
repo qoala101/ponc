@@ -13,7 +13,13 @@ class Project : public cpp::EnableSafePointer<Project> {
  public:
   ///
   explicit Project(std::vector<std::unique_ptr<IFamily>> families = {},
-                   Diagram diagram = Diagram{}, const Settings &settings = {});
+                   Diagram diagram = Diagram{},
+                   const Settings &settings = {
+                       .min_flow = -27.F,
+                       .low_flow = -22.F,
+                       .high_flow = -18.F,
+                       .max_flow = 6.F,
+                   });
 
   ///
   auto GetIdGenerator() const -> const IdGenerator &;

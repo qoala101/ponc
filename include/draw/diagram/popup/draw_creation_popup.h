@@ -4,15 +4,15 @@
 #include <imgui.h>
 #include <imgui_node_editor.h>
 
+#include "coreui_project.h"
 #include "draw_i_popup.h"
-#include "frame_node.h"
 
 namespace ne = ax::NodeEditor;
 
 namespace esc::draw {
 class CreationPopup : public IPopup {
  public:
-  void Draw(coreui::Frame &frame);
+  void Draw(coreui::Project &frame);
   void SetPosition(const ImVec2 &position);
   void SetDraggedFromPin(ne::PinId pin_id);
 

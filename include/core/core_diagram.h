@@ -6,11 +6,12 @@
 
 #include "core_i_node.h"
 #include "core_link.h"
+#include "cpp_safe_pointer.h"
 #include "imgui_node_editor.h"
 
 namespace esc::core {
 ///
-class Diagram {
+class Diagram : public cpp::EnableSafePointer<Diagram> {
  public:
   ///
   explicit Diagram(std::vector<std::unique_ptr<INode>> nodes = {},

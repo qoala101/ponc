@@ -5,8 +5,8 @@
 #include "core_group.h"
 #include "core_i_node.h"
 #include "coreui_i_node_traits.h"
+#include "coreui_project.h"
 #include "cpp_scope.h"
-#include "frame_node.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 

@@ -139,45 +139,46 @@ add_example_executable(esc
   coreui/traits/coreui_i_node_traits.cc
   coreui/traits/coreui_i_pin_traits.cc
 
+  coreui/coreui_diagram.cc
   coreui/coreui_link_creation.cc
-  coreui/coreui_handmade_link.cc
   coreui/coreui_node.cc
-  coreui/frame_node.cc
+  coreui/coreui_project.cc
 
   cpp/cpp_scope_function.cc
 
-  draw/dialog/draw_i_file_dialog.cc
-  draw/dialog/draw_open_file_dialog.cc
-  draw/dialog/draw_save_as_file_dialog.cc
+  # draw/diagram/popup/draw_background_popup.cc
+  # draw/diagram/popup/draw_creation_popup.cc
+  # draw/diagram/popup/draw_i_popup.cc
+  # draw/diagram/popup/draw_link_popup.cc
+  # draw/diagram/popup/draw_node_popup.cc
 
-  draw/editor/popup/draw_background_popup.cc
-  draw/editor/popup/draw_creation_popup.cc
-  draw/editor/popup/draw_i_popup.cc
-  draw/editor/popup/draw_link_popup.cc
-  draw/editor/popup/draw_node_popup.cc
+  # draw/diagram/draw_diagram.cc
 
-  # draw/editor/process/draw_delete_items_process.cc
-  draw/editor/draw_link_creation.cc
-  draw/editor/draw_flow_icon.cc
+  # # draw/diagram/process/draw_delete_items_process.cc
+  # draw/diagram/draw_link_creation.cc
+  # draw/diagram/draw_flow_icon.cc
 
-  # draw/editor/draw_groups.cc
-  draw/editor/draw_handmade_link.cc
-  draw/editor/draw_link.cc
-  draw/editor/draw_node_editor.cc
-  draw/editor/draw_node.cc
-  draw/editor/draw_tooltip.cc
+  # # draw/diagram/draw_groups.cc
+  # draw/diagram/draw_handmade_link.cc
+  # draw/diagram/draw_link.cc
+  # draw/diagram/draw_node.cc
+  # draw/diagram/draw_tooltip.cc
 
-  # draw/view/draw_families_view.cc
-  # draw/view/draw_flow_tree_view.cc
-  # draw/view/draw_group_settings_view.cc
-  # draw/view/draw_groups_view.cc
-  draw/view/draw_i_hideable.cc
-  draw/view/draw_settings_view.cc
-  draw/draw_main_menu_bar.cc
-  draw/draw_main_window.cc
+  # draw/dialog/draw_i_file_dialog.cc
+  # draw/dialog/draw_open_file_dialog.cc
+  # draw/dialog/draw_save_as_file_dialog.cc
 
+  # # draw/view/draw_families_view.cc
+  # # draw/view/draw_flow_tree_view.cc
+  # # draw/view/draw_group_settings_view.cc
+  # # draw/view/draw_groups_view.cc
+  # draw/view/draw_i_hideable.cc
+  # draw/view/draw_settings_view.cc
+  # draw/draw_main_menu_bar.cc
+  # draw/draw_main_window.cc
+  flow/flow_algorithms.cc
   flow/flow_node_flow.cc
-  flow/flow_tree.cc
+  flow/flow_tree_traversal.cc
 
   json/json_diagram_serializer.cc
   json/json_i_family_parser.cc
@@ -201,10 +202,10 @@ target_include_directories(esc
   PUBLIC ${PROJECT_SOURCE_DIR}/include/core/family
   PUBLIC ${PROJECT_SOURCE_DIR}/include/cpp
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/diagram
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/dialog
-  PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/editor
-  PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/editor/popup
-  PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/editor/process
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/diagram/popup
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/diagram/process
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/view
   PUBLIC ${PROJECT_SOURCE_DIR}/include/flow
   PUBLIC ${PROJECT_SOURCE_DIR}/include/frame
