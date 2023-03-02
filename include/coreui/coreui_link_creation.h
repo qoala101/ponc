@@ -12,6 +12,7 @@
 
 #include "core_i_node.h"
 #include "core_link.h"
+#include "cpp_hook.h"
 
 namespace esc::coreui {
 ///
@@ -20,9 +21,9 @@ class LinkCreation {
   ///
   struct Hooks {
     ///
-    std::function<auto(ne::PinId pin_id)->const core::INode&> find_pin_node{};
+    cpp::Hook<auto(ne::PinId pin_id)->const core::INode&> find_pin_node{};
     ///
-    std::function<auto(ne::PinId pin_id)->std::optional<const core::Link*>>
+    cpp::Hook<auto(ne::PinId pin_id)->std::optional<const core::Link*>>
         find_pin_link{};
   };
 

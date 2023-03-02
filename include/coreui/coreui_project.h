@@ -10,9 +10,11 @@
 #include <variant>
 #include <vector>
 
+#include "core_i_generation.h"
 #include "core_project.h"
 #include "coreui_diagram.h"
 #include "coreui_event_loop.h"
+#include "coreui_textures_handle.h"
 #include "cpp_safe_pointer.h"
 
 namespace esc::coreui {
@@ -20,7 +22,9 @@ namespace esc::coreui {
 class Project {
  public:
   ///
-  explicit Project(cpp::SafePointer<core::Project> project);
+  Project(cpp::SafePointer<core::Project> project,
+          std::vector<std::unique_ptr<core::IGeneration>> generations,
+          TexturesHandle textures_handle);
 
   ///
   void OnFrame();
@@ -31,7 +35,14 @@ class Project {
 
  private:
   ///
+  void ResetProject() const;
+
+  ///
   cpp::SafePointer<core::Project> project_;
+  ///
+  std::vector<std::unique_ptr<core::IGeneration>> generations_{};
+  ///
+  TexturesHandle textures_handle_;
   ///
   EventLoop event_loop_{};
   ///

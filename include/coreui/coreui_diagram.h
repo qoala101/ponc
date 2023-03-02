@@ -17,11 +17,13 @@
 #include "core_link.h"
 #include "core_project.h"
 #include "coreui_event_loop.h"
+#include "coreui_i_header_traits.h"
 #include "coreui_i_pin_traits.h"
 #include "coreui_link.h"
 #include "coreui_link_creation.h"
 #include "coreui_node.h"
 #include "coreui_texture.h"
+#include "cpp_hook.h"
 #include "cpp_safe_pointer.h"
 #include "imgui.h"
 #include "imgui_internal.h"
@@ -33,11 +35,13 @@ class Diagram {
   ///
   struct Hooks {
     ///
-    std::function<auto()->bool> is_color_flow{};
+    cpp::Hook<auto()->bool> is_color_flow{};
     ///
-    std::function<auto(float flow)->ImColor> get_flow_color{};
+    cpp::Hook<auto(float flow)->ImColor> get_flow_color{};
     ///
-    std::function<void(Event event)> post_event{};
+    cpp::Hook<void(Event event)> post_event{};
+    ///
+    cpp::Hook<auto(std::string_view file_path)->Texture> get_texture{};
   };
 
   ///
@@ -67,8 +71,8 @@ class Diagram {
   ///
   void UpdateLinks(const flow::NodeFlows &node_flows);
   ///
-  auto GetNodeHeaderColor(const INodeTraits &node_traits,
-                          const flow::NodeFlow &node_flow) const;
+  auto GetHeaderColor(const IHeaderTraits &header_traits,
+                      const flow::NodeFlow &node_flow) const;
   ///
   auto GetPinIconAlpha(ne::PinId pin_id) const;
   ///

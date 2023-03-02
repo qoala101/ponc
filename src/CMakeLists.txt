@@ -136,6 +136,7 @@ add_example_executable(esc
 
   coreui/traits/coreui_flow_pin_traits.cc
   coreui/traits/coreui_i_family_traits.cc
+  coreui/traits/coreui_i_header_traits.cc
   coreui/traits/coreui_i_node_traits.cc
   coreui/traits/coreui_i_pin_traits.cc
 
@@ -144,6 +145,7 @@ add_example_executable(esc
   coreui/coreui_link_creation.cc
   coreui/coreui_node.cc
   coreui/coreui_project.cc
+  coreui/coreui_textures_handle.cc
 
   cpp/cpp_scope_function.cc
 

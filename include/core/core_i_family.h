@@ -8,11 +8,10 @@
 #include "core_i_node.h"
 #include "core_id_generator.h"
 #include "cpp_interface.h"
+#include "json_i_node_parser.h"
 
 namespace esc {
 namespace json {
-///
-class INodeParser;
 ///
 class IFamilyWriter;
 }  // namespace json

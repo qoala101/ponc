@@ -1,8 +1,15 @@
 #include "coreui_i_node_traits.h"
 
+#include <memory>
+
+#include "coreui_i_header_traits.h"
+
 namespace esc::coreui {
 ///
-auto INodeTraits::HasHeader() const -> bool { return true; }
+auto INodeTraits::CreateHeaderTraits() const
+    -> std::optional<std::unique_ptr<IHeaderTraits>> {
+  return std::nullopt;
+}
 
 ///
 auto INodeTraits::CreatePinTraits() const

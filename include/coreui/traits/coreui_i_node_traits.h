@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 
+#include "coreui_i_header_traits.h"
 #include "coreui_i_pin_traits.h"
 #include "cpp_interface.h"
-#include "imgui.h"
 
 namespace esc::coreui {
 ///
@@ -16,9 +16,8 @@ class INodeTraits : public cpp::Interface {
   ///
   virtual auto GetLabel() const -> std::string = 0;
   ///
-  virtual auto GetColor() const -> ImColor = 0;
-  ///
-  virtual auto HasHeader() const -> bool;
+  virtual auto CreateHeaderTraits() const
+      -> std::optional<std::unique_ptr<IHeaderTraits>>;
   ///
   virtual auto CreatePinTraits() const
       -> std::vector<std::unique_ptr<IPinTraits>>;

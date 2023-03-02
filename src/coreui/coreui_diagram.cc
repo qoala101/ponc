@@ -167,10 +167,10 @@ void Diagram::UpdateLinks(const flow::NodeFlows& node_flows) {
 }
 
 ///
-auto Diagram::GetNodeHeaderColor(const INodeTraits& node_traits,
-                                 const flow::NodeFlow& node_flow) const {
+auto Diagram::GetHeaderColor(const IHeaderTraits& header_traits,
+                             const flow::NodeFlow& node_flow) const {
   if (!hooks_.is_color_flow()) {
-    return node_traits.GetColor();
+    return header_traits.GetColor();
   }
 
   if (const auto input_flow = node_flow.input_pin_flow) {
@@ -221,13 +221,14 @@ auto Diagram::PinFrom(const IPinTraits& pin_traits,
 ///
 auto Diagram::NodeFrom(const core::INode& core_node,
                        const flow::NodeFlow& node_flow) const {
-  const auto node_traits = core_node.CreateUiTraits();
   auto node = Node{.id = core_node.GetId().Get()};
+  const auto node_traits = core_node.CreateUiTraits();
 
-  if (node_traits->HasHeader()) {
-    node.header =
-        NodeHeader{.label = node_traits->GetLabel(),
-                   .color = GetNodeHeaderColor(*node_traits, node_flow)};
+  if (const auto header_traits = node_traits->CreateHeaderTraits()) {
+    node.header = Header{
+        .label = node_traits->GetLabel(),
+        .color = GetHeaderColor(**header_traits, node_flow),
+        .texture = hooks_.get_texture((*header_traits)->GetTextureFilePath())};
   }
 
   for (const auto& pin_traits : node_traits->CreatePinTraits()) {

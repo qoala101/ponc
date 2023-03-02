@@ -1,20 +1,21 @@
 #include "app_app.h"
 
-#include "app_textures.h"
 #include "coreui_texture.h"
+#include "coreui_textures_handle.h"
 #include "cpp_assert.h"
 
 namespace esc {
-  ///
+///
 App::App(const char* name, int argc, char** argv)
-    : Application{name, argc, argv} {}
+    : Application{name, argc, argv}, EnableSafePointer{this} {}
 
-  ///
+///
 auto App::GetWindowFlags() const -> ImGuiWindowFlags {
   // NOLINTNEXTLINE(*-signed-bitwise)
   return Application::GetWindowFlags() | ImGuiWindowFlags_MenuBar;
 }
 
+///
 auto App::LoadTexture(std::string_view file_path) {
   auto texture =
       coreui::Texture{.id = Application::LoadTexture(file_path.data())};
@@ -23,31 +24,33 @@ auto App::LoadTexture(std::string_view file_path) {
   return texture;
 }
 
+///
 void App::OnStart() {
-  Expects(!textures_.has_value());
   Expects(!app_.has_value());
 
-  textures_ =
-      Textures{.node_header = LoadTexture("data/node_header_texture.png")};
-  app_.emplace(*textures_);
+  app_.emplace(
+      coreui::TexturesHandle{{.load_texture =
+                                  [app = CreateSafePointer()](auto file_path) {
+                                    return app->LoadTexture(file_path);
+                                  },
+                              .destroy_texture =
+                                  [app = CreateSafePointer()](auto texture_id) {
+                                    return app->DestroyTexture(texture_id);
+                                  }}});
 
-  Ensures(textures_.has_value());
   Ensures(app_.has_value());
 }
 
+///
 void App::OnStop() {
   Expects(app_.has_value());
-  Expects(textures_.has_value());
 
   app_.reset();
 
-  DestroyTexture(textures_->node_header.id);
-  textures_.reset();
-
   Ensures(!app_.has_value());
-  Ensures(!textures_.has_value());
 }
 
+///
 void App::OnFrame(float /*unused*/) {
   Expects(app_.has_value());
 

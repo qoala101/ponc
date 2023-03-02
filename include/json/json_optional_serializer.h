@@ -9,7 +9,7 @@ struct OptionalSerializer {
   ///
   template <typename Item>
   static auto ParseFromJson(const crude_json::value& json,
-                            const std::string& item_name,
+                            const crude_json::string& item_name,
                             const auto& item_parser) -> std::optional<Item> {
     if (!json.contains(item_name)) {
       return std::nullopt;
@@ -22,7 +22,7 @@ struct OptionalSerializer {
   template <typename Item>
   static auto WriteToJson(crude_json::value& json,
                           const std::optional<Item>& item,
-                          const std::string& item_name,
+                          const crude_json::string& item_name,
                           const auto& item_writer) {
     if (!item.has_value()) {
       return;

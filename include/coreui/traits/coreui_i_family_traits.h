@@ -19,8 +19,6 @@ class IFamilyTraits : public cpp::Interface {
   ///
   virtual auto GetLabel() const -> std::string = 0;
   ///
-  virtual auto GetColor() const -> ImColor = 0;
-  ///
   virtual auto GetGroupLabel() const -> std::string;
   ///
   virtual auto IsUserAccessible() -> bool;

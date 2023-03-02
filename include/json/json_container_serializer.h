@@ -9,7 +9,7 @@ struct ContainerSerializer {
   ///
   template <typename Item>
   static auto ParseFromJson(const crude_json::value& json,
-                            const std::string& items_name,
+                            const crude_json::string& items_name,
                             const auto& item_parser) {
     const auto items_size =
         json[items_name + "_size"].get<crude_json::number>();
@@ -29,7 +29,7 @@ struct ContainerSerializer {
   template <typename Item>
   static auto WriteToJson(crude_json::value& json,
                           const std::vector<Item>& items,
-                          const std::string& items_name,
+                          const crude_json::string& items_name,
                           const auto& item_writer) {
     const auto items_size = items.size();
 

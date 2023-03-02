@@ -25,7 +25,7 @@
 
 namespace esc::coreui {
 ///
-struct NodeHeader {
+struct Header {
   ///
   std::string label{};
   ///
@@ -41,7 +41,7 @@ struct Node {
   ///
   ne::NodeId id{};
   ///
-  std::optional<NodeHeader> header{};
+  std::optional<Header> header{};
   ///
   std::vector<Pin> input_pins{};
   ///
