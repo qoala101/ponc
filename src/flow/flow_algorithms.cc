@@ -23,7 +23,7 @@ auto HasLinkFromParent(const NodeFlow &node_flow,
 ///
 auto FindRootNodes(const std::vector<std::unique_ptr<core::INode>> &nodes,
                    const std::vector<core::Link> &links,
-                   const cpp::SafePointerFactory &safe_pointer_factory) {
+                   const cpp::SafeOwner &safe_owner) {
   auto root_nodes = std::vector<TreeNode>{};
 
   for (const auto &node : nodes) {
@@ -34,8 +34,7 @@ auto FindRootNodes(const std::vector<std::unique_ptr<core::INode>> &nodes,
       continue;
     }
 
-    root_nodes.emplace_back(
-        TreeNode{.node = safe_pointer_factory.CreateSafePointer(&*node)});
+    root_nodes.emplace_back(TreeNode{.node = safe_owner.MakeSafe(&*node)});
   }
 
   return root_nodes;
@@ -103,12 +102,11 @@ void CalculateNodeFlow(flow::NodeFlows &node_flows_, const TreeNode &node,
 
 ///
 auto BuildFlowTree(const core::Diagram &diagram,
-                   const cpp::SafePointerFactory &safe_pointer_factory)
-    -> FlowTree {
+                   const cpp::SafeOwner &safe_owner) -> FlowTree {
   const auto &links = diagram.GetLinks();
   const auto &nodes = diagram.GetNodes();
 
-  auto flow_tree = FlowTree{FindRootNodes(nodes, links, safe_pointer_factory)};
+  auto flow_tree = FlowTree{FindRootNodes(nodes, links, safe_owner)};
   auto visited_nodes = std::unordered_set<const core::INode *>{};
   auto current_level_tree_nodes = std::vector<TreeNode *>{};
 
@@ -141,9 +139,8 @@ auto BuildFlowTree(const core::Diagram &diagram,
 
         auto &[pin_id, tree_node] =
             *possible_parent->child_nodes
-                 .emplace(
-                     (*link_to_parent)->start_pin_id,
-                     TreeNode{safe_pointer_factory.CreateSafePointer(&*node)})
+                 .emplace((*link_to_parent)->start_pin_id,
+                          TreeNode{safe_owner.MakeSafe(&*node)})
                  .first;
 
         current_level_tree_nodes.emplace_back(&tree_node);

@@ -3,7 +3,7 @@
 
 #include <functional>
 
-#include "cpp_safe_pointer.h"
+#include "cpp_safe_ptr.h"
 
 namespace esc::coreui {
 ///

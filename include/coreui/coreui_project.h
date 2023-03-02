@@ -15,14 +15,14 @@
 #include "coreui_diagram.h"
 #include "coreui_event_loop.h"
 #include "coreui_textures_handle.h"
-#include "cpp_safe_pointer.h"
+#include "cpp_safe_ptr.h"
 
 namespace esc::coreui {
 ///
 class Project {
  public:
   ///
-  Project(cpp::SafePointer<core::Project> project,
+  Project(cpp::SafePtr<core::Project> project,
           std::vector<std::unique_ptr<core::IGeneration>> generations,
           TexturesHandle textures_handle);
 
@@ -38,9 +38,9 @@ class Project {
   void ResetProject() const;
 
   ///
-  cpp::SafePointerFactory safe_pointer_factory_{};
+  cpp::SafeOwner safe_owner_{};
   ///
-  cpp::SafePointer<core::Project> project_;
+  cpp::SafePtr<core::Project> project_;
   ///
   std::vector<std::unique_ptr<core::IGeneration>> generations_{};
   ///

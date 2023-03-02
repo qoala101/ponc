@@ -6,7 +6,7 @@
 
 #include "coreui_texture.h"
 #include "cpp_hook.h"
-#include "cpp_safe_pointer.h"
+#include "cpp_safe_ptr.h"
 #include "imgui.h"
 
 namespace esc::coreui {

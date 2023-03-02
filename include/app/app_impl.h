@@ -20,7 +20,7 @@ class AppImpl {
 
  private:
   ///
-  cpp::SafePointerFactory safe_pointer_factory_{};
+  cpp::SafeOwner safe_owner_{};
   ///
   core::Project project_{};
   ///

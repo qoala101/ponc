@@ -6,7 +6,7 @@
 
 #include "core_i_node.h"
 #include "core_link.h"
-#include "cpp_safe_pointer.h"
+#include "cpp_safe_ptr.h"
 #include "imgui_node_editor.h"
 
 namespace esc::core {

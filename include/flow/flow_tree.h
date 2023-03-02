@@ -1,5 +1,5 @@
-#ifndef VH_CORE_TREE_H_
-#define VH_CORE_TREE_H_
+#ifndef VH_FLOW_TREE_H_
+#define VH_FLOW_TREE_H_
 
 #include <concepts>
 #include <functional>
@@ -8,13 +8,13 @@
 #include <vector>
 
 #include "core_i_node.h"
-#include "cpp_safe_pointer.h"
+#include "cpp_safe_ptr.h"
 
 namespace esc::flow {
 ///
 struct TreeNode {
   ///
-  cpp::SafePointer<core::INode> node;
+  cpp::SafePtr<core::INode> node;
   ///
   std::map<uintptr_t, TreeNode> child_nodes{};
 };
@@ -26,4 +26,4 @@ struct FlowTree {
 };
 }  // namespace esc::flow
 
-#endif  // VH_CORE_TREE_H_
+#endif  // VH_FLOW_TREE_H_

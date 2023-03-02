@@ -5,7 +5,7 @@
 #include "core_i_family.h"
 #include "core_id_generator.h"
 #include "core_settings.h"
-#include "cpp_safe_pointer.h"
+#include "cpp_safe_ptr.h"
 
 namespace esc::core {
 ///

@@ -6,7 +6,7 @@
 #include <optional>
 
 #include "app_impl.h"
-#include "cpp_safe_pointer.h"
+#include "cpp_safe_ptr.h"
 
 namespace esc {
 ///
@@ -30,7 +30,7 @@ class App : public Application {
   auto LoadTexture(std::string_view file_path);
 
   ///
-  cpp::SafePointerFactory safe_pointer_factory_{};
+  cpp::SafeOwner safe_owner_{};
   ///
   std::optional<AppImpl> app_{};
 };

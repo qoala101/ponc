@@ -30,11 +30,13 @@ void App::OnStart() {
 
   app_.emplace(coreui::TexturesHandle{
       {.load_texture =
-           [app = safe_pointer_factory_.CreateSafePointer(this)](
-               auto file_path) { return app->LoadTexture(file_path); },
+           [safe_this = safe_owner_.MakeSafe(this)](auto file_path) {
+             return safe_this->LoadTexture(file_path);
+           },
        .destroy_texture =
-           [app = safe_pointer_factory_.CreateSafePointer(this)](
-               auto texture_id) { return app->DestroyTexture(texture_id); }}});
+           [safe_this = safe_owner_.MakeSafe(this)](auto texture_id) {
+             return safe_this->DestroyTexture(texture_id);
+           }}});
 
   Ensures(app_.has_value());
 }

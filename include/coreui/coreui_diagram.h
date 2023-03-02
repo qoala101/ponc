@@ -24,7 +24,7 @@
 #include "coreui_node.h"
 #include "coreui_texture.h"
 #include "cpp_hook.h"
-#include "cpp_safe_pointer.h"
+#include "cpp_safe_ptr.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 
@@ -45,7 +45,7 @@ class Diagram {
   };
 
   ///
-  Diagram(cpp::SafePointer<core::Diagram> diagram, Hooks hooks);
+  Diagram(cpp::SafePtr<core::Diagram> diagram, Hooks hooks);
 
   ///
   void OnFrame();
@@ -85,9 +85,9 @@ class Diagram {
   void UpdateNodes(const flow::NodeFlows &node_flows);
 
   ///
-  cpp::SafePointerFactory safe_pointer_factory_{};
+  cpp::SafeOwner safe_owner_{};
   ///
-  cpp::SafePointer<core::Diagram> diagram_;
+  cpp::SafePtr<core::Diagram> diagram_;
   ///
   Hooks hooks_{};
   ///
