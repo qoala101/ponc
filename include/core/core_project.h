@@ -9,7 +9,7 @@
 
 namespace esc::core {
 ///
-class Project : public cpp::EnableSafePointer<Project> {
+class Project {
  public:
   ///
   explicit Project(std::vector<std::unique_ptr<IFamily>> families = {},

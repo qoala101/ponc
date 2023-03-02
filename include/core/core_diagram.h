@@ -11,7 +11,7 @@
 
 namespace esc::core {
 ///
-class Diagram : public cpp::EnableSafePointer<Diagram> {
+class Diagram {
  public:
   ///
   explicit Diagram(std::vector<std::unique_ptr<INode>> nodes = {},

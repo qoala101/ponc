@@ -85,6 +85,8 @@ class Diagram {
   void UpdateNodes(const flow::NodeFlows &node_flows);
 
   ///
+  cpp::SafePointerFactory safe_pointer_factory_{};
+  ///
   cpp::SafePointer<core::Diagram> diagram_;
   ///
   Hooks hooks_{};

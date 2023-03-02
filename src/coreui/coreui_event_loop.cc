@@ -2,9 +2,6 @@
 
 namespace esc::coreui {
 ///
-EventLoop::EventLoop() : EnableSafePointer{this} {}
-
-///
 void EventLoop::PostEvent(Event event) {
   events_.emplace_back(std::move(event));
 }

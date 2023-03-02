@@ -15,6 +15,7 @@
 #include "coreui_link_creation.h"
 #include "coreui_pin.h"
 #include "cpp_assert.h"
+#include "cpp_safe_pointer.h"
 #include "flow_algorithms.h"
 #include "flow_node_flow.h"
 #include "flow_tree.h"
@@ -26,18 +27,22 @@ namespace esc::coreui {
 Diagram::Diagram(cpp::SafePointer<core::Diagram> diagram, Hooks hooks)
     : diagram_{std::move(diagram)},
       hooks_{std::move(hooks)},
-      link_creation_{{.find_pin_node = [diagram = diagram_](
-                                           auto pin_id) -> const core::INode& {
-                        return core::Diagram::FindPinNode(*diagram, pin_id);
-                      },
-                      .find_pin_link =
-                          [diagram = diagram_](auto pin_id) {
-                            return core::Diagram::FindPinLink(*diagram, pin_id);
-                          }}} {}
+      link_creation_{
+          {.find_pin_node = [safe_this =
+                                 safe_pointer_factory_.CreateSafePointer(this)](
+                                auto pin_id) -> const core::INode& {
+             return core::Diagram::FindPinNode(*safe_this->diagram_, pin_id);
+           },
+           .find_pin_link =
+               [safe_this = safe_pointer_factory_.CreateSafePointer(this)](
+                   auto pin_id) {
+                 return core::Diagram::FindPinLink(*safe_this->diagram_,
+                                                   pin_id);
+               }}} {}
 
 ///
 void Diagram::OnFrame() {
-  const auto flow_tree = flow::BuildFlowTree(*diagram_);
+  const auto flow_tree = flow::BuildFlowTree(*diagram_, safe_pointer_factory_);
   const auto node_flows = flow::CalculateNodeFlows(flow_tree);
 
   UpdateLinks(node_flows);
@@ -162,7 +167,7 @@ void Diagram::UpdateLinks(const flow::NodeFlows& node_flows) {
                  });
 
   if (const auto repinning_link = GetRepinningLink()) {
-    links_.emplace_back(repinning_link);
+    links_.emplace_back(*repinning_link);
   }
 }
 

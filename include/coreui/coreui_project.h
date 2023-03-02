@@ -38,6 +38,8 @@ class Project {
   void ResetProject() const;
 
   ///
+  cpp::SafePointerFactory safe_pointer_factory_{};
+  ///
   cpp::SafePointer<core::Project> project_;
   ///
   std::vector<std::unique_ptr<core::IGeneration>> generations_{};

@@ -7,7 +7,7 @@
 namespace esc {
 ///
 App::App(const char* name, int argc, char** argv)
-    : Application{name, argc, argv}, EnableSafePointer{this} {}
+    : Application{name, argc, argv} {}
 
 ///
 auto App::GetWindowFlags() const -> ImGuiWindowFlags {
@@ -28,15 +28,13 @@ auto App::LoadTexture(std::string_view file_path) {
 void App::OnStart() {
   Expects(!app_.has_value());
 
-  app_.emplace(
-      coreui::TexturesHandle{{.load_texture =
-                                  [app = CreateSafePointer()](auto file_path) {
-                                    return app->LoadTexture(file_path);
-                                  },
-                              .destroy_texture =
-                                  [app = CreateSafePointer()](auto texture_id) {
-                                    return app->DestroyTexture(texture_id);
-                                  }}});
+  app_.emplace(coreui::TexturesHandle{
+      {.load_texture =
+           [app = safe_pointer_factory_.CreateSafePointer(this)](
+               auto file_path) { return app->LoadTexture(file_path); },
+       .destroy_texture =
+           [app = safe_pointer_factory_.CreateSafePointer(this)](
+               auto texture_id) { return app->DestroyTexture(texture_id); }}});
 
   Ensures(app_.has_value());
 }

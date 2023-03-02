@@ -11,7 +11,7 @@
 namespace esc {
 ///
 // NOLINTNEXTLINE(*-virtual-class-destructor, *-multiple-inheritance)
-class App : public Application, public cpp::EnableSafePointer<App> {
+class App : public Application {
  public:
   ///
   App(const char* name, int argc, char** argv);
@@ -29,6 +29,8 @@ class App : public Application, public cpp::EnableSafePointer<App> {
   ///
   auto LoadTexture(std::string_view file_path);
 
+  ///
+  cpp::SafePointerFactory safe_pointer_factory_{};
   ///
   std::optional<AppImpl> app_{};
 };

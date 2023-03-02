@@ -11,7 +11,7 @@
 
 namespace esc::coreui {
 ///
-class TexturesHandle : public cpp::EnableSafePointer<TexturesHandle> {
+class TexturesHandle {
  public:
   ///
   struct Hooks {

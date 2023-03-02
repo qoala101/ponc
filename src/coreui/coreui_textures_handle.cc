@@ -2,8 +2,7 @@
 
 namespace esc::coreui {
 ///
-TexturesHandle::TexturesHandle(Hooks hooks)
-    : EnableSafePointer{this}, hooks_{std::move(hooks)} {}
+TexturesHandle::TexturesHandle(Hooks hooks) : hooks_{std::move(hooks)} {}
 
 ///
 TexturesHandle::~TexturesHandle() {

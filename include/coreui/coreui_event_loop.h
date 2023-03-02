@@ -10,11 +10,8 @@ namespace esc::coreui {
 using Event = std::function<void()>;
 
 ///
-class EventLoop : public cpp::EnableSafePointer<EventLoop> {
+class EventLoop {
  public:
-  ///
-  EventLoop();
-
   ///
   void PostEvent(Event event);
   ///

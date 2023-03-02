@@ -1,6 +1,7 @@
 #include "coreui_project.h"
 
 #include <functional>
+#include <iterator>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -21,25 +22,27 @@ Project::Project(cpp::SafePointer<core::Project> project,
     : project_{std::move(project)},
       generations_{std::move(generations)},
       textures_handle_{std::move(textures_handle)},
-      diagram_{project_->GetDiagram().CreateSafePointer(),
-               {.is_color_flow =
-                    [project = project_]() {
-                      return project->GetSettings().color_flow;
-                    },
-                .get_flow_color =
-                    [project = project_](auto flow) {
-                      return core::Settings::GetFlowColor(
-                          project->GetSettings(), flow);
-                    },
-                .post_event =
-                    [event_loop = event_loop_.CreateSafePointer()](auto event) {
-                      event_loop->PostEvent(std::move(event));
-                    },
-                .get_texture = [textures_handle =
-                                    textures_handle_.CreateSafePointer()](
-                                   auto file_path) -> const Texture& {
-                  textures_handle->GetTexture(file_path);
-                }}} {
+      diagram_{
+          safe_pointer_factory_.CreateSafePointer(&project_->GetDiagram()),
+          {.is_color_flow =
+               [safe_this = safe_pointer_factory_.CreateSafePointer(this)]() {
+                 return safe_this->project_->GetSettings().color_flow;
+               },
+           .get_flow_color =
+               [safe_this =
+                    safe_pointer_factory_.CreateSafePointer(this)](auto flow) {
+                 return core::Settings::GetFlowColor(
+                     safe_this->project_->GetSettings(), flow);
+               },
+           .post_event =
+               [safe_this =
+                    safe_pointer_factory_.CreateSafePointer(this)](auto event) {
+                 safe_this->event_loop_.PostEvent(std::move(event));
+               },
+           .get_texture = [safe_this = safe_pointer_factory_.CreateSafePointer(
+                               this)](auto file_path) -> const Texture& {
+             return safe_this->textures_handle_.GetTexture(file_path);
+           }}} {
   ResetProject();
 }
 
@@ -66,8 +69,9 @@ void Project::ResetProject() const {
   for (const auto& generation : generations_) {
     auto generation_families = generation->CreateFamilies(id_generator);
 
-    families.insert(families.end(), generation_families.begin(),
-                    generation_families.end());
+    families.insert(families.end(),
+                    std::move_iterator{generation_families.begin()},
+                    std::move_iterator{generation_families.end()});
   }
 
   *project_ = core::Project{std::move(families),

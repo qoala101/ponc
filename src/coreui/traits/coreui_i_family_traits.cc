@@ -23,7 +23,7 @@ auto IFamilyTraits::GroupByLabels(
       continue;
     }
 
-    group->second.emplace_back(family);
+    group->second.emplace_back(&*family);
   }
 
   return family_groups;

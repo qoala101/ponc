@@ -115,11 +115,12 @@ macro(add_example_executable name)
 endmacro()
 
 add_example_executable(esc
-  app/node/app_attenuator_node.cc
+
+  # app/node/app_attenuator_node.cc
 
   # app/node/app_client_node.cc
   # app/node/app_coupler_node.cc
-  app/node/app_input_node.cc
+  # app/node/app_input_node.cc
 
   # app/node/app_splitter_node.cc
   app/app_app.cc
@@ -133,6 +134,7 @@ add_example_executable(esc
   core/core_id_generator.cc
   core/core_link.cc
   core/core_project.cc
+  core/core_settings.cc
 
   coreui/traits/coreui_flow_pin_traits.cc
   coreui/traits/coreui_i_family_traits.cc
@@ -144,6 +146,7 @@ add_example_executable(esc
   coreui/coreui_event_loop.cc
   coreui/coreui_link_creation.cc
   coreui/coreui_node.cc
+  coreui/coreui_pin.cc
   coreui/coreui_project.cc
   coreui/coreui_textures_handle.cc
 

@@ -10,7 +10,7 @@
 
 namespace esc::core {
 ///
-auto GetAllPinIds(const INode& node) -> std::vector<ne::PinId> {
+auto INode::GetAllPinIds(const INode& node) -> std::vector<ne::PinId> {
   auto pin_ids = node.GetOutputPinIds();
 
   if (const auto& input_pin_id = node.GetInputPinId()) {
@@ -21,7 +21,7 @@ auto GetAllPinIds(const INode& node) -> std::vector<ne::PinId> {
 }
 
 ///
-auto GetPinKind(const INode& node, ne::PinId pin_id) -> ne::PinKind {
+auto INode::GetPinKind(const INode& node, ne::PinId pin_id) -> ne::PinKind {
   const auto& input_pin_id = node.GetInputPinId();
 
   if (input_pin_id.has_value() && (*input_pin_id == pin_id)) {

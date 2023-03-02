@@ -9,8 +9,8 @@
 
 namespace esc::coreui {
 ///
-auto GetPinKind(const coreui::IPinTraits& pin_traits,
-                const core::INode& pin_node) -> ne::PinKind {
+auto IPinTraits::GetPinKind(const coreui::IPinTraits& pin_traits,
+                            const core::INode& pin_node) -> ne::PinKind {
   const auto pin = pin_traits.GetPin();
 
   if (std::holds_alternative<ne::PinKind>(pin)) {

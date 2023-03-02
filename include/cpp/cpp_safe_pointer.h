@@ -3,50 +3,62 @@
 
 #include <memory>
 
-namespace esc::cpp {
+#include "cpp_assert.h"
 
+namespace esc::cpp {
+///
 template <typename T>
 class SafePointer {
  public:
+  ///
   auto operator*() const -> auto & {
     // NOLINTNEXTLINE(*-const-cast)
     return const_cast<SafePointer *>(this)->operator*();
   }
 
-  auto operator*() -> auto & { return *t_; }
+  ///
+  auto operator*() -> auto & {
+    Expects(!factory_.expired());
+    return *t_;
+  }
 
+  ///
   auto operator->() const {
     // NOLINTNEXTLINE(*-const-cast)
     return const_cast<SafePointer *>(this)->operator->();
   }
 
-  auto operator->() { return t_; }
-
- private:
-  template <typename U>
-  friend class SafePointerFactory;
-
-  SafePointer(T *t, const std::shared_ptr<void *> &shared)
-      : t_{t}, weak_instance_{shared} {}
-
-  T *t_{};
-
-  std::weak_ptr<void *> weak_instance_{};
-};
-
-template <typename T>
-class EnableSafePointer {
- public:
-  auto CreateSafePointer() const -> SafePointer<T> {
-    return SafePointer{t_, instance_};
+  ///
+  auto operator->() {
+    Expects(!factory_.expired());
+    return t_;
   }
 
- protected:
-  explicit EnableSafePointer(T *t) : t_{t} {}
+ private:
+  ///
+  friend class SafePointerFactory;
+
+  ///
+  SafePointer(T *t, const std::shared_ptr<void *> &shared)
+      : t_{t}, factory_{shared} {}
+
+  ///
+  T *t_{};
+  ///
+  std::weak_ptr<void *> factory_{};
+};
+
+///
+class SafePointerFactory {
+ public:
+  ///
+  template <typename T>
+  auto CreateSafePointer(T *t) const -> SafePointer<T> {
+    return SafePointer{t, instance_};
+  }
 
  private:
-  T *t_{};
-
+  ///
   std::shared_ptr<void *> instance_{};
 };
 }  // namespace esc::cpp

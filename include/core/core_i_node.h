@@ -29,7 +29,7 @@ class INodeTraits;
 
 namespace core {
 ///
-class INode : public cpp::Interface, public cpp::EnableSafePointer<INode> {
+class INode : public cpp::Interface {
  public:
   ///
   struct ConstructorArgs {

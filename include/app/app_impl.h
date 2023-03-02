@@ -20,6 +20,8 @@ class AppImpl {
 
  private:
   ///
+  cpp::SafePointerFactory safe_pointer_factory_{};
+  ///
   core::Project project_{};
   ///
   coreui::Project project_ui_;
