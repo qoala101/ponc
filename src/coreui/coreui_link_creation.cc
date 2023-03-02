@@ -63,6 +63,11 @@ auto LinkCreation::IsHoveringOverPin() const -> bool {
 }
 
 ///
+auto LinkCreation::CanCreateLink() const -> bool {
+  return GetCanCreateLinkReason().first;
+}
+
+///
 auto LinkCreation::GetCanCreateLinkReason() const
     -> std::pair<bool, std::string> {
   Expects(creating_data_.has_value());

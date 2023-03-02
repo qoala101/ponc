@@ -8,8 +8,7 @@ namespace esc::flow {
 ///
 auto BuildFlowTree(const core::Diagram &diagram) -> FlowTree;
 ///
-auto CalculateNodeFlows(const FlowTree &flow_tree)
-    -> std::unordered_map<uintptr_t, NodeFlow>;
+auto CalculateNodeFlows(const FlowTree &flow_tree) -> NodeFlows;
 }  // namespace esc::flow
 
 #endif  // VH_FLOW_BUILD_FLOW_TREE_H_

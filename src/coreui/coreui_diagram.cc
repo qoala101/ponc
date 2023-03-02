@@ -3,6 +3,8 @@
 
 #include <algorithm>
 #include <array>
+#include <iterator>
+#include <utility>
 #include <variant>
 
 #include "core_diagram.h"
@@ -13,11 +15,14 @@
 #include "coreui_link_creation.h"
 #include "coreui_pin.h"
 #include "cpp_assert.h"
+#include "flow_algorithms.h"
 #include "flow_node_flow.h"
 #include "flow_tree.h"
+#include "imgui.h"
 #include "imgui_node_editor.h"
 
 namespace esc::coreui {
+///
 Diagram::Diagram(cpp::SafePointer<core::Diagram> diagram,
                  cpp::SafePointer<EventLoop> event_loop, Hooks hooks)
     : diagram_{std::move(diagram)},
@@ -32,13 +37,149 @@ Diagram::Diagram(cpp::SafePointer<core::Diagram> diagram,
                             return core::Diagram::FindPinLink(*diagram, pin_id);
                           }}} {}
 
+///
 void Diagram::OnFrame() {
   const auto flow_tree = flow::BuildFlowTree(*diagram_);
   const auto node_flows = flow::CalculateNodeFlows(flow_tree);
-  const auto color_flow = hooks_.is_color_flow();
 
-  UpdateNodes(node_flows, color_flow);
-  UpdateLinks(node_flows, color_flow);
+  UpdateLinks(node_flows);
+  UpdateNodes(node_flows);
+}
+
+///
+auto Diagram::GetLinkCreation() -> LinkCreation& { return link_creation_; }
+
+///
+auto Diagram::GetNodes() const -> const std::vector<Node>& { return nodes_; }
+
+///
+auto Diagram::GetLinks() const -> const std::vector<Link>& { return links_; }
+
+///
+auto Diagram::GetFlowLinkAlpha(ne::LinkId link_id) const {
+  if (link_creation_.IsCreatingLink() && link_creation_.IsRepinningLink() &&
+      link_creation_.IsLinkBeingRepinned(link_id)) {
+    return 1.F / 2;
+  }
+
+  return 1.F;
+}
+
+///
+auto Diagram::FlowLinkFrom(const core::Link& core_link,
+                           const flow::NodeFlows& node_flows) const {
+  auto link = Link{
+      .type = core_link,
+      .thickness = 2.F,
+  };
+
+  const auto link_alpha = GetFlowLinkAlpha(core_link.id);
+
+  if (!hooks_.is_color_flow()) {
+    link.color = {1.F, 1.F, 1.F, link_alpha};
+    return link;
+  }
+
+  const auto start_pin_node_id =
+      core::Diagram::FindPinNode(*diagram_, core_link.start_pin_id)
+          .GetId()
+          .Get();
+
+  Expects(node_flows.contains(start_pin_node_id));
+  const auto& node_flow = node_flows.at(start_pin_node_id);
+
+  const auto start_pin_flow =
+      flow::NodeFlow::GetPinFlow(node_flow, core_link.start_pin_id);
+
+  link.color = hooks_.get_flow_color(start_pin_flow);
+  link.color.Value.w = link_alpha;
+
+  return link;
+}
+
+///
+auto Diagram::GetPinIconTipPos(ne::PinId pin_id) const {
+  const auto& pin_core_node = core::Diagram::FindPinNode(*diagram_, pin_id);
+  const auto pin_node_id = pin_core_node.GetId();
+
+  const auto pin_node = std::find_if(
+      nodes_.begin(), nodes_.end(),
+      [pin_node_id](const auto& node) { return node.id == pin_node_id; });
+  Expects(pin_node != nodes_.end());
+
+  const auto& pin = Node::FindPin(*pin_node, pin_id);
+  Expects(pin.icon.has_value());
+
+  const auto pin_rect = pin.icon->GetRect();
+  const auto pin_kind = core::INode::GetPinKind(pin_core_node, pin_id);
+
+  return std::pair{
+      pin_kind,
+      (pin_kind == ne::PinKind::Input)
+          ? ImVec2{pin_rect.Min.x, (pin_rect.Min.y + pin_rect.Max.y) / 2}
+          : ImVec2{pin_rect.Max.x, (pin_rect.Min.y + pin_rect.Max.y) / 2}};
+}
+
+///
+auto Diagram::GetRepinningLinkColor() const {
+  if (!link_creation_.IsHoveringOverPin()) {
+    return ImColor{1.F, 1.F, 1.F};
+  }
+
+  if (link_creation_.CanCreateLink()) {
+    return ImColor{1.F / 2, 1.F, 1.F / 2};
+  }
+
+  return ImColor{1.F, 1.F / 2, 1.F / 2};
+}
+
+///
+auto Diagram::GetRepinningLink() const -> std::optional<Link> {
+  if (!link_creation_.IsCreatingLink() || !link_creation_.IsRepinningLink()) {
+    return std::nullopt;
+  }
+
+  auto link = Link{.color = GetRepinningLinkColor(), .thickness = 4.F};
+
+  const auto fixed_pin_id = link_creation_.GetFixedPinOfLinkBeingRepinned();
+  const auto [pin_kind, tip_pos] = GetPinIconTipPos(fixed_pin_id);
+
+  if (pin_kind == ne::PinKind::Input) {
+    link.type = HandmadeLink{.end_pos = tip_pos};
+  } else {
+    link.type = HandmadeLink{.start_pos = tip_pos};
+  }
+
+  return link;
+}
+
+///
+void Diagram::UpdateLinks(const flow::NodeFlows& node_flows) {
+  links_.clear();
+
+  const auto& links = diagram_->GetLinks();
+  std::transform(links.begin(), links.end(), std::back_inserter(links_),
+                 [this, &node_flows](const auto& link) {
+                   return FlowLinkFrom(link, node_flows);
+                 });
+
+  if (const auto repinning_link = GetRepinningLink()) {
+    links_.emplace_back(repinning_link);
+  }
+}
+
+///
+auto Diagram::GetNodeHeaderColor(const INodeTraits& node_traits,
+                                 const flow::NodeFlow& node_flow) const {
+  if (!hooks_.is_color_flow()) {
+    return node_traits.GetColor();
+  }
+
+  if (const auto input_flow = node_flow.input_pin_flow) {
+    return hooks_.get_flow_color(input_flow->second);
+  }
+
+  return ImColor{1.F, 1.F, 1.F};
 }
 
 ///
@@ -52,173 +193,67 @@ auto Diagram::GetPinIconAlpha(ne::PinId pin_id) const {
 }
 
 ///
-auto Diagram::GetFlowLinkAlpha(ne::LinkId link_id) const {
-  if (link_creation_.IsCreatingLink() && link_creation_.IsRepinningLink() &&
-      link_creation_.IsLinkBeingRepinned(link_id)) {
-    return 1.F / 2;
+auto Diagram::PinFrom(const IPinTraits& pin_traits,
+                      const flow::NodeFlow& node_flow) const {
+  auto pin =
+      Pin{.value = pin_traits.GetValue(), .label = pin_traits.GetLabel()};
+
+  const auto pin_type = pin_traits.GetPin();
+
+  if (!std::holds_alternative<ne::PinId>(pin_type)) {
+    return pin;
   }
 
-  return 1.F;
+  const auto pin_id = std::get<ne::PinId>(pin_type);
+  const auto pin_flow = flow::NodeFlow::GetPinFlow(node_flow, pin_id);
+
+  pin.icon = PinIcon{
+      {.id = pin_id,
+       .color = hooks_.is_color_flow() ? hooks_.get_flow_color(pin_flow)
+                                       : ImColor{1.F, 1.F, 1.F},
+       .filled = core::Diagram::FindPinLink(*diagram_, pin_id).has_value()}};
+
+  if (std::holds_alternative<std::monostate>(pin.value)) {
+    pin.value = pin_flow;
+  }
+
+  return pin;
 }
 
-void Diagram::UpdateLinks(
-    const std::unordered_map<uintptr_t, flow::NodeFlow>& node_flows,
-    bool color_flow) {
-  for (const auto& link : diagram_->GetLinks()) {
-    auto& link_data = links_.emplace_back();
-    link_data.type = link;
-    link_data.thickness = 2.F;
+///
+auto Diagram::NodeFrom(const core::INode& core_node,
+                       const flow::NodeFlow& node_flow) const {
+  const auto node_traits = core_node.CreateUiTraits();
+  auto node = Node{.id = core_node.GetId().Get()};
 
-    const auto link_alpha = GetFlowLinkAlpha(link.id);
-
-    if (!color_flow) {
-      link_data.color = {1.F, 1.F, 1.F, link_alpha};
-      continue;
-    }
-
-    const auto& start_pin_node =
-        core::Diagram::FindPinNode(*diagram_, link.start_pin_id).GetId().Get();
-    Expects(node_flows.contains(start_pin_node));
-    const auto& node_flow = node_flows.at(start_pin_node);
-    const auto start_pin_flow = flow::GetPinFlow(node_flow, link.start_pin_id);
-
-    link_data.color = hooks_.get_flow_color(start_pin_flow);
-    link_data.color.Value.w = link_alpha;
+  if (node_traits->HasHeader()) {
+    node.header =
+        NodeHeader{.label = node_traits->GetLabel(),
+                   .color = GetNodeHeaderColor(*node_traits, node_flow)};
   }
 
-  if (!link_creation_.IsCreatingLink() || !link_creation_.IsRepinningLink()) {
-    return;
+  for (const auto& pin_traits : node_traits->CreatePinTraits()) {
+    auto& pins =
+        (IPinTraits::GetPinKind(*pin_traits, core_node) == ne::PinKind::Input)
+            ? node.input_pins
+            : node.output_pins;
+
+    pins.emplace_back(PinFrom(*pin_traits, node_flow));
   }
 
-  auto& link_data = links_.emplace_back();
-  link_data.thickness = 4.F;
-
-  link_data.type = HandmadeLink{};
-
-  const auto fixed_pin = link_creation_.GetFixedPinOfLinkBeingRepinned();
-  const auto fixed_node_id =
-      core::Diagram::FindPinNode(*diagram_, fixed_pin).GetId();
-  const auto fixed_node = std::find_if(
-      nodes_.begin(), nodes_.end(),
-      [fixed_node_id](const auto& node) { return node.id == fixed_node_id; });
-
-  Expects(fixed_node != nodes_.end());
-
-  const auto& pin = Node::FindPin(*fixed_node, fixed_pin);
-  Expects(pin.icon.has_value());
-
-  pin.icon->GetRect();
-
-  const auto fixed_pin_rect = nodes.pin_rects.at(fixed_pin.Get());
-  const auto fixed_pin_node = FindPinNode(diagram, fixed_pin);
-  const auto fixed_pin_kind = core::GetPinKind(*fixed_pin_node, fixed_pin);
-
-  if (fixed_pin_kind == ax::NodeEditor::PinKind::Input) {
-    curve.end_pos = ImVec2{fixed_pin_rect.Min.x,
-                           (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y) / 2};
-  } else {
-    curve.start_pos = ImVec2{fixed_pin_rect.Max.x,
-                             (fixed_pin_rect.Min.y + fixed_pin_rect.Max.y)2};
-  }
-
-  if (link_creation_.IsHoveringOverPin()) {
-    if (link_creation_.GetCanCreateLinkReason().first) {
-      link_creation_.color = ImColor{1.F / 2, 1.F, 1.F / 2};
-    } else {
-      curve.color = ImColor{1.F, 1.F / 2, 1.F / 2};
-    }
-  }
-
-  return curve;
+  return node;
 }
 
-void Diagram::UpdateNodes(
-    const std::unordered_map<uintptr_t, flow::NodeFlow>& node_flows,
-    bool color_flow) {
+///
+void Diagram::UpdateNodes(const flow::NodeFlows& node_flows) {
   nodes_.clear();
 
-  // USE TRANSFORM
-
-  for (const auto& node : diagram_->GetNodes()) {
-    const auto node_id = node->GetId().Get();
-
-    auto& node_data = nodes_.emplace_back();
-    node_data.id = node_id;
-
-    const auto node_traits = node->CreateUiTraits();
-
-    Expects(node_flows.contains(node_id));
-    const auto& node_flow = node_flows.at(node_id);
-
-    if (node_traits->HasHeader()) {
-      node_data.header = NodeHeader{.label = node_traits->GetLabel()};
-
-      if (color_flow) {
-        if (const auto input_flow = node_flow.input_pin_flow) {
-          node_data.header->color = hooks_.get_flow_color(input_flow->second);
-        } else {
-          node_data.header->color = {1.F, 1.F, 1.F};
-        }
-      } else {
-        node_data.header->color = node_traits->GetColor();
-      }
-    }
-
-    // USE TRANSFORM
-    for (const auto& pin_traits : node_traits->CreatePinTraits()) {
-      auto& pin_data =
-          (IPinTraits::GetPinKind(*pin_traits, *node) == ne::PinKind::Input)
-              ? node_data.input_pins.emplace_back()
-              : node_data.output_pins.emplace_back();
-      pin_data.value = pin_traits->GetValue();
-      pin_data.label = pin_traits->GetLabel();
-
-      const auto pin = pin_traits->GetPin();
-
-      if (!std::holds_alternative<ne::PinId>(pin)) {
-        continue;
-      }
-
-      const auto pin_id = std::get<ne::PinId>(pin);
-      const auto pin_flow = flow::GetPinFlow(node_flow, pin_id);
-
-      pin_data.icon = PinIcon{
-          {.id = pin_id,
-           .color = hooks_.get_flow_color(pin_flow),
-           .filled =
-               core::Diagram::FindPinLink(*diagram_, pin_id).has_value()}};
-
-      if (std::holds_alternative<std::monostate>(pin_data.value)) {
-        pin_data.value = pin_flow;
-      }
-    }
-  }
+  const auto& nodes = diagram_->GetNodes();
+  std::transform(nodes.begin(), nodes.end(), std::back_inserter(nodes_),
+                 [this, &node_flows](const auto& node) {
+                   const auto node_id = node->GetId().Get();
+                   Expects(node_flows.contains(node_id));
+                   return NodeFrom(*node, node_flows.at(node_id));
+                 });
 }
-
-// void Diagram::EmplaceNode(std::shared_ptr<core::INode> node,
-//                           const ImVec2& position) {
-//   events_.emplace_back([this, node = std::move(node), position]() mutable {
-//     const auto& new_node =
-//         signal_get_project_().GetDiagram().EmplaceNode(std::move(node));
-//     new_node->SetPosition(position);
-//   });
-// }
-
-// void Diagram::CreateLink(ne::PinId start_pin_id, ne::PinId end_pin_id) {
-//   events_.emplace_back([this, start_pin_id, end_pin_id]() {
-//     auto& project = signal_get_project_();
-
-//     project.GetDiagram().EmplaceLink(
-//         {.id = project.GetIdGenerator().Generate<ne::LinkId>(),
-//          .start_pin_id = start_pin_id,
-//          .end_pin_id = end_pin_id});
-//   });
-// }
-
-// void Project::DeleteLink(ne::LinkId link_id) {
-//   events_.emplace_back([this, link_id]() {
-//     ne::DeleteLink(link_id);
-//     signal_get_project_().GetDiagram().EraseLink(link_id);
-//   });
-// }
 }  // namespace esc::coreui

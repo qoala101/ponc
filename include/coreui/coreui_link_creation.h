@@ -41,6 +41,8 @@ class LinkCreation {
   ///
   auto IsHoveringOverPin() const -> bool;
   ///
+  auto CanCreateLink() const -> bool;
+  ///
   auto GetCanCreateLinkReason() const -> std::pair<bool, std::string>;
 
   ///

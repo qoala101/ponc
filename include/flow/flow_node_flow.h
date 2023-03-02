@@ -12,14 +12,19 @@ namespace ne = ax::NodeEditor;
 
 namespace esc::flow {
 ///
+using PinFlow = std::pair<uintptr_t, float>;
+///
+using PinFlows = std::unordered_map<PinFlow::first_type, PinFlow::second_type>;
+
+///
 struct NodeFlow {
   ///
   static auto GetPinFlow(const NodeFlow &flow, ne::PinId pin_id) -> float;
 
   ///
-  std::optional<std::pair<uintptr_t, float>> input_pin_flow{};
+  std::optional<PinFlow> input_pin_flow{};
   ///
-  std::unordered_map<uintptr_t, float> output_pin_flows{};
+  PinFlows output_pin_flows{};
 
  private:
   ///
@@ -31,6 +36,9 @@ struct NodeFlow {
   ///
   friend void operator+=(NodeFlow &left, float right);
 };
+
+///
+using NodeFlows = std::unordered_map<uintptr_t, flow::NodeFlow>;
 }  // namespace esc::flow
 
 #endif  // VH_CORE_FLOW_H_

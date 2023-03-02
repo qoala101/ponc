@@ -25,7 +25,8 @@ auto GetPinKind(const coreui::IPinTraits& pin_traits,
 auto IPinTraits::GetLabel() const -> std::string { return {}; }
 
 ///
-auto IPinTraits::GetValue() -> std::variant<std::monostate, float, float*> {
+auto IPinTraits::GetValue() const
+    -> std::variant<std::monostate, float, float*> {
   return {};
 }
 }  // namespace esc::coreui

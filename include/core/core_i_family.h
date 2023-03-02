@@ -24,14 +24,16 @@ namespace core {
 class IFamily : public cpp::Interface {
  public:
   ///
-  virtual auto CreateNode(IdGenerator &id_generator)
+  virtual auto CreateNode(IdGenerator &id_generator) const
       -> std::unique_ptr<INode> = 0;
   ///
-  virtual auto CreateNodeParser() -> std::unique_ptr<json::INodeParser> = 0;
+  virtual auto CreateNodeParser() const
+      -> std::unique_ptr<json::INodeParser> = 0;
   ///
-  virtual auto CreateWriter() -> std::unique_ptr<json::IFamilyWriter> = 0;
+  virtual auto CreateWriter() const -> std::unique_ptr<json::IFamilyWriter> = 0;
   ///
-  virtual auto CreateUiTraits() -> std::unique_ptr<coreui::IFamilyTraits> = 0;
+  virtual auto CreateUiTraits() const
+      -> std::unique_ptr<coreui::IFamilyTraits> = 0;
 
   ///
   auto GetId() const -> FamilyId;

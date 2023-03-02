@@ -4,6 +4,7 @@
 #include <unordered_set>
 
 #include "cpp_assert.h"
+#include "flow_node_flow.h"
 
 namespace esc::flow {
 namespace {
@@ -55,9 +56,9 @@ auto FindLinkConnectingPins(ne::PinId start_pin, ne::PinId end_pin,
 }
 
 ///
-auto FindLinkFromParentToChild(
-    const std::unordered_map<uintptr_t, float> &parent_output_pins,
-    ne::PinId child_input_pin, const std::vector<core::Link> &links)
+auto FindLinkFromParentToChild(const PinFlows &parent_output_pins,
+                               ne::PinId child_input_pin,
+                               const std::vector<core::Link> &links)
     -> std::optional<const core::Link *> {
   for (const auto &[parent_output_pin, value] : parent_output_pins) {
     const auto link =
@@ -73,8 +74,8 @@ auto FindLinkFromParentToChild(
 
 ///
 // NOLINTNEXTLINE(*-no-recursion)
-void CalculateNodeFlow(std::unordered_map<uintptr_t, NodeFlow> &node_flows_,
-                       const TreeNode &node, float input_from_parent = 0.F) {
+void CalculateNodeFlow(flow::NodeFlows &node_flows_, const TreeNode &node,
+                       float input_from_parent = 0.F) {
   const auto node_id = node.node->GetId();
 
   auto calculated_flow = node_flows_.find(node_id.Get());
@@ -151,9 +152,8 @@ auto BuildFlowTree(const core::Diagram &diagram) -> FlowTree {
 }
 
 ///
-auto CalculateNodeFlows(const FlowTree &flow_tree)
-    -> std::unordered_map<uintptr_t, NodeFlow> {
-  auto node_flows = std::unordered_map<uintptr_t, NodeFlow>{};
+auto CalculateNodeFlows(const FlowTree &flow_tree) -> flow::NodeFlows {
+  auto node_flows = flow::NodeFlows{};
 
   for (const auto &node : flow_tree.root_nodes) {
     CalculateNodeFlow(node_flows, node);

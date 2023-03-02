@@ -47,9 +47,10 @@ class INode : public cpp::Interface, public cpp::EnableSafePointer<INode> {
   static auto GetPinKind(const INode &node, ne::PinId pin_id) -> ne::PinKind;
 
   ///
-  virtual auto CreateWriter() -> std::unique_ptr<json::INodeWriter> = 0;
+  virtual auto CreateWriter() const -> std::unique_ptr<json::INodeWriter> = 0;
   ///
-  virtual auto CreateUiTraits() -> std::unique_ptr<coreui::INodeTraits> = 0;
+  virtual auto CreateUiTraits() const
+      -> std::unique_ptr<coreui::INodeTraits> = 0;
 
   ///
   auto GetId() const -> ne::NodeId;

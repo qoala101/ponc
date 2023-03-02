@@ -25,7 +25,7 @@ class IPinTraits : public cpp::Interface {
   ///
   virtual auto GetLabel() const -> std::string;
   ///
-  virtual auto GetValue() -> std::variant<std::monostate, float, float*>;
+  virtual auto GetValue() const -> std::variant<std::monostate, float, float*>;
 };
 }  // namespace esc::coreui
 

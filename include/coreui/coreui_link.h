@@ -28,9 +28,9 @@ struct MousePos {};
 ///
 struct HandmadeLink {
   ///
-  std::variant<ImVec2, MousePos> start_pos{};
+  std::variant<MousePos, ImVec2> start_pos{};
   ///
-  std::variant<ImVec2, MousePos> end_pos{};
+  std::variant<MousePos, ImVec2> end_pos{};
 };
 
 ///

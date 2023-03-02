@@ -23,7 +23,7 @@ void LinkCreation::Draw(
       if (ne::QueryNewLink(&dragged_from_pin, &hovering_over_pin)) {
         creation.SetPins(dragged_from_pin, hovering_over_pin);
 
-        const auto& [can_connect, reason] = creation.GetCanCreateLinkReason();
+        const auto [can_connect, reason] = creation.GetCanCreateLinkReason();
 
         if (can_connect) {
           if (!reason.empty()) {

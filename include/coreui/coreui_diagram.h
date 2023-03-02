@@ -27,6 +27,7 @@
 #include "imgui_internal.h"
 
 namespace esc::coreui {
+///
 class Diagram {
  public:
   ///
@@ -37,37 +38,61 @@ class Diagram {
     std::function<auto(float flow)->ImColor> get_flow_color{};
   };
 
+  ///
   Diagram(cpp::SafePointer<core::Diagram> diagram,
           cpp::SafePointer<EventLoop> event_loop, Hooks hooks);
 
+  ///
   void OnFrame();
 
+  ///
   auto GetLinkCreation() -> LinkCreation &;
+  ///
   auto GetNodes() const -> const std::vector<Node> &;
+  ///
   auto GetLinks() const -> const std::vector<Link> &;
 
-  void Event_EmplaceNode(std::unique_ptr<core::INode> node,
-                         const ImVec2 &position);
-  void Event_CreateLink(ne::PinId start_pin_id, ne::PinId end_pin_id);
-  void Event_DeleteLink(ne::LinkId link_id);
-
  private:
-  void UpdateLinks(
-      const std::unordered_map<uintptr_t, flow::NodeFlow> &node_flows,
-      bool color_flow);
-  void UpdateNodes(
-      const std::unordered_map<uintptr_t, flow::NodeFlow> &node_flows,
-      bool color_flow);
-
-  auto GetPinIconAlpha(ne::PinId pin_id) const;
+  ///
   auto GetFlowLinkAlpha(ne::LinkId link_id) const;
+  ///
+  auto FlowLinkFrom(const core::Link &core_link,
+                    const flow::NodeFlows &node_flows) const;
+  ///
+  auto GetPinIconTipPos(ne::PinId pin_id) const;
+  ///
+  auto GetRepinningLinkColor() const;
+  ///
+  auto GetRepinningLink() const -> std::optional<Link>;
+  ///
+  void UpdateLinks(const flow::NodeFlows &node_flows);
 
+  ///
+  auto GetNodeHeaderColor(const INodeTraits &node_traits,
+                          const flow::NodeFlow &node_flow) const;
+  ///
+  auto GetPinIconAlpha(ne::PinId pin_id) const;
+  ///
+  auto PinFrom(const IPinTraits &pin_traits,
+               const flow::NodeFlow &node_flow) const;
+  ///
+  auto NodeFrom(const core::INode &core_node,
+                const flow::NodeFlow &node_flow) const;
+  ///
+  void UpdateNodes(const flow::NodeFlows &node_flows);
+
+  ///
   cpp::SafePointer<core::Diagram> diagram_;
+  ///
   cpp::SafePointer<EventLoop> event_loop_;
+  ///
   Hooks hooks_{};
 
+  ///
   LinkCreation link_creation_;
+  ///
   std::vector<Node> nodes_{};
+  ///
   std::vector<Link> links_{};
 };
 }  // namespace esc::coreui
