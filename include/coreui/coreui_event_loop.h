@@ -6,19 +6,23 @@
 #include "cpp_safe_pointer.h"
 
 namespace esc::coreui {
+///
+using Event = std::function<void()>;
+
+///
 class EventLoop : public cpp::EnableSafePointer<EventLoop> {
  public:
-  EventLoop() : EnableSafePointer{this} {}
+  ///
+  EventLoop();
 
-  std::vector<std::function<void()>> events_{};
+  ///
+  void PostEvent(Event event);
+  ///
+  void ExecuteEvents();
 
-  void OnFrame() {
-    for (const auto& event : events_) {
-      event();
-    }
-
-    events_.clear();
-  }
+ private:
+  ///
+  std::vector<Event> events_{};
 };
 }  // namespace esc::coreui
 

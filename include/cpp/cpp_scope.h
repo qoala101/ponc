@@ -7,7 +7,6 @@
 namespace esc::cpp {
 ///
 template <std::invocable Destructor>
-///
 class Scope {
  public:
   ///

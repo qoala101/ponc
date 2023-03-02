@@ -32,19 +32,16 @@ class LinkCreation {
   ///
   void SetPins(const std::optional<ne::PinId>& dragged_from_pin,
                const std::optional<ne::PinId>& hovering_over_pin = {});
-
   ///
   auto IsCreatingLink() const -> bool;
   ///
   auto CanConnectToPin(ne::PinId pin_id) const -> bool;
-
   ///
   auto IsHoveringOverPin() const -> bool;
   ///
   auto CanCreateLink() const -> bool;
   ///
   auto GetCanCreateLinkReason() const -> std::pair<bool, std::string>;
-
   ///
   auto IsRepinningLink() const -> bool;
   ///
@@ -81,7 +78,6 @@ class LinkCreation {
     ne::NodeId dragged_from_node{};
     ///
     ne::PinKind dragged_from_pin_kind{};
-
     ///
     std::optional<HoveringData> hovering_data{};
     ///

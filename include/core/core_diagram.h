@@ -30,7 +30,6 @@ class Diagram : public cpp::EnableSafePointer<Diagram> {
   auto EmplaceNode(std::unique_ptr<INode> node) -> INode &;
   ///
   void EraseNode(ne::NodeId node_id);
-
   ///
   auto GetLinks() const -> const std::vector<Link> &;
   ///

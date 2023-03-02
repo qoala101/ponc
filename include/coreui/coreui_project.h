@@ -24,14 +24,10 @@ class Project {
 
   ///
   void OnFrame();
-
   ///
   auto GetDiagram() const -> const Diagram &;
   ///
   auto GetDiagram() -> Diagram &;
-
-  void Event_OpenFromFile(std::string file_path);
-  void Event_SaveToFile(std::string file_path);
 
  private:
   ///

@@ -40,7 +40,6 @@ class PinIcon {
 
   ///
   auto GetData() const -> const PinIconData &;
-
   ///
   auto GetRect() const -> const ImRect &;
   ///

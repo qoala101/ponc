@@ -140,6 +140,7 @@ add_example_executable(esc
   coreui/traits/coreui_i_pin_traits.cc
 
   coreui/coreui_diagram.cc
+  coreui/coreui_event_loop.cc
   coreui/coreui_link_creation.cc
   coreui/coreui_node.cc
   coreui/coreui_project.cc

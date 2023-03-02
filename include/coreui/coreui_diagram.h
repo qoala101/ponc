@@ -36,15 +36,15 @@ class Diagram {
     std::function<auto()->bool> is_color_flow{};
     ///
     std::function<auto(float flow)->ImColor> get_flow_color{};
+    ///
+    std::function<void(Event event)> post_event{};
   };
 
   ///
-  Diagram(cpp::SafePointer<core::Diagram> diagram,
-          cpp::SafePointer<EventLoop> event_loop, Hooks hooks);
+  Diagram(cpp::SafePointer<core::Diagram> diagram, Hooks hooks);
 
   ///
   void OnFrame();
-
   ///
   auto GetLinkCreation() -> LinkCreation &;
   ///
@@ -66,7 +66,6 @@ class Diagram {
   auto GetRepinningLink() const -> std::optional<Link>;
   ///
   void UpdateLinks(const flow::NodeFlows &node_flows);
-
   ///
   auto GetNodeHeaderColor(const INodeTraits &node_traits,
                           const flow::NodeFlow &node_flow) const;
@@ -84,10 +83,7 @@ class Diagram {
   ///
   cpp::SafePointer<core::Diagram> diagram_;
   ///
-  cpp::SafePointer<EventLoop> event_loop_;
-  ///
   Hooks hooks_{};
-
   ///
   LinkCreation link_creation_;
   ///

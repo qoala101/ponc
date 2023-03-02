@@ -18,10 +18,12 @@ namespace ne = ax::NodeEditor;
 
 namespace esc {
 namespace json {
+///
 class INodeWriter;
 }  // namespace json
 
 namespace coreui {
+///
 class INodeTraits;
 }  // namespace coreui
 
@@ -60,12 +62,10 @@ class INode : public cpp::Interface, public cpp::EnableSafePointer<INode> {
   auto GetInputPinId() const -> const std::optional<ne::PinId> &;
   ///
   auto GetOutputPinIds() const -> const std::vector<ne::PinId> &;
-
   ///
   auto GetPosition() const -> ImVec2;
   ///
   void SetPosition(const ImVec2 &position);
-
   ///
   auto GetInitialFlow() const -> flow::NodeFlow;
 

@@ -23,17 +23,15 @@
 
 namespace esc::coreui {
 ///
-Diagram::Diagram(cpp::SafePointer<core::Diagram> diagram,
-                 cpp::SafePointer<EventLoop> event_loop, Hooks hooks)
+Diagram::Diagram(cpp::SafePointer<core::Diagram> diagram, Hooks hooks)
     : diagram_{std::move(diagram)},
-      event_loop_{std::move(event_loop)},
       hooks_{std::move(hooks)},
-      link_creation_{{.find_pin_node = [diagram = diagram_](ne::PinId pin_id)
-                          -> const core::INode& {
+      link_creation_{{.find_pin_node = [diagram = diagram_](
+                                           auto pin_id) -> const core::INode& {
                         return core::Diagram::FindPinNode(*diagram, pin_id);
                       },
                       .find_pin_link =
-                          [diagram = diagram_](ne::PinId pin_id) {
+                          [diagram = diagram_](auto pin_id) {
                             return core::Diagram::FindPinLink(*diagram, pin_id);
                           }}} {}
 

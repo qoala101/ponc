@@ -25,15 +25,12 @@ class Project : public cpp::EnableSafePointer<Project> {
   auto GetIdGenerator() const -> const IdGenerator &;
   ///
   auto GetIdGenerator() -> IdGenerator &;
-
   ///
   auto GetFamilies() const -> const std::vector<std::unique_ptr<IFamily>> &;
-
   ///
   auto GetDiagram() const -> const Diagram &;
   ///
   auto GetDiagram() -> Diagram &;
-
   ///
   auto GetSettings() const -> const Settings &;
   ///
