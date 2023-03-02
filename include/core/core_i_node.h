@@ -63,9 +63,9 @@ class INode : public cpp::Interface, public cpp::EnableSafePointer<INode> {
   ///
   auto GetOutputPinIds() const -> const std::vector<ne::PinId> &;
   ///
-  auto GetPosition() const -> ImVec2;
+  auto GetPos() const -> ImVec2;
   ///
-  void SetPosition(const ImVec2 &position);
+  void SetPos(const ImVec2 &pos);
   ///
   auto GetInitialFlow() const -> flow::NodeFlow;
 

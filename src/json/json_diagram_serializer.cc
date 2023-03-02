@@ -16,17 +16,19 @@
 
 namespace esc::json {
 namespace {
-auto FindFamily(const std::vector<std::shared_ptr<core::IFamily>>& families,
+///
+auto FindFamily(const std::vector<std::unique_ptr<core::IFamily>>& families,
                 core::FamilyId family_id) -> auto& {
-  const auto family = std::ranges::find_if(
-      families,
+  const auto family = std::find_if(
+      families.begin(), families.end(),
       [family_id](const auto& family) { return family->GetId() == family_id; });
   Expects(family != families.end());
   return *family;
 }
 
+///
 auto ParseNode(const crude_json::value& json,
-               const std::vector<std::shared_ptr<core::IFamily>>& families) {
+               const std::vector<std::unique_ptr<core::IFamily>>& families) {
   const auto family_id =
       IdSerializer::ParseFromJson<core::FamilyId>(json["family_id"]);
   const auto& family = FindFamily(families, family_id);
@@ -34,25 +36,31 @@ auto ParseNode(const crude_json::value& json,
 }
 }  // namespace
 
+///
 auto DiagramSerializer::ParseFromJson(
     const crude_json::value& json,
-    const std::vector<std::shared_ptr<core::IFamily>>& families)
+    const std::vector<std::unique_ptr<core::IFamily>>& families)
     -> core::Diagram {
-  auto nodes = ContainerSerializer::ParseFromJson<std::shared_ptr<core::INode>>(
+  auto nodes = ContainerSerializer::ParseFromJson<std::unique_ptr<core::INode>>(
       json, "nodes",
       [&families](const auto& json) { return ParseNode(json, families); });
+
   auto links = ContainerSerializer::ParseFromJson<core::Link>(
       json, "links", &LinkSerializer::ParseFromJson);
+
   return core::Diagram{std::move(nodes), std::move(links)};
 }
 
+///
 auto DiagramSerializer::WriteToJson(const core::Diagram& diagram)
     -> crude_json::value {
   auto json = crude_json::value{};
+
   ContainerSerializer::WriteToJson(
       json, diagram.GetNodes(), "nodes", [](const auto& node) {
         return node->CreateWriter()->WriteToJson(*node);
       });
+
   ContainerSerializer::WriteToJson(json, diagram.GetLinks(), "links",
                                    &LinkSerializer::WriteToJson);
   return json;

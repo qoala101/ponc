@@ -8,12 +8,12 @@
 
 namespace esc::draw {
 namespace {
-void DrawIconPath(ImDrawList& draw_list, ImVec2 position, ImVec2 size) {
+void DrawIconPath(ImDrawList& draw_list, ImVec2 pos, ImVec2 size) {
   const auto padding = ImVec2{4, 4};
-  position += padding;
+  pos += padding;
   size -= padding * 2;
 
-  const auto top_left = position;
+  const auto top_left = pos;
   draw_list.PathLineTo(top_left);
 
   const auto top_middle = ImVec2{top_left.x + size.x / 2, top_left.y};
@@ -25,7 +25,7 @@ void DrawIconPath(ImDrawList& draw_list, ImVec2 position, ImVec2 size) {
   const auto bottom_middle = ImVec2{top_middle.x, top_middle.y + size.y};
   draw_list.PathLineTo(bottom_middle);
 
-  const auto bottom_left = ImVec2{position.x, position.y + size.y};
+  const auto bottom_left = ImVec2{pos.x, pos.y + size.y};
   draw_list.PathLineTo(bottom_left);
 }
 }  // namespace
@@ -34,14 +34,14 @@ void DrawFlowIcon(const ImVec2& size, const ImColor& color, bool filled) {
   auto* draw_list = ImGui::GetWindowDrawList();
   Expects(draw_list != nullptr);
 
-  const auto position = ImGui::GetCursorScreenPos();
+  const auto pos = ImGui::GetCursorScreenPos();
 
   if (filled) {
-    DrawIconPath(*draw_list, position, size);
+    DrawIconPath(*draw_list, pos, size);
     draw_list->PathFillConvex(color);
   }
 
-  DrawIconPath(*draw_list, position, size);
+  DrawIconPath(*draw_list, pos, size);
   draw_list->PathStroke(color, ImDrawFlags_Closed, 2.F);
 }
 }  // namespace esc::draw

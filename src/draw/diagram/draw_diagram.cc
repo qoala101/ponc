@@ -46,13 +46,13 @@ void NodeEditor::Draw(coreui::Project &frame) {
 }
 
 void NodeEditor::DrawShowPopupProcess(coreui::Project &frame) {
-  const auto popup_position = ImGui::GetMousePos();
+  const auto popup_pos = ImGui::GetMousePos();
 
   ne::Suspend();
   const auto resume_scope = cpp::Scope{[]() { ne::Resume(); }};
 
   if (ne::ShowBackgroundContextMenu()) {
-    background_popup.SetPosition(popup_position);
+    background_popup.SetPos(popup_pos);
     background_popup.Show();
     return;
   }
@@ -88,7 +88,7 @@ void NodeEditor::SlotCreateConnectedNode(const ImVec2 &new_node_pos,
                                          ne::PinId connect_to_pin) {
   ne::Suspend();
 
-  creation_popup.SetPosition(new_node_pos);
+  creation_popup.SetPos(new_node_pos);
   creation_popup.SetDraggedFromPin(connect_to_pin);
   creation_popup.Show();
 

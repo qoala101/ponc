@@ -20,9 +20,7 @@
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
-void CreationPopup::SetPosition(const ImVec2& position) {
-  position_ = position;
-}
+void CreationPopup::SetPos(const ImVec2& pos) { pos_ = pos; }
 
 auto CreationPopup::GetLabel() const -> std::string { return "Connect Node"; }
 
@@ -95,7 +93,7 @@ void CreationPopup::Draw(coreui::Project& frame) {
           connect_to_pin_id = *input_pin_id;
         }
 
-        frame.EmplaceNode(std::move(new_node), position_);
+        frame.EmplaceNode(std::move(new_node), pos_);
 
         if (dragged_from_pin_kind == ne::PinKind::Input) {
           frame.CreateLink(connect_to_pin_id, dragged_from_pin_);

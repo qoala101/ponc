@@ -8,9 +8,7 @@
 #include "draw_id_label.h"
 
 namespace esc::draw {
-void BackgroundPopup::SetPosition(const ImVec2& position) {
-  position_ = position;
-}
+void BackgroundPopup::SetPos(const ImVec2& pos) { pos_ = pos; }
 
 auto BackgroundPopup::GetLabel() const -> std::string {
   return "Create New Node";
@@ -43,7 +41,7 @@ void BackgroundPopup::Draw(
       if (ImGui::MenuItem(
               IdLabel(family->CreateUiTraits()->GetLabel(), family->GetId())
                   .c_str())) {
-        signal_create_node(family, position_);
+        signal_create_node(family, pos_);
       }
     }
 

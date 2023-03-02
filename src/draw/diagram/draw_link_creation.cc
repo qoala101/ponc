@@ -13,7 +13,7 @@ void LinkCreation::Draw(
     const SignalCreateCurrentLink& signal_create_current_link,
     const SignalCreateConnectedNode& signal_create_connected_node) {
   const auto new_link_alpha = creation.IsRepinningLink() ? 0.F : 1.F;
-  const auto popup_position = ImGui::GetMousePos();
+  const auto popup_pos = ImGui::GetMousePos();
 
   {
     if (ne::BeginCreate(ImColor{1.F, 1.F, 1.F, new_link_alpha}, 3.F)) {
@@ -46,7 +46,7 @@ void LinkCreation::Draw(
         DrawTooltip("Create Node", ImColor{0.F, 1.F / 3, 0.F, 1.F * 3 / 4});
 
         if (ne::AcceptNewItem()) {
-          signal_create_connected_node(popup_position, dragged_from_pin);
+          signal_create_connected_node(popup_pos, dragged_from_pin);
         }
       }
     } else {

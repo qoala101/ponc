@@ -13,13 +13,13 @@ namespace esc::draw {
 class CreationPopup : public IPopup {
  public:
   void Draw(coreui::Project &frame);
-  void SetPosition(const ImVec2 &position);
+  void SetPos(const ImVec2 &pos);
   void SetDraggedFromPin(ne::PinId pin_id);
 
  private:
   auto GetLabel() const -> std::string override;
 
-  ImVec2 position_{};
+  ImVec2 pos_{};
   ne::PinId dragged_from_pin_{};
 };
 }  // namespace esc::draw

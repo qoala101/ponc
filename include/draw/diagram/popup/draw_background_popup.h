@@ -17,12 +17,12 @@ class BackgroundPopup : public IPopup {
 
   void Draw(const std::vector<std::shared_ptr<core::IFamily>> &families,
             const SignalCreateNode &signal_create_node);
-  void SetPosition(const ImVec2 &position);
+  void SetPos(const ImVec2 &pos);
 
  private:
   auto GetLabel() const -> std::string override;
 
-  ImVec2 position_{};
+  ImVec2 pos_{};
 };
 }  // namespace esc::draw
 
