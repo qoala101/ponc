@@ -15,6 +15,8 @@ class MainMenuBar {
  private:
   ///
   void DrawFileMenu(coreui::Project &project);
+  ///
+  void DrawDialogs(coreui::Project &project);
 
   ///
   OpenFileDialog open_file_dialog_{};

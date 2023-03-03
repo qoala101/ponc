@@ -29,4 +29,7 @@ auto INodeWriter::WriteToJson(const core::INode& node) const
   json["data"] = WriteToJson();
   return json;
 }
+
+///
+auto INodeWriter::WriteToJson() const -> crude_json::value { return {}; }
 }  // namespace esc::json

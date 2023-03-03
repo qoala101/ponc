@@ -19,15 +19,10 @@ auto INodeParser::ParseFromJson(const crude_json::value& json) const
       .input_pin_id = OptionalSerializer::ParseFromJson<ne::PinId>(
           json, "input_pin_id", &IdSerializer::ParseFromJson<ne::PinId>),
       .output_pin_ids = ContainerSerializer::ParseFromJson<ne::PinId>(
-          json, "output_pin_ids", &IdSerializer::ParseFromJson<ne::PinId>)};
+          json, "output_pin_ids", &IdSerializer::ParseFromJson<ne::PinId>),
+      .pos = {static_cast<float>(json["pos_x"].get<crude_json::number>()),
+              static_cast<float>(json["pos_y"].get<crude_json::number>())}};
 
-  auto parsed_node = ParseFromJson(std::move(parsed_args), json["data"]);
-
-  const auto parsed_pos =
-      ImVec2{static_cast<float>(json["pos_x"].get<crude_json::number>()),
-             static_cast<float>(json["pos_y"].get<crude_json::number>())};
-  parsed_node->SetPos(parsed_pos);
-
-  return parsed_node;
+  return ParseFromJson(std::move(parsed_args), json["data"]);
 }
 }  // namespace esc::json

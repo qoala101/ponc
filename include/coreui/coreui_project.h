@@ -14,6 +14,7 @@
 #include "core_project.h"
 #include "coreui_diagram.h"
 #include "coreui_event_loop.h"
+#include "coreui_family.h"
 #include "coreui_textures_handle.h"
 #include "cpp_safe_ptr.h"
 
@@ -27,6 +28,10 @@ class Project {
 
   ///
   void OnFrame();
+  ///
+  auto GetProject() const -> const core::Project &;
+  ///
+  auto GetProject() -> core::Project &;
   ///
   auto GetDiagram() const -> const Diagram &;
   ///
@@ -49,9 +54,9 @@ class Project {
   ///
   TexturesHandle textures_handle_;
   ///
-  core::Project project_;
-  ///
   cpp::SafeOwner safe_owner_{};
+  ///
+  core::Project project_;
   ///
   EventLoop event_loop_{};
   ///

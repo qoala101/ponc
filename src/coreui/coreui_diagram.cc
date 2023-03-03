@@ -4,11 +4,16 @@
 #include <algorithm>
 #include <array>
 #include <iterator>
+#include <memory>
 #include <utility>
 #include <variant>
+#include <vector>
 
 #include "core_diagram.h"
+#include "core_i_family.h"
 #include "core_i_node.h"
+#include "coreui_family.h"
+#include "coreui_i_family_traits.h"
 #include "coreui_i_node_traits.h"
 #include "coreui_i_pin_traits.h"
 #include "coreui_link.h"
@@ -24,8 +29,13 @@
 
 namespace esc::coreui {
 ///
-Diagram::Diagram(cpp::SafePtr<core::Diagram> diagram, Hooks hooks)
+Diagram::Diagram(
+    cpp::SafePtr<core::Diagram> diagram,
+    cpp::SafePtr<const std::vector<std::unique_ptr<core::IFamily>>> families,
+    cpp::SafePtr<core::IdGenerator> id_generator, Hooks hooks)
     : diagram_{std::move(diagram)},
+      families_{std::move(families)},
+      id_generator_{std::move(id_generator)},
       hooks_{std::move(hooks)},
       link_creation_{
           {.find_pin_node = [safe_this = safe_owner_.MakeSafe(this)](
@@ -40,6 +50,8 @@ Diagram::Diagram(cpp::SafePtr<core::Diagram> diagram, Hooks hooks)
 
 ///
 void Diagram::OnFrame() {
+  UpdateFamilyGroups();
+
   const auto flow_tree = flow::BuildFlowTree(*diagram_, safe_owner_);
   const auto node_flows = flow::CalculateNodeFlows(flow_tree);
 
@@ -48,13 +60,58 @@ void Diagram::OnFrame() {
 }
 
 ///
+auto Diagram::GetDiagram() const -> core::Diagram& { return *diagram_; }
+
+///
 auto Diagram::GetLinkCreation() -> LinkCreation& { return link_creation_; }
+
+///
+auto Diagram::GetFamilyGroups() -> const std::vector<FamilyGroup>& {
+  return family_groups_;
+}
 
 ///
 auto Diagram::GetNodes() const -> const std::vector<Node>& { return nodes_; }
 
 ///
 auto Diagram::GetLinks() const -> const std::vector<Link>& { return links_; }
+
+auto Diagram::FamilyFrom(const core::IFamily& core_family) const {
+  return Family{
+      safe_owner_.MakeSafe(&core_family),
+      id_generator_,
+      {.node_created = [safe_this = safe_owner_.MakeSafe(this)](auto node) {
+        safe_this->hooks_.post_event(
+            [safe_this, node = std::make_shared<std::unique_ptr<core::INode>>(
+                            std::move(node))]() {
+              safe_this->diagram_->EmplaceNode(std::move(*node));
+            });
+      }}};
+}
+
+///
+void Diagram::UpdateFamilyGroups() {
+  family_groups_.clear();
+
+  for (const auto& core_family : *families_) {
+    auto family = FamilyFrom(*core_family);
+
+    const auto group_label = core_family->CreateUiTraits()->GetGroupLabel();
+    const auto group =
+        std::find_if(family_groups_.begin(), family_groups_.end(),
+                     [&group_label](const auto& group) {
+                       return group.label == group_label;
+                     });
+
+    if (group == family_groups_.end()) {
+      family_groups_.emplace_back(FamilyGroup{
+          .label = group_label, .families = std::vector{std::move(family)}});
+      continue;
+    }
+
+    group->families.emplace_back(std::move(family));
+  }
+}
 
 ///
 auto Diagram::GetFlowLinkAlpha(ne::LinkId link_id) const {

@@ -25,9 +25,9 @@ auto Project::CreateProject() const {
   for (const auto& generation : generations_) {
     auto generation_families = generation->CreateFamilies(id_generator);
 
-    generation_families.insert(generation_families.end(),
-                               std::move_iterator{generation_families.begin()},
-                               std::move_iterator{generation_families.end()});
+    families.insert(families.end(),
+                    std::move_iterator{generation_families.begin()},
+                    std::move_iterator{generation_families.end()});
   }
 
   return core::Project{core::Settings{
@@ -46,6 +46,8 @@ Project::Project(std::vector<std::unique_ptr<core::IGeneration>> generations,
       textures_handle_{std::move(textures_handle)},
       project_{CreateProject()},
       diagram_{safe_owner_.MakeSafe(&project_.GetDiagram()),
+               safe_owner_.MakeSafe(&project_.GetFamilies()),
+               safe_owner_.MakeSafe(&project_.GetIdGenerator()),
                {.is_color_flow =
                     [safe_this = safe_owner_.MakeSafe(this)]() {
                       return safe_this->project_.GetSettings().color_flow;
@@ -69,6 +71,15 @@ void Project::OnFrame() {
   event_loop_.ExecuteEvents();
   diagram_.OnFrame();
 }
+
+///
+auto Project::GetProject() const -> const core::Project& {
+  // NOLINTNEXTLINE(*-const-cast)
+  return const_cast<Project*>(this)->GetProject();
+}
+
+///
+auto Project::GetProject() -> core::Project& { return project_; }
 
 ///
 auto Project::GetDiagram() const -> const Diagram& {

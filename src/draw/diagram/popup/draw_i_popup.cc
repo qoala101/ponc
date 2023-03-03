@@ -8,10 +8,12 @@
 namespace ne = ax::NodeEditor;
 
 namespace esc::draw {
+///
 void IPopup::Show() {
   ImGui::OpenPopup(GetLabel().c_str(), ImGuiPopupFlags_NoOpenOverExistingPopup);
 }
 
+///
 auto IPopup::DrawContentScope() const -> std::pair<bool, cpp::ScopeFunction> {
   const auto label = GetLabel();
   const auto *label_data = label.c_str();

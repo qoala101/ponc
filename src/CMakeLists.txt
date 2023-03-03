@@ -116,13 +116,13 @@ endmacro()
 
 add_example_executable(esc
 
-  # app/node/app_attenuator_node.cc
+  # app/generation/app_attenuator_generation.cc
 
-  # app/node/app_client_node.cc
-  # app/node/app_coupler_node.cc
-  # app/node/app_input_node.cc
+  # app/generation/app_client_generation.cc
+  # app/generation/app_coupler_generation.cc
+  app/generation/app_input_generation.cc
 
-  # app/node/app_splitter_node.cc
+  # app/generation/app_splitter_generation.cc
   app/app_app.cc
   app/app_impl.cc
 
@@ -144,6 +144,7 @@ add_example_executable(esc
 
   coreui/coreui_diagram.cc
   coreui/coreui_event_loop.cc
+  coreui/coreui_family.cc
   coreui/coreui_link_creation.cc
   coreui/coreui_node.cc
   coreui/coreui_pin.cc
@@ -152,9 +153,11 @@ add_example_executable(esc
 
   cpp/cpp_scope_function.cc
 
-  # draw/diagram/popup/draw_background_popup.cc
+  draw/diagram/popup/draw_background_popup.cc
+
   # draw/diagram/popup/draw_creation_popup.cc
-  # draw/diagram/popup/draw_i_popup.cc
+  draw/diagram/popup/draw_i_popup.cc
+
   # draw/diagram/popup/draw_link_popup.cc
   # draw/diagram/popup/draw_node_popup.cc
   draw/diagram/draw_diagram_editor.cc
@@ -168,7 +171,6 @@ add_example_executable(esc
   # draw/diagram/draw_link.cc
   # draw/diagram/draw_node.cc
   # draw/diagram/draw_tooltip.cc
-
   draw/dialog/draw_i_file_dialog.cc
   draw/dialog/draw_open_file_dialog.cc
   draw/dialog/draw_save_as_file_dialog.cc
@@ -201,7 +203,7 @@ add_example_executable(esc
 target_include_directories(esc
   PUBLIC ${PROJECT_SOURCE_DIR}/include
   PUBLIC ${PROJECT_SOURCE_DIR}/include/app
-  PUBLIC ${PROJECT_SOURCE_DIR}/include/app/node
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/app/generation
   PUBLIC ${PROJECT_SOURCE_DIR}/include/core
   PUBLIC ${PROJECT_SOURCE_DIR}/include/coreui
   PUBLIC ${PROJECT_SOURCE_DIR}/include/coreui/traits

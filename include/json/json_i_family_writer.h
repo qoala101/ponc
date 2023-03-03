@@ -16,7 +16,7 @@ class IFamilyWriter : public cpp::Interface {
   ///
   virtual auto GetTypeName() const -> std::string = 0;
   ///
-  virtual auto WriteToJson() const -> crude_json::value = 0;
+  virtual auto WriteToJson() const -> crude_json::value;
 };
 }  // namespace esc::json
 

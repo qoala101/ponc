@@ -21,6 +21,13 @@ auto AsLowerCase(std::string text) {
 
   return text;
 }
+
+///
+void ShowFlow(const std::vector<core::Link> &links) {
+  for (const auto &link : links) {
+    ne::Flow(link.id);
+  }
+}
 }  // namespace
 
 ///
@@ -33,15 +40,13 @@ void MainMenuBar::Draw(coreui::Project &project) {
     }
 
     if (ImGui::MenuItem("Show Flow")) {
-      for (const auto &link : project.GetDiagram().GetLinks()) {
-        if (std::holds_alternative<core::Link>(link.type)) {
-          ne::Flow(std::get<core::Link>(link.type).id);
-        }
-      }
+      ShowFlow(project.GetDiagram().GetDiagram().GetLinks());
     }
 
     ImGui::EndMainMenuBar();
   }
+
+  DrawDialogs(project);
 }
 
 ///
@@ -63,7 +68,10 @@ void MainMenuBar::DrawFileMenu(coreui::Project &project) {
 
     ImGui::EndMenu();
   }
+}
 
+///
+void MainMenuBar::DrawDialogs(coreui::Project &project) {
   open_file_dialog_.Draw({.file_selected = [&project](auto file_path) {
     project.OpenFromFile(std::move(file_path));
   }});

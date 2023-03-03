@@ -1,47 +1,35 @@
 #include "draw_background_popup.h"
 
+#include <imgui.h>
+
 #include <ranges>
 #include <string>
 
-#include "core_i_family.h"
-#include "coreui_i_family_traits.h"
-#include "draw_id_label.h"
-
 namespace esc::draw {
-void BackgroundPopup::SetPos(const ImVec2& pos) { pos_ = pos; }
-
-auto BackgroundPopup::GetLabel() const -> std::string {
-  return "Create New Node";
-}
-
+///
 void BackgroundPopup::Draw(
-    const std::vector<std::shared_ptr<core::IFamily>>& families,
-    const SignalCreateNode& signal_create_node) {
+    const std::vector<coreui::FamilyGroup>& family_groups) {
   const auto [is_visible, content_scope] = DrawContentScope();
 
   if (!is_visible) {
     return;
   }
 
-  const auto family_groups = coreui::GroupByLabels(families);
-
-  for (const auto& [group_label, families] : family_groups) {
-    const auto is_group = families.size() > 1;
+  for (const auto& family_group : family_groups) {
+    const auto is_group = family_group.families.size() > 1;
     auto draw_items = true;
 
     if (is_group) {
-      draw_items = ImGui::BeginMenu(group_label.c_str());
+      draw_items = ImGui::BeginMenu(family_group.label.c_str());
     }
 
     if (!draw_items) {
       continue;
     }
 
-    for (const auto& family : families) {
-      if (ImGui::MenuItem(
-              IdLabel(family->CreateUiTraits()->GetLabel(), family->GetId())
-                  .c_str())) {
-        signal_create_node(family, pos_);
+    for (const auto& family : family_group.families) {
+      if (ImGui::MenuItem(family.GetLabel().c_str())) {
+        family.CreateNodeAt(pos_);
       }
     }
 
@@ -51,5 +39,13 @@ void BackgroundPopup::Draw(
 
     ImGui::EndMenu();
   }
+}
+
+///
+void BackgroundPopup::SetPos(const ImVec2& pos) { pos_ = pos; }
+
+///
+auto BackgroundPopup::GetLabel() const -> std::string {
+  return "Create New Node";
 }
 }  // namespace esc::draw

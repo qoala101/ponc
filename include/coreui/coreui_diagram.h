@@ -17,6 +17,7 @@
 #include "core_link.h"
 #include "core_project.h"
 #include "coreui_event_loop.h"
+#include "coreui_family.h"
 #include "coreui_i_header_traits.h"
 #include "coreui_i_pin_traits.h"
 #include "coreui_link.h"
@@ -45,18 +46,29 @@ class Diagram {
   };
 
   ///
-  Diagram(cpp::SafePtr<core::Diagram> diagram, Hooks hooks);
+  Diagram(
+      cpp::SafePtr<core::Diagram> diagram,
+      cpp::SafePtr<const std::vector<std::unique_ptr<core::IFamily>>> families,
+      cpp::SafePtr<core::IdGenerator> id_generator, Hooks hooks);
 
   ///
   void OnFrame();
   ///
+  auto GetDiagram() const -> core::Diagram &;
+  ///
   auto GetLinkCreation() -> LinkCreation &;
+  ///
+  auto GetFamilyGroups() -> const std::vector<FamilyGroup> &;
   ///
   auto GetNodes() const -> const std::vector<Node> &;
   ///
   auto GetLinks() const -> const std::vector<Link> &;
 
  private:
+  ///
+  auto FamilyFrom(const core::IFamily &core_family) const;
+  ///
+  void UpdateFamilyGroups();
   ///
   auto GetFlowLinkAlpha(ne::LinkId link_id) const;
   ///
@@ -85,13 +97,19 @@ class Diagram {
   void UpdateNodes(const flow::NodeFlows &node_flows);
 
   ///
-  cpp::SafeOwner safe_owner_{};
-  ///
   cpp::SafePtr<core::Diagram> diagram_;
+  ///
+  cpp::SafePtr<const std::vector<std::unique_ptr<core::IFamily>>> families_;
+  ///
+  cpp::SafePtr<core::IdGenerator> id_generator_;
   ///
   Hooks hooks_{};
   ///
+  cpp::SafeOwner safe_owner_{};
+  ///
   LinkCreation link_creation_;
+  ///
+  std::vector<FamilyGroup> family_groups_{};
   ///
   std::vector<Node> nodes_{};
   ///

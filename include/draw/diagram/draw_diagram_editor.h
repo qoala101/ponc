@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "coreui_diagram.h"
+#include "draw_background_popup.h"
 
 namespace ne = ax::NodeEditor;
 
@@ -17,11 +18,18 @@ class DiagramEditor {
   DiagramEditor();
 
   ///
-  void Draw(const coreui::Diagram &diagram);
+  void Draw(coreui::Diagram &diagram);
 
  private:
   ///
+  void ShowPopupsIfRequested();
+  ///
+  void DrawPopups(coreui::Diagram &diagram);
+
+  ///
   std::unique_ptr<ne::EditorContext, void (*)(ne::EditorContext *)> context_;
+  ///
+  BackgroundPopup background_popup_{};
 };
 }  // namespace esc::draw
 

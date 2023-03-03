@@ -12,4 +12,7 @@ auto IFamilyWriter::WriteToJson(const core::IFamily& family) const
   json["data"] = WriteToJson();
   return json;
 }
+
+///
+auto IFamilyWriter::WriteToJson() const -> crude_json::value { return {}; }
 }  // namespace esc::json

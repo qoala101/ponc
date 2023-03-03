@@ -41,6 +41,8 @@ class INode : public cpp::Interface {
     std::optional<ne::PinId> input_pin_id{};
     ///
     std::vector<ne::PinId> output_pin_ids{};
+    ///
+    ImVec2 pos{};
   };
 
   ///
@@ -63,7 +65,7 @@ class INode : public cpp::Interface {
   ///
   auto GetOutputPinIds() const -> const std::vector<ne::PinId> &;
   ///
-  auto GetPos() const -> ImVec2;
+  auto GetPos() const -> const ImVec2 &;
   ///
   void SetPos(const ImVec2 &pos);
   ///
@@ -85,6 +87,8 @@ class INode : public cpp::Interface {
   std::optional<ne::PinId> input_pin_id_{};
   ///
   std::vector<ne::PinId> output_pin_ids_{};
+  ///
+  ImVec2 pos_{};
 };
 }  // namespace core
 }  // namespace esc

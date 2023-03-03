@@ -48,10 +48,10 @@ auto INode::GetOutputPinIds() const -> const std::vector<ne::PinId>& {
 }
 
 ///
-auto INode::GetPos() const -> ImVec2 { return ne::GetNodePosition(id_); }
+auto INode::GetPos() const -> const ImVec2& { return pos_; }
 
 ///
-void INode::SetPos(const ImVec2& pos) { ne::SetNodePosition(id_, pos); }
+void INode::SetPos(const ImVec2& pos) { pos_ = pos; }
 
 ///
 auto INode::GetInitialFlow() const -> flow::NodeFlow {

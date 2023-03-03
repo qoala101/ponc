@@ -16,7 +16,7 @@ class INodeWriter : public cpp::Interface {
 
  private:
   ///
-  virtual auto WriteToJson() const -> crude_json::value = 0;
+  virtual auto WriteToJson() const -> crude_json::value;
 };
 }  // namespace esc::json
 

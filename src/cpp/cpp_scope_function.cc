@@ -6,5 +6,11 @@ ScopeFunction::ScopeFunction(std::function<void()> destructor)
     : destructor_{std::move(destructor)} {}
 
 ///
-ScopeFunction::~ScopeFunction() { destructor_(); }
+ScopeFunction::~ScopeFunction() {
+  if (const auto object_was_moved = !destructor_) {
+    return;
+  }
+
+  destructor_();
+}
 }  // namespace esc::cpp
