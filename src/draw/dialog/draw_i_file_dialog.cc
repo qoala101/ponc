@@ -2,14 +2,14 @@
 
 namespace esc::draw {
 ///
-void IFileDialog::Draw(const Hooks &hooks) {
+void IFileDialog::Draw(const Callbacks &callbacks) {
   dialog_.Display();
 
   if (!dialog_.HasSelected()) {
     return;
   }
 
-  hooks.file_selected(dialog_.GetSelected().string());
+  callbacks.file_selected(dialog_.GetSelected().string());
   dialog_.ClearSelected();
 }
 

@@ -32,11 +32,11 @@ namespace esc::coreui {
 Diagram::Diagram(
     cpp::SafePtr<core::Diagram> diagram,
     cpp::SafePtr<const std::vector<std::unique_ptr<core::IFamily>>> families,
-    cpp::SafePtr<core::IdGenerator> id_generator, Hooks hooks)
+    cpp::SafePtr<core::IdGenerator> id_generator, Callbacks callbacks)
     : diagram_{std::move(diagram)},
       families_{std::move(families)},
       id_generator_{std::move(id_generator)},
-      hooks_{std::move(hooks)},
+      callbacks_{std::move(callbacks)},
       link_creation_{
           {.find_pin_node = [safe_this = safe_owner_.MakeSafe(this)](
                                 auto pin_id) -> const core::INode& {
@@ -81,7 +81,7 @@ auto Diagram::FamilyFrom(const core::IFamily& core_family) const {
       safe_owner_.MakeSafe(&core_family),
       id_generator_,
       {.node_created = [safe_this = safe_owner_.MakeSafe(this)](auto node) {
-        safe_this->hooks_.post_event(
+        safe_this->callbacks_.post_event(
             [safe_this, node = std::make_shared<std::unique_ptr<core::INode>>(
                             std::move(node))]() {
               safe_this->diagram_->EmplaceNode(std::move(*node));
@@ -133,7 +133,7 @@ auto Diagram::FlowLinkFrom(const core::Link& core_link,
 
   const auto link_alpha = GetFlowLinkAlpha(core_link.id);
 
-  if (!hooks_.is_color_flow()) {
+  if (!callbacks_.is_color_flow()) {
     link.color = {1.F, 1.F, 1.F, link_alpha};
     return link;
   }
@@ -149,7 +149,7 @@ auto Diagram::FlowLinkFrom(const core::Link& core_link,
   const auto start_pin_flow =
       flow::NodeFlow::GetPinFlow(node_flow, core_link.start_pin_id);
 
-  link.color = hooks_.get_flow_color(start_pin_flow);
+  link.color = callbacks_.get_flow_color(start_pin_flow);
   link.color.Value.w = link_alpha;
 
   return link;
@@ -231,12 +231,12 @@ void Diagram::UpdateLinks(const flow::NodeFlows& node_flows) {
 ///
 auto Diagram::GetHeaderColor(const IHeaderTraits& header_traits,
                              const flow::NodeFlow& node_flow) const {
-  if (!hooks_.is_color_flow()) {
+  if (!callbacks_.is_color_flow()) {
     return header_traits.GetColor();
   }
 
   if (const auto input_flow = node_flow.input_pin_flow) {
-    return hooks_.get_flow_color(input_flow->second);
+    return callbacks_.get_flow_color(input_flow->second);
   }
 
   return ImColor{1.F, 1.F, 1.F};
@@ -269,8 +269,8 @@ auto Diagram::PinFrom(const IPinTraits& pin_traits,
 
   pin.icon = PinIcon{
       {.id = pin_id,
-       .color = hooks_.is_color_flow() ? hooks_.get_flow_color(pin_flow)
-                                       : ImColor{1.F, 1.F, 1.F},
+       .color = callbacks_.is_color_flow() ? callbacks_.get_flow_color(pin_flow)
+                                           : ImColor{1.F, 1.F, 1.F},
        .filled = core::Diagram::FindPinLink(*diagram_, pin_id).has_value()}};
 
   if (std::holds_alternative<std::monostate>(pin.value)) {
@@ -287,10 +287,10 @@ auto Diagram::NodeFrom(const core::INode& core_node,
   const auto node_traits = core_node.CreateUiTraits();
 
   if (const auto header_traits = node_traits->CreateHeaderTraits()) {
-    node.header = Header{
-        .label = node_traits->GetLabel(),
-        .color = GetHeaderColor(**header_traits, node_flow),
-        .texture = hooks_.get_texture((*header_traits)->GetTextureFilePath())};
+    node.header = Header{.label = node_traits->GetLabel(),
+                         .color = GetHeaderColor(**header_traits, node_flow),
+                         .texture = callbacks_.get_texture(
+                             (*header_traits)->GetTextureFilePath())};
   }
 
   for (const auto& pin_traits : node_traits->CreatePinTraits()) {

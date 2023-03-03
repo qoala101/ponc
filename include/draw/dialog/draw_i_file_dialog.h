@@ -4,10 +4,11 @@
 // clang-format off
 #include <imgui.h>
 #include <imfilebrowser.h>
-#include <functional>
 // clang-format on
 
-#include "cpp_hook.h"
+#include <functional>
+
+#include "cpp_callbacks.h"
 #include "cpp_interface.h"
 
 namespace esc::draw {
@@ -15,13 +16,13 @@ namespace esc::draw {
 class IFileDialog : public cpp::Interface {
  public:
   ///
-  struct Hooks {
+  struct Callbacks {
     ///
-    cpp::Hook<void(std::string file_path)> file_selected{};
+    cpp::Signal<std::string> file_selected{};
   };
 
   ///
-  void Draw(const Hooks &hooks);
+  void Draw(const Callbacks &callbacks);
   ///
   void Show();
 

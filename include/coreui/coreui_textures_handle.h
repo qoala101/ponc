@@ -5,7 +5,7 @@
 #include <unordered_map>
 
 #include "coreui_texture.h"
-#include "cpp_hook.h"
+#include "cpp_callbacks.h"
 #include "cpp_safe_ptr.h"
 #include "imgui.h"
 
@@ -14,15 +14,15 @@ namespace esc::coreui {
 class TexturesHandle {
  public:
   ///
-  struct Hooks {
+  struct Callbacks {
     ///
-    cpp::Hook<auto(std::string_view file_path)->Texture> load_texture{};
+    cpp::Query<Texture, std::string_view> load_texture{};
     ///
-    cpp::Hook<void(ImTextureID)> destroy_texture{};
+    cpp::Action<ImTextureID> destroy_texture{};
   };
 
   ///
-  explicit TexturesHandle(Hooks hooks);
+  explicit TexturesHandle(Callbacks callbacks);
 
   ///
   TexturesHandle(const TexturesHandle &) = delete;
@@ -42,7 +42,7 @@ class TexturesHandle {
 
  private:
   ///
-  Hooks hooks_{};
+  Callbacks callbacks_{};
   ///
   std::unordered_map<std::string, Texture> loaded_textures_{};
 };

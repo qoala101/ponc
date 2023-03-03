@@ -24,7 +24,7 @@
 #include "coreui_link_creation.h"
 #include "coreui_node.h"
 #include "coreui_texture.h"
-#include "cpp_hook.h"
+#include "cpp_callbacks.h"
 #include "cpp_safe_ptr.h"
 #include "imgui.h"
 #include "imgui_internal.h"
@@ -34,22 +34,22 @@ namespace esc::coreui {
 class Diagram {
  public:
   ///
-  struct Hooks {
+  struct Callbacks {
     ///
-    cpp::Hook<auto()->bool> is_color_flow{};
+    cpp::Query<bool> is_color_flow{};
     ///
-    cpp::Hook<auto(float flow)->ImColor> get_flow_color{};
+    cpp::Query<ImColor, float> get_flow_color{};
     ///
-    cpp::Hook<void(Event event)> post_event{};
+    cpp::Query<Texture, std::string_view> get_texture{};
     ///
-    cpp::Hook<auto(std::string_view file_path)->Texture> get_texture{};
+    cpp::Action<void(Event event)> post_event{};
   };
 
   ///
   Diagram(
       cpp::SafePtr<core::Diagram> diagram,
       cpp::SafePtr<const std::vector<std::unique_ptr<core::IFamily>>> families,
-      cpp::SafePtr<core::IdGenerator> id_generator, Hooks hooks);
+      cpp::SafePtr<core::IdGenerator> id_generator, Callbacks callbacks);
 
   ///
   void OnFrame();
@@ -103,7 +103,7 @@ class Diagram {
   ///
   cpp::SafePtr<core::IdGenerator> id_generator_;
   ///
-  Hooks hooks_{};
+  Callbacks callbacks_{};
   ///
   cpp::SafeOwner safe_owner_{};
   ///

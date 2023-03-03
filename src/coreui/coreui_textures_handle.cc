@@ -2,12 +2,13 @@
 
 namespace esc::coreui {
 ///
-TexturesHandle::TexturesHandle(Hooks hooks) : hooks_{std::move(hooks)} {}
+TexturesHandle::TexturesHandle(Callbacks callbacks)
+    : callbacks_{std::move(callbacks)} {}
 
 ///
 TexturesHandle::~TexturesHandle() {
   for (const auto &[file_path, texture] : loaded_textures_) {
-    hooks_.destroy_texture(texture.id);
+    callbacks_.destroy_texture(texture.id);
   }
 }
 
@@ -17,7 +18,7 @@ auto TexturesHandle::GetTexture(std::string_view file_path) -> const Texture & {
 
   if (texture == loaded_textures_.end()) {
     texture =
-        loaded_textures_.emplace(file_path, hooks_.load_texture(file_path))
+        loaded_textures_.emplace(file_path, callbacks_.load_texture(file_path))
             .first;
   }
 

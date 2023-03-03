@@ -12,23 +12,22 @@
 
 #include "core_i_node.h"
 #include "core_link.h"
-#include "cpp_hook.h"
+#include "cpp_callbacks.h"
 
 namespace esc::coreui {
 ///
 class LinkCreation {
  public:
   ///
-  struct Hooks {
+  struct Callbacks {
     ///
-    cpp::Hook<auto(ne::PinId pin_id)->const core::INode&> find_pin_node{};
+    cpp::Query<const core::INode&, ne::PinId> find_pin_node{};
     ///
-    cpp::Hook<auto(ne::PinId pin_id)->std::optional<const core::Link*>>
-        find_pin_link{};
+    cpp::Query<std::optional<const core::Link*>, ne::PinId> find_pin_link{};
   };
 
   ///
-  explicit LinkCreation(Hooks hooks);
+  explicit LinkCreation(Callbacks callbacks);
 
   ///
   void SetPins(const std::optional<ne::PinId>& dragged_from_pin,
@@ -90,7 +89,7 @@ class LinkCreation {
       -> std::pair<bool, std::string>;
 
   ///
-  Hooks hooks_{};
+  Callbacks callbacks_{};
   ///
   std::optional<CreatingData> creating_data_{};
 };

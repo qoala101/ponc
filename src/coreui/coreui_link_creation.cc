@@ -6,7 +6,8 @@
 
 namespace esc::coreui {
 ///
-LinkCreation::LinkCreation(Hooks hooks) : hooks_{std::move(hooks)} {}
+LinkCreation::LinkCreation(Callbacks callbacks)
+    : callbacks_{std::move(callbacks)} {}
 
 ///
 void LinkCreation::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
@@ -17,7 +18,7 @@ void LinkCreation::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
     return;
   }
 
-  const auto& dragged_from_node = hooks_.find_pin_node(*dragged_from_pin);
+  const auto& dragged_from_node = callbacks_.find_pin_node(*dragged_from_pin);
 
   creating_data_ =
       CreatingData{.dragged_from_pin = *dragged_from_pin,
@@ -25,7 +26,7 @@ void LinkCreation::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
                    .dragged_from_pin_kind = core::INode::GetPinKind(
                        dragged_from_node, *dragged_from_pin)};
 
-  const auto link_to_repin = hooks_.find_pin_link(*dragged_from_pin);
+  const auto link_to_repin = callbacks_.find_pin_link(*dragged_from_pin);
 
   if (link_to_repin.has_value()) {
     const auto fixed_pin = (dragged_from_pin == (*link_to_repin)->start_pin_id)
@@ -34,7 +35,7 @@ void LinkCreation::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
     creating_data_->repinning_data = RepinningData{
         .link_to_repin = (*link_to_repin)->id,
         .fixed_pin = fixed_pin,
-        .fixed_pin_node = hooks_.find_pin_node(fixed_pin).GetId()};
+        .fixed_pin_node = callbacks_.find_pin_node(fixed_pin).GetId()};
   }
 
   if (!hovering_over_pin.has_value()) {
@@ -103,7 +104,7 @@ auto LinkCreation::GetCanConnectToPinReason(ne::PinId pin_id) const
 
   const auto is_repinning = creating_data_->repinning_data.has_value();
 
-  if (const auto pin_link = hooks_.find_pin_link(pin_id)) {
+  if (const auto pin_link = callbacks_.find_pin_link(pin_id)) {
     if (const auto pin_of_link_being_repinned =
             is_repinning && ((*pin_link)->id ==
                              creating_data_->repinning_data->link_to_repin)) {
@@ -113,7 +114,7 @@ auto LinkCreation::GetCanConnectToPinReason(ne::PinId pin_id) const
     return {false, "Pin Is Taken"};
   }
 
-  const auto& pin_node = hooks_.find_pin_node(pin_id);
+  const auto& pin_node = callbacks_.find_pin_node(pin_id);
 
   if (const auto same_node =
           pin_node.GetId() == creating_data_->dragged_from_node) {
