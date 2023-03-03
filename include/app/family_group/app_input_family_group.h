@@ -1,15 +1,15 @@
-#ifndef VH_APP_INPUT_GENERATION_H_
-#define VH_APP_INPUT_GENERATION_H_
+#ifndef VH_APP_INPUT_FAMILY_GROUP_H_
+#define VH_APP_INPUT_FAMILY_GROUP_H_
 
 #include <memory>
 
 #include "core_i_family.h"
-#include "core_i_generation.h"
+#include "core_i_family_group.h"
 #include "json_i_family_parser.h"
 
 namespace esc {
 ///
-class InputGeneration : public core::IGeneration {
+class InputFamilyGroup : public core::IFamilyGroup {
  public:
   ///
   auto CreateFamilies(core::IdGenerator &id_generator) const
@@ -20,4 +20,4 @@ class InputGeneration : public core::IGeneration {
 };
 }  // namespace esc
 
-#endif  // VH_APP_INPUT_GENERATION_H_
+#endif  // VH_APP_INPUT_FAMILY_GROUP_H_

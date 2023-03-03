@@ -1,4 +1,4 @@
-#include "app_input_generation.h"
+#include "app_input_family_group.h"
 
 #include <memory>
 #include <vector>
@@ -214,7 +214,7 @@ auto CreateFamilyUiTraits(cpp::SafePtr<const Family> family)
 }
 }  // namespace
 
-auto InputGeneration::CreateFamilies(core::IdGenerator& id_generator) const
+auto InputFamilyGroup::CreateFamilies(core::IdGenerator& id_generator) const
     -> std::vector<std::unique_ptr<core::IFamily>> {
   auto families = std::vector<std::unique_ptr<core::IFamily>>{};
   families.emplace_back(
@@ -222,7 +222,7 @@ auto InputGeneration::CreateFamilies(core::IdGenerator& id_generator) const
   return families;
 }
 
-auto InputGeneration::CreateFamilyParser() const
+auto InputFamilyGroup::CreateFamilyParser() const
     -> std::unique_ptr<json::IFamilyParser> {
   return std::make_unique<FamilyParser>();
 }

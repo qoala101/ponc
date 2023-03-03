@@ -10,7 +10,7 @@
 #include <variant>
 #include <vector>
 
-#include "core_i_generation.h"
+#include "core_i_family_group.h"
 #include "core_project.h"
 #include "coreui_diagram.h"
 #include "coreui_event_loop.h"
@@ -23,7 +23,7 @@ namespace esc::coreui {
 class Project {
  public:
   ///
-  Project(std::vector<std::unique_ptr<core::IGeneration>> generations,
+  Project(std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups,
           TexturesHandle textures_handle);
 
   ///
@@ -50,7 +50,7 @@ class Project {
   auto CreateFamilyParsers() const;
 
   ///
-  std::vector<std::unique_ptr<core::IGeneration>> generations_{};
+  std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups_{};
   ///
   TexturesHandle textures_handle_;
   ///

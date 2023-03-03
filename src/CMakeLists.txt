@@ -116,13 +116,13 @@ endmacro()
 
 add_example_executable(esc
 
-  # app/generation/app_attenuator_generation.cc
+  # app/family_group/app_attenuator_family_group.cc
 
-  # app/generation/app_client_generation.cc
-  # app/generation/app_coupler_generation.cc
-  app/generation/app_input_generation.cc
+  # app/family_group/app_client_family_group.cc
+  # app/family_group/app_coupler_family_group.cc
+  app/family_group/app_input_family_group.cc
 
-  # app/generation/app_splitter_generation.cc
+  # app/family_group/app_splitter_family_group.cc
   app/app_app.cc
   app/app_impl.cc
 
@@ -203,7 +203,7 @@ add_example_executable(esc
 target_include_directories(esc
   PUBLIC ${PROJECT_SOURCE_DIR}/include
   PUBLIC ${PROJECT_SOURCE_DIR}/include/app
-  PUBLIC ${PROJECT_SOURCE_DIR}/include/app/generation
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/app/family_group
   PUBLIC ${PROJECT_SOURCE_DIR}/include/core
   PUBLIC ${PROJECT_SOURCE_DIR}/include/coreui
   PUBLIC ${PROJECT_SOURCE_DIR}/include/coreui/traits

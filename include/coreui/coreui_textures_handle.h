@@ -16,9 +16,9 @@ class TexturesHandle {
   ///
   struct Callbacks {
     ///
-    cpp::Query<Texture, std::string_view> load_texture{};
+    cpp::Action<auto(std::string_view)->Texture> load_texture{};
     ///
-    cpp::Action<ImTextureID> destroy_texture{};
+    cpp::Action<void(ImTextureID)> destroy_texture{};
   };
 
   ///

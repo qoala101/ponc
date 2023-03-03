@@ -22,12 +22,11 @@ auto Project::CreateProject() const {
   auto id_generator = core::IdGenerator{};
   auto families = std::vector<std::unique_ptr<core::IFamily>>{};
 
-  for (const auto& generation : generations_) {
-    auto generation_families = generation->CreateFamilies(id_generator);
+  for (const auto& family_group : family_groups_) {
+    auto group_families = family_group->CreateFamilies(id_generator);
 
-    families.insert(families.end(),
-                    std::move_iterator{generation_families.begin()},
-                    std::move_iterator{generation_families.end()});
+    families.insert(families.end(), std::move_iterator{group_families.begin()},
+                    std::move_iterator{group_families.end()});
   }
 
   return core::Project{core::Settings{
@@ -40,9 +39,9 @@ auto Project::CreateProject() const {
 }
 
 ///
-Project::Project(std::vector<std::unique_ptr<core::IGeneration>> generations,
+Project::Project(std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups,
                  TexturesHandle textures_handle)
-    : generations_{std::move(generations)},
+    : family_groups_{std::move(family_groups)},
       textures_handle_{std::move(textures_handle)},
       project_{CreateProject()},
       diagram_{safe_owner_.MakeSafe(&project_.GetDiagram()),
@@ -57,14 +56,14 @@ Project::Project(std::vector<std::unique_ptr<core::IGeneration>> generations,
                       return core::Settings::GetFlowColor(
                           safe_this->project_.GetSettings(), flow);
                     },
-                .post_event =
-                    [safe_this = safe_owner_.MakeSafe(this)](auto event) {
-                      safe_this->event_loop_.PostEvent(std::move(event));
-                    },
                 .get_texture = [safe_this = safe_owner_.MakeSafe(this)](
                                    auto file_path) -> const Texture& {
                   return safe_this->textures_handle_.GetTexture(file_path);
-                }}} {}
+                },
+                .post_event =
+                    [safe_this = safe_owner_.MakeSafe(this)](auto event) {
+                      safe_this->event_loop_.PostEvent(std::move(event));
+                    }}} {}
 
 ///
 void Project::OnFrame() {
@@ -93,12 +92,13 @@ auto Project::GetDiagram() -> Diagram& { return diagram_; }
 ///
 auto Project::CreateFamilyParsers() const {
   auto family_parsers = std::vector<std::unique_ptr<json::IFamilyParser>>{};
-  family_parsers.reserve(generations_.size());
+  family_parsers.reserve(family_groups_.size());
 
-  std::transform(
-      generations_.begin(), generations_.end(),
-      std::back_inserter(family_parsers),
-      [](const auto& generation) { return generation->CreateFamilyParser(); });
+  std::transform(family_groups_.begin(), family_groups_.end(),
+                 std::back_inserter(family_parsers),
+                 [](const auto& family_group) {
+                   return family_group->CreateFamilyParser();
+                 });
 
   return family_parsers;
 }

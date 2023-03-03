@@ -1,5 +1,5 @@
-#ifndef VH_CORE_I_GENERATION_H_
-#define VH_CORE_I_GENERATION_H_
+#ifndef VH_CORE_I_FAMILY_GROUP_H_
+#define VH_CORE_I_FAMILY_GROUP_H_
 
 #include <memory>
 #include <vector>
@@ -11,7 +11,7 @@
 
 namespace esc::core {
 ///
-class IGeneration : public cpp::Interface {
+class IFamilyGroup : public cpp::Interface {
  public:
   ///
   virtual auto CreateFamilies(IdGenerator &id_generator) const
@@ -22,4 +22,4 @@ class IGeneration : public cpp::Interface {
 };
 }  // namespace esc::core
 
-#endif  // VH_CORE_I_GENERATION_H_
+#endif  // VH_CORE_I_FAMILY_GROUP_H_

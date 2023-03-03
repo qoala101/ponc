@@ -13,8 +13,8 @@ template <typename... Args>
 using Signal = std::function<void(Args...)>;
 
 ///
-template <typename... Args>
-using Action = std::function<void(Args...)>;
+template <typename Signature>
+using Action = std::function<Signature>;
 }  // namespace esc::cpp
 
 #endif  // VH_CPP_CALLBACKS_H_

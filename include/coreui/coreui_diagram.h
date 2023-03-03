@@ -15,7 +15,6 @@
 #include "core_i_node.h"
 #include "core_id_generator.h"
 #include "core_link.h"
-#include "core_project.h"
 #include "coreui_event_loop.h"
 #include "coreui_family.h"
 #include "coreui_i_header_traits.h"
@@ -27,7 +26,6 @@
 #include "cpp_callbacks.h"
 #include "cpp_safe_ptr.h"
 #include "imgui.h"
-#include "imgui_internal.h"
 
 namespace esc::coreui {
 ///
@@ -42,7 +40,7 @@ class Diagram {
     ///
     cpp::Query<Texture, std::string_view> get_texture{};
     ///
-    cpp::Action<void(Event event)> post_event{};
+    cpp::Action<void(Event)> post_event{};
   };
 
   ///
