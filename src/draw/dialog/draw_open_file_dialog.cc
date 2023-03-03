@@ -3,6 +3,7 @@
 #include "draw_i_file_dialog.h"
 
 namespace esc::draw {
+///
 OpenFileDialog::OpenFileDialog()
     : IFileDialog{[]() {
         auto dialog = ImGui::FileBrowser{ImGuiFileBrowserFlags_CloseOnEsc};

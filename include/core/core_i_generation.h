@@ -1,5 +1,5 @@
-#ifndef VH_CORE_I_DOMAIN_H_
-#define VH_CORE_I_DOMAIN_H_
+#ifndef VH_CORE_I_GENERATION_H_
+#define VH_CORE_I_GENERATION_H_
 
 #include <memory>
 #include <vector>
@@ -22,4 +22,4 @@ class IGeneration : public cpp::Interface {
 };
 }  // namespace esc::core
 
-#endif  // VH_CORE_I_DOMAIN_H_
+#endif  // VH_CORE_I_GENERATION_H_

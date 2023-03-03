@@ -159,6 +159,8 @@ void Diagram::UpdateLinks(const flow::NodeFlows& node_flows) {
   links_.clear();
 
   const auto& links = diagram_->GetLinks();
+  links_.reserve(links.size());
+
   std::transform(links.begin(), links.end(), std::back_inserter(links_),
                  [this, &node_flows](const auto& link) {
                    return FlowLinkFrom(link, node_flows);
@@ -251,6 +253,8 @@ void Diagram::UpdateNodes(const flow::NodeFlows& node_flows) {
   nodes_.clear();
 
   const auto& nodes = diagram_->GetNodes();
+  nodes_.reserve(nodes.size());
+
   std::transform(nodes.begin(), nodes.end(), std::back_inserter(nodes_),
                  [this, &node_flows](const auto& node) {
                    const auto node_id = node->GetId().Get();

@@ -1,11 +1,12 @@
 #include "draw_main_window.h"
 
-#include "draw_diagram.h"
+#include "draw_diagram_editor.h"
 #include "draw_main_menu_bar.h"
 
 namespace esc::draw {
-void MainWindow::Draw(coreui::Project &frame) {
-  main_menu_bar.Draw(frame);
-  node_editor.Draw(frame);
+///
+void MainWindow::Draw(coreui::Project &project) {
+  main_menu_bar_.Draw(project);
+  diagram_editor_.Draw(project.GetDiagram());
 }
 }  // namespace esc::draw

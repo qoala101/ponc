@@ -20,12 +20,9 @@ class AppImpl {
 
  private:
   ///
-  cpp::SafeOwner safe_owner_{};
-  ///
-  core::Project project_{};
-  ///
-  coreui::Project project_ui_;
-  // draw::MainWindow main_window_{};
+  coreui::Project project_;
+   ///
+  draw::MainWindow main_window_{};
 };
 }  // namespace esc
 

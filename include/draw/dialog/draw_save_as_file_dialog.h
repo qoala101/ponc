@@ -4,8 +4,10 @@
 #include "draw_i_file_dialog.h"
 
 namespace esc::draw {
+///
 class SaveAsFileDialog : public IFileDialog {
  public:
+  ///
   SaveAsFileDialog();
 };
 }  // namespace esc::draw

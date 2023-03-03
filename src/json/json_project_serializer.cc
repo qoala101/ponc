@@ -35,6 +35,8 @@ auto ProjectSerializer::ParseFromJson(
     const crude_json::value& json,
     const std::vector<std::unique_ptr<IFamilyParser>>& family_parsers)
     -> core::Project {
+  const auto settings = SettingsSerializer::ParseFromJson(json["settings"]);
+
   auto families =
       ContainerSerializer::ParseFromJson<std::unique_ptr<core::IFamily>>(
           json, "families", [&family_parsers](const auto& json) {
@@ -42,14 +44,14 @@ auto ProjectSerializer::ParseFromJson(
           });
 
   auto diagram = DiagramSerializer::ParseFromJson(json["diagram"], families);
-  const auto settings = SettingsSerializer::ParseFromJson(json["settings"]);
-  return core::Project{std::move(families), std::move(diagram), settings};
+  return core::Project{settings, std::move(families), std::move(diagram)};
 }
 
 ///
 auto ProjectSerializer::WriteToJson(const core::Project& project)
     -> crude_json::value {
   auto json = crude_json::value{};
+  json["settings"] = SettingsSerializer::WriteToJson(project.GetSettings());
 
   ContainerSerializer::WriteToJson(
       json, project.GetFamilies(), "families", [](const auto& family) {
@@ -57,7 +59,6 @@ auto ProjectSerializer::WriteToJson(const core::Project& project)
       });
 
   json["diagram"] = DiagramSerializer::WriteToJson(project.GetDiagram());
-  json["settings"] = SettingsSerializer::WriteToJson(project.GetSettings());
   return json;
 }
 }  // namespace esc::json

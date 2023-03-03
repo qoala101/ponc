@@ -52,6 +52,9 @@ class SafePtr {
 class SafeOwner {
  public:
   ///
+  SafeOwner() : instance_{std::make_shared<void *>()} {}
+
+  ///
   auto MakeSafe(auto *t) const { return SafePtr{t, instance_}; }
 
  private:

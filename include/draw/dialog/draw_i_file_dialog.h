@@ -7,20 +7,30 @@
 #include <functional>
 // clang-format on
 
+#include "cpp_hook.h"
 #include "cpp_interface.h"
 
 namespace esc::draw {
+///
 class IFileDialog : public cpp::Interface {
  public:
-  using SignalFileSelected = std::function<void(std::string file_path)>;
+  ///
+  struct Hooks {
+    ///
+    cpp::Hook<void(std::string file_path)> file_selected{};
+  };
 
-  void Draw(const SignalFileSelected &signal_file_selected);
+  ///
+  void Draw(const Hooks &hooks);
+  ///
   void Show();
 
  protected:
+  ///
   explicit IFileDialog(const ImGui::FileBrowser &dialog);
 
  private:
+  ///
   ImGui::FileBrowser dialog_{};
 };
 }  // namespace esc::draw

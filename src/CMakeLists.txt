@@ -157,8 +157,7 @@ add_example_executable(esc
   # draw/diagram/popup/draw_i_popup.cc
   # draw/diagram/popup/draw_link_popup.cc
   # draw/diagram/popup/draw_node_popup.cc
-
-  # draw/diagram/draw_diagram.cc
+  draw/diagram/draw_diagram_editor.cc
 
   # # draw/diagram/process/draw_delete_items_process.cc
   # draw/diagram/draw_link_creation.cc
@@ -170,9 +169,9 @@ add_example_executable(esc
   # draw/diagram/draw_node.cc
   # draw/diagram/draw_tooltip.cc
 
-  # draw/dialog/draw_i_file_dialog.cc
-  # draw/dialog/draw_open_file_dialog.cc
-  # draw/dialog/draw_save_as_file_dialog.cc
+  draw/dialog/draw_i_file_dialog.cc
+  draw/dialog/draw_open_file_dialog.cc
+  draw/dialog/draw_save_as_file_dialog.cc
 
   # # draw/view/draw_families_view.cc
   # # draw/view/draw_flow_tree_view.cc
@@ -180,8 +179,9 @@ add_example_executable(esc
   # # draw/view/draw_groups_view.cc
   # draw/view/draw_i_hideable.cc
   # draw/view/draw_settings_view.cc
-  # draw/draw_main_menu_bar.cc
-  # draw/draw_main_window.cc
+  draw/draw_main_menu_bar.cc
+  draw/draw_main_window.cc
+
   flow/flow_algorithms.cc
   flow/flow_node_flow.cc
   flow/flow_tree_traversal.cc

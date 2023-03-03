@@ -5,12 +5,11 @@
 namespace esc {
 ///
 AppImpl::AppImpl(coreui::TexturesHandle textures_handle)
-    : project_ui_{
-          safe_owner_.MakeSafe(&project_), {}, std::move(textures_handle)} {}
+    : project_{{}, std::move(textures_handle)} {}
 
 ///
 void AppImpl::OnFrame() {
-  project_ui_.OnFrame();
-  // main_window_.Draw(controller_);
+  project_.OnFrame();
+  main_window_.Draw(project_);
 }
 }  // namespace esc

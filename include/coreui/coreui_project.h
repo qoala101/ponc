@@ -22,8 +22,7 @@ namespace esc::coreui {
 class Project {
  public:
   ///
-  Project(cpp::SafePtr<core::Project> project,
-          std::vector<std::unique_ptr<core::IGeneration>> generations,
+  Project(std::vector<std::unique_ptr<core::IGeneration>> generations,
           TexturesHandle textures_handle);
 
   ///
@@ -32,19 +31,27 @@ class Project {
   auto GetDiagram() const -> const Diagram &;
   ///
   auto GetDiagram() -> Diagram &;
+  ///
+  void OpenFromFile(std::string file_path);
+  ///
+  void SaveToFile(std::string file_path);
+  ///
+  void Reset();
 
  private:
   ///
-  void ResetProject() const;
+  auto CreateProject() const;
+  ///
+  auto CreateFamilyParsers() const;
 
-  ///
-  cpp::SafeOwner safe_owner_{};
-  ///
-  cpp::SafePtr<core::Project> project_;
   ///
   std::vector<std::unique_ptr<core::IGeneration>> generations_{};
   ///
   TexturesHandle textures_handle_;
+  ///
+  core::Project project_;
+  ///
+  cpp::SafeOwner safe_owner_{};
   ///
   EventLoop event_loop_{};
   ///

@@ -12,13 +12,14 @@ namespace esc::core {
 class Project {
  public:
   ///
-  explicit Project(std::vector<std::unique_ptr<IFamily>> families = {},
-                   Diagram diagram = Diagram{}, const Settings &settings = {});
+  Project(const Settings &settings,
+          std::vector<std::unique_ptr<IFamily>> families,
+          Diagram diagram = Diagram{});
 
   ///
-  auto GetIdGenerator() const -> const IdGenerator &;
+  auto GetSettings() const -> const Settings &;
   ///
-  auto GetIdGenerator() -> IdGenerator &;
+  auto GetSettings() -> Settings &;
   ///
   auto GetFamilies() const -> const std::vector<std::unique_ptr<IFamily>> &;
   ///
@@ -26,19 +27,22 @@ class Project {
   ///
   auto GetDiagram() -> Diagram &;
   ///
-  auto GetSettings() const -> const Settings &;
+  auto GetIdGenerator() const -> const IdGenerator &;
   ///
-  auto GetSettings() -> Settings &;
+  auto GetIdGenerator() -> IdGenerator &;
 
  private:
   ///
-  IdGenerator id_generator_{};
+  auto FindMaxId() const;
+
+  ///
+  Settings settings_{};
   ///
   std::vector<std::unique_ptr<IFamily>> families_{};
   ///
   Diagram diagram_{};
   ///
-  Settings settings_{};
+  IdGenerator id_generator_{};
 };
 }  // namespace esc::core
 
