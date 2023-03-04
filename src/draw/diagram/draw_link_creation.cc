@@ -19,7 +19,7 @@ void DrawNewLinkQuery(coreui::LinkCreation &link_creation) {
 
   if (!can_create_link) {
     DrawTooltip(reason, {1.F / 3, 0.F, 0.F, 1.F * 3 / 4});
-    ne::RejectNewItem({1.F, 1.F / 2, 1.F / 2, new_link_alpha}, 4.F);
+    ne::RejectNewItem({1.F, 1.F / 2, 1.F / 2, new_link_alpha}, 4);
     return;
   }
 
@@ -29,7 +29,7 @@ void DrawNewLinkQuery(coreui::LinkCreation &link_creation) {
 
   DrawTooltip(reason.c_str(), {0.F, 1.F / 3, 0.F, 1.F * 3 / 4});
 
-  if (!ne::AcceptNewItem({1.F / 2, 1.F, 1.F / 2, new_link_alpha}, 4.F)) {
+  if (!ne::AcceptNewItem({1.F / 2, 1.F, 1.F / 2, new_link_alpha}, 4)) {
     return;
   }
 
@@ -42,7 +42,7 @@ void LinkCreation::Draw(coreui::LinkCreation &link_creation,
                         const std::vector<coreui::FamilyGroup> &family_groups) {
   const auto mouse_pos = ImGui::GetMousePos();
 
-  if (ne::BeginCreate({1.F, 1.F, 1.F, GetNewLinkAlpha(link_creation)}, 3.F)) {
+  if (ne::BeginCreate({1.F, 1.F, 1.F, GetNewLinkAlpha(link_creation)}, 3)) {
     auto dragged_from_pin = ne::PinId{};
     auto hovering_over_pin = ne::PinId{};
 

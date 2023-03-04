@@ -5,6 +5,7 @@
 
 #include "coreui_diagram.h"
 #include "cpp_scope.h"
+#include "draw_link.h"
 #include "draw_link_creation.h"
 #include "draw_node.h"
 #include "imgui_node_editor.h"
@@ -24,6 +25,10 @@ void DiagramEditor::Draw(coreui::Diagram &diagram) {
 
   for (auto &node : diagram.GetNodes()) {
     DrawNode(node);
+  }
+
+  for (const auto &link : diagram.GetLinks()) {
+    DrawLink(link);
   }
 
   ShowPopupsIfRequested();

@@ -42,6 +42,6 @@ void DrawFlowIcon(const ImVec2& size, const ImColor& color, bool filled) {
   }
 
   DrawIconPath(*draw_list, pos, size);
-  draw_list->PathStroke(color, ImDrawFlags_Closed, 2.F);
+  draw_list->PathStroke(color, ImDrawFlags_Closed, 2);
 }
 }  // namespace esc::draw

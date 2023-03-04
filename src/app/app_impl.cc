@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "app_attenuator_family_group.h"
 #include "app_input_family_group.h"
 #include "core_i_family_group.h"
 #include "coreui_project.h"
@@ -15,6 +16,8 @@ AppImpl::AppImpl(coreui::TexturesHandle textures_handle)
             auto family_groups =
                 std::vector<std::unique_ptr<core::IFamilyGroup>>{};
             family_groups.emplace_back(std::make_unique<InputFamilyGroup>());
+            family_groups.emplace_back(
+                std::make_unique<AttenuatorFamilyGroup>());
             return family_groups;
           }(),
           std::move(textures_handle)} {}

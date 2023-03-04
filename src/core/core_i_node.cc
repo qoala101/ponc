@@ -32,12 +32,6 @@ auto INode::GetPinKind(const INode& node, ne::PinId pin_id) -> ne::PinKind {
 }
 
 ///
-auto INode::GetOppositePinKind(ne::PinKind pin_kind) -> ne::PinKind {
-  return (pin_kind == ne::PinKind::Input) ? ne::PinKind::Output
-                                          : ne::PinKind::Input;
-}
-
-///
 auto INode::GetId() const -> ne::NodeId { return id_; }
 
 ///
@@ -80,7 +74,8 @@ INode::INode(ConstructorArgs args)
     : id_{args.id},
       family_id_{args.family_id},
       input_pin_id_{args.input_pin_id},
-      output_pin_ids_{std::move(args.output_pin_ids)} {}
+      output_pin_ids_{std::move(args.output_pin_ids)},
+      pos_{args.pos} {}
 
 ///
 void INode::SetInitialFlowValues(flow::NodeFlow& /*unused*/) const {}

@@ -76,7 +76,7 @@ auto FindLinkFromParentToChild(const PinFlows &parent_output_pins,
 ///
 // NOLINTNEXTLINE(*-no-recursion)
 void CalculateNodeFlow(flow::NodeFlows &node_flows_, const TreeNode &node,
-                       float input_from_parent = 0.F) {
+                       float input_from_parent = 0) {
   const auto node_id = node.node->GetId();
 
   auto calculated_flow = node_flows_.find(node_id.Get());

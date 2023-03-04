@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "core_i_node.h"
+#include "core_pin.h"
 #include "coreui_family.h"
 #include "imgui_node_editor.h"
 
@@ -16,8 +16,7 @@ namespace esc::draw {
 ///
 auto BackgroundConnectionPopup::GetGroupsValidForConnection(
     const std::vector<coreui::FamilyGroup>& family_groups) const {
-  const auto target_pin_kind =
-      core::INode::GetOppositePinKind(source_pin_kind_);
+  const auto target_pin_kind = core::Pin::GetOppositeKind(source_pin_kind_);
 
   auto valid_groups =
       std::vector<std::pair<std::string, std::vector<const coreui::Family*>>>{};

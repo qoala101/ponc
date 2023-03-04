@@ -10,6 +10,10 @@ namespace esc::core {
 struct Link {
   ///
   static auto HasPin(const Link &link, ne::PinId pin_id) -> bool;
+  ///
+  static auto GetPinKind(const Link &link, ne::PinId pin_id) -> ne::PinKind;
+  ///
+  static auto GetOtherPin(const Link &link, ne::PinId pin_id) -> ne::PinId;
 
   ///
   ne::LinkId id{};

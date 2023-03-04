@@ -10,7 +10,6 @@
 
 #include "core_family_id.h"
 #include "cpp_interface.h"
-#include "cpp_safe_ptr.h"
 #include "flow_node_flow.h"
 #include "imgui.h"
 
@@ -49,8 +48,6 @@ class INode : public cpp::Interface {
   static auto GetAllPinIds(const INode &node) -> std::vector<ne::PinId>;
   ///
   static auto GetPinKind(const INode &node, ne::PinId pin_id) -> ne::PinKind;
-  ///
-  static auto GetOppositePinKind(ne::PinKind pin_kind) -> ne::PinKind;
 
   ///
   virtual auto CreateWriter() const -> std::unique_ptr<json::INodeWriter> = 0;

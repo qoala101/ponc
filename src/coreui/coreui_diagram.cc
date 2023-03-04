@@ -161,7 +161,7 @@ auto Diagram::FlowLinkFrom(const core::Link& core_link,
                            const flow::NodeFlows& node_flows) const {
   auto link = Link{
       .type = core_link,
-      .thickness = 2.F,
+      .thickness = 2,
   };
 
   const auto link_alpha = GetFlowLinkAlpha(core_link.id);
@@ -227,7 +227,7 @@ auto Diagram::GetRepinningLink() const -> std::optional<Link> {
     return std::nullopt;
   }
 
-  auto link = Link{.color = GetRepinningLinkColor(), .thickness = 4.F};
+  auto link = Link{.color = GetRepinningLinkColor(), .thickness = 4};
 
   const auto [fixed_pin_id, pin_kind] =
       link_creation_.GetCurrentLinkSourcePin();

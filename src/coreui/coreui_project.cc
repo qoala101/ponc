@@ -30,10 +30,10 @@ auto Project::CreateProject() const {
   }
 
   return core::Project{core::Settings{
-                           .min_flow = -27.F,
-                           .low_flow = -22.F,
-                           .high_flow = -18.F,
-                           .max_flow = 6.F,
+                           .min_flow = -27,
+                           .low_flow = -22,
+                           .high_flow = -18,
+                           .max_flow = 6,
                        },
                        std::move(families), core::Diagram{}};
 }

@@ -4,12 +4,19 @@
 #include <memory>
 
 #include "core_i_family.h"
+#include "core_i_family_group.h"
 #include "json_i_family_parser.h"
 
 namespace esc {
-struct AttenuatorNode {
-  static auto CreateFamily(core::FamilyId id) -> std::shared_ptr<core::IFamily>;
-  static auto CreateFamilyParser() -> std::unique_ptr<json::IFamilyParser>;
+///
+struct AttenuatorFamilyGroup : public core::IFamilyGroup {
+ public:
+  ///
+  auto CreateFamilies(core::IdGenerator &id_generator) const
+      -> std::vector<std::unique_ptr<core::IFamily>> override;
+  ///
+  auto CreateFamilyParser() const
+      -> std::unique_ptr<json::IFamilyParser> override;
 };
 }  // namespace esc
 

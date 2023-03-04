@@ -1,9 +1,10 @@
 #ifndef VH_DRAW_LINK_H_
 #define VH_DRAW_LINK_H_
 
-#include "coreui_project.h"
+#include "coreui_link.h"
 
 namespace esc::draw {
+///
 void DrawLink(const coreui::Link &link);
 }  // namespace esc::draw
 

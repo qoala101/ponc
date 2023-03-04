@@ -39,7 +39,7 @@ void DrawPinField(const coreui::Pin& pin) {
 
   auto* float_value = std::get<float*>(pin.value);
   ImGui::SetNextItemWidth(100);
-  ImGui::InputFloat(label.c_str(), float_value, 0.F, 0.F, "%.3f");
+  ImGui::InputFloat(label.c_str(), float_value, 0, 0, "%.3f");
 }
 
 auto DrawPinIconArea(const coreui::Pin& pin) -> std::optional<ImRect> {
@@ -119,7 +119,7 @@ void DrawNode(coreui::Node& node) {
         ImGui::BeginHorizontal(layout_id++);
       }
 
-      DrawPinIconArea(pin);
+      pin.icon->SetRect(*DrawPinIconArea(pin));
       DrawPinField(pin);
 
       ImGui::EndHorizontal();
@@ -152,14 +152,14 @@ void DrawNode(coreui::Node& node) {
 
     for (auto& pin : node.output_pins) {
       if (pin.icon.has_value()) {
-        ne::BeginPin(pin.icon->GetData().id, ne::PinKind::Input);
+        ne::BeginPin(pin.icon->GetData().id, ne::PinKind::Output);
         ImGui::BeginHorizontal(pin.icon->GetData().id.AsPointer());
       } else {
         ImGui::BeginHorizontal(layout_id++);
       }
 
       DrawPinField(pin);
-      DrawPinIconArea(pin);
+      pin.icon->SetRect(*DrawPinIconArea(pin));
 
       ImGui::EndHorizontal();
 

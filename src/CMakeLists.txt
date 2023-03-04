@@ -116,7 +116,7 @@ endmacro()
 
 add_example_executable(esc
 
-  # app/family_group/app_attenuator_family_group.cc
+  app/family_group/app_attenuator_family_group.cc
 
   # app/family_group/app_client_family_group.cc
   # app/family_group/app_coupler_family_group.cc
@@ -133,6 +133,7 @@ add_example_executable(esc
   core/core_i_node.cc
   core/core_id_generator.cc
   core/core_link.cc
+  core/core_pin.cc
   core/core_project.cc
   core/core_settings.cc
 
@@ -166,8 +167,7 @@ add_example_executable(esc
   draw/diagram/draw_flow_icon.cc
 
   # # draw/diagram/draw_groups.cc
-  # draw/diagram/draw_handmade_link.cc
-  # draw/diagram/draw_link.cc
+  draw/diagram/draw_link.cc
   draw/diagram/draw_node.cc
 
   draw/diagram/draw_tooltip.cc

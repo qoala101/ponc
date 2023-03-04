@@ -1,7 +1,7 @@
 #include "coreui_link_creation.h"
 
-#include "core_diagram.h"
 #include "core_i_node.h"
+#include "core_link.h"
 #include "cpp_assert.h"
 #include "imgui_node_editor.h"
 
@@ -30,12 +30,13 @@ void LinkCreation::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
   const auto link_to_repin = callbacks_.find_pin_link(*dragged_from_pin);
 
   if (link_to_repin.has_value()) {
-    const auto fixed_pin = (dragged_from_pin == (*link_to_repin)->start_pin_id)
-                               ? (*link_to_repin)->end_pin_id
-                               : (*link_to_repin)->start_pin_id;
+    const auto fixed_pin =
+        core::Link::GetOtherPin(**link_to_repin, *dragged_from_pin);
+
     creating_data_->repinning_data = RepinningData{
         .link_to_repin = (*link_to_repin)->id,
         .fixed_pin = fixed_pin,
+        .fixed_pin_kind = core::Link::GetPinKind(**link_to_repin, fixed_pin),
         .fixed_pin_node = callbacks_.find_pin_node(fixed_pin).GetId()};
   }
 

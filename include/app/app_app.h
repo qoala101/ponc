@@ -10,7 +10,7 @@
 
 namespace esc {
 ///
-// NOLINTNEXTLINE(*-virtual-class-destructor, *-multiple-inheritance)
+// NOLINTNEXTLINE(*-virtual-class-destructor)
 class App : public Application {
  public:
   ///

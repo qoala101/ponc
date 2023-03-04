@@ -29,7 +29,7 @@ auto CreateNodeUiTraits(cpp::SafePtr<const Node> node)
 
 class Node : public core::INode {
  public:
-  explicit Node(ConstructorArgs args, float value = {6.F})
+  explicit Node(ConstructorArgs args, float value = 6)
       : INode{std::move(args)}, value_{value} {}
 
   auto CreateWriter() const -> std::unique_ptr<json::INodeWriter> override {
@@ -80,9 +80,9 @@ auto CreateNodeWriter(cpp::SafePtr<const Node> node)
   return std::make_unique<NodeWriter>(std::move(node));
 }
 
-class PinUiTraits : public coreui::IPinTraits {
+class ValuePinTraits : public coreui::IPinTraits {
  public:
-  explicit PinUiTraits(cpp::SafePtr<const Node> node)
+  explicit ValuePinTraits(cpp::SafePtr<const Node> node)
       : node_{std::move(node)} {}
 
   auto GetPin() const -> std::variant<ne::PinId, ne::PinKind> override {
@@ -100,7 +100,7 @@ class PinUiTraits : public coreui::IPinTraits {
 
 class HeaderUiTraits : public coreui::IHeaderTraits {
  public:
-  auto GetColor() const -> ImColor override { return {255, 0, 0}; }
+  auto GetColor() const -> ImColor override { return {1.F, 0.F, 0.F}; }
 };
 
 class NodeUiTraits : public coreui::INodeTraits {
@@ -117,9 +117,9 @@ class NodeUiTraits : public coreui::INodeTraits {
 
   auto CreatePinTraits() const
       -> std::vector<std::unique_ptr<coreui::IPinTraits>> override {
-    auto pin_drawers = std::vector<std::unique_ptr<coreui::IPinTraits>>{};
-    pin_drawers.emplace_back(std::make_unique<PinUiTraits>(node_));
-    return pin_drawers;
+    auto pin_traits = std::vector<std::unique_ptr<coreui::IPinTraits>>{};
+    pin_traits.emplace_back(std::make_unique<ValuePinTraits>(node_));
+    return pin_traits;
   }
 
  private:
