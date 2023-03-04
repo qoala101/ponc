@@ -1,11 +1,12 @@
 #ifndef VH_JSON_ID_SERIALIZER_H_
 #define VH_JSON_ID_SERIALIZER_H_
 
+#include "cpp_no_instances.h"
 #include "crude_json.h"
 
 namespace esc::json {
 ///
-struct IdSerializer {
+struct IdSerializer : public cpp::NoInstances {
   ///
   template <typename Id>
   static auto ParseFromJson(const crude_json::value &json) {

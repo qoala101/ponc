@@ -24,6 +24,10 @@ class LinkCreation {
     cpp::Query<const core::INode&, ne::PinId> find_pin_node{};
     ///
     cpp::Query<std::optional<const core::Link*>, ne::PinId> find_pin_link{};
+    ///
+    cpp::Action<void(ne::PinId, ne::PinId)> create_link{};
+    ///
+    cpp::Action<void(ne::LinkId)> delete_link{};
   };
 
   ///
@@ -47,13 +51,17 @@ class LinkCreation {
   ///
   auto IsLinkBeingRepinned(ne::LinkId link_id) const -> bool;
   ///
-  auto GetFixedPinOfLinkBeingRepinned() const -> ne::PinId;
+  auto GetCurrentLinkSourcePin() const -> std::pair<ne::PinId, ne::PinKind>;
+  ///
+  void AcceptCurrentLink() const;
 
  private:
   ///
   struct HoveringData {
     ///
     ne::PinId hovering_over_pin{};
+    ///
+    ne::PinKind hovering_over_pin_kind{};
     ///
     bool can_connect_to_hovered_pin{};
     ///
@@ -66,6 +74,8 @@ class LinkCreation {
     ne::LinkId link_to_repin{};
     ///
     ne::PinId fixed_pin{};
+    ///
+    ne::PinKind fixed_pin_kind{};
     ///
     ne::NodeId fixed_pin_node{};
   };

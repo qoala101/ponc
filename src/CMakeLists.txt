@@ -153,9 +153,8 @@ add_example_executable(esc
 
   cpp/cpp_scope_function.cc
 
+  draw/diagram/popup/draw_background_connection_popup.cc
   draw/diagram/popup/draw_background_popup.cc
-
-  # draw/diagram/popup/draw_creation_popup.cc
   draw/diagram/popup/draw_i_popup.cc
 
   # draw/diagram/popup/draw_link_popup.cc
@@ -163,14 +162,15 @@ add_example_executable(esc
   draw/diagram/draw_diagram_editor.cc
 
   # # draw/diagram/process/draw_delete_items_process.cc
-  # draw/diagram/draw_link_creation.cc
-  # draw/diagram/draw_flow_icon.cc
+  draw/diagram/draw_link_creation.cc
+  draw/diagram/draw_flow_icon.cc
 
   # # draw/diagram/draw_groups.cc
   # draw/diagram/draw_handmade_link.cc
   # draw/diagram/draw_link.cc
-  # draw/diagram/draw_node.cc
-  # draw/diagram/draw_tooltip.cc
+  draw/diagram/draw_node.cc
+
+  draw/diagram/draw_tooltip.cc
   draw/dialog/draw_i_file_dialog.cc
   draw/dialog/draw_open_file_dialog.cc
   draw/dialog/draw_save_as_file_dialog.cc

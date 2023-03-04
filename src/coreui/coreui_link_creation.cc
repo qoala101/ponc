@@ -3,6 +3,7 @@
 #include "core_diagram.h"
 #include "core_i_node.h"
 #include "cpp_assert.h"
+#include "imgui_node_editor.h"
 
 namespace esc::coreui {
 ///
@@ -42,8 +43,13 @@ void LinkCreation::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
     return;
   }
 
+  const auto& hovering_over_pin_node =
+      callbacks_.find_pin_node(*hovering_over_pin);
+
   creating_data_->hovering_data = HoveringData{
       .hovering_over_pin = *hovering_over_pin,
+      .hovering_over_pin_kind =
+          core::INode::GetPinKind(hovering_over_pin_node, *hovering_over_pin),
       .reason = GetCanConnectToPinReason(*hovering_over_pin).second};
 }
 
@@ -91,10 +97,43 @@ auto LinkCreation::IsLinkBeingRepinned(ne::LinkId link_id) const -> bool {
 }
 
 ///
-auto LinkCreation::GetFixedPinOfLinkBeingRepinned() const -> ne::PinId {
+auto LinkCreation::GetCurrentLinkSourcePin() const
+    -> std::pair<ne::PinId, ne::PinKind> {
   Expects(creating_data_.has_value());
-  Expects(creating_data_->repinning_data.has_value());
-  return creating_data_->repinning_data->fixed_pin;
+
+  if (creating_data_->repinning_data.has_value()) {
+    return {creating_data_->repinning_data->fixed_pin,
+            creating_data_->repinning_data->fixed_pin_kind};
+  }
+
+  return {creating_data_->dragged_from_pin,
+          creating_data_->dragged_from_pin_kind};
+}
+
+///
+void LinkCreation::AcceptCurrentLink() const {
+  Expects(creating_data_.has_value());
+  Expects(creating_data_->hovering_data.has_value());
+
+  auto opposite_to_hovering_pin = ne::PinId{};
+
+  if (creating_data_->repinning_data.has_value()) {
+    opposite_to_hovering_pin = creating_data_->repinning_data->fixed_pin;
+
+    callbacks_.delete_link(creating_data_->repinning_data->link_to_repin);
+  } else {
+    opposite_to_hovering_pin = creating_data_->dragged_from_pin;
+  }
+
+  if (creating_data_->hovering_data->hovering_over_pin_kind ==
+      ne::PinKind::Input) {
+    callbacks_.create_link(opposite_to_hovering_pin,
+                           creating_data_->hovering_data->hovering_over_pin);
+    return;
+  }
+
+  callbacks_.create_link(creating_data_->hovering_data->hovering_over_pin,
+                         opposite_to_hovering_pin);
 }
 
 ///

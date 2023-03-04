@@ -2,11 +2,12 @@
 #define VH_JSON_SETINGS_SERIALIZER_H_
 
 #include "core_settings.h"
+#include "cpp_no_instances.h"
 #include "crude_json.h"
 
 namespace esc::json {
 ///
-struct SettingsSerializer {
+struct SettingsSerializer : public cpp::NoInstances {
   ///
   static auto ParseFromJson(const crude_json::value &json) -> core::Settings;
   ///

@@ -41,6 +41,8 @@ struct Node {
   ///
   ne::NodeId id{};
   ///
+  ImVec2 pos{};
+  ///
   std::optional<Header> header{};
   ///
   std::vector<Pin> input_pins{};

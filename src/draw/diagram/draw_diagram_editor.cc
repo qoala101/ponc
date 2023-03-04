@@ -5,6 +5,8 @@
 
 #include "coreui_diagram.h"
 #include "cpp_scope.h"
+#include "draw_link_creation.h"
+#include "draw_node.h"
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
@@ -17,6 +19,12 @@ DiagramEditor::DiagramEditor()
 ///
 void DiagramEditor::Draw(coreui::Diagram &diagram) {
   ne::Begin("DiagramEditor");
+
+  link_creation_.Draw(diagram.GetLinkCreation(), diagram.GetFamilyGroups());
+
+  for (auto &node : diagram.GetNodes()) {
+    DrawNode(node);
+  }
 
   ShowPopupsIfRequested();
   DrawPopups(diagram);

@@ -7,6 +7,7 @@
 
 #include "coreui_diagram.h"
 #include "draw_background_popup.h"
+#include "draw_link_creation.h"
 
 namespace ne = ax::NodeEditor;
 
@@ -28,6 +29,8 @@ class DiagramEditor {
 
   ///
   std::unique_ptr<ne::EditorContext, void (*)(ne::EditorContext *)> context_;
+  ///
+  LinkCreation link_creation_{};
   ///
   BackgroundPopup background_popup_{};
 };

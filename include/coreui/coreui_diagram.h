@@ -60,6 +60,8 @@ class Diagram {
   ///
   auto GetNodes() const -> const std::vector<Node> &;
   ///
+  auto GetNodes() -> std::vector<Node> &;
+  ///
   auto GetLinks() const -> const std::vector<Link> &;
 
  private:
@@ -73,7 +75,7 @@ class Diagram {
   auto FlowLinkFrom(const core::Link &core_link,
                     const flow::NodeFlows &node_flows) const;
   ///
-  auto GetPinIconTipPos(ne::PinId pin_id) const;
+  auto GetPinIconTipPos(ne::PinId pin_id, ne::PinKind pin_kind) const;
   ///
   auto GetRepinningLinkColor() const;
   ///

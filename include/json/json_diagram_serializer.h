@@ -5,11 +5,12 @@
 
 #include "core_diagram.h"
 #include "core_i_family.h"
+#include "cpp_no_instances.h"
 #include "crude_json.h"
 
 namespace esc::json {
 ///
-struct DiagramSerializer {
+struct DiagramSerializer : public cpp::NoInstances {
   ///
   static auto ParseFromJson(
       const crude_json::value &json,

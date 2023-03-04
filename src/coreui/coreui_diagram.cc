@@ -12,6 +12,7 @@
 #include "core_diagram.h"
 #include "core_i_family.h"
 #include "core_i_node.h"
+#include "core_link.h"
 #include "coreui_family.h"
 #include "coreui_i_family_traits.h"
 #include "coreui_i_node_traits.h"
@@ -46,6 +47,23 @@ Diagram::Diagram(
                [safe_this = safe_owner_.MakeSafe(this)](auto pin_id) {
                  return core::Diagram::FindPinLink(*safe_this->diagram_,
                                                    pin_id);
+               },
+           .create_link =
+               [safe_this = safe_owner_.MakeSafe(this)](auto start_pin_id,
+                                                        auto end_pin_id) {
+                 safe_this->callbacks_.post_event([safe_this, start_pin_id,
+                                                   end_pin_id]() {
+                   safe_this->diagram_->EmplaceLink(core::Link{
+                       .id = safe_this->id_generator_->Generate<ne::LinkId>(),
+                       .start_pin_id = start_pin_id,
+                       .end_pin_id = end_pin_id});
+                 });
+               },
+           .delete_link =
+               [safe_this = safe_owner_.MakeSafe(this)](auto link_id) {
+                 safe_this->callbacks_.post_event([safe_this, link_id]() {
+                   safe_this->diagram_->EraseLink(link_id);
+                 });
                }}} {}
 
 ///
@@ -71,22 +89,37 @@ auto Diagram::GetFamilyGroups() -> const std::vector<FamilyGroup>& {
 }
 
 ///
-auto Diagram::GetNodes() const -> const std::vector<Node>& { return nodes_; }
+auto Diagram::GetNodes() const -> const std::vector<Node>& {
+  // NOLINTNEXTLINE(*-const-cast)
+  return const_cast<Diagram*>(this)->GetNodes();
+}
+
+///
+auto Diagram::GetNodes() -> std::vector<Node>& { return nodes_; }
 
 ///
 auto Diagram::GetLinks() const -> const std::vector<Link>& { return links_; }
 
+///
 auto Diagram::FamilyFrom(const core::IFamily& core_family) const {
   return Family{
       safe_owner_.MakeSafe(&core_family),
       id_generator_,
-      {.node_created = [safe_this = safe_owner_.MakeSafe(this)](auto node) {
-        safe_this->callbacks_.post_event(
-            [safe_this, node = std::make_shared<std::unique_ptr<core::INode>>(
-                            std::move(node))]() {
-              safe_this->diagram_->EmplaceNode(std::move(*node));
-            });
-      }}};
+      {.node_created =
+           [safe_this = safe_owner_.MakeSafe(this)](auto node) {
+             safe_this->callbacks_.post_event(
+                 [safe_this,
+                  node = std::make_shared<std::unique_ptr<core::INode>>(
+                      std::move(node))]() {
+                   safe_this->diagram_->EmplaceNode(std::move(*node));
+                 });
+           },
+       .link_created =
+           [safe_this = safe_owner_.MakeSafe(this)](const auto& link) {
+             safe_this->callbacks_.post_event([safe_this, link]() {
+               safe_this->diagram_->EmplaceLink(link);
+             });
+           }}};
 }
 
 ///
@@ -156,7 +189,7 @@ auto Diagram::FlowLinkFrom(const core::Link& core_link,
 }
 
 ///
-auto Diagram::GetPinIconTipPos(ne::PinId pin_id) const {
+auto Diagram::GetPinIconTipPos(ne::PinId pin_id, ne::PinKind pin_kind) const {
   const auto& pin_core_node = core::Diagram::FindPinNode(*diagram_, pin_id);
   const auto pin_node_id = pin_core_node.GetId();
 
@@ -169,13 +202,10 @@ auto Diagram::GetPinIconTipPos(ne::PinId pin_id) const {
   Expects(pin.icon.has_value());
 
   const auto pin_rect = pin.icon->GetRect();
-  const auto pin_kind = core::INode::GetPinKind(pin_core_node, pin_id);
 
-  return std::pair{
-      pin_kind,
-      (pin_kind == ne::PinKind::Input)
-          ? ImVec2{pin_rect.Min.x, (pin_rect.Min.y + pin_rect.Max.y) / 2}
-          : ImVec2{pin_rect.Max.x, (pin_rect.Min.y + pin_rect.Max.y) / 2}};
+  return ImVec2{
+      (pin_kind == ne::PinKind::Input) ? pin_rect.Min.x : pin_rect.Max.x,
+      (pin_rect.Min.y + pin_rect.Max.y) / 2};
 }
 
 ///
@@ -199,8 +229,9 @@ auto Diagram::GetRepinningLink() const -> std::optional<Link> {
 
   auto link = Link{.color = GetRepinningLinkColor(), .thickness = 4.F};
 
-  const auto fixed_pin_id = link_creation_.GetFixedPinOfLinkBeingRepinned();
-  const auto [pin_kind, tip_pos] = GetPinIconTipPos(fixed_pin_id);
+  const auto [fixed_pin_id, pin_kind] =
+      link_creation_.GetCurrentLinkSourcePin();
+  const auto tip_pos = GetPinIconTipPos(fixed_pin_id, pin_kind);
 
   if (pin_kind == ne::PinKind::Input) {
     link.type = HandmadeLink{.end_pos = tip_pos};
@@ -283,7 +314,7 @@ auto Diagram::PinFrom(const IPinTraits& pin_traits,
 ///
 auto Diagram::NodeFrom(const core::INode& core_node,
                        const flow::NodeFlow& node_flow) const {
-  auto node = Node{.id = core_node.GetId().Get()};
+  auto node = Node{.id = core_node.GetId().Get(), .pos = core_node.GetPos()};
   const auto node_traits = core_node.CreateUiTraits();
 
   if (const auto header_traits = node_traits->CreateHeaderTraits()) {

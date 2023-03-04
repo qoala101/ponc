@@ -32,6 +32,12 @@ auto INode::GetPinKind(const INode& node, ne::PinId pin_id) -> ne::PinKind {
 }
 
 ///
+auto INode::GetOppositePinKind(ne::PinKind pin_kind) -> ne::PinKind {
+  return (pin_kind == ne::PinKind::Input) ? ne::PinKind::Output
+                                          : ne::PinKind::Input;
+}
+
+///
 auto INode::GetId() const -> ne::NodeId { return id_; }
 
 ///

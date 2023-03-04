@@ -2,12 +2,13 @@
 #define VH_JSON_PROJECT_SERIALIZER_H_
 
 #include "core_project.h"
+#include "cpp_no_instances.h"
 #include "crude_json.h"
 #include "json_i_family_parser.h"
 
 namespace esc::json {
 ///
-struct ProjectSerializer {
+struct ProjectSerializer : public cpp::NoInstances {
   ///
   static auto ParseFromJson(
       const crude_json::value &json,
