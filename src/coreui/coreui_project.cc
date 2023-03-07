@@ -14,6 +14,7 @@
 #include "coreui_diagram.h"
 #include "coreui_event_loop.h"
 #include "coreui_texture.h"
+#include "cpp_share.h"
 #include "json_project_serializer.h"
 
 namespace esc::coreui {
@@ -44,26 +45,29 @@ Project::Project(std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups,
     : family_groups_{std::move(family_groups)},
       textures_handle_{std::move(textures_handle)},
       project_{CreateProject()},
-      diagram_{safe_owner_.MakeSafe(&project_.GetDiagram()),
-               safe_owner_.MakeSafe(&project_.GetFamilies()),
-               safe_owner_.MakeSafe(&project_.GetIdGenerator()),
-               {.is_color_flow =
-                    [safe_this = safe_owner_.MakeSafe(this)]() {
-                      return safe_this->project_.GetSettings().color_flow;
-                    },
-                .get_flow_color =
-                    [safe_this = safe_owner_.MakeSafe(this)](auto flow) {
-                      return core::Settings::GetFlowColor(
-                          safe_this->project_.GetSettings(), flow);
-                    },
-                .get_texture = [safe_this = safe_owner_.MakeSafe(this)](
-                                   auto file_path) -> const Texture& {
-                  return safe_this->textures_handle_.GetTexture(file_path);
-                },
-                .post_event =
-                    [safe_this = safe_owner_.MakeSafe(this)](auto event) {
-                      safe_this->event_loop_.PostEvent(std::move(event));
-                    }}} {}
+      diagram_{
+          safe_owner_.MakeSafe(&project_.GetDiagram()),
+          safe_owner_.MakeSafe(&project_.GetFamilies()),
+          safe_owner_.MakeSafe(&project_.GetIdGenerator()),
+          {.is_color_flow =
+               [color_flow = safe_owner_.MakeSafe(
+                    &project_.GetSettings().color_flow)]() {
+                 return *color_flow;
+               },
+           .get_flow_color =
+               [settings =
+                    safe_owner_.MakeSafe(&project_.GetSettings())](auto flow) {
+                 return core::Settings::GetFlowColor(*settings, flow);
+               },
+           .get_texture = [textures_handle =
+                               safe_owner_.MakeSafe(&textures_handle_)](
+                              auto file_path) -> const Texture& {
+             return textures_handle->GetTexture(file_path);
+           },
+           .post_event =
+               [event_loop = safe_owner_.MakeSafe(&event_loop_)](auto event) {
+                 event_loop->PostEvent(std::move(event));
+               }}} {}
 
 ///
 void Project::OnFrame() {
@@ -105,27 +109,28 @@ auto Project::CreateFamilyParsers() const {
 
 ///
 void Project::OpenFromFile(std::string file_path) {
-  event_loop_.PostEvent([safe_this = safe_owner_.MakeSafe(this),
+  event_loop_.PostEvent([project = safe_owner_.MakeSafe(&project_),
+                         family_parsers = cpp::Share(CreateFamilyParsers()),
                          file_path = std::move(file_path)]() {
     const auto json = crude_json::value::load(file_path).first;
-    safe_this->project_ = json::ProjectSerializer::ParseFromJson(
-        json, safe_this->CreateFamilyParsers());
+    *project = json::ProjectSerializer::ParseFromJson(json, *family_parsers);
   });
 }
 
 ///
 void Project::SaveToFile(std::string file_path) {
-  event_loop_.PostEvent([safe_this = safe_owner_.MakeSafe(this),
+  event_loop_.PostEvent([project = safe_owner_.MakeSafe(&project_),
                          file_path = std::move(file_path)]() {
-    const auto json = json::ProjectSerializer::WriteToJson(safe_this->project_);
+    const auto json = json::ProjectSerializer::WriteToJson(*project);
     json.save(file_path);
   });
 }
 
 ///
 void Project::Reset() {
-  event_loop_.PostEvent([safe_this = safe_owner_.MakeSafe(this)]() {
-    safe_this->project_ = safe_this->CreateProject();
+  event_loop_.PostEvent([project = safe_owner_.MakeSafe(&project_),
+                         new_project = cpp::Share(CreateProject())]() mutable {
+    *project = std::move(*new_project);
   });
 }
 }  // namespace esc::coreui

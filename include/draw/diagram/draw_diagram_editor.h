@@ -6,8 +6,9 @@
 #include <memory>
 
 #include "coreui_diagram.h"
-#include "draw_background_popup.h"
+#include "draw_create_node_popup.h"
 #include "draw_link_creation.h"
+#include "draw_nodes.h"
 
 namespace ne = ax::NodeEditor;
 
@@ -23,8 +24,6 @@ class DiagramEditor {
 
  private:
   ///
-  void ShowPopupsIfRequested();
-  ///
   void DrawPopups(coreui::Diagram &diagram);
 
   ///
@@ -32,7 +31,9 @@ class DiagramEditor {
   ///
   LinkCreation link_creation_{};
   ///
-  BackgroundPopup background_popup_{};
+  Nodes nodes_{};
+  ///
+  CreateNodePopup create_node_popup_{};
 };
 }  // namespace esc::draw
 

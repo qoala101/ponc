@@ -6,7 +6,7 @@
 
 namespace esc::core {
 ///
-template <class T>
+template <typename T>
 concept Id = requires(T t) {
                { t.Get() } -> std::same_as<uintptr_t>;
              } && std::constructible_from<uintptr_t>;

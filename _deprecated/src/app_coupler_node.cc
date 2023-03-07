@@ -67,7 +67,7 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
       case 7:
         return -2.6F;
       case 8:
-        return -3.0F;
+        return -3.F;
       default:
         return -3.4F;
     };
@@ -88,7 +88,7 @@ class Node : public core::INode, public std::enable_shared_from_this<Node> {
       case 5:
         return -5.7F;
       case 6:
-        return -5.0F;
+        return -5.F;
       case 7:
         return -4.4F;
       case 8:

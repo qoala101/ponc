@@ -1,6 +1,7 @@
 #ifndef VH_COREUI_LINK_CREATION_H_
 #define VH_COREUI_LINK_CREATION_H_
 
+#include <imgui.h>
 #include <imgui_node_editor.h>
 
 #include <functional>
@@ -10,11 +11,31 @@
 #include <variant>
 #include <vector>
 
+#include "core_i_family.h"
 #include "core_i_node.h"
 #include "core_link.h"
+#include "coreui_family.h"
 #include "cpp_callbacks.h"
 
 namespace esc::coreui {
+///
+struct MousePos {};
+
+///
+using PosVariant = std::variant<MousePos, ne::PinId, ImVec2>;
+
+///
+struct HandmadeLink {
+  ///
+  PosVariant start_pos{};
+  ///
+  PosVariant end_pos{};
+  ///
+  ImColor color{};
+  ///
+  float thickness{};
+};
+
 ///
 class LinkCreation {
  public:
@@ -24,6 +45,8 @@ class LinkCreation {
     cpp::Query<const core::INode&, ne::PinId> find_pin_node{};
     ///
     cpp::Query<std::optional<const core::Link*>, ne::PinId> find_pin_link{};
+    ///
+    cpp::Action<void(std::unique_ptr<core::INode>)> emplace_node{};
     ///
     cpp::Action<void(ne::PinId, ne::PinId)> create_link{};
     ///
@@ -41,19 +64,23 @@ class LinkCreation {
   ///
   auto CanConnectToPin(ne::PinId pin_id) const -> bool;
   ///
-  auto IsHoveringOverPin() const -> bool;
-  ///
-  auto CanCreateLink() const -> bool;
-  ///
   auto GetCanCreateLinkReason() const -> std::pair<bool, std::string>;
   ///
   auto IsRepinningLink() const -> bool;
   ///
   auto IsLinkBeingRepinned(ne::LinkId link_id) const -> bool;
   ///
-  auto GetCurrentLinkSourcePin() const -> std::pair<ne::PinId, ne::PinKind>;
+  auto GetHandmadeLink() const -> std::optional<HandmadeLink>;
   ///
-  void AcceptCurrentLink() const;
+  void AcceptNewLink();
+  ///
+  void SetNodeBeingCreatedAt(const ImVec2& pos);
+  ///
+  auto IsFamilyValidForNewNode(const core::IFamily& family) const -> bool;
+  ///
+  void AcceptNewNode(std::unique_ptr<core::INode> node);
+  ///
+  void DiscardNewNode();
 
  private:
   ///
@@ -89,11 +116,21 @@ class LinkCreation {
     ///
     ne::PinKind dragged_from_pin_kind{};
     ///
+    std::optional<ImVec2> new_node_pos{};
+    ///
+    std::optional<HandmadeLink> handmade_link{};
+    ///
     std::optional<HoveringData> hovering_data{};
     ///
     std::optional<RepinningData> repinning_data{};
   };
 
+  ///
+  auto GetCurrentLinkSourcePin() const;
+  ///
+  auto GetHandmadeLinkColor() const;
+  ///
+  auto CreateHandmadeLinkTo(const PosVariant& target_pos) const;
   ///
   auto GetCanConnectToPinReason(ne::PinId pin_id) const
       -> std::pair<bool, std::string>;

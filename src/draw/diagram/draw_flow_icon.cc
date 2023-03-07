@@ -8,6 +8,7 @@
 
 namespace esc::draw {
 namespace {
+///
 void DrawIconPath(ImDrawList& draw_list, ImVec2 pos, ImVec2 size) {
   const auto padding = ImVec2{4, 4};
   pos += padding;
@@ -30,6 +31,7 @@ void DrawIconPath(ImDrawList& draw_list, ImVec2 pos, ImVec2 size) {
 }
 }  // namespace
 
+///
 void DrawFlowIcon(const ImVec2& size, const ImColor& color, bool filled) {
   auto* draw_list = ImGui::GetWindowDrawList();
   Expects(draw_list != nullptr);

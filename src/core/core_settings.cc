@@ -50,9 +50,9 @@ auto Settings::GetFlowColor(const Settings &settings, float flow) -> ImColor {
   const auto green_red = ImColor{1.F, 1.F, 0.F};
 
   if (value_min_max_percentage >= high_percentage) {
-    return GetGradient(green_red, red,
-                       (value_min_max_percentage - high_percentage) /
-                           (1.0F - high_percentage));
+    return GetGradient(
+        green_red, red,
+        (value_min_max_percentage - high_percentage) / (1.F - high_percentage));
   }
 
   const auto low_high_range = (high_percentage - low_percentage);

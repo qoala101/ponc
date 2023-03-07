@@ -22,6 +22,7 @@
 #include "coreui_pin.h"
 #include "cpp_assert.h"
 #include "cpp_safe_ptr.h"
+#include "cpp_share.h"
 #include "flow_algorithms.h"
 #include "flow_node_flow.h"
 #include "flow_tree.h"
@@ -38,33 +39,37 @@ Diagram::Diagram(
       families_{std::move(families)},
       id_generator_{std::move(id_generator)},
       callbacks_{std::move(callbacks)},
-      link_creation_{
-          {.find_pin_node = [safe_this = safe_owner_.MakeSafe(this)](
-                                auto pin_id) -> const core::INode& {
-             return core::Diagram::FindPinNode(*safe_this->diagram_, pin_id);
-           },
-           .find_pin_link =
-               [safe_this = safe_owner_.MakeSafe(this)](auto pin_id) {
-                 return core::Diagram::FindPinLink(*safe_this->diagram_,
-                                                   pin_id);
-               },
-           .create_link =
-               [safe_this = safe_owner_.MakeSafe(this)](auto start_pin_id,
-                                                        auto end_pin_id) {
-                 safe_this->callbacks_.post_event([safe_this, start_pin_id,
-                                                   end_pin_id]() {
-                   safe_this->diagram_->EmplaceLink(core::Link{
-                       .id = safe_this->id_generator_->Generate<ne::LinkId>(),
-                       .start_pin_id = start_pin_id,
-                       .end_pin_id = end_pin_id});
-                 });
-               },
-           .delete_link =
-               [safe_this = safe_owner_.MakeSafe(this)](auto link_id) {
-                 safe_this->callbacks_.post_event([safe_this, link_id]() {
-                   safe_this->diagram_->EraseLink(link_id);
-                 });
-               }}} {}
+      link_creation_{{.find_pin_node = [diagram = diagram_](
+                                           auto pin_id) -> const core::INode& {
+                        return core::Diagram::FindPinNode(*diagram, pin_id);
+                      },
+                      .find_pin_link =
+                          [diagram = diagram_](auto pin_id) {
+                            return core::Diagram::FindPinLink(*diagram, pin_id);
+                          },
+                      .emplace_node =
+                          [safe_this = safe_owner_.MakeSafe(this)](auto node) {
+                            safe_this->EmplaceNode(std::move(node));
+                          },
+                      .create_link =
+                          [callbacks = safe_owner_.MakeSafe(&callbacks_),
+                           diagram = diagram_, id_generator = id_generator_](
+                              auto start_pin_id, auto end_pin_id) mutable {
+                            callbacks->post_event([diagram, id_generator,
+                                                   start_pin_id, end_pin_id]() {
+                              diagram->EmplaceLink(core::Link{
+                                  .id = id_generator->Generate<ne::LinkId>(),
+                                  .start_pin_id = start_pin_id,
+                                  .end_pin_id = end_pin_id});
+                            });
+                          },
+                      .delete_link =
+                          [callbacks = safe_owner_.MakeSafe(&callbacks_),
+                           diagram = diagram_](auto link_id) mutable {
+                            callbacks->post_event([diagram, link_id]() {
+                              diagram->EraseLink(link_id);
+                            });
+                          }}} {}
 
 ///
 void Diagram::OnFrame() {
@@ -98,28 +103,19 @@ auto Diagram::GetNodes() const -> const std::vector<Node>& {
 auto Diagram::GetNodes() -> std::vector<Node>& { return nodes_; }
 
 ///
+void Diagram::EmplaceNode(std::unique_ptr<core::INode> node) {
+  callbacks_.post_event(
+      [diagram = diagram_, node = cpp::Share(std::move(node))]() {
+        diagram->EmplaceNode(std::move(*node));
+      });
+}
+
+///
 auto Diagram::GetLinks() const -> const std::vector<Link>& { return links_; }
 
 ///
 auto Diagram::FamilyFrom(const core::IFamily& core_family) const {
-  return Family{
-      safe_owner_.MakeSafe(&core_family),
-      id_generator_,
-      {.node_created =
-           [safe_this = safe_owner_.MakeSafe(this)](auto node) {
-             safe_this->callbacks_.post_event(
-                 [safe_this,
-                  node = std::make_shared<std::unique_ptr<core::INode>>(
-                      std::move(node))]() {
-                   safe_this->diagram_->EmplaceNode(std::move(*node));
-                 });
-           },
-       .link_created =
-           [safe_this = safe_owner_.MakeSafe(this)](const auto& link) {
-             safe_this->callbacks_.post_event([safe_this, link]() {
-               safe_this->diagram_->EmplaceLink(link);
-             });
-           }}};
+  return Family{safe_owner_.MakeSafe(&core_family), id_generator_};
 }
 
 ///
@@ -147,7 +143,7 @@ void Diagram::UpdateFamilyGroups() {
 }
 
 ///
-auto Diagram::GetFlowLinkAlpha(ne::LinkId link_id) const {
+auto Diagram::GetLinkAlpha(ne::LinkId link_id) const {
   if (link_creation_.IsCreatingLink() && link_creation_.IsRepinningLink() &&
       link_creation_.IsLinkBeingRepinned(link_id)) {
     return 1.F / 2;
@@ -157,14 +153,14 @@ auto Diagram::GetFlowLinkAlpha(ne::LinkId link_id) const {
 }
 
 ///
-auto Diagram::FlowLinkFrom(const core::Link& core_link,
-                           const flow::NodeFlows& node_flows) const {
+auto Diagram::LinkFrom(const core::Link& core_link,
+                       const flow::NodeFlows& node_flows) const {
   auto link = Link{
-      .type = core_link,
+      .core_link = core_link,
       .thickness = 2,
   };
 
-  const auto link_alpha = GetFlowLinkAlpha(core_link.id);
+  const auto link_alpha = GetLinkAlpha(core_link.id);
 
   if (!callbacks_.is_color_flow()) {
     link.color = {1.F, 1.F, 1.F, link_alpha};
@@ -189,60 +185,6 @@ auto Diagram::FlowLinkFrom(const core::Link& core_link,
 }
 
 ///
-auto Diagram::GetPinIconTipPos(ne::PinId pin_id, ne::PinKind pin_kind) const {
-  const auto& pin_core_node = core::Diagram::FindPinNode(*diagram_, pin_id);
-  const auto pin_node_id = pin_core_node.GetId();
-
-  const auto pin_node = std::find_if(
-      nodes_.begin(), nodes_.end(),
-      [pin_node_id](const auto& node) { return node.id == pin_node_id; });
-  Expects(pin_node != nodes_.end());
-
-  const auto& pin = Node::FindPin(*pin_node, pin_id);
-  Expects(pin.icon.has_value());
-
-  const auto pin_rect = pin.icon->GetRect();
-
-  return ImVec2{
-      (pin_kind == ne::PinKind::Input) ? pin_rect.Min.x : pin_rect.Max.x,
-      (pin_rect.Min.y + pin_rect.Max.y) / 2};
-}
-
-///
-auto Diagram::GetRepinningLinkColor() const {
-  if (!link_creation_.IsHoveringOverPin()) {
-    return ImColor{1.F, 1.F, 1.F};
-  }
-
-  if (link_creation_.CanCreateLink()) {
-    return ImColor{1.F / 2, 1.F, 1.F / 2};
-  }
-
-  return ImColor{1.F, 1.F / 2, 1.F / 2};
-}
-
-///
-auto Diagram::GetRepinningLink() const -> std::optional<Link> {
-  if (!link_creation_.IsCreatingLink() || !link_creation_.IsRepinningLink()) {
-    return std::nullopt;
-  }
-
-  auto link = Link{.color = GetRepinningLinkColor(), .thickness = 4};
-
-  const auto [fixed_pin_id, pin_kind] =
-      link_creation_.GetCurrentLinkSourcePin();
-  const auto tip_pos = GetPinIconTipPos(fixed_pin_id, pin_kind);
-
-  if (pin_kind == ne::PinKind::Input) {
-    link.type = HandmadeLink{.end_pos = tip_pos};
-  } else {
-    link.type = HandmadeLink{.start_pos = tip_pos};
-  }
-
-  return link;
-}
-
-///
 void Diagram::UpdateLinks(const flow::NodeFlows& node_flows) {
   links_.clear();
 
@@ -251,12 +193,8 @@ void Diagram::UpdateLinks(const flow::NodeFlows& node_flows) {
 
   std::transform(links.begin(), links.end(), std::back_inserter(links_),
                  [this, &node_flows](const auto& link) {
-                   return FlowLinkFrom(link, node_flows);
+                   return LinkFrom(link, node_flows);
                  });
-
-  if (const auto repinning_link = GetRepinningLink()) {
-    links_.emplace_back(*repinning_link);
-  }
 }
 
 ///
@@ -298,11 +236,11 @@ auto Diagram::PinFrom(const IPinTraits& pin_traits,
   const auto pin_id = std::get<ne::PinId>(pin_type);
   const auto pin_flow = flow::NodeFlow::GetPinFlow(node_flow, pin_id);
 
-  pin.icon = PinIcon{
-      {.id = pin_id,
-       .color = callbacks_.is_color_flow() ? callbacks_.get_flow_color(pin_flow)
-                                           : ImColor{1.F, 1.F, 1.F},
-       .filled = core::Diagram::FindPinLink(*diagram_, pin_id).has_value()}};
+  pin.flow_data = PinFlowData{
+      .id = pin_id,
+      .color = callbacks_.is_color_flow() ? callbacks_.get_flow_color(pin_flow)
+                                          : ImColor{1.F, 1.F, 1.F},
+      .filled = core::Diagram::FindPinLink(*diagram_, pin_id).has_value()};
 
   if (std::holds_alternative<std::monostate>(pin.value)) {
     pin.value = pin_flow;

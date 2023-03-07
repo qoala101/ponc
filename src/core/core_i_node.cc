@@ -58,11 +58,11 @@ auto INode::GetInitialFlow() const -> flow::NodeFlow {
   auto initial_flow = flow::NodeFlow{};
 
   if (input_pin_id_.has_value()) {
-    initial_flow.input_pin_flow.emplace(input_pin_id_->Get(), 0.0F);
+    initial_flow.input_pin_flow.emplace(input_pin_id_->Get(), 0);
   }
 
   for (const auto pin_id : output_pin_ids_) {
-    initial_flow.output_pin_flows.emplace(pin_id.Get(), 0.0F);
+    initial_flow.output_pin_flows.emplace(pin_id, 0);
   }
 
   SetInitialFlowValues(initial_flow);

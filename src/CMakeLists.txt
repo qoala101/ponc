@@ -148,14 +148,12 @@ add_example_executable(esc
   coreui/coreui_family.cc
   coreui/coreui_link_creation.cc
   coreui/coreui_node.cc
-  coreui/coreui_pin.cc
   coreui/coreui_project.cc
   coreui/coreui_textures_handle.cc
 
   cpp/cpp_scope_function.cc
 
-  draw/diagram/popup/draw_background_connection_popup.cc
-  draw/diagram/popup/draw_background_popup.cc
+  draw/diagram/popup/draw_create_node_popup.cc
   draw/diagram/popup/draw_i_popup.cc
 
   # draw/diagram/popup/draw_link_popup.cc
@@ -168,7 +166,7 @@ add_example_executable(esc
 
   # # draw/diagram/draw_groups.cc
   draw/diagram/draw_link.cc
-  draw/diagram/draw_node.cc
+  draw/diagram/draw_nodes.cc
 
   draw/diagram/draw_tooltip.cc
   draw/dialog/draw_i_file_dialog.cc

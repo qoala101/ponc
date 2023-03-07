@@ -62,24 +62,22 @@ class Diagram {
   ///
   auto GetNodes() -> std::vector<Node> &;
   ///
+  void EmplaceNode(std::unique_ptr<core::INode> node);
+  ///
   auto GetLinks() const -> const std::vector<Link> &;
 
  private:
+  ///
+  auto GetPinTipPos(ne::PinId pin_id, ne::PinKind pin_kind) const;
   ///
   auto FamilyFrom(const core::IFamily &core_family) const;
   ///
   void UpdateFamilyGroups();
   ///
-  auto GetFlowLinkAlpha(ne::LinkId link_id) const;
+  auto GetLinkAlpha(ne::LinkId link_id) const;
   ///
-  auto FlowLinkFrom(const core::Link &core_link,
-                    const flow::NodeFlows &node_flows) const;
-  ///
-  auto GetPinIconTipPos(ne::PinId pin_id, ne::PinKind pin_kind) const;
-  ///
-  auto GetRepinningLinkColor() const;
-  ///
-  auto GetRepinningLink() const -> std::optional<Link>;
+  auto LinkFrom(const core::Link &core_link,
+                const flow::NodeFlows &node_flows) const;
   ///
   void UpdateLinks(const flow::NodeFlows &node_flows);
   ///

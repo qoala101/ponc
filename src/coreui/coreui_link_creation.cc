@@ -2,7 +2,9 @@
 
 #include "core_i_node.h"
 #include "core_link.h"
+#include "core_pin.h"
 #include "cpp_assert.h"
+#include "imgui.h"
 #include "imgui_node_editor.h"
 
 namespace esc::coreui {
@@ -11,8 +13,66 @@ LinkCreation::LinkCreation(Callbacks callbacks)
     : callbacks_{std::move(callbacks)} {}
 
 ///
+auto LinkCreation::GetHandmadeLinkColor() const {
+  Expects(creating_data_.has_value());
+
+  if (const auto creating_new_node = creating_data_->new_node_pos.has_value()) {
+    return ImColor{1.F, 1.F, 1.F};
+  }
+
+  if (const auto not_hovering_over_pin =
+          !creating_data_->hovering_data.has_value()) {
+    return ImColor{1.F, 1.F, 1.F};
+  }
+
+  if (const auto can_create_link_to_hovered_pin =
+          GetCanCreateLinkReason().first) {
+    return ImColor{1.F / 2, 1.F, 1.F / 2};
+  }
+
+  return ImColor{1.F, 1.F / 2, 1.F / 2};
+}
+
+///
+auto LinkCreation::GetCurrentLinkSourcePin() const {
+  Expects(creating_data_.has_value());
+
+  if (creating_data_->repinning_data.has_value()) {
+    return std::pair{creating_data_->repinning_data->fixed_pin,
+                     creating_data_->repinning_data->fixed_pin_kind};
+  }
+
+  return std::pair{creating_data_->dragged_from_pin,
+                   creating_data_->dragged_from_pin_kind};
+}
+
+auto LinkCreation::CreateHandmadeLinkTo(const PosVariant& target_pos) const {
+  Expects(creating_data_.has_value());
+
+  auto link = HandmadeLink{.color = GetHandmadeLinkColor(), .thickness = 4};
+
+  const auto [source_pin, source_kind] = GetCurrentLinkSourcePin();
+  const auto source_pos = PosVariant{source_pin};
+
+  if (source_kind == ne::PinKind::Input) {
+    link.start_pos = target_pos;
+    link.end_pos = source_pos;
+  } else {
+    link.start_pos = source_pos;
+    link.end_pos = target_pos;
+  }
+
+  return link;
+}
+
+///
 void LinkCreation::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
                            const std::optional<ne::PinId>& hovering_over_pin) {
+  if (const auto creating_new_node = creating_data_.has_value() &&
+                                     creating_data_->new_node_pos.has_value()) {
+    return;
+  }
+
   creating_data_.reset();
 
   if (!dragged_from_pin.has_value()) {
@@ -30,6 +90,8 @@ void LinkCreation::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
   const auto link_to_repin = callbacks_.find_pin_link(*dragged_from_pin);
 
   if (link_to_repin.has_value()) {
+    creating_data_->handmade_link = CreateHandmadeLinkTo(MousePos{});
+
     const auto fixed_pin =
         core::Link::GetOtherPin(**link_to_repin, *dragged_from_pin);
 
@@ -65,17 +127,6 @@ auto LinkCreation::CanConnectToPin(ne::PinId pin_id) const -> bool {
 }
 
 ///
-auto LinkCreation::IsHoveringOverPin() const -> bool {
-  Expects(creating_data_.has_value());
-  return creating_data_->hovering_data.has_value();
-}
-
-///
-auto LinkCreation::CanCreateLink() const -> bool {
-  return GetCanCreateLinkReason().first;
-}
-
-///
 auto LinkCreation::GetCanCreateLinkReason() const
     -> std::pair<bool, std::string> {
   Expects(creating_data_.has_value());
@@ -98,44 +149,93 @@ auto LinkCreation::IsLinkBeingRepinned(ne::LinkId link_id) const -> bool {
 }
 
 ///
-auto LinkCreation::GetCurrentLinkSourcePin() const
-    -> std::pair<ne::PinId, ne::PinKind> {
-  Expects(creating_data_.has_value());
-
-  if (creating_data_->repinning_data.has_value()) {
-    return {creating_data_->repinning_data->fixed_pin,
-            creating_data_->repinning_data->fixed_pin_kind};
+auto LinkCreation::GetHandmadeLink() const -> std::optional<HandmadeLink> {
+  if (!creating_data_.has_value()) {
+    return std::nullopt;
   }
 
-  return {creating_data_->dragged_from_pin,
-          creating_data_->dragged_from_pin_kind};
+  return creating_data_->handmade_link;
 }
 
 ///
-void LinkCreation::AcceptCurrentLink() const {
+void LinkCreation::AcceptNewLink() {
   Expects(creating_data_.has_value());
   Expects(creating_data_->hovering_data.has_value());
 
-  auto opposite_to_hovering_pin = ne::PinId{};
-
-  if (creating_data_->repinning_data.has_value()) {
-    opposite_to_hovering_pin = creating_data_->repinning_data->fixed_pin;
-
+  if (const auto is_repinning_link =
+          creating_data_->repinning_data.has_value()) {
     callbacks_.delete_link(creating_data_->repinning_data->link_to_repin);
+  }
+
+  const auto [source_pin, source_kind] = GetCurrentLinkSourcePin();
+
+  if (source_kind == ne::PinKind::Input) {
+    callbacks_.create_link(creating_data_->hovering_data->hovering_over_pin,
+                           source_pin);
   } else {
-    opposite_to_hovering_pin = creating_data_->dragged_from_pin;
-  }
-
-  if (creating_data_->hovering_data->hovering_over_pin_kind ==
-      ne::PinKind::Input) {
-    callbacks_.create_link(opposite_to_hovering_pin,
+    callbacks_.create_link(source_pin,
                            creating_data_->hovering_data->hovering_over_pin);
-    return;
   }
 
-  callbacks_.create_link(creating_data_->hovering_data->hovering_over_pin,
-                         opposite_to_hovering_pin);
+  creating_data_.reset();
 }
+
+///
+void LinkCreation::SetNodeBeingCreatedAt(const ImVec2& pos) {
+  Expects(creating_data_.has_value());
+  creating_data_->new_node_pos = pos;
+  creating_data_->handmade_link =
+      CreateHandmadeLinkTo(*creating_data_->new_node_pos);
+}
+
+///
+auto LinkCreation::IsFamilyValidForNewNode(const core::IFamily& family) const
+    -> bool {
+  const auto& [source_pin, source_kind] = GetCurrentLinkSourcePin();
+
+  auto id_generator = core::IdGenerator{};
+  const auto node = family.CreateNode(id_generator);
+
+  if (source_kind == ne::PinKind::Input) {
+    return !node->GetOutputPinIds().empty();
+  }
+
+  return node->GetInputPinId().has_value();
+}
+
+///
+void LinkCreation::AcceptNewNode(std::unique_ptr<core::INode> node) {
+  Expects(creating_data_.has_value());
+  Expects(creating_data_->new_node_pos.has_value());
+
+  node->SetPos(*creating_data_->new_node_pos);
+
+  const auto [source_pin, source_kind] = GetCurrentLinkSourcePin();
+  auto target_pin = ne::PinId{};
+
+  if (source_kind == ne::PinKind::Input) {
+    const auto& output_pins = node->GetOutputPinIds();
+    Expects(!output_pins.empty());
+    target_pin = output_pins[0];
+  } else {
+    const auto& input_pin = node->GetInputPinId();
+    Expects(input_pin.has_value());
+    target_pin = *input_pin;
+  }
+
+  callbacks_.emplace_node(std::move(node));
+
+  if (source_kind == ne::PinKind::Input) {
+    callbacks_.create_link(target_pin, source_pin);
+  } else {
+    callbacks_.create_link(source_pin, target_pin);
+  }
+
+  creating_data_.reset();
+}
+
+///
+void LinkCreation::DiscardNewNode() { creating_data_.reset(); }
 
 ///
 auto LinkCreation::GetCanConnectToPinReason(ne::PinId pin_id) const
