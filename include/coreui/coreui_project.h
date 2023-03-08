@@ -47,6 +47,8 @@ class Project {
   ///
   auto CreateProject() const;
   ///
+  auto CreateDiagram();
+  ///
   auto CreateFamilyParsers() const;
 
   ///

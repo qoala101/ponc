@@ -40,34 +40,35 @@ auto Project::CreateProject() const {
 }
 
 ///
+auto Project::CreateDiagram() {
+  return Diagram{
+      safe_owner_.MakeSafe(&project_.GetDiagram()),
+      safe_owner_.MakeSafe(&project_.GetFamilies()),
+      safe_owner_.MakeSafe(&project_.GetIdGenerator()),
+      {.is_color_flow =
+           [color_flow = safe_owner_.MakeSafe(
+                &project_.GetSettings().color_flow)]() { return *color_flow; },
+       .get_flow_color =
+           [settings =
+                safe_owner_.MakeSafe(&project_.GetSettings())](auto flow) {
+             return core::Settings::GetFlowColor(*settings, flow);
+           },
+       .get_texture = [textures_handle = safe_owner_.MakeSafe(
+                           &textures_handle_)](auto file_path)
+           -> const Texture& { return textures_handle->GetTexture(file_path); },
+       .post_event =
+           [event_loop = safe_owner_.MakeSafe(&event_loop_)](auto event) {
+             event_loop->PostEvent(std::move(event));
+           }}};
+}
+
+///
 Project::Project(std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups,
                  TexturesHandle textures_handle)
     : family_groups_{std::move(family_groups)},
       textures_handle_{std::move(textures_handle)},
       project_{CreateProject()},
-      diagram_{
-          safe_owner_.MakeSafe(&project_.GetDiagram()),
-          safe_owner_.MakeSafe(&project_.GetFamilies()),
-          safe_owner_.MakeSafe(&project_.GetIdGenerator()),
-          {.is_color_flow =
-               [color_flow = safe_owner_.MakeSafe(
-                    &project_.GetSettings().color_flow)]() {
-                 return *color_flow;
-               },
-           .get_flow_color =
-               [settings =
-                    safe_owner_.MakeSafe(&project_.GetSettings())](auto flow) {
-                 return core::Settings::GetFlowColor(*settings, flow);
-               },
-           .get_texture = [textures_handle =
-                               safe_owner_.MakeSafe(&textures_handle_)](
-                              auto file_path) -> const Texture& {
-             return textures_handle->GetTexture(file_path);
-           },
-           .post_event =
-               [event_loop = safe_owner_.MakeSafe(&event_loop_)](auto event) {
-                 event_loop->PostEvent(std::move(event));
-               }}} {}
+      diagram_{CreateDiagram()} {}
 
 ///
 void Project::OnFrame() {
@@ -109,11 +110,13 @@ auto Project::CreateFamilyParsers() const {
 
 ///
 void Project::OpenFromFile(std::string file_path) {
-  event_loop_.PostEvent([project = safe_owner_.MakeSafe(&project_),
+  event_loop_.PostEvent([safe_this = safe_owner_.MakeSafe(this),
                          family_parsers = cpp::Share(CreateFamilyParsers()),
                          file_path = std::move(file_path)]() {
     const auto json = crude_json::value::load(file_path).first;
-    *project = json::ProjectSerializer::ParseFromJson(json, *family_parsers);
+    safe_this->project_ =
+        json::ProjectSerializer::ParseFromJson(json, *family_parsers);
+    safe_this->diagram_ = safe_this->CreateDiagram();
   });
 }
 
@@ -128,9 +131,10 @@ void Project::SaveToFile(std::string file_path) {
 
 ///
 void Project::Reset() {
-  event_loop_.PostEvent([project = safe_owner_.MakeSafe(&project_),
+  event_loop_.PostEvent([safe_this = safe_owner_.MakeSafe(this),
                          new_project = cpp::Share(CreateProject())]() {
-    *project = std::move(*new_project);
+    safe_this->project_ = std::move(*new_project);
+    safe_this->diagram_ = safe_this->CreateDiagram();
   });
 }
 }  // namespace esc::coreui

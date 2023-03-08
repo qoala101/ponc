@@ -46,13 +46,30 @@ auto GetConnectableFamilyGroups(
 
   return connectable_groups;
 }
-}  // namespace
 
 ///
-DiagramEditor::DiagramEditor()
-    : context_{ne::CreateEditor(), &ne::DestroyEditor} {
-  ne::SetCurrentEditor(context_.get());
+void DeleteItemsIfRequested(coreui::Diagram &diagram) {
+  if (ne::BeginDelete()) {
+    auto link_id = ne::LinkId{};
+
+    while (ne::QueryDeletedLink(&link_id)) {
+      if (ne::AcceptDeletedItem()) {
+        diagram.DeleteLink(link_id);
+      }
+    }
+
+    auto node_id = ne::NodeId{};
+
+    while (ne::QueryDeletedNode(&node_id)) {
+      if (ne::AcceptDeletedItem()) {
+        diagram.DeleteNode(node_id);
+      }
+    }
+  }
+
+  ne::EndDelete();
 }
+}  // namespace
 
 ///
 void DiagramEditor::Draw(coreui::Diagram &diagram) {
@@ -76,6 +93,7 @@ void DiagramEditor::Draw(coreui::Diagram &diagram) {
     DrawLink(link);
   }
 
+  DeleteItemsIfRequested(diagram);
   OpenPopupsIfRequested();
   DrawPopups(diagram);
 

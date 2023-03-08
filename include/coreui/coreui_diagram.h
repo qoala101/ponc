@@ -89,8 +89,7 @@ class Diagram {
   auto PinFrom(const IPinTraits &pin_traits,
                const flow::NodeFlow &node_flow) const;
   ///
-  auto NodeFrom(const core::INode &core_node,
-                const flow::NodeFlow &node_flow) const;
+  auto NodeFrom(core::INode &core_node, const flow::NodeFlow &node_flow) const;
   ///
   void UpdateNodes(const flow::NodeFlows &node_flows);
 
@@ -102,6 +101,8 @@ class Diagram {
   cpp::SafePtr<core::IdGenerator> id_generator_;
   ///
   Callbacks callbacks_{};
+  ///
+  std::unique_ptr<ne::EditorContext, void (*)(ne::EditorContext *)> context_;
   ///
   cpp::SafeOwner safe_owner_{};
   ///

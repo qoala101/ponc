@@ -73,17 +73,27 @@ auto DrawPinIconArea(const coreui::Pin& pin, ne::PinKind pin_kind)
 }  // namespace
 
 void Nodes::DrawNode(const coreui::Node& node) {
-  ne::SetNodePosition(node.id, node.pos);
+  auto& core_node = node.GetNode();
+  const auto& node_data = node.GetData();
+  const auto node_id = core_node.GetId();
+  const auto node_pos = ne::GetNodePosition(node_id);
+
+  if (const auto pos_not_set =
+          (node_pos.x == FLT_MAX) && (node_pos.y == FLT_MAX)) {
+    ne::SetNodePosition(node_id, core_node.GetPos());
+  } else {
+    core_node.SetPos(node_pos);
+  }
 
   ne::PushStyleVar(ne::StyleVar_NodePadding, ImVec4{8, 4, 8, 8});
-  ne::BeginNode(node.id);
+  ne::BeginNode(node_id);
 
-  ImGui::PushID(node.id.AsPointer());
+  ImGui::PushID(node_id.AsPointer());
   ImGui::BeginVertical("Node");
 
   auto header_rect = std::optional<ImRect>{};
 
-  if (const auto header = node.header) {
+  if (const auto header = node_data.header) {
     ImGui::BeginHorizontal("Header");
 
     ImGui::Spring(0);
@@ -106,7 +116,7 @@ void Nodes::DrawNode(const coreui::Node& node) {
 
   auto layout_id = 0;
 
-  if (!node.input_pins.empty()) {
+  if (!node_data.input_pins.empty()) {
     ImGui::BeginVertical("InputPins", {0, 0}, 0);
 
     // if (!header_.has_value()) {
@@ -116,7 +126,7 @@ void Nodes::DrawNode(const coreui::Node& node) {
     ne::PushStyleVar(ne::StyleVar_PivotAlignment, {0, 0.5F});
     ne::PushStyleVar(ne::StyleVar_PivotSize, {0, 0});
 
-    for (auto& pin : node.input_pins) {
+    for (auto& pin : node_data.input_pins) {
       if (pin.flow_data.has_value()) {
         ne::BeginPin(pin.flow_data->id, ne::PinKind::Input);
         ImGui::BeginHorizontal(pin.flow_data->id.AsPointer());
@@ -142,8 +152,8 @@ void Nodes::DrawNode(const coreui::Node& node) {
     ImGui::EndVertical();
   }
 
-  if (!node.output_pins.empty()) {
-    if (!node.input_pins.empty()) {
+  if (!node_data.output_pins.empty()) {
+    if (!node_data.input_pins.empty()) {
       ImGui::Spring(1);
     }
 
@@ -156,7 +166,7 @@ void Nodes::DrawNode(const coreui::Node& node) {
     ne::PushStyleVar(ne::StyleVar_PivotAlignment, {1, 0.5F});
     ne::PushStyleVar(ne::StyleVar_PivotSize, {0, 0});
 
-    for (auto& pin : node.output_pins) {
+    for (auto& pin : node_data.output_pins) {
       if (pin.flow_data.has_value()) {
         ne::BeginPin(pin.flow_data->id, ne::PinKind::Output);
         ImGui::BeginHorizontal(pin.flow_data->id.AsPointer());
@@ -188,21 +198,22 @@ void Nodes::DrawNode(const coreui::Node& node) {
   ne::EndNode();
 
   if (header_rect.has_value()) {
-    auto* drawList = ne::GetNodeBackgroundDrawList(node.id);
+    auto* drawList = ne::GetNodeBackgroundDrawList(node_id);
 
-    const auto texture_uv =
-        ImVec2{header_rect->GetWidth() /
-                   (4.F * static_cast<float>(node.header->texture.width)),
-               header_rect->GetHeight() /
-                   (4.F * static_cast<float>(node.header->texture.height))};
+    const auto texture_uv = ImVec2{
+        header_rect->GetWidth() /
+            (4.F * static_cast<float>(node_data.header->texture.width)),
+        header_rect->GetHeight() /
+            (4.F * static_cast<float>(node_data.header->texture.height))};
     const auto alpha = static_cast<int>(255 * ImGui::GetStyle().Alpha);
-    const auto header_color = IM_COL32(0, 0, 0, alpha) |
-                              (node.header->color & IM_COL32(255, 255, 255, 0));
+    const auto header_color =
+        IM_COL32(0, 0, 0, alpha) |
+        (node_data.header->color & IM_COL32(255, 255, 255, 0));
     const auto& style = ne::GetStyle();
     const auto half_border_width = style.NodeBorderWidth * 0.5f;
 
     drawList->AddImageRounded(
-        node.header->texture.id,
+        node_data.header->texture.id,
         header_rect->Min - ImVec2{8 - half_border_width, 4 - half_border_width},
         header_rect->Max + ImVec2{8 - half_border_width, 0}, ImVec2{0.F, 0.F},
         texture_uv, header_color, style.NodeRounding,

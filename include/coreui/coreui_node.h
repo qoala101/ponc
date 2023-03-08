@@ -10,8 +10,10 @@
 #include <variant>
 #include <vector>
 
+#include "core_i_node.h"
 #include "coreui_pin.h"
 #include "coreui_texture.h"
+#include "cpp_safe_ptr.h"
 #include "imgui.h"
 
 namespace esc::coreui {
@@ -25,17 +27,32 @@ struct Header {
   Texture texture{};
 };
 
-struct Node {
-  ///
-  ne::NodeId id{};
-  ///
-  ImVec2 pos{};
+///
+struct NodeData {
   ///
   std::optional<Header> header{};
   ///
   std::vector<Pin> input_pins{};
   ///
   std::vector<Pin> output_pins{};
+};
+
+///
+class Node {
+ public:
+  ///
+  explicit Node(cpp::SafePtr<core::INode> core_node, NodeData data);
+
+  ///
+  auto GetNode() const -> core::INode&;
+  ///
+  auto GetData() const -> const NodeData&;
+
+ private:
+  ///
+  cpp::SafePtr<core::INode> core_node_;
+  ///
+  NodeData data_{};
 };
 }  // namespace esc::coreui
 

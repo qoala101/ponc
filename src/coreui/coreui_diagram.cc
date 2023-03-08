@@ -39,6 +39,7 @@ Diagram::Diagram(
       families_{std::move(families)},
       id_generator_{std::move(id_generator)},
       callbacks_{std::move(callbacks)},
+      context_{ne::CreateEditor(), &ne::DestroyEditor},
       linking_{{.find_pin_node =
                     [diagram = diagram_](auto pin_id) -> const core::INode& {
                   return core::Diagram::FindPinNode(*diagram, pin_id);
@@ -62,7 +63,9 @@ Diagram::Diagram(
                 .delete_link =
                     [safe_this = safe_owner_.MakeSafe(this)](auto link_id) {
                       safe_this->DeleteLink(link_id);
-                    }}} {}
+                    }}} {
+  ne::SetCurrentEditor(context_.get());
+}
 
 ///
 void Diagram::OnFrame() {
@@ -111,6 +114,8 @@ void Diagram::AddNode(std::unique_ptr<core::INode> node) const {
 
 ///
 void Diagram::DeleteNode(ne::NodeId node_id) const {
+  ne::DeleteNode(node_id);
+
   callbacks_.post_event(
       [diagram = diagram_, node_id]() { diagram->DeleteNode(node_id); });
 }
@@ -120,6 +125,8 @@ auto Diagram::GetLinks() const -> const std::vector<Link>& { return links_; }
 
 ///
 void Diagram::DeleteLink(ne::LinkId link_id) const {
+  ne::DeleteLink(link_id);
+
   callbacks_.post_event(
       [diagram = diagram_, link_id]() { diagram->DeleteLink(link_id); });
 }
@@ -246,28 +253,29 @@ auto Diagram::PinFrom(const IPinTraits& pin_traits,
 }
 
 ///
-auto Diagram::NodeFrom(const core::INode& core_node,
+auto Diagram::NodeFrom(core::INode& core_node,
                        const flow::NodeFlow& node_flow) const {
-  auto node = Node{.id = core_node.GetId(), .pos = core_node.GetPos()};
   const auto node_traits = core_node.CreateUiTraits();
+  auto node_data = NodeData{};
 
   if (const auto header_traits = node_traits->CreateHeaderTraits()) {
-    node.header = Header{.label = node_traits->GetLabel(),
-                         .color = GetHeaderColor(**header_traits, node_flow),
-                         .texture = callbacks_.get_texture(
-                             (*header_traits)->GetTextureFilePath())};
+    node_data.header = Header{
+        .label = node_traits->GetLabel(),
+        .color = GetHeaderColor(**header_traits, node_flow),
+        .texture =
+            callbacks_.get_texture((*header_traits)->GetTextureFilePath())};
   }
 
   for (const auto& pin_traits : node_traits->CreatePinTraits()) {
     auto& pins =
         (IPinTraits::GetPinKind(*pin_traits, core_node) == ne::PinKind::Input)
-            ? node.input_pins
-            : node.output_pins;
+            ? node_data.input_pins
+            : node_data.output_pins;
 
     pins.emplace_back(PinFrom(*pin_traits, node_flow));
   }
 
-  return node;
+  return Node{safe_owner_.MakeSafe(&core_node), std::move(node_data)};
 }
 
 ///

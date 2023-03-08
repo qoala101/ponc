@@ -12,15 +12,10 @@
 #include "draw_node_popup.h"
 #include "draw_nodes.h"
 
-namespace ne = ax::NodeEditor;
-
 namespace esc::draw {
 ///
 class DiagramEditor {
  public:
-  ///
-  DiagramEditor();
-
   ///
   void Draw(coreui::Diagram &diagram);
 
@@ -32,8 +27,6 @@ class DiagramEditor {
   ///
   void DrawCreateNodePopup(coreui::Diagram &diagram);
 
-  ///
-  std::unique_ptr<ne::EditorContext, void (*)(ne::EditorContext *)> context_;
   ///
   Linking linking_{};
   ///
