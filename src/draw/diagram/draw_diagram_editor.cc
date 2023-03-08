@@ -14,40 +14,6 @@
 namespace esc::draw {
 namespace {
 ///
-auto GetConnectableFamilyGroups(
-    const std::vector<coreui::FamilyGroup> &family_groups,
-    const coreui::Linking &linking) {
-  auto connectable_groups = std::vector<coreui::FamilyGroup>{};
-  auto id_generator = core::IdGenerator{};
-
-  for (const auto &family_group : family_groups) {
-    for (const auto &family : family_group.families) {
-      const auto fake_node = family.GetFamily().CreateNode(id_generator);
-
-      if (!linking.CanConnectToNode(*fake_node)) {
-        continue;
-      }
-
-      const auto connectable_group =
-          std::find_if(connectable_groups.begin(), connectable_groups.end(),
-                       [&family_group](const auto &group) {
-                         return group.label == family_group.label;
-                       });
-
-      if (connectable_group == connectable_groups.end()) {
-        connectable_groups.emplace_back(coreui::FamilyGroup{
-            .label = family_group.label, .families = std::vector{family}});
-        continue;
-      }
-
-      connectable_group->families.emplace_back(family);
-    }
-  }
-
-  return connectable_groups;
-}
-
-///
 void DeleteItemsIfRequested(coreui::Diagram &diagram) {
   if (ne::BeginDelete()) {
     auto link_id = ne::LinkId{};
@@ -152,14 +118,21 @@ void DiagramEditor::DrawCreateNodePopup(coreui::Diagram &diagram) {
   const auto &family_groups = diagram.GetFamilyGroups();
 
   if (linking.IsCreatingNode()) {
+    auto id_generator = core::IdGenerator{};
+
     create_node_popup_.Draw(
-        GetConnectableFamilyGroups(family_groups, linking),
-        {.closed = [&linking]() { linking.DiscardNewNode(); },
-         .node_created =
-             [&diagram, &linking](auto node) {
-               linking.AcceptNewNode(*node);
-               diagram.AddNode(std::move(node));
-             }});
+        family_groups, {.is_family_enabled =
+                            [&linking, &id_generator](const auto &family) {
+                              const auto fake_node =
+                                  family.CreateNode(id_generator);
+                              return linking.CanConnectToNode(*fake_node);
+                            },
+                        .closed = [&linking]() { linking.DiscardNewNode(); },
+                        .node_created =
+                            [&diagram, &linking](auto node) {
+                              linking.AcceptNewNode(*node);
+                              diagram.AddNode(std::move(node));
+                            }});
     return;
   }
 

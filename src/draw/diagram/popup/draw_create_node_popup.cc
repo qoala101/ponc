@@ -33,7 +33,12 @@ void CreateNodePopup::Draw(
     }
 
     for (const auto& family : families) {
-      if (ImGui::MenuItem(family.GetLabel().c_str())) {
+      const auto is_family_enabled =
+          !callbacks.is_family_enabled.has_value() ||
+          (*callbacks.is_family_enabled)(family.GetFamily());
+
+      if (ImGui::MenuItem(family.GetLabel().c_str(), nullptr, false,
+                          is_family_enabled)) {
         auto new_node = family.CreateNode();
         new_node->SetPos(pos_);
 

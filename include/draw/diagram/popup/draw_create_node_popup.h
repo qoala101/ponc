@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "core_i_family.h"
 #include "core_i_node.h"
 #include "coreui_family.h"
 #include "cpp_callbacks.h"
@@ -17,6 +18,8 @@ class CreateNodePopup : public IPopup {
  public:
   ///
   struct Callbacks {
+    ///
+    std::optional<cpp::Query<bool, const core::IFamily &>> is_family_enabled{};
     ///
     std::optional<cpp::Signal<>> closed{};
     ///
