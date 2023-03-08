@@ -47,10 +47,6 @@ Diagram::Diagram(
                           [diagram = diagram_](auto pin_id) {
                             return core::Diagram::FindPinLink(*diagram, pin_id);
                           },
-                      .emplace_node =
-                          [safe_this = safe_owner_.MakeSafe(this)](auto node) {
-                            safe_this->EmplaceNode(std::move(node));
-                          },
                       .create_link =
                           [callbacks = safe_owner_.MakeSafe(&callbacks_),
                            diagram = diagram_, id_generator = id_generator_](
@@ -84,6 +80,12 @@ void Diagram::OnFrame() {
 
 ///
 auto Diagram::GetDiagram() const -> core::Diagram& { return *diagram_; }
+
+///
+auto Diagram::GetLinkCreation() const -> const LinkCreation& {
+  // NOLINTNEXTLINE(*-const-cast)
+  return const_cast<Diagram*>(this)->GetLinkCreation();
+}
 
 ///
 auto Diagram::GetLinkCreation() -> LinkCreation& { return link_creation_; }
@@ -143,16 +145,6 @@ void Diagram::UpdateFamilyGroups() {
 }
 
 ///
-auto Diagram::GetLinkAlpha(ne::LinkId link_id) const {
-  if (link_creation_.IsCreatingLink() && link_creation_.IsRepinningLink() &&
-      link_creation_.IsLinkBeingRepinned(link_id)) {
-    return 1.F / 2;
-  }
-
-  return 1.F;
-}
-
-///
 auto Diagram::LinkFrom(const core::Link& core_link,
                        const flow::NodeFlows& node_flows) const {
   auto link = Link{
@@ -160,7 +152,8 @@ auto Diagram::LinkFrom(const core::Link& core_link,
       .thickness = 2,
   };
 
-  const auto link_alpha = GetLinkAlpha(core_link.id);
+  const auto link_alpha =
+      link_creation_.IsRepiningLink(link.core_link.id) ? 1.F / 2 : 1.F;
 
   if (!callbacks_.is_color_flow()) {
     link.color = {1.F, 1.F, 1.F, link_alpha};
@@ -212,16 +205,6 @@ auto Diagram::GetHeaderColor(const IHeaderTraits& header_traits,
 }
 
 ///
-auto Diagram::GetPinIconAlpha(ne::PinId pin_id) const {
-  if (link_creation_.IsCreatingLink() &&
-      !link_creation_.CanConnectToPin(pin_id)) {
-    return 1.F / 4;
-  }
-
-  return 1.F;
-}
-
-///
 auto Diagram::PinFrom(const IPinTraits& pin_traits,
                       const flow::NodeFlow& node_flow) const {
   auto pin =
@@ -242,6 +225,10 @@ auto Diagram::PinFrom(const IPinTraits& pin_traits,
                                           : ImColor{1.F, 1.F, 1.F},
       .filled = core::Diagram::FindPinLink(*diagram_, pin_id).has_value()};
 
+  if (!link_creation_.CanConnectToPin(pin_id)) {
+    pin.flow_data->color.Value.w = 1.F / 4;
+  }
+
   if (std::holds_alternative<std::monostate>(pin.value)) {
     pin.value = pin_flow;
   }
@@ -252,7 +239,7 @@ auto Diagram::PinFrom(const IPinTraits& pin_traits,
 ///
 auto Diagram::NodeFrom(const core::INode& core_node,
                        const flow::NodeFlow& node_flow) const {
-  auto node = Node{.id = core_node.GetId().Get(), .pos = core_node.GetPos()};
+  auto node = Node{.id = core_node.GetId(), .pos = core_node.GetPos()};
   const auto node_traits = core_node.CreateUiTraits();
 
   if (const auto header_traits = node_traits->CreateHeaderTraits()) {

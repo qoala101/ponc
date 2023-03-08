@@ -14,10 +14,9 @@ namespace esc::draw {
 void CreateNodePopup::Draw(
     const std::vector<coreui::FamilyGroup>& family_groups,
     const Callbacks& callbacks) {
-  const auto [is_visible, content_scope] =
-      DrawContentScope({.closed = callbacks.closed});
+  const auto content_scope = DrawContentScope({.closed = callbacks.closed});
 
-  if (!is_visible) {
+  if (!IsOpened()) {
     return;
   }
 
@@ -35,7 +34,10 @@ void CreateNodePopup::Draw(
 
     for (const auto& family : families) {
       if (ImGui::MenuItem(family.GetLabel().c_str())) {
-        callbacks.node_created(family.CreateNode());
+        auto new_node = family.CreateNode();
+        new_node->SetPos(pos_);
+
+        callbacks.node_created(std::move(new_node));
       }
     }
 
@@ -46,6 +48,9 @@ void CreateNodePopup::Draw(
     ImGui::EndMenu();
   }
 }
+
+///
+void CreateNodePopup::SetPos(const ImVec2& pos) { pos_ = pos; }
 
 ///
 auto CreateNodePopup::GetLabel() const -> std::string { return "Crate Node"; }

@@ -24,12 +24,15 @@ void IPopup::Open() {
   opened_ = true;
 }
 
+//
+auto IPopup::IsOpened() const -> bool { return opened_; }
+
 ///
 IPopup::IPopup() : id_{GenerateId()} {}
 
 ///
 auto IPopup::DrawContentScope(const Callbacks &callbacks)
-    -> std::pair<bool, cpp::ScopeFunction> {
+    -> cpp::ScopeFunction {
   const auto label = GetLabel();
   const auto id_label = IdLabel(label, id_);
 
@@ -39,10 +42,10 @@ auto IPopup::DrawContentScope(const Callbacks &callbacks)
     ImGui::TextUnformatted(label.c_str());
     ImGui::Separator();
 
-    return {true, cpp::ScopeFunction{[]() {
-              ImGui::EndPopup();
-              ne::Resume();
-            }}};
+    return cpp::ScopeFunction{[]() {
+      ImGui::EndPopup();
+      ne::Resume();
+    }};
   }
 
   if (opened_) {
@@ -53,6 +56,6 @@ auto IPopup::DrawContentScope(const Callbacks &callbacks)
     }
   }
 
-  return {false, cpp::ScopeFunction{[]() { ne::Resume(); }}};
+  return cpp::ScopeFunction{[]() { ne::Resume(); }};
 }
 }  // namespace esc::draw

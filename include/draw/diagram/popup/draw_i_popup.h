@@ -20,6 +20,8 @@ class IPopup : public cpp::Interface {
 
   ///
   void Open();
+  //
+  auto IsOpened() const -> bool;
 
  protected:
   ///
@@ -27,7 +29,7 @@ class IPopup : public cpp::Interface {
 
   ///
   auto DrawContentScope(const Callbacks &callbacks = {{}})
-      -> std::pair<bool, cpp::ScopeFunction>;
+      -> cpp::ScopeFunction;
 
  private:
   ///

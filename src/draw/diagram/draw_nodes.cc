@@ -1,18 +1,20 @@
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include "draw_nodes.h"
+
+#include <imgui_internal.h>
+
 #include <cstdint>
+#include <iostream>
 #include <memory>
+#include <optional>
+#include <string_view>
 #include <unordered_map>
 #include <variant>
 #include <vector>
-#define IMGUI_DEFINE_MATH_OPERATORS
-#include <iostream>
-#include <optional>
-#include <string_view>
 
-#include "coreui_project.h"
 #include "cpp_assert.h"
 #include "cpp_scope.h"
 #include "draw_flow_icon.h"
-#include "draw_nodes.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 

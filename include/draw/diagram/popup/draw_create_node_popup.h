@@ -1,5 +1,5 @@
-#ifndef VH_DRAW_BACKGROUND_CONNECTION_POPUP_H_
-#define VH_DRAW_BACKGROUND_CONNECTION_POPUP_H_
+#ifndef VH_DRAW_CREATE_NODE_POPUP_H_
+#define VH_DRAW_CREATE_NODE_POPUP_H_
 
 #include <imgui.h>
 #include <imgui_node_editor.h>
@@ -26,11 +26,16 @@ class CreateNodePopup : public IPopup {
   ///
   void Draw(const std::vector<coreui::FamilyGroup> &family_groups,
             const Callbacks &callbacks);
+  ///
+  void SetPos(const ImVec2 &pos);
 
  private:
   ///
   auto GetLabel() const -> std::string override;
+
+  ///
+  ImVec2 pos_{};
 };
 }  // namespace esc::draw
 
-#endif  // VH_DRAW_BACKGROUND_CONNECTION_POPUP_H_
+#endif  // VH_DRAW_CREATE_NODE_POPUP_H_

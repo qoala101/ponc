@@ -54,6 +54,8 @@ class Diagram {
   ///
   auto GetDiagram() const -> core::Diagram &;
   ///
+  auto GetLinkCreation() const -> const LinkCreation &;
+  ///
   auto GetLinkCreation() -> LinkCreation &;
   ///
   auto GetFamilyGroups() -> const std::vector<FamilyGroup> &;
@@ -68,13 +70,9 @@ class Diagram {
 
  private:
   ///
-  auto GetPinTipPos(ne::PinId pin_id, ne::PinKind pin_kind) const;
-  ///
   auto FamilyFrom(const core::IFamily &core_family) const;
   ///
   void UpdateFamilyGroups();
-  ///
-  auto GetLinkAlpha(ne::LinkId link_id) const;
   ///
   auto LinkFrom(const core::Link &core_link,
                 const flow::NodeFlows &node_flows) const;
@@ -83,8 +81,6 @@ class Diagram {
   ///
   auto GetHeaderColor(const IHeaderTraits &header_traits,
                       const flow::NodeFlow &node_flow) const;
-  ///
-  auto GetPinIconAlpha(ne::PinId pin_id) const;
   ///
   auto PinFrom(const IPinTraits &pin_traits,
                const flow::NodeFlow &node_flow) const;

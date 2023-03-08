@@ -11,6 +11,8 @@
 #include <variant>
 #include <vector>
 
+namespace ne = ax::NodeEditor;
+
 namespace esc::coreui {
 ///
 struct PinFlowData {

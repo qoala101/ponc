@@ -147,7 +147,6 @@ add_example_executable(esc
   coreui/coreui_event_loop.cc
   coreui/coreui_family.cc
   coreui/coreui_link_creation.cc
-  coreui/coreui_node.cc
   coreui/coreui_project.cc
   coreui/coreui_textures_handle.cc
 

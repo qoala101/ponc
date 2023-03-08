@@ -11,10 +11,8 @@
 #include <variant>
 #include <vector>
 
-#include "core_i_family.h"
 #include "core_i_node.h"
 #include "core_link.h"
-#include "coreui_family.h"
 #include "cpp_callbacks.h"
 
 namespace esc::coreui {
@@ -22,10 +20,13 @@ namespace esc::coreui {
 struct MousePos {};
 
 ///
-using PosVariant = std::variant<MousePos, ne::PinId, ImVec2>;
+struct NewNodePos {};
 
 ///
-struct HandmadeLink {
+using PosVariant = std::variant<MousePos, NewNodePos, ne::PinId>;
+
+///
+struct ManualLink {
   ///
   PosVariant start_pos{};
   ///
@@ -46,8 +47,6 @@ class LinkCreation {
     ///
     cpp::Query<std::optional<const core::Link*>, ne::PinId> find_pin_link{};
     ///
-    cpp::Action<void(std::unique_ptr<core::INode>)> emplace_node{};
-    ///
     cpp::Action<void(ne::PinId, ne::PinId)> create_link{};
     ///
     cpp::Action<void(ne::LinkId)> delete_link{};
@@ -60,27 +59,25 @@ class LinkCreation {
   void SetPins(const std::optional<ne::PinId>& dragged_from_pin,
                const std::optional<ne::PinId>& hovering_over_pin = {});
   ///
-  auto IsCreatingLink() const -> bool;
-  ///
   auto CanConnectToPin(ne::PinId pin_id) const -> bool;
+  ///
+  auto CanConnectToNode(const core::INode& node) const -> bool;
   ///
   auto GetCanCreateLinkReason() const -> std::pair<bool, std::string>;
   ///
-  auto IsRepinningLink() const -> bool;
-  ///
-  auto IsLinkBeingRepinned(ne::LinkId link_id) const -> bool;
-  ///
-  auto GetHandmadeLink() const -> std::optional<HandmadeLink>;
+  auto IsRepiningLink(ne::LinkId link_id) const -> bool;
   ///
   void AcceptNewLink();
   ///
-  void SetNodeBeingCreatedAt(const ImVec2& pos);
+  void StartCreatingNode();
   ///
-  auto IsFamilyValidForNewNode(const core::IFamily& family) const -> bool;
+  auto IsCreatingNode() const -> bool;
   ///
-  void AcceptNewNode(std::unique_ptr<core::INode> node);
+  void AcceptNewNode(core::INode& node);
   ///
   void DiscardNewNode();
+  ///
+  auto GetManualLink() const -> std::optional<const ManualLink*>;
 
  private:
   ///
@@ -116,9 +113,9 @@ class LinkCreation {
     ///
     ne::PinKind dragged_from_pin_kind{};
     ///
-    std::optional<ImVec2> new_node_pos{};
+    bool creating_node{};
     ///
-    std::optional<HandmadeLink> handmade_link{};
+    std::optional<ManualLink> manual_link{};
     ///
     std::optional<HoveringData> hovering_data{};
     ///
@@ -128,9 +125,10 @@ class LinkCreation {
   ///
   auto GetCurrentLinkSourcePin() const;
   ///
-  auto GetHandmadeLinkColor() const;
+  auto GetRepinningLinkColor() const;
   ///
-  auto CreateHandmadeLinkTo(const PosVariant& target_pos) const;
+  auto CreateManualLinkTo(const PosVariant& target_pos,
+                          const ImColor& color) const;
   ///
   auto GetCanConnectToPinReason(ne::PinId pin_id) const
       -> std::pair<bool, std::string>;

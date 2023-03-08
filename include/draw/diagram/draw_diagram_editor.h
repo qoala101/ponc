@@ -25,6 +25,8 @@ class DiagramEditor {
  private:
   ///
   void DrawPopups(coreui::Diagram &diagram);
+  ///
+  void DrawCreateNodePopup(coreui::Diagram &diagram);
 
   ///
   std::unique_ptr<ne::EditorContext, void (*)(ne::EditorContext *)> context_;

@@ -7,7 +7,7 @@
 #include <string>
 
 #include "coreui_link_creation.h"
-#include "draw_create_node_popup.h"
+#include "cpp_callbacks.h"
 #include "imgui.h"
 
 namespace esc::draw {
@@ -18,21 +18,26 @@ class LinkCreation {
   struct Callbacks {
     ///
     cpp::Query<ImVec2, ne::PinId> get_pin_tip_pos{};
+    ///
+    cpp::Signal<ImVec2> new_node_requested_at{};
   };
 
-  void Draw(coreui::LinkCreation &link_creation,
-            const std::vector<coreui::FamilyGroup> &family_groups,
-            const Callbacks &callbacks);
+  ///
+  void Draw(coreui::LinkCreation &link_creation, const Callbacks &callbacks);
 
  private:
+  ///
   void DrawNewNodeQuery(coreui::LinkCreation &link_creation,
-                        const ImVec2 &new_node_pos);
-
-  auto GetPos(const coreui::PosVariant &pos_variant,
-              const Callbacks &callbacks) const;
+                        const Callbacks &callbacks) const;
+  ///
+  auto GetPosValue(const coreui::PosVariant &pos_variant,
+                   const Callbacks &callbacks) const;
+  ///
+  void DrawManualLink(const coreui::ManualLink &link,
+                      const Callbacks &callbacks) const;
 
   ///
-  CreateNodePopup create_node_popup_{};
+  ImVec2 new_node_pos_{};
 };
 }  // namespace esc::draw
 
