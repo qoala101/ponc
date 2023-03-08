@@ -146,7 +146,7 @@ add_example_executable(esc
   coreui/coreui_diagram.cc
   coreui/coreui_event_loop.cc
   coreui/coreui_family.cc
-  coreui/coreui_link_creation.cc
+  coreui/coreui_linking.cc
   coreui/coreui_project.cc
   coreui/coreui_textures_handle.cc
 
@@ -160,7 +160,7 @@ add_example_executable(esc
   draw/diagram/draw_diagram_editor.cc
 
   # # draw/diagram/process/draw_delete_items_process.cc
-  draw/diagram/draw_link_creation.cc
+  draw/diagram/draw_linking.cc
   draw/diagram/draw_flow_icon.cc
 
   # # draw/diagram/draw_groups.cc

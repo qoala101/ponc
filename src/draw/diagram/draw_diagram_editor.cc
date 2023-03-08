@@ -6,7 +6,7 @@
 #include "coreui_diagram.h"
 #include "draw_create_node_popup.h"
 #include "draw_link.h"
-#include "draw_link_creation.h"
+#include "draw_linking.h"
 #include "draw_nodes.h"
 #include "imgui_node_editor.h"
 
@@ -15,7 +15,7 @@ namespace {
 ///
 auto GetConnectableFamilyGroups(
     const std::vector<coreui::FamilyGroup> &family_groups,
-    const coreui::LinkCreation &link_creation) {
+    const coreui::Linking &linking) {
   auto connectable_groups = std::vector<coreui::FamilyGroup>{};
   auto id_generator = core::IdGenerator{};
 
@@ -23,7 +23,7 @@ auto GetConnectableFamilyGroups(
     for (const auto &family : family_group.families) {
       const auto fake_node = family.GetFamily().CreateNode(id_generator);
 
-      if (!link_creation.CanConnectToNode(*fake_node)) {
+      if (!linking.CanConnectToNode(*fake_node)) {
         continue;
       }
 
@@ -57,8 +57,8 @@ DiagramEditor::DiagramEditor()
 void DiagramEditor::Draw(coreui::Diagram &diagram) {
   ne::Begin("DiagramEditor");
 
-  link_creation_.Draw(
-      diagram.GetLinkCreation(),
+  linking_.Draw(
+      diagram.GetLinking(),
       {.get_pin_tip_pos =
            [&nodes = nodes_](auto pin_id) {
              return nodes.GetDrawnPinTipPos(pin_id);
@@ -102,16 +102,16 @@ void DiagramEditor::DrawCreateNodePopup(coreui::Diagram &diagram) {
     return;
   }
 
-  auto &link_creation = diagram.GetLinkCreation();
+  auto &linking = diagram.GetLinking();
   const auto &family_groups = diagram.GetFamilyGroups();
 
-  if (link_creation.IsCreatingNode()) {
+  if (linking.IsCreatingNode()) {
     create_node_popup_.Draw(
-        GetConnectableFamilyGroups(family_groups, link_creation),
-        {.closed = [&link_creation]() { link_creation.DiscardNewNode(); },
+        GetConnectableFamilyGroups(family_groups, linking),
+        {.closed = [&linking]() { linking.DiscardNewNode(); },
          .node_created =
-             [&diagram, &link_creation](auto node) {
-               link_creation.AcceptNewNode(*node);
+             [&diagram, &linking](auto node) {
+               linking.AcceptNewNode(*node);
                diagram.EmplaceNode(std::move(node));
              }});
     return;

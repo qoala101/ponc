@@ -1,18 +1,18 @@
-#ifndef VH_DRAW_LINK_CREATION_H_
-#define VH_DRAW_LINK_CREATION_H_
+#ifndef VH_DRAW_LINKING_H_
+#define VH_DRAW_LINKING_H_
 
 #include <imgui_node_editor.h>
 
 #include <optional>
 #include <string>
 
-#include "coreui_link_creation.h"
+#include "coreui_linking.h"
 #include "cpp_callbacks.h"
 #include "imgui.h"
 
 namespace esc::draw {
 ///
-class LinkCreation {
+class Linking {
  public:
   ///
   struct Callbacks {
@@ -23,11 +23,11 @@ class LinkCreation {
   };
 
   ///
-  void Draw(coreui::LinkCreation &link_creation, const Callbacks &callbacks);
+  void Draw(coreui::Linking &linking, const Callbacks &callbacks);
 
  private:
   ///
-  void DrawNewNodeQuery(coreui::LinkCreation &link_creation,
+  void DrawNewNodeQuery(coreui::Linking &linking,
                         const Callbacks &callbacks) const;
   ///
   auto GetPosValue(const coreui::PosVariant &pos_variant,
@@ -41,4 +41,4 @@ class LinkCreation {
 };
 }  // namespace esc::draw
 
-#endif  // VH_DRAW_LINK_CREATION_H_
+#endif  // VH_DRAW_LINKING_H_

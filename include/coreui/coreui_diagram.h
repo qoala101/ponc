@@ -20,7 +20,7 @@
 #include "coreui_i_header_traits.h"
 #include "coreui_i_pin_traits.h"
 #include "coreui_link.h"
-#include "coreui_link_creation.h"
+#include "coreui_linking.h"
 #include "coreui_node.h"
 #include "coreui_texture.h"
 #include "cpp_callbacks.h"
@@ -54,9 +54,9 @@ class Diagram {
   ///
   auto GetDiagram() const -> core::Diagram &;
   ///
-  auto GetLinkCreation() const -> const LinkCreation &;
+  auto GetLinking() const -> const Linking &;
   ///
-  auto GetLinkCreation() -> LinkCreation &;
+  auto GetLinking() -> Linking &;
   ///
   auto GetFamilyGroups() -> const std::vector<FamilyGroup> &;
   ///
@@ -101,7 +101,7 @@ class Diagram {
   ///
   cpp::SafeOwner safe_owner_{};
   ///
-  LinkCreation link_creation_;
+  Linking linking_;
   ///
   std::vector<FamilyGroup> family_groups_{};
   ///

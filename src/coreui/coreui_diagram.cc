@@ -18,7 +18,7 @@
 #include "coreui_i_node_traits.h"
 #include "coreui_i_pin_traits.h"
 #include "coreui_link.h"
-#include "coreui_link_creation.h"
+#include "coreui_linking.h"
 #include "coreui_pin.h"
 #include "cpp_assert.h"
 #include "cpp_safe_ptr.h"
@@ -39,33 +39,33 @@ Diagram::Diagram(
       families_{std::move(families)},
       id_generator_{std::move(id_generator)},
       callbacks_{std::move(callbacks)},
-      link_creation_{{.find_pin_node = [diagram = diagram_](
-                                           auto pin_id) -> const core::INode& {
-                        return core::Diagram::FindPinNode(*diagram, pin_id);
-                      },
-                      .find_pin_link =
-                          [diagram = diagram_](auto pin_id) {
-                            return core::Diagram::FindPinLink(*diagram, pin_id);
-                          },
-                      .create_link =
-                          [callbacks = safe_owner_.MakeSafe(&callbacks_),
-                           diagram = diagram_, id_generator = id_generator_](
-                              auto start_pin_id, auto end_pin_id) mutable {
-                            callbacks->post_event([diagram, id_generator,
-                                                   start_pin_id, end_pin_id]() {
-                              diagram->EmplaceLink(core::Link{
-                                  .id = id_generator->Generate<ne::LinkId>(),
-                                  .start_pin_id = start_pin_id,
-                                  .end_pin_id = end_pin_id});
-                            });
-                          },
-                      .delete_link =
-                          [callbacks = safe_owner_.MakeSafe(&callbacks_),
-                           diagram = diagram_](auto link_id) mutable {
-                            callbacks->post_event([diagram, link_id]() {
-                              diagram->EraseLink(link_id);
-                            });
-                          }}} {}
+      linking_{{.find_pin_node =
+                    [diagram = diagram_](auto pin_id) -> const core::INode& {
+                  return core::Diagram::FindPinNode(*diagram, pin_id);
+                },
+                .find_pin_link =
+                    [diagram = diagram_](auto pin_id) {
+                      return core::Diagram::FindPinLink(*diagram, pin_id);
+                    },
+                .create_link =
+                    [callbacks = safe_owner_.MakeSafe(&callbacks_),
+                     diagram = diagram_, id_generator = id_generator_](
+                        auto start_pin_id, auto end_pin_id) mutable {
+                      callbacks->post_event(
+                          [diagram, id_generator, start_pin_id, end_pin_id]() {
+                            diagram->EmplaceLink(core::Link{
+                                .id = id_generator->Generate<ne::LinkId>(),
+                                .start_pin_id = start_pin_id,
+                                .end_pin_id = end_pin_id});
+                          });
+                    },
+                .delete_link =
+                    [callbacks = safe_owner_.MakeSafe(&callbacks_),
+                     diagram = diagram_](auto link_id) mutable {
+                      callbacks->post_event([diagram, link_id]() {
+                        diagram->EraseLink(link_id);
+                      });
+                    }}} {}
 
 ///
 void Diagram::OnFrame() {
@@ -82,13 +82,13 @@ void Diagram::OnFrame() {
 auto Diagram::GetDiagram() const -> core::Diagram& { return *diagram_; }
 
 ///
-auto Diagram::GetLinkCreation() const -> const LinkCreation& {
+auto Diagram::GetLinking() const -> const Linking& {
   // NOLINTNEXTLINE(*-const-cast)
-  return const_cast<Diagram*>(this)->GetLinkCreation();
+  return const_cast<Diagram*>(this)->GetLinking();
 }
 
 ///
-auto Diagram::GetLinkCreation() -> LinkCreation& { return link_creation_; }
+auto Diagram::GetLinking() -> Linking& { return linking_; }
 
 ///
 auto Diagram::GetFamilyGroups() -> const std::vector<FamilyGroup>& {
@@ -153,7 +153,7 @@ auto Diagram::LinkFrom(const core::Link& core_link,
   };
 
   const auto link_alpha =
-      link_creation_.IsRepiningLink(link.core_link.id) ? 1.F / 2 : 1.F;
+      linking_.IsRepiningLink(link.core_link.id) ? 1.F / 2 : 1.F;
 
   if (!callbacks_.is_color_flow()) {
     link.color = {1.F, 1.F, 1.F, link_alpha};
@@ -225,7 +225,7 @@ auto Diagram::PinFrom(const IPinTraits& pin_traits,
                                           : ImColor{1.F, 1.F, 1.F},
       .filled = core::Diagram::FindPinLink(*diagram_, pin_id).has_value()};
 
-  if (!link_creation_.CanConnectToPin(pin_id)) {
+  if (!linking_.CanConnectToPin(pin_id)) {
     pin.flow_data->color.Value.w = 1.F / 4;
   }
 

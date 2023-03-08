@@ -1,5 +1,5 @@
-#ifndef VH_COREUI_LINK_CREATION_H_
-#define VH_COREUI_LINK_CREATION_H_
+#ifndef VH_COREUI_LINKING_H_
+#define VH_COREUI_LINKING_H_
 
 #include <imgui.h>
 #include <imgui_node_editor.h>
@@ -38,7 +38,7 @@ struct ManualLink {
 };
 
 ///
-class LinkCreation {
+class Linking {
  public:
   ///
   struct Callbacks {
@@ -53,7 +53,7 @@ class LinkCreation {
   };
 
   ///
-  explicit LinkCreation(Callbacks callbacks);
+  explicit Linking(Callbacks callbacks);
 
   ///
   void SetPins(const std::optional<ne::PinId>& dragged_from_pin,
@@ -105,7 +105,7 @@ class LinkCreation {
   };
 
   ///
-  struct CreatingData {
+  struct LinkingData {
     ///
     ne::PinId dragged_from_pin{};
     ///
@@ -136,8 +136,8 @@ class LinkCreation {
   ///
   Callbacks callbacks_{};
   ///
-  std::optional<CreatingData> creating_data_{};
+  std::optional<LinkingData> linking_data_{};
 };
 }  // namespace esc::coreui
 
-#endif  // VH_COREUI_LINK_CREATION_H_
+#endif  // VH_COREUI_LINKING_H_
