@@ -8,14 +8,25 @@
 namespace ne = ax::NodeEditor;
 
 namespace esc::draw {
+///
 class NodePopup : public IPopup {
  public:
-  void Draw();
+  ///
+  struct Callbacks {
+    ///
+    cpp::Signal<ne::NodeId> node_deleted{};
+  };
+
+  ///
+  void Draw(const Callbacks &callbacks);
+  ///
   void SetNodeId(ne::NodeId node_id);
 
  private:
+  ///
   auto GetLabel() const -> std::string override;
 
+  ///
   ne::NodeId node_id_{};
 };
 }  // namespace esc::draw

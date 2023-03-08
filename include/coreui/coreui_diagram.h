@@ -58,15 +58,19 @@ class Diagram {
   ///
   auto GetLinking() -> Linking &;
   ///
-  auto GetFamilyGroups() -> const std::vector<FamilyGroup> &;
+  auto GetFamilyGroups() const -> const std::vector<FamilyGroup> &;
   ///
   auto GetNodes() const -> const std::vector<Node> &;
   ///
   auto GetNodes() -> std::vector<Node> &;
   ///
-  void EmplaceNode(std::unique_ptr<core::INode> node);
+  void AddNode(std::unique_ptr<core::INode> node) const;
+  ///
+  void DeleteNode(ne::NodeId node_id) const;
   ///
   auto GetLinks() const -> const std::vector<Link> &;
+  ///
+  void DeleteLink(ne::LinkId link_id) const;
 
  private:
   ///

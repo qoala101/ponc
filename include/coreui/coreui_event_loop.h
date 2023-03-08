@@ -3,8 +3,6 @@
 
 #include <functional>
 
-#include "cpp_safe_ptr.h"
-
 namespace esc::coreui {
 ///
 using Event = std::function<void()>;

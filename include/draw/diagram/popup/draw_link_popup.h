@@ -3,22 +3,31 @@
 
 #include <imgui_node_editor.h>
 
-#include "coreui_project.h"
+#include "cpp_callbacks.h"
 #include "draw_i_popup.h"
 
 namespace ne = ax::NodeEditor;
 
 namespace esc::draw {
+///
 class LinkPopup : public IPopup {
  public:
-  using SignalDeleteLink = std::function<void(ne::LinkId link_id)>;
+  ///
+  struct Callbacks {
+    ///
+    cpp::Signal<ne::LinkId> link_deleted{};
+  };
 
-  void Draw(const SignalDeleteLink &signal_delete_link);
+  ///
+  void Draw(const Callbacks &callbacks);
+  ///
   void SetLinkId(ne::LinkId link_id);
 
  private:
+  ///
   auto GetLabel() const -> std::string override;
 
+  ///
   ne::LinkId link_id_{};
 };
 }  // namespace esc::draw

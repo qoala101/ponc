@@ -29,13 +29,13 @@ class Diagram {
   ///
   auto EmplaceNode(std::unique_ptr<INode> node) -> INode &;
   ///
-  void EraseNode(ne::NodeId node_id);
+  void DeleteNode(ne::NodeId node_id);
   ///
   auto GetLinks() const -> const std::vector<Link> &;
   ///
   auto EmplaceLink(const Link &link) -> Link &;
   ///
-  void EraseLink(ne::LinkId link_id);
+  void DeleteLink(ne::LinkId link_id);
 
  private:
   ///

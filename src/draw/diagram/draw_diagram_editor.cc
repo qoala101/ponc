@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "coreui_diagram.h"
+#include "cpp_scope.h"
 #include "draw_create_node_popup.h"
 #include "draw_link.h"
 #include "draw_linking.h"
@@ -75,25 +76,52 @@ void DiagramEditor::Draw(coreui::Diagram &diagram) {
     DrawLink(link);
   }
 
+  OpenPopupsIfRequested();
   DrawPopups(diagram);
 
   ne::End();
 }
 
 ///
-void DiagramEditor::DrawPopups(coreui::Diagram &diagram) {
+void DiagramEditor::OpenPopupsIfRequested() {
   const auto popup_pos = ImGui::GetMousePos();
 
   ne::Suspend();
+  const auto resume_scope = cpp::Scope{[]() { ne::Resume(); }};
 
   if (ne::ShowBackgroundContextMenu()) {
     create_node_popup_.SetPos(popup_pos);
     create_node_popup_.Open();
+    return;
   }
 
-  ne::Resume();
+  auto node_id = ne::NodeId{};
 
+  if (ne::ShowNodeContextMenu(&node_id)) {
+    node_popup_.SetNodeId(node_id);
+    node_popup_.Open();
+    return;
+  }
+
+  auto link_id = ne::LinkId{};
+
+  if (ne::ShowLinkContextMenu(&link_id)) {
+    link_popup_.SetLinkId(link_id);
+    link_popup_.Open();
+  }
+}
+
+///
+void DiagramEditor::DrawPopups(coreui::Diagram &diagram) {
   DrawCreateNodePopup(diagram);
+
+  node_popup_.Draw({.node_deleted = [&diagram](auto node_id) {
+    diagram.DeleteNode(node_id);
+  }});
+
+  link_popup_.Draw({.link_deleted = [&diagram](auto link_id) {
+    diagram.DeleteLink(link_id);
+  }});
 }
 
 ///
@@ -112,14 +140,14 @@ void DiagramEditor::DrawCreateNodePopup(coreui::Diagram &diagram) {
          .node_created =
              [&diagram, &linking](auto node) {
                linking.AcceptNewNode(*node);
-               diagram.EmplaceNode(std::move(node));
+               diagram.AddNode(std::move(node));
              }});
     return;
   }
 
   create_node_popup_.Draw(family_groups,
                           {.node_created = [&diagram](auto node) {
-                            diagram.EmplaceNode(std::move(node));
+                            diagram.AddNode(std::move(node));
                           }});
 }
 }  // namespace esc::draw

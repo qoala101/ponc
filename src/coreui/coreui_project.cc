@@ -129,7 +129,7 @@ void Project::SaveToFile(std::string file_path) {
 ///
 void Project::Reset() {
   event_loop_.PostEvent([project = safe_owner_.MakeSafe(&project_),
-                         new_project = cpp::Share(CreateProject())]() mutable {
+                         new_project = cpp::Share(CreateProject())]() {
     *project = std::move(*new_project);
   });
 }

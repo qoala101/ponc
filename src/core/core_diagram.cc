@@ -62,7 +62,7 @@ auto Diagram::EmplaceNode(std::unique_ptr<INode> node) -> INode& {
 }
 
 ///
-void Diagram::EraseNode(ne::NodeId node_id) {
+void Diagram::DeleteNode(ne::NodeId node_id) {
   Expects(!nodes_.empty());
 
   const auto found_node = std::find_if(
@@ -84,7 +84,7 @@ auto Diagram::EmplaceLink(const Link& link) -> Link& {
 }
 
 ///
-void Diagram::EraseLink(ne::LinkId link_id) {
+void Diagram::DeleteLink(ne::LinkId link_id) {
   Expects(!links_.empty());
 
   const auto found_link =

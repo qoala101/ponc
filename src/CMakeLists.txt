@@ -154,6 +154,8 @@ add_example_executable(esc
 
   draw/diagram/popup/draw_create_node_popup.cc
   draw/diagram/popup/draw_i_popup.cc
+  draw/diagram/popup/draw_link_popup.cc
+  draw/diagram/popup/draw_node_popup.cc
 
   # draw/diagram/popup/draw_link_popup.cc
   # draw/diagram/popup/draw_node_popup.cc

@@ -50,7 +50,7 @@ Diagram::Diagram(
                 .create_link =
                     [callbacks = safe_owner_.MakeSafe(&callbacks_),
                      diagram = diagram_, id_generator = id_generator_](
-                        auto start_pin_id, auto end_pin_id) mutable {
+                        auto start_pin_id, auto end_pin_id) {
                       callbacks->post_event(
                           [diagram, id_generator, start_pin_id, end_pin_id]() {
                             diagram->EmplaceLink(core::Link{
@@ -60,11 +60,8 @@ Diagram::Diagram(
                           });
                     },
                 .delete_link =
-                    [callbacks = safe_owner_.MakeSafe(&callbacks_),
-                     diagram = diagram_](auto link_id) mutable {
-                      callbacks->post_event([diagram, link_id]() {
-                        diagram->EraseLink(link_id);
-                      });
+                    [safe_this = safe_owner_.MakeSafe(this)](auto link_id) {
+                      safe_this->DeleteLink(link_id);
                     }}} {}
 
 ///
@@ -91,7 +88,7 @@ auto Diagram::GetLinking() const -> const Linking& {
 auto Diagram::GetLinking() -> Linking& { return linking_; }
 
 ///
-auto Diagram::GetFamilyGroups() -> const std::vector<FamilyGroup>& {
+auto Diagram::GetFamilyGroups() const -> const std::vector<FamilyGroup>& {
   return family_groups_;
 }
 
@@ -105,7 +102,7 @@ auto Diagram::GetNodes() const -> const std::vector<Node>& {
 auto Diagram::GetNodes() -> std::vector<Node>& { return nodes_; }
 
 ///
-void Diagram::EmplaceNode(std::unique_ptr<core::INode> node) {
+void Diagram::AddNode(std::unique_ptr<core::INode> node) const {
   callbacks_.post_event(
       [diagram = diagram_, node = cpp::Share(std::move(node))]() {
         diagram->EmplaceNode(std::move(*node));
@@ -113,7 +110,19 @@ void Diagram::EmplaceNode(std::unique_ptr<core::INode> node) {
 }
 
 ///
+void Diagram::DeleteNode(ne::NodeId node_id) const {
+  callbacks_.post_event(
+      [diagram = diagram_, node_id]() { diagram->DeleteNode(node_id); });
+}
+
+///
 auto Diagram::GetLinks() const -> const std::vector<Link>& { return links_; }
+
+///
+void Diagram::DeleteLink(ne::LinkId link_id) const {
+  callbacks_.post_event(
+      [diagram = diagram_, link_id]() { diagram->DeleteLink(link_id); });
+}
 
 ///
 auto Diagram::FamilyFrom(const core::IFamily& core_family) const {
