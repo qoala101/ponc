@@ -5,6 +5,7 @@
 
 #include "core_i_node.h"
 #include "core_id_generator.h"
+#include "coreui_empty_pin_traits.h"
 #include "coreui_flow_pin_traits.h"
 #include "coreui_i_family_traits.h"
 #include "coreui_i_node_traits.h"
@@ -123,6 +124,8 @@ class NodeUiTraits : public coreui::INodeTraits {
         std::make_unique<coreui::FlowPinTraits>(*node_->GetInputPinId()));
     pin_traits.emplace_back(std::make_unique<DropPinTraits>(node_));
     pin_traits.emplace_back(
+        std::make_unique<coreui::EmptyPinTraits>(ne::PinKind::Output));
+    pin_traits.emplace_back(
         std::make_unique<coreui::FlowPinTraits>(node_->GetOutputPinIds()[0]));
     return pin_traits;
   }
@@ -192,9 +195,9 @@ class FamilyWriter : public json::IFamilyWriter {
   explicit FamilyWriter(cpp::SafePtr<const Family> family)
       : family_{std::move(family)} {}
 
+ private:
   auto GetTypeName() const -> std::string override { return kTypeName; }
 
- private:
   cpp::SafePtr<const Family> family_;
 };
 

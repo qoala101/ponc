@@ -1,18 +1,18 @@
-#include "app_free_pin_family_group.h"
+#include "app_splitter_family_group.h"
 
+#include <cstdint>
 #include <memory>
-#include <vector>
 
-#include "core_family_id.h"
+#include "core_gradient.h"
 #include "core_i_node.h"
 #include "core_id_generator.h"
+#include "coreui_empty_pin_traits.h"
 #include "coreui_flow_pin_traits.h"
 #include "coreui_i_family_traits.h"
-#include "coreui_i_header_traits.h"
 #include "coreui_i_node_traits.h"
 #include "coreui_i_pin_traits.h"
+#include "coreui_project.h"
 #include "cpp_assert.h"
-#include "cpp_safe_ptr.h"
 #include "crude_json.h"
 #include "imgui_node_editor.h"
 #include "json_i_family_writer.h"
@@ -41,17 +41,30 @@ class Node : public core::INode {
     return CreateNodeUiTraits(safe_owner_.MakeSafe(this));
   }
 
+  auto GetDrop() const {
+    switch (GetOutputPinIds().size()) {
+      case 2:
+        return -4.3F;
+      case 4:
+        return -7.4F;
+      case 8:
+        return -10.7F;
+      case 16:
+      default:
+        return -13.9F;
+    };
+  }
+
+  void SetInitialFlowValues(flow::NodeFlow& node_flow) const override {
+    const auto drop = GetDrop();
+
+    for (auto& [pin_id, flow] : node_flow.output_pin_flows) {
+      flow = drop;
+    }
+  }
+
  private:
   cpp::SafeOwner safe_owner_{};
-};
-
-class NodeParser : public json::INodeParser {
- private:
-  auto ParseFromJson(core::INode::ConstructorArgs parsed_args,
-                     const crude_json::value& json) const
-      -> std::unique_ptr<core::INode> override {
-    return std::make_unique<Node>(std::move(parsed_args));
-  }
 };
 
 class NodeWriter : public json::INodeWriter {
@@ -67,15 +80,46 @@ auto CreateNodeWriter(cpp::SafePtr<const Node> node)
   return std::make_unique<NodeWriter>(std::move(node));
 }
 
-class PinTraits : public coreui::FlowPinTraits {
+class DropPinTraits : public coreui::IPinTraits {
  public:
-  using FlowPinTraits::FlowPinTraits;
+  explicit DropPinTraits(float drop) : drop_{drop} {}
 
-  auto GetValue() const -> coreui::PinValueVariant override { return {}; }
-
-  auto GetLabel() const -> std::optional<coreui::PinLabel> override {
-    return coreui::PinLabel{.color = {1.F, 1.F, 1.F}};
+  auto GetPin() const -> std::variant<ne::PinId, ne::PinKind> override {
+    return ne::PinKind::Input;
   }
+
+  auto GetValue() const -> coreui::PinValueVariant override { return drop_; }
+
+ private:
+  float drop_{};
+};
+
+class HeaderUiTraits : public coreui::IHeaderTraits {
+ public:
+  explicit HeaderUiTraits(cpp::SafePtr<const Node> node)
+      : node_{std::move(node)} {}
+
+  auto GetColor() const -> ImColor override {
+    auto index = 1;
+
+    switch (node_->GetOutputPinIds().size()) {
+      case 4:
+        index = 2;
+        break;
+      case 8:
+        index = 3;
+        break;
+      case 16:
+        index = 4;
+        break;
+    }
+
+    return core::GetGradient({0.F, 0.F, 0.5F}, {0.F, 0.F, 1.F},
+                             1.F - index * 1.F / 4);
+  }
+
+ private:
+  cpp::SafePtr<const Node> node_;
 };
 
 class NodeUiTraits : public coreui::INodeTraits {
@@ -84,20 +128,31 @@ class NodeUiTraits : public coreui::INodeTraits {
       : node_{std::move(node)} {}
 
   auto GetLabel() const -> std::string override {
-    return node_->GetInputPinId().has_value() ? "Free Input Pin"
-                                              : "Free Output Pin";
+    return "Splitter 1x" + std::to_string(node_->GetOutputPinIds().size());
+  }
+
+  auto CreateHeaderTraits() const
+      -> std::optional<std::unique_ptr<coreui::IHeaderTraits>> override {
+    return std::make_unique<HeaderUiTraits>(node_);
   }
 
   auto CreatePinTraits() const
       -> std::vector<std::unique_ptr<coreui::IPinTraits>> override {
     auto pin_traits = std::vector<std::unique_ptr<coreui::IPinTraits>>{};
 
-    if (const auto& input_pin = node_->GetInputPinId()) {
-      pin_traits.emplace_back(std::make_unique<PinTraits>(*input_pin));
-    } else {
-      const auto& output_pins = node_->GetOutputPinIds();
-      Expects(!output_pins.empty());
-      pin_traits.emplace_back(std::make_unique<PinTraits>(output_pins[0]));
+    pin_traits.emplace_back(
+        std::make_unique<coreui::FlowPinTraits>(*node_->GetInputPinId()));
+
+    for (const auto pin_id : node_->GetOutputPinIds()) {
+      pin_traits.emplace_back(
+          std::make_unique<DropPinTraits>(node_->GetDrop()));
+    }
+
+    pin_traits.emplace_back(
+        std::make_unique<coreui::EmptyPinTraits>(ne::PinKind::Output));
+
+    for (const auto pin_id : node_->GetOutputPinIds()) {
+      pin_traits.emplace_back(std::make_unique<coreui::FlowPinTraits>(pin_id));
     }
 
     return pin_traits;
@@ -114,6 +169,9 @@ auto CreateNodeUiTraits(cpp::SafePtr<const Node> node)
 
 class Family;
 
+auto CreateFamilyNodeParser(cpp::SafePtr<const Family> family)
+    -> std::unique_ptr<json::INodeParser>;
+
 auto CreateFamilyWriter(cpp::SafePtr<const Family> family)
     -> std::unique_ptr<json::IFamilyWriter>;
 
@@ -122,27 +180,20 @@ auto CreateFamilyUiTraits(cpp::SafePtr<const Family> family)
 
 class Family : public core::IFamily {
  public:
-  explicit Family(core::FamilyId id, ne::PinKind pin_kind)
-      : IFamily{id}, pin_kind_{pin_kind} {}
+  Family(core::FamilyId id, int num_output_pins)
+      : IFamily{id}, num_output_pins_{num_output_pins} {}
 
   auto CreateNode(core::IdGenerator& id_generator) const
       -> std::unique_ptr<core::INode> override {
-    return std::make_unique<Node>(
-        (pin_kind_ == ne::PinKind::Input)
-            ? core::INode::ConstructorArgs{.id = id_generator
-                                                     .Generate<ne::NodeId>(),
-                                           .family_id = GetId(),
-                                           .input_pin_id =
-                                               id_generator
-                                                   .Generate<ne::PinId>()}
-            : core::INode::ConstructorArgs{
-                  .id = id_generator.Generate<ne::NodeId>(),
-                  .family_id = GetId(),
-                  .output_pin_ids = id_generator.GenerateN<ne::PinId>(1)});
+    return std::make_unique<Node>(core::INode::ConstructorArgs{
+        .id = id_generator.Generate<ne::NodeId>(),
+        .family_id = GetId(),
+        .input_pin_id = id_generator.Generate<ne::PinId>(),
+        .output_pin_ids = id_generator.GenerateN<ne::PinId>(num_output_pins_)});
   }
 
   auto CreateNodeParser() const -> std::unique_ptr<json::INodeParser> override {
-    return std::make_unique<NodeParser>();
+    return CreateFamilyNodeParser(safe_owner_.MakeSafe(this));
   }
 
   auto CreateWriter() const -> std::unique_ptr<json::IFamilyWriter> override {
@@ -154,14 +205,34 @@ class Family : public core::IFamily {
     return CreateFamilyUiTraits(safe_owner_.MakeSafe(this));
   }
 
-  auto GetPinKind() const { return pin_kind_; }
+  auto GetNumOutputPins() const { return num_output_pins_; }
 
  private:
-  ne::PinKind pin_kind_{};
+  int num_output_pins_{};
   cpp::SafeOwner safe_owner_{};
 };
 
-constexpr auto kTypeName = "FreePin";
+class NodeParser : public json::INodeParser {
+ public:
+  explicit NodeParser(cpp::SafePtr<const Family> family)
+      : family_{std::move(family)} {}
+
+ private:
+  auto ParseFromJson(core::INode::ConstructorArgs parsed_args,
+                     const crude_json::value& json) const
+      -> std::unique_ptr<core::INode> override {
+    return std::make_unique<Node>(std::move(parsed_args));
+  }
+
+  cpp::SafePtr<const Family> family_;
+};
+
+auto CreateFamilyNodeParser(cpp::SafePtr<const Family> family)
+    -> std::unique_ptr<json::INodeParser> {
+  return std::make_unique<NodeParser>(std::move(family));
+}
+
+constexpr auto kTypeName = "Splitter";
 
 class FamilyParser : public json::IFamilyParser {
  public:
@@ -171,8 +242,7 @@ class FamilyParser : public json::IFamilyParser {
                      const crude_json::value& json) const
       -> std::unique_ptr<core::IFamily> override {
     return std::make_unique<Family>(
-        parsed_id,
-        static_cast<ne::PinKind>(json["pin_kind"].get<crude_json::number>()));
+        parsed_id, json["num_output_pins"].get<crude_json::number>());
   }
 };
 
@@ -184,9 +254,10 @@ class FamilyWriter : public json::IFamilyWriter {
  private:
   auto GetTypeName() const -> std::string override { return kTypeName; }
 
-  auto WriteToJson() const -> crude_json::value override {
+  auto WriteToJson() const -> crude_json::value {
     auto json = crude_json::value{};
-    json["pin_kind"] = static_cast<crude_json::number>(family_->GetPinKind());
+    json["num_output_pins"] =
+        static_cast<crude_json::number>(family_->GetNumOutputPins());
     return json;
   }
 
@@ -204,11 +275,10 @@ class FamilyUiTraits : public coreui::IFamilyTraits {
       : family_{std::move(family)} {}
 
   auto GetLabel() const -> std::string override {
-    return (family_->GetPinKind() == ne::PinKind::Input) ? "Free Input Pin"
-                                                         : "Free Output Pin";
+    return "Splitter 1x" + std::to_string(family_->GetNumOutputPins());
   }
 
-  auto GetGroupLabel() const -> std::string override { return "Free Pin"; }
+  auto GetGroupLabel() const -> std::string override { return "Splitter"; }
 
  private:
   cpp::SafePtr<const Family> family_;
@@ -220,17 +290,19 @@ auto CreateFamilyUiTraits(cpp::SafePtr<const Family> family)
 }
 }  // namespace
 
-auto FreePinFamilyGroup::CreateFamilies(core::IdGenerator& id_generator) const
+auto SplitterFamilyGroup::CreateFamilies(core::IdGenerator& id_generator) const
     -> std::vector<std::unique_ptr<core::IFamily>> {
   auto families = std::vector<std::unique_ptr<core::IFamily>>{};
-  families.emplace_back(std::make_unique<Family>(
-      id_generator.Generate<core::FamilyId>(), ne::PinKind::Input));
-  families.emplace_back(std::make_unique<Family>(
-      id_generator.Generate<core::FamilyId>(), ne::PinKind::Output));
+
+  for (auto num_output_pins : {2, 4, 8, 16}) {
+    families.emplace_back(std::make_unique<Family>(
+        id_generator.Generate<core::FamilyId>(), num_output_pins));
+  }
+
   return families;
 }
 
-auto FreePinFamilyGroup::CreateFamilyParser() const
+auto SplitterFamilyGroup::CreateFamilyParser() const
     -> std::unique_ptr<json::IFamilyParser> {
   return std::make_unique<FamilyParser>();
 }

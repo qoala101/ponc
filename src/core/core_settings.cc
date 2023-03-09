@@ -1,22 +1,8 @@
 #include "core_settings.h"
 
+#include "core_gradient.h"
+
 namespace esc::core {
-namespace {
-///
-auto GetGradient(float start_value, float end_value, float percentage) {
-  return start_value + percentage * (end_value - start_value);
-}
-
-///
-auto GetGradient(const ImColor &start_color, const ImColor &end_color,
-                 float percentage) {
-  return ImColor{
-      GetGradient(start_color.Value.x, end_color.Value.x, percentage),
-      GetGradient(start_color.Value.y, end_color.Value.y, percentage),
-      GetGradient(start_color.Value.z, end_color.Value.z, percentage)};
-}
-}  // namespace
-
 ///
 auto Settings::GetFlowColor(const Settings &settings, float flow) -> ImColor {
   const auto blue = ImColor{0.F, 0.F, 1.F};

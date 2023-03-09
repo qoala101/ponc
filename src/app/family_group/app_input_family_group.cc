@@ -185,9 +185,9 @@ class FamilyWriter : public json::IFamilyWriter {
   explicit FamilyWriter(cpp::SafePtr<const Family> family)
       : family_{std::move(family)} {}
 
+ private:
   auto GetTypeName() const -> std::string override { return kTypeName; }
 
- private:
   cpp::SafePtr<const Family> family_;
 };
 

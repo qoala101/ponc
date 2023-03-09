@@ -5,8 +5,10 @@
 
 #include "app_attenuator_family_group.h"
 #include "app_client_family_group.h"
+#include "app_coupler_family_group.h"
 #include "app_free_pin_family_group.h"
 #include "app_input_family_group.h"
+#include "app_splitter_family_group.h"
 #include "core_i_family_group.h"
 #include "coreui_project.h"
 
@@ -19,6 +21,8 @@ AppImpl::AppImpl(coreui::TexturesHandle textures_handle)
                 std::vector<std::unique_ptr<core::IFamilyGroup>>{};
             family_groups.emplace_back(std::make_unique<InputFamilyGroup>());
             family_groups.emplace_back(std::make_unique<ClientFamilyGroup>());
+            family_groups.emplace_back(std::make_unique<SplitterFamilyGroup>());
+            family_groups.emplace_back(std::make_unique<CouplerFamilyGroup>());
             family_groups.emplace_back(
                 std::make_unique<AttenuatorFamilyGroup>());
             family_groups.emplace_back(std::make_unique<FreePinFamilyGroup>());

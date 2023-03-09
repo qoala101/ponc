@@ -118,27 +118,25 @@ add_example_executable(esc
 
   app/family_group/app_attenuator_family_group.cc
   app/family_group/app_client_family_group.cc
+  app/family_group/app_coupler_family_group.cc
   app/family_group/app_free_pin_family_group.cc
-
-  # app/family_group/app_client_family_group.cc
-  # app/family_group/app_coupler_family_group.cc
   app/family_group/app_input_family_group.cc
+  app/family_group/app_splitter_family_group.cc
 
-  # app/family_group/app_splitter_family_group.cc
   app/app_app.cc
   app/app_impl.cc
 
-  # core/family/core_free_pin_family.cc
-  # core/family/core_placeholder_family.cc
   core/core_diagram.cc
   core/core_i_family.cc
   core/core_i_node.cc
   core/core_id_generator.cc
+  core/core_gradient.cc
   core/core_link.cc
   core/core_pin.cc
   core/core_project.cc
   core/core_settings.cc
 
+  coreui/traits/coreui_empy_pin_traits.cc
   coreui/traits/coreui_flow_pin_traits.cc
   coreui/traits/coreui_i_family_traits.cc
   coreui/traits/coreui_i_header_traits.cc
