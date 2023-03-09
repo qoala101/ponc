@@ -62,7 +62,7 @@ class Project {
   ///
   EventLoop event_loop_{};
   ///
-  Diagram diagram_;
+  std::unique_ptr<Diagram> diagram_{};
 };
 }  // namespace esc::coreui
 

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <functional>
 #include <iterator>
+#include <memory>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -42,25 +43,30 @@ auto Project::CreateProject() const {
 
 ///
 auto Project::CreateDiagram() {
-  return Diagram{
+  return std::make_unique<Diagram>(
       safe_owner_.MakeSafe(&project_.GetDiagram()),
       safe_owner_.MakeSafe(&project_.GetFamilies()),
       safe_owner_.MakeSafe(&project_.GetIdGenerator()),
-      {.is_color_flow =
-           [color_flow = safe_owner_.MakeSafe(
-                &project_.GetSettings().color_flow)]() { return *color_flow; },
-       .get_flow_color =
-           [settings =
-                safe_owner_.MakeSafe(&project_.GetSettings())](auto flow) {
-             return core::Settings::GetFlowColor(*settings, flow);
-           },
-       .get_texture = [textures_handle = safe_owner_.MakeSafe(
-                           &textures_handle_)](auto file_path)
-           -> const Texture& { return textures_handle->GetTexture(file_path); },
-       .post_event =
-           [event_loop = safe_owner_.MakeSafe(&event_loop_)](auto event) {
-             event_loop->PostEvent(std::move(event));
-           }}};
+      Diagram::Callbacks{
+          .is_color_flow =
+              [color_flow =
+                   safe_owner_.MakeSafe(&project_.GetSettings().color_flow)]() {
+                return *color_flow;
+              },
+          .get_flow_color =
+              [settings =
+                   safe_owner_.MakeSafe(&project_.GetSettings())](auto flow) {
+                return core::Settings::GetFlowColor(*settings, flow);
+              },
+          .get_texture = [textures_handle =
+                              safe_owner_.MakeSafe(&textures_handle_)](
+                             auto file_path) -> const Texture& {
+            return textures_handle->GetTexture(file_path);
+          },
+          .post_event =
+              [event_loop = safe_owner_.MakeSafe(&event_loop_)](auto event) {
+                event_loop->PostEvent(std::move(event));
+              }});
 }
 
 ///
@@ -83,7 +89,7 @@ Project::Project(std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups,
 ///
 void Project::OnFrame() {
   event_loop_.ExecuteEvents();
-  diagram_.OnFrame();
+  diagram_->OnFrame();
 }
 
 ///
@@ -102,7 +108,7 @@ auto Project::GetDiagram() const -> const Diagram& {
 }
 
 ///
-auto Project::GetDiagram() -> Diagram& { return diagram_; }
+auto Project::GetDiagram() -> Diagram& { return *diagram_; }
 
 ///
 auto Project::CreateFamilyParsers() const {

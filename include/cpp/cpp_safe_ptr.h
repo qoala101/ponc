@@ -55,6 +55,19 @@ class SafeOwner {
   SafeOwner() : instance_{std::make_shared<void *>()} {}
 
   ///
+  SafeOwner(const SafeOwner &) = delete;
+  ///
+  SafeOwner(SafeOwner &&) noexcept = delete;
+
+  ///
+  auto operator=(const SafeOwner &) -> SafeOwner & = delete;
+  ///
+  auto operator=(SafeOwner &&) noexcept -> SafeOwner & = delete;
+
+  ///
+  ~SafeOwner() = default;
+
+  ///
   auto MakeSafe(auto *t) const { return SafePtr{t, instance_}; }
 
  private:
