@@ -1,5 +1,5 @@
-#ifndef VH_COREUI_FLOW_PIN_DRAWER_H_
-#define VH_COREUI_FLOW_PIN_DRAWER_H_
+#ifndef VH_COREUI_FLOW_PIN_TRAITS_H_
+#define VH_COREUI_FLOW_PIN_TRAITS_H_
 
 #include <imgui_node_editor.h>
 
@@ -14,6 +14,8 @@ class FlowPinTraits : public IPinTraits {
 
   ///
   auto GetPin() const -> std::variant<ne::PinId, ne::PinKind> override;
+  ///
+  auto GetValue() const -> PinValueVariant override;
 
  private:
   ///
@@ -21,4 +23,4 @@ class FlowPinTraits : public IPinTraits {
 };
 }  // namespace esc::coreui
 
-#endif  // VH_COREUI_FLOW_PIN_DRAWER_H_
+#endif  // VH_COREUI_FLOW_PIN_TRAITS_H_

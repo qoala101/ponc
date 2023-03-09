@@ -113,6 +113,10 @@ auto Linking::CanConnectToPin(ne::PinId pin_id) const -> bool {
 
 ///
 auto Linking::CanConnectToNode(const core::INode& node) const -> bool {
+  if (!linking_data_.has_value()) {
+    return true;
+  }
+
   const auto& [source_pin, source_kind] = GetCurrentLinkSourcePin();
 
   if (source_kind == ne::PinKind::Input) {

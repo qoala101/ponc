@@ -6,7 +6,6 @@
 #include <variant>
 
 #include "core_link.h"
-#include "coreui_link.h"
 #include "coreui_project.h"
 #include "draw_open_file_dialog.h"
 #include "draw_save_as_file_dialog.h"
@@ -41,6 +40,10 @@ void MainMenuBar::Draw(coreui::Project &project) {
 
     if (ImGui::MenuItem("Show Flow")) {
       ShowFlow(project.GetDiagram().GetDiagram().GetLinks());
+    }
+
+    if (ImGui::MenuItem("Color Flow", nullptr,
+                        &project.GetProject().GetSettings().color_flow)) {
     }
 
     ImGui::EndMainMenuBar();

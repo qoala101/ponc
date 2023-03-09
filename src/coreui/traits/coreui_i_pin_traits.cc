@@ -22,11 +22,10 @@ auto IPinTraits::GetPinKind(const coreui::IPinTraits& pin_traits,
 }
 
 ///
-auto IPinTraits::GetLabel() const -> std::string { return {}; }
+auto IPinTraits::GetLabel() const -> std::optional<PinLabel> {
+  return std::nullopt;
+}
 
 ///
-auto IPinTraits::GetValue() const
-    -> std::variant<std::monostate, float, float*> {
-  return {};
-}
+auto IPinTraits::GetValue() const -> PinValueVariant { return {}; }
 }  // namespace esc::coreui

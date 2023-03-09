@@ -117,6 +117,8 @@ endmacro()
 add_example_executable(esc
 
   app/family_group/app_attenuator_family_group.cc
+  app/family_group/app_client_family_group.cc
+  app/family_group/app_free_pin_family_group.cc
 
   # app/family_group/app_client_family_group.cc
   # app/family_group/app_coupler_family_group.cc
@@ -160,6 +162,7 @@ add_example_executable(esc
 
   # draw/diagram/popup/draw_link_popup.cc
   # draw/diagram/popup/draw_node_popup.cc
+  draw/diagram/draw_colored_text.cc
   draw/diagram/draw_diagram_editor.cc
 
   # # draw/diagram/process/draw_delete_items_process.cc

@@ -11,6 +11,8 @@
 #include <variant>
 #include <vector>
 
+#include "coreui_i_pin_traits.h"
+
 namespace ne = ax::NodeEditor;
 
 namespace esc::coreui {
@@ -31,7 +33,7 @@ struct Pin {
   ///
   std::variant<std::monostate, float, float *> value{};
   ///
-  std::string label{};
+  std::optional<PinLabel> label{};
 };
 }  // namespace esc::coreui
 

@@ -1,5 +1,5 @@
-#ifndef VH_COREUI_I_NODE_DRAWER_H_
-#define VH_COREUI_I_NODE_DRAWER_H_
+#ifndef VH_COREUI_I_NODE_TRAITS_H_
+#define VH_COREUI_I_NODE_TRAITS_H_
 
 #include <memory>
 #include <string>
@@ -24,4 +24,4 @@ class INodeTraits : public cpp::Interface {
 };
 }  // namespace esc::coreui
 
-#endif  // VH_COREUI_I_NODE_DRAWER_H_
+#endif  // VH_COREUI_I_NODE_TRAITS_H_

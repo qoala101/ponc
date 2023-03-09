@@ -1,6 +1,5 @@
+#include "draw_colored_text.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include "draw_nodes.h"
-
 #include <imgui_internal.h>
 
 #include <cstdint>
@@ -15,6 +14,7 @@
 #include "cpp_assert.h"
 #include "cpp_scope.h"
 #include "draw_flow_icon.h"
+#include "draw_nodes.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
@@ -28,18 +28,30 @@ auto GetPinTipPos(const ImRect& pin_rect, ne::PinKind pin_kind) {
 
 void DrawPinField(const coreui::Pin& pin) {
   const auto label = pin.label;
+  const auto has_label = label.has_value();
+  const auto has_value = !std::holds_alternative<std::monostate>(pin.value);
+
+  if (!has_value && !has_label) {
+    return;
+  }
 
   ImGui::Spring(0);
-  const auto spring_scope = cpp::Scope{[]() { ImGui::Spring(0); }};
 
-  if (std::holds_alternative<std::monostate>(pin.value)) {
-    ImGui::TextUnformatted(label.c_str());
+  const auto label_spring_scope = cpp::Scope{[&label, has_label]() {
+    if (has_label) {
+      DrawColoredText(label->text, label->color);
+    }
+
+    ImGui::Spring(0);
+  }};
+
+  if (!has_value) {
     return;
   }
 
   if (std::holds_alternative<float>(pin.value)) {
     const auto float_value = std::get<float>(pin.value);
-    ImGui::Text("%.3f %s", float_value, label.c_str());
+    ImGui::Text("%.3f", float_value);
     return;
   }
 
@@ -47,7 +59,7 @@ void DrawPinField(const coreui::Pin& pin) {
 
   auto* float_value = std::get<float*>(pin.value);
   ImGui::SetNextItemWidth(100);
-  ImGui::InputFloat(label.c_str(), float_value, 0, 0, "%.3f");
+  ImGui::InputFloat("", float_value, 0, 0, "%.3f");
 }
 
 auto DrawPinIconArea(const coreui::Pin& pin, ne::PinKind pin_kind)

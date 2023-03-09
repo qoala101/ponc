@@ -15,7 +15,6 @@ class IHeaderTraits : public cpp::Interface {
   ///
   virtual auto GetTextureFilePath() const -> std::string;
 };
-
 }  // namespace esc::coreui
 
 #endif  // VH_COREUI_I_NODE_HEADER_TRAITS_H_

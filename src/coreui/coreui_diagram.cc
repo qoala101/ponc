@@ -223,8 +223,15 @@ auto Diagram::GetHeaderColor(const IHeaderTraits& header_traits,
 ///
 auto Diagram::PinFrom(const IPinTraits& pin_traits,
                       const flow::NodeFlow& node_flow) const {
-  auto pin =
-      Pin{.value = pin_traits.GetValue(), .label = pin_traits.GetLabel()};
+  auto pin = Pin{.label = pin_traits.GetLabel()};
+
+  const auto pin_value = pin_traits.GetValue();
+
+  if (std::holds_alternative<float>(pin_value)) {
+    pin.value = std::get<float>(pin_value);
+  } else if (std::holds_alternative<float*>(pin_value)) {
+    pin.value = std::get<float*>(pin_value);
+  }
 
   const auto pin_type = pin_traits.GetPin();
 
@@ -234,18 +241,23 @@ auto Diagram::PinFrom(const IPinTraits& pin_traits,
 
   const auto pin_id = std::get<ne::PinId>(pin_type);
   const auto pin_flow = flow::NodeFlow::GetPinFlow(node_flow, pin_id);
+  const auto color_flow = callbacks_.is_color_flow();
 
   pin.flow_data = PinFlowData{
       .id = pin_id,
-      .color = callbacks_.is_color_flow() ? callbacks_.get_flow_color(pin_flow)
-                                          : ImColor{1.F, 1.F, 1.F},
+      .color = color_flow ? callbacks_.get_flow_color(pin_flow)
+                          : ImColor{1.F, 1.F, 1.F},
       .filled = core::Diagram::FindPinLink(*diagram_, pin_id).has_value()};
+
+  if (color_flow && pin.label.has_value()) {
+    pin.label->color = pin.flow_data->color;
+  }
 
   if (!linking_.CanConnectToPin(pin_id)) {
     pin.flow_data->color.Value.w = 1.F / 4;
   }
 
-  if (std::holds_alternative<std::monostate>(pin.value)) {
+  if (std::holds_alternative<PinFlow>(pin_value)) {
     pin.value = pin_flow;
   }
 

@@ -9,10 +9,25 @@
 
 #include "core_i_node.h"
 #include "cpp_interface.h"
+#include "imgui.h"
 
 namespace ne = ax::NodeEditor;
 
 namespace esc::coreui {
+///
+struct PinLabel {
+  ///
+  std::string text{};
+  ///
+  ImColor color{};
+};
+
+///
+struct PinFlow {};
+
+///
+using PinValueVariant = std::variant<std::monostate, PinFlow, float, float*>;
+
 ///
 class IPinTraits : public cpp::Interface {
  public:
@@ -23,9 +38,9 @@ class IPinTraits : public cpp::Interface {
   ///
   virtual auto GetPin() const -> std::variant<ne::PinId, ne::PinKind> = 0;
   ///
-  virtual auto GetLabel() const -> std::string;
+  virtual auto GetLabel() const -> std::optional<PinLabel>;
   ///
-  virtual auto GetValue() const -> std::variant<std::monostate, float, float*>;
+  virtual auto GetValue() const -> PinValueVariant;
 };
 }  // namespace esc::coreui
 

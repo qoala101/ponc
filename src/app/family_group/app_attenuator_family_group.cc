@@ -91,8 +91,7 @@ class DropPinTraits : public coreui::IPinTraits {
     return ne::PinKind::Input;
   }
 
-  auto GetValue() const
-      -> std::variant<std::monostate, float, float*> override {
+  auto GetValue() const -> coreui::PinValueVariant override {
     return &node_->GetDrop();
   }
 
