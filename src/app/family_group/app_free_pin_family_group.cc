@@ -207,6 +207,8 @@ class FamilyUiTraits : public coreui::IFamilyTraits {
                                                          : "Free Output Pin";
   }
 
+  auto GetGroupLabel() const -> std::string override { return "Free Pin"; }
+
  private:
   cpp::SafePtr<const Family> family_;
 };

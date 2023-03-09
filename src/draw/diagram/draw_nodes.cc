@@ -28,7 +28,7 @@ auto GetPinTipPos(const ImRect& pin_rect, ne::PinKind pin_kind) {
 
 void DrawPinField(const coreui::Pin& pin) {
   const auto label = pin.label;
-  const auto has_label = label.has_value();
+  const auto has_label = label.has_value() && !label->text.empty();
   const auto has_value = !std::holds_alternative<std::monostate>(pin.value);
 
   if (!has_value && !has_label) {
@@ -36,14 +36,7 @@ void DrawPinField(const coreui::Pin& pin) {
   }
 
   ImGui::Spring(0);
-
-  const auto label_spring_scope = cpp::Scope{[&label, has_label]() {
-    if (has_label) {
-      DrawColoredText(label->text, label->color);
-    }
-
-    ImGui::Spring(0);
-  }};
+  const auto spring_scope = cpp::Scope{[]() { ImGui::Spring(0); }};
 
   if (!has_value) {
     return;
@@ -127,6 +120,7 @@ void Nodes::DrawNode(const coreui::Node& node) {
   ImGui::Spring(0, 0);
 
   auto layout_id = 0;
+  const auto frame_padding = ImGui::GetStyle().FramePadding;
 
   if (!node_data.input_pins.empty()) {
     ImGui::BeginVertical("InputPins", {0, 0}, 0);
@@ -138,10 +132,10 @@ void Nodes::DrawNode(const coreui::Node& node) {
     ne::PushStyleVar(ne::StyleVar_PivotAlignment, {0, 0.5F});
     ne::PushStyleVar(ne::StyleVar_PivotSize, {0, 0});
 
-    for (auto& pin : node_data.input_pins) {
+    for (const auto& pin : node_data.input_pins) {
       if (pin.flow_data.has_value()) {
-        ne::BeginPin(pin.flow_data->id, ne::PinKind::Input);
         ImGui::BeginHorizontal(pin.flow_data->id.AsPointer());
+        ne::BeginPin(pin.flow_data->id, ne::PinKind::Input);
       } else {
         ImGui::BeginHorizontal(layout_id++);
       }
@@ -150,11 +144,18 @@ void Nodes::DrawNode(const coreui::Node& node) {
                                    *DrawPinIconArea(pin, ne::PinKind::Input));
       DrawPinField(pin);
 
-      ImGui::EndHorizontal();
-
       if (pin.flow_data.has_value()) {
         ne::EndPin();
       }
+
+      if (const auto& label = pin.label) {
+        auto pos = ImGui::GetCursorPos();
+        pos.y += frame_padding.y;
+        DrawColoredText(label->text, label->color, pos);
+        ImGui::Spring(0);
+      }
+
+      ImGui::EndHorizontal();
     }
 
     ne::PopStyleVar();
@@ -180,21 +181,34 @@ void Nodes::DrawNode(const coreui::Node& node) {
 
     for (auto& pin : node_data.output_pins) {
       if (pin.flow_data.has_value()) {
-        ne::BeginPin(pin.flow_data->id, ne::PinKind::Output);
         ImGui::BeginHorizontal(pin.flow_data->id.AsPointer());
       } else {
         ImGui::BeginHorizontal(layout_id++);
+      }
+
+      if (const auto& label = pin.label) {
+        ImGui::Spring(0);
+        auto pos = ImGui::GetCursorPos();
+        pos.y += frame_padding.y;
+        DrawColoredText(label->text, label->color, pos);
+        pos = ImGui::GetCursorPos();
+        pos.y -= frame_padding.y;
+        ImGui::SetCursorPos(pos);
+      }
+
+      if (pin.flow_data.has_value()) {
+        ne::BeginPin(pin.flow_data->id, ne::PinKind::Output);
       }
 
       DrawPinField(pin);
       drawn_pin_tip_poses_.emplace(pin.flow_data->id,
                                    *DrawPinIconArea(pin, ne::PinKind::Output));
 
-      ImGui::EndHorizontal();
-
       if (pin.flow_data.has_value()) {
         ne::EndPin();
       }
+
+      ImGui::EndHorizontal();
     }
 
     ne::PopStyleVar();
