@@ -1,17 +1,20 @@
 #ifndef VH_CORE_I_FAMILY_H_
 #define VH_CORE_I_FAMILY_H_
 
+#include <imgui_node_editor.h>
+
 #include <memory>
 #include <vector>
 
-#include "core_family_id.h"
-#include "core_i_node.h"
 #include "core_id_generator.h"
 #include "cpp_interface.h"
-#include "json_i_node_parser.h"
+
+namespace ne = ax::NodeEditor;
 
 namespace esc {
 namespace json {
+///
+class INodeParser;
 ///
 class IFamilyWriter;
 }  // namespace json
@@ -23,8 +26,22 @@ class IFamilyTraits;
 
 namespace core {
 ///
+class INode;
+
+///
+struct FamilyId : public ne::Details::SafePointerType<FamilyId> {
+  ///
+  using SafePointerType::SafePointerType;
+};
+
+///
+enum class FamilyType { kFreePin };
+
+///
 class IFamily : public cpp::Interface {
  public:
+  ///
+  virtual auto GetType() const -> std::optional<FamilyType>;
   ///
   virtual auto CreateNode(IdGenerator &id_generator) const
       -> std::unique_ptr<INode> = 0;

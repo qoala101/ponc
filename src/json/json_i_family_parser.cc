@@ -2,7 +2,6 @@
 
 #include <memory>
 
-#include "core_family_id.h"
 #include "json_id_serializer.h"
 
 namespace esc::json {

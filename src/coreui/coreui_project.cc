@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "core_diagram.h"
+#include "core_i_family_group.h"
 #include "core_id_generator.h"
 #include "core_project.h"
 #include "core_settings.h"
@@ -65,7 +66,16 @@ auto Project::CreateDiagram() {
 ///
 Project::Project(std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups,
                  TexturesHandle textures_handle)
-    : family_groups_{std::move(family_groups)},
+    : family_groups_{[&family_groups]() {
+        auto default_family_groups =
+            core::IFamilyGroup::CreateDefaultFamilyGroups();
+
+        family_groups.insert(family_groups.end(),
+                             std::move_iterator{default_family_groups.begin()},
+                             std::move_iterator{default_family_groups.end()});
+
+        return std::move(family_groups);
+      }()},
       textures_handle_{std::move(textures_handle)},
       project_{CreateProject()},
       diagram_{CreateDiagram()} {}

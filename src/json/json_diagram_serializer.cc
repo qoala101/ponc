@@ -3,7 +3,6 @@
 #include <memory>
 
 #include "core_diagram.h"
-#include "core_family_id.h"
 #include "core_i_node.h"
 #include "core_link.h"
 #include "cpp_assert.h"

@@ -119,7 +119,6 @@ add_example_executable(esc
   app/family_group/app_attenuator_family_group.cc
   app/family_group/app_client_family_group.cc
   app/family_group/app_coupler_family_group.cc
-  app/family_group/app_free_pin_family_group.cc
   app/family_group/app_input_family_group.cc
   app/family_group/app_splitter_family_group.cc
 
@@ -127,6 +126,8 @@ add_example_executable(esc
   app/app_impl.cc
 
   core/core_diagram.cc
+  core/core_free_pin_family_group.cc
+  core/core_i_family_group.cc
   core/core_i_family.cc
   core/core_i_node.cc
   core/core_id_generator.cc

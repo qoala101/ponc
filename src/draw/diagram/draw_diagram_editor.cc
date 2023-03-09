@@ -3,6 +3,7 @@
 #include <functional>
 #include <memory>
 
+#include "core_diagram.h"
 #include "coreui_diagram.h"
 #include "cpp_scope.h"
 #include "draw_create_node_popup.h"
@@ -41,6 +42,12 @@ void DeleteItemsIfRequested(coreui::Diagram &diagram) {
 void DiagramEditor::Draw(coreui::Diagram &diagram) {
   ne::Begin("DiagramEditor");
 
+  nodes_.Draw(diagram.GetNodes());
+
+  for (const auto &link : diagram.GetLinks()) {
+    DrawLink(link);
+  }
+
   linking_.Draw(
       diagram.GetLinking(),
       {.get_pin_tip_pos =
@@ -53,21 +60,15 @@ void DiagramEditor::Draw(coreui::Diagram &diagram) {
              create_node_popup.Open();
            }});
 
-  nodes_.Draw(diagram.GetNodes());
-
-  for (const auto &link : diagram.GetLinks()) {
-    DrawLink(link);
-  }
-
   DeleteItemsIfRequested(diagram);
-  OpenPopupsIfRequested();
+  OpenPopupsIfRequested(diagram.GetDiagram());
   DrawPopups(diagram);
 
   ne::End();
 }
 
 ///
-void DiagramEditor::OpenPopupsIfRequested() {
+void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
   const auto popup_pos = ImGui::GetMousePos();
 
   ne::Suspend();
@@ -80,8 +81,20 @@ void DiagramEditor::OpenPopupsIfRequested() {
   }
 
   auto node_id = ne::NodeId{};
+  auto requested_node_popup = false;
 
   if (ne::ShowNodeContextMenu(&node_id)) {
+    requested_node_popup = true;
+  } else {
+    auto pin_id = ne::PinId{};
+
+    if (ne::ShowPinContextMenu(&pin_id)) {
+      node_id = core::Diagram::FindPinNode(diagram, pin_id).GetId();
+      requested_node_popup = true;
+    }
+  }
+
+  if (requested_node_popup) {
     node_popup_.SetNodeId(node_id);
     node_popup_.Open();
     return;

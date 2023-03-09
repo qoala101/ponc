@@ -5,6 +5,7 @@
 
 #include <memory>
 
+#include "core_diagram.h"
 #include "coreui_diagram.h"
 #include "draw_create_node_popup.h"
 #include "draw_link_popup.h"
@@ -21,7 +22,7 @@ class DiagramEditor {
 
  private:
   ///
-  void OpenPopupsIfRequested();
+  void OpenPopupsIfRequested(const core::Diagram &diagram);
   ///
   void DrawPopups(coreui::Diagram &diagram);
   ///

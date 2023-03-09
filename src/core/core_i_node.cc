@@ -6,8 +6,6 @@
 #include <ranges>
 #include <vector>
 
-#include "core_family_id.h"
-
 namespace esc::core {
 ///
 auto INode::GetAllPinIds(const INode& node) -> std::vector<ne::PinId> {

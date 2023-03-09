@@ -1,9 +1,10 @@
-#include "app_free_pin_family_group.h"
+#include "core_free_pin_family_group.h"
 
 #include <memory>
+#include <optional>
 #include <vector>
 
-#include "core_family_id.h"
+#include "core_i_family.h"
 #include "core_i_node.h"
 #include "core_id_generator.h"
 #include "coreui_flow_pin_traits.h"
@@ -19,7 +20,7 @@
 #include "json_i_node_parser.h"
 #include "json_i_node_writer.h"
 
-namespace esc {
+namespace esc::core {
 namespace {
 class Node;
 
@@ -124,6 +125,10 @@ class Family : public core::IFamily {
  public:
   explicit Family(core::FamilyId id, ne::PinKind pin_kind)
       : IFamily{id}, pin_kind_{pin_kind} {}
+
+  auto GetType() const -> std::optional<FamilyType> override {
+    return FamilyType::kFreePin;
+  }
 
   auto CreateNode(core::IdGenerator& id_generator) const
       -> std::unique_ptr<core::INode> override {
@@ -234,4 +239,4 @@ auto FreePinFamilyGroup::CreateFamilyParser() const
     -> std::unique_ptr<json::IFamilyParser> {
   return std::make_unique<FamilyParser>();
 }
-}  // namespace esc
+}  // namespace esc::core

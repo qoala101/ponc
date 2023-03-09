@@ -68,6 +68,8 @@ class Diagram {
   ///
   void DeleteNode(ne::NodeId node_id) const;
   ///
+  void DeleteNodeWithLinks(ne::NodeId node_id) const;
+  ///
   auto GetLinks() const -> const std::vector<Link> &;
   ///
   void DeleteLink(ne::LinkId link_id) const;

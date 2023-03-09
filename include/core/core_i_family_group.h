@@ -14,6 +14,10 @@ namespace esc::core {
 class IFamilyGroup : public cpp::Interface {
  public:
   ///
+  static auto CreateDefaultFamilyGroups()
+      -> std::vector<std::unique_ptr<IFamilyGroup>>;
+
+  ///
   virtual auto CreateFamilies(IdGenerator &id_generator) const
       -> std::vector<std::unique_ptr<IFamily>> = 0;
   ///
