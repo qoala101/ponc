@@ -46,11 +46,9 @@ void CreateNodePopup::Draw(
       }
     }
 
-    if (!is_group) {
-      continue;
+    if (is_group) {
+      ImGui::EndMenu();
     }
-
-    ImGui::EndMenu();
   }
 }
 

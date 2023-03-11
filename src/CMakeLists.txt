@@ -167,6 +167,7 @@ add_example_executable(esc
   # # draw/diagram/process/draw_delete_items_process.cc
   draw/diagram/draw_linker.cc
   draw/diagram/draw_flow_icon.cc
+  draw/diagram/draw_item_deleter.cc
 
   # # draw/diagram/draw_groups.cc
   draw/diagram/draw_link.cc

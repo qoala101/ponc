@@ -29,12 +29,10 @@ auto FindRootNodes(const std::vector<std::unique_ptr<core::INode>> &nodes,
   for (const auto &node : nodes) {
     const auto pin_flows = node->GetInitialFlow();
 
-    if (pin_flows.input_pin_flow.has_value() &&
-        HasLinkFromParent(pin_flows, links)) {
-      continue;
+    if (!pin_flows.input_pin_flow.has_value() ||
+        !HasLinkFromParent(pin_flows, links)) {
+      root_nodes.emplace_back(TreeNode{.node = safe_owner.MakeSafe(&*node)});
     }
-
-    root_nodes.emplace_back(TreeNode{.node = safe_owner.MakeSafe(&*node)});
   }
 
   return root_nodes;

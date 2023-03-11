@@ -8,6 +8,7 @@
 #include "core_diagram.h"
 #include "coreui_diagram.h"
 #include "draw_create_node_popup.h"
+#include "draw_item_deleter.h"
 #include "draw_link_popup.h"
 #include "draw_linker.h"
 #include "draw_node_popup.h"
@@ -17,6 +18,9 @@ namespace esc::draw {
 ///
 class DiagramEditor {
  public:
+  ///
+  DiagramEditor();
+
   ///
   void Draw(coreui::Diagram &diagram);
 
@@ -28,6 +32,10 @@ class DiagramEditor {
   ///
   void DrawCreateNodePopup(coreui::Diagram &diagram);
 
+  ///
+  std::unique_ptr<ne::EditorContext, void (*)(ne::EditorContext *)> context_;
+  ///
+  ItemDeleter item_deleter_{};
   ///
   Linker linker_{};
   ///

@@ -13,35 +13,17 @@
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
-namespace {
 ///
-void DeleteItemsIfRequested(coreui::Diagram &diagram) {
-  if (ne::BeginDelete()) {
-    auto link_id = ne::LinkId{};
-
-    while (ne::QueryDeletedLink(&link_id)) {
-      if (ne::AcceptDeletedItem()) {
-        diagram.DeleteLink(link_id);
-      }
-    }
-
-    auto node_id = ne::NodeId{};
-
-    while (ne::QueryDeletedNode(&node_id)) {
-      if (ne::AcceptDeletedItem()) {
-        diagram.DeleteNode(node_id);
-      }
-    }
-  }
-
-  ne::EndDelete();
+DiagramEditor::DiagramEditor()
+    : context_{ne::CreateEditor(), &ne::DestroyEditor} {
+  ne::SetCurrentEditor(context_.get());
 }
-}  // namespace
 
 ///
 void DiagramEditor::Draw(coreui::Diagram &diagram) {
   ne::Begin("DiagramEditor");
 
+  item_deleter_.UnregisterDeletedItems(diagram.GetDiagram());
   nodes_.Draw(diagram.GetNodes());
 
   for (const auto &link : diagram.GetLinks()) {
@@ -59,9 +41,9 @@ void DiagramEditor::Draw(coreui::Diagram &diagram) {
                       create_node_popup.Open();
                     }});
 
-  DeleteItemsIfRequested(diagram);
   OpenPopupsIfRequested(diagram.GetDiagram());
   DrawPopups(diagram);
+  item_deleter_.DeleteUnregisteredItems(diagram);
 
   ne::End();
 }
