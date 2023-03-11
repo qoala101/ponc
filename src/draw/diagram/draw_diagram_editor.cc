@@ -8,7 +8,7 @@
 #include "cpp_scope.h"
 #include "draw_create_node_popup.h"
 #include "draw_link.h"
-#include "draw_linking.h"
+#include "draw_linker.h"
 #include "draw_nodes.h"
 #include "imgui_node_editor.h"
 
@@ -48,17 +48,16 @@ void DiagramEditor::Draw(coreui::Diagram &diagram) {
     DrawLink(link);
   }
 
-  linking_.Draw(
-      diagram.GetLinking(),
-      {.get_pin_tip_pos =
-           [&nodes = nodes_](auto pin_id) {
-             return nodes.GetDrawnPinTipPos(pin_id);
-           },
-       .new_node_requested_at =
-           [&create_node_popup = create_node_popup_](const auto &pos) {
-             create_node_popup.SetPos(pos);
-             create_node_popup.Open();
-           }});
+  linker_.Draw(diagram.GetLinker(),
+               {.get_pin_tip_pos =
+                    [&nodes = nodes_](auto pin_id) {
+                      return nodes.GetDrawnPinTipPos(pin_id);
+                    },
+                .new_node_requested_at =
+                    [&create_node_popup = create_node_popup_](const auto &pos) {
+                      create_node_popup.SetPos(pos);
+                      create_node_popup.Open();
+                    }});
 
   DeleteItemsIfRequested(diagram);
   OpenPopupsIfRequested(diagram.GetDiagram());
@@ -129,25 +128,25 @@ void DiagramEditor::DrawCreateNodePopup(coreui::Diagram &diagram) {
     return;
   }
 
-  auto &linking = diagram.GetLinking();
+  auto &linker = diagram.GetLinker();
   const auto &family_groups = diagram.GetFamilyGroups();
 
-  if (linking.IsCreatingNode()) {
+  if (linker.IsCreatingNode()) {
     auto id_generator = core::IdGenerator{};
 
-    create_node_popup_.Draw(
-        family_groups, {.is_family_enabled =
-                            [&linking, &id_generator](const auto &family) {
-                              const auto fake_node =
-                                  family.CreateNode(id_generator);
-                              return linking.CanConnectToNode(*fake_node);
-                            },
-                        .closed = [&linking]() { linking.DiscardNewNode(); },
-                        .node_created =
-                            [&diagram, &linking](auto node) {
-                              linking.AcceptNewNode(*node);
-                              diagram.AddNode(std::move(node));
-                            }});
+    create_node_popup_.Draw(family_groups,
+                            {.is_family_enabled =
+                                 [&linker, &id_generator](const auto &family) {
+                                   const auto fake_node =
+                                       family.CreateNode(id_generator);
+                                   return linker.CanConnectToNode(*fake_node);
+                                 },
+                             .closed = [&linker]() { linker.DiscardNewNode(); },
+                             .node_created =
+                                 [&diagram, &linker](auto node) {
+                                   linker.AcceptNewNode(*node);
+                                   diagram.AddNode(std::move(node));
+                                 }});
     return;
   }
 

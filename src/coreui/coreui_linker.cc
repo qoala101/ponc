@@ -1,20 +1,19 @@
-#include "coreui_linking.h"
-
 #include <iostream>
 
 #include "core_i_node.h"
 #include "core_link.h"
 #include "core_pin.h"
+#include "coreui_linker.h"
 #include "cpp_assert.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
 namespace esc::coreui {
 ///
-Linking::Linking(Callbacks callbacks) : callbacks_{std::move(callbacks)} {}
+Linker::Linker(Callbacks callbacks) : callbacks_{std::move(callbacks)} {}
 
 ///
-auto Linking::GetRepinningLinkColor() const {
+auto Linker::GetRepinningLinkColor() const {
   Expects(linking_data_.has_value());
 
   if (const auto not_hovering_over_pin =
@@ -30,7 +29,7 @@ auto Linking::GetRepinningLinkColor() const {
 }
 
 ///
-auto Linking::GetCurrentLinkSourcePin() const {
+auto Linker::GetCurrentLinkSourcePin() const {
   Expects(linking_data_.has_value());
 
   if (linking_data_->repinning_data.has_value()) {
@@ -43,8 +42,8 @@ auto Linking::GetCurrentLinkSourcePin() const {
 }
 
 ///
-auto Linking::CreateManualLinkTo(const PosVariant& target_pos,
-                                 const ImColor& color) const {
+auto Linker::CreateManualLinkTo(const PosVariant& target_pos,
+                                const ImColor& color) const {
   auto link = ManualLink{.color = color, .thickness = 4};
 
   const auto [source_pin, source_kind] = GetCurrentLinkSourcePin();
@@ -62,8 +61,8 @@ auto Linking::CreateManualLinkTo(const PosVariant& target_pos,
 }
 
 ///
-void Linking::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
-                      const std::optional<ne::PinId>& hovering_over_pin) {
+void Linker::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
+                     const std::optional<ne::PinId>& hovering_over_pin) {
   linking_data_.reset();
 
   if (!dragged_from_pin.has_value()) {
@@ -108,12 +107,12 @@ void Linking::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
 }
 
 ///
-auto Linking::CanConnectToPin(ne::PinId pin_id) const -> bool {
+auto Linker::CanConnectToPin(ne::PinId pin_id) const -> bool {
   return GetCanConnectToPinReason(pin_id).first;
 }
 
 ///
-auto Linking::CanConnectToNode(const core::INode& node) const -> bool {
+auto Linker::CanConnectToNode(const core::INode& node) const -> bool {
   if (!linking_data_.has_value()) {
     return true;
   }
@@ -125,7 +124,7 @@ auto Linking::CanConnectToNode(const core::INode& node) const -> bool {
 }
 
 ///
-auto Linking::GetCanCreateLinkReason() const -> std::pair<bool, std::string> {
+auto Linker::GetCanCreateLinkReason() const -> std::pair<bool, std::string> {
   if (!linking_data_.has_value() || !linking_data_->hovering_data.has_value()) {
     return {true, {}};
   }
@@ -135,7 +134,7 @@ auto Linking::GetCanCreateLinkReason() const -> std::pair<bool, std::string> {
 }
 
 ///
-auto Linking::IsRepiningLink(ne::LinkId link_id) const -> bool {
+auto Linker::IsRepiningLink(ne::LinkId link_id) const -> bool {
   if (!linking_data_.has_value() ||
       !linking_data_->repinning_data.has_value()) {
     return false;
@@ -145,7 +144,7 @@ auto Linking::IsRepiningLink(ne::LinkId link_id) const -> bool {
 }
 
 ///
-void Linking::AcceptNewLink() {
+void Linker::AcceptNewLink() {
   Expects(linking_data_.has_value());
   Expects(linking_data_->hovering_data.has_value());
 
@@ -167,7 +166,7 @@ void Linking::AcceptNewLink() {
 }
 
 ///
-void Linking::StartCreatingNode() {
+void Linker::StartCreatingNode() {
   Expects(linking_data_.has_value());
   linking_data_->creating_node = true;
   linking_data_->manual_link =
@@ -175,12 +174,12 @@ void Linking::StartCreatingNode() {
 }
 
 ///
-auto Linking::IsCreatingNode() const -> bool {
+auto Linker::IsCreatingNode() const -> bool {
   return linking_data_.has_value() && linking_data_->creating_node;
 }
 
 ///
-void Linking::AcceptNewNode(core::INode& node) {
+void Linker::AcceptNewNode(core::INode& node) {
   const auto [source_pin, source_kind] = GetCurrentLinkSourcePin();
 
   if (source_kind == ne::PinKind::Input) {
@@ -195,10 +194,10 @@ void Linking::AcceptNewNode(core::INode& node) {
 }
 
 ///
-void Linking::DiscardNewNode() { linking_data_.reset(); }
+void Linker::DiscardNewNode() { linking_data_.reset(); }
 
 ///
-auto Linking::GetManualLink() const -> std::optional<const ManualLink*> {
+auto Linker::GetManualLink() const -> std::optional<const ManualLink*> {
   if (!linking_data_.has_value() || !linking_data_->manual_link.has_value()) {
     return std::nullopt;
   }
@@ -207,7 +206,7 @@ auto Linking::GetManualLink() const -> std::optional<const ManualLink*> {
 }
 
 ///
-auto Linking::GetCanConnectToPinReason(ne::PinId pin_id) const
+auto Linker::GetCanConnectToPinReason(ne::PinId pin_id) const
     -> std::pair<bool, std::string> {
   if (!linking_data_.has_value()) {
     return {true, {}};

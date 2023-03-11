@@ -38,7 +38,7 @@ struct ManualLink {
 };
 
 ///
-class Linking {
+class Linker {
  public:
   ///
   struct Callbacks {
@@ -53,7 +53,7 @@ class Linking {
   };
 
   ///
-  explicit Linking(Callbacks callbacks);
+  explicit Linker(Callbacks callbacks);
 
   ///
   void SetPins(const std::optional<ne::PinId>& dragged_from_pin,

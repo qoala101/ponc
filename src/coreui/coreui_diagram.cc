@@ -18,7 +18,7 @@
 #include "coreui_i_node_traits.h"
 #include "coreui_i_pin_traits.h"
 #include "coreui_link.h"
-#include "coreui_linking.h"
+#include "coreui_linker.h"
 #include "coreui_pin.h"
 #include "cpp_assert.h"
 #include "cpp_safe_ptr.h"
@@ -40,30 +40,30 @@ Diagram::Diagram(
       id_generator_{std::move(id_generator)},
       callbacks_{std::move(callbacks)},
       context_{ne::CreateEditor(), &ne::DestroyEditor},
-      linking_{{.find_pin_node =
-                    [diagram = diagram_](auto pin_id) -> const core::INode& {
-                  return core::Diagram::FindPinNode(*diagram, pin_id);
-                },
-                .find_pin_link =
-                    [diagram = diagram_](auto pin_id) {
-                      return core::Diagram::FindPinLink(*diagram, pin_id);
-                    },
-                .create_link =
-                    [callbacks = safe_owner_.MakeSafe(&callbacks_),
-                     diagram = diagram_, id_generator = id_generator_](
-                        auto start_pin_id, auto end_pin_id) {
-                      callbacks->post_event(
-                          [diagram, id_generator, start_pin_id, end_pin_id]() {
-                            diagram->EmplaceLink(core::Link{
-                                .id = id_generator->Generate<ne::LinkId>(),
-                                .start_pin_id = start_pin_id,
-                                .end_pin_id = end_pin_id});
-                          });
-                    },
-                .delete_link =
-                    [safe_this = safe_owner_.MakeSafe(this)](auto link_id) {
-                      safe_this->DeleteLink(link_id);
-                    }}} {
+      linker_{{.find_pin_node =
+                   [diagram = diagram_](auto pin_id) -> const core::INode& {
+                 return core::Diagram::FindPinNode(*diagram, pin_id);
+               },
+               .find_pin_link =
+                   [diagram = diagram_](auto pin_id) {
+                     return core::Diagram::FindPinLink(*diagram, pin_id);
+                   },
+               .create_link =
+                   [callbacks = safe_owner_.MakeSafe(&callbacks_),
+                    diagram = diagram_, id_generator = id_generator_](
+                       auto start_pin_id, auto end_pin_id) {
+                     callbacks->post_event(
+                         [diagram, id_generator, start_pin_id, end_pin_id]() {
+                           diagram->EmplaceLink(core::Link{
+                               .id = id_generator->Generate<ne::LinkId>(),
+                               .start_pin_id = start_pin_id,
+                               .end_pin_id = end_pin_id});
+                         });
+                   },
+               .delete_link =
+                   [safe_this = safe_owner_.MakeSafe(this)](auto link_id) {
+                     safe_this->DeleteLink(link_id);
+                   }}} {
   ne::SetCurrentEditor(context_.get());
 }
 
@@ -82,13 +82,13 @@ void Diagram::OnFrame() {
 auto Diagram::GetDiagram() const -> core::Diagram& { return *diagram_; }
 
 ///
-auto Diagram::GetLinking() const -> const Linking& {
+auto Diagram::GetLinker() const -> const Linker& {
   // NOLINTNEXTLINE(*-const-cast)
-  return const_cast<Diagram*>(this)->GetLinking();
+  return const_cast<Diagram*>(this)->GetLinker();
 }
 
 ///
-auto Diagram::GetLinking() -> Linking& { return linking_; }
+auto Diagram::GetLinker() -> Linker& { return linker_; }
 
 ///
 auto Diagram::GetFamilyGroups() const -> const std::vector<FamilyGroup>& {
@@ -169,7 +169,7 @@ auto Diagram::LinkFrom(const core::Link& core_link,
   };
 
   const auto link_alpha =
-      linking_.IsRepiningLink(link.core_link.id) ? 1.F / 2 : 1.F;
+      linker_.IsRepiningLink(link.core_link.id) ? 1.F / 2 : 1.F;
 
   if (!callbacks_.is_color_flow()) {
     link.color = {1.F, 1.F, 1.F, link_alpha};
@@ -253,7 +253,7 @@ auto Diagram::PinFrom(const IPinTraits& pin_traits,
     pin.label->color = pin.flow_data->color;
   }
 
-  if (!linking_.CanConnectToPin(pin_id)) {
+  if (!linker_.CanConnectToPin(pin_id)) {
     pin.flow_data->color.Value.w = 1.F / 4;
   }
 

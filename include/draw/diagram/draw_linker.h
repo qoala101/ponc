@@ -6,13 +6,13 @@
 #include <optional>
 #include <string>
 
-#include "coreui_linking.h"
+#include "coreui_linker.h"
 #include "cpp_callbacks.h"
 #include "imgui.h"
 
 namespace esc::draw {
 ///
-class Linking {
+class Linker {
  public:
   ///
   struct Callbacks {
@@ -23,11 +23,11 @@ class Linking {
   };
 
   ///
-  void Draw(coreui::Linking &linking, const Callbacks &callbacks);
+  void Draw(coreui::Linker &linker, const Callbacks &callbacks);
 
  private:
   ///
-  void DrawNewNodeQuery(coreui::Linking &linking,
+  void DrawNewNodeQuery(coreui::Linker &linker,
                         const Callbacks &callbacks) const;
   ///
   auto GetPosValue(const coreui::PosVariant &pos_variant,

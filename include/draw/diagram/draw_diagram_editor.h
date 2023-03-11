@@ -9,7 +9,7 @@
 #include "coreui_diagram.h"
 #include "draw_create_node_popup.h"
 #include "draw_link_popup.h"
-#include "draw_linking.h"
+#include "draw_linker.h"
 #include "draw_node_popup.h"
 #include "draw_nodes.h"
 
@@ -29,7 +29,7 @@ class DiagramEditor {
   void DrawCreateNodePopup(coreui::Diagram &diagram);
 
   ///
-  Linking linking_{};
+  Linker linker_{};
   ///
   Nodes nodes_{};
   ///
