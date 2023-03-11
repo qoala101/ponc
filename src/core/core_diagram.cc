@@ -18,16 +18,29 @@ Diagram::Diagram(std::vector<std::unique_ptr<INode>> nodes,
     : nodes_{std::move(nodes)}, links_{std::move(links)} {}
 
 ///
+auto Diagram::FindNode(const Diagram& diagram, ne::NodeId node_id)
+    -> const INode& {
+  const auto& nodes = diagram.GetNodes();
+  const auto node = std::find_if(
+      nodes.begin(), nodes.end(),
+      [node_id](const auto& node) { return node->GetId() == node_id; });
+
+  Expects(node != nodes.end());
+  return **node;
+}
+
+///
 auto Diagram::FindPinNode(const Diagram& diagram, ne::PinId pin_id)
     -> const INode& {
   const auto& nodes = diagram.GetNodes();
   const auto pin_node =
       std::find_if(nodes.begin(), nodes.end(), [pin_id](const auto& node) {
-        const auto node_pins = INode::GetAllPinIds(*node);
+        const auto node_pins = INode::GetAllPins(*node);
 
-        return std::any_of(
-            node_pins.begin(), node_pins.end(),
-            [pin_id](const auto node_pin) { return node_pin == pin_id; });
+        return std::any_of(node_pins.begin(), node_pins.end(),
+                           [pin_id](const auto& node_pin) {
+                             return node_pin.first == pin_id;
+                           });
       });
 
   Expects(pin_node != nodes.end());
@@ -37,7 +50,14 @@ auto Diagram::FindPinNode(const Diagram& diagram, ne::PinId pin_id)
 ///
 auto Diagram::FindPinLink(const Diagram& diagram, ne::PinId pin_id)
     -> std::optional<const Link*> {
-  const auto& links = diagram.GetLinks();
+  // NOLINTNEXTLINE(*-const-cast)
+  return FindPinLink(const_cast<Diagram&>(diagram), pin_id);
+}
+
+///
+auto Diagram::FindPinLink(Diagram& diagram, ne::PinId pin_id)
+    -> std::optional<Link*> {
+  auto& links = diagram.GetLinksImpl();
   const auto pin_link = std::find_if(
       links.begin(), links.end(),
       [pin_id](const auto& link) { return Link::HasPin(link, pin_id); });
@@ -74,7 +94,10 @@ void Diagram::DeleteNode(ne::NodeId node_id) {
 }
 
 ///
-auto Diagram::GetLinks() const -> const std::vector<Link>& { return links_; }
+auto Diagram::GetLinks() const -> const std::vector<Link>& {
+  // NOLINTNEXTLINE(*-const-cast)
+  return const_cast<Diagram*>(this)->GetLinksImpl();
+}
 
 ///
 auto Diagram::EmplaceLink(const Link& link) -> Link& {
@@ -94,4 +117,7 @@ void Diagram::DeleteLink(ne::LinkId link_id) {
   Expects(found_link != links_.end());
   links_.erase(found_link);
 }
+
+///
+auto Diagram::GetLinksImpl() -> std::vector<Link>& { return links_; }
 }  // namespace esc::core

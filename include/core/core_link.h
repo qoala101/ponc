@@ -14,6 +14,10 @@ struct Link {
   static auto GetPinKind(const Link &link, ne::PinId pin_id) -> ne::PinKind;
   ///
   static auto GetOtherPin(const Link &link, ne::PinId pin_id) -> ne::PinId;
+  ///
+  static auto GetPinOfKind(const Link &link, ne::PinKind pin_kind) -> ne::PinId;
+  ///
+  static auto GetPinOfKind(Link &link, ne::PinKind pin_kind) -> ne::PinId &;
 
   ///
   ne::LinkId id{};

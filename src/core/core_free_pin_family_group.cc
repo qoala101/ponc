@@ -96,9 +96,8 @@ class NodeUiTraits : public coreui::INodeTraits {
     if (const auto& input_pin = node_->GetInputPinId()) {
       pin_traits.emplace_back(std::make_unique<PinTraits>(*input_pin));
     } else {
-      const auto& output_pins = node_->GetOutputPinIds();
-      Expects(!output_pins.empty());
-      pin_traits.emplace_back(std::make_unique<PinTraits>(output_pins[0]));
+      pin_traits.emplace_back(std::make_unique<PinTraits>(
+          core::INode::GetFirstPinOfKind(*node_, ne::PinKind::Output)));
     }
 
     return pin_traits;

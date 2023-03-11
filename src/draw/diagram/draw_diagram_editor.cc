@@ -112,9 +112,11 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
 void DiagramEditor::DrawPopups(coreui::Diagram &diagram) {
   DrawCreateNodePopup(diagram);
 
-  node_popup_.Draw({.node_deleted = [&diagram](auto node_id) {
-    diagram.DeleteNode(node_id);
-  }});
+  node_popup_.Draw(
+      {.node_deleted =
+           [&diagram](auto node_id) { diagram.DeleteNode(node_id); },
+       .node_deleted_with_links =
+           [&diagram](auto node_id) { diagram.DeleteNodeWithLinks(node_id); }});
 
   link_popup_.Draw({.link_deleted = [&diagram](auto link_id) {
     diagram.DeleteLink(link_id);

@@ -4,7 +4,7 @@
 
 namespace esc::draw {
 ///
-void NodePopup::Draw(const Callbacks &callbacks) {
+void NodePopup::Draw(const Callbacks& callbacks) {
   const auto content_scope = DrawContentScope();
 
   if (!IsOpened()) {
@@ -13,6 +13,18 @@ void NodePopup::Draw(const Callbacks &callbacks) {
 
   if (ImGui::MenuItem("Delete")) {
     callbacks.node_deleted(node_id_);
+  }
+
+  if (ImGui::MenuItem("Delete With Links")) {
+    callbacks.node_deleted_with_links(node_id_);
+  }
+
+  if (ImGui::BeginMenu("Replace With")) {
+    ImGui::EndMenu();
+  }
+
+  if (ImGui::BeginMenu("Fill With")) {
+    ImGui::EndMenu();
   }
 }
 

@@ -15,6 +15,8 @@ class NodePopup : public IPopup {
   struct Callbacks {
     ///
     cpp::Signal<ne::NodeId> node_deleted{};
+    ///
+    cpp::Signal<ne::NodeId> node_deleted_with_links{};
   };
 
   ///

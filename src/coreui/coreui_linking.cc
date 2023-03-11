@@ -4,6 +4,7 @@
 
 #include "core_i_node.h"
 #include "core_link.h"
+#include "core_pin.h"
 #include "cpp_assert.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
@@ -118,12 +119,9 @@ auto Linking::CanConnectToNode(const core::INode& node) const -> bool {
   }
 
   const auto& [source_pin, source_kind] = GetCurrentLinkSourcePin();
+  const auto target_kind = core::Pin::GetOppositeKind(source_kind);
 
-  if (source_kind == ne::PinKind::Input) {
-    return !node.GetOutputPinIds().empty();
-  }
-
-  return node.GetInputPinId().has_value();
+  return core::INode::FindFirstPinOfKind(node, target_kind).has_value();
 }
 
 ///
@@ -184,22 +182,13 @@ auto Linking::IsCreatingNode() const -> bool {
 ///
 void Linking::AcceptNewNode(core::INode& node) {
   const auto [source_pin, source_kind] = GetCurrentLinkSourcePin();
-  auto target_pin = ne::PinId{};
 
   if (source_kind == ne::PinKind::Input) {
-    const auto& output_pins = node.GetOutputPinIds();
-    Expects(!output_pins.empty());
-    target_pin = output_pins[0];
+    callbacks_.create_link(
+        core::INode::GetFirstPinOfKind(node, ne::PinKind::Output), source_pin);
   } else {
-    const auto& input_pin = node.GetInputPinId();
-    Expects(input_pin.has_value());
-    target_pin = *input_pin;
-  }
-
-  if (source_kind == ne::PinKind::Input) {
-    callbacks_.create_link(target_pin, source_pin);
-  } else {
-    callbacks_.create_link(source_pin, target_pin);
+    callbacks_.create_link(
+        source_pin, core::INode::GetFirstPinOfKind(node, ne::PinKind::Input));
   }
 
   linking_data_.reset();

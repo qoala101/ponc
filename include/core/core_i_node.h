@@ -45,9 +45,16 @@ class INode : public cpp::Interface {
   };
 
   ///
-  static auto GetAllPinIds(const INode &node) -> std::vector<ne::PinId>;
+  static auto GetAllPins(const INode &node)
+      -> std::vector<std::pair<ne::PinId, ne::PinKind>>;
   ///
   static auto GetPinKind(const INode &node, ne::PinId pin_id) -> ne::PinKind;
+  ///
+  static auto GetFirstPinOfKind(const INode &node, ne::PinKind pin_kind)
+      -> ne::PinId;
+  ///
+  static auto FindFirstPinOfKind(const INode &node, ne::PinKind pin_kind)
+      -> std::optional<ne::PinId>;
 
   ///
   virtual auto CreateWriter() const -> std::unique_ptr<json::INodeWriter> = 0;

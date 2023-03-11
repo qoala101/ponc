@@ -3,19 +3,31 @@
 #include <imgui_node_editor.h>
 
 #include <algorithm>
+#include <optional>
 #include <ranges>
 #include <vector>
 
+#include "cpp_assert.h"
+
 namespace esc::core {
 ///
-auto INode::GetAllPinIds(const INode& node) -> std::vector<ne::PinId> {
-  auto pin_ids = node.GetOutputPinIds();
+auto INode::GetAllPins(const INode& node)
+    -> std::vector<std::pair<ne::PinId, ne::PinKind>> {
+  auto pins = std::vector<std::pair<ne::PinId, ne::PinKind>>{};
+
+  const auto& output_pins = node.GetOutputPinIds();
+  pins.reserve(output_pins.size() + 1);
 
   if (const auto& input_pin_id = node.GetInputPinId()) {
-    pin_ids.insert(pin_ids.begin(), *input_pin_id);
+    pins.emplace_back(*input_pin_id, ne::PinKind::Input);
   }
 
-  return pin_ids;
+  std::transform(output_pins.begin(), output_pins.end(),
+                 std::back_inserter(pins), [](const auto pin_id) {
+                   return std::pair{pin_id, ne::PinKind::Output};
+                 });
+
+  return pins;
 }
 
 ///
@@ -27,6 +39,34 @@ auto INode::GetPinKind(const INode& node, ne::PinId pin_id) -> ne::PinKind {
   }
 
   return ne::PinKind::Output;
+}
+
+///
+auto INode::GetFirstPinOfKind(const INode& node, ne::PinKind pin_kind)
+    -> ne::PinId {
+  const auto pin = FindFirstPinOfKind(node, pin_kind);
+  Expects(pin.has_value());
+  return *pin;
+}
+
+///
+auto INode::FindFirstPinOfKind(const INode& node, ne::PinKind pin_kind)
+    -> std::optional<ne::PinId> {
+  if (pin_kind == ne::PinKind::Input) {
+    if (const auto& input_pin = node.GetInputPinId()) {
+      return *input_pin;
+    }
+
+    return std::nullopt;
+  }
+
+  const auto& output_pins = node.GetOutputPinIds();
+
+  if (output_pins.empty()) {
+    return std::nullopt;
+  }
+
+  return output_pins[0];
 }
 
 ///

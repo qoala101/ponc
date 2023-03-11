@@ -18,11 +18,17 @@ class Diagram {
                    std::vector<Link> links = {});
 
   ///
+  static auto FindNode(const Diagram &diagram, ne::NodeId node_id)
+      -> const INode &;
+  ///
   static auto FindPinNode(const Diagram &diagram, ne::PinId pin_id)
       -> const INode &;
   ///
   static auto FindPinLink(const Diagram &diagram, ne::PinId pin_id)
       -> std::optional<const Link *>;
+  ///
+  static auto FindPinLink(Diagram &diagram, ne::PinId pin_id)
+      -> std::optional<Link *>;
 
   ///
   auto GetNodes() const -> const std::vector<std::unique_ptr<INode>> &;
@@ -38,6 +44,9 @@ class Diagram {
   void DeleteLink(ne::LinkId link_id);
 
  private:
+  ///
+  auto GetLinksImpl() -> std::vector<Link> &;
+
   ///
   std::vector<std::unique_ptr<INode>> nodes_{};
   ///

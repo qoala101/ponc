@@ -25,4 +25,19 @@ auto Link::GetOtherPin(const Link &link, ne::PinId pin_id) -> ne::PinId {
 
   return link.start_pin_id;
 }
+
+///
+auto Link::GetPinOfKind(const Link &link, ne::PinKind pin_kind) -> ne::PinId {
+  // NOLINTNEXTLINE(*-const-cast)
+  return GetPinOfKind(const_cast<Link &>(link), pin_kind);
+}
+
+///
+auto Link::GetPinOfKind(Link &link, ne::PinKind pin_kind) -> ne::PinId & {
+  if (pin_kind == ne::PinKind::Input) {
+    return link.end_pin_id;
+  }
+
+  return link.start_pin_id;
+}
 }  // namespace esc::core

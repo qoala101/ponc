@@ -86,9 +86,8 @@ class NodeUiTraits : public coreui::INodeTraits {
   auto CreatePinTraits() const
       -> std::vector<std::unique_ptr<coreui::IPinTraits>> override {
     auto pin_traits = std::vector<std::unique_ptr<coreui::IPinTraits>>{};
-    const auto input_pin = node_->GetInputPinId();
-    Expects(input_pin.has_value());
-    pin_traits.emplace_back(std::make_unique<PinTraits>(*input_pin));
+    pin_traits.emplace_back(std::make_unique<PinTraits>(
+        core::INode::GetFirstPinOfKind(*node_, ne::PinKind::Input)));
     return pin_traits;
   }
 

@@ -12,6 +12,7 @@
 
 #include "core_diagram.h"
 #include "core_id_generator.h"
+#include "cpp_assert.h"
 
 namespace esc::core {
 ///
@@ -25,8 +26,8 @@ auto Project::FindMaxId() const {
   for (const auto& node : diagram_.GetNodes()) {
     max_id = std::max(node->GetId().Get(), max_id);
 
-    for (const auto pin_id : INode::GetAllPinIds(*node)) {
-      max_id = std::max(pin_id.Get(), max_id);
+    for (const auto& pin : INode::GetAllPins(*node)) {
+      max_id = std::max(pin.first.Get(), max_id);
     }
   }
 
@@ -35,6 +36,18 @@ auto Project::FindMaxId() const {
   }
 
   return max_id;
+}
+
+///
+auto Project::GetDefaultFamily(
+    const std::vector<std::unique_ptr<IFamily>>& families,
+    FamilyType family_type) -> const IFamily& {
+  const auto family = std::find_if(families.begin(), families.end(),
+                                   [family_type](const auto& family) {
+                                     return family->GetType() == family_type;
+                                   });
+  Expects(family != families.end());
+  return **family;
 }
 
 ///

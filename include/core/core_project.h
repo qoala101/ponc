@@ -17,6 +17,11 @@ class Project {
           Diagram diagram = Diagram{});
 
   ///
+  static auto GetDefaultFamily(
+      const std::vector<std::unique_ptr<IFamily>> &families,
+      FamilyType family_type) -> const IFamily &;
+
+  ///
   auto GetSettings() const -> const Settings &;
   ///
   auto GetSettings() -> Settings &;
