@@ -156,21 +156,7 @@ void Linker::AcceptNewLink() {
   Expects(linking_data_.has_value());
   Expects(linking_data_->hovering_data.has_value());
 
-  if (const auto is_repinning_link =
-          linking_data_->repinning_data.has_value()) {
-    parent_diagram_->DeleteLink(linking_data_->repinning_data->link_to_repin);
-  }
-
-  const auto [source_pin, source_kind] = GetCurrentLinkSourcePin();
-  const auto target_pin = linking_data_->hovering_data->hovering_over_pin;
-
-  if (source_kind == ne::PinKind::Input) {
-    parent_diagram_->CreateLink(target_pin, source_pin);
-  } else {
-    parent_diagram_->CreateLink(source_pin, target_pin);
-  }
-
-  linking_data_.reset();
+  AcceptNewLinkTo(linking_data_->hovering_data->hovering_over_pin);
 }
 
 ///
@@ -189,16 +175,9 @@ auto Linker::IsCreatingNode() const -> bool {
 ///
 void Linker::AcceptNewNode(core::INode& node) {
   const auto [source_pin, source_kind] = GetCurrentLinkSourcePin();
+  const auto target_kind = core::Pin::GetOppositeKind(source_kind);
 
-  if (source_kind == ne::PinKind::Input) {
-    parent_diagram_->CreateLink(
-        core::INode::GetFirstPinOfKind(node, ne::PinKind::Output), source_pin);
-  } else {
-    parent_diagram_->CreateLink(
-        source_pin, core::INode::GetFirstPinOfKind(node, ne::PinKind::Input));
-  }
-
-  linking_data_.reset();
+  AcceptNewLinkTo(core::INode::GetFirstPinOfKind(node, target_kind));
 }
 
 ///
@@ -234,17 +213,12 @@ auto Linker::GetCanConnectToPinReason(ne::PinId pin_id) const
   }
 
   const auto& pin_node = core::Diagram::FindPinNode(diagram, pin_id);
+  const auto source_node = is_repinning
+                               ? linking_data_->repinning_data->fixed_pin_node
+                               : linking_data_->dragged_from_node;
 
-  if (const auto same_node =
-          pin_node.GetId() == linking_data_->dragged_from_node) {
+  if (const auto same_node = pin_node.GetId() == source_node) {
     return {false, "Same Node"};
-  }
-
-  if (is_repinning) {
-    if (const auto same_node =
-            pin_node.GetId() == linking_data_->repinning_data->fixed_pin_node) {
-      return {false, "Same Node"};
-    }
   }
 
   const auto pin_kind = core::INode::GetPinKind(pin_node, pin_id);
@@ -259,5 +233,25 @@ auto Linker::GetCanConnectToPinReason(ne::PinId pin_id) const
   }
 
   return {true, "Create Link"};
+}
+
+///
+void Linker::AcceptNewLinkTo(ne::PinId target_pin) {
+  Expects(linking_data_.has_value());
+
+  if (const auto is_repinning_link =
+          linking_data_->repinning_data.has_value()) {
+    parent_diagram_->DeleteLink(linking_data_->repinning_data->link_to_repin);
+  }
+
+  const auto [source_pin, source_kind] = GetCurrentLinkSourcePin();
+
+  if (source_kind == ne::PinKind::Input) {
+    parent_diagram_->CreateLink(target_pin, source_pin);
+  } else {
+    parent_diagram_->CreateLink(source_pin, target_pin);
+  }
+
+  linking_data_.reset();
 }
 }  // namespace esc::coreui

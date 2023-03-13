@@ -122,6 +122,8 @@ class Linker {
   ///
   auto GetCanConnectToPinReason(ne::PinId pin_id) const
       -> std::pair<bool, std::string>;
+  ///
+  void AcceptNewLinkTo(ne::PinId target_pin);
 
   ///
   cpp::SafePtr<Diagram> parent_diagram_;
