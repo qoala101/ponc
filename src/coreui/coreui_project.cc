@@ -119,6 +119,8 @@ void Project::OpenFromFile(std::string file_path) {
         json::ProjectSerializer::ParseFromJson(json, *family_parsers);
     safe_this->diagram_ = safe_this->CreateDiagram();
   });
+
+  event_loop_.PostLateEvent([]() { ne::NavigateToContent(); });
 }
 
 ///
