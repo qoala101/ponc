@@ -2,9 +2,13 @@
 
 #include <concepts>
 #include <cstdint>
+#include <functional>
+#include <iostream>
 #include <iterator>
 
+#include "core_concepts.h"
 #include "core_link.h"
+#include "coreui_diagram.h"
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
@@ -12,66 +16,74 @@ namespace {
 ///
 template <typename T>
 void UnregisterDeletedItemsImpl(
-    const std::vector<T> &items,
+    ItemDeleter::ItemIds &item_ids, const std::vector<T> &items,
     const std::invocable<const T &> auto &get_item_id,
-    const std::invocable<uintptr_t> auto &unregister,
-    std::set<uintptr_t> &registered_item_ids) {
-  auto item_ids = std::set<uintptr_t>{};
-
+    const std::invocable<uintptr_t> auto &unregister_item) {
+  auto new_item_ids = std::set<uintptr_t>{};
   std::transform(items.begin(), items.end(),
-                 std::inserter(item_ids, item_ids.begin()), get_item_id);
+                 std::inserter(new_item_ids, new_item_ids.begin()),
+                 get_item_id);
 
   auto deleted_item_ids = std::vector<uintptr_t>{};
-
-  std::set_difference(registered_item_ids.begin(), registered_item_ids.end(),
-                      item_ids.begin(), item_ids.end(),
-                      std::back_inserter(deleted_item_ids));
+  std::set_difference(item_ids.registered_ids_.begin(),
+                      item_ids.registered_ids_.end(), new_item_ids.begin(),
+                      new_item_ids.end(), std::back_inserter(deleted_item_ids));
 
   for (const auto deleted_id : deleted_item_ids) {
-    unregister(deleted_id);
+    unregister_item(deleted_id);
+    item_ids.unregistered_ids_.insert(deleted_id);
   }
 
-  registered_item_ids = std::move(item_ids);
+  item_ids.registered_ids_ = std::move(new_item_ids);
+}
+
+///
+template <core::Id T>
+void DeleteUnregisteredItemsImpl(
+    ItemDeleter::ItemIds &item_ids,
+    const std::invocable<T *> auto &query_deleted_item,
+    const std::invocable<T> auto &delete_item) {
+  auto item_id = T{};
+
+  while (query_deleted_item(&item_id)) {
+    if (!ne::AcceptDeletedItem()) {
+      continue;
+    }
+
+    const auto item_id_value = item_id.Get();
+
+    if (item_ids.unregistered_ids_.contains(item_id_value)) {
+      item_ids.unregistered_ids_.erase(item_id_value);
+      continue;
+    }
+
+    delete_item(item_id);
+    item_ids.registered_ids_.erase(item_id_value);
+  }
 }
 }  // namespace
 
 ///
 void ItemDeleter::UnregisterDeletedItems(const core::Diagram &diagram) {
   UnregisterDeletedItemsImpl(
-      diagram.GetLinks(), [](const auto &link) { return link.id.Get(); },
-      [](const auto link_id) { ne::DeleteLink(link_id); },
-      registered_link_ids_);
+      link_ids_, diagram.GetLinks(),
+      [](const auto &link) { return link.id.Get(); }, &ne::DeleteLink);
 
   UnregisterDeletedItemsImpl(
-      diagram.GetNodes(), [](const auto &node) { return node->GetId().Get(); },
-      [](const auto node_id) { ne::DeleteNode(node_id); },
-      registered_node_ids_);
+      node_ids_, diagram.GetNodes(),
+      [](const auto &node) { return node->GetId().Get(); }, &ne::DeleteNode);
 }
 
 ///
 void ItemDeleter::DeleteUnregisteredItems(coreui::Diagram &diagram) {
   if (ne::BeginDelete()) {
-    auto link_id = ne::LinkId{};
+    DeleteUnregisteredItemsImpl<ne::LinkId>(
+        link_ids_, [](auto link_id) { return ne::QueryDeletedLink(link_id); },
+        std::bind_front(&coreui::Diagram::DeleteLink, &diagram));
 
-    while (ne::QueryDeletedLink(&link_id)) {
-      if (!ne::AcceptDeletedItem()) {
-        continue;
-      }
-
-      registered_link_ids_.erase(link_id.Get());
-      diagram.DeleteLink(link_id);
-    }
-
-    auto node_id = ne::NodeId{};
-
-    while (ne::QueryDeletedNode(&node_id)) {
-      if (!ne::AcceptDeletedItem()) {
-        continue;
-      }
-
-      registered_node_ids_.erase(node_id.Get());
-      diagram.DeleteNode(node_id);
-    }
+    DeleteUnregisteredItemsImpl<ne::NodeId>(
+        node_ids_, &ne::QueryDeletedNode,
+        std::bind_front(&coreui::Diagram::DeleteNode, &diagram));
   }
 
   ne::EndDelete();

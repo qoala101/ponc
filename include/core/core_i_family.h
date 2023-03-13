@@ -56,6 +56,8 @@ class IFamily : public cpp::Interface {
 
   ///
   auto GetId() const -> FamilyId;
+  ///
+  auto CreateNode() const -> std::unique_ptr<INode>;
 
  protected:
   ///

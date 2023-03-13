@@ -11,15 +11,23 @@ namespace esc::draw {
 class ItemDeleter {
  public:
   ///
+  struct ItemIds {
+    ///
+    std::set<uintptr_t> registered_ids_{};
+    ///
+    std::set<uintptr_t> unregistered_ids_{};
+  };
+
+  ///
   void UnregisterDeletedItems(const core::Diagram &diagram);
   ///
   void DeleteUnregisteredItems(coreui::Diagram &diagram);
 
  private:
   ///
-  std::set<uintptr_t> registered_node_ids_{};
+  ItemIds node_ids_{};
   ///
-  std::set<uintptr_t> registered_link_ids_{};
+  ItemIds link_ids_{};
 };
 }  // namespace esc::draw
 

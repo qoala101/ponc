@@ -49,7 +49,9 @@ class Diagram {
   auto GetNodes() -> std::vector<Node> &;
   ///
   void AddNode(std::unique_ptr<core::INode> node) const;
+  ///
   void DeleteNode(ne::NodeId node_id) const;
+  ///
   void DeleteNodeWithLinks(ne::NodeId node_id) const;
   ///
   auto GetLinks() const -> const std::vector<Link> &;
@@ -78,6 +80,9 @@ class Diagram {
   auto NodeFrom(core::INode &core_node, const flow::NodeFlow &node_flow) const;
   ///
   void UpdateNodes(const flow::NodeFlows &node_flows);
+  ///
+  auto GetFreePinFamily(ne::PinKind pin_kind) const -> auto &;
+  ///
   void MoveConnectedLinkToNewFreePin(
       ne::PinId pin_id, ne::PinKind pin_kind,
       const core::IFamily &free_pin_family) const;

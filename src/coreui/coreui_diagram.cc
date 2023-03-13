@@ -86,46 +86,58 @@ void Diagram::AddNode(std::unique_ptr<core::INode> node) const {
       });
 }
 
-void Diagram::DeleteNode(ne::NodeId node_id) const {
-  // const auto& node = core::Diagram::FindNode(*diagram_, node_id);
+///
+auto Diagram::GetFreePinFamily(ne::PinKind pin_kind) const -> auto& {
+  const auto& families = parent_project_->GetProject().GetFamilies();
 
-  // if (const auto input_pin = node.GetInputPinId()) {
-  //   const auto& free_pin_family = core::Project::GetDefaultFamily(
-  //       *families_, core::FamilyType::kFreeInputPin);
+  const auto family = std::find_if(
+      families.begin(), families.end(), [pin_kind](const auto& family) {
+        if (family->GetType() != core::FamilyType::kFreePin) {
+          return false;
+        }
 
-  //   MoveConnectedLinkToNewFreePin(*input_pin, ne::PinKind::Input,
-  //                                 free_pin_family);
-  // }
+        const auto node = family->CreateNode();
+        return core::INode::FindFirstPinOfKind(*node, pin_kind).has_value();
+      });
 
-  // const auto& free_pin_family = core::Project::GetDefaultFamily(
-  //     *families_, core::FamilyType::kFreeOutputPin);
-
-  // for (const auto ouput_pin : node.GetOutputPinIds()) {
-  //   MoveConnectedLinkToNewFreePin(ouput_pin, ne::PinKind::Output,
-  //                                 free_pin_family);
-  // }
-
-  // diagram_->DeleteNode(node_id);
-
-  // const auto& node = core::Diagram::FindNode(*diagram_, node_id);
-
-  // for (const auto& pin : core::INode::GetAllPins(node)) {
-  //   if (const auto link = core::Diagram::FindPinLink(*diagram_, pin.first)) {
-  //     diagram_->DeleteLink((*link)->id);
-  //   }
-  // }
+  Expects(family != families.end());
+  return **family;
 }
 
+///
+void Diagram::DeleteNode(ne::NodeId node_id) const {
+  const auto& node = core::Diagram::FindNode(*diagram_, node_id);
+
+  if (const auto input_pin = node.GetInputPinId()) {
+    const auto& free_pin_family = GetFreePinFamily(ne::PinKind::Input);
+
+    MoveConnectedLinkToNewFreePin(*input_pin, ne::PinKind::Input,
+                                  free_pin_family);
+  }
+
+  const auto& free_pin_family = GetFreePinFamily(ne::PinKind::Output);
+
+  for (const auto ouput_pin : node.GetOutputPinIds()) {
+    MoveConnectedLinkToNewFreePin(ouput_pin, ne::PinKind::Output,
+                                  free_pin_family);
+  }
+
+  parent_project_->GetEventLoop().PostEvent(
+      [diagram = diagram_, node_id]() { diagram->DeleteNode(node_id); });
+}
+
+///
 void Diagram::DeleteNodeWithLinks(ne::NodeId node_id) const {
-  // const auto& node = core::Diagram::FindNode(*diagram_, node_id);
+  const auto& node = core::Diagram::FindNode(*diagram_, node_id);
 
-  // for (const auto& pin : core::INode::GetAllPins(node)) {
-  //   if (const auto link = core::Diagram::FindPinLink(*diagram_, pin.first)) {
-  //     diagram_->DeleteLink((*link)->id);
-  //   }
-  // }
+  for (const auto& pin : core::INode::GetAllPins(node)) {
+    if (const auto link = core::Diagram::FindPinLink(*diagram_, pin.first)) {
+      DeleteLink((*link)->id);
+    }
+  }
 
-  // diagram_->DeleteNode(node_id);
+  parent_project_->GetEventLoop().PostEvent(
+      [diagram = diagram_, node_id]() { diagram->DeleteNode(node_id); });
 }
 
 ///
@@ -336,6 +348,7 @@ void Diagram::UpdateNodes(const flow::NodeFlows& node_flows) {
                  });
 }
 
+///
 void Diagram::MoveConnectedLinkToNewFreePin(
     ne::PinId pin_id, ne::PinKind pin_kind,
     const core::IFamily& free_pin_family) const {
@@ -351,6 +364,6 @@ void Diagram::MoveConnectedLinkToNewFreePin(
   core::Link::GetPinOfKind(**link, pin_kind) =
       core::INode::GetFirstPinOfKind(*free_pin, pin_kind);
 
-  diagram_->EmplaceNode(std::move(free_pin));
+  AddNode(std::move(free_pin));
 }
 }  // namespace esc::coreui

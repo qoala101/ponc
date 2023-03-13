@@ -39,18 +39,6 @@ auto Project::FindMaxId() const {
 }
 
 ///
-auto Project::GetDefaultFamily(
-    const std::vector<std::unique_ptr<IFamily>>& families,
-    FamilyType family_type) -> const IFamily& {
-  const auto family = std::find_if(families.begin(), families.end(),
-                                   [family_type](const auto& family) {
-                                     return family->GetType() == family_type;
-                                   });
-  Expects(family != families.end());
-  return **family;
-}
-
-///
 Project::Project(const Settings& settings,
                  std::vector<std::unique_ptr<IFamily>> families,
                  Diagram diagram)

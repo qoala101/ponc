@@ -2,6 +2,9 @@
 
 #include <optional>
 
+#include "core_i_node.h"
+#include "core_id_generator.h"
+
 namespace esc::core {
 ///
 auto IFamily::GetType() const -> std::optional<FamilyType> {
@@ -10,6 +13,12 @@ auto IFamily::GetType() const -> std::optional<FamilyType> {
 
 ///
 auto IFamily::GetId() const -> FamilyId { return id_; }
+
+///
+auto IFamily::CreateNode() const -> std::unique_ptr<INode> {
+  auto id_generator = IdGenerator{};
+  return CreateNode(id_generator);
+}
 
 ///
 IFamily::IFamily(FamilyId id) : id_{id} {}

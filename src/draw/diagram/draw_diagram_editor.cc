@@ -113,28 +113,25 @@ void DiagramEditor::DrawCreateNodePopup(coreui::Diagram &diagram) {
   auto &linker = diagram.GetLinker();
   const auto &family_groups = diagram.GetFamilyGroups();
 
-  if (linker.IsCreatingNode()) {
-    auto id_generator = core::IdGenerator{};
-
+  if (!linker.IsCreatingNode()) {
     create_node_popup_.Draw(family_groups,
-                            {.is_family_enabled =
-                                 [&linker, &id_generator](const auto &family) {
-                                   const auto fake_node =
-                                       family.CreateNode(id_generator);
-                                   return linker.CanConnectToNode(*fake_node);
-                                 },
-                             .closed = [&linker]() { linker.DiscardNewNode(); },
-                             .node_created =
-                                 [&diagram, &linker](auto node) {
-                                   linker.AcceptNewNode(*node);
-                                   diagram.AddNode(std::move(node));
-                                 }});
+                            {.node_created = [&diagram](auto node) {
+                              diagram.AddNode(std::move(node));
+                            }});
     return;
   }
 
-  create_node_popup_.Draw(family_groups,
-                          {.node_created = [&diagram](auto node) {
-                            diagram.AddNode(std::move(node));
-                          }});
+  create_node_popup_.Draw(
+      family_groups,
+      {.is_family_enabled =
+           [&linker](const auto &family) {
+             return linker.CanConnectToNode(*family.CreateNode());
+           },
+       .closed = [&linker]() { linker.DiscardNewNode(); },
+       .node_created =
+           [&diagram, &linker](auto node) {
+             linker.AcceptNewNode(*node);
+             diagram.AddNode(std::move(node));
+           }});
 }
 }  // namespace esc::draw
