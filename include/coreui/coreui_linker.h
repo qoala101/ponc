@@ -12,10 +12,12 @@
 #include <vector>
 
 #include "core_i_node.h"
-#include "core_link.h"
-#include "cpp_callbacks.h"
+#include "cpp_safe_ptr.h"
 
 namespace esc::coreui {
+///
+class Diagram;
+
 ///
 struct MousePos {};
 
@@ -41,19 +43,7 @@ struct ManualLink {
 class Linker {
  public:
   ///
-  struct Callbacks {
-    ///
-    cpp::Query<const core::INode&, ne::PinId> find_pin_node{};
-    ///
-    cpp::Query<std::optional<const core::Link*>, ne::PinId> find_pin_link{};
-    ///
-    cpp::Action<void(ne::PinId, ne::PinId)> create_link{};
-    ///
-    cpp::Action<void(ne::LinkId)> delete_link{};
-  };
-
-  ///
-  explicit Linker(Callbacks callbacks);
+  explicit Linker(cpp::SafePtr<Diagram> parent_diagram);
 
   ///
   void SetPins(const std::optional<ne::PinId>& dragged_from_pin,
@@ -134,7 +124,7 @@ class Linker {
       -> std::pair<bool, std::string>;
 
   ///
-  Callbacks callbacks_{};
+  cpp::SafePtr<Diagram> parent_diagram_;
   ///
   std::optional<LinkingData> linking_data_{};
 };

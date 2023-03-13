@@ -14,7 +14,6 @@
 #include "core_project.h"
 #include "coreui_diagram.h"
 #include "coreui_event_loop.h"
-#include "coreui_family.h"
 #include "coreui_textures_handle.h"
 #include "cpp_safe_ptr.h"
 
@@ -36,6 +35,10 @@ class Project {
   auto GetDiagram() const -> const Diagram &;
   ///
   auto GetDiagram() -> Diagram &;
+  ///
+  auto GetTexturesHandle() -> TexturesHandle &;
+  ///
+  auto GetEventLoop() -> EventLoop &;
   ///
   void OpenFromFile(std::string file_path);
   ///

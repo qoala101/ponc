@@ -1,16 +1,20 @@
+#include "coreui_linker.h"
+
 #include <iostream>
 
+#include "core_diagram.h"
 #include "core_i_node.h"
 #include "core_link.h"
 #include "core_pin.h"
-#include "coreui_linker.h"
+#include "coreui_diagram.h"
 #include "cpp_assert.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
 namespace esc::coreui {
 ///
-Linker::Linker(Callbacks callbacks) : callbacks_{std::move(callbacks)} {}
+Linker::Linker(cpp::SafePtr<Diagram> parent_diagram)
+    : parent_diagram_{std::move(parent_diagram)} {}
 
 ///
 auto Linker::GetRepinningLinkColor() const {
@@ -69,14 +73,17 @@ void Linker::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
     return;
   }
 
-  const auto& dragged_from_node = callbacks_.find_pin_node(*dragged_from_pin);
+  const auto& diagram = parent_diagram_->GetDiagram();
+  const auto& dragged_from_node =
+      core::Diagram::FindPinNode(diagram, *dragged_from_pin);
 
   linking_data_ = LinkingData{.dragged_from_pin = *dragged_from_pin,
                               .dragged_from_node = dragged_from_node.GetId(),
                               .dragged_from_pin_kind = core::INode::GetPinKind(
                                   dragged_from_node, *dragged_from_pin)};
 
-  const auto link_to_repin = callbacks_.find_pin_link(*dragged_from_pin);
+  const auto link_to_repin =
+      core::Diagram::FindPinLink(diagram, *dragged_from_pin);
 
   if (link_to_repin.has_value()) {
     const auto fixed_pin =
@@ -86,7 +93,8 @@ void Linker::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
         .link_to_repin = (*link_to_repin)->id,
         .fixed_pin = fixed_pin,
         .fixed_pin_kind = core::Link::GetPinKind(**link_to_repin, fixed_pin),
-        .fixed_pin_node = callbacks_.find_pin_node(fixed_pin).GetId()};
+        .fixed_pin_node =
+            core::Diagram::FindPinNode(diagram, fixed_pin).GetId()};
 
     linking_data_->manual_link =
         CreateManualLinkTo(MousePos{}, GetRepinningLinkColor());
@@ -97,7 +105,7 @@ void Linker::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
   }
 
   const auto& hovering_over_pin_node =
-      callbacks_.find_pin_node(*hovering_over_pin);
+      core::Diagram::FindPinNode(diagram, *hovering_over_pin);
 
   linking_data_->hovering_data = HoveringData{
       .hovering_over_pin = *hovering_over_pin,
@@ -150,16 +158,16 @@ void Linker::AcceptNewLink() {
 
   if (const auto is_repinning_link =
           linking_data_->repinning_data.has_value()) {
-    callbacks_.delete_link(linking_data_->repinning_data->link_to_repin);
+    parent_diagram_->DeleteLink(linking_data_->repinning_data->link_to_repin);
   }
 
   const auto [source_pin, source_kind] = GetCurrentLinkSourcePin();
   const auto target_pin = linking_data_->hovering_data->hovering_over_pin;
 
   if (source_kind == ne::PinKind::Input) {
-    callbacks_.create_link(target_pin, source_pin);
+    parent_diagram_->CreateLink(target_pin, source_pin);
   } else {
-    callbacks_.create_link(source_pin, target_pin);
+    parent_diagram_->CreateLink(source_pin, target_pin);
   }
 
   linking_data_.reset();
@@ -183,10 +191,10 @@ void Linker::AcceptNewNode(core::INode& node) {
   const auto [source_pin, source_kind] = GetCurrentLinkSourcePin();
 
   if (source_kind == ne::PinKind::Input) {
-    callbacks_.create_link(
+    parent_diagram_->CreateLink(
         core::INode::GetFirstPinOfKind(node, ne::PinKind::Output), source_pin);
   } else {
-    callbacks_.create_link(
+    parent_diagram_->CreateLink(
         source_pin, core::INode::GetFirstPinOfKind(node, ne::PinKind::Input));
   }
 
@@ -212,9 +220,10 @@ auto Linker::GetCanConnectToPinReason(ne::PinId pin_id) const
     return {true, {}};
   }
 
+  const auto& diagram = parent_diagram_->GetDiagram();
   const auto is_repinning = linking_data_->repinning_data.has_value();
 
-  if (const auto pin_link = callbacks_.find_pin_link(pin_id)) {
+  if (const auto pin_link = core::Diagram::FindPinLink(diagram, pin_id)) {
     if (const auto pin_of_link_being_repinned =
             is_repinning &&
             ((*pin_link)->id == linking_data_->repinning_data->link_to_repin)) {
@@ -224,7 +233,7 @@ auto Linker::GetCanConnectToPinReason(ne::PinId pin_id) const
     return {false, "Pin Is Taken"};
   }
 
-  const auto& pin_node = callbacks_.find_pin_node(pin_id);
+  const auto& pin_node = core::Diagram::FindPinNode(diagram, pin_id);
 
   if (const auto same_node =
           pin_node.GetId() == linking_data_->dragged_from_node) {

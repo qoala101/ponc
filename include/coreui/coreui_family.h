@@ -6,16 +6,18 @@
 
 #include "core_i_family.h"
 #include "core_i_node.h"
-#include "core_id_generator.h"
 #include "cpp_safe_ptr.h"
 
 namespace esc::coreui {
 ///
+class Project;
+
+///
 class Family {
  public:
   ///
-  Family(cpp::SafePtr<const core::IFamily> family,
-         cpp::SafePtr<core::IdGenerator> id_generator);
+  Family(cpp::SafePtr<Project> parent_project,
+         cpp::SafePtr<const core::IFamily> family);
 
   ///
   auto GetFamily() const -> const core::IFamily &;
@@ -26,9 +28,9 @@ class Family {
 
  private:
   ///
-  cpp::SafePtr<const core::IFamily> family_;
+  cpp::SafePtr<Project> parent_project_;
   ///
-  cpp::SafePtr<core::IdGenerator> id_generator_;
+  cpp::SafePtr<const core::IFamily> family_;
 };
 
 ///

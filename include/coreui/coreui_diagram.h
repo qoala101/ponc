@@ -13,41 +13,25 @@
 #include "core_diagram.h"
 #include "core_i_family.h"
 #include "core_i_node.h"
-#include "core_id_generator.h"
 #include "core_link.h"
-#include "coreui_event_loop.h"
 #include "coreui_family.h"
 #include "coreui_i_header_traits.h"
 #include "coreui_i_pin_traits.h"
 #include "coreui_link.h"
 #include "coreui_linker.h"
 #include "coreui_node.h"
-#include "coreui_texture.h"
-#include "cpp_callbacks.h"
 #include "cpp_safe_ptr.h"
-#include "imgui.h"
 
 namespace esc::coreui {
+///
+class Project;
+
 ///
 class Diagram {
  public:
   ///
-  struct Callbacks {
-    ///
-    cpp::Query<bool> is_color_flow{};
-    ///
-    cpp::Query<ImColor, float> get_flow_color{};
-    ///
-    cpp::Query<Texture, std::string_view> get_texture{};
-    ///
-    cpp::Action<void(Event)> post_event{};
-  };
-
-  ///
-  Diagram(
-      cpp::SafePtr<core::Diagram> diagram,
-      cpp::SafePtr<const std::vector<std::unique_ptr<core::IFamily>>> families,
-      cpp::SafePtr<core::IdGenerator> id_generator, Callbacks callbacks);
+  Diagram(cpp::SafePtr<Project> parent_project,
+          cpp::SafePtr<core::Diagram> diagram);
 
   ///
   void OnFrame();
@@ -65,12 +49,12 @@ class Diagram {
   auto GetNodes() -> std::vector<Node> &;
   ///
   void AddNode(std::unique_ptr<core::INode> node) const;
-  ///
   void DeleteNode(ne::NodeId node_id) const;
-  ///
   void DeleteNodeWithLinks(ne::NodeId node_id) const;
   ///
   auto GetLinks() const -> const std::vector<Link> &;
+  ///
+  void CreateLink(ne::PinId start_pin_id, ne::PinId end_pin_id) const;
   ///
   void DeleteLink(ne::LinkId link_id) const;
 
@@ -94,17 +78,14 @@ class Diagram {
   auto NodeFrom(core::INode &core_node, const flow::NodeFlow &node_flow) const;
   ///
   void UpdateNodes(const flow::NodeFlows &node_flows);
+  void MoveConnectedLinkToNewFreePin(
+      ne::PinId pin_id, ne::PinKind pin_kind,
+      const core::IFamily &free_pin_family) const;
 
   ///
+  cpp::SafePtr<Project> parent_project_;
+  ///
   cpp::SafePtr<core::Diagram> diagram_;
-  ///
-  cpp::SafePtr<const std::vector<std::unique_ptr<core::IFamily>>> families_;
-  ///
-  cpp::SafePtr<core::IdGenerator> id_generator_;
-  ///
-  Callbacks callbacks_{};
-  ///
-  std::unique_ptr<ne::EditorContext, void (*)(ne::EditorContext *)> context_;
   ///
   cpp::SafeOwner safe_owner_{};
   ///

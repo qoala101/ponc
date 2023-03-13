@@ -41,7 +41,7 @@ struct NodeData {
 class Node {
  public:
   ///
-  explicit Node(cpp::SafePtr<core::INode> core_node, NodeData data);
+  explicit Node(cpp::SafePtr<core::INode> node, NodeData data);
 
   ///
   auto GetNode() const -> core::INode&;
@@ -50,7 +50,7 @@ class Node {
 
  private:
   ///
-  cpp::SafePtr<core::INode> core_node_;
+  cpp::SafePtr<core::INode> node_;
   ///
   NodeData data_{};
 };
