@@ -201,6 +201,17 @@ void Nodes::DrawNode(const coreui::Node& node) {
       }
 
       DrawPinField(pin);
+
+      const auto label = pin.label;
+      const auto has_label = label.has_value() && !label->text.empty();
+      const auto has_value = !std::holds_alternative<std::monostate>(pin.value);
+
+      if (!has_value && !has_label) {
+        ImGui::Spring(0);
+      } else {
+        ImGui::Spring(1, 0);
+      }
+
       drawn_pin_tip_poses_.emplace(pin.flow_data->id,
                                    *DrawPinIconArea(pin, ne::PinKind::Output));
 
