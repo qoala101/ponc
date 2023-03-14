@@ -2,6 +2,9 @@
 
 namespace esc::draw {
 ///
+void IFileDialog::Open() { dialog_.Open(); }
+
+///
 void IFileDialog::Draw(const Callbacks &callbacks) {
   dialog_.Display();
 
@@ -12,9 +15,6 @@ void IFileDialog::Draw(const Callbacks &callbacks) {
   callbacks.file_selected(dialog_.GetSelected().string());
   dialog_.ClearSelected();
 }
-
-///
-void IFileDialog::Show() { dialog_.Open(); }
 
 ///
 IFileDialog::IFileDialog(const ImGui::FileBrowser &dialog) : dialog_{dialog} {}

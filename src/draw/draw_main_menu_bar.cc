@@ -5,7 +5,6 @@
 #include <functional>
 #include <variant>
 
-#include "core_link.h"
 #include "coreui_project.h"
 #include "draw_open_file_dialog.h"
 #include "draw_save_as_file_dialog.h"
@@ -44,12 +43,12 @@ void MainMenuBar::Draw(coreui::Project &project) {
 ///
 void MainMenuBar::DrawFileMenu(coreui::Project &project) {
   if (ImGui::BeginMenu("File")) {
-    if (ImGui::MenuItem("New")) {
-      project.Reset();
+    if (ImGui::MenuItem("New...")) {
+      new_project_dialog_.Open();
     }
 
     if (ImGui::MenuItem("Open...", nullptr)) {
-      open_file_dialog_.Show();
+      open_file_dialog_.Open();
     }
 
     ImGui::Separator();
@@ -59,7 +58,7 @@ void MainMenuBar::DrawFileMenu(coreui::Project &project) {
     }
 
     if (ImGui::MenuItem("Save As...")) {
-      save_as_file_dialog_.Show();
+      save_as_file_dialog_.Open();
     }
 
     ImGui::EndMenu();
@@ -68,6 +67,8 @@ void MainMenuBar::DrawFileMenu(coreui::Project &project) {
 
 ///
 void MainMenuBar::DrawDialogs(coreui::Project &project) {
+  new_project_dialog_.Draw({.accepted = [&project]() { project.Reset(); }});
+
   open_file_dialog_.Draw({.file_selected = [&project](auto file_path) {
     project.OpenFromFile(std::move(file_path));
   }});

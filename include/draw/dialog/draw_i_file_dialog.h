@@ -22,9 +22,9 @@ class IFileDialog : public cpp::Interface {
   };
 
   ///
-  void Draw(const Callbacks &callbacks);
+  void Open();
   ///
-  void Show();
+  void Draw(const Callbacks &callbacks);
 
  protected:
   ///
