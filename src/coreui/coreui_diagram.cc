@@ -39,7 +39,11 @@ Diagram::Diagram(cpp::SafePtr<Project> parent_project,
                  cpp::SafePtr<core::Diagram> diagram)
     : parent_project_{std::move(parent_project)},
       diagram_{std::move(diagram)},
-      linker_{safe_owner_.MakeSafe(this)} {}
+      linker_{safe_owner_.MakeSafe(this)} {
+  for (const auto& node : diagram_->GetNodes()) {
+    UpdateNodePos(node->GetId());
+  }
+}
 
 ///
 void Diagram::OnFrame() {
@@ -50,6 +54,8 @@ void Diagram::OnFrame() {
 
   UpdateLinks(node_flows);
   UpdateNodes(node_flows);
+
+  update_poses_nodes_.clear();
 }
 
 ///
@@ -79,10 +85,13 @@ auto Diagram::GetNodes() const -> const std::vector<Node>& {
 auto Diagram::GetNodes() -> std::vector<Node>& { return nodes_; }
 
 ///
-void Diagram::AddNode(std::unique_ptr<core::INode> node) const {
+void Diagram::AddNode(std::unique_ptr<core::INode> node) {
   parent_project_->GetEventLoop().PostEvent(
-      [diagram = diagram_, node = cpp::Share(std::move(node))]() {
-        diagram->EmplaceNode(std::move(*node));
+      [safe_this = safe_owner_.MakeSafe(this),
+       node = cpp::Share(std::move(node))]() {
+        const auto node_id = (*node)->GetId();
+        safe_this->diagram_->EmplaceNode(std::move(*node));
+        safe_this->UpdateNodePos(node_id);
       });
 }
 
@@ -105,7 +114,7 @@ auto Diagram::GetFreePinFamily(ne::PinKind pin_kind) const -> auto& {
 }
 
 ///
-void Diagram::DeleteNode(ne::NodeId node_id) const {
+void Diagram::DeleteNode(ne::NodeId node_id) {
   const auto& node = core::Diagram::FindNode(*diagram_, node_id);
 
   if (const auto input_pin = node.GetInputPinId()) {
@@ -309,7 +318,8 @@ auto Diagram::PinFrom(const IPinTraits& pin_traits,
 auto Diagram::NodeFrom(core::INode& core_node,
                        const flow::NodeFlow& node_flow) const {
   const auto node_traits = core_node.CreateUiTraits();
-  auto node_data = NodeData{};
+  auto node_data = NodeData{
+      .update_pos = update_poses_nodes_.contains(core_node.GetId().Get())};
 
   if (const auto header_traits = node_traits->CreateHeaderTraits()) {
     const auto texture_file_path = (*header_traits)->GetTextureFilePath();
@@ -349,9 +359,14 @@ void Diagram::UpdateNodes(const flow::NodeFlows& node_flows) {
 }
 
 ///
+void Diagram::UpdateNodePos(ne::NodeId node_id) {
+  update_poses_nodes_.insert(node_id.Get());
+}
+
+///
 void Diagram::MoveConnectedLinkToNewFreePin(
     ne::PinId pin_id, ne::PinKind pin_kind,
-    const core::IFamily& free_pin_family) const {
+    const core::IFamily& free_pin_family) {
   const auto link = core::Diagram::FindPinLink(*diagram_, pin_id);
 
   if (!link.has_value()) {

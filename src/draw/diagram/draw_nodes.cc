@@ -1,3 +1,5 @@
+#include <limits>
+
 #include "draw_colored_text.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
@@ -81,13 +83,11 @@ void Nodes::DrawNode(const coreui::Node& node) {
   auto& core_node = node.GetNode();
   const auto& node_data = node.GetData();
   const auto node_id = core_node.GetId();
-  const auto node_pos = ne::GetNodePosition(node_id);
 
-  if (const auto pos_not_set =
-          (node_pos.x == FLT_MAX) && (node_pos.y == FLT_MAX)) {
+  if (node_data.update_pos) {
     ne::SetNodePosition(node_id, core_node.GetPos());
   } else {
-    core_node.SetPos(node_pos);
+    core_node.SetPos(ne::GetNodePosition(node_id));
   }
 
   ne::PushStyleVar(ne::StyleVar_NodePadding, ImVec4{8, 4, 8, 8});

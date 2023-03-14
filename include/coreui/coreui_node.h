@@ -30,6 +30,8 @@ struct Header {
 ///
 struct NodeData {
   ///
+  bool update_pos{};
+  ///
   std::optional<Header> header{};
   ///
   std::vector<Pin> input_pins{};

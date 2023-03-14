@@ -3,10 +3,12 @@
 
 #include <imgui_node_editor.h>
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_set>
 #include <variant>
 #include <vector>
 
@@ -48,9 +50,9 @@ class Diagram {
   ///
   auto GetNodes() -> std::vector<Node> &;
   ///
-  void AddNode(std::unique_ptr<core::INode> node) const;
+  void AddNode(std::unique_ptr<core::INode> node);
   ///
-  void DeleteNode(ne::NodeId node_id) const;
+  void DeleteNode(ne::NodeId node_id);
   ///
   void DeleteNodeWithLinks(ne::NodeId node_id) const;
   ///
@@ -81,11 +83,12 @@ class Diagram {
   ///
   void UpdateNodes(const flow::NodeFlows &node_flows);
   ///
+  void UpdateNodePos(ne::NodeId node_id);
+  ///
   auto GetFreePinFamily(ne::PinKind pin_kind) const -> auto &;
   ///
-  void MoveConnectedLinkToNewFreePin(
-      ne::PinId pin_id, ne::PinKind pin_kind,
-      const core::IFamily &free_pin_family) const;
+  void MoveConnectedLinkToNewFreePin(ne::PinId pin_id, ne::PinKind pin_kind,
+                                     const core::IFamily &free_pin_family);
 
   ///
   cpp::SafePtr<Project> parent_project_;
@@ -101,6 +104,8 @@ class Diagram {
   std::vector<Node> nodes_{};
   ///
   std::vector<Link> links_{};
+  ///
+  std::unordered_set<uintptr_t> update_poses_nodes_{};
 };
 }  // namespace esc::coreui
 
