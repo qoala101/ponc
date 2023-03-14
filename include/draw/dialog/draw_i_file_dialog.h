@@ -18,7 +18,7 @@ class IFileDialog : public cpp::Interface {
   ///
   struct Callbacks {
     ///
-    cpp::Signal<std::string> file_selected{};
+    cpp::Signal<std::filesystem::path> file_selected{};
   };
 
   ///

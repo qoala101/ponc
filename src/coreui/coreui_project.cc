@@ -139,6 +139,9 @@ void Project::OpenFromFile(std::filesystem::path file_path) {
 }
 
 ///
+auto Project::CanSave() const -> bool { return !file_path_.empty(); }
+
+///
 void Project::Save() {
   Expects(!file_path_.empty());
   SaveToFile(file_path_);

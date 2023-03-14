@@ -52,6 +52,8 @@ class Project {
   ///
   void OpenFromFile(std::filesystem::path file_path);
   ///
+  auto CanSave() const -> bool;
+  ///
   void Save();
   ///
   void SaveToFile(std::filesystem::path file_path);

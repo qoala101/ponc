@@ -20,13 +20,6 @@ auto AsLowerCase(std::string text) {
 
   return text;
 }
-
-///
-void ShowFlow(const std::vector<core::Link> &links) {
-  for (const auto &link : links) {
-    ne::Flow(link.id);
-  }
-}
 }  // namespace
 
 ///
@@ -36,10 +29,6 @@ void MainMenuBar::Draw(coreui::Project &project) {
 
     if (ImGui::MenuItem("Zoom to Content")) {
       ne::NavigateToContent();
-    }
-
-    if (ImGui::MenuItem("Show Flow")) {
-      ShowFlow(project.GetDiagram().GetDiagram().GetLinks());
     }
 
     if (ImGui::MenuItem("Color Flow", nullptr,
@@ -65,17 +54,12 @@ void MainMenuBar::DrawFileMenu(coreui::Project &project) {
 
     ImGui::Separator();
 
-    if (ImGui::MenuItem("Save")) {
+    if (ImGui::MenuItem("Save", "", false, project.CanSave())) {
       project.Save();
     }
 
     if (ImGui::MenuItem("Save As...")) {
       save_as_file_dialog_.Show();
-    }
-
-    ImGui::Separator();
-
-    if (ImGui::MenuItem("Exit")) {
     }
 
     ImGui::EndMenu();
