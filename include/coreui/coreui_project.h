@@ -3,6 +3,7 @@
 
 #include <imgui_node_editor.h>
 
+#include <filesystem>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -15,6 +16,7 @@
 #include "coreui_diagram.h"
 #include "coreui_event_loop.h"
 #include "coreui_textures_handle.h"
+#include "cpp_callbacks.h"
 #include "cpp_safe_ptr.h"
 
 namespace esc::coreui {
@@ -22,8 +24,14 @@ namespace esc::coreui {
 class Project {
  public:
   ///
+  struct Callbacks {
+    ///
+    cpp::Signal<std::string> name_changed{};
+  };
+
+  ///
   Project(std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups,
-          TexturesHandle textures_handle);
+          TexturesHandle textures_handle, Callbacks callbacks);
 
   ///
   void OnFrame();
@@ -40,11 +48,13 @@ class Project {
   ///
   auto GetEventLoop() -> EventLoop &;
   ///
-  void OpenFromFile(std::string file_path);
-  ///
-  void SaveToFile(std::string file_path);
-  ///
   void Reset();
+  ///
+  void OpenFromFile(std::filesystem::path file_path);
+  ///
+  void Save();
+  ///
+  void SaveToFile(std::filesystem::path file_path);
 
  private:
   ///
@@ -53,13 +63,21 @@ class Project {
   auto CreateDiagram();
   ///
   auto CreateFamilyParsers() const;
+  ///
+  auto GetName() const -> std::string;
+  ///
+  void SetFilePath(std::filesystem::path file_path);
 
   ///
   std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups_{};
   ///
   TexturesHandle textures_handle_;
   ///
+  Callbacks callbacks_{};
+  ///
   cpp::SafeOwner safe_owner_{};
+  ///
+  std::filesystem::path file_path_{};
   ///
   core::Project project_;
   ///

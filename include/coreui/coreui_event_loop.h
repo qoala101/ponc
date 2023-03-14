@@ -13,15 +13,11 @@ class EventLoop {
   ///
   void PostEvent(Event event);
   ///
-  void PostLateEvent(Event event);
-  ///
   void ExecuteEvents();
 
  private:
   ///
   std::vector<Event> events_{};
-  ///
-  std::vector<Event> late_events_{};
 };
 }  // namespace esc::coreui
 

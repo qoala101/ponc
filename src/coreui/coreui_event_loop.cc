@@ -7,16 +7,11 @@ void EventLoop::PostEvent(Event event) {
 }
 
 ///
-void EventLoop::PostLateEvent(Event event) {
-  late_events_.emplace_back(std::move(event));
-}
-
-///
 void EventLoop::ExecuteEvents() {
-  for (const auto& event : events_) {
+  auto events = std::move(events_);
+
+  for (const auto& event : events) {
     event();
   }
-
-  events_ = std::move(late_events_);
 }
 }  // namespace esc::coreui

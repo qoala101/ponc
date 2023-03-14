@@ -55,8 +55,18 @@ void MainMenuBar::Draw(coreui::Project &project) {
 ///
 void MainMenuBar::DrawFileMenu(coreui::Project &project) {
   if (ImGui::BeginMenu("File")) {
+    if (ImGui::MenuItem("New")) {
+      project.Reset();
+    }
+
     if (ImGui::MenuItem("Open...", nullptr)) {
       open_file_dialog_.Show();
+    }
+
+    ImGui::Separator();
+
+    if (ImGui::MenuItem("Save")) {
+      project.Save();
     }
 
     if (ImGui::MenuItem("Save As...")) {
@@ -65,8 +75,7 @@ void MainMenuBar::DrawFileMenu(coreui::Project &project) {
 
     ImGui::Separator();
 
-    if (ImGui::MenuItem("Reset")) {
-      project.Reset();
+    if (ImGui::MenuItem("Exit")) {
     }
 
     ImGui::EndMenu();

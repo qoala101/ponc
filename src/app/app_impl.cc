@@ -8,13 +8,13 @@
 #include "app_coupler_family_group.h"
 #include "app_input_family_group.h"
 #include "app_splitter_family_group.h"
-#include "core_free_pin_family_group.h"
 #include "core_i_family_group.h"
 #include "coreui_project.h"
 
 namespace esc {
 ///
-AppImpl::AppImpl(coreui::TexturesHandle textures_handle)
+AppImpl::AppImpl(coreui::TexturesHandle textures_handle,
+                 coreui::Project::Callbacks project_callbacks)
     : project_{
           []() {
             auto family_groups =
@@ -27,7 +27,7 @@ AppImpl::AppImpl(coreui::TexturesHandle textures_handle)
                 std::make_unique<AttenuatorFamilyGroup>());
             return family_groups;
           }(),
-          std::move(textures_handle)} {}
+          std::move(textures_handle), std::move(project_callbacks)} {}
 
 ///
 void AppImpl::OnFrame() {

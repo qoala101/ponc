@@ -3,8 +3,7 @@
 
 #include <application.h>
 
-#include "core_project.h"
-#include "coreui_event_loop.h"
+#include "coreui_project.h"
 #include "coreui_textures_handle.h"
 #include "draw_main_window.h"
 
@@ -13,7 +12,8 @@ namespace esc {
 class AppImpl {
  public:
   ///
-  explicit AppImpl(coreui::TexturesHandle textures_handle);
+  AppImpl(coreui::TexturesHandle textures_handle,
+          coreui::Project::Callbacks project_callbacks);
 
   ///
   void OnFrame();
@@ -21,7 +21,7 @@ class AppImpl {
  private:
   ///
   coreui::Project project_;
-   ///
+  ///
   draw::MainWindow main_window_{};
 };
 }  // namespace esc
