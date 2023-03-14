@@ -12,7 +12,6 @@
 #include "draw_link_popup.h"
 #include "draw_linker.h"
 #include "draw_node_popup.h"
-#include "draw_nodes.h"
 
 namespace esc::draw {
 ///
@@ -38,8 +37,6 @@ class DiagramEditor {
   ItemDeleter item_deleter_{};
   ///
   Linker linker_{};
-  ///
-  Nodes nodes_{};
   ///
   CreateNodePopup create_node_popup_{};
   ///

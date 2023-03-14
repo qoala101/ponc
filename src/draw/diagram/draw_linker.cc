@@ -75,7 +75,7 @@ void Linker::Draw(coreui::Linker &linker, const Callbacks &callbacks) {
   ne::EndCreate();
 
   if (const auto link = linker.GetManualLink()) {
-    DrawManualLink(**link, callbacks);
+    DrawManualLink(**link);
   }
 }
 
@@ -93,33 +93,31 @@ void Linker::DrawNewNodeQuery(coreui::Linker &linker,
 }
 
 ///
-auto Linker::GetPosValue(const coreui::PosVariant &pos_variant,
-                         const Callbacks &callbacks) const {
+auto Linker::GetPosValue(const coreui::PosVariant &pos_variant) const {
   if (std::holds_alternative<coreui::NewNodePos>(pos_variant)) {
     return new_node_pos_;
   }
 
-  if (std::holds_alternative<ne::PinId>(pos_variant)) {
-    return callbacks.get_pin_tip_pos(std::get<ne::PinId>(pos_variant));
+  if (std::holds_alternative<ImVec2>(pos_variant)) {
+    return std::get<ImVec2>(pos_variant);
   }
 
   return ImGui::GetMousePos();
 }
 
 ///
-void Linker::DrawManualLink(const coreui::ManualLink &link,
-                            const Callbacks &callbacks) const {
+void Linker::DrawManualLink(const coreui::ManualLink &link) const {
   auto fake_link = ax::NodeEditor::Detail::Link{nullptr, {}};
   fake_link.m_Color = link.color;
   fake_link.m_Thickness = link.thickness;
 
   auto fake_start_pin = CreateFakePin(ne::PinKind::Output);
   fake_link.m_StartPin = &fake_start_pin;
-  fake_link.m_Start = GetPosValue(link.start_pos, callbacks);
+  fake_link.m_Start = GetPosValue(link.start_pos);
 
   auto fake_end_pin = CreateFakePin(ne::PinKind::Input);
   fake_link.m_EndPin = &fake_end_pin;
-  fake_link.m_End = GetPosValue(link.end_pos, callbacks);
+  fake_link.m_End = GetPosValue(link.end_pos);
 
   fake_link.Draw(ImGui::GetWindowDrawList());
 }

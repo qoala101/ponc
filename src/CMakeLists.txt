@@ -171,7 +171,7 @@ add_example_executable(esc
 
   # # draw/diagram/draw_groups.cc
   draw/diagram/draw_link.cc
-  draw/diagram/draw_nodes.cc
+  draw/diagram/draw_node.cc
 
   draw/diagram/draw_tooltip.cc
   draw/dialog/draw_i_file_dialog.cc

@@ -16,7 +16,7 @@
 #include "cpp_assert.h"
 #include "cpp_scope.h"
 #include "draw_flow_icon.h"
-#include "draw_nodes.h"
+#include "draw_node.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
@@ -79,7 +79,7 @@ auto DrawPinIconArea(const coreui::Pin& pin, ne::PinKind pin_kind)
 }
 }  // namespace
 
-void Nodes::DrawNode(const coreui::Node& node) {
+void DrawNode(coreui::Node& node) {
   auto& core_node = node.GetNode();
   const auto& node_data = node.GetData();
   const auto node_id = core_node.GetId();
@@ -140,8 +140,8 @@ void Nodes::DrawNode(const coreui::Node& node) {
         ImGui::BeginHorizontal(layout_id++);
       }
 
-      drawn_pin_tip_poses_.emplace(pin.flow_data->id,
-                                   *DrawPinIconArea(pin, ne::PinKind::Input));
+      node.SetPinTipPos(pin.flow_data->id,
+                        *DrawPinIconArea(pin, ne::PinKind::Input));
       DrawPinField(pin);
 
       if (pin.flow_data.has_value()) {
@@ -212,8 +212,8 @@ void Nodes::DrawNode(const coreui::Node& node) {
         ImGui::Spring(1, 0);
       }
 
-      drawn_pin_tip_poses_.emplace(pin.flow_data->id,
-                                   *DrawPinIconArea(pin, ne::PinKind::Output));
+      node.SetPinTipPos(pin.flow_data->id,
+                        *DrawPinIconArea(pin, ne::PinKind::Output));
 
       if (pin.flow_data.has_value()) {
         ne::EndPin();
@@ -233,6 +233,8 @@ void Nodes::DrawNode(const coreui::Node& node) {
   ImGui::EndVertical();
 
   ne::EndNode();
+
+  node.SetSize(ne::GetNodeSize(node_id));
 
   if (header_rect.has_value()) {
     auto* drawList = ne::GetNodeBackgroundDrawList(node_id);
@@ -264,20 +266,5 @@ void Nodes::DrawNode(const coreui::Node& node) {
 
   ImGui::PopID();
   ne::PopStyleVar();
-}
-
-void Nodes::Draw(const std::vector<coreui::Node>& nodes) {
-  drawn_pin_tip_poses_.clear();
-
-  for (const auto& node : nodes) {
-    DrawNode(node);
-  }
-}
-
-///
-auto Nodes::GetDrawnPinTipPos(ne::PinId pin_id) const -> ImVec2 {
-  const auto pin_id_value = pin_id.Get();
-  Expects(drawn_pin_tip_poses_.contains(pin_id_value));
-  return drawn_pin_tip_poses_.at(pin_id_value);
 }
 }  // namespace esc::draw

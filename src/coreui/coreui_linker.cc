@@ -33,16 +33,14 @@ auto Linker::GetRepinningLinkColor() const {
 }
 
 ///
-auto Linker::GetCurrentLinkSourcePin() const {
+auto Linker::GetCurrentLinkSourcePin() const -> auto& {
   Expects(linking_data_.has_value());
 
   if (linking_data_->repinning_data.has_value()) {
-    return std::pair{linking_data_->repinning_data->fixed_pin,
-                     linking_data_->repinning_data->fixed_pin_kind};
+    return linking_data_->repinning_data->fixed_pin_data;
   }
 
-  return std::pair{linking_data_->dragged_from_pin,
-                   linking_data_->dragged_from_pin_kind};
+  return linking_data_->dragged_from_pin_data;
 }
 
 ///
@@ -50,10 +48,12 @@ auto Linker::CreateManualLinkTo(const PosVariant& target_pos,
                                 const ImColor& color) const {
   auto link = ManualLink{.color = color, .thickness = 4};
 
-  const auto [source_pin, source_kind] = GetCurrentLinkSourcePin();
-  const auto source_pos = PosVariant{source_pin};
+  const auto& source_pin = GetCurrentLinkSourcePin();
+  const auto& source_node =
+      Diagram::FindNode(*parent_diagram_, source_pin.node_id);
+  const auto source_pos = PosVariant{source_node.GetPinTipPos(source_pin.id)};
 
-  if (source_kind == ne::PinKind::Input) {
+  if (source_pin.kind == ne::PinKind::Input) {
     link.start_pos = target_pos;
     link.end_pos = source_pos;
   } else {
@@ -77,10 +77,11 @@ void Linker::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
   const auto& dragged_from_node =
       core::Diagram::FindPinNode(diagram, *dragged_from_pin);
 
-  linking_data_ = LinkingData{.dragged_from_pin = *dragged_from_pin,
-                              .dragged_from_node = dragged_from_node.GetId(),
-                              .dragged_from_pin_kind = core::INode::GetPinKind(
-                                  dragged_from_node, *dragged_from_pin)};
+  linking_data_ = LinkingData{
+      .dragged_from_pin_data = {
+          .id = *dragged_from_pin,
+          .kind = core::INode::GetPinKind(dragged_from_node, *dragged_from_pin),
+          .node_id = dragged_from_node.GetId()}};
 
   const auto link_to_repin =
       core::Diagram::FindPinLink(diagram, *dragged_from_pin);
@@ -91,10 +92,10 @@ void Linker::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
 
     linking_data_->repinning_data = RepinningData{
         .link_to_repin = (*link_to_repin)->id,
-        .fixed_pin = fixed_pin,
-        .fixed_pin_kind = core::Link::GetPinKind(**link_to_repin, fixed_pin),
-        .fixed_pin_node =
-            core::Diagram::FindPinNode(diagram, fixed_pin).GetId()};
+        .fixed_pin_data = {
+            .id = fixed_pin,
+            .kind = core::Link::GetPinKind(**link_to_repin, fixed_pin),
+            .node_id = core::Diagram::FindPinNode(diagram, fixed_pin).GetId()}};
 
     linking_data_->manual_link =
         CreateManualLinkTo(MousePos{}, GetRepinningLinkColor());
@@ -125,8 +126,8 @@ auto Linker::CanConnectToNode(const core::INode& node) const -> bool {
     return true;
   }
 
-  const auto& [source_pin, source_kind] = GetCurrentLinkSourcePin();
-  const auto target_kind = core::Pin::GetOppositeKind(source_kind);
+  const auto& source_pin = GetCurrentLinkSourcePin();
+  const auto target_kind = core::Pin::GetOppositeKind(source_pin.kind);
 
   return core::INode::FindFirstPinOfKind(node, target_kind).has_value();
 }
@@ -174,8 +175,8 @@ auto Linker::IsCreatingNode() const -> bool {
 
 ///
 void Linker::AcceptNewNode(core::INode& node) {
-  const auto [source_pin, source_kind] = GetCurrentLinkSourcePin();
-  const auto target_kind = core::Pin::GetOppositeKind(source_kind);
+  const auto& source_pin = GetCurrentLinkSourcePin();
+  const auto target_kind = core::Pin::GetOppositeKind(source_pin.kind);
 
   AcceptNewLinkTo(core::INode::GetFirstPinOfKind(node, target_kind));
 }
@@ -213,16 +214,16 @@ auto Linker::GetCanConnectToPinReason(ne::PinId pin_id) const
   }
 
   const auto& pin_node = core::Diagram::FindPinNode(diagram, pin_id);
-  const auto source_node = is_repinning
-                               ? linking_data_->repinning_data->fixed_pin_node
-                               : linking_data_->dragged_from_node;
+  const auto source_node =
+      is_repinning ? linking_data_->repinning_data->fixed_pin_data.node_id
+                   : linking_data_->dragged_from_pin_data.node_id;
 
   if (const auto same_node = pin_node.GetId() == source_node) {
     return {false, "Same Node"};
   }
 
   const auto pin_kind = core::INode::GetPinKind(pin_node, pin_id);
-  const auto same_kind = pin_kind == linking_data_->dragged_from_pin_kind;
+  const auto same_kind = pin_kind == linking_data_->dragged_from_pin_data.kind;
 
   if (const auto wrong_kind = is_repinning != same_kind) {
     return {false, "Wrong Pin Kind"};
@@ -241,15 +242,16 @@ void Linker::AcceptNewLinkTo(ne::PinId target_pin) {
 
   if (const auto is_repinning_link =
           linking_data_->repinning_data.has_value()) {
-    parent_diagram_->DeleteLink(linking_data_->repinning_data->link_to_repin);
-  }
-
-  const auto [source_pin, source_kind] = GetCurrentLinkSourcePin();
-
-  if (source_kind == ne::PinKind::Input) {
-    parent_diagram_->CreateLink(target_pin, source_pin);
+    parent_diagram_->MoveLink(linking_data_->dragged_from_pin_data.id,
+                              target_pin);
   } else {
-    parent_diagram_->CreateLink(source_pin, target_pin);
+    const auto& source_pin = GetCurrentLinkSourcePin();
+
+    if (source_pin.kind == ne::PinKind::Input) {
+      parent_diagram_->CreateLink(target_pin, source_pin.id);
+    } else {
+      parent_diagram_->CreateLink(source_pin.id, target_pin);
+    }
   }
 
   linking_data_.reset();

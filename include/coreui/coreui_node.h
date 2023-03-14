@@ -1,7 +1,8 @@
 #ifndef VH_COREUI_NODE_H_
 #define VH_COREUI_NODE_H_
 
-#include <imgui_node_editor.h>
+#include <imgui.h>
+#include <imgui_internal.h>
 
 #include <functional>
 #include <memory>
@@ -14,7 +15,7 @@
 #include "coreui_pin.h"
 #include "coreui_texture.h"
 #include "cpp_safe_ptr.h"
-#include "imgui.h"
+#include "imgui_node_editor.h"
 
 namespace esc::coreui {
 ///
@@ -46,15 +47,27 @@ class Node {
   explicit Node(cpp::SafePtr<core::INode> node, NodeData data);
 
   ///
-  auto GetNode() const -> core::INode&;
+  auto GetNode() const -> core::INode &;
   ///
-  auto GetData() const -> const NodeData&;
+  auto GetData() const -> const NodeData &;
+  ///
+  auto GetSize() const -> const ImVec2 &;
+  ///
+  void SetSize(const ImVec2 &size);
+  ///
+  auto GetPinTipPos(ne::PinId pin_id) const -> ImVec2;
+  ///
+  void SetPinTipPos(ne::PinId pin_id, const ImVec2 &pos);
 
  private:
   ///
   cpp::SafePtr<core::INode> node_;
   ///
   NodeData data_{};
+  ///
+  ImVec2 size_{};
+  ///
+  std::unordered_map<uintptr_t, ImVec2> pin_tip_poses_{};
 };
 }  // namespace esc::coreui
 

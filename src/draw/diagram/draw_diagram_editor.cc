@@ -9,7 +9,7 @@
 #include "draw_create_node_popup.h"
 #include "draw_link.h"
 #include "draw_linker.h"
-#include "draw_nodes.h"
+#include "draw_node.h"
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
@@ -22,20 +22,18 @@ DiagramEditor::DiagramEditor()
 ///
 void DiagramEditor::Draw(coreui::Diagram &diagram) {
   ne::Begin("DiagramEditor");
-
   item_deleter_.UnregisterDeletedItems(diagram.GetDiagram());
-  nodes_.Draw(diagram.GetNodes());
+
+  for (auto &node : diagram.GetNodes()) {
+    DrawNode(node);
+  }
 
   for (const auto &link : diagram.GetLinks()) {
     DrawLink(link);
   }
 
   linker_.Draw(diagram.GetLinker(),
-               {.get_pin_tip_pos =
-                    [&nodes = nodes_](auto pin_id) {
-                      return nodes.GetDrawnPinTipPos(pin_id);
-                    },
-                .new_node_requested_at =
+               {.new_node_requested_at =
                     [&create_node_popup = create_node_popup_](const auto &pos) {
                       create_node_popup.SetPos(pos);
                       create_node_popup.Open();
@@ -43,8 +41,8 @@ void DiagramEditor::Draw(coreui::Diagram &diagram) {
 
   OpenPopupsIfRequested(diagram.GetDiagram());
   DrawPopups(diagram);
-  item_deleter_.DeleteUnregisteredItems(diagram);
 
+  item_deleter_.DeleteUnregisteredItems(diagram);
   ne::End();
 }
 

@@ -17,8 +17,6 @@ class Linker {
   ///
   struct Callbacks {
     ///
-    cpp::Query<ImVec2, ne::PinId> get_pin_tip_pos{};
-    ///
     cpp::Signal<ImVec2> new_node_requested_at{};
   };
 
@@ -30,11 +28,9 @@ class Linker {
   void DrawNewNodeQuery(coreui::Linker &linker,
                         const Callbacks &callbacks) const;
   ///
-  auto GetPosValue(const coreui::PosVariant &pos_variant,
-                   const Callbacks &callbacks) const;
+  auto GetPosValue(const coreui::PosVariant &pos_variant) const;
   ///
-  void DrawManualLink(const coreui::ManualLink &link,
-                      const Callbacks &callbacks) const;
+  void DrawManualLink(const coreui::ManualLink &link) const;
 
   ///
   ImVec2 new_node_pos_{};

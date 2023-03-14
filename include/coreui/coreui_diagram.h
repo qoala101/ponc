@@ -32,6 +32,9 @@ class Project;
 class Diagram {
  public:
   ///
+  static auto FindNode(Diagram &diagram, ne::NodeId node_id) -> Node &;
+
+  ///
   Diagram(cpp::SafePtr<Project> parent_project,
           cpp::SafePtr<core::Diagram> diagram);
 
@@ -60,6 +63,8 @@ class Diagram {
   ///
   void CreateLink(ne::PinId start_pin_id, ne::PinId end_pin_id) const;
   ///
+  void MoveLink(ne::PinId source_pin_id, ne::PinId target_pin_id) const;
+  ///
   void DeleteLink(ne::LinkId link_id) const;
 
  private:
@@ -87,7 +92,10 @@ class Diagram {
   ///
   auto GetFreePinFamily(ne::PinKind pin_kind) const -> auto &;
   ///
-  void MoveConnectedLinkToNewFreePin(ne::PinId pin_id, ne::PinKind pin_kind,
+  auto IsFreePin(const core::INode &node) const;
+  ///
+  void MoveConnectedLinkToNewFreePin(const Node &node, ne::PinId pin_id,
+                                     ne::PinKind pin_kind,
                                      const core::IFamily &free_pin_family);
 
   ///

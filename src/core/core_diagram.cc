@@ -48,6 +48,17 @@ auto Diagram::FindPinNode(const Diagram& diagram, ne::PinId pin_id)
 }
 
 ///
+auto Diagram::FindLink(Diagram& diagram, ne::LinkId link_id) -> Link& {
+  auto& links = diagram.GetLinksImpl();
+  const auto link =
+      std::find_if(links.begin(), links.end(),
+                   [link_id](const auto& link) { return link.id == link_id; });
+
+  Expects(link != links.end());
+  return *link;
+}
+
+///
 auto Diagram::FindPinLink(const Diagram& diagram, ne::PinId pin_id)
     -> std::optional<const Link*> {
   // NOLINTNEXTLINE(*-const-cast)

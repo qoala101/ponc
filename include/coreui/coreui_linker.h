@@ -1,5 +1,5 @@
-#ifndef VH_COREUI_LINKING_H_
-#define VH_COREUI_LINKING_H_
+#ifndef VH_COREUI_LINKER_H_
+#define VH_COREUI_LINKER_H_
 
 #include <imgui.h>
 #include <imgui_node_editor.h>
@@ -25,7 +25,7 @@ struct MousePos {};
 struct NewNodePos {};
 
 ///
-using PosVariant = std::variant<MousePos, NewNodePos, ne::PinId>;
+using PosVariant = std::variant<MousePos, NewNodePos, ImVec2>;
 
 ///
 struct ManualLink {
@@ -71,6 +71,16 @@ class Linker {
 
  private:
   ///
+  struct PinData {
+    ///
+    ne::PinId id{};
+    ///
+    ne::PinKind kind{};
+    ///
+    ne::NodeId node_id{};
+  };
+
+  ///
   struct HoveringData {
     ///
     ne::PinId hovering_over_pin{};
@@ -87,21 +97,13 @@ class Linker {
     ///
     ne::LinkId link_to_repin{};
     ///
-    ne::PinId fixed_pin{};
-    ///
-    ne::PinKind fixed_pin_kind{};
-    ///
-    ne::NodeId fixed_pin_node{};
+    PinData fixed_pin_data{};
   };
 
   ///
   struct LinkingData {
     ///
-    ne::PinId dragged_from_pin{};
-    ///
-    ne::NodeId dragged_from_node{};
-    ///
-    ne::PinKind dragged_from_pin_kind{};
+    PinData dragged_from_pin_data{};
     ///
     bool creating_node{};
     ///
@@ -113,7 +115,7 @@ class Linker {
   };
 
   ///
-  auto GetCurrentLinkSourcePin() const;
+  auto GetCurrentLinkSourcePin() const -> auto&;
   ///
   auto GetRepinningLinkColor() const;
   ///
@@ -132,4 +134,4 @@ class Linker {
 };
 }  // namespace esc::coreui
 
-#endif  // VH_COREUI_LINKING_H_
+#endif  // VH_COREUI_LINKER_H_
