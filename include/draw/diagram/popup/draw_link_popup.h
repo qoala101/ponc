@@ -15,20 +15,11 @@ class LinkPopup : public IPopup {
   ///
   struct Callbacks {
     ///
-    cpp::Signal<ne::LinkId> link_deleted{};
+    cpp::Signal<std::vector<ne::LinkId>> delete_selected{};
   };
 
   ///
   void Draw(const Callbacks &callbacks);
-  ///
-  void SetLinkId(ne::LinkId link_id);
-
- private:
-  ///
-  auto GetLabel() const -> std::string override;
-
-  ///
-  ne::LinkId link_id_{};
 };
 }  // namespace esc::draw
 

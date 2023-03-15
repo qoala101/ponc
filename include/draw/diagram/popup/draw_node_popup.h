@@ -14,22 +14,13 @@ class NodePopup : public IPopup {
   ///
   struct Callbacks {
     ///
-    cpp::Signal<ne::NodeId> node_deleted{};
+    cpp::Signal<const std::vector<ne::NodeId> &> delete_selected{};
     ///
-    cpp::Signal<ne::NodeId> node_deleted_with_links{};
+    cpp::Signal<const std::vector<ne::NodeId> &> delete_with_links_selected{};
   };
 
   ///
   void Draw(const Callbacks &callbacks);
-  ///
-  void SetNodeId(ne::NodeId node_id);
-
- private:
-  ///
-  auto GetLabel() const -> std::string override;
-
-  ///
-  ne::NodeId node_id_{};
 };
 }  // namespace esc::draw
 

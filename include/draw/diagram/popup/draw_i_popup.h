@@ -7,6 +7,7 @@
 #include "cpp_callbacks.h"
 #include "cpp_interface.h"
 #include "cpp_scope_function.h"
+#include "imgui.h"
 
 namespace esc::draw {
 ///
@@ -28,15 +29,13 @@ class IPopup : public cpp::Interface {
   IPopup();
 
   ///
-  auto DrawContentScope(const Callbacks &callbacks = {{}})
+  auto DrawContentScope(std::string_view title = {},
+                        const Callbacks &callbacks = {{}})
       -> cpp::ScopeFunction;
 
  private:
   ///
-  virtual auto GetLabel() const -> std::string = 0;
-
-  ///
-  uintptr_t id_{};
+  ImGuiID id_{};
   ///
   bool opened_{};
 };

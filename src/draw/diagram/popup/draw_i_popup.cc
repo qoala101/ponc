@@ -12,14 +12,14 @@ namespace esc::draw {
 namespace {
 ///
 auto GenerateId() {
-  static auto id = uintptr_t{};
+  static auto id = ImGuiID{};
   return id++;
 }
 }  // namespace
 
 ///
 void IPopup::Open() {
-  ImGui::OpenPopup(IdLabel(GetLabel(), id_).c_str(),
+  ImGui::OpenPopup(IdLabel("", id_).c_str(),
                    ImGuiPopupFlags_NoOpenOverExistingPopup);
   opened_ = true;
 }
@@ -31,16 +31,16 @@ auto IPopup::IsOpened() const -> bool { return opened_; }
 IPopup::IPopup() : id_{GenerateId()} {}
 
 ///
-auto IPopup::DrawContentScope(const Callbacks &callbacks)
+auto IPopup::DrawContentScope(std::string_view title,
+                              const Callbacks &callbacks)
     -> cpp::ScopeFunction {
-  const auto label = GetLabel();
-  const auto id_label = IdLabel(label, id_);
-
   ne::Suspend();
 
-  if (ImGui::BeginPopup(id_label.c_str())) {
-    ImGui::TextUnformatted(label.c_str());
-    ImGui::Separator();
+  if (ImGui::BeginPopup(IdLabel("", id_).c_str())) {
+    if (!title.empty()) {
+      ImGui::TextUnformatted(title.data());
+      ImGui::Separator();
+    }
 
     return cpp::ScopeFunction{[]() {
       ImGui::EndPopup();

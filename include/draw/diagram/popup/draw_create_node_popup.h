@@ -34,9 +34,6 @@ class CreateNodePopup : public IPopup {
 
  private:
   ///
-  auto GetLabel() const -> std::string override;
-
-  ///
   ImVec2 pos_{};
 };
 }  // namespace esc::draw

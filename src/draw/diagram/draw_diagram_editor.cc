@@ -74,7 +74,10 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
   }
 
   if (requested_node_popup) {
-    node_popup_.SetNodeId(node_id);
+    if (!ne::IsNodeSelected(node_id)) {
+      ne::SelectNode(node_id);
+    }
+
     node_popup_.Open();
     return;
   }
@@ -82,7 +85,10 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
   auto link_id = ne::LinkId{};
 
   if (ne::ShowLinkContextMenu(&link_id)) {
-    link_popup_.SetLinkId(link_id);
+    if (!ne::IsLinkSelected(link_id)) {
+      ne::SelectLink(link_id);
+    }
+
     link_popup_.Open();
   }
 }
@@ -91,14 +97,23 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
 void DiagramEditor::DrawPopups(coreui::Diagram &diagram) {
   DrawCreateNodePopup(diagram);
 
-  node_popup_.Draw(
-      {.node_deleted =
-           [&diagram](auto node_id) { diagram.DeleteNode(node_id); },
-       .node_deleted_with_links =
-           [&diagram](auto node_id) { diagram.DeleteNodeWithLinks(node_id); }});
+  node_popup_.Draw({.delete_selected =
+                        [&diagram](const auto &node_ids) {
+                          for (const auto node_id : node_ids) {
+                            diagram.DeleteNode(node_id);
+                          }
+                        },
+                    .delete_with_links_selected =
+                        [&diagram](const auto &node_ids) {
+                          for (const auto node_id : node_ids) {
+                            diagram.DeleteNodeWithLinks(node_id);
+                          }
+                        }});
 
-  link_popup_.Draw({.link_deleted = [&diagram](auto link_id) {
-    diagram.DeleteLink(link_id);
+  link_popup_.Draw({.delete_selected = [&diagram](const auto &link_ids) {
+    for (const auto link_id : link_ids) {
+      diagram.DeleteLink(link_id);
+    }
   }});
 }
 
