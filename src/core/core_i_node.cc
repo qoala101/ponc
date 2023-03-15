@@ -66,7 +66,7 @@ auto INode::FindFirstPinOfKind(const INode& node, ne::PinKind pin_kind)
     return std::nullopt;
   }
 
-  return output_pins[0];
+  return output_pins.front();
 }
 
 ///

@@ -40,7 +40,7 @@ class Node : public core::INode {
   }
 
   void SetInitialFlowValues(flow::NodeFlow& node_flow) const override {
-    node_flow.output_pin_flows.at(GetOutputPinIds()[0].Get()) = value_;
+    node_flow.output_pin_flows.at(GetOutputPinIds().front().Get()) = value_;
   }
 
   auto GetValue() const -> auto& { return value_; }
@@ -85,7 +85,7 @@ class ValuePinTraits : public coreui::IPinTraits {
       : node_{std::move(node)} {}
 
   auto GetPin() const -> std::variant<ne::PinId, ne::PinKind> override {
-    return node_->GetOutputPinIds()[0];
+    return node_->GetOutputPinIds().front();
   }
 
   auto GetValue() const -> coreui::PinValueVariant override {

@@ -39,13 +39,16 @@ auto Project::CreateProject() const {
                            .high_flow = -18,
                            .max_flow = 6,
                        },
-                       std::move(families), core::Diagram{}};
+                       std::move(families), std::vector<core::Diagram>(1)};
 }
 
 ///
 auto Project::CreateDiagram() {
-  return std::make_unique<Diagram>(
-      safe_owner_.MakeSafe(this), safe_owner_.MakeSafe(&project_.GetDiagram()));
+  auto& diagrams = project_.GetDiagrams();
+  Expects(!diagrams.empty());
+
+  return std::make_unique<Diagram>(safe_owner_.MakeSafe(this),
+                                   safe_owner_.MakeSafe(&diagrams.front()));
 }
 
 ///

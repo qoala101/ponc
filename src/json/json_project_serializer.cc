@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <memory>
 
+#include "core_diagram.h"
 #include "core_i_family.h"
 #include "core_project.h"
 #include "cpp_assert.h"
@@ -43,8 +44,13 @@ auto ProjectSerializer::ParseFromJson(
             return ParseFamily(json, family_parsers);
           });
 
-  auto diagram = DiagramSerializer::ParseFromJson(json["diagram"], families);
-  return core::Project{settings, std::move(families), std::move(diagram)};
+  auto diagrams = ContainerSerializer::ParseFromJson<core::Diagram>(
+      json, "diagrams", [&families](const auto& json) {
+        return DiagramSerializer::ParseFromJson(json, families);
+      });
+
+  ;
+  return core::Project{settings, std::move(families), std::move(diagrams)};
 }
 
 ///
@@ -58,7 +64,9 @@ auto ProjectSerializer::WriteToJson(const core::Project& project)
         return family->CreateWriter()->WriteToJson(*family);
       });
 
-  json["diagram"] = DiagramSerializer::WriteToJson(project.GetDiagram());
+  ContainerSerializer::WriteToJson(json, project.GetDiagrams(), "diagrams",
+                                   &DiagramSerializer::WriteToJson);
+
   return json;
 }
 }  // namespace esc::json

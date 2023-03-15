@@ -12,7 +12,6 @@
 
 #include "core_diagram.h"
 #include "core_id_generator.h"
-#include "cpp_assert.h"
 
 namespace esc::core {
 ///
@@ -23,16 +22,18 @@ auto Project::FindMaxId() const {
     max_id = std::max(family->GetId().Get(), max_id);
   }
 
-  for (const auto& node : diagram_.GetNodes()) {
-    max_id = std::max(node->GetId().Get(), max_id);
+  for (const auto& diagram : diagrams_) {
+    for (const auto& node : diagram.GetNodes()) {
+      max_id = std::max(node->GetId().Get(), max_id);
 
-    for (const auto& pin : INode::GetAllPins(*node)) {
-      max_id = std::max(pin.first.Get(), max_id);
+      for (const auto& pin : INode::GetAllPins(*node)) {
+        max_id = std::max(pin.first.Get(), max_id);
+      }
     }
-  }
 
-  for (const auto& link : diagram_.GetLinks()) {
-    max_id = std::max(link.id.Get(), max_id);
+    for (const auto& link : diagram.GetLinks()) {
+      max_id = std::max(link.id.Get(), max_id);
+    }
   }
 
   return max_id;
@@ -41,10 +42,10 @@ auto Project::FindMaxId() const {
 ///
 Project::Project(const Settings& settings,
                  std::vector<std::unique_ptr<IFamily>> families,
-                 Diagram diagram)
+                 std::vector<Diagram> diagrams)
     : settings_{settings},
       families_{std::move(families)},
-      diagram_{std::move(diagram)},
+      diagrams_{std::move(diagrams)},
       id_generator_{FindMaxId() + 1} {}
 
 ///
@@ -63,13 +64,13 @@ auto Project::GetFamilies() const
 }
 
 ///
-auto Project::GetDiagram() const -> const Diagram& {
+auto Project::GetDiagrams() const -> const std::vector<Diagram>& {
   // NOLINTNEXTLINE(*-const-cast)
-  return const_cast<Project*>(this)->GetDiagram();
+  return const_cast<Project*>(this)->GetDiagrams();
 }
 
 ///
-auto Project::GetDiagram() -> Diagram& { return diagram_; }
+auto Project::GetDiagrams() -> std::vector<Diagram>& { return diagrams_; }
 
 ///
 auto Project::GetSettings() const -> const Settings& {

@@ -125,8 +125,8 @@ class NodeUiTraits : public coreui::INodeTraits {
     pin_traits.emplace_back(std::make_unique<DropPinTraits>(node_));
     pin_traits.emplace_back(
         std::make_unique<coreui::EmptyPinTraits>(ne::PinKind::Output));
-    pin_traits.emplace_back(
-        std::make_unique<coreui::FlowPinTraits>(node_->GetOutputPinIds()[0]));
+    pin_traits.emplace_back(std::make_unique<coreui::FlowPinTraits>(
+        node_->GetOutputPinIds().front()));
     return pin_traits;
   }
 

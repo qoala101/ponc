@@ -13,7 +13,7 @@ class Project {
   ///
   Project(const Settings &settings,
           std::vector<std::unique_ptr<IFamily>> families,
-          Diagram diagram = Diagram{});
+          std::vector<Diagram> diagrams);
 
   ///
   auto GetSettings() const -> const Settings &;
@@ -22,9 +22,9 @@ class Project {
   ///
   auto GetFamilies() const -> const std::vector<std::unique_ptr<IFamily>> &;
   ///
-  auto GetDiagram() const -> const Diagram &;
+  auto GetDiagrams() const -> const std::vector<Diagram> &;
   ///
-  auto GetDiagram() -> Diagram &;
+  auto GetDiagrams() -> std::vector<Diagram> &;
   ///
   auto GetIdGenerator() const -> const IdGenerator &;
   ///
@@ -39,7 +39,7 @@ class Project {
   ///
   std::vector<std::unique_ptr<IFamily>> families_{};
   ///
-  Diagram diagram_{};
+  std::vector<Diagram> diagrams_{};
   ///
   IdGenerator id_generator_{};
 };
