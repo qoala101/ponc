@@ -26,23 +26,48 @@ class Node;
 auto CreateNodeWriter(cpp::SafePtr<const Node> node)
     -> std::unique_ptr<json::INodeWriter>;
 
-auto CreateNodeUiTraits(cpp::SafePtr<const Node> node)
+auto CreateNodeUiTraits(cpp::SafePtr<Node> node)
     -> std::unique_ptr<coreui::INodeTraits>;
 
 class Node : public core::INode {
  public:
-  Node(ConstructorArgs args, int percentage_index)
-      : INode{std::move(args)}, percentage_index_{percentage_index} {}
+  Node(ConstructorArgs args, int percentage_index, bool reverse_order = {})
+      : INode{std::move(args)},
+        percentage_index_{percentage_index},
+        reverse_order_{reverse_order} {}
 
   auto CreateWriter() const -> std::unique_ptr<json::INodeWriter> override {
     return CreateNodeWriter(safe_owner_.MakeSafe(this));
   }
 
   auto CreateUiTraits() const -> std::unique_ptr<coreui::INodeTraits> override {
-    return CreateNodeUiTraits(safe_owner_.MakeSafe(this));
+    return CreateNodeUiTraits(safe_owner_.MakeSafe(const_cast<Node*>(this)));
   }
 
-  auto GetSmallDrop() const {
+  auto GetFirstDrop() const {
+    return reverse_order_ ? GetBigDrop() : GetSmallDrop();
+  }
+
+  auto GetSecondDrop() const {
+    return reverse_order_ ? GetSmallDrop() : GetBigDrop();
+  }
+
+  void SetInitialFlowValues(flow::NodeFlow& node_flow) const override {
+    const auto& output_pins = GetOutputPinIds();
+    Expects(output_pins.size() > 1);
+
+    node_flow.output_pin_flows.at(output_pins[0].Get()) = GetFirstDrop();
+    node_flow.output_pin_flows.at(output_pins[1].Get()) = GetSecondDrop();
+  }
+
+  auto GetPercentageIndex() const { return percentage_index_; }
+
+  auto IsOrderReversed() const { return reverse_order_; }
+
+  void ReverseOrder() { reverse_order_ = !reverse_order_; }
+
+ private:
+  auto GetSmallDrop() const -> float {
     switch (percentage_index_) {
       case 0:
         return -0.4F;
@@ -67,7 +92,7 @@ class Node : public core::INode {
     };
   }
 
-  auto GetBigDrop() const {
+  auto GetBigDrop() const -> float {
     switch (percentage_index_) {
       case 0:
         return -13.8F;
@@ -92,18 +117,8 @@ class Node : public core::INode {
     };
   }
 
-  void SetInitialFlowValues(flow::NodeFlow& node_flow) const override {
-    const auto& output_pins = GetOutputPinIds();
-    Expects(output_pins.size() > 1);
-
-    node_flow.output_pin_flows.at(output_pins[0].Get()) = GetSmallDrop();
-    node_flow.output_pin_flows.at(output_pins[1].Get()) = GetBigDrop();
-  }
-
-  auto GetPercentageIndex() const { return percentage_index_; }
-
- private:
   int percentage_index_{};
+  bool reverse_order_{};
   cpp::SafeOwner safe_owner_{};
 };
 
@@ -112,6 +127,16 @@ class NodeWriter : public json::INodeWriter {
   explicit NodeWriter(cpp::SafePtr<const Node> node) : node_{std::move(node)} {}
 
  private:
+  auto WriteToJson() const -> crude_json::value override {
+    auto json = crude_json::value{};
+
+    if (node_->IsOrderReversed()) {
+      json["reverse_order"] = true;
+    }
+
+    return json;
+  }
+
   cpp::SafePtr<const Node> node_;
 };
 
@@ -136,8 +161,7 @@ class DropPinTraits : public coreui::IPinTraits {
 
 class HeaderUiTraits : public coreui::IHeaderTraits {
  public:
-  explicit HeaderUiTraits(cpp::SafePtr<const Node> node)
-      : node_{std::move(node)} {}
+  explicit HeaderUiTraits(cpp::SafePtr<Node> node) : node_{std::move(node)} {}
 
   auto GetColor() const -> ImColor override {
     return core::GetGradient(
@@ -146,18 +170,24 @@ class HeaderUiTraits : public coreui::IHeaderTraits {
   }
 
  private:
-  cpp::SafePtr<const Node> node_;
+  cpp::SafePtr<Node> node_;
 };
 
 class NodeUiTraits : public coreui::INodeTraits {
  public:
-  explicit NodeUiTraits(cpp::SafePtr<const Node> node)
-      : node_{std::move(node)} {}
+  explicit NodeUiTraits(cpp::SafePtr<Node> node) : node_{std::move(node)} {}
 
   auto GetLabel() const -> std::string override {
     const auto percentage = (node_->GetPercentageIndex() + 1) * 5;
-    return "Coupler " + std::to_string(percentage) + "%-" +
-           std::to_string(100 - percentage) + "%";
+
+    auto label = "Coupler " + std::to_string(percentage) + "%-" +
+                 std::to_string(100 - percentage) + "%";
+
+    if (node_->IsOrderReversed()) {
+      label += " *";
+    }
+
+    return label;
   }
 
   auto CreateHeaderTraits() const
@@ -171,9 +201,9 @@ class NodeUiTraits : public coreui::INodeTraits {
     pin_traits.emplace_back(
         std::make_unique<coreui::FlowPinTraits>(*node_->GetInputPinId()));
     pin_traits.emplace_back(
-        std::make_unique<DropPinTraits>(node_->GetSmallDrop()));
+        std::make_unique<DropPinTraits>(node_->GetFirstDrop()));
     pin_traits.emplace_back(
-        std::make_unique<DropPinTraits>(node_->GetBigDrop()));
+        std::make_unique<DropPinTraits>(node_->GetSecondDrop()));
     pin_traits.emplace_back(
         std::make_unique<coreui::EmptyPinTraits>(ne::PinKind::Output));
     pin_traits.emplace_back(
@@ -183,11 +213,25 @@ class NodeUiTraits : public coreui::INodeTraits {
     return pin_traits;
   }
 
+  auto GetActionNames() const -> std::vector<std::string> override {
+    if (node_->GetPercentageIndex() < 9) {
+      return {"Reverse Order"};
+    }
+
+    return {};
+  }
+
+  void ExecuteAction(std::string_view action_name) override {
+    if (action_name == "Reverse Order") {
+      node_->ReverseOrder();
+    }
+  }
+
  private:
-  cpp::SafePtr<const Node> node_;
+  cpp::SafePtr<Node> node_;
 };
 
-auto CreateNodeUiTraits(cpp::SafePtr<const Node> node)
+auto CreateNodeUiTraits(cpp::SafePtr<Node> node)
     -> std::unique_ptr<coreui::INodeTraits> {
   return std::make_unique<NodeUiTraits>(std::move(node));
 }
@@ -248,8 +292,11 @@ class NodeParser : public json::INodeParser {
   auto ParseFromJson(core::INode::ConstructorArgs parsed_args,
                      const crude_json::value& json) const
       -> std::unique_ptr<core::INode> override {
-    return std::make_unique<Node>(std::move(parsed_args),
-                                  family_->GetPercentageIndex());
+    return std::make_unique<Node>(
+        std::move(parsed_args), family_->GetPercentageIndex(),
+        json.contains("reverse_order")
+            ? json["reverse_order"].get<crude_json::boolean>()
+            : false);
   }
 
   cpp::SafePtr<const Family> family_;
@@ -282,7 +329,7 @@ class FamilyWriter : public json::IFamilyWriter {
  private:
   auto GetTypeName() const -> std::string override { return kTypeName; }
 
-  auto WriteToJson() const -> crude_json::value {
+  auto WriteToJson() const -> crude_json::value override {
     auto json = crude_json::value{};
     json["percentage_index"] =
         static_cast<crude_json::number>(family_->GetPercentageIndex());

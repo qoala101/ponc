@@ -21,6 +21,10 @@ class INodeTraits : public cpp::Interface {
   ///
   virtual auto CreatePinTraits() const
       -> std::vector<std::unique_ptr<IPinTraits>>;
+  ///
+  virtual auto GetActionNames() const -> std::vector<std::string>;
+  ///
+  virtual void ExecuteAction(std::string_view action_name);
 };
 }  // namespace esc::coreui
 

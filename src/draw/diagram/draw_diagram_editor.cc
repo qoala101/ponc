@@ -5,6 +5,7 @@
 
 #include "core_diagram.h"
 #include "coreui_diagram.h"
+#include "coreui_i_node_traits.h"
 #include "cpp_scope.h"
 #include "draw_create_node_popup.h"
 #include "draw_link.h"
@@ -97,18 +98,29 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
 void DiagramEditor::DrawPopups(coreui::Diagram &diagram) {
   DrawCreateNodePopup(diagram);
 
-  node_popup_.Draw({.delete_selected =
-                        [&diagram](const auto &node_ids) {
-                          for (const auto node_id : node_ids) {
-                            diagram.DeleteNode(node_id);
-                          }
-                        },
-                    .delete_with_links_selected =
-                        [&diagram](const auto &node_ids) {
-                          for (const auto node_id : node_ids) {
-                            diagram.DeleteNodeWithLinks(node_id);
-                          }
-                        }});
+  node_popup_.Draw(
+      {.get_node_action_names =
+           [&diagram = diagram.GetDiagram()](auto node_id) {
+             const auto &node = core::Diagram::FindNode(diagram, node_id);
+             return node.CreateUiTraits()->GetActionNames();
+           },
+       .node_action_selected =
+           [&diagram = diagram.GetDiagram()](auto node_id, auto action_name) {
+             const auto &node = core::Diagram::FindNode(diagram, node_id);
+             return node.CreateUiTraits()->ExecuteAction(action_name);
+           },
+       .delete_selected =
+           [&diagram](const auto &node_ids) {
+             for (const auto node_id : node_ids) {
+               diagram.DeleteNode(node_id);
+             }
+           },
+       .delete_with_links_selected =
+           [&diagram](const auto &node_ids) {
+             for (const auto node_id : node_ids) {
+               diagram.DeleteNodeWithLinks(node_id);
+             }
+           }});
 
   link_popup_.Draw({.delete_selected = [&diagram](const auto &link_ids) {
     for (const auto link_id : link_ids) {

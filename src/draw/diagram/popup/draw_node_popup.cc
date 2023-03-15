@@ -66,5 +66,20 @@ void NodePopup::Draw(const Callbacks& callbacks) {
   if (ImGui::BeginMenu("Fill With")) {
     ImGui::EndMenu();
   }
+
+  const auto node_id = selected_nodes.front();
+  const auto node_action_names = callbacks.get_node_action_names(node_id);
+
+  if (node_action_names.empty()) {
+    return;
+  }
+
+  ImGui::Separator();
+
+  for (const auto& action_name : node_action_names) {
+    if (ImGui::MenuItem(action_name.c_str())) {
+      callbacks.node_action_selected(node_id, action_name);
+    }
+  }
 }
 }  // namespace esc::draw

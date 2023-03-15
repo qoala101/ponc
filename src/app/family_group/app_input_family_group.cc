@@ -67,7 +67,7 @@ class NodeWriter : public json::INodeWriter {
  private:
   auto WriteToJson() const -> crude_json::value override {
     auto json = crude_json::value{};
-    json["value"] = static_cast<crude_json::number>(node_->GetValue());
+    json["value"] = node_->GetValue();
     return json;
   }
 

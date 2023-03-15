@@ -71,7 +71,7 @@ class NodeWriter : public json::INodeWriter {
  private:
   auto WriteToJson() const -> crude_json::value override {
     auto json = crude_json::value{};
-    json["drop"] = static_cast<crude_json::number>(node_->GetDrop());
+    json["drop"] = node_->GetDrop();
     return json;
   }
 

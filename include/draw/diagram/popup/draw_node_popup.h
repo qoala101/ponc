@@ -3,6 +3,9 @@
 
 #include <imgui_node_editor.h>
 
+#include <vector>
+
+#include "cpp_callbacks.h"
 #include "draw_i_popup.h"
 
 namespace ne = ax::NodeEditor;
@@ -13,6 +16,10 @@ class NodePopup : public IPopup {
  public:
   ///
   struct Callbacks {
+    ///
+    cpp::Query<std::vector<std::string>, ne::NodeId> get_node_action_names{};
+    ///
+    cpp::Signal<ne::NodeId, std::string_view> node_action_selected{};
     ///
     cpp::Signal<const std::vector<ne::NodeId> &> delete_selected{};
     ///
