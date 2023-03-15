@@ -15,7 +15,7 @@ auto IFamily::GetType() const -> std::optional<FamilyType> {
 auto IFamily::GetId() const -> FamilyId { return id_; }
 
 ///
-auto IFamily::CreateNode() const -> std::unique_ptr<INode> {
+auto IFamily::CreateSampleNode() const -> std::unique_ptr<INode> {
   auto id_generator = IdGenerator{};
   return CreateNode(id_generator);
 }

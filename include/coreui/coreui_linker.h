@@ -11,7 +11,9 @@
 #include <variant>
 #include <vector>
 
+#include "core_i_family.h"
 #include "core_i_node.h"
+#include "coreui_family.h"
 #include "cpp_safe_ptr.h"
 
 namespace esc::coreui {
@@ -22,10 +24,7 @@ class Diagram;
 struct MousePos {};
 
 ///
-struct NewNodePos {};
-
-///
-using PosVariant = std::variant<MousePos, NewNodePos, ImVec2>;
+using PosVariant = std::variant<MousePos, ImVec2>;
 
 ///
 struct ManualLink {
@@ -51,23 +50,25 @@ class Linker {
   ///
   auto CanConnectToPin(ne::PinId pin_id) const -> bool;
   ///
-  auto CanConnectToNode(const core::INode& node) const -> bool;
+  auto CanConnectToFamily(const core::IFamily& family) const -> bool;
   ///
   auto GetCanCreateLinkReason() const -> std::pair<bool, std::string>;
   ///
   auto IsRepiningLink(ne::LinkId link_id) const -> bool;
   ///
-  void AcceptNewLink();
+  void AcceptCreateLink();
   ///
-  void StartCreatingNode();
+  void StartCreatingNodeAt(const ImVec2& new_node_pos);
   ///
-  auto IsCreatingNode() const -> bool;
+  auto CanCreateNodesForAllPins() const -> bool;
   ///
-  void AcceptNewNode(core::INode& node);
+  void SetCreateNodesForAllPins(bool create_for_all_pins);
   ///
-  void DiscardNewNode();
+  void AcceptCreateNode(const Family& family);
   ///
-  auto GetManualLink() const -> std::optional<const ManualLink*>;
+  void DiscardCreateNode();
+  ///
+  auto GetManualLinks() const -> std::optional<const std::vector<ManualLink>*>;
 
  private:
   ///
@@ -101,31 +102,45 @@ class Linker {
   };
 
   ///
+  struct CreatingData {
+    ///
+    ImVec2 new_node_pos{};
+    ///
+    bool create_for_all_pins{};
+    ///
+    std::vector<ne::PinId> source_node_empty_pins{};
+  };
+
+  ///
   struct LinkingData {
     ///
     PinData dragged_from_pin_data{};
     ///
-    bool creating_node{};
-    ///
-    std::optional<ManualLink> manual_link{};
+    std::vector<ManualLink> manual_links{};
     ///
     std::optional<HoveringData> hovering_data{};
     ///
     std::optional<RepinningData> repinning_data{};
+    ///
+    std::optional<CreatingData> creating_data{};
   };
 
   ///
   auto GetCurrentLinkSourcePin() const -> auto&;
   ///
-  auto GetRepinningLinkColor() const;
-  ///
-  auto CreateManualLinkTo(const PosVariant& target_pos,
-                          const ImColor& color) const;
-  ///
   auto GetCanConnectToPinReason(ne::PinId pin_id) const
       -> std::pair<bool, std::string>;
   ///
-  void AcceptNewLinkTo(ne::PinId target_pin);
+  void CreateLink(ne::PinId source_pin, ne::PinId target_pin);
+  ///
+  void CreateOrRepinCurrentLink(ne::PinId target_pin);
+  ///
+  auto GetRepinningLinkColor() const;
+  ///
+  auto CreateManualLink(ne::PinId source_pin_id, const PosVariant& target_pos,
+                        const ImColor& color) const;
+  ///
+  void UpdateManualLinks();
 
   ///
   cpp::SafePtr<Diagram> parent_diagram_;

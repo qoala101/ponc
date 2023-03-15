@@ -96,7 +96,7 @@ class Diagram {
   ///
   void MoveConnectedLinkToNewFreePin(const Node &node, ne::PinId pin_id,
                                      ne::PinKind pin_kind,
-                                     const core::IFamily &free_pin_family);
+                                     const coreui::Family &free_pin_family);
 
   ///
   cpp::SafePtr<Project> parent_project_;

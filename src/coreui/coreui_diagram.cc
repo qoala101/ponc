@@ -109,28 +109,36 @@ void Diagram::AddNode(std::unique_ptr<core::INode> node) {
 
 ///
 auto Diagram::GetFreePinFamily(ne::PinKind pin_kind) const -> auto& {
-  const auto& families = parent_project_->GetProject().GetFamilies();
+  for (const auto& group : family_groups_) {
+    const auto free_pin_family = std::find_if(
+        group.families.begin(), group.families.end(),
+        [pin_kind](const auto& family) {
+          const auto& core_family = family.GetFamily();
 
-  const auto family = std::find_if(
-      families.begin(), families.end(), [pin_kind](const auto& family) {
-        if (family->GetType() != core::FamilyType::kFreePin) {
-          return false;
-        }
+          if (core_family.GetType() != core::FamilyType::kFreePin) {
+            return false;
+          }
 
-        const auto node = family->CreateNode();
-        return core::INode::FindFirstPinOfKind(*node, pin_kind).has_value();
-      });
+          const auto node = core_family.CreateSampleNode();
+          return core::INode::FindFirstPinOfKind(*node, pin_kind).has_value();
+        });
 
-  Expects(family != families.end());
-  return **family;
+    if (free_pin_family != group.families.end()) {
+      return *free_pin_family;
+    }
+  }
+
+  Expects(false);
 }
 
 ///
 auto Diagram::IsFreePin(const core::INode& node) const {
   const auto family_id = node.GetFamilyId();
 
-  return (family_id == GetFreePinFamily(ne::PinKind::Input).GetId()) ||
-         (family_id == GetFreePinFamily(ne::PinKind::Output).GetId());
+  return (family_id ==
+          GetFreePinFamily(ne::PinKind::Input).GetFamily().GetId()) ||
+         (family_id ==
+          GetFreePinFamily(ne::PinKind::Output).GetFamily().GetId());
 }
 
 ///
@@ -145,9 +153,7 @@ void Diagram::DeleteNode(ne::NodeId node_id) {
 
   const auto input_pin = core_node.GetInputPinId();
 
-  if (const auto pin_has_connected_link =
-          input_pin.has_value() &&
-          core::Diagram::FindPinLink(*diagram_, *input_pin).has_value()) {
+  if (input_pin.has_value() && core::Diagram::HasLink(*diagram_, *input_pin)) {
     const auto& free_pin_family = GetFreePinFamily(ne::PinKind::Input);
 
     MoveConnectedLinkToNewFreePin(node, *input_pin, ne::PinKind::Input,
@@ -157,8 +163,7 @@ void Diagram::DeleteNode(ne::NodeId node_id) {
   const auto& free_pin_family = GetFreePinFamily(ne::PinKind::Output);
 
   for (const auto ouput_pin : core_node.GetOutputPinIds()) {
-    if (const auto pin_has_connected_link =
-            core::Diagram::FindPinLink(*diagram_, ouput_pin).has_value()) {
+    if (core::Diagram::HasLink(*diagram_, ouput_pin)) {
       MoveConnectedLinkToNewFreePin(node, ouput_pin, ne::PinKind::Output,
                                     free_pin_family);
     }
@@ -350,7 +355,7 @@ auto Diagram::PinFrom(const IPinTraits& pin_traits,
       .color = settings.color_flow
                    ? core::Settings::GetFlowColor(settings, pin_flow)
                    : ImColor{1.F, 1.F, 1.F},
-      .filled = core::Diagram::FindPinLink(*diagram_, pin_id).has_value()};
+      .filled = core::Diagram::HasLink(*diagram_, pin_id)};
 
   if (settings.color_flow && pin.label.has_value()) {
     pin.label->color = pin.flow_data->color;
@@ -419,9 +424,8 @@ void Diagram::UpdateNodePos(ne::NodeId node_id) {
 ///
 void Diagram::MoveConnectedLinkToNewFreePin(
     const Node& node, ne::PinId pin_id, ne::PinKind pin_kind,
-    const core::IFamily& free_pin_family) {
-  auto free_pin_node = free_pin_family.CreateNode(
-      parent_project_->GetProject().GetIdGenerator());
+    const coreui::Family& free_pin_family) {
+  auto free_pin_node = free_pin_family.CreateNode();
 
   const auto pin_tip_pos = node.GetPinTipPos(pin_id);
   free_pin_node->SetPos(pin_tip_pos);

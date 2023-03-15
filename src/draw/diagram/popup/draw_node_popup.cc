@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+#include "coreui_i_node_traits.h"
+#include "draw_family_groups_menu.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
@@ -37,7 +39,7 @@ auto GetTitle(const std::vector<ne::NodeId>& nodes) {
 }  // namespace
 
 ///
-void NodePopup::Draw(const Callbacks& callbacks) {
+void NodePopup::Draw(coreui::Diagram& diagram) {
   const auto selected_nodes =
       IsOpened() ? GetSelectedNodes() : std::vector<ne::NodeId>{};
   const auto title = GetTitle(selected_nodes);
@@ -48,27 +50,34 @@ void NodePopup::Draw(const Callbacks& callbacks) {
   }
 
   if (ImGui::MenuItem("Delete")) {
-    callbacks.delete_selected(selected_nodes);
+    for (const auto node_id : selected_nodes) {
+      diagram.DeleteNode(node_id);
+    }
   }
 
   if (ImGui::MenuItem("Delete With Links")) {
-    callbacks.delete_with_links_selected(selected_nodes);
+    for (const auto node_id : selected_nodes) {
+      diagram.DeleteNodeWithLinks(node_id);
+    }
   }
 
   if (selected_nodes.size() > 1) {
     return;
   }
 
+  const auto& node =
+      core::Diagram::FindNode(diagram.GetDiagram(), selected_nodes.front());
+
   if (ImGui::BeginMenu("Replace With")) {
+    FamilyGroupsMenu::Draw(
+        diagram.GetFamilyGroups(),
+        {.is_family_enabled = [](const auto& family) { return true; },
+         .family_selected = [](const auto& family) {}});
     ImGui::EndMenu();
   }
 
-  if (ImGui::BeginMenu("Fill With")) {
-    ImGui::EndMenu();
-  }
-
-  const auto node_id = selected_nodes.front();
-  const auto node_action_names = callbacks.get_node_action_names(node_id);
+  const auto node_traits = node.CreateUiTraits();
+  const auto node_action_names = node_traits->GetActionNames();
 
   if (node_action_names.empty()) {
     return;
@@ -78,7 +87,7 @@ void NodePopup::Draw(const Callbacks& callbacks) {
 
   for (const auto& action_name : node_action_names) {
     if (ImGui::MenuItem(action_name.c_str())) {
-      callbacks.node_action_selected(node_id, action_name);
+      node_traits->ExecuteAction(action_name);
     }
   }
 }

@@ -6,10 +6,7 @@
 
 #include <memory>
 
-#include "core_i_family.h"
-#include "core_i_node.h"
-#include "coreui_family.h"
-#include "cpp_callbacks.h"
+#include "coreui_diagram.h"
 #include "draw_i_popup.h"
 
 namespace esc::draw {
@@ -17,18 +14,7 @@ namespace esc::draw {
 class CreateNodePopup : public IPopup {
  public:
   ///
-  struct Callbacks {
-    ///
-    std::optional<cpp::Query<bool, const core::IFamily &>> is_family_enabled{};
-    ///
-    std::optional<cpp::Signal<>> closed{};
-    ///
-    cpp::Signal<std::unique_ptr<core::INode>> node_created{};
-  };
-
-  ///
-  void Draw(const std::vector<coreui::FamilyGroup> &family_groups,
-            const Callbacks &callbacks);
+  void Draw(coreui::Diagram &diagram);
   ///
   void SetPos(const ImVec2 &pos);
 

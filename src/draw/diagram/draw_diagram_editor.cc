@@ -5,7 +5,6 @@
 
 #include "core_diagram.h"
 #include "coreui_diagram.h"
-#include "coreui_i_node_traits.h"
 #include "cpp_scope.h"
 #include "draw_create_node_popup.h"
 #include "draw_link.h"
@@ -33,12 +32,7 @@ void DiagramEditor::Draw(coreui::Diagram &diagram) {
     DrawLink(link);
   }
 
-  linker_.Draw(diagram.GetLinker(),
-               {.new_node_requested_at =
-                    [&create_node_popup = create_node_popup_](const auto &pos) {
-                      create_node_popup.SetPos(pos);
-                      create_node_popup.Open();
-                    }});
+  linker_.Draw(diagram.GetLinker(), diagram.GetFamilyGroups());
 
   OpenPopupsIfRequested(diagram.GetDiagram());
   DrawPopups(diagram);
@@ -96,67 +90,12 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
 
 ///
 void DiagramEditor::DrawPopups(coreui::Diagram &diagram) {
-  DrawCreateNodePopup(diagram);
-
-  node_popup_.Draw(
-      {.get_node_action_names =
-           [&diagram = diagram.GetDiagram()](auto node_id) {
-             const auto &node = core::Diagram::FindNode(diagram, node_id);
-             return node.CreateUiTraits()->GetActionNames();
-           },
-       .node_action_selected =
-           [&diagram = diagram.GetDiagram()](auto node_id, auto action_name) {
-             const auto &node = core::Diagram::FindNode(diagram, node_id);
-             return node.CreateUiTraits()->ExecuteAction(action_name);
-           },
-       .delete_selected =
-           [&diagram](const auto &node_ids) {
-             for (const auto node_id : node_ids) {
-               diagram.DeleteNode(node_id);
-             }
-           },
-       .delete_with_links_selected =
-           [&diagram](const auto &node_ids) {
-             for (const auto node_id : node_ids) {
-               diagram.DeleteNodeWithLinks(node_id);
-             }
-           }});
-
+  create_node_popup_.Draw(diagram);
+  node_popup_.Draw(diagram);
   link_popup_.Draw({.delete_selected = [&diagram](const auto &link_ids) {
     for (const auto link_id : link_ids) {
       diagram.DeleteLink(link_id);
     }
   }});
-}
-
-///
-void DiagramEditor::DrawCreateNodePopup(coreui::Diagram &diagram) {
-  if (!create_node_popup_.IsOpened()) {
-    return;
-  }
-
-  auto &linker = diagram.GetLinker();
-  const auto &family_groups = diagram.GetFamilyGroups();
-
-  if (!linker.IsCreatingNode()) {
-    create_node_popup_.Draw(family_groups,
-                            {.node_created = [&diagram](auto node) {
-                              diagram.AddNode(std::move(node));
-                            }});
-    return;
-  }
-
-  create_node_popup_.Draw(
-      family_groups,
-      {.is_family_enabled =
-           [&linker](const auto &family) {
-             return linker.CanConnectToNode(*family.CreateNode());
-           },
-       .closed = [&linker]() { linker.DiscardNewNode(); },
-       .node_created =
-           [&diagram, &linker](auto node) {
-             linker.AcceptNewNode(*node);
-             diagram.AddNode(std::move(node));
-           }});
 }
 }  // namespace esc::draw

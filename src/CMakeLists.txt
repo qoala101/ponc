@@ -154,7 +154,9 @@ add_example_executable(esc
 
   cpp/cpp_scope_function.cc
 
+  draw/diagram/popup/draw_connect_node_popup.cc
   draw/diagram/popup/draw_create_node_popup.cc
+  draw/diagram/popup/draw_family_groups_menu.cc
   draw/diagram/popup/draw_i_popup.cc
   draw/diagram/popup/draw_link_popup.cc
   draw/diagram/popup/draw_node_popup.cc

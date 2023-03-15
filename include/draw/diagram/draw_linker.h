@@ -1,40 +1,27 @@
-#ifndef VH_DRAW_LINKING_H_
-#define VH_DRAW_LINKING_H_
+#ifndef VH_DRAW_LINKER_H_
+#define VH_DRAW_LINKER_H_
 
-#include <imgui_node_editor.h>
+#include <vector>
 
-#include <optional>
-#include <string>
-
+#include "coreui_family.h"
 #include "coreui_linker.h"
-#include "cpp_callbacks.h"
-#include "imgui.h"
+#include "draw_connect_node_popup.h"
 
 namespace esc::draw {
 ///
 class Linker {
  public:
   ///
-  struct Callbacks {
-    ///
-    cpp::Signal<ImVec2> new_node_requested_at{};
-  };
-
-  ///
-  void Draw(coreui::Linker &linker, const Callbacks &callbacks);
+  void Draw(coreui::Linker &linker,
+            const std::vector<coreui::FamilyGroup> &family_groups);
 
  private:
   ///
-  void DrawNewNodeQuery(coreui::Linker &linker,
-                        const Callbacks &callbacks) const;
-  ///
-  auto GetPosValue(const coreui::PosVariant &pos_variant) const;
-  ///
-  void DrawManualLink(const coreui::ManualLink &link) const;
+  void DrawNewNodeQuery(coreui::Linker &linker, const ImVec2 &new_node_pos);
 
   ///
-  ImVec2 new_node_pos_{};
+  ConnectNodePopup connect_node_popup_{};
 };
 }  // namespace esc::draw
 
-#endif  // VH_DRAW_LINKING_H_
+#endif  // VH_DRAW_LINKER_H_

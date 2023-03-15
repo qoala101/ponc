@@ -3,54 +3,30 @@
 #include <cstdint>
 #include <limits>
 #include <memory>
-#include <ranges>
 #include <string>
 #include <vector>
 
+#include "coreui_diagram.h"
 #include "coreui_family.h"
+#include "draw_family_groups_menu.h"
+#include "imgui.h"
 
 namespace esc::draw {
 ///
-void CreateNodePopup::Draw(
-    const std::vector<coreui::FamilyGroup>& family_groups,
-    const Callbacks& callbacks) {
-  const auto content_scope =
-      DrawContentScope("Crate Node", {.closed = callbacks.closed});
+void CreateNodePopup::Draw(coreui::Diagram& diagram) {
+  const auto content_scope = DrawContentScope("Crate Node");
 
   if (!IsOpened()) {
     return;
   }
 
-  for (const auto& [group_label, families] : family_groups) {
-    const auto is_group = families.size() > 1;
-    auto draw_items = true;
-
-    if (is_group) {
-      draw_items = ImGui::BeginMenu(group_label.c_str());
-    }
-
-    if (!draw_items) {
-      continue;
-    }
-
-    for (const auto& family : families) {
-      const auto is_family_enabled =
-          !callbacks.is_family_enabled.has_value() ||
-          (*callbacks.is_family_enabled)(family.GetFamily());
-
-      if (ImGui::MenuItem(family.GetLabel().c_str(), nullptr, false,
-                          is_family_enabled)) {
+  FamilyGroupsMenu::Draw(
+      diagram.GetFamilyGroups(),
+      {.family_selected = [&diagram, pos = pos_](const auto& family) {
         auto new_node = family.CreateNode();
-        new_node->SetPos(pos_);
-
-        callbacks.node_created(std::move(new_node));
-      }
-    }
-
-    if (is_group) {
-      ImGui::EndMenu();
-    }
-  }
+        new_node->SetPos(pos);
+        diagram.AddNode(std::move(new_node));
+      }});
 }
 
 ///

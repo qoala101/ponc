@@ -81,6 +81,11 @@ auto Diagram::FindPinLink(Diagram& diagram, ne::PinId pin_id)
 }
 
 ///
+auto Diagram::HasLink(const Diagram& diagram, ne::PinId pin_id) -> bool {
+  return FindPinLink(diagram, pin_id).has_value();
+}
+
+///
 auto Diagram::GetNodes() const -> const std::vector<std::unique_ptr<INode>>& {
   return nodes_;
 }

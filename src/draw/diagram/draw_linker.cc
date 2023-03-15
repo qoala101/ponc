@@ -12,7 +12,13 @@ namespace esc::draw {
 namespace {
 ///
 auto GetNewLinkAlpha(const coreui::Linker &linker) {
-  return linker.GetManualLink().has_value() ? 0.F : 1.F;
+  const auto manual_links = linker.GetManualLinks();
+
+  if (!manual_links.has_value() || (*manual_links)->empty()) {
+    return 1.F;
+  }
+
+  return 0.F;
 }
 
 ///
@@ -36,7 +42,7 @@ void DrawNewLinkQuery(coreui::Linker &linker) {
     return;
   }
 
-  linker.AcceptNewLink();
+  linker.AcceptCreateLink();
 }
 
 ///
@@ -50,54 +56,9 @@ auto CreateFakePin(ne::PinKind pin_kind) {
                                                     : style.SourceDirection;
   return fake_pin;
 }
-}  // namespace
 
 ///
-void Linker::Draw(coreui::Linker &linker, const Callbacks &callbacks) {
-  const auto mouse_pos = ImGui::GetMousePos();
-
-  if (ne::BeginCreate({1.F, 1.F, 1.F, GetNewLinkAlpha(linker)}, 3)) {
-    auto dragged_from_pin = ne::PinId{};
-    auto hovering_over_pin = ne::PinId{};
-
-    if (ne::QueryNewLink(&dragged_from_pin, &hovering_over_pin)) {
-      linker.SetPins(dragged_from_pin, hovering_over_pin);
-      DrawNewLinkQuery(linker);
-    } else if (ne::QueryNewNode(&dragged_from_pin)) {
-      new_node_pos_ = mouse_pos;
-      linker.SetPins(dragged_from_pin);
-      DrawNewNodeQuery(linker, callbacks);
-    }
-  } else if (!linker.IsCreatingNode()) {
-    linker.SetPins({});
-  }
-
-  ne::EndCreate();
-
-  if (const auto link = linker.GetManualLink()) {
-    DrawManualLink(**link);
-  }
-}
-
-///
-void Linker::DrawNewNodeQuery(coreui::Linker &linker,
-                              const Callbacks &callbacks) const {
-  DrawTooltip("Create Node", {0.F, 1.F / 3, 0.F, 1.F * 3 / 4});
-
-  if (!ne::AcceptNewItem()) {
-    return;
-  }
-
-  linker.StartCreatingNode();
-  callbacks.new_node_requested_at(new_node_pos_);
-}
-
-///
-auto Linker::GetPosValue(const coreui::PosVariant &pos_variant) const {
-  if (std::holds_alternative<coreui::NewNodePos>(pos_variant)) {
-    return new_node_pos_;
-  }
-
+auto GetPosValue(const coreui::PosVariant &pos_variant) {
   if (std::holds_alternative<ImVec2>(pos_variant)) {
     return std::get<ImVec2>(pos_variant);
   }
@@ -106,7 +67,7 @@ auto Linker::GetPosValue(const coreui::PosVariant &pos_variant) const {
 }
 
 ///
-void Linker::DrawManualLink(const coreui::ManualLink &link) const {
+void DrawManualLink(const coreui::ManualLink &link) {
   auto fake_link = ax::NodeEditor::Detail::Link{nullptr, {}};
   fake_link.m_Color = link.color;
   fake_link.m_Thickness = link.thickness;
@@ -120,5 +81,50 @@ void Linker::DrawManualLink(const coreui::ManualLink &link) const {
   fake_link.m_End = GetPosValue(link.end_pos);
 
   fake_link.Draw(ImGui::GetWindowDrawList());
+}
+}  // namespace
+
+///
+void Linker::Draw(coreui::Linker &linker,
+                  const std::vector<coreui::FamilyGroup> &family_groups) {
+  const auto mouse_pos = ImGui::GetMousePos();
+
+  if (ne::BeginCreate({1.F, 1.F, 1.F, GetNewLinkAlpha(linker)}, 3)) {
+    auto dragged_from_pin = ne::PinId{};
+    auto hovering_over_pin = ne::PinId{};
+
+    if (ne::QueryNewLink(&dragged_from_pin, &hovering_over_pin)) {
+      linker.SetPins(dragged_from_pin, hovering_over_pin);
+      DrawNewLinkQuery(linker);
+    } else if (ne::QueryNewNode(&dragged_from_pin)) {
+      linker.SetPins(dragged_from_pin);
+      DrawNewNodeQuery(linker, mouse_pos);
+    }
+  } else {
+    linker.SetPins({});
+  }
+
+  ne::EndCreate();
+
+  if (const auto manual_links = linker.GetManualLinks()) {
+    for (const auto &link : **manual_links) {
+      DrawManualLink(link);
+    }
+  }
+
+  connect_node_popup_.Draw(linker, family_groups);
+}
+
+///
+void Linker::DrawNewNodeQuery(coreui::Linker &linker,
+                              const ImVec2 &new_node_pos) {
+  DrawTooltip("Create Node", {0.F, 1.F / 3, 0.F, 1.F * 3 / 4});
+
+  if (!ne::AcceptNewItem()) {
+    return;
+  }
+
+  linker.StartCreatingNodeAt(new_node_pos);
+  connect_node_popup_.Open();
 }
 }  // namespace esc::draw

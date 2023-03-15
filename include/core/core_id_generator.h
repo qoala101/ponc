@@ -1,9 +1,9 @@
 #ifndef VH_CORE_ID_GENERATOR_H_
 #define VH_CORE_ID_GENERATOR_H_
 
-#include <bits/ranges_algo.h>
 #include <imgui_node_editor.h>
 
+#include <algorithm>
 #include <vector>
 
 #include "core_concepts.h"
@@ -25,7 +25,7 @@ class IdGenerator {
   template <Id T>
   auto GenerateN(int n) {
     auto ids = std::vector<T>(n);
-    std::ranges::generate(ids, [this]() { return Generate<T>(); });
+    std::generate(ids.begin(), ids.end(), [this]() { return Generate<T>(); });
     return ids;
   }
 

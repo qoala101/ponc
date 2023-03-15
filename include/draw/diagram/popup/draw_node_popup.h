@@ -5,29 +5,15 @@
 
 #include <vector>
 
-#include "cpp_callbacks.h"
+#include "coreui_diagram.h"
 #include "draw_i_popup.h"
-
-namespace ne = ax::NodeEditor;
 
 namespace esc::draw {
 ///
 class NodePopup : public IPopup {
  public:
   ///
-  struct Callbacks {
-    ///
-    cpp::Query<std::vector<std::string>, ne::NodeId> get_node_action_names{};
-    ///
-    cpp::Signal<ne::NodeId, std::string_view> node_action_selected{};
-    ///
-    cpp::Signal<const std::vector<ne::NodeId> &> delete_selected{};
-    ///
-    cpp::Signal<const std::vector<ne::NodeId> &> delete_with_links_selected{};
-  };
-
-  ///
-  void Draw(const Callbacks &callbacks);
+  void Draw(coreui::Diagram &diagram);
 };
 }  // namespace esc::draw
 

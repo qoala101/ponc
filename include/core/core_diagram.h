@@ -31,6 +31,8 @@ class Diagram {
   ///
   static auto FindPinLink(Diagram &diagram, ne::PinId pin_id)
       -> std::optional<Link *>;
+  ///
+  static auto HasLink(const Diagram &diagram, ne::PinId pin_id) -> bool;
 
   ///
   auto GetNodes() const -> const std::vector<std::unique_ptr<INode>> &;
