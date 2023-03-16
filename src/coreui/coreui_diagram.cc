@@ -51,14 +51,13 @@ Diagram::Diagram(cpp::SafePtr<Project> parent_project,
                  cpp::SafePtr<core::Diagram> diagram)
     : parent_project_{std::move(parent_project)},
       diagram_{std::move(diagram)},
-      linker_{safe_owner_.MakeSafe(this)} {
-  for (const auto& node : diagram_->GetNodes()) {
-    UpdateNodePos(node->GetId());
-  }
-}
+      node_mover_{safe_owner_.MakeSafe(this)},
+      linker_{safe_owner_.MakeSafe(this)} {}
 
 ///
 void Diagram::OnFrame() {
+  node_mover_.OnFrame();
+
   UpdateFamilyGroups();
 
   const auto flow_tree = flow::BuildFlowTree(*diagram_, safe_owner_);
@@ -66,12 +65,19 @@ void Diagram::OnFrame() {
 
   UpdateLinks(node_flows);
   UpdateNodes(node_flows);
-
-  update_poses_nodes_.clear();
 }
 
 ///
 auto Diagram::GetDiagram() const -> core::Diagram& { return *diagram_; }
+
+///
+auto Diagram::GetNodeMover() const -> const NodeMover& {
+  // NOLINTNEXTLINE(*-const-cast)
+  return const_cast<Diagram*>(this)->GetNodeMover();
+}
+
+///
+auto Diagram::GetNodeMover() -> NodeMover& { return node_mover_; }
 
 ///
 auto Diagram::GetLinker() const -> const Linker& {
@@ -101,9 +107,7 @@ void Diagram::AddNode(std::unique_ptr<core::INode> node) {
   parent_project_->GetEventLoop().PostEvent(
       [safe_this = safe_owner_.MakeSafe(this),
        node = cpp::Share(std::move(node))]() {
-        const auto node_id = (*node)->GetId();
         safe_this->diagram_->EmplaceNode(std::move(*node));
-        safe_this->UpdateNodePos(node_id);
       });
 }
 
@@ -143,28 +147,27 @@ auto Diagram::IsFreePin(const core::INode& node) const {
 
 ///
 void Diagram::DeleteNode(ne::NodeId node_id) {
-  const auto& node = FindNode(*this, node_id);
-  const auto& core_node = node.GetNode();
+  const auto& node = core::Diagram::FindNode(*diagram_, node_id);
 
-  if (IsFreePin(core_node)) {
+  if (IsFreePin(node)) {
     DeleteNodeWithLinks(node_id);
     return;
   }
 
-  const auto input_pin = core_node.GetInputPinId();
+  const auto input_pin = node.GetInputPinId();
 
   if (input_pin.has_value() && core::Diagram::HasLink(*diagram_, *input_pin)) {
     const auto& free_pin_family = GetFreePinFamily(ne::PinKind::Input);
 
-    MoveConnectedLinkToNewFreePin(node, *input_pin, ne::PinKind::Input,
+    MoveConnectedLinkToNewFreePin(*input_pin, ne::PinKind::Input,
                                   free_pin_family);
   }
 
   const auto& free_pin_family = GetFreePinFamily(ne::PinKind::Output);
 
-  for (const auto ouput_pin : core_node.GetOutputPinIds()) {
+  for (const auto ouput_pin : node.GetOutputPinIds()) {
     if (core::Diagram::HasLink(*diagram_, ouput_pin)) {
-      MoveConnectedLinkToNewFreePin(node, ouput_pin, ne::PinKind::Output,
+      MoveConnectedLinkToNewFreePin(ouput_pin, ne::PinKind::Output,
                                     free_pin_family);
     }
   }
@@ -375,8 +378,7 @@ auto Diagram::PinFrom(const IPinTraits& pin_traits,
 auto Diagram::NodeFrom(core::INode& core_node,
                        const flow::NodeFlow& node_flow) const {
   const auto node_traits = core_node.CreateUiTraits();
-  auto node_data = NodeData{
-      .update_pos = update_poses_nodes_.contains(core_node.GetId().Get())};
+  auto node_data = NodeData{};
 
   if (const auto header_traits = node_traits->CreateHeaderTraits()) {
     const auto texture_file_path = (*header_traits)->GetTextureFilePath();
@@ -416,48 +418,22 @@ void Diagram::UpdateNodes(const flow::NodeFlows& node_flows) {
 }
 
 ///
-void Diagram::UpdateNodePos(ne::NodeId node_id) {
-  update_poses_nodes_.insert(node_id.Get());
-}
-
-///
 void Diagram::MoveConnectedLinkToNewFreePin(
-    const Node& node, ne::PinId pin_id, ne::PinKind pin_kind,
+    ne::PinId pin_id, ne::PinKind pin_kind,
     const coreui::Family& free_pin_family) {
   auto free_pin_node = free_pin_family.CreateNode();
 
-  const auto pin_tip_pos = node.GetPinTipPos(pin_id);
-  free_pin_node->SetPos(pin_tip_pos);
+  const auto pin_pos = node_mover_.GetPinPos(pin_id);
+  free_pin_node->SetPos(pin_pos);
 
   const auto free_pin_id =
       core::INode::GetFirstPinOfKind(*free_pin_node, pin_kind);
-  const auto free_pin_node_id = free_pin_node->GetId();
 
   AddNode(std::move(free_pin_node));
   MoveLink(pin_id, free_pin_id);
 
   parent_project_->GetEventLoop().PostEvent(
-      [safe_this = safe_owner_.MakeSafe(this), free_pin_node_id, free_pin_id,
-       pin_tip_pos]() mutable {
-        safe_this->parent_project_->GetEventLoop().PostEvent(
-            [safe_this = std::move(safe_this), free_pin_node_id, free_pin_id,
-             pin_tip_pos]() {
-              safe_this->MoveNodeToMatchPinTipPos(free_pin_node_id, free_pin_id,
-                                                  pin_tip_pos);
-            });
-      });
-}
-
-///
-void Diagram::MoveNodeToMatchPinTipPos(ne::NodeId node_id, ne::PinId pin_id,
-                                       const ImVec2& required_pin_tip_pos) {
-  const auto& node = FindNode(*this, node_id);
-  auto& core_node = node.GetNode();
-  const auto current_pin_tip_pos = node.GetPinTipPos(pin_id);
-  const auto matching_node_pos =
-      core_node.GetPos() - current_pin_tip_pos + required_pin_tip_pos;
-
-  core_node.SetPos(matching_node_pos);
-  UpdateNodePos(node_id);
+      [node_mover = safe_owner_.MakeSafe(&node_mover_), free_pin_id,
+       pin_pos]() { node_mover->MovePinTo(free_pin_id, pin_pos); });
 }
 }  // namespace esc::coreui

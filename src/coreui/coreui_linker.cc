@@ -236,11 +236,8 @@ void Linker::AcceptCreateNode(const Family& family) {
 
   auto& node_mover = parent_diagram_->GetNodeMover();
 
-  Expects(!created_nodes.empty());
   Expects(first_created_node_pin.has_value());
-  node_mover.MoveNodeToMatchPinTipPos(created_nodes.front(),
-                                      *first_created_node_pin,
-                                      creating_data->new_node_pos);
+  node_mover.MovePinTo(*first_created_node_pin, creating_data->new_node_pos);
 
   // if (created_nodes.size() > 1) {
   //   node_mover.PlaceNodesVertically(created_nodes,

@@ -29,8 +29,7 @@ auto Diagram::FindNode(const Diagram& diagram, ne::NodeId node_id) -> INode& {
 }
 
 ///
-auto Diagram::FindPinNode(const Diagram& diagram, ne::PinId pin_id)
-    -> const INode& {
+auto Diagram::FindPinNode(const Diagram& diagram, ne::PinId pin_id) -> INode& {
   const auto& nodes = diagram.GetNodes();
   const auto pin_node =
       std::find_if(nodes.begin(), nodes.end(), [pin_id](const auto& node) {
