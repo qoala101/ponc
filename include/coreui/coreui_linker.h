@@ -13,6 +13,7 @@
 
 #include "core_i_family.h"
 #include "core_i_node.h"
+#include "coreui_event.h"
 #include "coreui_family.h"
 #include "cpp_safe_ptr.h"
 
@@ -138,7 +139,7 @@ class Linker {
   ///
   void UpdateManualLinks();
   ///
-  void CreateLink(ne::PinId source_pin, ne::PinId target_pin) const;
+  auto CreateLink(ne::PinId source_pin, ne::PinId target_pin) const -> Event&;
 
   ///
   cpp::SafePtr<Diagram> parent_diagram_;

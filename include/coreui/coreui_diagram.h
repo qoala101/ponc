@@ -16,6 +16,7 @@
 #include "core_i_family.h"
 #include "core_i_node.h"
 #include "core_link.h"
+#include "coreui_event.h"
 #include "coreui_family.h"
 #include "coreui_i_header_traits.h"
 #include "coreui_i_pin_traits.h"
@@ -58,19 +59,21 @@ class Diagram {
   ///
   auto GetNodes() -> std::vector<Node> &;
   ///
-  void AddNode(std::unique_ptr<core::INode> node);
+  auto AddNode(std::unique_ptr<core::INode> node) -> Event &;
   ///
-  void DeleteNode(ne::NodeId node_id);
+  auto DeleteNode(ne::NodeId node_id) -> Event &;
   ///
-  void DeleteNodeWithLinks(ne::NodeId node_id) const;
+  auto DeleteNodeWithLinks(ne::NodeId node_id) const -> Event &;
   ///
   auto GetLinks() const -> const std::vector<Link> &;
   ///
-  void CreateLink(ne::PinId start_pin_id, ne::PinId end_pin_id) const;
+  auto CreateLink(ne::PinId start_pin_id, ne::PinId end_pin_id) const
+      -> Event &;
   ///
-  void MoveLink(ne::PinId source_pin_id, ne::PinId target_pin_id) const;
+  auto MoveLink(ne::PinId source_pin_id, ne::PinId target_pin_id) const
+      -> Event &;
   ///
-  void DeleteLink(ne::LinkId link_id) const;
+  auto DeleteLink(ne::LinkId link_id) const -> Event &;
 
  private:
   ///
@@ -97,8 +100,9 @@ class Diagram {
   ///
   auto IsFreePin(const core::INode &node) const;
   ///
-  void MoveConnectedLinkToNewFreePin(ne::PinId pin_id, ne::PinKind pin_kind,
-                                     const coreui::Family &free_pin_family);
+  auto MoveConnectedLinkToNewFreePin(ne::PinId pin_id, ne::PinKind pin_kind,
+                                     const coreui::Family &free_pin_family)
+      -> Event &;
 
   ///
   cpp::SafePtr<Project> parent_project_;

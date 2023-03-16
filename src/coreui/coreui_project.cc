@@ -15,6 +15,7 @@
 #include "core_project.h"
 #include "core_settings.h"
 #include "coreui_diagram.h"
+#include "coreui_event.h"
 #include "coreui_event_loop.h"
 #include "cpp_assert.h"
 #include "cpp_share.h"
@@ -118,9 +119,9 @@ auto Project::CreateFamilyParsers() const {
 }
 
 ///
-void Project::Reset() {
-  event_loop_.PostEvent([safe_this = safe_owner_.MakeSafe(this),
-                         new_project = cpp::Share(CreateProject())]() {
+auto Project::Reset() -> Event& {
+  return event_loop_.PostEvent([safe_this = safe_owner_.MakeSafe(this),
+                                new_project = cpp::Share(CreateProject())]() {
     safe_this->project_ = std::move(*new_project);
     safe_this->diagram_ = safe_this->CreateDiagram();
     safe_this->SetFilePath({});
@@ -128,32 +129,34 @@ void Project::Reset() {
 }
 
 ///
-void Project::OpenFromFile(std::filesystem::path file_path) {
-  event_loop_.PostEvent([safe_this = safe_owner_.MakeSafe(this),
-                         family_parsers = cpp::Share(CreateFamilyParsers()),
-                         file_path = std::move(file_path)]() mutable {
-    const auto json = crude_json::value::load(file_path).first;
-    safe_this->project_ =
-        json::ProjectSerializer::ParseFromJson(json, *family_parsers);
-    safe_this->diagram_ = safe_this->CreateDiagram();
-    safe_this->SetFilePath(std::move(file_path));
-    safe_this->event_loop_.PostEvent([]() { ne::NavigateToContent(); });
-  });
+auto Project::OpenFromFile(std::filesystem::path file_path) -> Event& {
+  return event_loop_
+      .PostEvent([safe_this = safe_owner_.MakeSafe(this),
+                  family_parsers = cpp::Share(CreateFamilyParsers()),
+                  file_path = std::move(file_path)]() mutable {
+        const auto json = crude_json::value::load(file_path).first;
+        safe_this->project_ =
+            json::ProjectSerializer::ParseFromJson(json, *family_parsers);
+        safe_this->diagram_ = safe_this->CreateDiagram();
+        safe_this->SetFilePath(std::move(file_path));
+      })
+      .Then(([]() { ne::NavigateToContent(); }));
 }
 
 ///
 auto Project::CanSave() const -> bool { return !file_path_.empty(); }
 
 ///
-void Project::Save() {
+auto Project::Save() -> Event& {
   Expects(!file_path_.empty());
-  SaveToFile(file_path_);
+
+  return SaveToFile(file_path_);
 }
 
 ///
-void Project::SaveToFile(std::filesystem::path file_path) {
-  event_loop_.PostEvent([safe_this = safe_owner_.MakeSafe(this),
-                         file_path = std::move(file_path)]() mutable {
+auto Project::SaveToFile(std::filesystem::path file_path) -> Event& {
+  return event_loop_.PostEvent([safe_this = safe_owner_.MakeSafe(this),
+                                file_path = std::move(file_path)]() mutable {
     const auto json = json::ProjectSerializer::WriteToJson(safe_this->project_);
     json.save(file_path);
     safe_this->SetFilePath(std::move(file_path));

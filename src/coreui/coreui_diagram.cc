@@ -103,8 +103,8 @@ auto Diagram::GetNodes() const -> const std::vector<Node>& {
 auto Diagram::GetNodes() -> std::vector<Node>& { return nodes_; }
 
 ///
-void Diagram::AddNode(std::unique_ptr<core::INode> node) {
-  parent_project_->GetEventLoop().PostEvent(
+auto Diagram::AddNode(std::unique_ptr<core::INode> node) -> Event& {
+  return parent_project_->GetEventLoop().PostEvent(
       [safe_this = safe_owner_.MakeSafe(this),
        node = cpp::Share(std::move(node))]() {
         safe_this->diagram_->EmplaceNode(std::move(*node));
@@ -146,12 +146,11 @@ auto Diagram::IsFreePin(const core::INode& node) const {
 }
 
 ///
-void Diagram::DeleteNode(ne::NodeId node_id) {
+auto Diagram::DeleteNode(ne::NodeId node_id) -> Event& {
   const auto& node = core::Diagram::FindNode(*diagram_, node_id);
 
   if (IsFreePin(node)) {
-    DeleteNodeWithLinks(node_id);
-    return;
+    return DeleteNodeWithLinks(node_id);
   }
 
   const auto input_pin = node.GetInputPinId();
@@ -172,15 +171,15 @@ void Diagram::DeleteNode(ne::NodeId node_id) {
     }
   }
 
-  parent_project_->GetEventLoop().PostEvent(
+  return parent_project_->GetEventLoop().PostEvent(
       [diagram = diagram_, node_id]() { diagram->DeleteNode(node_id); });
 }
 
 ///
-void Diagram::DeleteNodeWithLinks(ne::NodeId node_id) const {
+auto Diagram::DeleteNodeWithLinks(ne::NodeId node_id) const -> Event& {
   const auto& node = core::Diagram::FindNode(*diagram_, node_id);
 
-  parent_project_->GetEventLoop().PostEvent(
+  return parent_project_->GetEventLoop().PostEvent(
       [diagram = diagram_, pins = core::INode::GetAllPins(node), node_id]() {
         for (const auto& pin : pins) {
           if (const auto link =
@@ -197,11 +196,12 @@ void Diagram::DeleteNodeWithLinks(ne::NodeId node_id) const {
 auto Diagram::GetLinks() const -> const std::vector<Link>& { return links_; }
 
 ///
-void Diagram::CreateLink(ne::PinId start_pin_id, ne::PinId end_pin_id) const {
+auto Diagram::CreateLink(ne::PinId start_pin_id, ne::PinId end_pin_id) const
+    -> Event& {
   const auto link_id =
       parent_project_->GetProject().GetIdGenerator().Generate<ne::LinkId>();
 
-  parent_project_->GetEventLoop().PostEvent(
+  return parent_project_->GetEventLoop().PostEvent(
       [diagram = diagram_, link = core::Link{.id = link_id,
                                              .start_pin_id = start_pin_id,
                                              .end_pin_id = end_pin_id}]() {
@@ -210,8 +210,9 @@ void Diagram::CreateLink(ne::PinId start_pin_id, ne::PinId end_pin_id) const {
 }
 
 ///
-void Diagram::MoveLink(ne::PinId source_pin_id, ne::PinId target_pin_id) const {
-  parent_project_->GetEventLoop().PostEvent(
+auto Diagram::MoveLink(ne::PinId source_pin_id, ne::PinId target_pin_id) const
+    -> Event& {
+  return parent_project_->GetEventLoop().PostEvent(
       [diagram = diagram_, source_pin_id, target_pin_id]() {
         const auto link = core::Diagram::FindPinLink(*diagram, source_pin_id);
 
@@ -227,8 +228,8 @@ void Diagram::MoveLink(ne::PinId source_pin_id, ne::PinId target_pin_id) const {
 }
 
 ///
-void Diagram::DeleteLink(ne::LinkId link_id) const {
-  parent_project_->GetEventLoop().PostEvent(
+auto Diagram::DeleteLink(ne::LinkId link_id) const -> Event& {
+  return parent_project_->GetEventLoop().PostEvent(
       [diagram = diagram_, link_id]() { diagram->DeleteLink(link_id); });
 }
 
@@ -418,9 +419,9 @@ void Diagram::UpdateNodes(const flow::NodeFlows& node_flows) {
 }
 
 ///
-void Diagram::MoveConnectedLinkToNewFreePin(
+auto Diagram::MoveConnectedLinkToNewFreePin(
     ne::PinId pin_id, ne::PinKind pin_kind,
-    const coreui::Family& free_pin_family) {
+    const coreui::Family& free_pin_family) -> Event& {
   auto free_pin_node = free_pin_family.CreateNode();
 
   const auto pin_pos = node_mover_.GetPinPos(pin_id);
@@ -432,7 +433,7 @@ void Diagram::MoveConnectedLinkToNewFreePin(
   AddNode(std::move(free_pin_node));
   MoveLink(pin_id, free_pin_id);
 
-  parent_project_->GetEventLoop().PostEvent(
+  return parent_project_->GetEventLoop().PostEvent(
       [node_mover = safe_owner_.MakeSafe(&node_mover_), free_pin_id,
        pin_pos]() { node_mover->MovePinTo(free_pin_id, pin_pos); });
 }

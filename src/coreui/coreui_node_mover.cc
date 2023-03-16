@@ -16,8 +16,6 @@ NodeMover::NodeMover(cpp::SafePtr<Diagram> parent_diagram)
 
 ///
 void NodeMover::OnFrame() {
-  event_loop_.ExecuteEvents();
-
   MoveNewNodes();
   ApplyMoves();
 
@@ -47,13 +45,14 @@ void NodeMover::MoveNodesTo(const std::vector<ne::NodeId>& node_ids,
 
 ///
 void NodeMover::MovePinTo(ne::PinId pin_id, const ImVec2& pos) {
-  event_loop_.PostEvent(
-      [safe_this = safe_owner_.MakeSafe(this), pin_id, pos]() mutable {
-        safe_this->event_loop_.PostEvent(
-            [safe_this = std::move(safe_this), pin_id, pos]() {
-              safe_this->MovePinToImpl(pin_id, pos);
-            });
-      });
+  const auto current_pin_pos = GetPinPos(pin_id);
+
+  auto& node =
+      core::Diagram::FindPinNode(parent_diagram_->GetDiagram(), pin_id);
+  const auto matching_node_pos = node.GetPos() - current_pin_pos + pos;
+
+  node.SetPos(matching_node_pos);
+  MoveNode(node.GetId());
 }
 
 ///
@@ -101,17 +100,5 @@ void NodeMover::ApplyMoves() const {
     ne::SetNodePosition(node_id,
                         core::Diagram::FindNode(diagram, node_id).GetPos());
   }
-}
-
-///
-void NodeMover::MovePinToImpl(ne::PinId pin_id, const ImVec2& pos) {
-  const auto current_pin_pos = GetPinPos(pin_id);
-
-  auto& node =
-      core::Diagram::FindPinNode(parent_diagram_->GetDiagram(), pin_id);
-  const auto matching_node_pos = node.GetPos() - current_pin_pos + pos;
-
-  node.SetPos(matching_node_pos);
-  MoveNode(node.GetId());
 }
 }  // namespace esc::coreui

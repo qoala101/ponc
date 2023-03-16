@@ -11,6 +11,7 @@
 #include "core_link.h"
 #include "core_pin.h"
 #include "coreui_diagram.h"
+#include "coreui_event.h"
 #include "cpp_assert.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
@@ -215,6 +216,7 @@ void Linker::AcceptCreateNode(const Family& family) {
 
   auto created_nodes = std::vector<ne::NodeId>{};
   auto first_created_node_pin = std::optional<ne::PinId>{};
+  auto* last_link_created_event = static_cast<Event*>(nullptr);
 
   for (const auto source_pin : source_pins) {
     auto new_node = family.CreateNode();
@@ -229,20 +231,33 @@ void Linker::AcceptCreateNode(const Family& family) {
     }
 
     parent_diagram_->AddNode(std::move(new_node));
-    CreateLink(source_pin, target_pin);
+    last_link_created_event = &CreateLink(source_pin, target_pin);
   }
+
+  Expects(first_created_node_pin.has_value());
+
+  auto& first_node_moved_event = last_link_created_event->Then(
+      [parent_diagram = parent_diagram_,
+       first_created_node_pin = *first_created_node_pin,
+       new_node_pos = creating_data->new_node_pos]() {
+        parent_diagram->GetNodeMover().MovePinTo(first_created_node_pin,
+                                                 new_node_pos);
+      });
 
   linking_data_.reset();
 
-  auto& node_mover = parent_diagram_->GetNodeMover();
+  if (created_nodes.size() <= 1) {
+    return;
+  }
 
-  Expects(first_created_node_pin.has_value());
-  node_mover.MovePinTo(*first_created_node_pin, creating_data->new_node_pos);
+  first_node_moved_event.Then([parent_diagram = parent_diagram_,
+                               created_nodes = std::move(created_nodes)]() {
+    const auto& first_node = core::Diagram::FindNode(
+        parent_diagram->GetDiagram(), created_nodes.front());
 
-  // if (created_nodes.size() > 1) {
-  //   node_mover.PlaceNodesVertically(created_nodes,
-  //   creating_data->new_node_pos);
-  // }
+    parent_diagram->GetNodeMover().MoveNodesTo(created_nodes,
+                                               first_node.GetPos());
+  });
 }
 
 ///
@@ -370,7 +385,8 @@ void Linker::UpdateManualLinks() {
 }
 
 ///
-void Linker::CreateLink(ne::PinId source_pin, ne::PinId target_pin) const {
+auto Linker::CreateLink(ne::PinId source_pin, ne::PinId target_pin) const
+    -> Event& {
   Expects(linking_data_.has_value());
 
   const auto& source_pin_data = GetSourcePinData();
@@ -378,15 +394,14 @@ void Linker::CreateLink(ne::PinId source_pin, ne::PinId target_pin) const {
   if (const auto is_repinning_link =
           (source_pin == source_pin_data.id) &&
           linking_data_->repinning_data.has_value()) {
-    parent_diagram_->MoveLink(linking_data_->dragged_from_pin_data.id,
-                              target_pin);
-    return;
+    return parent_diagram_->MoveLink(linking_data_->dragged_from_pin_data.id,
+                                     target_pin);
   }
 
   if (source_pin_data.kind == ne::PinKind::Input) {
-    parent_diagram_->CreateLink(target_pin, source_pin);
-  } else {
-    parent_diagram_->CreateLink(source_pin, target_pin);
+    return parent_diagram_->CreateLink(target_pin, source_pin);
   }
+
+  return parent_diagram_->CreateLink(source_pin, target_pin);
 }
 }  // namespace esc::coreui

@@ -137,6 +137,9 @@ add_example_executable(esc
   core/core_project.cc
   core/core_settings.cc
 
+  coreui/event/coreui_event_loop.cc
+  coreui/event/coreui_event.cc
+
   coreui/traits/coreui_empy_pin_traits.cc
   coreui/traits/coreui_flow_pin_traits.cc
   coreui/traits/coreui_i_family_traits.cc
@@ -145,7 +148,6 @@ add_example_executable(esc
   coreui/traits/coreui_i_pin_traits.cc
 
   coreui/coreui_diagram.cc
-  coreui/coreui_event_loop.cc
   coreui/coreui_family.cc
   coreui/coreui_linker.cc
   coreui/coreui_node_mover.cc
@@ -213,14 +215,14 @@ target_include_directories(esc
   PUBLIC ${PROJECT_SOURCE_DIR}/include/app/family_group
   PUBLIC ${PROJECT_SOURCE_DIR}/include/core
   PUBLIC ${PROJECT_SOURCE_DIR}/include/coreui
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/coreui/event
   PUBLIC ${PROJECT_SOURCE_DIR}/include/coreui/traits
   PUBLIC ${PROJECT_SOURCE_DIR}/include/core/family
   PUBLIC ${PROJECT_SOURCE_DIR}/include/cpp
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/diagram
-  PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/dialog
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/diagram/popup
-  PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/diagram/process
+  PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/dialog
   PUBLIC ${PROJECT_SOURCE_DIR}/include/draw/view
   PUBLIC ${PROJECT_SOURCE_DIR}/include/flow
   PUBLIC ${PROJECT_SOURCE_DIR}/include/frame

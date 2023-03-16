@@ -41,15 +41,11 @@ class NodeMover {
   void MoveNewNodes();
   ///
   void ApplyMoves() const;
-  ///
-  void MovePinToImpl(ne::PinId pin_id, const ImVec2 &pos);
 
   ///
   cpp::SafePtr<Diagram> parent_diagram_;
   ///
   cpp::SafeOwner safe_owner_{};
-  ///
-  EventLoop event_loop_{};
   ///
   std::unordered_set<uintptr_t> nodes_to_move_{};
   ///

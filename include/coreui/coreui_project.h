@@ -48,15 +48,15 @@ class Project {
   ///
   auto GetEventLoop() -> EventLoop &;
   ///
-  void Reset();
+  auto Reset() -> Event &;
   ///
-  void OpenFromFile(std::filesystem::path file_path);
+  auto OpenFromFile(std::filesystem::path file_path) -> Event &;
   ///
   auto CanSave() const -> bool;
   ///
-  void Save();
+  auto Save() -> Event &;
   ///
-  void SaveToFile(std::filesystem::path file_path);
+  auto SaveToFile(std::filesystem::path file_path) -> Event &;
 
  private:
   ///
@@ -79,11 +79,11 @@ class Project {
   ///
   cpp::SafeOwner safe_owner_{};
   ///
+  EventLoop event_loop_{};
+  ///
   std::filesystem::path file_path_{};
   ///
   core::Project project_;
-  ///
-  EventLoop event_loop_{};
   ///
   std::unique_ptr<Diagram> diagram_{};
 };

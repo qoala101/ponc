@@ -3,15 +3,14 @@
 
 #include <functional>
 
-namespace esc::coreui {
-///
-using Event = std::function<void()>;
+#include "coreui_event.h"
 
+namespace esc::coreui {
 ///
 class EventLoop {
  public:
   ///
-  void PostEvent(Event event);
+  auto PostEvent(std::function<void()> event) -> Event&;
   ///
   void ExecuteEvents();
 
