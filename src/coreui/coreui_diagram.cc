@@ -431,10 +431,9 @@ auto Diagram::MoveConnectedLinkToNewFreePin(
       core::INode::GetFirstPinOfKind(*free_pin_node, pin_kind);
 
   AddNode(std::move(free_pin_node));
-  MoveLink(pin_id, free_pin_id);
 
-  return parent_project_->GetEventLoop().PostEvent(
-      [node_mover = safe_owner_.MakeSafe(&node_mover_), free_pin_id,
-       pin_pos]() { node_mover->MovePinTo(free_pin_id, pin_pos); });
+  return MoveLink(pin_id, free_pin_id)
+      .Then([node_mover = safe_owner_.MakeSafe(&node_mover_), free_pin_id,
+             pin_pos]() { node_mover->MovePinTo(free_pin_id, pin_pos); });
 }
 }  // namespace esc::coreui
