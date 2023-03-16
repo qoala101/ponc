@@ -276,16 +276,15 @@ auto Diagram::LinkFrom(const core::Link& core_link,
     return link;
   }
 
+  const auto start_pin_id = core_link.start_pin_id;
   const auto start_pin_node_id =
-      core::Diagram::FindPinNode(*diagram_, core_link.start_pin_id)
-          .GetId()
-          .Get();
+      core::Diagram::FindPinNode(*diagram_, start_pin_id).GetId().Get();
 
   Expects(node_flows.contains(start_pin_node_id));
   const auto& node_flow = node_flows.at(start_pin_node_id);
 
   const auto start_pin_flow =
-      flow::NodeFlow::GetPinFlow(node_flow, core_link.start_pin_id);
+      flow::NodeFlow::GetPinFlow(node_flow, start_pin_id);
 
   link.color = core::Settings::GetFlowColor(settings, start_pin_flow);
   link.color.Value.w = link_alpha;
@@ -443,17 +442,22 @@ void Diagram::MoveConnectedLinkToNewFreePin(
         safe_this->parent_project_->GetEventLoop().PostEvent(
             [safe_this = std::move(safe_this), free_pin_node_id, free_pin_id,
              pin_tip_pos]() {
-              const auto& free_pin_node =
-                  safe_this->FindNode(*safe_this, free_pin_node_id);
-              auto& core_free_pin_node = free_pin_node.GetNode();
-              const auto free_pin_tip_pos =
-                  free_pin_node.GetPinTipPos(free_pin_id);
-              const auto node_pos_matching_pin_tip_pos =
-                  core_free_pin_node.GetPos() - free_pin_tip_pos + pin_tip_pos;
-
-              core_free_pin_node.SetPos(node_pos_matching_pin_tip_pos);
-              safe_this->UpdateNodePos(free_pin_node_id);
+              safe_this->MoveNodeToMatchPinTipPos(free_pin_node_id, free_pin_id,
+                                                  pin_tip_pos);
             });
       });
+}
+
+///
+void Diagram::MoveNodeToMatchPinTipPos(ne::NodeId node_id, ne::PinId pin_id,
+                                       const ImVec2& required_pin_tip_pos) {
+  const auto& node = FindNode(*this, node_id);
+  auto& core_node = node.GetNode();
+  const auto current_pin_tip_pos = node.GetPinTipPos(pin_id);
+  const auto matching_node_pos =
+      core_node.GetPos() - current_pin_tip_pos + required_pin_tip_pos;
+
+  core_node.SetPos(matching_node_pos);
+  UpdateNodePos(node_id);
 }
 }  // namespace esc::coreui

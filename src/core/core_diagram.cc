@@ -18,8 +18,7 @@ Diagram::Diagram(std::vector<std::unique_ptr<INode>> nodes,
     : nodes_{std::move(nodes)}, links_{std::move(links)} {}
 
 ///
-auto Diagram::FindNode(const Diagram& diagram, ne::NodeId node_id)
-    -> const INode& {
+auto Diagram::FindNode(const Diagram& diagram, ne::NodeId node_id) -> INode& {
   const auto& nodes = diagram.GetNodes();
   const auto node = std::find_if(
       nodes.begin(), nodes.end(),
@@ -92,9 +91,7 @@ auto Diagram::GetNodes() const -> const std::vector<std::unique_ptr<INode>>& {
 
 ///
 auto Diagram::EmplaceNode(std::unique_ptr<INode> node) -> INode& {
-  const auto& new_node = nodes_.emplace_back(std::move(node));
-  Ensures(!nodes_.empty());
-  return *new_node;
+  return *nodes_.emplace_back(std::move(node));
 }
 
 ///
@@ -117,9 +114,7 @@ auto Diagram::GetLinks() const -> const std::vector<Link>& {
 
 ///
 auto Diagram::EmplaceLink(const Link& link) -> Link& {
-  auto& new_link = links_.emplace_back(link);
-  Ensures(!links_.empty());
-  return new_link;
+  return links_.emplace_back(link);
 }
 
 ///

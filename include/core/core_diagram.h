@@ -18,8 +18,7 @@ class Diagram {
                    std::vector<Link> links = {});
 
   ///
-  static auto FindNode(const Diagram &diagram, ne::NodeId node_id)
-      -> const INode &;
+  static auto FindNode(const Diagram &diagram, ne::NodeId node_id) -> INode &;
   ///
   static auto FindPinNode(const Diagram &diagram, ne::PinId pin_id)
       -> const INode &;

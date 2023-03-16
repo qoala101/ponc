@@ -35,14 +35,14 @@ void ConnectNodePopup::Draw(
        .family_selected =
            [&linker](const auto& family) { linker.AcceptCreateNode(family); }});
 
-  if (!linker.CanCreateNodesForAllPins()) {
+  if (!linker.CanCreateNodeForAllPins()) {
     return;
   }
 
   ImGui::Separator();
 
   if (ImGui::Checkbox("For All Pins", &for_all_pins_)) {
-    linker.SetCreateNodesForAllPins(for_all_pins_);
+    linker.SetCreateNodeForAllPins(for_all_pins_);
   }
 }
 }  // namespace esc::draw

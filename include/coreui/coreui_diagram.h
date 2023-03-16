@@ -22,6 +22,7 @@
 #include "coreui_link.h"
 #include "coreui_linker.h"
 #include "coreui_node.h"
+#include "coreui_node_mover.h"
 #include "cpp_safe_ptr.h"
 
 namespace esc::coreui {
@@ -42,6 +43,10 @@ class Diagram {
   void OnFrame();
   ///
   auto GetDiagram() const -> core::Diagram &;
+  ///
+  auto GetNodeMover() const -> const NodeMover &;
+  ///
+  auto GetNodeMover() -> NodeMover &;
   ///
   auto GetLinker() const -> const Linker &;
   ///
@@ -88,14 +93,11 @@ class Diagram {
   ///
   void UpdateNodes(const flow::NodeFlows &node_flows);
   ///
-  void UpdateNodePos(ne::NodeId node_id);
-  ///
   auto GetFreePinFamily(ne::PinKind pin_kind) const -> auto &;
   ///
   auto IsFreePin(const core::INode &node) const;
   ///
-  void MoveConnectedLinkToNewFreePin(const Node &node, ne::PinId pin_id,
-                                     ne::PinKind pin_kind,
+  void MoveConnectedLinkToNewFreePin(ne::PinId pin_id, ne::PinKind pin_kind,
                                      const coreui::Family &free_pin_family);
 
   ///
@@ -105,6 +107,8 @@ class Diagram {
   ///
   cpp::SafeOwner safe_owner_{};
   ///
+  NodeMover node_mover_;
+  ///
   Linker linker_;
   ///
   std::vector<FamilyGroup> family_groups_{};
@@ -112,8 +116,6 @@ class Diagram {
   std::vector<Node> nodes_{};
   ///
   std::vector<Link> links_{};
-  ///
-  std::unordered_set<uintptr_t> update_poses_nodes_{};
 };
 }  // namespace esc::coreui
 

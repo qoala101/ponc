@@ -79,16 +79,12 @@ auto DrawPinIconArea(const coreui::Pin& pin, ne::PinKind pin_kind)
 }
 }  // namespace
 
-void DrawNode(coreui::Node& node) {
+void DrawNode(coreui::Node& node, coreui::NodeMover& node_mover) {
   auto& core_node = node.GetNode();
   const auto& node_data = node.GetData();
   const auto node_id = core_node.GetId();
 
-  if (node_data.update_pos) {
-    ne::SetNodePosition(node_id, core_node.GetPos());
-  } else {
-    core_node.SetPos(ne::GetNodePosition(node_id));
-  }
+  core_node.SetPos(ne::GetNodePosition(node_id));
 
   ne::PushStyleVar(ne::StyleVar_NodePadding, ImVec4{8, 4, 8, 8});
   ne::BeginNode(node_id);
@@ -140,8 +136,8 @@ void DrawNode(coreui::Node& node) {
         ImGui::BeginHorizontal(layout_id++);
       }
 
-      node.SetPinTipPos(pin.flow_data->id,
-                        *DrawPinIconArea(pin, ne::PinKind::Input));
+      node_mover.SetPinPos(pin.flow_data->id,
+                           *DrawPinIconArea(pin, ne::PinKind::Input));
       DrawPinField(pin);
 
       if (pin.flow_data.has_value()) {
@@ -212,8 +208,8 @@ void DrawNode(coreui::Node& node) {
         ImGui::Spring(1, 0);
       }
 
-      node.SetPinTipPos(pin.flow_data->id,
-                        *DrawPinIconArea(pin, ne::PinKind::Output));
+      node_mover.SetPinPos(pin.flow_data->id,
+                           *DrawPinIconArea(pin, ne::PinKind::Output));
 
       if (pin.flow_data.has_value()) {
         ne::EndPin();
@@ -234,7 +230,7 @@ void DrawNode(coreui::Node& node) {
 
   ne::EndNode();
 
-  node.SetSize(ne::GetNodeSize(node_id));
+  node_mover.SetNodeSize(node_id, ne::GetNodeSize(node_id));
 
   if (header_rect.has_value()) {
     auto* drawList = ne::GetNodeBackgroundDrawList(node_id);

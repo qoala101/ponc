@@ -56,19 +56,19 @@ class Linker {
   ///
   auto IsRepiningLink(ne::LinkId link_id) const -> bool;
   ///
+  auto GetManualLinks() const -> std::vector<ManualLink>;
+  ///
   void AcceptCreateLink();
   ///
   void StartCreatingNodeAt(const ImVec2& new_node_pos);
   ///
-  auto CanCreateNodesForAllPins() const -> bool;
+  auto CanCreateNodeForAllPins() const -> bool;
   ///
-  void SetCreateNodesForAllPins(bool create_for_all_pins);
+  void SetCreateNodeForAllPins(bool create_for_all_pins);
   ///
   void AcceptCreateNode(const Family& family);
   ///
   void DiscardCreateNode();
-  ///
-  auto GetManualLinks() const -> std::optional<const std::vector<ManualLink>*>;
 
  private:
   ///
@@ -126,21 +126,19 @@ class Linker {
   };
 
   ///
-  auto GetCurrentLinkSourcePin() const -> auto&;
+  auto GetSourcePinData() const -> auto&;
   ///
   auto GetCanConnectToPinReason(ne::PinId pin_id) const
       -> std::pair<bool, std::string>;
   ///
-  void CreateLink(ne::PinId source_pin, ne::PinId target_pin);
-  ///
-  void CreateOrRepinCurrentLink(ne::PinId target_pin);
+  auto CreateManualLink(ne::PinId source_pin, const PosVariant& target_pos,
+                        const ImColor& color) const;
   ///
   auto GetRepinningLinkColor() const;
   ///
-  auto CreateManualLink(ne::PinId source_pin_id, const PosVariant& target_pos,
-                        const ImColor& color) const;
-  ///
   void UpdateManualLinks();
+  ///
+  void CreateLink(ne::PinId source_pin, ne::PinId target_pin) const;
 
   ///
   cpp::SafePtr<Diagram> parent_diagram_;

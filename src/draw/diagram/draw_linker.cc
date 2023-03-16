@@ -11,20 +11,8 @@
 namespace esc::draw {
 namespace {
 ///
-auto GetNewLinkAlpha(const coreui::Linker &linker) {
-  const auto manual_links = linker.GetManualLinks();
-
-  if (!manual_links.has_value() || (*manual_links)->empty()) {
-    return 1.F;
-  }
-
-  return 0.F;
-}
-
-///
-void DrawNewLinkQuery(coreui::Linker &linker) {
+void DrawNewLinkQuery(coreui::Linker &linker, float new_link_alpha) {
   const auto [can_create_link, reason] = linker.GetCanCreateLinkReason();
-  const auto new_link_alpha = GetNewLinkAlpha(linker);
 
   if (!can_create_link) {
     DrawTooltip(reason, {1.F / 3, 0.F, 0.F, 1.F * 3 / 4});
@@ -88,14 +76,16 @@ void DrawManualLink(const coreui::ManualLink &link) {
 void Linker::Draw(coreui::Linker &linker,
                   const std::vector<coreui::FamilyGroup> &family_groups) {
   const auto mouse_pos = ImGui::GetMousePos();
+  const auto &manual_links = linker.GetManualLinks();
+  const auto new_link_alpha = manual_links.empty() ? 1.F : 0.F;
 
-  if (ne::BeginCreate({1.F, 1.F, 1.F, GetNewLinkAlpha(linker)}, 3)) {
+  if (ne::BeginCreate({1.F, 1.F, 1.F, new_link_alpha}, 3)) {
     auto dragged_from_pin = ne::PinId{};
     auto hovering_over_pin = ne::PinId{};
 
     if (ne::QueryNewLink(&dragged_from_pin, &hovering_over_pin)) {
       linker.SetPins(dragged_from_pin, hovering_over_pin);
-      DrawNewLinkQuery(linker);
+      DrawNewLinkQuery(linker, new_link_alpha);
     } else if (ne::QueryNewNode(&dragged_from_pin)) {
       linker.SetPins(dragged_from_pin);
       DrawNewNodeQuery(linker, mouse_pos);
@@ -106,10 +96,8 @@ void Linker::Draw(coreui::Linker &linker,
 
   ne::EndCreate();
 
-  if (const auto manual_links = linker.GetManualLinks()) {
-    for (const auto &link : **manual_links) {
-      DrawManualLink(link);
-    }
+  for (const auto &link : linker.GetManualLinks()) {
+    DrawManualLink(link);
   }
 
   connect_node_popup_.Draw(linker, family_groups);

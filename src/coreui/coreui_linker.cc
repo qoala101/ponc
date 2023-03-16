@@ -1,6 +1,8 @@
 #include "coreui_linker.h"
 
+#include <algorithm>
 #include <iostream>
+#include <iterator>
 #include <optional>
 #include <vector>
 
@@ -17,17 +19,6 @@ namespace esc::coreui {
 ///
 Linker::Linker(cpp::SafePtr<Diagram> parent_diagram)
     : parent_diagram_{std::move(parent_diagram)} {}
-
-///
-auto Linker::GetCurrentLinkSourcePin() const -> auto& {
-  Expects(linking_data_.has_value());
-
-  if (const auto& repinning_data = linking_data_->repinning_data) {
-    return repinning_data->fixed_pin_data;
-  }
-
-  return linking_data_->dragged_from_pin_data;
-}
 
 ///
 void Linker::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
@@ -90,14 +81,25 @@ auto Linker::CanConnectToPin(ne::PinId pin_id) const -> bool {
 }
 
 ///
+auto Linker::GetSourcePinData() const -> auto& {
+  Expects(linking_data_.has_value());
+
+  if (const auto& repinning_data = linking_data_->repinning_data) {
+    return repinning_data->fixed_pin_data;
+  }
+
+  return linking_data_->dragged_from_pin_data;
+}
+
+///
 auto Linker::CanConnectToFamily(const core::IFamily& family) const -> bool {
   if (!linking_data_.has_value()) {
     return true;
   }
 
   const auto sample_node = family.CreateSampleNode();
-  const auto& source_pin = GetCurrentLinkSourcePin();
-  const auto target_kind = core::Pin::GetOppositeKind(source_pin.kind);
+  const auto source_kind = GetSourcePinData().kind;
+  const auto target_kind = core::Pin::GetOppositeKind(source_kind);
 
   return core::INode::FindFirstPinOfKind(*sample_node, target_kind).has_value();
 }
@@ -133,12 +135,22 @@ auto Linker::IsRepiningLink(ne::LinkId link_id) const -> bool {
 }
 
 ///
+auto Linker::GetManualLinks() const -> std::vector<ManualLink> {
+  if (!linking_data_.has_value()) {
+    return {};
+  }
+
+  return linking_data_->manual_links;
+}
+
+///
 void Linker::AcceptCreateLink() {
   Expects(linking_data_.has_value());
   const auto& hovering_data = linking_data_->hovering_data;
   Expects(hovering_data.has_value());
 
-  CreateOrRepinCurrentLink(hovering_data->hovering_over_pin);
+  CreateLink(GetSourcePinData().id, hovering_data->hovering_over_pin);
+  linking_data_.reset();
 }
 
 ///
@@ -150,7 +162,7 @@ void Linker::StartCreatingNodeAt(const ImVec2& new_node_pos) {
   creating_data = CreatingData{.new_node_pos = new_node_pos};
   UpdateManualLinks();
 
-  const auto& source_pin = GetCurrentLinkSourcePin();
+  const auto& source_pin = GetSourcePinData();
 
   if (source_pin.kind == ne::PinKind::Input) {
     return;
@@ -161,31 +173,26 @@ void Linker::StartCreatingNodeAt(const ImVec2& new_node_pos) {
       core::Diagram::FindNode(diagram, source_pin.node_id);
 
   for (const auto pin_id : source_node.GetOutputPinIds()) {
-    if (pin_id == source_pin.id) {
-      continue;
+    if (!core::Diagram::HasLink(diagram, pin_id)) {
+      creating_data->source_node_empty_pins.emplace_back(pin_id);
     }
-
-    if (core::Diagram::HasLink(diagram, pin_id)) {
-      continue;
-    }
-
-    creating_data->source_node_empty_pins.emplace_back(pin_id);
   }
 }
 
 ///
-auto Linker::CanCreateNodesForAllPins() const -> bool {
+auto Linker::CanCreateNodeForAllPins() const -> bool {
   if (!linking_data_.has_value()) {
     return false;
   }
 
   const auto& creating_data = linking_data_->creating_data;
+
   return creating_data.has_value() &&
-         !creating_data->source_node_empty_pins.empty();
+         creating_data->source_node_empty_pins.size() > 1;
 }
 
 ///
-void Linker::SetCreateNodesForAllPins(bool create_for_all_pins) {
+void Linker::SetCreateNodeForAllPins(bool create_for_all_pins) {
   Expects(linking_data_.has_value());
   auto& creating_data = linking_data_->creating_data;
   Expects(creating_data.has_value());
@@ -194,52 +201,55 @@ void Linker::SetCreateNodesForAllPins(bool create_for_all_pins) {
   UpdateManualLinks();
 }
 
+///
 void Linker::AcceptCreateNode(const Family& family) {
   Expects(linking_data_.has_value());
   const auto& creating_data = linking_data_->creating_data;
   Expects(creating_data.has_value());
 
-  const auto target_kind =
-      core::Pin::GetOppositeKind(GetCurrentLinkSourcePin().kind);
+  const auto& source_pin_data = GetSourcePinData();
+  const auto target_kind = core::Pin::GetOppositeKind(source_pin_data.kind);
+  const auto source_pins = creating_data->create_for_all_pins
+                               ? creating_data->source_node_empty_pins
+                               : std::vector{source_pin_data.id};
+
   auto created_nodes = std::vector<ne::NodeId>{};
+  auto first_created_node_pin = std::optional<ne::PinId>{};
 
-  if (creating_data->create_for_all_pins) {
-    for (const auto empty_source_pin : creating_data->source_node_empty_pins) {
-      auto new_node = family.CreateNode();
-      new_node->SetPos(creating_data->new_node_pos);
+  for (const auto source_pin : source_pins) {
+    auto new_node = family.CreateNode();
+    new_node->SetPos(creating_data->new_node_pos);
+    created_nodes.emplace_back(new_node->GetId());
 
-      CreateLink(empty_source_pin,
-                 core::INode::GetFirstPinOfKind(*new_node, target_kind));
+    const auto target_pin =
+        core::INode::GetFirstPinOfKind(*new_node, target_kind);
 
-      created_nodes.emplace_back(new_node->GetId());
-      parent_diagram_->AddNode(std::move(new_node));
+    if (!first_created_node_pin.has_value()) {
+      first_created_node_pin = target_pin;
     }
+
+    parent_diagram_->AddNode(std::move(new_node));
+    CreateLink(source_pin, target_pin);
   }
 
-  auto new_node = family.CreateNode();
-  new_node->SetPos(creating_data->new_node_pos);
+  linking_data_.reset();
 
-  CreateOrRepinCurrentLink(
-      core::INode::GetFirstPinOfKind(*new_node, target_kind));
+  auto& node_mover = parent_diagram_->GetNodeMover();
 
-  created_nodes.emplace_back(new_node->GetId());
-  parent_diagram_->AddNode(std::move(new_node));
+  Expects(!created_nodes.empty());
+  Expects(first_created_node_pin.has_value());
+  node_mover.MoveNodeToMatchPinTipPos(created_nodes.front(),
+                                      *first_created_node_pin,
+                                      creating_data->new_node_pos);
 
-  // parent_diagram_->PlaceVertically();
+  // if (created_nodes.size() > 1) {
+  //   node_mover.PlaceNodesVertically(created_nodes,
+  //   creating_data->new_node_pos);
+  // }
 }
 
 ///
 void Linker::DiscardCreateNode() { linking_data_.reset(); }
-
-///
-auto Linker::GetManualLinks() const
-    -> std::optional<const std::vector<ManualLink>*> {
-  if (!linking_data_.has_value()) {
-    return std::nullopt;
-  }
-
-  return &linking_data_->manual_links;
-}
 
 ///
 auto Linker::GetCanConnectToPinReason(ne::PinId pin_id) const
@@ -286,51 +296,24 @@ auto Linker::GetCanConnectToPinReason(ne::PinId pin_id) const
 }
 
 ///
-void Linker::CreateLink(ne::PinId source_pin, ne::PinId target_pin) {
-  const auto source_pin_kind = GetCurrentLinkSourcePin().kind;
-
-  if (source_pin_kind == ne::PinKind::Input) {
-    parent_diagram_->CreateLink(target_pin, source_pin);
-  } else {
-    parent_diagram_->CreateLink(source_pin, target_pin);
-  }
-}
-
-///
-void Linker::CreateOrRepinCurrentLink(ne::PinId target_pin) {
-  Expects(linking_data_.has_value());
-
-  if (const auto is_repinning_link =
-          linking_data_->repinning_data.has_value()) {
-    parent_diagram_->MoveLink(linking_data_->dragged_from_pin_data.id,
-                              target_pin);
-  } else {
-    CreateLink(GetCurrentLinkSourcePin().id, target_pin);
-  }
-
-  linking_data_.reset();
-}
-
-///
-auto Linker::CreateManualLink(ne::PinId source_pin_id,
+auto Linker::CreateManualLink(ne::PinId source_pin,
                               const PosVariant& target_pos,
                               const ImColor& color) const {
-  auto link = ManualLink{.color = color, .thickness = 4};
+  auto manual_link = ManualLink{.color = color, .thickness = 4};
 
-  const auto& source_pin = GetCurrentLinkSourcePin();
-  const auto& source_node =
-      Diagram::FindNode(*parent_diagram_, source_pin.node_id);
-  const auto source_pos = PosVariant{source_node.GetPinTipPos(source_pin_id)};
+  const auto source_kind = GetSourcePinData().kind;
+  const auto source_pos =
+      PosVariant{parent_diagram_->GetNodeMover().GetPinPos(source_pin)};
 
-  if (source_pin.kind == ne::PinKind::Input) {
-    link.start_pos = target_pos;
-    link.end_pos = source_pos;
+  if (source_kind == ne::PinKind::Input) {
+    manual_link.start_pos = target_pos;
+    manual_link.end_pos = source_pos;
   } else {
-    link.start_pos = source_pos;
-    link.end_pos = target_pos;
+    manual_link.start_pos = source_pos;
+    manual_link.end_pos = target_pos;
   }
 
-  return link;
+  return manual_link;
 }
 
 ///
@@ -356,7 +339,9 @@ void Linker::UpdateManualLinks() {
   auto& manual_links = linking_data_->manual_links;
   manual_links.clear();
 
-  if (!linking_data_->creating_data.has_value()) {
+  const auto& creating_data = linking_data_->creating_data;
+
+  if (const auto moving_link_around = !creating_data.has_value()) {
     if (const auto& repinning_data = linking_data_->repinning_data) {
       const auto repinning_link =
           CreateManualLink(repinning_data->fixed_pin_data.id, MousePos{},
@@ -368,23 +353,43 @@ void Linker::UpdateManualLinks() {
     return;
   }
 
-  const auto& creating_data = linking_data_->creating_data;
   const auto& new_node_pos = creating_data->new_node_pos;
   const auto creating_link_color = ImColor{1.F, 1.F, 1.F};
-  const auto creating_link = CreateManualLink(
-      GetCurrentLinkSourcePin().id, new_node_pos, creating_link_color);
-
-  manual_links.emplace_back(creating_link);
 
   if (!creating_data->create_for_all_pins) {
+    const auto creating_link = CreateManualLink(
+        GetSourcePinData().id, new_node_pos, creating_link_color);
+
+    manual_links.emplace_back(creating_link);
     return;
   }
 
   for (const auto empty_source_pin : creating_data->source_node_empty_pins) {
-    const auto empty_source_link =
+    const auto creating_link =
         CreateManualLink(empty_source_pin, new_node_pos, creating_link_color);
 
-    manual_links.emplace_back(empty_source_link);
+    manual_links.emplace_back(creating_link);
+  }
+}
+
+///
+void Linker::CreateLink(ne::PinId source_pin, ne::PinId target_pin) const {
+  Expects(linking_data_.has_value());
+
+  const auto& source_pin_data = GetSourcePinData();
+
+  if (const auto is_repinning_link =
+          (source_pin == source_pin_data.id) &&
+          linking_data_->repinning_data.has_value()) {
+    parent_diagram_->MoveLink(linking_data_->dragged_from_pin_data.id,
+                              target_pin);
+    return;
+  }
+
+  if (source_pin_data.kind == ne::PinKind::Input) {
+    parent_diagram_->CreateLink(target_pin, source_pin);
+  } else {
+    parent_diagram_->CreateLink(source_pin, target_pin);
   }
 }
 }  // namespace esc::coreui

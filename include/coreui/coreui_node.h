@@ -15,7 +15,6 @@
 #include "coreui_pin.h"
 #include "coreui_texture.h"
 #include "cpp_safe_ptr.h"
-#include "imgui_node_editor.h"
 
 namespace esc::coreui {
 ///
@@ -30,8 +29,6 @@ struct Header {
 
 ///
 struct NodeData {
-  ///
-  bool update_pos{};
   ///
   std::optional<Header> header{};
   ///
@@ -50,24 +47,12 @@ class Node {
   auto GetNode() const -> core::INode &;
   ///
   auto GetData() const -> const NodeData &;
-  ///
-  auto GetSize() const -> const ImVec2 &;
-  ///
-  void SetSize(const ImVec2 &size);
-  ///
-  auto GetPinTipPos(ne::PinId pin_id) const -> ImVec2;
-  ///
-  void SetPinTipPos(ne::PinId pin_id, const ImVec2 &pos);
 
  private:
   ///
   cpp::SafePtr<core::INode> node_;
   ///
   NodeData data_{};
-  ///
-  ImVec2 size_{};
-  ///
-  std::unordered_map<uintptr_t, ImVec2> pin_tip_poses_{};
 };
 }  // namespace esc::coreui
 

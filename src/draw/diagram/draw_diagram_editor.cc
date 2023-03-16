@@ -24,8 +24,10 @@ void DiagramEditor::Draw(coreui::Diagram &diagram) {
   ne::Begin("DiagramEditor");
   item_deleter_.UnregisterDeletedItems(diagram.GetDiagram());
 
+  auto &node_mover = diagram.GetNodeMover();
+
   for (auto &node : diagram.GetNodes()) {
-    DrawNode(node);
+    DrawNode(node, node_mover);
   }
 
   for (const auto &link : diagram.GetLinks()) {

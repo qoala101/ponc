@@ -45,8 +45,6 @@ void App::OnStart() {
             const auto title = file_name + " - PON Calculator";
             safe_this->SetTitle(title.c_str());
           }});
-
-  Ensures(app_.has_value());
 }
 
 ///
@@ -54,8 +52,6 @@ void App::OnStop() {
   Expects(app_.has_value());
 
   app_.reset();
-
-  Ensures(!app_.has_value());
 }
 
 ///
