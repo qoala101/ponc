@@ -3,6 +3,9 @@
 #include <string>
 #include <vector>
 
+#include "core_diagram.h"
+#include "core_i_node.h"
+#include "coreui_family.h"
 #include "coreui_i_node_traits.h"
 #include "draw_family_groups_menu.h"
 #include "imgui.h"
@@ -71,8 +74,16 @@ void NodePopup::Draw(coreui::Diagram& diagram) {
   if (ImGui::BeginMenu("Replace With")) {
     FamilyGroupsMenu::Draw(
         diagram.GetFamilyGroups(),
-        {.is_family_enabled = [](const auto& family) { return true; },
-         .family_selected = [](const auto& family) {}});
+        {.is_family_enabled =
+             [&diagram, &node](const auto& family) {
+               const auto sample_node = family.CreateSampleNode();
+               return diagram.CanReplaceNode(node, *sample_node);
+             },
+         .family_selected =
+             [&diagram, &node](const auto& family) {
+               diagram.ReplaceNode(node, family.CreateNode());
+             }});
+
     ImGui::EndMenu();
   }
 

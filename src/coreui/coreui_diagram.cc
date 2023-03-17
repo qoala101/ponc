@@ -193,6 +193,71 @@ auto Diagram::DeleteNodeWithLinks(ne::NodeId node_id) const -> Event& {
 }
 
 ///
+auto Diagram::CanReplaceNode(const core::INode& source_node,
+                             const core::INode& target_node) -> bool {
+  const auto& source_input_pin = source_node.GetInputPinId();
+  const auto source_has_input_link =
+      source_input_pin.has_value() &&
+      core::Diagram::HasLink(*diagram_, *source_input_pin);
+
+  if (source_has_input_link && !target_node.GetInputPinId().has_value()) {
+    return false;
+  }
+
+  const auto num_target_output_pins = target_node.GetOutputPinIds().size();
+  const auto& source_output_pins = source_node.GetOutputPinIds();
+
+  if (num_target_output_pins >= source_output_pins.size()) {
+    return true;
+  }
+
+  const auto num_linked_output_pins =
+      std::count_if(source_output_pins.begin(), source_output_pins.end(),
+                    [&diagram = diagram_](auto pin_id) {
+                      return core::Diagram::HasLink(*diagram, pin_id);
+                    });
+
+  return static_cast<int>(num_target_output_pins) >= num_linked_output_pins;
+}
+
+///
+auto Diagram::ReplaceNode(const core::INode& source_node,
+                          std::unique_ptr<core::INode> target_node) -> Event& {
+  if (const auto& source_input_pin = source_node.GetInputPinId()) {
+    if (const auto input_link =
+            core::Diagram::FindPinLink(*diagram_, *source_input_pin)) {
+      const auto target_input_pin = target_node->GetInputPinId();
+      Expects(target_input_pin.has_value());
+
+      MoveLink(*source_input_pin, *target_input_pin);
+    }
+  }
+
+  const auto& target_pins = target_node->GetOutputPinIds();
+  const auto target_pins_end = target_pins.end();
+  auto next_target_pin = target_pins.begin();
+
+  for (const auto source_pin : source_node.GetOutputPinIds()) {
+    if (!core::Diagram::HasLink(*diagram_, source_pin)) {
+      continue;
+    }
+
+    Expects(next_target_pin != target_pins_end);
+    MoveLink(source_pin, *next_target_pin);
+    ++next_target_pin;
+  }
+
+  target_node->SetPos(source_node.GetPos());
+
+  parent_project_->GetEventLoop().PostEvent(
+      [diagram = diagram_, node_id = source_node.GetId()]() {
+        diagram->DeleteNode(node_id);
+      });
+
+  return AddNode(std::move(target_node));
+}
+
+///
 auto Diagram::GetLinks() const -> const std::vector<Link>& { return links_; }
 
 ///

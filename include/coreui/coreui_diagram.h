@@ -65,6 +65,12 @@ class Diagram {
   ///
   auto DeleteNodeWithLinks(ne::NodeId node_id) const -> Event &;
   ///
+  auto CanReplaceNode(const core::INode &source_node,
+                      const core::INode &target_node) -> bool;
+  ///
+  auto ReplaceNode(const core::INode &source_node,
+                   std::unique_ptr<core::INode> target_node) -> Event &;
+  ///
   auto GetLinks() const -> const std::vector<Link> &;
   ///
   auto CreateLink(ne::PinId start_pin_id, ne::PinId end_pin_id) const
