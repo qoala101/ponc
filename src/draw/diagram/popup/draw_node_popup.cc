@@ -68,6 +68,8 @@ void NodePopup::Draw(coreui::Diagram& diagram) {
     return;
   }
 
+  ImGui::Separator();
+
   const auto& node =
       core::Diagram::FindNode(diagram.GetDiagram(), selected_nodes.front());
 

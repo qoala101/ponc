@@ -195,6 +195,11 @@ auto Diagram::DeleteNodeWithLinks(ne::NodeId node_id) const -> Event& {
 ///
 auto Diagram::CanReplaceNode(const core::INode& source_node,
                              const core::INode& target_node) -> bool {
+  if (const auto same_family =
+          source_node.GetFamilyId() == target_node.GetFamilyId()) {
+    return false;
+  }
+
   const auto& source_input_pin = source_node.GetInputPinId();
   const auto source_has_input_link =
       source_input_pin.has_value() &&

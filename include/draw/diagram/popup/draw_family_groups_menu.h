@@ -18,6 +18,11 @@ struct FamilyGroupsMenu {
   ///
   static void Draw(const std::vector<coreui::FamilyGroup>& family_groups,
                    const Callbacks& callbacks);
+
+ private:
+  ///
+  static auto GetDisabledFamilies(const std::vector<coreui::Family>& families,
+                                  const Callbacks& callbacks);
 };
 }  // namespace esc::draw
 
