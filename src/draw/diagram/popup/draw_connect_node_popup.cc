@@ -13,11 +13,14 @@
 
 namespace esc::draw {
 ///
+auto ConnectNodePopup::GetLabel() -> std::string { return "Connect Node"; }
+
+///
 void ConnectNodePopup::Draw(
     coreui::Linker& linker,
     const std::vector<coreui::FamilyGroup>& family_groups) {
   const auto content_scope = DrawContentScope(
-      "Connect Node", {.closed = [&for_all_pins = for_all_pins_, &linker]() {
+      GetLabel(), {.closed = [&for_all_pins = for_all_pins_, &linker]() {
         linker.DiscardCreateNode();
         for_all_pins = false;
       }});

@@ -19,10 +19,10 @@ class IPopup : public cpp::Interface {
     std::optional<cpp::Signal<>> closed{};
   };
 
-  ///
-  void Open();
   //
   auto IsOpened() const -> bool;
+  ///
+  void Open();
 
  protected:
   ///

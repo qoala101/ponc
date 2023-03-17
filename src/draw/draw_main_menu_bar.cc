@@ -5,6 +5,7 @@
 #include <functional>
 #include <variant>
 
+#include "core_settings.h"
 #include "coreui_project.h"
 #include "draw_open_file_dialog.h"
 #include "draw_save_as_file_dialog.h"
@@ -25,6 +26,7 @@ auto AsLowerCase(std::string text) {
 void MainMenuBar::Draw(coreui::Project &project) {
   if (ImGui::BeginMainMenuBar()) {
     DrawFileMenu(project);
+    DrawViewMenu();
 
     if (ImGui::MenuItem("Zoom to Content")) {
       ne::NavigateToContent();
@@ -38,6 +40,7 @@ void MainMenuBar::Draw(coreui::Project &project) {
   }
 
   DrawDialogs(project);
+  DrawViews(project.GetProject().GetSettings());
 }
 
 ///
@@ -47,18 +50,38 @@ void MainMenuBar::DrawFileMenu(coreui::Project &project) {
       new_project_dialog_.Open();
     }
 
-    if (ImGui::MenuItem("Open...", nullptr)) {
+    if (ImGui::MenuItem("Open...")) {
       open_file_dialog_.Open();
     }
 
     ImGui::Separator();
 
-    if (ImGui::MenuItem("Save", "", false, project.CanSave())) {
+    if (ImGui::MenuItem("Save", nullptr, false, project.CanSave())) {
       project.Save();
     }
 
     if (ImGui::MenuItem("Save As...")) {
       save_as_file_dialog_.Open();
+    }
+
+    ImGui::EndMenu();
+  }
+}
+
+///
+void MainMenuBar::DrawViewMenu() {
+  if (ImGui::BeginMenu("View")) {
+    if (ImGui::MenuItem("Nodes")) {
+    }
+
+    if (ImGui::MenuItem("Flow Tree")) {
+    }
+
+    ImGui::Separator();
+
+    if (ImGui::MenuItem(settings_view_.GetLabel().c_str(), nullptr,
+                        settings_view_.IsOpened())) {
+      settings_view_.Toggle();
     }
 
     ImGui::EndMenu();
@@ -81,5 +104,10 @@ void MainMenuBar::DrawDialogs(coreui::Project &project) {
 
     project.SaveToFile(std::move(file_path));
   }});
+}
+
+///
+void MainMenuBar::DrawViews(core::Settings &settings) {
+  settings_view_.Draw(settings);
 }
 }  // namespace esc::draw

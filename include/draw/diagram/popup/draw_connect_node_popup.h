@@ -9,6 +9,9 @@ namespace esc::draw {
 class ConnectNodePopup : public IPopup {
  public:
   ///
+  static auto GetLabel() -> std::string;
+
+  ///
   void Draw(coreui::Linker &linker,
             const std::vector<coreui::FamilyGroup> &family_groups);
 

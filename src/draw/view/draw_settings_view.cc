@@ -2,50 +2,58 @@
 
 #include <imgui.h>
 
-#include "core_project.h"
 #include "core_settings.h"
-#include "coreui_project.h"
-#include "cpp_scope.h"
+#include "draw_id_label.h"
 
 namespace esc::draw {
+///
 auto SettingsView::GetLabel() const -> std::string { return "Settings"; }
 
+///
 void SettingsView::Draw(core::Settings& settings) {
-  if (!IsVisible()) {
+  const auto content_scope = DrawContentScope();
+
+  if (!IsOpened()) {
     return;
   }
 
-  if (ImGui::Begin("Settings", &GetVisible())) {
-    const auto low_high_mid =
-        settings.low_flow + (settings.high - settings.low_flow) / 2;
+  if (ImGui::TreeNodeEx("Flow Colors", ImGuiTreeNodeFlags_DefaultOpen)) {
+    auto color_button_id = 0;
 
-    ImGui::Checkbox("Color Flow", &settings.color_flow);
-
-    ImGui::ColorButton("##1", ImColor{0.F, 0.F, 1.F});
+    ImGui::ColorButton(IdLabel(color_button_id++).c_str(),
+                       ImColor{0.F, 0.F, 1.F});
     ImGui::SameLine();
-    ImGui::DragFloat("Very Low##link_color", &settings.min_flow, 0.01F,
-                     -FLT_MAX, settings.low_flow, "%.3f");
+    ImGui::DragFloat("Very Low", &settings.min_flow, 0.01F, -FLT_MAX,
+                     settings.low_flow, "%.3f");
 
-    ImGui::ColorButton("##2", ImColor{0.F, 1.F, 1.F});
+    ImGui::ColorButton(IdLabel(color_button_id++).c_str(),
+                       ImColor{0.F, 1.F, 1.F});
     ImGui::SameLine();
-    ImGui::SliderFloat("Low##link_color", &settings.low_flow, settings.min_flow,
-                       settings.high);
+    ImGui::SliderFloat("Low", &settings.low_flow, settings.min_flow,
+                       settings.high_flow);
 
-    ImGui::ColorButton("##5", ImColor{0.F, 1.F, 0.F});
+    ImGui::ColorButton(IdLabel(color_button_id++).c_str(),
+                       ImColor{0.F, 1.F, 0.F});
     ImGui::SameLine();
-    ImGui::Text("%.3f Good", low_high_mid);
 
-    ImGui::ColorButton("##3", ImColor{1.F, 1.F, 0.F});
+    const auto good_flow =
+        settings.low_flow + (settings.high_flow - settings.low_flow) / 2;
+
+    ImGui::Text("%.3f Good", good_flow);
+
+    ImGui::ColorButton(IdLabel(color_button_id++).c_str(),
+                       ImColor{1.F, 1.F, 0.F});
     ImGui::SameLine();
-    ImGui::SliderFloat("High##link_color", &settings.high, settings.low_flow,
+    ImGui::SliderFloat("High", &settings.high_flow, settings.low_flow,
                        settings.max_flow);
 
-    ImGui::ColorButton("##4", ImColor{1.F, 0.F, 0.F});
+    ImGui::ColorButton(IdLabel(color_button_id++).c_str(),
+                       ImColor{1.F, 0.F, 0.F});
     ImGui::SameLine();
-    ImGui::DragFloat("Very High##link_color", &settings.max_flow, 0.01F,
-                     settings.high, +FLT_MAX, "%.3f");
-  }
+    ImGui::DragFloat("Very High", &settings.max_flow, 0.01F, settings.high_flow,
+                     +FLT_MAX, "%.3f");
 
-  ImGui::End();
+    ImGui::TreePop();
+  }
 }
 }  // namespace esc::draw

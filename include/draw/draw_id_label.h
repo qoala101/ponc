@@ -10,14 +10,20 @@
 namespace esc::draw {
 ///
 template <std::integral T>
-auto IdLabel(std::string_view label, T id) {
-  return label.data() + std::string{"##"} + std::to_string(id);
+auto IdLabel(T id, std::string_view label = {}) {
+  auto id_label = std::string{"##"} + std::to_string(id);
+
+  if (label.empty()) {
+    return id_label;
+  }
+
+  return label.data() + std::move(id_label);
 }
 
 ///
 template <core::Id T>
-auto IdLabel(std::string_view label, T id) {
-  return IdLabel(label, id.Get());
+auto IdLabel(T id, std::string_view label = {}) {
+  return IdLabel(id.Get(), label);
 }
 }  // namespace esc::draw
 

@@ -1,5 +1,6 @@
 #include <variant>
 
+#include "draw_connect_node_popup.h"
 #include "imgui.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "coreui_linker.h"
@@ -106,7 +107,7 @@ void Linker::Draw(coreui::Linker &linker,
 ///
 void Linker::DrawNewNodeQuery(coreui::Linker &linker,
                               const ImVec2 &new_node_pos) {
-  DrawTooltip("Create Node", {0.F, 1.F / 3, 0.F, 1.F * 3 / 4});
+  DrawTooltip(ConnectNodePopup::GetLabel(), {0.F, 1.F / 3, 0.F, 1.F * 3 / 4});
 
   if (!ne::AcceptNewItem()) {
     return;

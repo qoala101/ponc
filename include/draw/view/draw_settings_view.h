@@ -4,15 +4,16 @@
 #include <string>
 
 #include "core_settings.h"
-#include "coreui_project.h"
-#include "draw_i_hidable.h"
-#include "imgui.h"
+#include "draw_i_view.h"
 
 namespace esc::draw {
-class SettingsView : public IHidable {
+///
+class SettingsView : public IView {
  public:
-  auto GetLabel() const -> std::string;
+  ///
+  auto GetLabel() const -> std::string override;
 
+  ///
   void Draw(core::Settings &settings);
 };
 }  // namespace esc::draw

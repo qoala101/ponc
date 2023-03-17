@@ -17,15 +17,15 @@ auto GenerateId() {
 }
 }  // namespace
 
+//
+auto IPopup::IsOpened() const -> bool { return opened_; }
+
 ///
 void IPopup::Open() {
-  ImGui::OpenPopup(IdLabel("", id_).c_str(),
+  ImGui::OpenPopup(IdLabel(id_).c_str(),
                    ImGuiPopupFlags_NoOpenOverExistingPopup);
   opened_ = true;
 }
-
-//
-auto IPopup::IsOpened() const -> bool { return opened_; }
 
 ///
 IPopup::IPopup() : id_{GenerateId()} {}
@@ -36,7 +36,7 @@ auto IPopup::DrawContentScope(std::string_view title,
     -> cpp::ScopeFunction {
   ne::Suspend();
 
-  if (ImGui::BeginPopup(IdLabel("", id_).c_str())) {
+  if (ImGui::BeginPopup(IdLabel(id_).c_str())) {
     if (!title.empty()) {
       ImGui::TextUnformatted(title.data());
       ImGui::Separator();

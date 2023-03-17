@@ -188,8 +188,8 @@ add_example_executable(esc
   # # draw/view/draw_flow_tree_view.cc
   # # draw/view/draw_group_settings_view.cc
   # # draw/view/draw_groups_view.cc
-  # draw/view/draw_i_hideable.cc
-  # draw/view/draw_settings_view.cc
+  draw/view/draw_i_view.cc
+  draw/view/draw_settings_view.cc
   draw/draw_main_menu_bar.cc
   draw/draw_main_window.cc
 
