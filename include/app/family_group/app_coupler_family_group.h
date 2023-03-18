@@ -9,7 +9,7 @@
 
 namespace esc {
 ///
-struct CouplerFamilyGroup : public core::IFamilyGroup {
+class CouplerFamilyGroup : public core::IFamilyGroup {
  public:
   ///
   auto CreateFamilies(core::IdGenerator &id_generator) const

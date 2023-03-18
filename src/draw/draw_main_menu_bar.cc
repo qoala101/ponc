@@ -24,6 +24,8 @@ auto AsLowerCase(std::string text) {
 
 ///
 void MainMenuBar::Draw(coreui::Project &project) {
+  auto &settings = project.GetProject().GetSettings();
+
   if (ImGui::BeginMainMenuBar()) {
     DrawFileMenu(project);
     DrawViewMenu();
@@ -32,15 +34,12 @@ void MainMenuBar::Draw(coreui::Project &project) {
       ne::NavigateToContent();
     }
 
-    if (ImGui::MenuItem("Color Flow", nullptr,
-                        &project.GetProject().GetSettings().color_flow)) {
-    }
-
+    ImGui::MenuItem("Color Flow", nullptr, &settings.color_flow);
     ImGui::EndMainMenuBar();
   }
 
   DrawDialogs(project);
-  DrawViews(project.GetProject().GetSettings());
+  DrawViews(project.GetDiagram(), settings);
 }
 
 ///
@@ -71,7 +70,9 @@ void MainMenuBar::DrawFileMenu(coreui::Project &project) {
 ///
 void MainMenuBar::DrawViewMenu() {
   if (ImGui::BeginMenu("View")) {
-    if (ImGui::MenuItem("Nodes")) {
+    if (ImGui::MenuItem(nodes_view_.GetLabel().c_str(), nullptr,
+                        nodes_view_.IsOpened())) {
+      nodes_view_.Toggle();
     }
 
     if (ImGui::MenuItem("Flow Tree")) {
@@ -107,7 +108,9 @@ void MainMenuBar::DrawDialogs(coreui::Project &project) {
 }
 
 ///
-void MainMenuBar::DrawViews(core::Settings &settings) {
+void MainMenuBar::DrawViews(const coreui::Diagram &diagram,
+                            core::Settings &settings) {
+  nodes_view_.Draw(diagram);
   settings_view_.Draw(settings);
 }
 }  // namespace esc::draw

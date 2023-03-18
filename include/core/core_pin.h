@@ -9,7 +9,7 @@ namespace ne = ax::NodeEditor;
 
 namespace esc::core {
 //
-struct Pin : cpp::NoInstances {
+struct Pin : public cpp::NoInstances {
   ///
   static auto GetOppositeKind(ne::PinKind pin_kind) -> ne::PinKind;
 };

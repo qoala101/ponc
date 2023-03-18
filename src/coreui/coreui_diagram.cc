@@ -1,6 +1,5 @@
+#include "coreui_node.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
-
-#include "coreui_diagram.h"
 
 #include <algorithm>
 #include <array>
@@ -17,6 +16,7 @@
 #include "core_link.h"
 #include "core_project.h"
 #include "core_settings.h"
+#include "coreui_diagram.h"
 #include "coreui_family.h"
 #include "coreui_i_family_traits.h"
 #include "coreui_i_node_traits.h"
@@ -58,13 +58,12 @@ Diagram::Diagram(cpp::SafePtr<Project> parent_project,
 void Diagram::OnFrame() {
   node_mover_.OnFrame();
 
-  UpdateFamilyGroups();
-
   const auto flow_tree = flow::BuildFlowTree(*diagram_, safe_owner_);
   const auto node_flows = flow::CalculateNodeFlows(flow_tree);
 
   UpdateLinks(node_flows);
   UpdateNodes(node_flows);
+  UpdateFamilyGroups();
 }
 
 ///
@@ -304,32 +303,14 @@ auto Diagram::DeleteLink(ne::LinkId link_id) const -> Event& {
 }
 
 ///
-auto Diagram::FamilyFrom(const core::IFamily& core_family) const {
-  return Family{parent_project_, safe_owner_.MakeSafe(&core_family)};
-}
+auto Diagram::GetFlowColor(float flow) const {
+  const auto& settings = parent_project_->GetProject().GetSettings();
 
-///
-void Diagram::UpdateFamilyGroups() {
-  family_groups_.clear();
-
-  for (const auto& core_family : parent_project_->GetProject().GetFamilies()) {
-    auto family = FamilyFrom(*core_family);
-
-    const auto group_label = core_family->CreateUiTraits()->GetGroupLabel();
-    const auto group =
-        std::find_if(family_groups_.begin(), family_groups_.end(),
-                     [&group_label](const auto& group) {
-                       return group.label == group_label;
-                     });
-
-    if (group != family_groups_.end()) {
-      group->families.emplace_back(std::move(family));
-      continue;
-    }
-
-    family_groups_.emplace_back(FamilyGroup{
-        .label = group_label, .families = std::vector{std::move(family)}});
+  if (!settings.color_flow) {
+    return ImColor{1.F, 1.F, 1.F};
   }
+
+  return core::Settings::GetFlowColor(settings, flow);
 }
 
 ///
@@ -343,9 +324,7 @@ auto Diagram::LinkFrom(const core::Link& core_link,
   const auto link_alpha =
       linker_.IsRepiningLink(link.core_link.id) ? 1.F / 2 : 1.F;
 
-  const auto& settings = parent_project_->GetProject().GetSettings();
-
-  if (!settings.color_flow) {
+  if (!parent_project_->GetProject().GetSettings().color_flow) {
     link.color = {1.F, 1.F, 1.F, link_alpha};
     return link;
   }
@@ -360,7 +339,7 @@ auto Diagram::LinkFrom(const core::Link& core_link,
   const auto start_pin_flow =
       flow::NodeFlow::GetPinFlow(node_flow, start_pin_id);
 
-  link.color = core::Settings::GetFlowColor(settings, start_pin_flow);
+  link.color = GetFlowColor(start_pin_flow);
   link.color.Value.w = link_alpha;
 
   return link;
@@ -389,15 +368,10 @@ auto Diagram::GetHeaderColor(const IHeaderTraits& header_traits,
   }
 
   if (const auto input_flow = node_flow.input_pin_flow) {
-    return core::Settings::GetFlowColor(settings, input_flow->second);
+    return GetFlowColor(input_flow->second);
   }
 
-  if (node_flow.output_pin_flows.empty()) {
-    return ImColor{1.F, 1.F, 1.F};
-  }
-
-  return core::Settings::GetFlowColor(
-      settings, node_flow.output_pin_flows.begin()->second);
+  return ImColor{1.F, 1.F, 1.F};
 }
 
 ///
@@ -423,12 +397,10 @@ auto Diagram::PinFrom(const IPinTraits& pin_traits,
   const auto pin_flow = flow::NodeFlow::GetPinFlow(node_flow, pin_id);
   const auto& settings = parent_project_->GetProject().GetSettings();
 
-  pin.flow_data = PinFlowData{
-      .id = pin_id,
-      .color = settings.color_flow
-                   ? core::Settings::GetFlowColor(settings, pin_flow)
-                   : ImColor{1.F, 1.F, 1.F},
-      .filled = core::Diagram::HasLink(*diagram_, pin_id)};
+  pin.flow_data =
+      PinFlowData{.id = pin_id,
+                  .color = GetFlowColor(pin_flow),
+                  .filled = core::Diagram::HasLink(*diagram_, pin_id)};
 
   if (settings.color_flow && pin.label.has_value()) {
     pin.label->color = pin.flow_data->color;
@@ -446,16 +418,50 @@ auto Diagram::PinFrom(const IPinTraits& pin_traits,
 }
 
 ///
+auto Diagram::NodeFlowFrom(const core::INode& core_node,
+                           const flow::NodeFlow& core_flow) const {
+  auto node_flow = NodeFlow{};
+
+  if (const auto& input_flow = core_flow.input_pin_flow) {
+    node_flow.input_flow = FlowValue{.value = input_flow->second,
+                                     .color = GetFlowColor(input_flow->second)};
+  }
+
+  auto& output_flows = node_flow.output_flows;
+
+  for (const auto output_pin : core_node.GetOutputPinIds()) {
+    const auto output_flow = flow::NodeFlow::GetPinFlow(core_flow, output_pin);
+
+    if (std::none_of(output_flows.begin(), output_flows.end(),
+                     [output_flow](const auto& other_flow) {
+                       return other_flow.value == output_flow;
+                     })) {
+      output_flows.emplace_back(FlowValue{.value = output_flow});
+    }
+  }
+
+  for (auto& output_flow : output_flows) {
+    output_flow.color = GetFlowColor(output_flow.value);
+  }
+
+  return node_flow;
+}
+
+///
 auto Diagram::NodeFrom(core::INode& core_node,
                        const flow::NodeFlow& node_flow) const {
   const auto node_traits = core_node.CreateUiTraits();
-  auto node_data = NodeData{};
+  const auto label = node_traits->GetLabel();
+
+  auto node_data =
+      NodeData{.label = label + " #" + std::to_string(core_node.GetId().Get()),
+               .flow = NodeFlowFrom(core_node, node_flow)};
 
   if (const auto header_traits = node_traits->CreateHeaderTraits()) {
     const auto texture_file_path = (*header_traits)->GetTextureFilePath();
 
     node_data.header = Header{
-        .label = node_traits->GetLabel(),
+        .label = label,
         .color = GetHeaderColor(**header_traits, node_flow),
         .texture =
             parent_project_->GetTexturesHandle().GetTexture(texture_file_path)};
@@ -486,6 +492,49 @@ void Diagram::UpdateNodes(const flow::NodeFlows& node_flows) {
                    Expects(node_flows.contains(node_id));
                    return NodeFrom(*node, node_flows.at(node_id));
                  });
+}
+
+///
+auto Diagram::GetFamilyNodes(core::FamilyId family_id) const {
+  auto nodes = std::vector<cpp::SafePtr<const Node>>{};
+
+  for (const auto& node : nodes_) {
+    if (node.GetNode().GetFamilyId() == family_id) {
+      nodes.emplace_back(safe_owner_.MakeSafe(&node));
+    }
+  }
+
+  return nodes;
+}
+
+///
+auto Diagram::FamilyFrom(const core::IFamily& core_family) const {
+  return Family{parent_project_, safe_owner_.MakeSafe(&core_family),
+                GetFamilyNodes(core_family.GetId())};
+}
+
+///
+void Diagram::UpdateFamilyGroups() {
+  family_groups_.clear();
+
+  for (const auto& core_family : parent_project_->GetProject().GetFamilies()) {
+    auto family = FamilyFrom(*core_family);
+
+    const auto group_label = core_family->CreateUiTraits()->GetGroupLabel();
+    const auto group =
+        std::find_if(family_groups_.begin(), family_groups_.end(),
+                     [&group_label](const auto& group) {
+                       return group.label == group_label;
+                     });
+
+    if (group != family_groups_.end()) {
+      group->families.emplace_back(std::move(family));
+      continue;
+    }
+
+    family_groups_.emplace_back(FamilyGroup{
+        .label = group_label, .families = std::vector{std::move(family)}});
+  }
 }
 
 ///

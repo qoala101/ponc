@@ -115,7 +115,6 @@ macro(add_example_executable name)
 endmacro()
 
 add_example_executable(esc
-
   app/family_group/app_attenuator_family_group.cc
   app/family_group/app_client_family_group.cc
   app/family_group/app_coupler_family_group.cc
@@ -164,12 +163,8 @@ add_example_executable(esc
   draw/diagram/popup/draw_link_popup.cc
   draw/diagram/popup/draw_node_popup.cc
 
-  # draw/diagram/popup/draw_link_popup.cc
-  # draw/diagram/popup/draw_node_popup.cc
   draw/diagram/draw_colored_text.cc
   draw/diagram/draw_diagram_editor.cc
-
-  # # draw/diagram/process/draw_delete_items_process.cc
   draw/diagram/draw_linker.cc
   draw/diagram/draw_flow_icon.cc
   draw/diagram/draw_item_deleter.cc
@@ -177,8 +172,8 @@ add_example_executable(esc
   # # draw/diagram/draw_groups.cc
   draw/diagram/draw_link.cc
   draw/diagram/draw_node.cc
-
   draw/diagram/draw_tooltip.cc
+
   draw/dialog/draw_i_file_dialog.cc
   draw/dialog/draw_new_project_dialog.cc
   draw/dialog/draw_open_file_dialog.cc
@@ -189,9 +184,11 @@ add_example_executable(esc
   # # draw/view/draw_group_settings_view.cc
   # # draw/view/draw_groups_view.cc
   draw/view/draw_i_view.cc
+  draw/view/draw_nodes_view.cc
   draw/view/draw_settings_view.cc
   draw/draw_main_menu_bar.cc
   draw/draw_main_window.cc
+  draw/draw_native_facade.cc
 
   flow/flow_algorithms.cc
   flow/flow_node_flow.cc

@@ -28,13 +28,33 @@ struct Header {
 };
 
 ///
+struct FlowValue {
+  ///
+  float value{};
+  ///
+  ImColor color{};
+};
+
+///
+struct NodeFlow {
+  ///
+  std::optional<FlowValue> input_flow{};
+  ///
+  std::vector<FlowValue> output_flows{};
+};
+
+///
 struct NodeData {
+  ///
+  std::string label{};
   ///
   std::optional<Header> header{};
   ///
   std::vector<Pin> input_pins{};
   ///
   std::vector<Pin> output_pins{};
+  ///
+  NodeFlow flow{};
 };
 
 ///

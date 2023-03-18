@@ -3,10 +3,11 @@
 
 #include "coreui_family.h"
 #include "cpp_callbacks.h"
+#include "cpp_no_instances.h"
 
 namespace esc::draw {
 ///
-struct FamilyGroupsMenu {
+struct FamilyGroupsMenu : public cpp::NoInstances {
   ///
   struct Callbacks {
     ///

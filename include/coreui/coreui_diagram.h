@@ -83,9 +83,7 @@ class Diagram {
 
  private:
   ///
-  auto FamilyFrom(const core::IFamily &core_family) const;
-  ///
-  void UpdateFamilyGroups();
+  auto GetFlowColor(float flow) const;
   ///
   auto LinkFrom(const core::Link &core_link,
                 const flow::NodeFlows &node_flows) const;
@@ -98,9 +96,18 @@ class Diagram {
   auto PinFrom(const IPinTraits &pin_traits,
                const flow::NodeFlow &node_flow) const;
   ///
+  auto NodeFlowFrom(const core::INode &core_node,
+                    const flow::NodeFlow &core_flow) const;
+  ///
   auto NodeFrom(core::INode &core_node, const flow::NodeFlow &node_flow) const;
   ///
   void UpdateNodes(const flow::NodeFlows &node_flows);
+  ///
+  auto GetFamilyNodes(core::FamilyId family_id) const;
+  ///
+  auto FamilyFrom(const core::IFamily &core_family) const;
+  ///
+  void UpdateFamilyGroups();
   ///
   auto GetFreePinFamily(ne::PinKind pin_kind) const -> auto &;
   ///

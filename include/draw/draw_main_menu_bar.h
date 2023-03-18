@@ -2,8 +2,10 @@
 #define VH_DRAW_MAIN_MENU_BAR_H_
 
 #include "core_settings.h"
+#include "coreui_diagram.h"
 #include "coreui_project.h"
 #include "draw_new_project_dialog.h"
+#include "draw_nodes_view.h"
 #include "draw_open_file_dialog.h"
 #include "draw_save_as_file_dialog.h"
 #include "draw_settings_view.h"
@@ -23,7 +25,7 @@ class MainMenuBar {
   ///
   void DrawDialogs(coreui::Project &project);
   ///
-  void DrawViews(core::Settings &settings);
+  void DrawViews(const coreui::Diagram &diagram, core::Settings &settings);
 
   ///
   NewProjectDialog new_project_dialog_{};
@@ -31,6 +33,8 @@ class MainMenuBar {
   OpenFileDialog open_file_dialog_{};
   ///
   SaveAsFileDialog save_as_file_dialog_{};
+  ///
+  NodesView nodes_view_{};
   ///
   SettingsView settings_view_{};
 };

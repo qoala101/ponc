@@ -1,11 +1,12 @@
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include "draw_linker.h"
+
 #include <variant>
 
-#include "draw_connect_node_popup.h"
-#include "imgui.h"
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include "coreui_linker.h"
-#include "draw_linker.h"
+#include "draw_connect_node_popup.h"
 #include "draw_tooltip.h"
+#include "imgui.h"
 #include "imgui_node_editor.h"
 #include "imgui_node_editor_internal.h"
 

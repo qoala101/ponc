@@ -8,23 +8,12 @@
 #include "coreui_family.h"
 #include "coreui_i_node_traits.h"
 #include "draw_family_groups_menu.h"
+#include "draw_native_facade.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
 namespace {
-///
-auto GetSelectedNodes() {
-  auto selected_nodes = std::vector<ne::NodeId>{};
-  selected_nodes.resize(ne::GetSelectedObjectCount());
-
-  const auto num_selected_nodes = ne::GetSelectedNodes(
-      selected_nodes.data(), static_cast<int>(selected_nodes.size()));
-  selected_nodes.resize(num_selected_nodes);
-
-  return selected_nodes;
-}
-
 ///
 auto GetTitle(const std::vector<ne::NodeId>& nodes) {
   if (nodes.empty()) {
@@ -44,7 +33,7 @@ auto GetTitle(const std::vector<ne::NodeId>& nodes) {
 ///
 void NodePopup::Draw(coreui::Diagram& diagram) {
   const auto selected_nodes =
-      IsOpened() ? GetSelectedNodes() : std::vector<ne::NodeId>{};
+      IsOpened() ? NativeFacade::GetSelectedNodes() : std::vector<ne::NodeId>{};
   const auto title = GetTitle(selected_nodes);
   const auto content_scope = DrawContentScope(title);
 
