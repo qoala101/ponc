@@ -75,7 +75,9 @@ void MainMenuBar::DrawViewMenu() {
       nodes_view_.Toggle();
     }
 
-    if (ImGui::MenuItem("Flow Tree")) {
+    if (ImGui::MenuItem(flow_tree_view_.GetLabel().c_str(), nullptr,
+                        flow_tree_view_.IsOpened())) {
+      flow_tree_view_.Toggle();
     }
 
     ImGui::Separator();
@@ -111,6 +113,7 @@ void MainMenuBar::DrawDialogs(coreui::Project &project) {
 void MainMenuBar::DrawViews(const coreui::Diagram &diagram,
                             core::Settings &settings) {
   nodes_view_.Draw(diagram);
+  flow_tree_view_.Draw(diagram);
   settings_view_.Draw(settings);
 }
 }  // namespace esc::draw

@@ -4,6 +4,7 @@
 #include "core_settings.h"
 #include "coreui_diagram.h"
 #include "coreui_project.h"
+#include "draw_flow_tree_view.h"
 #include "draw_new_project_dialog.h"
 #include "draw_nodes_view.h"
 #include "draw_open_file_dialog.h"
@@ -35,6 +36,8 @@ class MainMenuBar {
   SaveAsFileDialog save_as_file_dialog_{};
   ///
   NodesView nodes_view_{};
+  ///
+  FlowTreeView flow_tree_view_{};
   ///
   SettingsView settings_view_{};
 };

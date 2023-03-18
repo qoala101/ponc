@@ -18,14 +18,14 @@ void TraverseDepthFirst(
     const TreeNode &tree_node,
     const std::invocable<const TreeNode &> auto &visitor_before_children,
     const std::invocable<const TreeNode &> auto &visitor_after_children) {
-  (*visitor_before_children)(tree_node);
+  visitor_before_children(tree_node);
 
   for (const auto &child : tree_node.child_nodes) {
     TraverseDepthFirst(child.second, visitor_before_children,
                        visitor_after_children);
   }
 
-  (*visitor_after_children)(tree_node);
+  visitor_after_children(tree_node);
 }
 
 ///

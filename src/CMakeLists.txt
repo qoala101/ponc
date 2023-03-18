@@ -180,9 +180,9 @@ add_example_executable(esc
   draw/dialog/draw_save_as_file_dialog.cc
 
   # # draw/view/draw_families_view.cc
-  # # draw/view/draw_flow_tree_view.cc
   # # draw/view/draw_group_settings_view.cc
   # # draw/view/draw_groups_view.cc
+  draw/view/draw_flow_tree_view.cc
   draw/view/draw_i_view.cc
   draw/view/draw_nodes_view.cc
   draw/view/draw_settings_view.cc

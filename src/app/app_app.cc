@@ -32,17 +32,17 @@ void App::OnStart() {
   app_.emplace(
       coreui::TexturesHandle{
           {.load_texture =
-               [safe_this = safe_owner_.MakeSafe(this)](auto file_path) {
+               [safe_this = safe_owner_.MakeSafe(this)](const auto file_path) {
                  return safe_this->LoadTexture(file_path);
                },
            .destroy_texture =
-               [safe_this = safe_owner_.MakeSafe(this)](auto texture_id) {
+               [safe_this = safe_owner_.MakeSafe(this)](const auto texture_id) {
                  return safe_this->DestroyTexture(texture_id);
                }}},
       coreui::Project::Callbacks{
           .name_changed = [safe_this =
                                safe_owner_.MakeSafe(this)](auto file_name) {
-            const auto title = file_name + " - PON Calculator";
+            const auto title = std::move(file_name) + " - PON Calculator";
             safe_this->SetTitle(title.c_str());
           }});
 }

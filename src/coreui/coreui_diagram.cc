@@ -36,6 +36,13 @@
 
 namespace esc::coreui {
 ///
+auto Diagram::FindNode(const Diagram& diagram, ne::NodeId node_id)
+    -> const Node& {
+  // NOLINTNEXTLINE(*-const-cast)
+  return FindNode(const_cast<Diagram&>(diagram), node_id);
+}
+
+///
 auto Diagram::FindNode(Diagram& diagram, ne::NodeId node_id) -> Node& {
   const auto node = std::find_if(diagram.nodes_.begin(), diagram.nodes_.end(),
                                  [node_id](const auto& node) {
@@ -217,7 +224,7 @@ auto Diagram::CanReplaceNode(const core::INode& source_node,
 
   const auto num_linked_output_pins =
       std::count_if(source_output_pins.begin(), source_output_pins.end(),
-                    [&diagram = diagram_](auto pin_id) {
+                    [&diagram = diagram_](const auto pin_id) {
                       return core::Diagram::HasLink(*diagram, pin_id);
                     });
 

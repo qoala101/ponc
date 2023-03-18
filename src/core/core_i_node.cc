@@ -23,7 +23,7 @@ auto INode::GetAllPins(const INode& node)
   }
 
   std::transform(output_pins.begin(), output_pins.end(),
-                 std::back_inserter(pins), [](auto pin_id) {
+                 std::back_inserter(pins), [](const auto pin_id) {
                    return std::pair{pin_id, ne::PinKind::Output};
                  });
 

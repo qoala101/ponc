@@ -78,7 +78,8 @@ void ItemDeleter::UnregisterDeletedItems(const core::Diagram &diagram) {
 void ItemDeleter::DeleteUnregisteredItems(coreui::Diagram &diagram) {
   if (ne::BeginDelete()) {
     DeleteUnregisteredItemsImpl<ne::LinkId>(
-        link_ids_, [](auto link_id) { return ne::QueryDeletedLink(link_id); },
+        link_ids_,
+        [](const auto link_id) { return ne::QueryDeletedLink(link_id); },
         std::bind_front(&coreui::Diagram::DeleteLink, &diagram));
 
     DeleteUnregisteredItemsImpl<ne::NodeId>(

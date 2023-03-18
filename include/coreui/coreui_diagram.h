@@ -34,6 +34,9 @@ class Project;
 class Diagram {
  public:
   ///
+  static auto FindNode(const Diagram &diagram, ne::NodeId node_id)
+      -> const Node &;
+  ///
   static auto FindNode(Diagram &diagram, ne::NodeId node_id) -> Node &;
 
   ///

@@ -160,7 +160,7 @@ void NodesView::Draw(const coreui::Diagram& diagram) {
     auto selected_node_ids = std::unordered_set<uintptr_t>{};
     std::transform(selected_nodes.begin(), selected_nodes.end(),
                    std::inserter(selected_node_ids, selected_node_ids.begin()),
-                   [](auto node_id) { return node_id.Get(); });
+                   [](const auto node_id) { return node_id.Get(); });
 
     for (const auto& family_group : diagram.GetFamilyGroups()) {
       for (const auto& family : family_group.families) {
