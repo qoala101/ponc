@@ -13,6 +13,19 @@
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
+namespace {
+///
+auto IsHoveringOverChildWindow() {
+  const auto *context = ImGui::GetCurrentContext();
+
+  if (context == nullptr) {
+    return false;
+  }
+
+  return context->HoveredWindow != ImGui::GetCurrentWindow();
+}
+}  // namespace
+
 ///
 DiagramEditor::DiagramEditor()
     : context_{ne::CreateEditor(), &ne::DestroyEditor} {
@@ -50,7 +63,7 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
   ne::Suspend();
   const auto resume_scope = cpp::Scope{[]() { ne::Resume(); }};
 
-  if (ne::ShowBackgroundContextMenu()) {
+  if (ne::ShowBackgroundContextMenu() && !IsHoveringOverChildWindow()) {
     create_node_popup_.SetPos(popup_pos);
     create_node_popup_.Open();
     return;
