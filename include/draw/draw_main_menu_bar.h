@@ -6,6 +6,7 @@
 #include "coreui_project.h"
 #include "draw_flow_tree_view.h"
 #include "draw_new_project_dialog.h"
+#include "draw_node_view.h"
 #include "draw_nodes_view.h"
 #include "draw_open_file_dialog.h"
 #include "draw_save_as_file_dialog.h"
@@ -34,6 +35,8 @@ class MainMenuBar {
   OpenFileDialog open_file_dialog_{};
   ///
   SaveAsFileDialog save_as_file_dialog_{};
+  ///
+  NodeView node_view_{};
   ///
   NodesView nodes_view_{};
   ///

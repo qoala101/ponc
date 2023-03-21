@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "core_i_node.h"
+#include "coreui_flow_tree.h"
 #include "coreui_pin.h"
 #include "coreui_texture.h"
 #include "cpp_safe_ptr.h"
@@ -66,11 +67,17 @@ class Node {
   ///
   auto GetNode() const -> core::INode &;
   ///
+  auto GetTreeNode() const -> const TreeNode &;
+  ///
+  void SetTreeNode(cpp::SafePtr<const TreeNode> tree_node);
+  ///
   auto GetData() const -> const NodeData &;
 
  private:
   ///
   cpp::SafePtr<core::INode> node_;
+  ///
+  std::optional<cpp::SafePtr<const TreeNode>> tree_node_{};
   ///
   NodeData data_{};
 };

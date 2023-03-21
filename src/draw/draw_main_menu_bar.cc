@@ -3,12 +3,17 @@
 #include <imgui.h>
 
 #include <functional>
+#include <optional>
 #include <variant>
 
 #include "core_settings.h"
+#include "coreui_diagram.h"
 #include "coreui_project.h"
+#include "draw_i_view.h"
+#include "draw_native_facade.h"
 #include "draw_open_file_dialog.h"
 #include "draw_save_as_file_dialog.h"
+#include "imgui_node_editor.h"
 
 namespace esc::draw {
 namespace {
@@ -19,6 +24,13 @@ auto AsLowerCase(std::string text) {
   }
 
   return text;
+}
+
+///
+void DrawViewMenuItem(IView &view) {
+  if (ImGui::MenuItem(view.GetLabel().c_str(), nullptr, view.IsOpened())) {
+    view.Toggle();
+  }
 }
 }  // namespace
 
@@ -70,22 +82,12 @@ void MainMenuBar::DrawFileMenu(coreui::Project &project) {
 ///
 void MainMenuBar::DrawViewMenu() {
   if (ImGui::BeginMenu("View")) {
-    if (ImGui::MenuItem(nodes_view_.GetLabel().c_str(), nullptr,
-                        nodes_view_.IsOpened())) {
-      nodes_view_.Toggle();
-    }
-
-    if (ImGui::MenuItem(flow_tree_view_.GetLabel().c_str(), nullptr,
-                        flow_tree_view_.IsOpened())) {
-      flow_tree_view_.Toggle();
-    }
+    DrawViewMenuItem(node_view_);
+    DrawViewMenuItem(nodes_view_);
+    DrawViewMenuItem(flow_tree_view_);
 
     ImGui::Separator();
-
-    if (ImGui::MenuItem(settings_view_.GetLabel().c_str(), nullptr,
-                        settings_view_.IsOpened())) {
-      settings_view_.Toggle();
-    }
+    DrawViewMenuItem(settings_view_);
 
     ImGui::EndMenu();
   }
@@ -112,8 +114,15 @@ void MainMenuBar::DrawDialogs(coreui::Project &project) {
 ///
 void MainMenuBar::DrawViews(const coreui::Diagram &diagram,
                             core::Settings &settings) {
+  const auto selected_nodes = NativeFacade::GetSelectedNodes();
+  const auto selected_node =
+      (selected_nodes.size() == 1)
+          ? &coreui::Diagram::FindNode(diagram, selected_nodes.front())
+          : std::optional<const coreui::Node *>{};
+
+  node_view_.Draw(selected_node, diagram.GetFamilyGroups());
   nodes_view_.Draw(diagram);
-  flow_tree_view_.Draw(diagram);
+  flow_tree_view_.Draw(diagram.GetFlowTree());
   settings_view_.Draw(settings);
 }
 }  // namespace esc::draw

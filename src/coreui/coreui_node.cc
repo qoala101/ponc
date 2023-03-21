@@ -12,5 +12,16 @@ Node::Node(cpp::SafePtr<core::INode> node, NodeData data)
 auto Node::GetNode() const -> core::INode& { return *node_; }
 
 ///
+auto Node::GetTreeNode() const -> const TreeNode& {
+  Expects(tree_node_.has_value());
+  return **tree_node_;
+}
+
+///
+void Node::SetTreeNode(cpp::SafePtr<const TreeNode> tree_node) {
+  tree_node_ = std::move(tree_node);
+}
+
+///
 auto Node::GetData() const -> const NodeData& { return data_; }
 }  // namespace esc::coreui

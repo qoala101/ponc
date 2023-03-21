@@ -1,4 +1,9 @@
+#include <iostream>
+#include <stack>
+
+#include "coreui_flow_tree.h"
 #include "coreui_node.h"
+#include "flow_tree_traversal.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
 
 #include <algorithm>
@@ -71,6 +76,7 @@ void Diagram::OnFrame() {
   UpdateLinks(node_flows);
   UpdateNodes(node_flows);
   UpdateFamilyGroups();
+  UpdateFlowTree(flow_tree);
 }
 
 ///
@@ -310,6 +316,9 @@ auto Diagram::DeleteLink(ne::LinkId link_id) const -> Event& {
 }
 
 ///
+auto Diagram::GetFlowTree() const -> const FlowTree& { return flow_tree_; }
+
+///
 auto Diagram::GetFlowColor(float flow) const {
   const auto& settings = parent_project_->GetProject().GetSettings();
 
@@ -541,6 +550,62 @@ void Diagram::UpdateFamilyGroups() {
 
     family_groups_.emplace_back(FamilyGroup{
         .label = group_label, .families = std::vector{std::move(family)}});
+  }
+}
+
+///
+// NOLINTNEXTLINE(*-no-recursion)
+void Diagram::UpdateTreeNode(TreeNode& tree_node) {
+  tree_node.node->SetTreeNode(
+      safe_owner_.MakeSafe(&const_cast<const TreeNode&>(tree_node)));
+
+  for (auto& child : tree_node.child_nodes) {
+    UpdateTreeNode(child);
+  }
+
+  const auto& families = parent_project_->GetProject().GetFamilies();
+  auto& num_children_per_family = tree_node.num_children_per_family;
+
+  for (const auto& child_node : tree_node.child_nodes) {
+    for (const auto& [child_family, child_num_children] :
+         child_node.num_children_per_family) {
+      num_children_per_family[child_family] += child_num_children;
+    }
+
+    const auto child_family = std::find_if(
+        families.begin(), families.end(),
+        [child_family_id = child_node.node->GetNode().GetFamilyId()](
+            const auto& family) { return family->GetId() == child_family_id; });
+
+    Expects(child_family != families.end());
+    ++num_children_per_family[(*child_family)->GetId().Get()];
+  }
+}
+
+///
+void Diagram::UpdateFlowTree(const flow::FlowTree& core_tree) {
+  flow_tree_.root_nodes.clear();
+
+  auto parent_stack = std::stack<TreeNode*>{};
+
+  for (const auto& root_node : core_tree.root_nodes) {
+    flow::TraverseDepthFirst(
+        root_node,
+        [this, &parent_stack](const auto& core_tree_node) {
+          auto& node = FindNode(*this, core_tree_node.node->GetId());
+          auto& tree_node =
+              parent_stack.empty()
+                  ? flow_tree_.root_nodes.emplace_back(
+                        TreeNode{.node = safe_owner_.MakeSafe(&node)})
+                  : parent_stack.top()->child_nodes.emplace_back(
+                        TreeNode{.node = safe_owner_.MakeSafe(&node)});
+          parent_stack.emplace(&tree_node);
+        },
+        [&parent_stack](const auto&) { parent_stack.pop(); });
+  }
+
+  for (auto& root_node : flow_tree_.root_nodes) {
+    UpdateTreeNode(root_node);
   }
 }
 

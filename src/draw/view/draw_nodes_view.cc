@@ -10,97 +10,30 @@
 #include "coreui_family.h"
 #include "draw_id_label.h"
 #include "draw_native_facade.h"
+#include "draw_tree_node.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
 namespace esc::draw {
 namespace {
 ///
-void DrawNode(const coreui::Node& node) {
-  ImGui::TableNextRow();
-  ImGui::TableNextColumn();
-
-  const auto node_id = node.GetNode().GetId();
-
-  ImGui::TreeNodeEx(IdLabel(node_id).c_str(), ImGuiTreeNodeFlags_Leaf);
-  ImGui::SameLine();
-
-  const auto& node_data = node.GetData();
-  auto is_selected = ne::IsNodeSelected(node_id);
-
-  if (ImGui::Selectable(node_data.label.c_str(), &is_selected)) {
-    const auto ctrl_pressed = ImGui::GetIO().KeyCtrl;
-
-    if (ctrl_pressed) {
-      if (is_selected) {
-        ne::SelectNode(node_id, true);
-      } else {
-        ne::DeselectNode(node_id);
-      }
-    } else {
-      ne::SelectNode(node_id, false);
-    }
-
-    ne::NavigateToSelection();
-  }
-
-  ImGui::TableNextColumn();
-
-  if (const auto& input_flow = node_data.flow.input_flow) {
-    ImGui::TextColored(input_flow->color, "%.3f", input_flow->value);
-  }
-
-  ImGui::TableNextColumn();
-  ImGui::BeginHorizontal(node_id.AsPointer());
-
-  const auto& output_flows = node_data.flow.output_flows;
-  const auto output_flows_end = output_flows.end();
-  auto output_flow = output_flows.begin();
-
-  if (output_flow != output_flows_end) {
-    ImGui::TextColored(output_flow->color, "%.3f", output_flow->value);
-    ++output_flow;
-  }
-
-  for (; output_flow != output_flows_end; ++output_flow) {
-    ImGui::TextUnformatted("/");
-    ImGui::TextColored(output_flow->color, "%.3f", output_flow->value);
-  }
-
-  ImGui::EndHorizontal();
-  ImGui::TreePop();
-}
-
-///
-void DrawFamily(const coreui::Family& family,
-                const std::unordered_set<uintptr_t>& selected_node_ids) {
+void DrawSelectableName(
+    const coreui::Family& family,
+    const std::unordered_set<uintptr_t>& selected_node_ids) {
   const auto& nodes = family.GetNodes();
-
-  if (nodes.empty()) {
-    return;
-  }
-
-  ImGui::TableNextRow();
-  ImGui::TableNextColumn();
-
-  const auto tree_node_is_open =
-      ImGui::TreeNodeEx(IdLabel(family.GetFamily().GetId()).c_str(),
-                        ImGuiTreeNodeFlags_DefaultOpen);
-  ImGui::SameLine();
-
   const auto label =
       family.GetLabel() + " (" + std::to_string(nodes.size()) + ")";
 
-  auto is_selected = std::all_of(
+  auto item_is_selected = std::all_of(
       nodes.begin(), nodes.end(), [&selected_node_ids](const auto& node) {
         return selected_node_ids.contains(node->GetNode().GetId().Get());
       });
 
-  if (ImGui::Selectable(label.c_str(), &is_selected)) {
+  if (ImGui::Selectable(label.c_str(), &item_is_selected)) {
     const auto ctrl_pressed = ImGui::GetIO().KeyCtrl;
 
     if (ctrl_pressed) {
-      if (is_selected) {
+      if (item_is_selected) {
         for (const auto& node : nodes) {
           ne::SelectNode(node->GetNode().GetId(), true);
         }
@@ -119,14 +52,35 @@ void DrawFamily(const coreui::Family& family,
 
     ne::NavigateToSelection();
   }
+}
 
-  if (tree_node_is_open) {
-    for (const auto& node : nodes) {
-      DrawNode(*node);
-    }
+///
+void DrawFamily(const coreui::Family& family,
+                const std::unordered_set<uintptr_t>& selected_node_ids) {
+  const auto& nodes = family.GetNodes();
 
-    ImGui::TreePop();
+  if (nodes.empty()) {
+    return;
   }
+
+  ImGui::TableNextRow();
+  ImGui::TableNextColumn();
+
+  const auto item_is_open =
+      ImGui::TreeNodeEx(IdLabel(family.GetFamily().GetId()).c_str(),
+                        ImGuiTreeNodeFlags_DefaultOpen);
+  ImGui::SameLine();
+  DrawSelectableName(family, selected_node_ids);
+
+  if (!item_is_open) {
+    return;
+  }
+
+  for (const auto& node : nodes) {
+    DrawTreeNode(node->GetTreeNode(), false);
+  }
+
+  ImGui::TreePop();
 }
 }  // namespace
 

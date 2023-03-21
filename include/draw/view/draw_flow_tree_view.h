@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "coreui_diagram.h"
+#include "coreui_flow_tree.h"
 #include "draw_i_view.h"
 
 namespace esc::draw {
@@ -13,7 +13,8 @@ class FlowTreeView : public IView {
   ///
   auto GetLabel() const -> std::string override;
 
-  void Draw(const coreui::Diagram &diagram);
+  ///
+  void Draw(const coreui::FlowTree& flow_tree);
 };
 }  // namespace esc::draw
 

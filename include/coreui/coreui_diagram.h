@@ -18,6 +18,7 @@
 #include "core_link.h"
 #include "coreui_event.h"
 #include "coreui_family.h"
+#include "coreui_flow_tree.h"
 #include "coreui_i_header_traits.h"
 #include "coreui_i_pin_traits.h"
 #include "coreui_link.h"
@@ -25,6 +26,7 @@
 #include "coreui_node.h"
 #include "coreui_node_mover.h"
 #include "cpp_safe_ptr.h"
+#include "flow_tree.h"
 
 namespace esc::coreui {
 ///
@@ -83,6 +85,8 @@ class Diagram {
       -> Event &;
   ///
   auto DeleteLink(ne::LinkId link_id) const -> Event &;
+  ///
+  auto GetFlowTree() const -> const FlowTree &;
 
  private:
   ///
@@ -112,6 +116,10 @@ class Diagram {
   ///
   void UpdateFamilyGroups();
   ///
+  void UpdateTreeNode(TreeNode &tree_node);
+  ///
+  void UpdateFlowTree(const flow::FlowTree &core_tree);
+  ///
   auto GetFreePinFamily(ne::PinKind pin_kind) const -> auto &;
   ///
   auto IsFreePin(const core::INode &node) const;
@@ -136,6 +144,8 @@ class Diagram {
   std::vector<Node> nodes_{};
   ///
   std::vector<Link> links_{};
+  ///
+  FlowTree flow_tree_{};
 };
 }  // namespace esc::coreui
 
