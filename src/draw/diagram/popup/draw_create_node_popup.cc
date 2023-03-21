@@ -14,7 +14,7 @@
 namespace esc::draw {
 ///
 void CreateNodePopup::Draw(coreui::Diagram& diagram) {
-  const auto content_scope = DrawContentScope("Crate Node");
+  const auto content_scope = DrawContentScope("Create Node");
 
   if (!IsOpened()) {
     return;

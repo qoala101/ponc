@@ -16,6 +16,15 @@ auto IView::DrawContentScope() -> cpp::ScopeFunction {
   }
 
   ImGui::Begin(GetLabel().c_str(), &opened_);
+
+  if (ImGui::BeginPopupContextWindow()) {
+    if (ImGui::MenuItem("Close")) {
+      opened_ = false;
+    }
+
+    ImGui::EndPopup();
+  }
+
   return cpp::ScopeFunction{[]() { ImGui::End(); }};
 }
 }  // namespace esc::draw
