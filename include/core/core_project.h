@@ -11,6 +11,9 @@ namespace esc::core {
 class Project {
  public:
   ///
+  static auto IsEmpty(const Project &project) -> bool;
+
+  ///
   Project(const Settings &settings,
           std::vector<std::unique_ptr<IFamily>> families,
           std::vector<Diagram> diagrams);

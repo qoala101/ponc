@@ -1,21 +1,20 @@
-#include "draw_new_project_dialog.h"
-
 #include "cpp_assert.h"
+#include "draw_question_dialog.h"
 #include "imgui.h"
 
 namespace esc::draw {
-namespace {
-///
-constexpr auto kTitle = "New Project";
-}  // namespace
+QuestionDialog::QuestionDialog(const ConstructorArgs &args)
+    : title_{args.title}, question_{args.question}, ok_label_{args.ok_label} {}
 
 ///
-void NewProjectDialog::Open() { open_requested_ = true; }
+void QuestionDialog::Open() { open_requested_ = true; }
 
 ///
-void NewProjectDialog::Draw(const Callbacks &callbacks) {
+void QuestionDialog::Draw(const Callbacks &callbacks) {
+  const auto *title_data = title_.c_str();
+
   if (open_requested_) {
-    ImGui::OpenPopup(kTitle);
+    ImGui::OpenPopup(title_data);
     open_requested_ = false;
   }
 
@@ -25,13 +24,13 @@ void NewProjectDialog::Draw(const Callbacks &callbacks) {
   ImGui::SetNextWindowPos(viewport->GetCenter(), ImGuiCond_Appearing,
                           ImVec2{0.5F, 0.5F});
 
-  if (ImGui::BeginPopupModal(kTitle, nullptr,
+  if (ImGui::BeginPopupModal(title_data, nullptr,
                              ImGuiWindowFlags_AlwaysAutoResize)) {
-    ImGui::TextUnformatted("Current project would not be saved.\nProceed?");
+    ImGui::TextUnformatted(question_.data());
     ImGui::Separator();
     ImGui::BeginHorizontal("Buttons");
 
-    if (ImGui::Button("New Project")) {
+    if (ImGui::Button(ok_label_.c_str())) {
       callbacks.accepted();
       ImGui::CloseCurrentPopup();
     }

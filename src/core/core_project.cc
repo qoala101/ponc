@@ -40,6 +40,15 @@ auto Project::FindMaxId() const {
 }
 
 ///
+auto Project::IsEmpty(const Project& project) -> bool {
+  const auto& diagrams = project.GetDiagrams();
+
+  return std::all_of(diagrams.begin(), diagrams.end(), [](const auto& diagram) {
+    return diagram.GetNodes().empty() && diagram.GetLinks().empty();
+  });
+}
+
+///
 Project::Project(const Settings& settings,
                  std::vector<std::unique_ptr<IFamily>> families,
                  std::vector<Diagram> diagrams)

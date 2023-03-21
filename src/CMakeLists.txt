@@ -175,8 +175,8 @@ add_example_executable(esc
   draw/diagram/draw_tooltip.cc
 
   draw/dialog/draw_i_file_dialog.cc
-  draw/dialog/draw_new_project_dialog.cc
   draw/dialog/draw_open_file_dialog.cc
+  draw/dialog/draw_question_dialog.cc
   draw/dialog/draw_save_as_file_dialog.cc
 
   # # draw/view/draw_families_view.cc

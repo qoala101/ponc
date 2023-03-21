@@ -6,12 +6,14 @@
 #include <optional>
 #include <variant>
 
+#include "core_project.h"
 #include "core_settings.h"
 #include "coreui_diagram.h"
 #include "coreui_project.h"
 #include "draw_i_view.h"
 #include "draw_native_facade.h"
 #include "draw_open_file_dialog.h"
+#include "draw_question_dialog.h"
 #include "draw_save_as_file_dialog.h"
 #include "imgui_node_editor.h"
 
@@ -33,6 +35,13 @@ void DrawViewMenuItem(IView &view) {
   }
 }
 }  // namespace
+
+///
+MainMenuBar::MainMenuBar()
+    : new_project_dialog_{
+          {.title = "New Project",
+           .question = "Current project would not be saved.\nProceed?",
+           .ok_label = "New Project"}} {}
 
 ///
 void MainMenuBar::Draw(coreui::Project &project) {
@@ -58,7 +67,11 @@ void MainMenuBar::Draw(coreui::Project &project) {
 void MainMenuBar::DrawFileMenu(coreui::Project &project) {
   if (ImGui::BeginMenu("File")) {
     if (ImGui::MenuItem("New...")) {
-      new_project_dialog_.Open();
+      if (core::Project::IsEmpty(project.GetProject())) {
+        project.Reset();
+      } else {
+        new_project_dialog_.Open();
+      }
     }
 
     if (ImGui::MenuItem("Open...")) {
@@ -97,9 +110,14 @@ void MainMenuBar::DrawViewMenu() {
 void MainMenuBar::DrawDialogs(coreui::Project &project) {
   new_project_dialog_.Draw({.accepted = [&project]() { project.Reset(); }});
 
-  open_file_dialog_.Draw({.file_selected = [&project](auto file_path) {
-    project.OpenFromFile(std::move(file_path));
-  }});
+  const auto requires_confirmation =
+      !core::Project::IsEmpty(project.GetProject());
+
+  open_file_dialog_.Draw({.file_selected =
+                              [&project](auto file_path) {
+                                project.OpenFromFile(std::move(file_path));
+                              }},
+                         requires_confirmation);
 
   save_as_file_dialog_.Draw({.file_selected = [&project](auto file_path) {
     if (const auto not_json_extension =

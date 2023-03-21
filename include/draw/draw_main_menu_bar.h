@@ -5,10 +5,10 @@
 #include "coreui_diagram.h"
 #include "coreui_project.h"
 #include "draw_flow_tree_view.h"
-#include "draw_new_project_dialog.h"
 #include "draw_node_view.h"
 #include "draw_nodes_view.h"
 #include "draw_open_file_dialog.h"
+#include "draw_question_dialog.h"
 #include "draw_save_as_file_dialog.h"
 #include "draw_settings_view.h"
 
@@ -16,6 +16,9 @@ namespace esc::draw {
 ///
 class MainMenuBar {
  public:
+  ///
+  MainMenuBar();
+
   ///
   void Draw(coreui::Project &project);
 
@@ -30,7 +33,7 @@ class MainMenuBar {
   void DrawViews(const coreui::Diagram &diagram, core::Settings &settings);
 
   ///
-  NewProjectDialog new_project_dialog_{};
+  QuestionDialog new_project_dialog_;
   ///
   OpenFileDialog open_file_dialog_{};
   ///
