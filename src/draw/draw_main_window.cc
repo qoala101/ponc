@@ -6,7 +6,7 @@
 namespace esc::draw {
 ///
 void MainWindow::Draw(coreui::Project &project) {
-  main_menu_bar_.Draw(project);
   diagram_editor_.Draw(project.GetDiagram());
+  main_menu_bar_.Draw(project);
 }
 }  // namespace esc::draw

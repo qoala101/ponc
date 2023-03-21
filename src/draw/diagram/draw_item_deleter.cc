@@ -67,11 +67,19 @@ void DeleteUnregisteredItemsImpl(
 void ItemDeleter::UnregisterDeletedItems(const core::Diagram &diagram) {
   UnregisterDeletedItemsImpl(
       link_ids_, diagram.GetLinks(),
-      [](const auto &link) { return link.id.Get(); }, &ne::DeleteLink);
+      [](const auto &link) { return link.id.Get(); },
+      [](const auto link_id) {
+        ne::DeselectLink(link_id);
+        ne::DeleteLink(link_id);
+      });
 
   UnregisterDeletedItemsImpl(
       node_ids_, diagram.GetNodes(),
-      [](const auto &node) { return node->GetId().Get(); }, &ne::DeleteNode);
+      [](const auto &node) { return node->GetId().Get(); },
+      [](const auto node_id) {
+        ne::DeselectNode(node_id);
+        ne::DeleteNode(node_id);
+      });
 }
 
 ///

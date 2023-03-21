@@ -19,9 +19,9 @@ class MainWindow {
 
  private:
   ///
-  MainMenuBar main_menu_bar_{};
-  ///
   DiagramEditor diagram_editor_{};
+  ///
+  MainMenuBar main_menu_bar_{};
 };
 }  // namespace esc::draw
 
