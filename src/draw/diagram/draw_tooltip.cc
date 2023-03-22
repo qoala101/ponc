@@ -7,7 +7,7 @@
 
 #include <utility>
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 void DrawTooltip(std::string_view text, const ImColor& color) {
   const auto spacing = ImGui::GetStyle().ItemSpacing;
@@ -15,4 +15,4 @@ void DrawTooltip(std::string_view text, const ImColor& color) {
                    ImVec2{spacing.x, -spacing.y - ImGui::GetTextLineHeight()};
   DrawColoredText(text, color, pos);
 }
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw

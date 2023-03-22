@@ -1,12 +1,12 @@
-#ifndef VH_JSON_PROJECT_SERIALIZER_H_
-#define VH_JSON_PROJECT_SERIALIZER_H_
+#ifndef VH_PONC_JSON_PROJECT_SERIALIZER_H_
+#define VH_PONC_JSON_PROJECT_SERIALIZER_H_
 
 #include "core_project.h"
 #include "cpp_no_instances.h"
 #include "crude_json.h"
 #include "json_i_family_parser.h"
 
-namespace esc::json {
+namespace vh::ponc::json {
 ///
 struct ProjectSerializer : public cpp::NoInstances {
   ///
@@ -17,6 +17,6 @@ struct ProjectSerializer : public cpp::NoInstances {
   ///
   static auto WriteToJson(const core::Project &project) -> crude_json::value;
 };
-}  // namespace esc::json
+}  // namespace vh::ponc::json
 
-#endif  // VH_JSON_PROJECT_SERIALIZER_H_
+#endif  // VH_PONC_JSON_PROJECT_SERIALIZER_H_

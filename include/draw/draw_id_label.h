@@ -1,5 +1,5 @@
-#ifndef VH_DRAW_ID_LABEL_H_
-#define VH_DRAW_ID_LABEL_H_
+#ifndef VH_PONC_DRAW_ID_LABEL_H_
+#define VH_PONC_DRAW_ID_LABEL_H_
 
 #include <concepts>
 #include <string>
@@ -7,7 +7,7 @@
 
 #include "core_concepts.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 template <std::integral T>
 auto IdLabel(T id, std::string_view label = {}) {
@@ -25,6 +25,6 @@ template <core::Id T>
 auto IdLabel(T id, std::string_view label = {}) {
   return IdLabel(id.Get(), label);
 }
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw
 
-#endif  // VH_DRAW_ID_LABEL_H_
+#endif  // VH_PONC_DRAW_ID_LABEL_H_

@@ -1,12 +1,12 @@
-#ifndef VH_draw_question_dialog_H_
-#define VH_draw_question_dialog_H_
+#ifndef VH_PONC_DRAW_QUESTION_DIALOG_H_
+#define VH_PONC_DRAW_QUESTION_DIALOG_H_
 
 #include <string>
 #include <string_view>
 
 #include "cpp_callbacks.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 class QuestionDialog {
  public:
@@ -37,6 +37,6 @@ class QuestionDialog {
   std::string question_{};
   std::string ok_label_{};
 };
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw
 
-#endif  // VH_draw_question_dialog_H_
+#endif  // VH_PONC_DRAW_QUESTION_DIALOG_H_

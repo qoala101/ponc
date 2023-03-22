@@ -19,7 +19,7 @@
 #include "json_i_node_parser.h"
 #include "json_i_node_writer.h"
 
-namespace esc {
+namespace vh::ponc {
 namespace {
 class Node;
 
@@ -299,4 +299,4 @@ auto SplitterFamilyGroup::CreateFamilyParser() const
     -> std::unique_ptr<json::IFamilyParser> {
   return std::make_unique<FamilyParser>();
 }
-}  // namespace esc
+}  // namespace vh::ponc

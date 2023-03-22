@@ -1,5 +1,5 @@
-#ifndef VH_CORE_I_FAMILY_H_
-#define VH_CORE_I_FAMILY_H_
+#ifndef VH_PONC_CORE_I_FAMILY_H_
+#define VH_PONC_CORE_I_FAMILY_H_
 
 #include <imgui_node_editor.h>
 
@@ -12,7 +12,7 @@
 
 namespace ne = ax::NodeEditor;
 
-namespace esc {
+namespace vh::ponc {
 namespace json {
 ///
 class INodeParser;
@@ -69,6 +69,6 @@ class IFamily : public cpp::Interface {
   FamilyId id_{};
 };
 }  // namespace core
-}  // namespace esc
+}  // namespace vh::ponc
 
-#endif  // VH_CORE_I_FAMILY_H_
+#endif  // VH_PONC_CORE_I_FAMILY_H_

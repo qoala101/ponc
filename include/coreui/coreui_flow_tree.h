@@ -1,5 +1,5 @@
-#ifndef VH_COREUI_FLOW_TREE_H_
-#define VH_COREUI_FLOW_TREE_H_
+#ifndef VH_PONC_COREUI_FLOW_TREE_H_
+#define VH_PONC_COREUI_FLOW_TREE_H_
 
 #include <cstdint>
 #include <unordered_map>
@@ -7,7 +7,7 @@
 
 #include "cpp_safe_ptr.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 class Node;
 
@@ -26,6 +26,6 @@ struct FlowTree {
   ///
   std::vector<TreeNode> root_nodes{};
 };
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui
 
-#endif  // VH_COREUI_FLOW_TREE_H_
+#endif  // VH_PONC_COREUI_FLOW_TREE_H_

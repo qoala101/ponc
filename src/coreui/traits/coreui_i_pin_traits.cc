@@ -7,7 +7,7 @@
 #include "cpp_assert.h"
 #include "imgui_node_editor.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 auto IPinTraits::GetPinKind(const coreui::IPinTraits& pin_traits,
                             const core::INode& pin_node) -> ne::PinKind {
@@ -28,4 +28,4 @@ auto IPinTraits::GetLabel() const -> std::optional<PinLabel> {
 
 ///
 auto IPinTraits::GetValue() const -> PinValueVariant { return {}; }
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui

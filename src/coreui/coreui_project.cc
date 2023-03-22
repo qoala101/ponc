@@ -21,7 +21,7 @@
 #include "cpp_share.h"
 #include "json_project_serializer.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 auto Project::CreateProject() const {
   auto id_generator = core::IdGenerator{};
@@ -177,4 +177,4 @@ void Project::SetFilePath(std::filesystem::path file_path) {
   file_path_ = std::move(file_path);
   callbacks_.name_changed(GetName());
 }
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui

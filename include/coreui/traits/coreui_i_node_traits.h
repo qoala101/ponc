@@ -1,5 +1,5 @@
-#ifndef VH_COREUI_I_NODE_TRAITS_H_
-#define VH_COREUI_I_NODE_TRAITS_H_
+#ifndef VH_PONC_COREUI_I_NODE_TRAITS_H_
+#define VH_PONC_COREUI_I_NODE_TRAITS_H_
 
 #include <memory>
 #include <string>
@@ -9,7 +9,7 @@
 #include "coreui_i_pin_traits.h"
 #include "cpp_interface.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 class INodeTraits : public cpp::Interface {
  public:
@@ -26,6 +26,6 @@ class INodeTraits : public cpp::Interface {
   ///
   virtual void ExecuteAction(std::string_view action_name);
 };
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui
 
-#endif  // VH_COREUI_I_NODE_TRAITS_H_
+#endif  // VH_PONC_COREUI_I_NODE_TRAITS_H_

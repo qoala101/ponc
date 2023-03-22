@@ -1,5 +1,5 @@
-#ifndef VH_DRAW_I_POPUP_H_
-#define VH_DRAW_I_POPUP_H_
+#ifndef VH_PONC_DRAW_I_POPUP_H_
+#define VH_PONC_DRAW_I_POPUP_H_
 
 #include <optional>
 #include <string>
@@ -9,7 +9,7 @@
 #include "cpp_scope_function.h"
 #include "imgui.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 class IPopup : public cpp::Interface {
  public:
@@ -39,6 +39,6 @@ class IPopup : public cpp::Interface {
   ///
   bool opened_{};
 };
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw
 
-#endif  // VH_DRAW_I_POPUP_H_
+#endif  // VH_PONC_DRAW_I_POPUP_H_

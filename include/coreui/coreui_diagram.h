@@ -1,5 +1,5 @@
-#ifndef VH_COREUI_DIAGRAM_H_
-#define VH_COREUI_DIAGRAM_H_
+#ifndef VH_PONC_COREUI_DIAGRAM_H_
+#define VH_PONC_COREUI_DIAGRAM_H_
 
 #include <imgui_node_editor.h>
 
@@ -28,7 +28,7 @@
 #include "cpp_safe_ptr.h"
 #include "flow_tree.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 class Project;
 
@@ -147,6 +147,6 @@ class Diagram {
   ///
   FlowTree flow_tree_{};
 };
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui
 
-#endif  // VH_COREUI_DIAGRAM_H_
+#endif  // VH_PONC_COREUI_DIAGRAM_H_

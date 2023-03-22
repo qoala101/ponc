@@ -2,7 +2,7 @@
 
 #include "json_id_serializer.h"
 
-namespace esc::json {
+namespace vh::ponc::json {
 ///
 auto IFamilyWriter::WriteToJson(const core::IFamily& family) const
     -> crude_json::value {
@@ -15,4 +15,4 @@ auto IFamilyWriter::WriteToJson(const core::IFamily& family) const
 
 ///
 auto IFamilyWriter::WriteToJson() const -> crude_json::value { return {}; }
-}  // namespace esc::json
+}  // namespace vh::ponc::json

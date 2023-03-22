@@ -1,5 +1,5 @@
-#ifndef VH_CORE_DIAGRAM_H_
-#define VH_CORE_DIAGRAM_H_
+#ifndef VH_PONC_CORE_DIAGRAM_H_
+#define VH_PONC_CORE_DIAGRAM_H_
 
 #include <memory>
 #include <vector>
@@ -9,7 +9,7 @@
 #include "cpp_safe_ptr.h"
 #include "imgui_node_editor.h"
 
-namespace esc::core {
+namespace vh::ponc::core {
 ///
 class Diagram {
  public:
@@ -54,6 +54,6 @@ class Diagram {
   ///
   std::vector<Link> links_{};
 };
-}  // namespace esc::core
+}  // namespace vh::ponc::core
 
-#endif  // VH_CORE_DIAGRAM_H_
+#endif  // VH_PONC_CORE_DIAGRAM_H_

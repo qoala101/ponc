@@ -1,12 +1,12 @@
-#ifndef VH_CPP_SAFE_PTR_H_
-#define VH_CPP_SAFE_PTR_H_
+#ifndef VH_PONC_CPP_SAFE_PTR_H_
+#define VH_PONC_CPP_SAFE_PTR_H_
 
 #include <memory>
 #include <type_traits>
 
 #include "cpp_assert.h"
 
-namespace esc::cpp {
+namespace vh::ponc::cpp {
 ///
 template <typename T>
 class SafePtr {
@@ -74,6 +74,6 @@ class SafeOwner {
   ///
   std::shared_ptr<void *> instance_{};
 };
-}  // namespace esc::cpp
+}  // namespace vh::ponc::cpp
 
-#endif  // VH_CPP_SAFE_PTR_H_
+#endif  // VH_PONC_CPP_SAFE_PTR_H_

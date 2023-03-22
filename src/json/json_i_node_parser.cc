@@ -7,7 +7,7 @@
 #include "json_id_serializer.h"
 #include "json_optional_serializer.h"
 
-namespace esc::json {
+namespace vh::ponc::json {
 ///
 auto INodeParser::ParseFromJson(const crude_json::value& json) const
     -> std::unique_ptr<core::INode> {
@@ -24,4 +24,4 @@ auto INodeParser::ParseFromJson(const crude_json::value& json) const
 
   return ParseFromJson(std::move(parsed_args), json["data"]);
 }
-}  // namespace esc::json
+}  // namespace vh::ponc::json

@@ -1,11 +1,11 @@
-#ifndef VH_JSON_I_FAMILY_WRITER_H_
-#define VH_JSON_I_FAMILY_WRITER_H_
+#ifndef VH_PONC_JSON_I_FAMILY_WRITER_H_
+#define VH_PONC_JSON_I_FAMILY_WRITER_H_
 
 #include "core_i_family.h"
 #include "cpp_interface.h"
 #include "crude_json.h"
 
-namespace esc::json {
+namespace vh::ponc::json {
 ///
 class IFamilyWriter : public cpp::Interface {
  public:
@@ -18,6 +18,6 @@ class IFamilyWriter : public cpp::Interface {
   ///
   virtual auto WriteToJson() const -> crude_json::value;
 };
-}  // namespace esc::json
+}  // namespace vh::ponc::json
 
-#endif  // VH_JSON_I_FAMILY_WRITER_H_
+#endif  // VH_PONC_JSON_I_FAMILY_WRITER_H_

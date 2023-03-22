@@ -1,11 +1,11 @@
-#ifndef VH_COREUI_LINK_H_
-#define VH_COREUI_LINK_H_
+#ifndef VH_PONC_COREUI_LINK_H_
+#define VH_PONC_COREUI_LINK_H_
 
 #include <imgui.h>
 
 #include "core_link.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 struct Link {
   ///
@@ -15,6 +15,6 @@ struct Link {
   ///
   float thickness{};
 };
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui
 
-#endif  // VH_COREUI_LINK_H_
+#endif  // VH_PONC_COREUI_LINK_H_

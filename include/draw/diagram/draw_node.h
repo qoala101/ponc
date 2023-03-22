@@ -1,11 +1,11 @@
-#ifndef VH_DRAW_NODES_H_
-#define VH_DRAW_NODES_H_
+#ifndef VH_PONC_DRAW_NODE_H_
+#define VH_PONC_DRAW_NODE_H_
 
 #include "coreui_node.h"
 #include "coreui_node_mover.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 void DrawNode(coreui::Node &node, coreui::NodeMover &node_mover);
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw
 
-#endif  // VH_DRAW_NODES_H_
+#endif  // VH_PONC_DRAW_NODE_H_

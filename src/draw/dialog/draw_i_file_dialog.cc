@@ -1,6 +1,6 @@
 #include "draw_i_file_dialog.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 void IFileDialog::Open() { dialog_.Open(); }
 
@@ -18,4 +18,4 @@ void IFileDialog::Draw(const Callbacks &callbacks) {
 
 ///
 IFileDialog::IFileDialog(const ImGui::FileBrowser &dialog) : dialog_{dialog} {}
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw

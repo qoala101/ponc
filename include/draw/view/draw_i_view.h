@@ -1,12 +1,12 @@
-#ifndef VH_DRAW_I_VIEW_H_
-#define VH_DRAW_I_VIEW_H_
+#ifndef VH_PONC_DRAW_I_VIEW_H_
+#define VH_PONC_DRAW_I_VIEW_H_
 
 #include <string>
 
 #include "cpp_interface.h"
 #include "cpp_scope_function.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 class IView : public cpp::Interface {
  public:
@@ -26,6 +26,6 @@ class IView : public cpp::Interface {
   ///
   bool opened_{};
 };
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw
 
-#endif  // VH_DRAW_I_VIEW_H_
+#endif  // VH_PONC_DRAW_I_VIEW_H_

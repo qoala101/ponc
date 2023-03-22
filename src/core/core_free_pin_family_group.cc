@@ -20,7 +20,7 @@
 #include "json_i_node_parser.h"
 #include "json_i_node_writer.h"
 
-namespace esc::core {
+namespace vh::ponc::core {
 namespace {
 class Node;
 
@@ -238,4 +238,4 @@ auto FreePinFamilyGroup::CreateFamilyParser() const
     -> std::unique_ptr<json::IFamilyParser> {
   return std::make_unique<FamilyParser>();
 }
-}  // namespace esc::core
+}  // namespace vh::ponc::core

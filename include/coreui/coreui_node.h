@@ -1,5 +1,5 @@
-#ifndef VH_COREUI_NODE_H_
-#define VH_COREUI_NODE_H_
+#ifndef VH_PONC_COREUI_NODE_H_
+#define VH_PONC_COREUI_NODE_H_
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -17,7 +17,7 @@
 #include "coreui_texture.h"
 #include "cpp_safe_ptr.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 struct Header {
   ///
@@ -81,6 +81,6 @@ class Node {
   ///
   NodeData data_{};
 };
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui
 
-#endif  // VH_COREUI_NODE_H_
+#endif  // VH_PONC_COREUI_NODE_H_

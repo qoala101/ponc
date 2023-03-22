@@ -8,7 +8,7 @@
 
 namespace ne = ax::NodeEditor;
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 namespace {
 ///
 auto GenerateId() {
@@ -58,4 +58,4 @@ auto IPopup::DrawContentScope(std::string_view title,
 
   return cpp::ScopeFunction{[]() { ne::Resume(); }};
 }
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw

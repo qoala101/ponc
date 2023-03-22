@@ -1,5 +1,5 @@
-#ifndef VH_DRAW_NODE_POPUP_H_
-#define VH_DRAW_NODE_POPUP_H_
+#ifndef VH_PONC_DRAW_NODE_POPUP_H_
+#define VH_PONC_DRAW_NODE_POPUP_H_
 
 #include <imgui_node_editor.h>
 
@@ -8,13 +8,13 @@
 #include "coreui_diagram.h"
 #include "draw_i_popup.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 class NodePopup : public IPopup {
  public:
   ///
   void Draw(coreui::Diagram &diagram);
 };
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw
 
-#endif  // VH_DRAW_NODE_POPUP_H_
+#endif  // VH_PONC_DRAW_NODE_POPUP_H_

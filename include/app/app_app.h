@@ -1,5 +1,5 @@
-#ifndef VH_APP_APP_H_
-#define VH_APP_APP_H_
+#ifndef VH_PONC_APP_APP_H_
+#define VH_PONC_APP_APP_H_
 
 #include <application.h>
 
@@ -8,7 +8,7 @@
 #include "app_impl.h"
 #include "cpp_safe_ptr.h"
 
-namespace esc {
+namespace vh::ponc {
 ///
 // NOLINTNEXTLINE(*-virtual-class-destructor)
 class App : public Application {
@@ -34,6 +34,6 @@ class App : public Application {
   ///
   std::optional<AppImpl> app_{};
 };
-}  // namespace esc
+}  // namespace vh::ponc
 
-#endif  // VH_APP_APP_H_
+#endif  // VH_PONC_APP_APP_H_

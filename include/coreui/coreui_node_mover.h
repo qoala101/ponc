@@ -1,5 +1,5 @@
-#ifndef VH_COREUI_NODE_MOVER_H_
-#define VH_COREUI_NODE_MOVER_H_
+#ifndef VH_PONC_COREUI_NODE_MOVER_H_
+#define VH_PONC_COREUI_NODE_MOVER_H_
 
 #include <imgui_node_editor.h>
 
@@ -12,7 +12,7 @@
 #include "cpp_safe_ptr.h"
 #include "imgui.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 class NodeMover {
  public:
@@ -53,6 +53,6 @@ class NodeMover {
   ///
   std::unordered_map<uintptr_t, ImVec2> pin_poses_{};
 };
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui
 
-#endif  // VH_COREUI_NODE_MOVER_H_
+#endif  // VH_PONC_COREUI_NODE_MOVER_H_

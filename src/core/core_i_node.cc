@@ -9,7 +9,7 @@
 
 #include "cpp_assert.h"
 
-namespace esc::core {
+namespace vh::ponc::core {
 ///
 auto INode::GetAllPins(const INode& node)
     -> std::vector<std::pair<ne::PinId, ne::PinKind>> {
@@ -117,4 +117,4 @@ INode::INode(ConstructorArgs args)
 
 ///
 void INode::SetInitialFlowValues(flow::NodeFlow& /*unused*/) const {}
-}  // namespace esc::core
+}  // namespace vh::ponc::core

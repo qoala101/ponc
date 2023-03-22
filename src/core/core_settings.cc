@@ -2,7 +2,7 @@
 
 #include "core_gradient.h"
 
-namespace esc::core {
+namespace vh::ponc::core {
 ///
 auto Settings::GetFlowColor(const Settings &settings, float flow) -> ImColor {
   const auto blue = ImColor{0.F, 0.F, 1.F};
@@ -53,4 +53,4 @@ auto Settings::GetFlowColor(const Settings &settings, float flow) -> ImColor {
 
   return GetGradient(green, green_red, (value_high_low_percentage - 0.5F) * 2);
 }
-}  // namespace esc::core
+}  // namespace vh::ponc::core

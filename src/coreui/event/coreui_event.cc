@@ -1,6 +1,6 @@
 #include "coreui_event.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 Event::Event(std::function<void()> event) : event_{std::move(event)} {}
 
@@ -17,4 +17,4 @@ auto Event::Then(std::function<void()> continuation) -> Event& {
 auto Event::GetContinuation() -> std::optional<std::unique_ptr<Event>>& {
   return continuation_;
 }
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui

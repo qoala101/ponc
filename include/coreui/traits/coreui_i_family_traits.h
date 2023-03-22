@@ -1,11 +1,11 @@
-#ifndef VH_COREUI_I_FAMILY_TRAITS_H_
-#define VH_COREUI_I_FAMILY_TRAITS_H_
+#ifndef VH_PONC_COREUI_I_FAMILY_TRAITS_H_
+#define VH_PONC_COREUI_I_FAMILY_TRAITS_H_
 
 #include <string>
 
 #include "cpp_interface.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 class IFamilyTraits : public cpp::Interface {
  public:
@@ -16,6 +16,6 @@ class IFamilyTraits : public cpp::Interface {
   ///
   virtual auto IsUserAccessible() -> bool;
 };
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui
 
-#endif  // VH_COREUI_I_FAMILY_TRAITS_H_
+#endif  // VH_PONC_COREUI_I_FAMILY_TRAITS_H_

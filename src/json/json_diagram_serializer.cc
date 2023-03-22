@@ -13,7 +13,7 @@
 #include "json_id_serializer.h"
 #include "json_link_serializer.h"
 
-namespace esc::json {
+namespace vh::ponc::json {
 namespace {
 ///
 auto FindFamily(const std::vector<std::unique_ptr<core::IFamily>>& families,
@@ -64,4 +64,4 @@ auto DiagramSerializer::WriteToJson(const core::Diagram& diagram)
                                    &LinkSerializer::WriteToJson);
   return json;
 }
-}  // namespace esc::json
+}  // namespace vh::ponc::json

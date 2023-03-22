@@ -8,7 +8,7 @@
 #include "crude_json.h"
 #include "json_id_serializer.h"
 
-namespace esc::json {
+namespace vh::ponc::json {
 ///
 auto LinkSerializer::ParseFromJson(const crude_json::value& json)
     -> core::Link {
@@ -25,4 +25,4 @@ auto LinkSerializer::WriteToJson(const core::Link& link) -> crude_json::value {
   json["end_pin_id"] = IdSerializer::WriteToJson(link.end_pin_id);
   return json;
 }
-}  // namespace esc::json
+}  // namespace vh::ponc::json

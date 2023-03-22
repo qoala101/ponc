@@ -1,5 +1,5 @@
-#ifndef VH_DRAW_DIAGRAM_EDITOR_H_
-#define VH_DRAW_DIAGRAM_EDITOR_H_
+#ifndef VH_PONC_DRAW_DIAGRAM_EDITOR_H_
+#define VH_PONC_DRAW_DIAGRAM_EDITOR_H_
 
 #include <imgui_node_editor.h>
 
@@ -13,7 +13,7 @@
 #include "draw_linker.h"
 #include "draw_node_popup.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 class DiagramEditor {
  public:
@@ -42,6 +42,6 @@ class DiagramEditor {
   ///
   LinkPopup link_popup_{};
 };
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw
 
-#endif  // VH_DRAW_DIAGRAM_EDITOR_H_
+#endif  // VH_PONC_DRAW_DIAGRAM_EDITOR_H_

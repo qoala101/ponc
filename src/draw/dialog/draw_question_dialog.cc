@@ -1,8 +1,9 @@
-#include "cpp_assert.h"
 #include "draw_question_dialog.h"
+
+#include "cpp_assert.h"
 #include "imgui.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 QuestionDialog::QuestionDialog(const ConstructorArgs &args)
     : title_{args.title}, question_{args.question}, ok_label_{args.ok_label} {}
 
@@ -43,4 +44,4 @@ void QuestionDialog::Draw(const Callbacks &callbacks) {
     ImGui::EndPopup();
   }
 }
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw

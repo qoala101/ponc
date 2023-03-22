@@ -18,7 +18,7 @@
 #include "draw_save_as_file_dialog.h"
 #include "imgui_node_editor.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 namespace {
 ///
 auto AsLowerCase(std::string text) {
@@ -143,4 +143,4 @@ void MainMenuBar::DrawViews(const coreui::Diagram &diagram,
   flow_tree_view_.Draw(diagram.GetFlowTree());
   settings_view_.Draw(settings);
 }
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw

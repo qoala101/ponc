@@ -1,9 +1,9 @@
-#ifndef VH_CPP_CALLBACKS_H_
-#define VH_CPP_CALLBACKS_H_
+#ifndef VH_PONC_CPP_CALLBACKS_H_
+#define VH_PONC_CPP_CALLBACKS_H_
 
 #include <functional>
 
-namespace esc::cpp {
+namespace vh::ponc::cpp {
 ///
 template <typename T, typename... Args>
 using Query = std::function<auto(Args...)->T>;
@@ -15,6 +15,6 @@ using Signal = std::function<void(Args...)>;
 ///
 template <typename Signature>
 using Action = std::function<Signature>;
-}  // namespace esc::cpp
+}  // namespace vh::ponc::cpp
 
-#endif  // VH_CPP_CALLBACKS_H_
+#endif  // VH_PONC_CPP_CALLBACKS_H_

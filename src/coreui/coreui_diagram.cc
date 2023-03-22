@@ -39,7 +39,7 @@
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 auto Diagram::FindNode(const Diagram& diagram, ne::NodeId node_id)
     -> const Node& {
@@ -628,4 +628,4 @@ auto Diagram::MoveConnectedLinkToNewFreePin(
       .Then([node_mover = safe_owner_.MakeSafe(&node_mover_), free_pin_id,
              pin_pos]() { node_mover->MovePinTo(free_pin_id, pin_pos); });
 }
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui

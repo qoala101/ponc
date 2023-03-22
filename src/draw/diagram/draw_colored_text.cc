@@ -10,7 +10,7 @@
 
 namespace ne = ax::NodeEditor;
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 void DrawColoredText(std::string_view text, const ImColor& color,
                      const ImVec2& pos) {
@@ -27,4 +27,4 @@ void DrawColoredText(std::string_view text, const ImColor& color,
                           ne::GetStyle().PinRounding);
   ImGui::TextUnformatted(text.data());
 }
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw

@@ -1,5 +1,5 @@
-#ifndef VH_COREUI_LINKER_H_
-#define VH_COREUI_LINKER_H_
+#ifndef VH_PONC_COREUI_LINKER_H_
+#define VH_PONC_COREUI_LINKER_H_
 
 #include <imgui.h>
 #include <imgui_node_editor.h>
@@ -17,7 +17,7 @@
 #include "coreui_family.h"
 #include "cpp_safe_ptr.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 class Diagram;
 
@@ -146,6 +146,6 @@ class Linker {
   ///
   std::optional<LinkingData> linking_data_{};
 };
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui
 
-#endif  // VH_COREUI_LINKER_H_
+#endif  // VH_PONC_COREUI_LINKER_H_

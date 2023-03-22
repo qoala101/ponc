@@ -1,5 +1,5 @@
-#ifndef VH_DRAW_MAIN_WINDOW_H_
-#define VH_DRAW_MAIN_WINDOW_H_
+#ifndef VH_PONC_DRAW_MAIN_WINDOW_H_
+#define VH_PONC_DRAW_MAIN_WINDOW_H_
 
 #include <imgui_node_editor.h>
 
@@ -10,7 +10,7 @@
 #include "draw_diagram_editor.h"
 #include "draw_main_menu_bar.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 class MainWindow {
  public:
@@ -23,6 +23,6 @@ class MainWindow {
   ///
   MainMenuBar main_menu_bar_{};
 };
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw
 
-#endif  // VH_DRAW_MAIN_WINDOW_H_
+#endif  // VH_PONC_DRAW_MAIN_WINDOW_H_

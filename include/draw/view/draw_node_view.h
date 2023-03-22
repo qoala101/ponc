@@ -1,12 +1,12 @@
-#ifndef VH_DRAW_NODE_VIEW_H_
-#define VH_DRAW_NODE_VIEW_H_
+#ifndef VH_PONC_DRAW_NODE_VIEW_H_
+#define VH_PONC_DRAW_NODE_VIEW_H_
 
 #include <string>
 
 #include "coreui_family.h"
 #include "draw_i_view.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 class NodeView : public IView {
  public:
@@ -17,6 +17,6 @@ class NodeView : public IView {
   void Draw(std::optional<const coreui::Node *> node,
             const std::vector<coreui::FamilyGroup> &family_groups);
 };
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw
 
-#endif  // VH_DRAW_NODE_VIEW_H_
+#endif  // VH_PONC_DRAW_NODE_VIEW_H_

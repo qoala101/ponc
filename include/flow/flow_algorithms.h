@@ -1,16 +1,16 @@
-#ifndef VH_FLOW_BUILD_FLOW_TREE_H_
-#define VH_FLOW_BUILD_FLOW_TREE_H_
+#ifndef VH_PONC_FLOW_ALGORITHMS_H_
+#define VH_PONC_FLOW_ALGORITHMS_H_
 
 #include "core_diagram.h"
 #include "cpp_safe_ptr.h"
 #include "flow_tree.h"
 
-namespace esc::flow {
+namespace vh::ponc::flow {
 ///
 auto BuildFlowTree(const core::Diagram &diagram,
                    const cpp::SafeOwner &safe_owner) -> FlowTree;
 ///
 auto CalculateNodeFlows(const FlowTree &flow_tree) -> NodeFlows;
-}  // namespace esc::flow
+}  // namespace vh::ponc::flow
 
-#endif  // VH_FLOW_BUILD_FLOW_TREE_H_
+#endif  // VH_PONC_FLOW_ALGORITHMS_H_

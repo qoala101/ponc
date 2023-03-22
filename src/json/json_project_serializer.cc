@@ -13,7 +13,7 @@
 #include "json_i_family_writer.h"
 #include "json_setings_serializer.h"
 
-namespace esc::json {
+namespace vh::ponc::json {
 namespace {
 ///
 auto ParseFamily(
@@ -69,4 +69,4 @@ auto ProjectSerializer::WriteToJson(const core::Project& project)
 
   return json;
 }
-}  // namespace esc::json
+}  // namespace vh::ponc::json

@@ -12,7 +12,7 @@
 #include "draw_node.h"
 #include "imgui_node_editor.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 namespace {
 ///
 auto IsHoveringOverChildWindow() {
@@ -113,4 +113,4 @@ void DiagramEditor::DrawPopups(coreui::Diagram &diagram) {
     }
   }});
 }
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw

@@ -11,7 +11,7 @@
 #include "core_diagram.h"
 #include "core_id_generator.h"
 
-namespace esc::core {
+namespace vh::ponc::core {
 ///
 auto Project::FindMaxId() const {
   auto max_id = uintptr_t{1};
@@ -87,4 +87,4 @@ auto Project::GetSettings() const -> const Settings& {
 
 ///
 auto Project::GetSettings() -> Settings& { return settings_; }
-}  // namespace esc::core
+}  // namespace vh::ponc::core

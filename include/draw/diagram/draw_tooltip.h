@@ -1,13 +1,13 @@
-#ifndef VH_DRAW_TOOLTIP_H_
-#define VH_DRAW_TOOLTIP_H_
+#ifndef VH_PONC_DRAW_TOOLTIP_H_
+#define VH_PONC_DRAW_TOOLTIP_H_
 
 #include <imgui.h>
 
 #include <string_view>
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 void DrawTooltip(std::string_view text, const ImColor& color);
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw
 
-#endif  // VH_DRAW_TOOLTIP_H_
+#endif  // VH_PONC_DRAW_TOOLTIP_H_

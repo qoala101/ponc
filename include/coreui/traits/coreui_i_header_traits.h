@@ -1,12 +1,12 @@
-#ifndef VH_COREUI_I_NODE_HEADER_TRAITS_H_
-#define VH_COREUI_I_NODE_HEADER_TRAITS_H_
+#ifndef VH_PONC_COREUI_I_HEADER_TRAITS_H_
+#define VH_PONC_COREUI_I_HEADER_TRAITS_H_
 
 #include <string>
 
 #include "cpp_interface.h"
 #include "imgui.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 class IHeaderTraits : public cpp::Interface {
  public:
@@ -15,6 +15,6 @@ class IHeaderTraits : public cpp::Interface {
   ///
   virtual auto GetTextureFilePath() const -> std::string;
 };
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui
 
-#endif  // VH_COREUI_I_NODE_HEADER_TRAITS_H_
+#endif  // VH_PONC_COREUI_I_HEADER_TRAITS_H_

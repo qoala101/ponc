@@ -1,5 +1,5 @@
-#ifndef VH_CORE_I_NODE_H_
-#define VH_CORE_I_NODE_H_
+#ifndef VH_PONC_CORE_I_NODE_H_
+#define VH_PONC_CORE_I_NODE_H_
 
 #include <imgui_node_editor.h>
 
@@ -15,7 +15,7 @@
 
 namespace ne = ax::NodeEditor;
 
-namespace esc {
+namespace vh::ponc {
 namespace json {
 ///
 class INodeWriter;
@@ -97,6 +97,6 @@ class INode : public cpp::Interface {
   ImVec2 pos_{};
 };
 }  // namespace core
-}  // namespace esc
+}  // namespace vh::ponc
 
-#endif  // VH_CORE_I_NODE_H_
+#endif  // VH_PONC_CORE_I_NODE_H_

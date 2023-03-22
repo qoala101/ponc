@@ -11,7 +11,7 @@
 #include "coreui_diagram.h"
 #include "imgui_node_editor.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 namespace {
 ///
 template <typename T>
@@ -97,4 +97,4 @@ void ItemDeleter::DeleteUnregisteredItems(coreui::Diagram &diagram) {
 
   ne::EndDelete();
 }
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw

@@ -2,7 +2,7 @@
 #include "crude_json.h"
 #include "json_setings_serializer.h"
 
-namespace esc::json {
+namespace vh::ponc::json {
 ///
 auto SettingsSerializer::ParseFromJson(const crude_json::value& json)
     -> core::Settings {
@@ -28,4 +28,4 @@ auto SettingsSerializer::WriteToJson(const core::Settings& settings)
   json["max_flow"] = settings.max_flow;
   return json;
 }
-}  // namespace esc::json
+}  // namespace vh::ponc::json

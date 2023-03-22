@@ -1,12 +1,12 @@
-#ifndef VH_DRAW_NODES_VIEW_H_
-#define VH_DRAW_NODES_VIEW_H_
+#ifndef VH_PONC_DRAW_NODES_VIEW_H_
+#define VH_PONC_DRAW_NODES_VIEW_H_
 
 #include <string>
 
 #include "coreui_diagram.h"
 #include "draw_i_view.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 class NodesView : public IView {
  public:
@@ -16,6 +16,6 @@ class NodesView : public IView {
   ///
   void Draw(const coreui::Diagram &diagram);
 };
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw
 
-#endif  // VH_DRAW_NODES_VIEW_H_
+#endif  // VH_PONC_DRAW_NODES_VIEW_H_

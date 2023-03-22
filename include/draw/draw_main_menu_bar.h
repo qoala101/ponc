@@ -1,5 +1,5 @@
-#ifndef VH_DRAW_MAIN_MENU_BAR_H_
-#define VH_DRAW_MAIN_MENU_BAR_H_
+#ifndef VH_PONC_DRAW_MAIN_MENU_BAR_H_
+#define VH_PONC_DRAW_MAIN_MENU_BAR_H_
 
 #include "core_settings.h"
 #include "coreui_diagram.h"
@@ -12,7 +12,7 @@
 #include "draw_save_as_file_dialog.h"
 #include "draw_settings_view.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 class MainMenuBar {
  public:
@@ -47,6 +47,6 @@ class MainMenuBar {
   ///
   SettingsView settings_view_{};
 };
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw
 
-#endif  // VH_DRAW_MAIN_MENU_BAR_H_
+#endif  // VH_PONC_DRAW_MAIN_MENU_BAR_H_

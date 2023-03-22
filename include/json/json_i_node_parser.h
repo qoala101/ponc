@@ -1,5 +1,5 @@
-#ifndef VH_JSON_I_NODE_PARSER_H_
-#define VH_JSON_I_NODE_PARSER_H_
+#ifndef VH_PONC_JSON_I_NODE_PARSER_H_
+#define VH_PONC_JSON_I_NODE_PARSER_H_
 
 #include <memory>
 
@@ -7,7 +7,7 @@
 #include "cpp_interface.h"
 #include "crude_json.h"
 
-namespace esc::json {
+namespace vh::ponc::json {
 ///
 class INodeParser : public cpp::Interface {
  public:
@@ -21,6 +21,6 @@ class INodeParser : public cpp::Interface {
                              const crude_json::value &json) const
       -> std::unique_ptr<core::INode> = 0;
 };
-}  // namespace esc::json
+}  // namespace vh::ponc::json
 
-#endif  // VH_JSON_I_NODE_PARSER_H_
+#endif  // VH_PONC_JSON_I_NODE_PARSER_H_

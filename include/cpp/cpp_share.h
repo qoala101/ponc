@@ -1,15 +1,15 @@
-#ifndef VH_CPP_SHARE_H_
-#define VH_CPP_SHARE_H_
+#ifndef VH_PONC_CPP_SHARE_H_
+#define VH_PONC_CPP_SHARE_H_
 
 #include <memory>
 #include <utility>
 
-namespace esc::cpp {
+namespace vh::ponc::cpp {
 ///
 template <typename T>
 auto Share(T t) {
   return std::make_shared<std::remove_cvref_t<T>>(std::move(t));
 }
-}  // namespace esc::cpp
+}  // namespace vh::ponc::cpp
 
-#endif  // VH_CPP_SHARE_H_
+#endif  // VH_PONC_CPP_SHARE_H_

@@ -1,5 +1,5 @@
-#ifndef VH_APP_IMPL_H_
-#define VH_APP_IMPL_H_
+#ifndef VH_PONC_APP_IMPL_H_
+#define VH_PONC_APP_IMPL_H_
 
 #include <application.h>
 
@@ -7,7 +7,7 @@
 #include "coreui_textures_handle.h"
 #include "draw_main_window.h"
 
-namespace esc {
+namespace vh::ponc {
 ///
 class AppImpl {
  public:
@@ -24,6 +24,6 @@ class AppImpl {
   ///
   draw::MainWindow main_window_{};
 };
-}  // namespace esc
+}  // namespace vh::ponc
 
-#endif  // VH_APP_IMPL_H_
+#endif  // VH_PONC_APP_IMPL_H_

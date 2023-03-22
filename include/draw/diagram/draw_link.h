@@ -1,11 +1,11 @@
-#ifndef VH_DRAW_LINK_H_
-#define VH_DRAW_LINK_H_
+#ifndef VH_PONC_DRAW_LINK_H_
+#define VH_PONC_DRAW_LINK_H_
 
 #include "coreui_link.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 void DrawLink(const coreui::Link &link);
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw
 
-#endif  // VH_DRAW_LINK_H_
+#endif  // VH_PONC_DRAW_LINK_H_

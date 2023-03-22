@@ -1,10 +1,10 @@
-#ifndef VH_DRAW_CONNECT_NODE_POPUP_H_
-#define VH_DRAW_CONNECT_NODE_POPUP_H_
+#ifndef VH_PONC_DRAW_CONNECT_NODE_POPUP_H_
+#define VH_PONC_DRAW_CONNECT_NODE_POPUP_H_
 
 #include "coreui_linker.h"
 #include "draw_i_popup.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 class ConnectNodePopup : public IPopup {
  public:
@@ -19,6 +19,6 @@ class ConnectNodePopup : public IPopup {
   ///
   bool for_all_pins_{};
 };
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw
 
-#endif  // VH_DRAW_CONNECT_NODE_POPUP_H_
+#endif  // VH_PONC_DRAW_CONNECT_NODE_POPUP_H_

@@ -1,5 +1,5 @@
-#ifndef VH_DRAW_LINKER_H_
-#define VH_DRAW_LINKER_H_
+#ifndef VH_PONC_DRAW_LINKER_H_
+#define VH_PONC_DRAW_LINKER_H_
 
 #include <vector>
 
@@ -7,7 +7,7 @@
 #include "coreui_linker.h"
 #include "draw_connect_node_popup.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 class Linker {
  public:
@@ -22,6 +22,6 @@ class Linker {
   ///
   ConnectNodePopup connect_node_popup_{};
 };
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw
 
-#endif  // VH_DRAW_LINKER_H_
+#endif  // VH_PONC_DRAW_LINKER_H_

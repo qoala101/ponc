@@ -1,11 +1,11 @@
-#ifndef VH_COREUI_EMPTY_PIN_TRAITS_H_
-#define VH_COREUI_EMPTY_PIN_TRAITS_H_
+#ifndef VH_PONC_COREUI_EMPTY_PIN_TRAITS_H_
+#define VH_PONC_COREUI_EMPTY_PIN_TRAITS_H_
 
 #include <imgui_node_editor.h>
 
 #include "coreui_i_pin_traits.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 class EmptyPinTraits : public IPinTraits {
  public:
@@ -19,6 +19,6 @@ class EmptyPinTraits : public IPinTraits {
   ///
   ne::PinKind pin_kind_{};
 };
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui
 
-#endif  // VH_COREUI_EMPTY_PIN_TRAITS_H_
+#endif  // VH_PONC_COREUI_EMPTY_PIN_TRAITS_H_

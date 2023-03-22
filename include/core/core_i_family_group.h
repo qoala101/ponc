@@ -1,5 +1,5 @@
-#ifndef VH_CORE_I_FAMILY_GROUP_H_
-#define VH_CORE_I_FAMILY_GROUP_H_
+#ifndef VH_PONC_CORE_I_FAMILY_GROUP_H_
+#define VH_PONC_CORE_I_FAMILY_GROUP_H_
 
 #include <memory>
 #include <vector>
@@ -9,7 +9,7 @@
 #include "cpp_interface.h"
 #include "json_i_family_parser.h"
 
-namespace esc::core {
+namespace vh::ponc::core {
 ///
 class IFamilyGroup : public cpp::Interface {
  public:
@@ -24,6 +24,6 @@ class IFamilyGroup : public cpp::Interface {
   virtual auto CreateFamilyParser() const
       -> std::unique_ptr<json::IFamilyParser> = 0;
 };
-}  // namespace esc::core
+}  // namespace vh::ponc::core
 
-#endif  // VH_CORE_I_FAMILY_GROUP_H_
+#endif  // VH_PONC_CORE_I_FAMILY_GROUP_H_

@@ -1,9 +1,9 @@
-#ifndef VH_CORE_SETTINGS_H_
-#define VH_CORE_SETTINGS_H_
+#ifndef VH_PONC_CORE_SETTINGS_H_
+#define VH_PONC_CORE_SETTINGS_H_
 
 #include "imgui.h"
 
-namespace esc::core {
+namespace vh::ponc::core {
 ///
 struct Settings {
   ///
@@ -20,6 +20,6 @@ struct Settings {
   ///
   float max_flow{};
 };
-}  // namespace esc::core
+}  // namespace vh::ponc::core
 
-#endif  // VH_CORE_SETTINGS_H_
+#endif  // VH_PONC_CORE_SETTINGS_H_

@@ -1,10 +1,10 @@
-#ifndef VH_JSON_ID_SERIALIZER_H_
-#define VH_JSON_ID_SERIALIZER_H_
+#ifndef VH_PONC_JSON_ID_SERIALIZER_H_
+#define VH_PONC_JSON_ID_SERIALIZER_H_
 
 #include "cpp_no_instances.h"
 #include "crude_json.h"
 
-namespace esc::json {
+namespace vh::ponc::json {
 ///
 struct IdSerializer : public cpp::NoInstances {
   ///
@@ -19,6 +19,6 @@ struct IdSerializer : public cpp::NoInstances {
     return crude_json::value{static_cast<crude_json::number>(id.Get())};
   }
 };
-}  // namespace esc::json
+}  // namespace vh::ponc::json
 
-#endif  // VH_JSON_ID_SERIALIZER_H_
+#endif  // VH_PONC_JSON_ID_SERIALIZER_H_

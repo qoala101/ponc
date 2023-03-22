@@ -1,9 +1,9 @@
-#ifndef VH_CPP_SCOPE_FUNCTION_H_
-#define VH_CPP_SCOPE_FUNCTION_H_
+#ifndef VH_PONC_CPP_SCOPE_FUNCTION_H_
+#define VH_PONC_CPP_SCOPE_FUNCTION_H_
 
 #include <functional>
 
-namespace esc::cpp {
+namespace vh::ponc::cpp {
 ///
 class ScopeFunction {
  public:
@@ -27,6 +27,6 @@ class ScopeFunction {
   ///
   std::function<void()> destructor_{};
 };
-}  // namespace esc::cpp
+}  // namespace vh::ponc::cpp
 
-#endif  // VH_CPP_SCOPE_FUNCTION_H_
+#endif  // VH_PONC_CPP_SCOPE_FUNCTION_H_

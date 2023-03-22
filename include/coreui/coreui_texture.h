@@ -1,9 +1,9 @@
-#ifndef VH_COREUI_TEXTURE_H_
-#define VH_COREUI_TEXTURE_H_
+#ifndef VH_PONC_COREUI_TEXTURE_H_
+#define VH_PONC_COREUI_TEXTURE_H_
 
 #include <imgui.h>
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 struct Texture {
   ///
@@ -13,6 +13,6 @@ struct Texture {
   ///
   int height{};
 };
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui
 
-#endif  // VH_COREUI_TEXTURE_H_
+#endif  // VH_PONC_COREUI_TEXTURE_H_

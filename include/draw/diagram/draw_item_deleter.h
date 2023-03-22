@@ -1,12 +1,12 @@
-#ifndef VH_DRAW_ITEM_DELETER_H_
-#define VH_DRAW_ITEM_DELETER_H_
+#ifndef VH_PONC_DRAW_ITEM_DELETER_H_
+#define VH_PONC_DRAW_ITEM_DELETER_H_
 
 #include <set>
 
 #include "core_diagram.h"
 #include "coreui_diagram.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 class ItemDeleter {
  public:
@@ -29,6 +29,6 @@ class ItemDeleter {
   ///
   ItemIds link_ids_{};
 };
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw
 
-#endif  // VH_DRAW_ITEM_DELETER_H_
+#endif  // VH_PONC_DRAW_ITEM_DELETER_H_

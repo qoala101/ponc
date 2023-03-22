@@ -12,7 +12,7 @@
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 namespace {
 ///
 auto GetTitle(const std::vector<ne::NodeId>& nodes) {
@@ -93,4 +93,4 @@ void NodePopup::Draw(coreui::Diagram& diagram) {
     }
   }
 }
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw

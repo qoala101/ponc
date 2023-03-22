@@ -16,7 +16,7 @@
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 Linker::Linker(cpp::SafePtr<Diagram> parent_diagram)
     : parent_diagram_{std::move(parent_diagram)} {}
@@ -404,4 +404,4 @@ auto Linker::CreateLink(ne::PinId source_pin, ne::PinId target_pin) const
 
   return parent_diagram_->CreateLink(source_pin, target_pin);
 }
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui

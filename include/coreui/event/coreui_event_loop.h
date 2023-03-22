@@ -1,11 +1,11 @@
-#ifndef VH_COREUI_EVENT_LOOP_H_
-#define VH_COREUI_EVENT_LOOP_H_
+#ifndef VH_PONC_COREUI_EVENT_LOOP_H_
+#define VH_PONC_COREUI_EVENT_LOOP_H_
 
 #include <functional>
 
 #include "coreui_event.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 class EventLoop {
  public:
@@ -18,6 +18,6 @@ class EventLoop {
   ///
   std::vector<Event> events_{};
 };
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui
 
-#endif  // VH_COREUI_EVENT_LOOP_H_
+#endif  // VH_PONC_COREUI_EVENT_LOOP_H_

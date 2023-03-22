@@ -1,5 +1,5 @@
-#ifndef VH_CORE_ID_GENERATOR_H_
-#define VH_CORE_ID_GENERATOR_H_
+#ifndef VH_PONC_CORE_ID_GENERATOR_H_
+#define VH_PONC_CORE_ID_GENERATOR_H_
 
 #include <imgui_node_editor.h>
 
@@ -8,7 +8,7 @@
 
 #include "core_concepts.h"
 
-namespace esc::core {
+namespace vh::ponc::core {
 ///
 class IdGenerator {
  public:
@@ -36,6 +36,6 @@ class IdGenerator {
   ///
   uintptr_t next_id_{};
 };
-}  // namespace esc::core
+}  // namespace vh::ponc::core
 
-#endif  // VH_CORE_ID_GENERATOR_H_
+#endif  // VH_PONC_CORE_ID_GENERATOR_H_

@@ -11,7 +11,7 @@
 #include "core_i_family_group.h"
 #include "coreui_project.h"
 
-namespace esc {
+namespace vh::ponc {
 ///
 AppImpl::AppImpl(coreui::TexturesHandle textures_handle,
                  coreui::Project::Callbacks project_callbacks)
@@ -34,4 +34,4 @@ void AppImpl::OnFrame() {
   project_.OnFrame();
   main_window_.Draw(project_);
 }
-}  // namespace esc
+}  // namespace vh::ponc

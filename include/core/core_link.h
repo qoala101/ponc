@@ -1,11 +1,11 @@
-#ifndef VH_CORE_LINK_H_
-#define VH_CORE_LINK_H_
+#ifndef VH_PONC_CORE_LINK_H_
+#define VH_PONC_CORE_LINK_H_
 
 #include <imgui_node_editor.h>
 
 namespace ne = ax::NodeEditor;
 
-namespace esc::core {
+namespace vh::ponc::core {
 ///
 struct Link {
   ///
@@ -30,6 +30,6 @@ struct Link {
   ///
   friend auto operator==(const Link &, const Link &) -> bool = default;
 };
-}  // namespace esc::core
+}  // namespace vh::ponc::core
 
-#endif  // VH_CORE_LINK_H_
+#endif  // VH_PONC_CORE_LINK_H_

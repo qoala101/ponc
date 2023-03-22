@@ -1,5 +1,5 @@
-#ifndef VH_COREUI_I_PIN_TRAITS_H_
-#define VH_COREUI_I_PIN_TRAITS_H_
+#ifndef VH_PONC_COREUI_I_PIN_TRAITS_H_
+#define VH_PONC_COREUI_I_PIN_TRAITS_H_
 
 #include <imgui_node_editor.h>
 
@@ -13,7 +13,7 @@
 
 namespace ne = ax::NodeEditor;
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 struct PinLabel {
   ///
@@ -42,6 +42,6 @@ class IPinTraits : public cpp::Interface {
   ///
   virtual auto GetValue() const -> PinValueVariant;
 };
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui
 
-#endif  // VH_COREUI_I_PIN_TRAITS_H_
+#endif  // VH_PONC_COREUI_I_PIN_TRAITS_H_

@@ -7,7 +7,7 @@
 #include "cpp_assert.h"
 #include "flow_tree.h"
 
-namespace esc::flow {
+namespace vh::ponc::flow {
 ///
 auto NodeFlow::GetPinFlow(const NodeFlow &flow, ne::PinId pin_id) -> float {
   const auto pin_id_value = pin_id.Get();
@@ -67,4 +67,4 @@ void operator+=(NodeFlow &left, const NodeFlow &right) { left = left + right; }
 
 ///
 void operator+=(NodeFlow &left, float right) { left = left + right; }
-}  // namespace esc::flow
+}  // namespace vh::ponc::flow

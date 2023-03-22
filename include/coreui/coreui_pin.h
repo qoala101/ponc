@@ -1,5 +1,5 @@
-#ifndef VH_COREUI_PIN_H_
-#define VH_COREUI_PIN_H_
+#ifndef VH_PONC_COREUI_PIN_H_
+#define VH_PONC_COREUI_PIN_H_
 
 #include <imgui.h>
 #include <imgui_node_editor.h>
@@ -15,7 +15,7 @@
 
 namespace ne = ax::NodeEditor;
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 struct PinFlowData {
   ///
@@ -35,6 +35,6 @@ struct Pin {
   ///
   std::optional<PinLabel> label{};
 };
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui
 
-#endif  // VH_COREUI_PIN_H_
+#endif  // VH_PONC_COREUI_PIN_H_

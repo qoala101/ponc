@@ -1,10 +1,10 @@
-#ifndef VH_CPP_SCOPE_H_
-#define VH_CPP_SCOPE_H_
+#ifndef VH_PONC_CPP_SCOPE_H_
+#define VH_PONC_CPP_SCOPE_H_
 
 #include <concepts>
 #include <utility>
 
-namespace esc::cpp {
+namespace vh::ponc::cpp {
 ///
 template <std::invocable Destructor>
 class Scope {
@@ -29,6 +29,6 @@ class Scope {
   ///
   Destructor destructor_;
 };
-}  // namespace esc::cpp
+}  // namespace vh::ponc::cpp
 
-#endif  // VH_CPP_SCOPE_H_
+#endif  // VH_PONC_CPP_SCOPE_H_

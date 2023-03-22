@@ -1,5 +1,5 @@
-#ifndef VH_APP_ATTENUATOR_NODE_H_
-#define VH_APP_ATTENUATOR_NODE_H_
+#ifndef VH_PONC_APP_ATTENUATOR_FAMILY_GROUP_H_
+#define VH_PONC_APP_ATTENUATOR_FAMILY_GROUP_H_
 
 #include <memory>
 
@@ -7,7 +7,7 @@
 #include "core_i_family_group.h"
 #include "json_i_family_parser.h"
 
-namespace esc {
+namespace vh::ponc {
 ///
 class AttenuatorFamilyGroup : public core::IFamilyGroup {
  public:
@@ -18,6 +18,6 @@ class AttenuatorFamilyGroup : public core::IFamilyGroup {
   auto CreateFamilyParser() const
       -> std::unique_ptr<json::IFamilyParser> override;
 };
-}  // namespace esc
+}  // namespace vh::ponc
 
-#endif  // VH_APP_ATTENUATOR_NODE_H_
+#endif  // VH_PONC_APP_ATTENUATOR_FAMILY_GROUP_H_

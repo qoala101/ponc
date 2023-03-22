@@ -1,5 +1,5 @@
-#ifndef VH_DRAW_I_FILE_DIALOG_H_
-#define VH_DRAW_I_FILE_DIALOG_H_
+#ifndef VH_PONC_DRAW_I_FILE_DIALOG_H_
+#define VH_PONC_DRAW_I_FILE_DIALOG_H_
 
 // clang-format off
 #include <imgui.h>
@@ -11,7 +11,7 @@
 #include "cpp_callbacks.h"
 #include "cpp_interface.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 class IFileDialog : public cpp::Interface {
  public:
@@ -34,6 +34,6 @@ class IFileDialog : public cpp::Interface {
   ///
   ImGui::FileBrowser dialog_{};
 };
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw
 
-#endif  // VH_DRAW_I_FILE_DIALOG_H_
+#endif  // VH_PONC_DRAW_I_FILE_DIALOG_H_

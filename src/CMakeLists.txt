@@ -4,7 +4,7 @@ if(WIN32)
   set(EXECUTABLE_PROPERTIES WIN32)
 endif()
 
-add_executable(esc
+add_executable(ponc
   ${EXECUTABLE_PROPERTIES}
 
   app/family_group/app_attenuator_family_group.cc
@@ -98,7 +98,7 @@ add_executable(esc
   main.cc
 )
 
-target_include_directories(esc
+target_include_directories(ponc
   PRIVATE
   ${PROJECT_SOURCE_DIR}/include/app
   ${PROJECT_SOURCE_DIR}/include/app/family_group
@@ -116,7 +116,7 @@ target_include_directories(esc
   ${PROJECT_SOURCE_DIR}/include/json
 )
 
-target_link_libraries(esc
+target_link_libraries(ponc
   PRIVATE
   thirdparty::application
   thirdparty::imgui
@@ -124,13 +124,13 @@ target_link_libraries(esc
   thirdparty::imgui-filebrowser
 )
 
-set_target_properties(esc PROPERTIES
+set_target_properties(ponc PROPERTIES
   DEBUG_POSTFIX _debug
 )
 
-add_custom_command(TARGET esc POST_BUILD
+add_custom_command(TARGET ponc POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E make_directory
-  $<TARGET_FILE_DIR:esc>/data
+  $<TARGET_FILE_DIR:ponc>/data
 
   COMMAND ${CMAKE_COMMAND} -E copy
   $<TARGET_PROPERTY:thirdparty::application,SOURCE_DIR>/../data/Cuprum-Bold.ttf
@@ -138,5 +138,5 @@ add_custom_command(TARGET esc POST_BUILD
   $<TARGET_PROPERTY:thirdparty::application,SOURCE_DIR>/../data/Play-Regular.ttf
   $<TARGET_PROPERTY:thirdparty::application,SOURCE_DIR>/../data/Play-OFL.txt
   ${CMAKE_CURRENT_SOURCE_DIR}/resource/node_header_texture.png
-  $<TARGET_FILE_DIR:esc>/data
+  $<TARGET_FILE_DIR:ponc>/data
 )

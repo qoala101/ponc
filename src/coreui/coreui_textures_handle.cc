@@ -1,6 +1,6 @@
 #include "coreui_textures_handle.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 TexturesHandle::TexturesHandle(Callbacks callbacks)
     : callbacks_{std::move(callbacks)} {}
@@ -24,4 +24,4 @@ auto TexturesHandle::GetTexture(std::string_view file_path) -> const Texture & {
 
   return texture->second;
 }
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui

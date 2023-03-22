@@ -1,12 +1,12 @@
-#ifndef VH_DRAW_OPEN_FILE_DIALOG_H_
-#define VH_DRAW_OPEN_FILE_DIALOG_H_
+#ifndef VH_PONC_DRAW_OPEN_FILE_DIALOG_H_
+#define VH_PONC_DRAW_OPEN_FILE_DIALOG_H_
 
 #include <filesystem>
 
 #include "draw_i_file_dialog.h"
 #include "draw_question_dialog.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 class OpenFileDialog : public IFileDialog {
  public:
@@ -22,6 +22,6 @@ class OpenFileDialog : public IFileDialog {
   ///
   std::filesystem::path selected_file_path_{};
 };
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw
 
-#endif  // VH_DRAW_OPEN_FILE_DIALOG_H_
+#endif  // VH_PONC_DRAW_OPEN_FILE_DIALOG_H_

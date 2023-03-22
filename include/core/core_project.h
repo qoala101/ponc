@@ -1,12 +1,12 @@
-#ifndef VH_CORE_PROJECT_H_
-#define VH_CORE_PROJECT_H_
+#ifndef VH_PONC_CORE_PROJECT_H_
+#define VH_PONC_CORE_PROJECT_H_
 
 #include "core_diagram.h"
 #include "core_i_family.h"
 #include "core_id_generator.h"
 #include "core_settings.h"
 
-namespace esc::core {
+namespace vh::ponc::core {
 ///
 class Project {
  public:
@@ -46,6 +46,6 @@ class Project {
   ///
   IdGenerator id_generator_{};
 };
-}  // namespace esc::core
+}  // namespace vh::ponc::core
 
-#endif  // VH_CORE_PROJECT_H_
+#endif  // VH_PONC_CORE_PROJECT_H_

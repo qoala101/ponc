@@ -9,7 +9,7 @@
 #include "coreui_diagram.h"
 #include "coreui_node_mover.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 NodeMover::NodeMover(cpp::SafePtr<Diagram> parent_diagram)
     : parent_diagram_{std::move(parent_diagram)} {}
@@ -101,4 +101,4 @@ void NodeMover::ApplyMoves() const {
                         core::Diagram::FindNode(diagram, node_id).GetPos());
   }
 }
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui

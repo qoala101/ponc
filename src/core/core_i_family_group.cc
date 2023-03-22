@@ -4,7 +4,7 @@
 
 #include "core_free_pin_family_group.h"
 
-namespace esc::core {
+namespace vh::ponc::core {
 ///
 auto IFamilyGroup::CreateDefaultFamilyGroups()
     -> std::vector<std::unique_ptr<IFamilyGroup>> {
@@ -13,4 +13,4 @@ auto IFamilyGroup::CreateDefaultFamilyGroups()
   return family_groups;
 }
 
-}  // namespace esc::core
+}  // namespace vh::ponc::core

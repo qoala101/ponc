@@ -1,5 +1,5 @@
-#ifndef VH_DRAW_LINK_POPUP_H_
-#define VH_DRAW_LINK_POPUP_H_
+#ifndef VH_PONC_DRAW_LINK_POPUP_H_
+#define VH_PONC_DRAW_LINK_POPUP_H_
 
 #include <imgui_node_editor.h>
 
@@ -8,7 +8,7 @@
 
 namespace ne = ax::NodeEditor;
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 class LinkPopup : public IPopup {
  public:
@@ -21,6 +21,6 @@ class LinkPopup : public IPopup {
   ///
   void Draw(const Callbacks &callbacks);
 };
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw
 
-#endif  // VH_DRAW_LINK_POPUP_H_
+#endif  // VH_PONC_DRAW_LINK_POPUP_H_

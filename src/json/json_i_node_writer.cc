@@ -7,7 +7,7 @@
 #include "json_id_serializer.h"
 #include "json_optional_serializer.h"
 
-namespace esc::json {
+namespace vh::ponc::json {
 ///
 auto INodeWriter::WriteToJson(const core::INode& node) const
     -> crude_json::value {
@@ -32,4 +32,4 @@ auto INodeWriter::WriteToJson(const core::INode& node) const
 
 ///
 auto INodeWriter::WriteToJson() const -> crude_json::value { return {}; }
-}  // namespace esc::json
+}  // namespace vh::ponc::json

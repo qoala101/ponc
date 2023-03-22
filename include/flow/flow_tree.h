@@ -1,5 +1,5 @@
-#ifndef VH_FLOW_TREE_H_
-#define VH_FLOW_TREE_H_
+#ifndef VH_PONC_FLOW_TREE_H_
+#define VH_PONC_FLOW_TREE_H_
 
 #include <concepts>
 #include <functional>
@@ -10,7 +10,7 @@
 #include "core_i_node.h"
 #include "cpp_safe_ptr.h"
 
-namespace esc::flow {
+namespace vh::ponc::flow {
 ///
 struct TreeNode {
   ///
@@ -24,6 +24,6 @@ struct FlowTree {
   ///
   std::vector<TreeNode> root_nodes{};
 };
-}  // namespace esc::flow
+}  // namespace vh::ponc::flow
 
-#endif  // VH_FLOW_TREE_H_
+#endif  // VH_PONC_FLOW_TREE_H_

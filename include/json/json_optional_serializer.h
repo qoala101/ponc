@@ -1,10 +1,10 @@
-#ifndef VH_JSON_OPTIONAL_SERIALIZER_H_
-#define VH_JSON_OPTIONAL_SERIALIZER_H_
+#ifndef VH_PONC_JSON_OPTIONAL_SERIALIZER_H_
+#define VH_PONC_JSON_OPTIONAL_SERIALIZER_H_
 
 #include "cpp_no_instances.h"
 #include "crude_json.h"
 
-namespace esc::json {
+namespace vh::ponc::json {
 ///
 struct OptionalSerializer : public cpp::NoInstances {
   ///
@@ -32,6 +32,6 @@ struct OptionalSerializer : public cpp::NoInstances {
     json[item_name] = item_writer(*item);
   }
 };
-}  // namespace esc::json
+}  // namespace vh::ponc::json
 
-#endif  // VH_JSON_OPTIONAL_SERIALIZER_H_
+#endif  // VH_PONC_JSON_OPTIONAL_SERIALIZER_H_

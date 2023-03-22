@@ -5,7 +5,7 @@
 #include "coreui_i_header_traits.h"
 #include "cpp_assert.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 auto INodeTraits::CreateHeaderTraits() const
     -> std::optional<std::unique_ptr<IHeaderTraits>> {
@@ -25,4 +25,4 @@ auto INodeTraits::GetActionNames() const -> std::vector<std::string> {
 
 ///
 void INodeTraits::ExecuteAction(std::string_view /*unused*/) { Expects(false); }
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui

@@ -11,7 +11,7 @@
 #include "draw_family_groups_menu.h"
 #include "imgui.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 void CreateNodePopup::Draw(coreui::Diagram& diagram) {
   const auto content_scope = DrawContentScope("Create Node");
@@ -31,4 +31,4 @@ void CreateNodePopup::Draw(coreui::Diagram& diagram) {
 
 ///
 void CreateNodePopup::SetPos(const ImVec2& pos) { pos_ = pos; }
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw

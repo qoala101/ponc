@@ -7,7 +7,7 @@
 #include "flow_node_flow.h"
 #include "flow_tree.h"
 
-namespace esc::flow {
+namespace vh::ponc::flow {
 namespace {
 ///
 auto HasLinkFromParent(const NodeFlow &node_flow,
@@ -161,4 +161,4 @@ auto CalculateNodeFlows(const FlowTree &flow_tree) -> flow::NodeFlows {
 
   return node_flows;
 }
-}  // namespace esc::flow
+}  // namespace vh::ponc::flow

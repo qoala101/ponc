@@ -1,11 +1,11 @@
-#ifndef VH_COREUI_FLOW_PIN_TRAITS_H_
-#define VH_COREUI_FLOW_PIN_TRAITS_H_
+#ifndef VH_PONC_COREUI_FLOW_PIN_TRAITS_H_
+#define VH_PONC_COREUI_FLOW_PIN_TRAITS_H_
 
 #include <imgui_node_editor.h>
 
 #include "coreui_i_pin_traits.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 class FlowPinTraits : public IPinTraits {
  public:
@@ -21,6 +21,6 @@ class FlowPinTraits : public IPinTraits {
   ///
   ne::PinId pin_id_{};
 };
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui
 
-#endif  // VH_COREUI_FLOW_PIN_TRAITS_H_
+#endif  // VH_PONC_COREUI_FLOW_PIN_TRAITS_H_

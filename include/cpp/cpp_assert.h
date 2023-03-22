@@ -1,9 +1,9 @@
-#ifndef VH_CPP_ASSERT_H_
-#define VH_CPP_ASSERT_H_
+#ifndef VH_PONC_CPP_ASSERT_H_
+#define VH_PONC_CPP_ASSERT_H_
 
 #include <cassert>
 
 ///
 #define Expects(condition) assert(condition)
 
-#endif  // VH_CPP_ASSERT_H_
+#endif  // VH_PONC_CPP_ASSERT_H_

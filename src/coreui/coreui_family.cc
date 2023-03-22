@@ -3,7 +3,7 @@
 #include "coreui_i_family_traits.h"
 #include "coreui_project.h"
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 Family::Family(cpp::SafePtr<Project> parent_project,
                cpp::SafePtr<const core::IFamily> family,
@@ -29,4 +29,4 @@ auto Family::GetLabel() const -> std::string {
 auto Family::CreateNode() const -> std::unique_ptr<core::INode> {
   return family_->CreateNode(parent_project_->GetProject().GetIdGenerator());
 }
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui

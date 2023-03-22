@@ -1,5 +1,5 @@
-#ifndef VH_JSON_DIAGRAM_SERIALIZER_H_
-#define VH_JSON_DIAGRAM_SERIALIZER_H_
+#ifndef VH_PONC_JSON_DIAGRAM_SERIALIZER_H_
+#define VH_PONC_JSON_DIAGRAM_SERIALIZER_H_
 
 #include <memory>
 
@@ -8,7 +8,7 @@
 #include "cpp_no_instances.h"
 #include "crude_json.h"
 
-namespace esc::json {
+namespace vh::ponc::json {
 ///
 struct DiagramSerializer : public cpp::NoInstances {
   ///
@@ -19,6 +19,6 @@ struct DiagramSerializer : public cpp::NoInstances {
   ///
   static auto WriteToJson(const core::Diagram &diagram) -> crude_json::value;
 };
-}  // namespace esc::json
+}  // namespace vh::ponc::json
 
-#endif  // VH_JSON_DIAGRAM_SERIALIZER_H_
+#endif  // VH_PONC_JSON_DIAGRAM_SERIALIZER_H_

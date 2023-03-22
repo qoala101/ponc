@@ -1,12 +1,12 @@
-#ifndef VH_DRAW_SETTINGS_VIEW_H_
-#define VH_DRAW_SETTINGS_VIEW_H_
+#ifndef VH_PONC_DRAW_SETTINGS_VIEW_H_
+#define VH_PONC_DRAW_SETTINGS_VIEW_H_
 
 #include <string>
 
 #include "core_settings.h"
 #include "draw_i_view.h"
 
-namespace esc::draw {
+namespace vh::ponc::draw {
 ///
 class SettingsView : public IView {
  public:
@@ -16,6 +16,6 @@ class SettingsView : public IView {
   ///
   void Draw(core::Settings &settings);
 };
-}  // namespace esc::draw
+}  // namespace vh::ponc::draw
 
-#endif  // VH_DRAW_SETTINGS_VIEW_H_
+#endif  // VH_PONC_DRAW_SETTINGS_VIEW_H_

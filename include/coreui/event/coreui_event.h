@@ -1,12 +1,12 @@
-#ifndef VH_COREUI_EVENT_H_
-#define VH_COREUI_EVENT_H_
+#ifndef VH_PONC_COREUI_EVENT_H_
+#define VH_PONC_COREUI_EVENT_H_
 
 #include <functional>
 #include <memory>
 #include <optional>
 #include <utility>
 
-namespace esc::coreui {
+namespace vh::ponc::coreui {
 ///
 class Event {
  public:
@@ -27,6 +27,6 @@ class Event {
   ///
   std::optional<std::unique_ptr<Event>> continuation_;
 };
-}  // namespace esc::coreui
+}  // namespace vh::ponc::coreui
 
-#endif  // VH_COREUI_EVENT_H_
+#endif  // VH_PONC_COREUI_EVENT_H_

@@ -5,7 +5,7 @@
 #include "coreui_textures_handle.h"
 #include "cpp_assert.h"
 
-namespace esc {
+namespace vh::ponc {
 ///
 App::App(const char* name, int argc, char** argv)
     : Application{name, argc, argv} {}
@@ -60,4 +60,4 @@ void App::OnFrame(float /*unused*/) {
 
   app_->OnFrame();
 }
-}  // namespace esc
+}  // namespace vh::ponc

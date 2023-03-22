@@ -1,7 +1,7 @@
-#ifndef VH_CPP_INTERFACE_H_
-#define VH_CPP_INTERFACE_H_
+#ifndef VH_PONC_CPP_INTERFACE_H_
+#define VH_PONC_CPP_INTERFACE_H_
 
-namespace esc::cpp {
+namespace vh::ponc::cpp {
 ///
 class Interface {
  public:
@@ -22,6 +22,6 @@ class Interface {
   ///
   Interface() = default;
 };
-}  // namespace esc::cpp
+}  // namespace vh::ponc::cpp
 
-#endif  // VH_CPP_INTERFACE_H_
+#endif  // VH_PONC_CPP_INTERFACE_H_

@@ -1,9 +1,9 @@
-#ifndef VH_FLOW_TREE_TRAVERSAL_H_
-#define VH_FLOW_TREE_TRAVERSAL_H_
+#ifndef VH_PONC_FLOW_TREE_TRAVERSAL_H_
+#define VH_PONC_FLOW_TREE_TRAVERSAL_H_
 
 #include "flow_tree.h"
 
-namespace esc::flow {
+namespace vh::ponc::flow {
 ///
 struct FindById {
   ///
@@ -57,6 +57,6 @@ auto FindTreeNode(const FlowTree &tree,
 
   return std::nullopt;
 }
-}  // namespace esc::flow
+}  // namespace vh::ponc::flow
 
-#endif  // VH_FLOW_TREE_TRAVERSAL_H_
+#endif  // VH_PONC_FLOW_TREE_TRAVERSAL_H_

@@ -11,7 +11,7 @@
 #include "core_link.h"
 #include "cpp_assert.h"
 
-namespace esc::core {
+namespace vh::ponc::core {
 ///
 Diagram::Diagram(std::vector<std::unique_ptr<INode>> nodes,
                  std::vector<Link> links)
@@ -130,4 +130,4 @@ void Diagram::DeleteLink(ne::LinkId link_id) {
 
 ///
 auto Diagram::GetLinksImpl() -> std::vector<Link>& { return links_; }
-}  // namespace esc::core
+}  // namespace vh::ponc::core

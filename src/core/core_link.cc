@@ -2,7 +2,7 @@
 
 #include "imgui_node_editor.h"
 
-namespace esc::core {
+namespace vh::ponc::core {
 ///
 auto Link::HasPin(const Link &link, ne::PinId pin_id) -> bool {
   return (pin_id == link.start_pin_id) || (pin_id == link.end_pin_id);
@@ -40,4 +40,4 @@ auto Link::GetPinOfKind(Link &link, ne::PinKind pin_kind) -> ne::PinId & {
 
   return link.start_pin_id;
 }
-}  // namespace esc::core
+}  // namespace vh::ponc::core
