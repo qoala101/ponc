@@ -1,7 +1,5 @@
 #include "core_project.h"
 
-#include <bits/stdc++.h>
-
 #include <algorithm>
 #include <concepts>
 #include <cstdio>

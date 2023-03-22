@@ -13,6 +13,7 @@
 #include "draw_tree_node.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
+#include <iterator>
 
 namespace esc::draw {
 namespace {

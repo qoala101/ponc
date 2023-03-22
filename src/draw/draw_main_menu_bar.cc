@@ -2,6 +2,7 @@
 
 #include <imgui.h>
 
+#include <filesystem>
 #include <functional>
 #include <optional>
 #include <variant>
@@ -120,9 +121,8 @@ void MainMenuBar::DrawDialogs(coreui::Project &project) {
                          requires_confirmation);
 
   save_as_file_dialog_.Draw({.file_selected = [&project](auto file_path) {
-    if (const auto not_json_extension =
-            !AsLowerCase(file_path).ends_with(".json")) {
-      file_path += ".json";
+    if (AsLowerCase(file_path.extension().string()) != ".json") {
+      file_path.replace_extension(".json");
     }
 
     project.SaveToFile(std::move(file_path));

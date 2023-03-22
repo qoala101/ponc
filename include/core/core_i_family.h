@@ -4,6 +4,7 @@
 #include <imgui_node_editor.h>
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "core_id_generator.h"

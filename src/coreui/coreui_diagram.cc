@@ -548,8 +548,9 @@ void Diagram::UpdateFamilyGroups() {
       continue;
     }
 
-    family_groups_.emplace_back(FamilyGroup{
-        .label = group_label, .families = std::vector{std::move(family)}});
+    auto& new_group =
+        family_groups_.emplace_back(FamilyGroup{.label = group_label});
+    new_group.families.emplace_back(std::move(family));
   }
 }
 

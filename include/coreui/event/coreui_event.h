@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 #include <utility>
 
 namespace esc::coreui {

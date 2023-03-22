@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.24)
 
 # Generates compile_commands.json which is used by external tools to parse the project.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

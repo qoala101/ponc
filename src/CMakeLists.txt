@@ -1,6 +1,6 @@
 # TEMPORARY SOLUTION FOR WINDOWS
 if(WIN32)
-  set(IMGUI_NODE_EDITOR_ROOT_DIR C:/Users/qoala/source/repos/esc/build/_deps/imgui-node-editor-src/)
+  set(IMGUI_NODE_EDITOR_ROOT_DIR C:/Users/qoala/Desktop/ponc_repo/build/_deps/imgui-node-editor-src/)
 endif()
 
 # Enable solution folders in Visual Studio and Folders in Xcode

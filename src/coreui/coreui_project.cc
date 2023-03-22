@@ -134,7 +134,7 @@ auto Project::OpenFromFile(std::filesystem::path file_path) -> Event& {
       .PostEvent([safe_this = safe_owner_.MakeSafe(this),
                   family_parsers = cpp::Share(CreateFamilyParsers()),
                   file_path = std::move(file_path)]() mutable {
-        const auto json = crude_json::value::load(file_path).first;
+        const auto json = crude_json::value::load(file_path.string()).first;
         safe_this->project_ =
             json::ProjectSerializer::ParseFromJson(json, *family_parsers);
         safe_this->diagram_ = safe_this->CreateDiagram();
@@ -158,7 +158,7 @@ auto Project::SaveToFile(std::filesystem::path file_path) -> Event& {
   return event_loop_.PostEvent([safe_this = safe_owner_.MakeSafe(this),
                                 file_path = std::move(file_path)]() mutable {
     const auto json = json::ProjectSerializer::WriteToJson(safe_this->project_);
-    json.save(file_path);
+    json.save(file_path.string());
     safe_this->SetFilePath(std::move(file_path));
   });
 }
@@ -169,7 +169,7 @@ auto Project::GetName() const -> std::string {
     return "Unknown";
   }
 
-  return file_path_.filename();
+  return file_path_.filename().string();
 }
 
 ///
