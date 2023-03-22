@@ -7,8 +7,8 @@ FetchContent_Declare(imgui-node-editor SYSTEM
 
 FetchContent_MakeAvailable(imgui-node-editor)
 
+list(APPEND CMAKE_MODULE_PATH ${imgui-node-editor_SOURCE_DIR}/misc/cmake-modules)
 set(IMGUI_NODE_EDITOR_ROOT_DIR ${imgui-node-editor_SOURCE_DIR})
-list(APPEND CMAKE_MODULE_PATH ${IMGUI_NODE_EDITOR_ROOT_DIR}/misc/cmake-modules)
 
 find_package(imgui REQUIRED)
 find_package(imgui_node_editor REQUIRED)

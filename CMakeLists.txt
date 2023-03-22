@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 3.24)
 
-# Generates compile_commands.json which is used by external tools to parse the project.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(
-  "esc"
-  VERSION 0.2.0
+  "ponc"
+  VERSION 0.4.0
   LANGUAGES CXX
 )
 
@@ -28,7 +27,6 @@ if(LINUX)
     -pedantic
     -Wno-missing-braces
 
-    # Uncomment to treat warnings like errors. Not convenient for development.
     # -Werror
     # -pedantic-errors
   )

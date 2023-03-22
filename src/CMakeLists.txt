@@ -1,4 +1,12 @@
+set(EXECUTABLE_PROPERTIES)
+
+if(WIN32)
+  set(EXECUTABLE_PROPERTIES WIN32)
+endif()
+
 add_executable(esc
+  ${EXECUTABLE_PROPERTIES}
+
   app/family_group/app_attenuator_family_group.cc
   app/family_group/app_client_family_group.cc
   app/family_group/app_coupler_family_group.cc
@@ -114,4 +122,21 @@ target_link_libraries(esc
   thirdparty::imgui
   thirdparty::imgui_node_editor
   thirdparty::imgui-filebrowser
+)
+
+set_target_properties(esc PROPERTIES
+  DEBUG_POSTFIX _debug
+)
+
+add_custom_command(TARGET esc POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E make_directory
+  $<TARGET_FILE_DIR:esc>/data
+
+  COMMAND ${CMAKE_COMMAND} -E copy
+  $<TARGET_PROPERTY:thirdparty::application,SOURCE_DIR>/../data/Cuprum-Bold.ttf
+  $<TARGET_PROPERTY:thirdparty::application,SOURCE_DIR>/../data/Cuprum-OFL.txt
+  $<TARGET_PROPERTY:thirdparty::application,SOURCE_DIR>/../data/Play-Regular.ttf
+  $<TARGET_PROPERTY:thirdparty::application,SOURCE_DIR>/../data/Play-OFL.txt
+  ${CMAKE_CURRENT_SOURCE_DIR}/resource/node_header_texture.png
+  $<TARGET_FILE_DIR:esc>/data
 )
