@@ -29,19 +29,20 @@ void DrawSelectableName(ne::NodeId node_id, std::string_view node_label) {
     ne::NavigateToSelection();
   }
 }
+}  // namespace
 
 ///
-void DrawInputFlow(const std::optional<coreui::FlowValue>& input_flow) {
-  if (input_flow.has_value()) {
+void DrawInputFlow(const coreui::TreeNode& tree_node) {
+  if (const auto& input_flow = tree_node.node->GetData().flow.input_flow) {
     ImGui::TextColored(input_flow->color, "%.3f", input_flow->value);
   }
 }
 
 ///
-void DrawOutputFlows(ne::NodeId node_id,
-                     const std::vector<coreui::FlowValue>& output_flows) {
-  ImGui::BeginHorizontal(node_id.AsPointer());
+void DrawOutputFlows(const coreui::TreeNode& tree_node) {
+  ImGui::BeginHorizontal(tree_node.node->GetNode().GetId().AsPointer());
 
+  const auto& output_flows = tree_node.node->GetData().flow.output_flows;
   const auto output_flows_end = output_flows.end();
   auto output_flow = output_flows.begin();
 
@@ -57,11 +58,13 @@ void DrawOutputFlows(ne::NodeId node_id,
 
   ImGui::EndHorizontal();
 }
-}  // namespace
 
 ///
 // NOLINTNEXTLINE(*-no-recursion)
-void DrawTreeNode(const coreui::TreeNode& tree_node, bool draw_children) {
+void DrawTreeNode(
+    const coreui::TreeNode& tree_node, bool draw_children, bool selectable,
+    const std::vector<std::function<void(const coreui::TreeNode&)>>&
+        draw_columns) {
   ImGui::TableNextRow();
   ImGui::TableNextColumn();
 
@@ -72,16 +75,22 @@ void DrawTreeNode(const coreui::TreeNode& tree_node, bool draw_children) {
                               ? ImGuiTreeNodeFlags_DefaultOpen
                               : ImGuiTreeNodeFlags_Leaf;
 
-  const auto item_is_open =
-      ImGui::TreeNodeEx(IdLabel(node_id).c_str(), item_flags);
-  ImGui::SameLine();
-  DrawSelectableName(node_id, node_data.label);
+  auto item_is_open = false;
 
-  ImGui::TableNextColumn();
-  DrawInputFlow(node_data.flow.input_flow);
+  if (selectable) {
+    item_is_open = ImGui::TreeNodeEx(IdLabel(node_id).c_str(), item_flags);
+    ImGui::SameLine();
+    DrawSelectableName(node_id, node_data.label);
+  } else {
+    item_is_open =
+        ImGui::TreeNodeEx(IdLabel(node_id, node_data.label).c_str(),
+                          item_flags | ImGuiTreeNodeFlags_OpenOnArrow);
+  }
 
-  ImGui::TableNextColumn();
-  DrawOutputFlows(node_id, node_data.flow.output_flows);
+  for (const auto& draw_column : draw_columns) {
+    ImGui::TableNextColumn();
+    draw_column(tree_node);
+  }
 
   if (!item_is_open) {
     return;
@@ -89,7 +98,7 @@ void DrawTreeNode(const coreui::TreeNode& tree_node, bool draw_children) {
 
   if (draw_children) {
     for (const auto& child_node : child_nodes) {
-      DrawTreeNode(child_node, draw_children);
+      DrawTreeNode(child_node, draw_children, selectable, draw_columns);
     }
   }
 
