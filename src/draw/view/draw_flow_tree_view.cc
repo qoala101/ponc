@@ -29,7 +29,7 @@ void FlowTreeView::Draw(const coreui::FlowTree &flow_tree) {
   // NOLINTEND(*-signed-bitwise)
 
   if (ImGui::BeginTable("Flow Tree", 3, table_flags)) {
-    ImGui::TableSetupColumn("Name");
+    ImGui::TableSetupColumn("Node");
     ImGui::TableSetupColumn("Input");
     ImGui::TableSetupColumn("Output");
     ImGui::TableHeadersRow();

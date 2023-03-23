@@ -4,6 +4,7 @@
 #include "core_settings.h"
 #include "coreui_diagram.h"
 #include "coreui_project.h"
+#include "draw_calculator_view.h"
 #include "draw_flow_tree_view.h"
 #include "draw_node_view.h"
 #include "draw_nodes_view.h"
@@ -44,6 +45,8 @@ class MainMenuBar {
   NodesView nodes_view_{};
   ///
   FlowTreeView flow_tree_view_{};
+  ///
+  CalculatorView calculator_view_{};
   ///
   SettingsView settings_view_{};
 };

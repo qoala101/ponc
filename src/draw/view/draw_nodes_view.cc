@@ -105,7 +105,7 @@ void NodesView::Draw(const coreui::Diagram& diagram) {
   // NOLINTEND(*-signed-bitwise)
 
   if (ImGui::BeginTable("Nodes", 3, table_flags)) {
-    ImGui::TableSetupColumn("Name");
+    ImGui::TableSetupColumn("Node");
     ImGui::TableSetupColumn("Input");
     ImGui::TableSetupColumn("Output");
     ImGui::TableHeadersRow();

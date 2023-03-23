@@ -101,6 +101,9 @@ void MainMenuBar::DrawViewMenu() {
     DrawViewMenuItem(flow_tree_view_);
 
     ImGui::Separator();
+    DrawViewMenuItem(calculator_view_);
+
+    ImGui::Separator();
     DrawViewMenuItem(settings_view_);
 
     ImGui::EndMenu();
@@ -137,10 +140,12 @@ void MainMenuBar::DrawViews(const coreui::Diagram &diagram,
       (selected_nodes.size() == 1)
           ? &coreui::Diagram::FindNode(diagram, selected_nodes.front())
           : std::optional<const coreui::Node *>{};
+  const auto &family_groups = diagram.GetFamilyGroups();
 
-  node_view_.Draw(selected_node, diagram.GetFamilyGroups());
+  node_view_.Draw(selected_node, family_groups);
   nodes_view_.Draw(diagram);
   flow_tree_view_.Draw(diagram.GetFlowTree());
+  calculator_view_.Draw(selected_node, family_groups);
   settings_view_.Draw(settings);
 }
 }  // namespace vh::ponc::draw

@@ -55,7 +55,7 @@ void NodeView::Draw(std::optional<const coreui::Node*> node,
   // NOLINTEND(*-signed-bitwise)
 
   if (ImGui::BeginTable("Children", 2, table_flags)) {
-    ImGui::TableSetupColumn("Child");
+    ImGui::TableSetupColumn("Child Type");
     ImGui::TableSetupColumn("Count");
     ImGui::TableHeadersRow();
 
