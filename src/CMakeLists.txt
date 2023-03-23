@@ -19,6 +19,7 @@ add_executable(ponc
   core/core_diagram.cc
   core/core_free_pin_family_group.cc
   core/core_gradient.cc
+  core/core_hub_family_group.cc
   core/core_i_family_group.cc
   core/core_i_family.cc
   core/core_i_node.cc
