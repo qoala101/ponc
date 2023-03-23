@@ -70,8 +70,11 @@ Diagram::Diagram(cpp::SafePtr<Project> parent_project,
 void Diagram::OnFrame() {
   node_mover_.OnFrame();
 
-  const auto flow_tree = flow::BuildFlowTree(*diagram_, safe_owner_);
-  const auto node_flows = flow::CalculateNodeFlows(flow_tree);
+  const auto flow_tree = flow::BuildFlowTree(*diagram_);
+  const auto node_flows = flow::CalculateNodeFlows(
+      flow_tree, [&diagram = *diagram_](const auto node_id) {
+        return core::Diagram::FindNode(diagram, node_id).GetInitialFlow();
+      });
 
   UpdateLinks(node_flows);
   UpdateNodes(node_flows);
@@ -593,7 +596,7 @@ void Diagram::UpdateFlowTree(const flow::FlowTree& core_tree) {
     flow::TraverseDepthFirst(
         root_node,
         [this, &parent_stack](const auto& core_tree_node) {
-          auto& node = FindNode(*this, core_tree_node.node->GetId());
+          auto& node = FindNode(*this, core_tree_node.node_id);
           auto& tree_node =
               parent_stack.empty()
                   ? flow_tree_.root_nodes.emplace_back(

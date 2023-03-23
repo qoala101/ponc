@@ -1,20 +1,22 @@
 #ifndef VH_PONC_FLOW_TREE_H_
 #define VH_PONC_FLOW_TREE_H_
 
+#include <imgui_node_editor.h>
+
 #include <concepts>
 #include <functional>
+#include <map>
 #include <memory>
 #include <optional>
 #include <vector>
 
-#include "core_i_node.h"
-#include "cpp_safe_ptr.h"
+namespace ne = ax::NodeEditor;
 
 namespace vh::ponc::flow {
 ///
 struct TreeNode {
   ///
-  cpp::SafePtr<core::INode> node;
+  ne::NodeId node_id;
   ///
   std::map<uintptr_t, TreeNode> child_nodes{};
 };
