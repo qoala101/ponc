@@ -2,17 +2,9 @@
 #define VH_PONC_FLOW_TREE_TRAVERSAL_H_
 
 #include "flow_tree.h"
+#include "imgui_node_editor.h"
 
 namespace vh::ponc::flow {
-///
-struct FindById {
-  ///
-  auto operator()(const TreeNode &tree_node) const -> bool;
-
-  ///
-  ne::NodeId node_id{};
-};
-
 ///
 void TraverseDepthFirst(
     const TreeNode &tree_node,
@@ -46,10 +38,14 @@ auto FindTreeNode(const TreeNode &tree_node,
 }
 
 ///
-auto FindTreeNode(const FlowTree &tree,
+auto FindTreeNode(const TreeNode &tree_node, ne::NodeId node_id)
+    -> const TreeNode &;
+
+///
+auto FindTreeNode(const FlowTree &flow_tree,
                   const std::invocable<const TreeNode &> auto &predicate)
     -> std::optional<const TreeNode *> {
-  for (const auto &root : tree.root_nodes) {
+  for (const auto &root : flow_tree.root_nodes) {
     if (const auto found_node = FindTreeNode(root, predicate)) {
       return found_node;
     }
@@ -57,6 +53,10 @@ auto FindTreeNode(const FlowTree &tree,
 
   return std::nullopt;
 }
+
+///
+auto FindTreeNode(const FlowTree &flow_tree, ne::NodeId node_id)
+    -> const TreeNode &;
 }  // namespace vh::ponc::flow
 
 #endif  // VH_PONC_FLOW_TREE_TRAVERSAL_H_
