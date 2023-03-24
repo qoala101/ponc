@@ -7,8 +7,11 @@
 #include "core_i_node.h"
 #include "coreui_family.h"
 #include "coreui_i_node_traits.h"
+#include "cpp_assert.h"
 #include "draw_family_groups_menu.h"
 #include "draw_native_facade.h"
+#include "flow_algorithms.h"
+#include "flow_tree_traversal.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
@@ -76,6 +79,13 @@ void NodePopup::Draw(coreui::Diagram& diagram) {
              }});
 
     ImGui::EndMenu();
+  }
+
+  if (ImGui::MenuItem("Make Tree")) {
+    const auto flow_tree = flow::BuildFlowTree(diagram.GetDiagram());
+    const auto& tree_node = flow::FindTreeNode(flow_tree, node.GetId());
+
+    diagram.GetNodeMover().MakeTree(tree_node);
   }
 
   const auto node_traits = node.CreateUiTraits();

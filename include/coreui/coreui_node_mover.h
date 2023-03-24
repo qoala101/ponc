@@ -10,6 +10,7 @@
 #include "coreui_event_loop.h"
 #include "coreui_linker.h"
 #include "cpp_safe_ptr.h"
+#include "flow_tree.h"
 #include "imgui.h"
 
 namespace vh::ponc::coreui {
@@ -27,6 +28,8 @@ class NodeMover {
   void MoveNodesTo(const std::vector<ne::NodeId> &node_ids, ImVec2 pos);
   ///
   void MovePinTo(ne::PinId pin_id, const ImVec2 &pos);
+  ///
+  void MakeTree(const flow::TreeNode &tree_node);
   ///
   auto GetNodeSize(ne::NodeId node_id) const -> const ImVec2 &;
   ///

@@ -79,15 +79,13 @@ void CalculatorView::Draw(const coreui::Diagram& diagram,
 
   if (!calculator_input_.has_value()) {
     const auto flow_tree = flow::BuildFlowTree(diagram.GetDiagram());
-    const auto node_flows = flow::CalculateNodeFlows(
-        flow_tree, [&diagram = diagram.GetDiagram()](const auto node_id) {
-          return core::Diagram::FindNode(diagram, node_id).GetInitialFlow();
-        });
-    const auto tree_node =
-        flow::FindTreeNode(flow_tree, flow::FindById{.node_id = node_id});
-    Expects(tree_node.has_value());
+    // const auto node_flows = flow::CalculateNodeFlows(
+    //     flow_tree, [&diagram = diagram.GetDiagram()](const auto node_id) {
+    //       return core::Diagram::FindNode(diagram, node_id).GetInitialFlow();
+    //     });
 
-    calculator_input_ = flow::CalculatorInput{.tree_node = **tree_node};
+    calculator_input_ = flow::CalculatorInput{
+        .tree_node = flow::FindTreeNode(flow_tree, node_id)};
   }
 
   ImGui::TextUnformatted((*node)->GetData().label.c_str());

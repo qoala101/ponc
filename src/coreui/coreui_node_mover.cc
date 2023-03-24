@@ -1,15 +1,44 @@
+#include <algorithm>
 #include <functional>
 #include <iostream>
+#include <numeric>
 
 #include "core_diagram.h"
 #include "cpp_assert.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
-
 #include "core_i_node.h"
 #include "coreui_diagram.h"
 #include "coreui_node_mover.h"
+#include "flow_tree_traversal.h"
+#include "imgui.h"
 
 namespace vh::ponc::coreui {
+namespace {
+///
+auto GetNodesPerLevel(const flow::TreeNode& tree_node,
+                      const core::Diagram& diagram) {
+  auto level = 0;
+  auto nodes_per_level = std::vector<std::vector<core::INode*>>{};
+
+  flow::TraverseDepthFirst(
+      tree_node,
+      [&diagram, &level, &nodes_per_level](const auto& tree_node) {
+        auto& node = core::Diagram::FindNode(diagram, tree_node.node_id);
+
+        if ((static_cast<int>(nodes_per_level.size()) - 1) < level) {
+          nodes_per_level.emplace_back().emplace_back(&node);
+        } else {
+          nodes_per_level[level].emplace_back(&node);
+        }
+
+        ++level;
+      },
+      [&level](const auto&) { --level; });
+
+  return nodes_per_level;
+}
+}  // namespace
+
 ///
 NodeMover::NodeMover(cpp::SafePtr<Diagram> parent_diagram)
     : parent_diagram_{std::move(parent_diagram)} {}
@@ -40,6 +69,56 @@ void NodeMover::MoveNodesTo(const std::vector<ne::NodeId>& node_ids,
     MoveNode(node_id);
 
     pos.y += GetNodeSize(node_id).y;
+  }
+}
+
+///
+void NodeMover::MakeTree(const flow::TreeNode& tree_node) {
+  const auto nodes_per_level =
+      GetNodesPerLevel(tree_node, parent_diagram_->GetDiagram());
+
+  if (nodes_per_level.size() <= 1) {
+    return;
+  }
+
+  Expects(!nodes_per_level.front().empty());
+
+  const auto* root_node = nodes_per_level.front().front();
+  const auto root_pos = root_node->GetPos();
+
+  auto previous_level_rect = ImRect{{}, GetNodeSize(root_node->GetId())};
+  previous_level_rect.Translate(root_pos);
+
+  for (auto nodes = nodes_per_level.begin() + 1; nodes != nodes_per_level.end();
+       ++nodes) {
+    const auto level_height =
+        std::accumulate(nodes->begin(), nodes->end(), 0.F,
+                        [this](const auto height, const auto* node) {
+                          return height + GetNodeSize(node->GetId()).y;
+                        });
+
+    const auto level_width = std::transform_reduce(
+        nodes->begin(), nodes->end(), 0.F,
+        [](const auto max_width, const auto node_width) {
+          return std::max(max_width, node_width);
+        },
+        [this](const auto* node) { return GetNodeSize(node->GetId()).x; });
+
+    auto level_rect = ImRect{{}, {level_width, level_height}};
+    level_rect.Translate(
+        {previous_level_rect.Max.x,
+         previous_level_rect.GetCenter().y - level_rect.GetCenter().y});
+
+    auto next_node_y = level_rect.Min.y;
+
+    for (auto* node : *nodes) {
+      node->SetPos({level_rect.Min.x, next_node_y});
+      MoveNode(node->GetId());
+
+      next_node_y += GetNodeSize(node->GetId()).y;
+    }
+
+    previous_level_rect = level_rect;
   }
 }
 

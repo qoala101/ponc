@@ -1,10 +1,26 @@
 #ifndef VH_PONC_FLOW_TREE_TRAVERSAL_H_
 #define VH_PONC_FLOW_TREE_TRAVERSAL_H_
 
+#include <queue>
+
 #include "flow_tree.h"
 #include "imgui_node_editor.h"
 
 namespace vh::ponc::flow {
+namespace detail {
+///
+void TraverseBreadthFirstImpl(
+    std::queue<const TreeNode *> &queue,
+    const std::invocable<const TreeNode &> auto &visitor) {
+  while (!queue.empty()) {
+    for (const auto &child : queue.front()->child_nodes) {
+      visitor(child);
+      queue.push(&child.second);
+    }
+  }
+}
+}  // namespace detail
+
 ///
 void TraverseDepthFirst(
     const TreeNode &tree_node,
@@ -18,6 +34,15 @@ void TraverseDepthFirst(
   }
 
   visitor_after_children(tree_node);
+}
+
+///
+void TraverseBreadthFirst(
+    const TreeNode &tree_node,
+    const std::invocable<const TreeNode &> auto &visitor) {
+  auto queue = std::queue<const TreeNode *>{};
+  queue.push(&tree_node);
+  TraverseBreadthFirstImpl(queue, visitor);
 }
 
 ///
