@@ -16,7 +16,7 @@ namespace vh::ponc::flow {
 ///
 struct TreeNode {
   ///
-  ne::NodeId node_id;
+  ne::NodeId node_id{};
   ///
   std::map<uintptr_t, TreeNode> child_nodes{};
 };

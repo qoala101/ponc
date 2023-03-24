@@ -83,6 +83,7 @@ add_executable(ponc
   draw/draw_native_facade.cc
 
   flow/flow_algorithms.cc
+  flow/flow_calculator.cc
   flow/flow_node_flow.cc
   flow/flow_tree_traversal.cc
 

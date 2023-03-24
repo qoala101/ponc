@@ -145,7 +145,7 @@ void MainMenuBar::DrawViews(const coreui::Diagram &diagram,
   node_view_.Draw(selected_node, family_groups);
   nodes_view_.Draw(diagram);
   flow_tree_view_.Draw(diagram.GetFlowTree());
-  calculator_view_.Draw(selected_node, family_groups);
+  calculator_view_.Draw(diagram, selected_node);
   settings_view_.Draw(settings);
 }
 }  // namespace vh::ponc::draw
