@@ -20,7 +20,7 @@ void DrawColoredText(std::string_view text, const ImColor& color,
   const auto text_size = ImGui::CalcTextSize(text.data());
   const auto padding = ImGui::GetStyle().FramePadding;
 
-  auto rect = ImRect{padding, text_size + padding};
+  auto rect = ImRect{ImVec2{} - padding, text_size + padding};
   rect.Translate(cursor_screen_pos);
 
   auto* drawList = ImGui::GetWindowDrawList();
