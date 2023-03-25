@@ -44,6 +44,12 @@ class Project {
   ///
   auto GetDiagram() -> Diagram &;
   ///
+  auto AddDiagram(core::Diagram diagram) -> Event &;
+  ///
+  auto DeleteDiagram(int index) -> Event &;
+  ///
+  auto SetDiagram(int index) -> Event &;
+  ///
   auto GetTexturesHandle() -> TexturesHandle &;
   ///
   auto GetEventLoop() -> EventLoop &;
@@ -62,11 +68,11 @@ class Project {
   ///
   auto CreateProject() const;
   ///
-  auto CreateDiagram();
-  ///
   auto CreateFamilyParsers() const;
   ///
   auto GetName() const -> std::string;
+  ///
+  void SetDiagramImpl(int index);
   ///
   void SetFilePath(std::filesystem::path file_path);
 

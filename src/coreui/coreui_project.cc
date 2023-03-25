@@ -44,15 +44,6 @@ auto Project::CreateProject() const {
 }
 
 ///
-auto Project::CreateDiagram() {
-  auto& diagrams = project_.GetDiagrams();
-  Expects(!diagrams.empty());
-
-  return std::make_unique<Diagram>(safe_owner_.MakeSafe(this),
-                                   safe_owner_.MakeSafe(&diagrams.front()));
-}
-
-///
 Project::Project(std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups,
                  TexturesHandle textures_handle, Callbacks callbacks)
     : family_groups_{[&family_groups]() {
@@ -67,8 +58,8 @@ Project::Project(std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups,
       }()},
       textures_handle_{std::move(textures_handle)},
       callbacks_{std::move(callbacks)},
-      project_{CreateProject()},
-      diagram_{CreateDiagram()} {
+      project_{CreateProject()} {
+  SetDiagramImpl(0);
   callbacks_.name_changed(GetName());
 }
 
@@ -97,6 +88,41 @@ auto Project::GetDiagram() const -> const Diagram& {
 auto Project::GetDiagram() -> Diagram& { return *diagram_; }
 
 ///
+auto Project::AddDiagram(core::Diagram diagram) -> Event& {
+  return event_loop_.PostEvent(
+      [safe_this = safe_owner_.MakeSafe(this),
+       diagram = cpp::Share(std::move(diagram))]() mutable {
+        auto& added_diagram =
+            safe_this->project_.EmplaceDiagram(std::move(*diagram));
+
+        safe_this->diagram_ = std::make_unique<Diagram>(
+            safe_this, safe_this->safe_owner_.MakeSafe(&added_diagram));
+      });
+}
+
+///
+auto Project::DeleteDiagram(int index) -> Event& {
+  return event_loop_.PostEvent(
+      [index, safe_this = safe_owner_.MakeSafe(this)]() mutable {
+        safe_this->project_.DeleteDiagram(index);
+
+        const auto num_diagrams =
+            static_cast<int>(safe_this->project_.GetDiagrams().size());
+        const auto next_index = std::min(index, num_diagrams - 1);
+
+        safe_this->SetDiagramImpl(next_index);
+      });
+}
+
+///
+auto Project::SetDiagram(int index) -> Event& {
+  return event_loop_.PostEvent(
+      [index, safe_this = safe_owner_.MakeSafe(this)]() {
+        safe_this->SetDiagramImpl(index);
+      });
+}
+
+///
 auto Project::GetTexturesHandle() -> TexturesHandle& {
   return textures_handle_;
 }
@@ -123,24 +149,23 @@ auto Project::Reset() -> Event& {
   return event_loop_.PostEvent([safe_this = safe_owner_.MakeSafe(this),
                                 new_project = cpp::Share(CreateProject())]() {
     safe_this->project_ = std::move(*new_project);
-    safe_this->diagram_ = safe_this->CreateDiagram();
+    safe_this->SetDiagramImpl(0);
     safe_this->SetFilePath({});
   });
 }
 
 ///
 auto Project::OpenFromFile(std::filesystem::path file_path) -> Event& {
-  return event_loop_
-      .PostEvent([safe_this = safe_owner_.MakeSafe(this),
-                  family_parsers = cpp::Share(CreateFamilyParsers()),
-                  file_path = std::move(file_path)]() mutable {
+  return event_loop_.PostEvent(
+      [safe_this = safe_owner_.MakeSafe(this),
+       family_parsers = cpp::Share(CreateFamilyParsers()),
+       file_path = std::move(file_path)]() mutable {
         const auto json = crude_json::value::load(file_path.string()).first;
         safe_this->project_ =
             json::ProjectSerializer::ParseFromJson(json, *family_parsers);
-        safe_this->diagram_ = safe_this->CreateDiagram();
+        safe_this->SetDiagramImpl(0);
         safe_this->SetFilePath(std::move(file_path));
-      })
-      .Then(([]() { ne::NavigateToContent(); }));
+      });
 }
 
 ///
@@ -170,6 +195,15 @@ auto Project::GetName() const -> std::string {
   }
 
   return file_path_.filename().string();
+}
+
+///
+void Project::SetDiagramImpl(int index) {
+  auto& diagrams = project_.GetDiagrams();
+  Expects(static_cast<int>(diagrams.size()) > index);
+
+  diagram_ = std::make_unique<Diagram>(safe_owner_.MakeSafe(this),
+                                       safe_owner_.MakeSafe(&diagrams[index]));
 }
 
 ///

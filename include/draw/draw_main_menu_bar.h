@@ -5,6 +5,7 @@
 #include "coreui_diagram.h"
 #include "coreui_project.h"
 #include "draw_calculator_view.h"
+#include "draw_diagrams_view.h"
 #include "draw_flow_tree_view.h"
 #include "draw_node_view.h"
 #include "draw_nodes_view.h"
@@ -31,7 +32,7 @@ class MainMenuBar {
   ///
   void DrawDialogs(coreui::Project &project);
   ///
-  void DrawViews(const coreui::Diagram &diagram, core::Settings &settings);
+  void DrawViews(coreui::Project &project);
 
   ///
   QuestionDialog new_project_dialog_;
@@ -43,6 +44,8 @@ class MainMenuBar {
   NodeView node_view_{};
   ///
   NodesView nodes_view_{};
+  ///
+  DiagramsView diagrams_view_{};
   ///
   FlowTreeView flow_tree_view_{};
   ///

@@ -29,6 +29,10 @@ class Project {
   ///
   auto GetDiagrams() -> std::vector<Diagram> &;
   ///
+  auto EmplaceDiagram(Diagram diagram) -> Diagram &;
+  ///
+  void DeleteDiagram(int index);
+  ///
   auto GetIdGenerator() const -> const IdGenerator &;
   ///
   auto GetIdGenerator() -> IdGenerator &;

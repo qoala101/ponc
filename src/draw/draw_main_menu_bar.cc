@@ -46,8 +46,6 @@ MainMenuBar::MainMenuBar()
 
 ///
 void MainMenuBar::Draw(coreui::Project &project) {
-  auto &settings = project.GetProject().GetSettings();
-
   if (ImGui::BeginMainMenuBar()) {
     DrawFileMenu(project);
     DrawViewMenu();
@@ -56,12 +54,13 @@ void MainMenuBar::Draw(coreui::Project &project) {
       ne::NavigateToContent();
     }
 
-    ImGui::MenuItem("Color Flow", nullptr, &settings.color_flow);
+    ImGui::MenuItem("Color Flow", nullptr,
+                    &project.GetProject().GetSettings().color_flow);
     ImGui::EndMainMenuBar();
   }
 
   DrawDialogs(project);
-  DrawViews(project.GetDiagram(), settings);
+  DrawViews(project);
 }
 
 ///
@@ -98,6 +97,7 @@ void MainMenuBar::DrawViewMenu() {
   if (ImGui::BeginMenu("View")) {
     DrawViewMenuItem(node_view_);
     DrawViewMenuItem(nodes_view_);
+    DrawViewMenuItem(diagrams_view_);
     DrawViewMenuItem(flow_tree_view_);
 
     ImGui::Separator();
@@ -117,11 +117,14 @@ void MainMenuBar::DrawDialogs(coreui::Project &project) {
   const auto requires_confirmation =
       !core::Project::IsEmpty(project.GetProject());
 
-  open_file_dialog_.Draw({.file_selected =
-                              [&project](auto file_path) {
-                                project.OpenFromFile(std::move(file_path));
-                              }},
-                         requires_confirmation);
+  open_file_dialog_.Draw(
+      {.file_selected =
+           [&project](auto file_path) {
+             project.OpenFromFile(std::move(file_path)).Then(([]() {
+               ne::NavigateToContent();
+             }));
+           }},
+      requires_confirmation);
 
   save_as_file_dialog_.Draw({.file_selected = [&project](auto file_path) {
     if (AsLowerCase(file_path.extension().string()) != ".json") {
@@ -133,19 +136,19 @@ void MainMenuBar::DrawDialogs(coreui::Project &project) {
 }
 
 ///
-void MainMenuBar::DrawViews(const coreui::Diagram &diagram,
-                            core::Settings &settings) {
+void MainMenuBar::DrawViews(coreui::Project &project) {
+  const auto &diagram = project.GetDiagram();
   const auto selected_nodes = NativeFacade::GetSelectedNodes();
   const auto selected_node =
       (selected_nodes.size() == 1)
           ? &coreui::Diagram::FindNode(diagram, selected_nodes.front())
           : std::optional<const coreui::Node *>{};
-  const auto &family_groups = diagram.GetFamilyGroups();
 
-  node_view_.Draw(selected_node, family_groups);
+  node_view_.Draw(selected_node, diagram.GetFamilyGroups());
   nodes_view_.Draw(diagram);
+  diagrams_view_.Draw(project);
   flow_tree_view_.Draw(diagram.GetFlowTree());
   calculator_view_.Draw(diagram, selected_node);
-  settings_view_.Draw(settings);
+  settings_view_.Draw(project.GetProject().GetSettings());
 }
 }  // namespace vh::ponc::draw

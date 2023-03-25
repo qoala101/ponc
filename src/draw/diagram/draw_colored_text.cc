@@ -26,6 +26,7 @@ void DrawColoredText(std::string_view text, const ImColor& color,
   auto* drawList = ImGui::GetWindowDrawList();
   drawList->AddRectFilled(rect.Min, rect.Max, color,
                           ne::GetStyle().PinRounding);
+
   ImGui::TextUnformatted(text.data());
 }
 }  // namespace vh::ponc::draw

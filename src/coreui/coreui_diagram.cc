@@ -120,9 +120,8 @@ auto Diagram::GetNodes() -> std::vector<Node>& { return nodes_; }
 ///
 auto Diagram::AddNode(std::unique_ptr<core::INode> node) -> Event& {
   return parent_project_->GetEventLoop().PostEvent(
-      [safe_this = safe_owner_.MakeSafe(this),
-       node = cpp::Share(std::move(node))]() {
-        safe_this->diagram_->EmplaceNode(std::move(*node));
+      [diagram = diagram_, node = cpp::Share(std::move(node))]() {
+        diagram->EmplaceNode(std::move(*node));
       });
 }
 

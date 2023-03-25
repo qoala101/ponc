@@ -10,6 +10,7 @@
 
 #include "core_diagram.h"
 #include "core_id_generator.h"
+#include "cpp_assert.h"
 
 namespace vh::ponc::core {
 ///
@@ -78,6 +79,17 @@ auto Project::GetDiagrams() const -> const std::vector<Diagram>& {
 
 ///
 auto Project::GetDiagrams() -> std::vector<Diagram>& { return diagrams_; }
+
+///
+auto Project::EmplaceDiagram(Diagram diagram) -> Diagram& {
+  return diagrams_.emplace_back(std::move(diagram));
+}
+
+///
+void Project::DeleteDiagram(int index) {
+  Expects(static_cast<int>(diagrams_.size()) > index);
+  diagrams_.erase(diagrams_.begin() + index);
+}
 
 ///
 auto Project::GetSettings() const -> const Settings& {
