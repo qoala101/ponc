@@ -16,8 +16,7 @@ struct InputRange {
 
 struct FamilyFlow {
   NodeFlow node_flow{};
-  int count{};
-  float cost{};
+  int cost{};
 };
 
 struct CalculatorInput {

@@ -2,6 +2,8 @@
 
 #include <imgui.h>
 
+#include <limits>
+
 #include "core_settings.h"
 #include "draw_id_label.h"
 
@@ -23,8 +25,9 @@ void SettingsView::Draw(core::Settings& settings) {
     ImGui::ColorButton(IdLabel(color_button_id++).c_str(),
                        ImColor{0.F, 0.F, 1.F});
     ImGui::SameLine();
-    ImGui::DragFloat("Very Low", &settings.min_flow, 0.01F, -FLT_MAX,
-                     settings.low_flow, "%.3f");
+    ImGui::DragFloat("Very Low", &settings.min_flow, 0.01F,
+                     -std::numeric_limits<float>::max(), settings.low_flow,
+                     "%.3f");
 
     ImGui::ColorButton(IdLabel(color_button_id++).c_str(),
                        ImColor{0.F, 1.F, 1.F});
@@ -51,7 +54,7 @@ void SettingsView::Draw(core::Settings& settings) {
                        ImColor{1.F, 0.F, 0.F});
     ImGui::SameLine();
     ImGui::DragFloat("Very High", &settings.max_flow, 0.01F, settings.high_flow,
-                     +FLT_MAX, "%.3f");
+                     std::numeric_limits<float>::max(), "%.3f");
 
     ImGui::TreePop();
   }

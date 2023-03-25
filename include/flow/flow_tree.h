@@ -19,6 +19,10 @@ struct TreeNode {
   ne::NodeId node_id{};
   ///
   std::map<uintptr_t, TreeNode> child_nodes{};
+
+ private:
+  ///
+  friend auto operator==(const TreeNode &, const TreeNode &) -> bool = default;
 };
 
 ///

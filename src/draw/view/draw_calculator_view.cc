@@ -7,7 +7,9 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
+#include "core_diagram.h"
 #include "core_i_family.h"
 #include "coreui_diagram.h"
 #include "coreui_family.h"
@@ -24,17 +26,16 @@
 
 namespace vh::ponc::draw {
 namespace {
-void DrawMinInput(const coreui::TreeNode& tree_node) {
-  // static float f{};
-  // ImGui::InputFloat("", &f, 0, 0, "%.3f");
+auto DisableIf(bool condition) {
+  if (!condition) {
+    return cpp::ScopeFunction{[]() {}};
+  }
+
+  ImGui::PushDisabled();
+  return cpp::ScopeFunction{[]() { ImGui::PopDisabled(); }};
 }
 
-void DrawMaxInput(const coreui::TreeNode& tree_node) {
-  // static float f{};
-  // ImGui::InputFloat("", &f, 0, 0, "%.3f");
-}
-
-void DrawFamily(const coreui::Family& family, flow::FamilyFlow& family_flow) {
+void DrawFamily(const coreui::Family& family, int& cost) {
   ImGui::TableNextRow();
 
   ImGui::TableNextColumn();
@@ -43,52 +44,41 @@ void DrawFamily(const coreui::Family& family, flow::FamilyFlow& family_flow) {
   const auto family_id = family.GetFamily().GetId();
 
   ImGui::TableNextColumn();
-  ImGui::InputInt((IdLabel(family_id) + "Count").c_str(), &family_flow.count);
-
-  ImGui::TableNextColumn();
-  ImGui::InputFloat((IdLabel(family_id) + "Cost").c_str(), &family_flow.cost, 0,
-                    0, "%.3f");
+  ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
+  ImGui::InputInt((IdLabel(family_id) + "Count").c_str(), &cost);
 }
 }  // namespace
 
 auto CalculatorView::GetLabel() const -> std::string { return "Calculator"; }
 
 void CalculatorView::Draw(const coreui::Diagram& diagram,
-                          std::optional<const coreui::Node*> node) {
+                          std::optional<const coreui::Node*> node,
+                          const Callbacks& callbacks) {
   const auto content_scope = DrawContentScope();
 
   if (!IsOpened()) {
-    calculator_input_.reset();
     return;
   }
 
-  if (!node.has_value()) {
-    ImGui::TextUnformatted("Select single Node.");
-    ImGui::Separator();
+  const auto has_node = node.has_value();
 
-    calculator_input_.reset();
-    return;
+  {
+    const auto disable_scope = DisableIf(!has_node);
+
+    if (ImGui::Button("Calculate")) {
+      auto diagrams = std::vector<core::Diagram>{};
+      diagrams.emplace_back("vova");
+      diagrams.emplace_back("vova2");
+      diagrams.emplace_back("vova3");
+
+      callbacks.calculated_diagrams(std::move(diagrams));
+    }
   }
 
-  const auto node_id = (*node)->GetNode().GetId();
-
-  if (calculator_input_.has_value() &&
-      calculator_input_->tree_node.node_id != node_id) {
-    calculator_input_.reset();
+  if (!has_node) {
+    ImGui::SameLine();
+    ImGui::TextUnformatted("Select root Node.");
   }
-
-  if (!calculator_input_.has_value()) {
-    const auto flow_tree = flow::BuildFlowTree(diagram.GetDiagram());
-    // const auto node_flows = flow::CalculateNodeFlows(
-    //     flow_tree, [&diagram = diagram.GetDiagram()](const auto node_id) {
-    //       return core::Diagram::FindNode(diagram, node_id).GetInitialFlow();
-    //     });
-
-    calculator_input_ = flow::CalculatorInput{
-        .tree_node = flow::FindTreeNode(flow_tree, node_id)};
-  }
-
-  ImGui::TextUnformatted((*node)->GetData().label.c_str());
 
   // NOLINTBEGIN(*-signed-bitwise)
   const auto table_flags =
@@ -97,34 +87,18 @@ void CalculatorView::Draw(const coreui::Diagram& diagram,
       ImGuiTableFlags_BordersH | ImGuiTableFlags_BordersOuter;
   // NOLINTEND(*-signed-bitwise)
 
-  if (ImGui::CollapsingHeader("Required Inputs")) {
-    if (ImGui::BeginTable("Required Inputs", 3, table_flags)) {
-      ImGui::TableSetupColumn("Node");
-      ImGui::TableSetupColumn("Min");
-      ImGui::TableSetupColumn("Max");
-      ImGui::TableHeadersRow();
-
-      DrawTreeNode((*node)->GetTreeNode(), true, false,
-                   {&DrawMinInput, &DrawMaxInput});
-
-      ImGui::EndTable();
-    }
-  }
-
-  if (ImGui::CollapsingHeader("Available Nodes")) {
-    if (ImGui::BeginTable("Available Nodes", 3, table_flags)) {
+  if (ImGui::CollapsingHeader("Node Cost", ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (ImGui::BeginTable("Node Cost", 2, table_flags)) {
       ImGui::TableSetupColumn("Node Type");
-      ImGui::TableSetupColumn("Count");
-      ImGui::TableSetupColumn("Cost");
+      ImGui::TableSetupColumn("Cost, $");
       ImGui::TableHeadersRow();
-
-      auto& available_node_flows = calculator_input_->available_node_flows;
 
       for (const auto& family_group : diagram.GetFamilyGroups()) {
         for (const auto& family : family_group.families) {
           const auto& core_family = family.GetFamily();
 
-          if (family.GetFamily().GetType().has_value()) {
+          if (const auto family_is_default =
+                  family.GetFamily().GetType().has_value()) {
             continue;
           }
 
@@ -135,24 +109,13 @@ void CalculatorView::Draw(const coreui::Diagram& diagram,
             continue;
           }
 
-          auto* family_flow = static_cast<flow::FamilyFlow*>(nullptr);
           const auto family_id = core_family.GetId().Get();
+          auto& family_cost =
+              family_costs_.contains(family_id)
+                  ? family_costs_.at(family_id)
+                  : family_costs_.emplace(family_id, 10).first->second;
 
-          if (available_node_flows.contains(family_id)) {
-            family_flow = &available_node_flows.at(family_id);
-          } else {
-            std::cout << "emplca\n";
-            family_flow =
-                &calculator_input_->available_node_flows
-                     .emplace(core_family.GetId(),
-                              flow::FamilyFlow{
-                                  .node_flow = sample_node->GetInitialFlow(),
-                                  .count = 1000,
-                                  .cost = 100})
-                     .first->second;
-          }
-
-          DrawFamily(family, *family_flow);
+          DrawFamily(family, family_cost);
         }
       }
 
@@ -160,9 +123,67 @@ void CalculatorView::Draw(const coreui::Diagram& diagram,
     }
   }
 
-  if (ImGui::CollapsingHeader("Controls")) {
-    if (ImGui::Button("Calculate")) {
+  if (!has_node) {
+    return;
+  }
+
+  const auto flow_tree = flow::BuildFlowTree(diagram.GetDiagram());
+  auto tree_node = flow::FindTreeNode(flow_tree, (*node)->GetNode().GetId());
+
+  if (tree_node != tree_node_) {
+    tree_node_ = std::move(tree_node);
+    required_inputs_.clear();
+  }
+
+  if (ImGui::CollapsingHeader("Required Inputs",
+                              ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (ImGui::BeginTable("Required Inputs", 3, table_flags)) {
+      ImGui::TableSetupColumn("Node");
+      ImGui::TableSetupColumn("Min");
+      ImGui::TableSetupColumn("Max");
+      ImGui::TableHeadersRow();
+
+      DrawTreeNode((*node)->GetTreeNode(), true, false,
+                   {std::bind_front(&CalculatorView::DrawMinNodeInput, this),
+                    std::bind_front(&CalculatorView::DrawMaxNodeInput, this)});
+
+      ImGui::EndTable();
     }
   }
+}
+
+auto CalculatorView::GetNodeInputRange(ne::NodeId node_id) -> auto& {
+  const auto node_id_value = node_id.Get();
+
+  return required_inputs_.contains(node_id_value)
+             ? required_inputs_.at(node_id_value)
+             : required_inputs_.emplace(node_id, flow::InputRange{-22, -18})
+                   .first->second;
+}
+
+void CalculatorView::DrawMinNodeInput(const coreui::TreeNode& tree_node) {
+  if (!tree_node.child_nodes.empty()) {
+    return;
+  }
+
+  ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
+
+  const auto node_id = tree_node.node->GetNode().GetId();
+
+  ImGui::InputFloat((IdLabel(node_id) + "Min").c_str(),
+                    &GetNodeInputRange(node_id).min, 0, 0, "%.3f");
+}
+
+void CalculatorView::DrawMaxNodeInput(const coreui::TreeNode& tree_node) {
+  if (!tree_node.child_nodes.empty()) {
+    return;
+  }
+
+  ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
+
+  const auto node_id = tree_node.node->GetNode().GetId();
+
+  ImGui::InputFloat((IdLabel(node_id) + "Max").c_str(),
+                    &GetNodeInputRange(node_id).max, 0, 0, "%.3f");
 }
 }  // namespace vh::ponc::draw
