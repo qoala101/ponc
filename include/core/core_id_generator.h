@@ -30,6 +30,9 @@ class IdGenerator {
   }
 
   ///
+  auto Generate() { return next_id_++; }
+
+  ///
   auto GetNextId() const { return next_id_; }
 
  private:

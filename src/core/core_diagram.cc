@@ -13,9 +13,11 @@
 
 namespace vh::ponc::core {
 ///
-Diagram::Diagram(std::vector<std::unique_ptr<INode>> nodes,
+Diagram::Diagram(std::string name, std::vector<std::unique_ptr<INode>> nodes,
                  std::vector<Link> links)
-    : nodes_{std::move(nodes)}, links_{std::move(links)} {}
+    : name_{std::move(name)},
+      nodes_{std::move(nodes)},
+      links_{std::move(links)} {}
 
 ///
 auto Diagram::FindNode(const Diagram& diagram, ne::NodeId node_id) -> INode& {
@@ -82,6 +84,12 @@ auto Diagram::FindPinLink(Diagram& diagram, ne::PinId pin_id)
 auto Diagram::HasLink(const Diagram& diagram, ne::PinId pin_id) -> bool {
   return FindPinLink(diagram, pin_id).has_value();
 }
+
+///
+auto Diagram::GetName() const -> const std::string& { return name_; }
+
+///
+void Diagram::SetName(std::string name) { name_ = std::move(name); }
 
 ///
 auto Diagram::GetNodes() const -> const std::vector<std::unique_ptr<INode>>& {

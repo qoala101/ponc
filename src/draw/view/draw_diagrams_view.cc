@@ -77,8 +77,7 @@ void DiagramsView::Draw(coreui::Project& project) {
       const auto item_is_selected =
           &diagram == &project.GetDiagram().GetDiagram();
 
-      if (ImGui::Selectable(("Diagram " + std::to_string(index)).c_str(),
-                            item_is_selected) &&
+      if (ImGui::Selectable(diagram.GetName().c_str(), item_is_selected) &&
           !item_is_selected) {
         project.SetDiagram(index).Then(([]() { ne::NavigateToContent(); }));
       }

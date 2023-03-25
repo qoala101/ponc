@@ -40,6 +40,8 @@ class Project {
  private:
   ///
   auto FindMaxId() const;
+  ///
+  void SetDefaultNameIfEmpty(Diagram &diagram);
 
   ///
   Settings settings_{};
