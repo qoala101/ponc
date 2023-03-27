@@ -148,7 +148,7 @@ void MainMenuBar::DrawViews(coreui::Project &project) {
   nodes_view_.Draw(diagram);
   diagrams_view_.Draw(project);
   flow_tree_view_.Draw(diagram.GetFlowTree());
-  calculator_view_.Draw(diagram, selected_node,
+  calculator_view_.Draw(project.GetProject(), diagram, selected_node,
                         {.calculated_diagrams = [&project](auto diagrams) {
                           for (auto &diagram : diagrams) {
                             project.AddDiagram(std::move(diagram));

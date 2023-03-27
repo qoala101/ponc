@@ -3,7 +3,9 @@
 #include <algorithm>
 #include <cstdint>
 #include <iostream>
+#include <iterator>
 #include <set>
+#include <stack>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -11,9 +13,10 @@
 
 #include "core_diagram.h"
 #include "core_i_family.h"
+#include "core_project.h"
 #include "coreui_diagram.h"
-#include "coreui_family.h"
 #include "coreui_flow_tree.h"
+#include "coreui_i_family_traits.h"
 #include "cpp_assert.h"
 #include "draw_id_label.h"
 #include "draw_tree_node.h"
@@ -35,23 +38,46 @@ auto DisableIf(bool condition) {
   return cpp::ScopeFunction{[]() { ImGui::PopDisabled(); }};
 }
 
-void DrawFamily(const coreui::Family& family, int& cost) {
+void DrawFamily(const core::IFamily& family, flow::FamilyFlow& family_flow) {
   ImGui::TableNextRow();
 
   ImGui::TableNextColumn();
-  ImGui::TextUnformatted(family.GetLabel().c_str());
-
-  const auto family_id = family.GetFamily().GetId();
+  ImGui::TextUnformatted(family.CreateUiTraits()->GetLabel().c_str());
 
   ImGui::TableNextColumn();
   ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-  ImGui::InputInt((IdLabel(family_id) + "Count").c_str(), &cost);
+  ImGui::InputInt(IdLabel(family.GetId()).c_str(), &family_flow.cost);
+}
+
+auto MakeDiagram(core::Project& project, const flow::Diagram& diagram) {
+  auto new_diagram = core::Diagram{"new diag"};
+  auto parent_stack = std::stack<ne::NodeId>{};
+
+  for (const auto& root_node : diagram.flow_tree.root_nodes) {
+    flow::TraverseDepthFirst(
+        root_node,
+        [&project, &diagram, &new_diagram,
+         &parent_stack](const auto& tree_node) {
+          const auto node_id = tree_node.node_id.Get();
+          Expects(diagram.node_families.contains(node_id));
+          const auto family_id = diagram.node_families.at(node_id);
+          const auto& family = core::Project::FindFamily(project, family_id);
+          auto node = family.CreateNode(project.GetIdGenerator());
+          new_diagram.EmplaceNode(std::move(node));
+
+          parent_stack.emplace(node_id);
+        },
+        [&parent_stack](const auto&) { parent_stack.pop(); });
+  }
+
+  return new_diagram;
 }
 }  // namespace
 
 auto CalculatorView::GetLabel() const -> std::string { return "Calculator"; }
 
-void CalculatorView::Draw(const coreui::Diagram& diagram,
+void CalculatorView::Draw(core::Project& project,
+                          const coreui::Diagram& diagram,
                           std::optional<const coreui::Node*> node,
                           const Callbacks& callbacks) {
   const auto content_scope = DrawContentScope();
@@ -61,17 +87,13 @@ void CalculatorView::Draw(const coreui::Diagram& diagram,
   }
 
   const auto has_node = node.has_value();
+  auto calculate_pressed = false;
 
   {
     const auto disable_scope = DisableIf(!has_node);
 
     if (ImGui::Button("Calculate")) {
-      auto diagrams = std::vector<core::Diagram>{};
-      diagrams.emplace_back("vova");
-      diagrams.emplace_back("vova2");
-      diagrams.emplace_back("vova3");
-
-      callbacks.calculated_diagrams(std::move(diagrams));
+      calculate_pressed = true;
     }
   }
 
@@ -93,30 +115,30 @@ void CalculatorView::Draw(const coreui::Diagram& diagram,
       ImGui::TableSetupColumn("Cost, $");
       ImGui::TableHeadersRow();
 
-      for (const auto& family_group : diagram.GetFamilyGroups()) {
-        for (const auto& family : family_group.families) {
-          const auto& core_family = family.GetFamily();
-
-          if (const auto family_is_default =
-                  family.GetFamily().GetType().has_value()) {
-            continue;
-          }
-
-          const auto sample_node = family.GetFamily().CreateSampleNode();
-
-          if (!sample_node->GetInputPinId().has_value() ||
-              sample_node->GetOutputPinIds().empty()) {
-            continue;
-          }
-
-          const auto family_id = core_family.GetId().Get();
-          auto& family_cost =
-              family_costs_.contains(family_id)
-                  ? family_costs_.at(family_id)
-                  : family_costs_.emplace(family_id, 10).first->second;
-
-          DrawFamily(family, family_cost);
+      for (const auto& family : project.GetFamilies()) {
+        if (const auto family_is_default = family->GetType().has_value()) {
+          continue;
         }
+
+        const auto sample_node = family->CreateSampleNode();
+
+        if (!sample_node->GetInputPinId().has_value() ||
+            sample_node->GetOutputPinIds().empty()) {
+          continue;
+        }
+
+        const auto family_id = family->GetId().Get();
+        auto& family_flow =
+            family_flows_.contains(family_id)
+                ? family_flows_.at(family_id)
+                : family_flows_
+                      .emplace(family_id,
+                               flow::FamilyFlow{
+                                   .node_flow = sample_node->GetInitialFlow(),
+                                   .cost = 10})
+                      .first->second;
+
+        DrawFamily(*family, family_flow);
       }
 
       ImGui::EndTable();
@@ -149,6 +171,28 @@ void CalculatorView::Draw(const coreui::Diagram& diagram,
 
       ImGui::EndTable();
     }
+  }
+
+  if (calculate_pressed) {
+    auto result = flow::Calculate(
+        {.input_tree = tree_node_,
+         .input_flows = flow::CalculateNodeFlows(
+             {.root_nodes = {tree_node_}},
+             [&diagram = diagram.GetDiagram()](const auto node_id) {
+               return core::Diagram::FindNode(diagram, node_id)
+                   .GetInitialFlow();
+             }),
+         .family_flows = family_flows_,
+         .node_input_ranges = required_inputs_});
+
+    auto diagrams = std::vector<core::Diagram>{};
+
+    std::transform(result.begin(), result.end(), std::back_inserter(diagrams),
+                   [&project](const auto& diagram) {
+                     return MakeDiagram(project, diagram);
+                   });
+
+    callbacks.calculated_diagrams(std::move(diagrams));
   }
 }
 

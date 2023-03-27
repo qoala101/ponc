@@ -15,7 +15,7 @@ void TraverseBreadthFirstImpl(
   while (!queue.empty()) {
     for (const auto &child : queue.front()->child_nodes) {
       visitor(child);
-      queue.push(&child.second);
+      queue.emplace(&child.second);
     }
   }
 }
@@ -41,7 +41,7 @@ void TraverseBreadthFirst(
     const TreeNode &tree_node,
     const std::invocable<const TreeNode &> auto &visitor) {
   auto queue = std::queue<const TreeNode *>{};
-  queue.push(&tree_node);
+  queue.emplace(&tree_node);
   TraverseBreadthFirstImpl(queue, visitor);
 }
 

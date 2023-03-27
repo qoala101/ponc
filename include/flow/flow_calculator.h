@@ -20,18 +20,18 @@ struct FamilyFlow {
 };
 
 struct CalculatorInput {
-  TreeNode tree_node{};
-  NodeFlows node_flows{};
-  std::unordered_map<uintptr_t, InputRange> desired_node_inputs{};
-  std::unordered_map<uintptr_t, FamilyFlow> available_node_flows{};
+  TreeNode input_tree{};
+  NodeFlows input_flows{};
+  std::unordered_map<uintptr_t, FamilyFlow> family_flows{};
+  std::unordered_map<uintptr_t, InputRange> node_input_ranges{};
 };
 
-struct CalculatorResult {
-  std::vector<TreeNode> tree_steps{};
+struct Diagram {
+  FlowTree flow_tree{};
   std::unordered_map<uintptr_t, core::FamilyId> node_families{};
 };
 
-auto Calculate(const CalculatorInput &input) -> CalculatorResult;
+auto Calculate(const CalculatorInput &input) -> std::vector<Diagram>;
 }  // namespace vh::ponc::flow
 
 #endif  // VH_PONC_FLOW_CALCULATOR_H_

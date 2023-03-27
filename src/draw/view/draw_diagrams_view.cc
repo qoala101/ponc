@@ -10,6 +10,7 @@
 #include "core_diagram.h"
 #include "cpp_scope.h"
 #include "cpp_scope_function.h"
+#include "draw_id_label.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
@@ -77,7 +78,8 @@ void DiagramsView::Draw(coreui::Project& project) {
       const auto item_is_selected =
           &diagram == &project.GetDiagram().GetDiagram();
 
-      if (ImGui::Selectable(diagram.GetName().c_str(), item_is_selected) &&
+      if (ImGui::Selectable(IdLabel(index, diagram.GetName()).c_str(),
+                            item_is_selected) &&
           !item_is_selected) {
         project.SetDiagram(index).Then(([]() { ne::NavigateToContent(); }));
       }

@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "core_project.h"
 #include "coreui_diagram.h"
 #include "coreui_family.h"
 #include "cpp_callbacks.h"
@@ -20,7 +21,7 @@ class CalculatorView : public IView {
 
   auto GetLabel() const -> std::string override;
 
-  void Draw(const coreui::Diagram &diagram,
+  void Draw(core::Project &project, const coreui::Diagram &diagram,
             std::optional<const coreui::Node *> node,
             const Callbacks &callbacks);
 
@@ -30,7 +31,7 @@ class CalculatorView : public IView {
   void DrawMaxNodeInput(const coreui::TreeNode &tree_node);
 
   flow::TreeNode tree_node_{};
-  std::unordered_map<uintptr_t, int> family_costs_{};
+  std::unordered_map<uintptr_t, flow::FamilyFlow> family_flows_{};
   std::unordered_map<uintptr_t, flow::InputRange> required_inputs_{};
 };
 }  // namespace vh::ponc::draw

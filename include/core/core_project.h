@@ -12,6 +12,9 @@ class Project {
  public:
   ///
   static auto IsEmpty(const Project &project) -> bool;
+  ///
+  static auto FindFamily(const Project &project, core::FamilyId family_id)
+      -> IFamily &;
 
   ///
   Project(const Settings &settings,

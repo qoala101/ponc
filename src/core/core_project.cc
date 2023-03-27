@@ -5,12 +5,15 @@
 #include <cstdio>
 #include <iostream>
 #include <iterator>
+#include <stack>
 #include <string>
 #include <vector>
 
 #include "core_diagram.h"
 #include "core_id_generator.h"
 #include "cpp_assert.h"
+#include "flow_tree_traversal.h"
+#include "imgui_node_editor.h"
 
 namespace vh::ponc::core {
 ///
@@ -45,6 +48,17 @@ auto Project::IsEmpty(const Project& project) -> bool {
   return std::all_of(diagrams.begin(), diagrams.end(), [](const auto& diagram) {
     return diagram.GetNodes().empty() && diagram.GetLinks().empty();
   });
+}
+
+///
+auto Project::FindFamily(const Project& project, core::FamilyId family_id)
+    -> IFamily& {
+  const auto family = std::find_if(
+      project.families_.begin(), project.families_.end(),
+      [family_id](const auto& family) { return family->GetId() == family_id; });
+
+  Expects(family != project.families_.end());
+  return **family;
 }
 
 ///
