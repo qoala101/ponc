@@ -1,9 +1,11 @@
 #ifndef VH_PONC_DRAW_CALCULATOR_VIEW_H_
 #define VH_PONC_DRAW_CALCULATOR_VIEW_H_
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
+#include "core_i_family.h"
 #include "core_project.h"
 #include "coreui_diagram.h"
 #include "coreui_family.h"
@@ -19,20 +21,16 @@ class CalculatorView : public IView {
     cpp::Signal<std::vector<core::Diagram>> calculated_diagrams{};
   };
 
+  CalculatorView();
+
   auto GetLabel() const -> std::string override;
 
-  void Draw(core::Project &project, const coreui::Diagram &diagram,
-            std::optional<const coreui::Node *> node,
-            const Callbacks &callbacks);
+  void Draw(core::Project &project, const Callbacks &callbacks);
 
  private:
-  auto GetNodeInputRange(ne::NodeId) -> auto &;
-  void DrawMinNodeInput(const coreui::TreeNode &tree_node);
-  void DrawMaxNodeInput(const coreui::TreeNode &tree_node);
-
-  flow::TreeNode tree_node_{};
-  std::unordered_map<uintptr_t, flow::FamilyFlow> family_flows_{};
-  std::unordered_map<uintptr_t, flow::InputRange> required_inputs_{};
+  int num_inputs_{};
+  std::vector<flow::FamilyFlow> family_flows_{};
+  std::vector<flow::InputRange> required_inputs_{};
 };
 }  // namespace vh::ponc::draw
 

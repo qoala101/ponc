@@ -8,32 +8,29 @@
 #include "core_i_family.h"
 
 namespace vh::ponc::flow {
+struct TreeNodeEx {
+  core::FamilyId family_id{};
+  std::vector<float> outputs{};
+  std::map<int, TreeNodeEx> child_nodes{};
+};
+
 struct InputRange {
   float min{};
   float max{};
 };
 
 struct FamilyFlow {
-  std::vector<float> output_pin_flows{};
-  int cost{};
-};
-
-struct TreeNodeEx {
   core::FamilyId family_id{};
-  std::map<int, TreeNodeEx> child_nodes{};
+  std::vector<float> outputs{};
+  float cost{};
 };
 
 struct CalculatorInput {
-  TreeNodeEx input_tree{};
-  std::unordered_map<uintptr_t, FamilyFlow> family_flows{};
-  std::unordered_map<uintptr_t, InputRange> leaf_input_ranges{};
+  std::vector<FamilyFlow> family_flows{};
+  std::vector<InputRange> input_ranges{};
 };
 
-struct Diagram {
-  TreeNodeEx output_tree{};
-};
-
-auto Calculate(const CalculatorInput &input) -> std::vector<Diagram>;
+auto Calculate(const CalculatorInput &input) -> std::vector<TreeNodeEx>;
 }  // namespace vh::ponc::flow
 
 #endif  // VH_PONC_FLOW_CALCULATOR_H_
