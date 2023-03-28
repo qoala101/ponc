@@ -13,6 +13,8 @@
 
 #include "core_diagram.h"
 #include "core_i_family.h"
+#include "core_i_node.h"
+#include "core_link.h"
 #include "core_project.h"
 #include "coreui_diagram.h"
 #include "coreui_flow_tree.h"
@@ -49,26 +51,68 @@ void DrawFamily(const core::IFamily& family, flow::FamilyFlow& family_flow) {
   ImGui::InputInt(IdLabel(family.GetId()).c_str(), &family_flow.cost);
 }
 
+void TraverseDepthFirst(
+    const flow::TreeNodeEx& tree_node,
+    const std::invocable<const flow::TreeNodeEx&> auto& visitor_before_children,
+    const std::invocable<const flow::TreeNodeEx&> auto&
+        visitor_after_children) {
+  visitor_before_children(tree_node);
+
+  for (const auto& child : tree_node.child_nodes) {
+    TraverseDepthFirst(child.second, visitor_before_children,
+                       visitor_after_children);
+  }
+
+  visitor_after_children(tree_node);
+}
+
 auto MakeDiagram(core::Project& project, const flow::Diagram& diagram) {
   auto new_diagram = core::Diagram{"new diag"};
-  auto parent_stack = std::stack<ne::NodeId>{};
+  auto parent_stack =
+      std::stack<std::pair<const flow::TreeNodeEx*, const core::INode*>>{};
 
-  for (const auto& root_node : diagram.flow_tree.root_nodes) {
-    flow::TraverseDepthFirst(
-        root_node,
-        [&project, &diagram, &new_diagram,
-         &parent_stack](const auto& tree_node) {
-          const auto node_id = tree_node.node_id.Get();
-          Expects(diagram.node_families.contains(node_id));
-          const auto family_id = diagram.node_families.at(node_id);
-          const auto& family = core::Project::FindFamily(project, family_id);
-          auto node = family.CreateNode(project.GetIdGenerator());
-          new_diagram.EmplaceNode(std::move(node));
+  TraverseDepthFirst(
+      diagram.output_tree,
+      [&project, &new_diagram, &parent_stack](const auto& tree_node) {
+        auto& id_generator = project.GetIdGenerator();
 
-          parent_stack.emplace(node_id);
-        },
-        [&parent_stack](const auto&) { parent_stack.pop(); });
-  }
+        const auto& family =
+            core::Project::FindFamily(project, tree_node.family_id);
+        const auto& node =
+            new_diagram.EmplaceNode(family.CreateNode(id_generator));
+
+        if (!parent_stack.empty()) {
+          const auto& [parent_tree_node, parent_node] = parent_stack.top();
+
+          for (const auto& child_node : parent_tree_node->child_nodes) {
+            if (&child_node.second != &tree_node) {
+              continue;
+            }
+
+            const auto parent_output_pins = parent_node->GetOutputPinIds();
+
+            Expects(static_cast<int>(parent_output_pins.size()) >
+                    child_node.first);
+            const auto parent_output_pin_to_this =
+                parent_output_pins[child_node.first];
+
+            const auto input_pin = node.GetInputPinId();
+            Expects(input_pin.has_value());
+
+            const auto link =
+                core::Link{.id = id_generator.Generate<ne::LinkId>(),
+                           .start_pin_id = parent_output_pin_to_this,
+                           .end_pin_id = *input_pin};
+
+            new_diagram.EmplaceLink(link);
+
+            break;
+          }
+        }
+
+        parent_stack.emplace(&tree_node, &node);
+      },
+      [&parent_stack](const auto&) { parent_stack.pop(); });
 
   return new_diagram;
 }
@@ -127,15 +171,23 @@ void CalculatorView::Draw(core::Project& project,
           continue;
         }
 
+        const auto output_pin_flows =
+            sample_node->GetInitialFlow().output_pin_flows;
+
+        auto output_pin_flows_vector = std::vector<float>{};
+        std::transform(output_pin_flows.begin(), output_pin_flows.end(),
+                       std::back_inserter(output_pin_flows_vector),
+                       [](const auto& pair) { return pair.second; });
+
         const auto family_id = family->GetId().Get();
         auto& family_flow =
             family_flows_.contains(family_id)
                 ? family_flows_.at(family_id)
                 : family_flows_
                       .emplace(family_id,
-                               flow::FamilyFlow{
-                                   .node_flow = sample_node->GetInitialFlow(),
-                                   .cost = 10})
+                               flow::FamilyFlow{.output_pin_flows = std::move(
+                                                    output_pin_flows_vector),
+                                                .cost = 10})
                       .first->second;
 
         DrawFamily(*family, family_flow);
@@ -174,16 +226,17 @@ void CalculatorView::Draw(core::Project& project,
   }
 
   if (calculate_pressed) {
-    auto result = flow::Calculate(
-        {.input_tree = tree_node_,
-         .input_flows = flow::CalculateNodeFlows(
-             {.root_nodes = {tree_node_}},
-             [&diagram = diagram.GetDiagram()](const auto node_id) {
-               return core::Diagram::FindNode(diagram, node_id)
-                   .GetInitialFlow();
-             }),
-         .family_flows = family_flows_,
-         .node_input_ranges = required_inputs_});
+    auto root = flow::TreeNodeEx{.family_id = (*node)->GetNode().GetFamilyId()};
+    auto child_index = 0;
+
+    for (const auto& child : (*node)->GetTreeNode().child_nodes) {
+      root.child_nodes.emplace(
+          child_index++,
+          flow::TreeNodeEx{.family_id = child.node->GetNode().GetFamilyId()});
+    }
+
+    auto result =
+        flow::Calculate({.input_tree = root, .family_flows = family_flows_});
 
     auto diagrams = std::vector<core::Diagram>{};
 

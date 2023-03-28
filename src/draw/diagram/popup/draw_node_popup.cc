@@ -81,13 +81,6 @@ void NodePopup::Draw(coreui::Diagram& diagram) {
     ImGui::EndMenu();
   }
 
-  if (ImGui::MenuItem("Make Tree")) {
-    const auto flow_tree = flow::BuildFlowTree(diagram.GetDiagram());
-    const auto& tree_node = flow::FindTreeNode(flow_tree, node.GetId());
-
-    diagram.GetNodeMover().MakeTree(tree_node);
-  }
-
   const auto node_traits = node.CreateUiTraits();
   const auto node_action_names = node_traits->GetActionNames();
 

@@ -16,6 +16,8 @@
 #include "draw_open_file_dialog.h"
 #include "draw_question_dialog.h"
 #include "draw_save_as_file_dialog.h"
+#include "flow_algorithms.h"
+#include "flow_tree_traversal.h"
 #include "imgui_node_editor.h"
 
 namespace vh::ponc::draw {
@@ -56,6 +58,16 @@ void MainMenuBar::Draw(coreui::Project &project) {
 
     ImGui::MenuItem("Color Flow", nullptr,
                     &project.GetProject().GetSettings().color_flow);
+
+    if (ImGui::MenuItem("BETA: Make Tree")) {
+      auto &diagram = project.GetDiagram();
+      const auto flow_tree = flow::BuildFlowTree(diagram.GetDiagram());
+
+      for (const auto &root_node : flow_tree.root_nodes) {
+        diagram.GetNodeMover().MakeTree(root_node);
+      }
+    }
+
     ImGui::EndMainMenuBar();
   }
 
