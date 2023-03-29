@@ -21,8 +21,6 @@ class CalculatorView : public IView {
     cpp::Signal<std::vector<core::Diagram>> calculated_diagrams{};
   };
 
-  CalculatorView();
-
   auto GetLabel() const -> std::string override;
 
   void Draw(core::Project &project, const Callbacks &callbacks);

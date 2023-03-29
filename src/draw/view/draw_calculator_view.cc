@@ -164,10 +164,6 @@ auto MakeDiagram(core::Project& project,
 }
 }  // namespace
 
-CalculatorView::CalculatorView() : num_inputs_{1} {
-  required_inputs_.resize(num_inputs_, {.min = -28, .max = -22});
-}
-
 auto CalculatorView::GetLabel() const -> std::string { return "Calculator"; }
 
 void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
@@ -178,13 +174,16 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
   }
 
   ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
+  ImGui::InputInt("", &num_inputs_);
 
-  if (ImGui::InputInt("", &num_inputs_)) {
-    if (num_inputs_ <= 0) {
-      num_inputs_ = 1;
-    }
+  if (num_inputs_ <= 0) {
+    num_inputs_ = 1;
+  }
 
-    required_inputs_.resize(num_inputs_, {.min = -28, .max = -22});
+  if (static_cast<int>(required_inputs_.size()) != num_inputs_) {
+    const auto& settings = project.GetSettings();
+    required_inputs_.resize(num_inputs_, {.min = settings.low_flow - 6,
+                                          .max = settings.high_flow - 6});
   }
 
   const auto calculate_pressed = ImGui::Button("Calculate");
