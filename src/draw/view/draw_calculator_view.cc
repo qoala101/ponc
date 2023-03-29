@@ -280,6 +280,8 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
   const auto result = flow::Calculate(
       {.family_flows = family_flows_, .input_ranges = required_inputs_});
 
+  std::cout << "Calculated: " << result.size() << " trees\n";
+
   auto diagrams = std::vector<core::Diagram>{};
   // std::transform(result.begin(), result.end(), std::back_inserter(diagrams),
   //                [&project](const auto& tree_node) {

@@ -1,7 +1,9 @@
 #include "flow_calculator.h"
 
+#include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <set>
 #include <unordered_set>
 #include <vector>
@@ -46,8 +48,9 @@ auto CalculateOutputs(TreeNodeEx root_node) {
 }
 
 auto InRange(float value, const InputRange &range) {
-  std::cout << "checking: " << value << " in " << range.min << " " << range.max
-            << "\n";
+  // std::cout << "checking: " << value << " in " << range.min << " " <<
+  // range.max
+  //           << "\n";
   return (value >= range.min) && (value <= range.max);
 }
 
@@ -114,67 +117,81 @@ auto DoesTreeHaveOutputs(TreeNodeEx tree,
   return unique_pins.size() >= output_ranges.size();
 }
 
-auto BuildAllValidTrees(const std::vector<FamilyFlow> &family_flows,
-                        const std::vector<InputRange> &output_ranges) {
-  auto out_trees = std::vector<TreeNodeEx>{};
-  auto fake_root = TreeNodeEx{};
+auto LastChildLessThanMin(TreeNodeEx tree, float min) {
+  auto last_child_less_than_min = false;
 
-  for (const auto &family_flow_0 : family_flows) {
-    auto *root_0 =
-        &fake_root.child_nodes
-             .emplace(0, TreeNodeEx{.family_id = family_flow_0.family_id,
-                                    .outputs = family_flow_0.outputs})
-             .first->second;
+  TraverseDepthFirstEx(
+      tree,
+      [min, &last_child_less_than_min](auto &tree_node) {
+        if (last_child_less_than_min) {
+          return;
+        }
 
-    if (DoesTreeHaveOutputs(*root_0, output_ranges)) {
-      out_trees.emplace_back(*root_0);
-    } else {
-      for (const auto &family_flow_1 : family_flows) {
-        auto *root_1 =
-            &root_0->child_nodes
-                 .emplace(0, TreeNodeEx{.family_id = family_flow_1.family_id,
-                                        .outputs = family_flow_1.outputs})
-                 .first->second;
-
-        if (DoesTreeHaveOutputs(*root_0, output_ranges)) {
-          out_trees.emplace_back(*root_0);
-        } else {
-          for (const auto &family_flow_2 : family_flows) {
-            auto *root_2 =
-                &root_1->child_nodes
-                     .emplace(0,
-                              TreeNodeEx{.family_id = family_flow_2.family_id,
-                                         .outputs = family_flow_2.outputs})
-                     .first->second;
-
-            if (DoesTreeHaveOutputs(*root_0, output_ranges)) {
-              out_trees.emplace_back(*root_0);
-            } else {
-              for (const auto &family_flow_3 : family_flows) {
-                auto *root_3 =
-                    &root_2->child_nodes
-                         .emplace(
-                             0, TreeNodeEx{.family_id = family_flow_3.family_id,
-                                           .outputs = family_flow_3.outputs})
-                         .first->second;
-
-                if (DoesTreeHaveOutputs(*root_0, output_ranges)) {
-                  out_trees.emplace_back(*root_0);
-                }
-
-                root_2->child_nodes.clear();
-              }
-            }
-
-            root_1->child_nodes.clear();
+        for (auto &child : tree_node.child_nodes) {
+          for (auto &output : child.second.outputs) {
+            output += tree_node.outputs[child.first];
           }
         }
 
-        root_0->child_nodes.clear();
-      }
-    }
+        if (!tree_node.child_nodes.empty()) {
+          return;
+        }
 
-    fake_root.child_nodes.clear();
+        if (std::all_of(tree_node.outputs.begin(), tree_node.outputs.end(),
+                        [min](const auto output) { return output < min; })) {
+          last_child_less_than_min = true;
+        }
+      },
+      [](const auto &) {});
+
+  return last_child_less_than_min;
+}
+
+void BuildAllValidTreesRecursiveStep(
+    std::vector<TreeNodeEx> &out_trees, const TreeNodeEx &root,
+    TreeNodeEx *last_child, float min_output,
+    const std::vector<FamilyFlow> &family_flows,
+    const std::vector<InputRange> &output_ranges) {
+  if (DoesTreeHaveOutputs(root, output_ranges)) {
+    out_trees.emplace_back(root);
+    return;
+  }
+
+  if (LastChildLessThanMin(root, min_output)) {
+    return;
+  }
+
+  for (const auto &family_flow : family_flows) {
+    auto *new_last_child =
+        &last_child->child_nodes
+             .emplace(0, TreeNodeEx{.family_id = family_flow.family_id,
+                                    .outputs = family_flow.outputs})
+             .first->second;
+
+    BuildAllValidTreesRecursiveStep(out_trees, root, new_last_child, min_output,
+                                    family_flows, output_ranges);
+
+    last_child->child_nodes.clear();
+  }
+}
+
+auto BuildAllValidTreesRecursive(const std::vector<FamilyFlow> &family_flows,
+                                 const std::vector<InputRange> &output_ranges) {
+  auto min_output = std::numeric_limits<float>::max();
+
+  for (const auto &range : output_ranges) {
+    min_output = std::min(range.min, min_output);
+  }
+
+  auto out_trees = std::vector<TreeNodeEx>{};
+
+  for (const auto &family_flow : family_flows) {
+    auto root = TreeNodeEx{.family_id = family_flow.family_id,
+                           .outputs = family_flow.outputs};
+    auto *last_child = &root;
+
+    BuildAllValidTreesRecursiveStep(out_trees, root, last_child, min_output,
+                                    family_flows, output_ranges);
   }
 
   return out_trees;
@@ -185,6 +202,7 @@ auto Calculate(const CalculatorInput &input) -> std::vector<TreeNodeEx> {
   const auto &family_flows = input.family_flows;
   const auto &input_ranges = input.input_ranges;
 
-  return BuildAllValidTrees(family_flows, input_ranges);
+  // return BuildAllValidTrees(family_flows, input_ranges);
+  return BuildAllValidTreesRecursive(family_flows, input_ranges);
 }
 }  // namespace vh::ponc::flow
