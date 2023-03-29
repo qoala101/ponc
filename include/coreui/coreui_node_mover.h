@@ -31,6 +31,8 @@ class NodeMover {
   ///
   void MakeTree(const flow::TreeNode &tree_node);
   ///
+  void MakeTrees(const std::vector<flow::TreeNode> &tree_nodes);
+  ///
   auto GetNodeSize(ne::NodeId node_id) const -> const ImVec2 &;
   ///
   void SetNodeSize(ne::NodeId node_id, const ImVec2 &size);
@@ -44,6 +46,8 @@ class NodeMover {
   void MoveNewNodes();
   ///
   void ApplyMoves() const;
+  ///
+  auto MakeTreeImpl(const flow::TreeNode &tree_node);
 
   ///
   cpp::SafePtr<Diagram> parent_diagram_;

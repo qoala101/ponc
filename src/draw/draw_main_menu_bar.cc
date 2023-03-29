@@ -62,10 +62,7 @@ void MainMenuBar::Draw(coreui::Project &project) {
     if (ImGui::MenuItem("BETA: Make Tree")) {
       auto &diagram = project.GetDiagram();
       const auto flow_tree = flow::BuildFlowTree(diagram.GetDiagram());
-
-      for (const auto &root_node : flow_tree.root_nodes) {
-        diagram.GetNodeMover().MakeTree(root_node);
-      }
+      diagram.GetNodeMover().MakeTrees(flow_tree.root_nodes);
     }
 
     ImGui::EndMainMenuBar();

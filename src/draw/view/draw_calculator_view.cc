@@ -107,6 +107,61 @@ auto MakeDiagram(core::Project& project, const flow::TreeNodeEx& diagram) {
 
   return new_diagram;
 }
+
+auto MakeDiagram(core::Project& project,
+                 const std::vector<flow::TreeNodeEx>& roots) {
+  auto new_diagram = core::Diagram{"new diag"};
+
+  for (const auto& root : roots) {
+    auto parent_stack =
+        std::stack<std::pair<const flow::TreeNodeEx*, const core::INode*>>{};
+
+    TraverseDepthFirst(
+        root,
+        [&project, &new_diagram, &parent_stack](const auto& tree_node) {
+          auto& id_generator = project.GetIdGenerator();
+
+          const auto& family =
+              core::Project::FindFamily(project, tree_node.family_id);
+          const auto& node =
+              new_diagram.EmplaceNode(family.CreateNode(id_generator));
+
+          if (!parent_stack.empty()) {
+            const auto& [parent_tree_node, parent_node] = parent_stack.top();
+
+            for (const auto& child_node : parent_tree_node->child_nodes) {
+              if (&child_node.second != &tree_node) {
+                continue;
+              }
+
+              const auto parent_output_pins = parent_node->GetOutputPinIds();
+
+              Expects(static_cast<int>(parent_output_pins.size()) >
+                      child_node.first);
+              const auto parent_output_pin_to_this =
+                  parent_output_pins[child_node.first];
+
+              const auto input_pin = node.GetInputPinId();
+              Expects(input_pin.has_value());
+
+              const auto link =
+                  core::Link{.id = id_generator.Generate<ne::LinkId>(),
+                             .start_pin_id = parent_output_pin_to_this,
+                             .end_pin_id = *input_pin};
+
+              new_diagram.EmplaceLink(link);
+
+              break;
+            }
+          }
+
+          parent_stack.emplace(&tree_node, &node);
+        },
+        [&parent_stack](const auto&) { parent_stack.pop(); });
+  }
+
+  return new_diagram;
+}
 }  // namespace
 
 CalculatorView::CalculatorView() : num_inputs_{1} {
@@ -227,10 +282,12 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
       {.family_flows = family_flows_, .input_ranges = required_inputs_});
 
   auto diagrams = std::vector<core::Diagram>{};
-  std::transform(result.begin(), result.end(), std::back_inserter(diagrams),
-                 [&project](const auto& tree_node) {
-                   return MakeDiagram(project, tree_node);
-                 });
+  // std::transform(result.begin(), result.end(), std::back_inserter(diagrams),
+  //                [&project](const auto& tree_node) {
+  //                  return MakeDiagram(project, tree_node);
+  //                });
+
+  diagrams.emplace_back(MakeDiagram(project, result));
 
   callbacks.calculated_diagrams(std::move(diagrams));
 }

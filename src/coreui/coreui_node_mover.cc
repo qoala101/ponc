@@ -73,13 +73,9 @@ void NodeMover::MoveNodesTo(const std::vector<ne::NodeId>& node_ids,
 }
 
 ///
-void NodeMover::MakeTree(const flow::TreeNode& tree_node) {
+auto NodeMover::MakeTreeImpl(const flow::TreeNode& tree_node) {
   const auto nodes_per_level =
       GetNodesPerLevel(tree_node, parent_diagram_->GetDiagram());
-
-  if (nodes_per_level.size() <= 1) {
-    return;
-  }
 
   Expects(!nodes_per_level.front().empty());
 
@@ -88,6 +84,8 @@ void NodeMover::MakeTree(const flow::TreeNode& tree_node) {
 
   auto previous_level_rect = ImRect{{}, GetNodeSize(root_node->GetId())};
   previous_level_rect.Translate(root_pos);
+
+  auto tree_rect = previous_level_rect;
 
   for (auto nodes = nodes_per_level.begin() + 1; nodes != nodes_per_level.end();
        ++nodes) {
@@ -119,6 +117,37 @@ void NodeMover::MakeTree(const flow::TreeNode& tree_node) {
     }
 
     previous_level_rect = level_rect;
+    tree_rect.Add(level_rect);
+  }
+
+  return tree_rect;
+}
+
+///
+void NodeMover::MakeTree(const flow::TreeNode& tree_node) {
+  MakeTreeImpl(tree_node);
+}
+
+///
+void NodeMover::MakeTrees(const std::vector<flow::TreeNode>& tree_nodes) {
+  auto last_tree_rect = std::optional<ImRect>{};
+  const auto& diagram = parent_diagram_->GetDiagram();
+
+  for (const auto& tree_node : tree_nodes) {
+    const auto tree_rect = MakeTreeImpl(tree_node);
+
+    if (!last_tree_rect.has_value()) {
+      last_tree_rect = tree_rect;
+      continue;
+    }
+
+    auto& node = core::Diagram::FindNode(diagram, tree_node.node_id);
+
+    node.SetPos({last_tree_rect->Min.x,
+                 node.GetPos().y - tree_rect.Min.y + last_tree_rect->Max.y});
+    MoveNode(tree_node.node_id);
+
+    last_tree_rect = MakeTreeImpl(tree_node);
   }
 }
 
