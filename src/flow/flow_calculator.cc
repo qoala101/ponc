@@ -18,6 +18,20 @@
 
 namespace vh::ponc::flow {
 namespace {
+void TraverseDepthFirstExConst(
+    const TreeNodeEx &tree_node,
+    const std::invocable<const TreeNodeEx &> auto &visitor_before_children,
+    const std::invocable<const TreeNodeEx &> auto &visitor_after_children) {
+  visitor_before_children(tree_node);
+
+  for (const auto &child : tree_node.child_nodes) {
+    TraverseDepthFirstExConst(child.second, visitor_before_children,
+                              visitor_after_children);
+  }
+
+  visitor_after_children(tree_node);
+}
+
 void TraverseDepthFirstEx(
     TreeNodeEx &tree_node,
     const std::invocable<TreeNodeEx &> auto &visitor_before_children,
@@ -62,19 +76,13 @@ struct Pin {
   friend auto operator==(const Pin &, const Pin &) -> bool = default;
 };
 
-auto DoesTreeHaveOutputs(TreeNodeEx tree,
+auto DoesTreeHaveOutputs(const TreeNodeEx &tree,
                          const std::vector<InputRange> &output_ranges) {
   auto matching_pins = std::map<const InputRange *, std::vector<Pin>>{};
 
-  TraverseDepthFirstEx(
+  TraverseDepthFirstExConst(
       tree,
       [&output_ranges, &matching_pins](auto &tree_node) {
-        for (auto &child : tree_node.child_nodes) {
-          for (auto &output : child.second.outputs) {
-            output += tree_node.outputs[child.first];
-          }
-        }
-
         auto index = 0;
 
         for (const auto output : tree_node.outputs) {
@@ -117,86 +125,107 @@ auto DoesTreeHaveOutputs(TreeNodeEx tree,
   return unique_pins.size() >= output_ranges.size();
 }
 
-auto LastChildLessThanMin(TreeNodeEx tree, float min) {
-  auto last_child_less_than_min = false;
-
-  TraverseDepthFirstEx(
-      tree,
-      [min, &last_child_less_than_min](auto &tree_node) {
-        if (last_child_less_than_min) {
-          return;
-        }
-
-        for (auto &child : tree_node.child_nodes) {
-          for (auto &output : child.second.outputs) {
-            output += tree_node.outputs[child.first];
-          }
-        }
-
-        if (!tree_node.child_nodes.empty()) {
-          return;
-        }
-
-        if (std::all_of(tree_node.outputs.begin(), tree_node.outputs.end(),
-                        [min](const auto output) { return output < min; })) {
-          last_child_less_than_min = true;
-        }
-      },
-      [](const auto &) {});
-
-  return last_child_less_than_min;
-}
-
-void BuildAllValidTreesRecursiveStep(
-    std::vector<TreeNodeEx> &out_trees, const TreeNodeEx &root,
-    TreeNodeEx *last_child, float min_output,
-    const std::vector<FamilyFlow> &family_flows,
-    const std::vector<InputRange> &output_ranges) {
-  if (DoesTreeHaveOutputs(root, output_ranges)) {
-    out_trees.emplace_back(root);
-    return;
-  }
-
-  if (LastChildLessThanMin(root, min_output)) {
-    return;
-  }
-
-  for (const auto &family_flow : family_flows) {
-    auto *new_last_child =
-        &last_child->child_nodes
-             .emplace(0, TreeNodeEx{.family_id = family_flow.family_id,
-                                    .outputs = family_flow.outputs})
-             .first->second;
-
-    BuildAllValidTreesRecursiveStep(out_trees, root, new_last_child, min_output,
-                                    family_flows, output_ranges);
-
-    last_child->child_nodes.clear();
-  }
-}
-
-auto BuildAllValidTreesRecursive(const std::vector<FamilyFlow> &family_flows,
-                                 const std::vector<InputRange> &output_ranges) {
+auto GetMinOutput(const std::vector<InputRange> &output_ranges) {
   auto min_output = std::numeric_limits<float>::max();
 
   for (const auto &range : output_ranges) {
     min_output = std::min(range.min, min_output);
   }
 
+  return min_output;
+}
+
+enum class Status { kRecordedTree, kNoSenseToAddFamiliesAtEnd, kNothing };
+
+// NOLINTNEXTLINE(*-no-recursion)
+auto BuildAllValidTreesRecursiveStep(
+    std::vector<TreeNodeEx> &out_trees, const TreeNodeEx &root,
+    TreeNodeEx &last_child, float min_output,
+    const std::vector<FamilyFlow> &family_flows,
+    const std::vector<InputRange> &output_ranges) -> Status {
+  // out_trees.emplace_back(root);
+
+  if (DoesTreeHaveOutputs(root, output_ranges)) {
+    out_trees.emplace_back(root);
+    return Status::kRecordedTree;
+  }
+
+  const auto &family_flow = family_flows.front();
+
+  auto *new_last_child =
+      &last_child.EmplaceChild(0, TreeNodeEx{.family_id = family_flow.family_id,
+                                             .outputs = family_flow.outputs,
+                                             .cost = family_flow.cost});
+
+  if (new_last_child->AreOutputsLessThan(min_output)) {
+    last_child.child_nodes.erase(0);
+    return Status::kNoSenseToAddFamiliesAtEnd;
+  }
+
+  auto status =
+      BuildAllValidTreesRecursiveStep(out_trees, root, *new_last_child,
+                                      min_output, family_flows, output_ranges);
+
+  if (status != Status::kNoSenseToAddFamiliesAtEnd) {
+    return Status::kNothing;
+  }
+
+  new_last_child =
+      &last_child.EmplaceChild(1, TreeNodeEx{.family_id = family_flow.family_id,
+                                             .outputs = family_flow.outputs,
+                                             .cost = family_flow.cost});
+
+  if (new_last_child->AreOutputsLessThan(min_output)) {
+    last_child.child_nodes.erase(1);
+    return Status::kNoSenseToAddFamiliesAtEnd;
+  }
+
+  status =
+      BuildAllValidTreesRecursiveStep(out_trees, root, *new_last_child,
+                                      min_output, family_flows, output_ranges);
+
+  if (status != Status::kNoSenseToAddFamiliesAtEnd) {
+    return Status::kNothing;
+  }
+
+  return Status::kNoSenseToAddFamiliesAtEnd;
+}
+
+auto BuildAllValidTreesRecursive(const std::vector<FamilyFlow> &family_flows,
+                                 const std::vector<InputRange> &output_ranges) {
+  const auto min_output = GetMinOutput(output_ranges);
+
   auto out_trees = std::vector<TreeNodeEx>{};
 
   for (const auto &family_flow : family_flows) {
     auto root = TreeNodeEx{.family_id = family_flow.family_id,
-                           .outputs = family_flow.outputs};
-    auto *last_child = &root;
+                           .outputs = family_flow.outputs,
+                           .cost = family_flow.cost};
 
-    BuildAllValidTreesRecursiveStep(out_trees, root, last_child, min_output,
-                                    family_flows, output_ranges);
+    if (!root.AreOutputsLessThan(min_output)) {
+      BuildAllValidTreesRecursiveStep(out_trees, root, root, min_output,
+                                      family_flows, output_ranges);
+    }
   }
 
   return out_trees;
 }
 }  // namespace
+
+auto TreeNodeEx::EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx & {
+  auto &new_child = child_nodes.emplace(index, std::move(child)).first->second;
+
+  for (auto &output : new_child.outputs) {
+    output += outputs[index];
+  }
+
+  return new_child;
+}
+
+auto TreeNodeEx::AreOutputsLessThan(float value) const -> bool {
+  return std::all_of(outputs.begin(), outputs.end(),
+                     [value](const auto output) { return output < value; });
+}
 
 auto Calculate(const CalculatorInput &input) -> std::vector<TreeNodeEx> {
   const auto &family_flows = input.family_flows;

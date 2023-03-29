@@ -11,7 +11,11 @@ namespace vh::ponc::flow {
 struct TreeNodeEx {
   core::FamilyId family_id{};
   std::vector<float> outputs{};
+  float cost{};
   std::map<int, TreeNodeEx> child_nodes{};
+
+  auto EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx &;
+  auto AreOutputsLessThan(float value) const -> bool;
 };
 
 struct InputRange {

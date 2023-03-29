@@ -112,7 +112,8 @@ auto MakeDiagram(core::Project& project,
                  const std::vector<flow::TreeNodeEx>& roots) {
   auto new_diagram = core::Diagram{"new diag"};
 
-  for (const auto& root : roots) {
+  for (auto i = 0; i < std::min(static_cast<int>(roots.size()), 10); ++i) {
+    const auto& root = roots[i];
     auto parent_stack =
         std::stack<std::pair<const flow::TreeNodeEx*, const core::INode*>>{};
 
@@ -164,7 +165,9 @@ auto MakeDiagram(core::Project& project,
 }
 }  // namespace
 
-auto CalculatorView::GetLabel() const -> std::string { return "Calculator"; }
+auto CalculatorView::GetLabel() const -> std::string {
+  return "BETA: Calculator";
+}
 
 void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
   const auto content_scope = DrawContentScope();
@@ -209,6 +212,10 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
         }
 
         if (!family->CreateUiTraits()->GetLabel().starts_with("Splitter")) {
+          continue;
+        }
+
+        if (!family->CreateUiTraits()->GetLabel().starts_with("Splitter 1x2")) {
           continue;
         }
 
