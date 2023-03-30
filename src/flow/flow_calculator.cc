@@ -5,6 +5,7 @@
 #include <iostream>
 #include <limits>
 #include <set>
+#include <stack>
 #include <unordered_set>
 #include <vector>
 
@@ -150,14 +151,13 @@ auto BuildAllValidTreesRecursiveStep(
     return Status::kRecordedTree;
   }
 
+  // for (const auto &family_flow : family_flows)
   const auto &family_flow = family_flows.front();
   const auto num_outputs = static_cast<int>(last_child.outputs.size());
 
   for (auto child_index = 0; child_index < num_outputs; ++child_index) {
-    auto &new_last_child = last_child.EmplaceChild(
-        child_index, TreeNodeEx{.family_id = family_flow.family_id,
-                                .outputs = family_flow.outputs,
-                                .cost = family_flow.cost});
+    auto &new_last_child =
+        last_child.EmplaceChild(child_index, TreeNodeEx{family_flow});
 
     if (new_last_child.AreOutputsLessThan(min_output)) {
       last_child.child_nodes.erase(child_index);
@@ -168,7 +168,7 @@ auto BuildAllValidTreesRecursiveStep(
         out_trees, root, new_last_child, min_output, family_flows,
         output_ranges);
 
-    if (status != Status::kNoSenseToAddFamiliesAtEnd) {
+    if (status == Status::kNothing) {
       return Status::kNothing;
     }
   }
@@ -183,28 +183,507 @@ auto BuildAllValidTreesRecursive(const std::vector<FamilyFlow> &family_flows,
   auto out_trees = std::vector<TreeNodeEx>{};
 
   for (const auto &family_flow : family_flows) {
-    auto root = TreeNodeEx{.family_id = family_flow.family_id,
-                           .outputs = family_flow.outputs,
-                           .cost = family_flow.cost};
+    auto root = TreeNodeEx{family_flow};
 
-    if (!root.AreOutputsLessThan(min_output)) {
-      BuildAllValidTreesRecursiveStep(out_trees, root, root, min_output,
-                                      family_flows, output_ranges);
+    if (root.AreOutputsLessThan(min_output)) {
+      continue;
     }
+
+    BuildAllValidTreesRecursiveStep(out_trees, root, root, min_output,
+                                    family_flows, output_ranges);
   }
 
   return out_trees;
 }
+
+void AddChildren(std::vector<TreeNodeEx> &out_trees, TreeNodeEx &root,
+                 int child_index, const std::vector<FamilyFlow> &family_flows,
+                 const std::vector<InputRange> &output_ranges) {
+  if (child_index >= static_cast<int>(root.outputs.size())) {
+    return;
+  }
+
+  for (const auto &family_flow : family_flows) {
+    root.EmplaceChild(child_index, TreeNodeEx{family_flow});
+
+    if (DoesTreeHaveOutputs(root, output_ranges)) {
+      out_trees.emplace_back(root);
+    }
+
+    ++child_index;
+    AddChildren(out_trees, root, child_index, family_flows, output_ranges);
+    --child_index;
+  }
+}
+
+auto GetNextFamilyFlow(core::FamilyId family_id,
+                       const std::vector<FamilyFlow> &family_flows)
+    -> std::optional<const FamilyFlow *> {
+  auto family_flow = std::find_if(family_flows.begin(), family_flows.end(),
+                                  [family_id](const auto &family_flow) {
+                                    return family_flow.family_id == family_id;
+                                  });
+  Expects(family_flow != family_flows.end());
+  ++family_flow;
+
+  if (family_flow == family_flows.end()) {
+    return std::nullopt;
+  }
+
+  return &*family_flow;
+}
+
+auto NewAlg(const std::vector<FamilyFlow> &family_flows,
+            const std::vector<InputRange> &output_ranges) {
+  auto out_trees = std::vector<TreeNodeEx>{};
+  const auto min_output = GetMinOutput(output_ranges);
+
+  auto root = TreeNodeEx{family_flows.front()};
+  auto parent_stack = std::stack<TreeNodeEx *>{};
+
+  auto try_next_family = [&]() {
+    auto next_family_flow =
+        GetNextFamilyFlow(parent_stack.top()->family_id, family_flows);
+
+    parent_stack.pop();
+    parent_stack.emplace(
+        &parent_stack.top()->EmplaceChild(0, TreeNodeEx{**next_family_flow}));
+    out_trees.emplace_back(root);
+  };
+
+  parent_stack.emplace(&root);
+  out_trees.emplace_back(root);
+
+  parent_stack.emplace(
+      &parent_stack.top()->EmplaceChild(0, TreeNodeEx{family_flows.front()}));
+  out_trees.emplace_back(root);
+  parent_stack.emplace(
+      &parent_stack.top()->EmplaceChild(0, TreeNodeEx{family_flows.front()}));
+  out_trees.emplace_back(root);
+  parent_stack.emplace(
+      &parent_stack.top()->EmplaceChild(0, TreeNodeEx{family_flows.front()}));
+  out_trees.emplace_back(root);
+  parent_stack.emplace(
+      &parent_stack.top()->EmplaceChild(0, TreeNodeEx{family_flows.front()}));
+  out_trees.emplace_back(root);
+  parent_stack.emplace(
+      &parent_stack.top()->EmplaceChild(0, TreeNodeEx{family_flows.front()}));
+  out_trees.emplace_back(root);
+
+  parent_stack.emplace(
+      &parent_stack.top()->EmplaceChild(0, TreeNodeEx{family_flows.front()}));
+  out_trees.emplace_back(root);
+
+  try_next_family();
+  try_next_family();
+  try_next_family();
+
+  parent_stack.pop();
+  parent_stack.top()->child_nodes.erase(0);
+  out_trees.emplace_back(root);
+
+  parent_stack.pop();
+  parent_stack.emplace(
+      &parent_stack.top()->EmplaceChild(1, TreeNodeEx{family_flows.front()}));
+  out_trees.emplace_back(root);
+
+  parent_stack.emplace(
+      &parent_stack.top()->EmplaceChild(0, TreeNodeEx{family_flows.front()}));
+  out_trees.emplace_back(root);
+
+  try_next_family();
+  try_next_family();
+  try_next_family();
+
+  // after this
+
+  parent_stack.pop();
+  parent_stack.top()->child_nodes.erase(0);
+  out_trees.emplace_back(root);
+
+  parent_stack.pop();
+
+  if (parent_stack.top()->child_nodes.size() >=
+      parent_stack.top()->outputs.size()) {
+    auto next_family_flow = GetNextFamilyFlow(
+        parent_stack.top()->child_nodes.at(0).family_id, family_flows);
+
+    parent_stack.top()->child_nodes.clear();
+    out_trees.emplace_back(root);
+
+    if (next_family_flow.has_value()) {
+      parent_stack.emplace(
+          &parent_stack.top()->EmplaceChild(0, TreeNodeEx{**next_family_flow}));
+      out_trees.emplace_back(root);
+    }
+  }
+
+  try_next_family();
+  try_next_family();
+
+  parent_stack.pop();
+  parent_stack.top()->child_nodes.erase(0);
+  out_trees.emplace_back(root);
+
+  parent_stack.pop();
+
+  auto next_family_flow = GetNextFamilyFlow(
+      parent_stack.top()->child_nodes.at(0).family_id, family_flows);
+
+  parent_stack.top()->child_nodes.erase(0);
+  out_trees.emplace_back(root);
+
+  parent_stack.emplace(
+      &parent_stack.top()->EmplaceChild(0, TreeNodeEx{**next_family_flow}));
+  out_trees.emplace_back(root);
+
+  parent_stack.emplace(
+      &parent_stack.top()->EmplaceChild(0, TreeNodeEx{family_flows.front()}));
+  out_trees.emplace_back(root);
+
+  try_next_family();
+  try_next_family();
+  try_next_family();
+
+  parent_stack.pop();
+  parent_stack.top()->child_nodes.erase(0);
+  out_trees.emplace_back(root);
+
+  parent_stack.pop();
+
+  parent_stack.emplace(
+      &parent_stack.top()->EmplaceChild(1, TreeNodeEx{family_flows.front()}));
+  out_trees.emplace_back(root);
+
+  parent_stack.emplace(
+      &parent_stack.top()->EmplaceChild(0, TreeNodeEx{family_flows.front()}));
+  out_trees.emplace_back(root);
+
+  parent_stack.emplace(
+      &parent_stack.top()->EmplaceChild(0, TreeNodeEx{family_flows.front()}));
+  out_trees.emplace_back(root);
+
+  try_next_family();
+  try_next_family();
+  try_next_family();
+
+  parent_stack.pop();
+  parent_stack.top()->child_nodes.erase(0);
+  out_trees.emplace_back(root);
+
+  parent_stack.pop();
+
+  parent_stack.emplace(
+      &parent_stack.top()->EmplaceChild(1, TreeNodeEx{family_flows.front()}));
+  out_trees.emplace_back(root);
+
+  parent_stack.emplace(
+      &parent_stack.top()->EmplaceChild(0, TreeNodeEx{family_flows.front()}));
+  out_trees.emplace_back(root);
+
+  try_next_family();
+  try_next_family();
+  try_next_family();
+
+  parent_stack.pop();
+  parent_stack.top()->child_nodes.erase(0);
+  out_trees.emplace_back(root);
+
+  parent_stack.pop();
+
+  next_family_flow = GetNextFamilyFlow(
+      parent_stack.top()->child_nodes.at(0).family_id, family_flows);
+
+  parent_stack.top()->child_nodes.clear();
+  out_trees.emplace_back(root);
+
+  parent_stack.emplace(
+      &parent_stack.top()->EmplaceChild(0, TreeNodeEx{**next_family_flow}));
+  out_trees.emplace_back(root);
+
+  try_next_family();
+  try_next_family();
+
+  parent_stack.pop();
+  parent_stack.top()->child_nodes.erase(0);
+  out_trees.emplace_back(root);
+
+  parent_stack.pop();
+
+  next_family_flow = GetNextFamilyFlow(
+      parent_stack.top()->child_nodes.at(1).family_id, family_flows);
+
+  parent_stack.emplace(
+      &parent_stack.top()->EmplaceChild(1, TreeNodeEx{**next_family_flow}));
+  out_trees.emplace_back(root);
+
+  parent_stack.emplace(
+      &parent_stack.top()->EmplaceChild(0, TreeNodeEx{family_flows.front()}));
+  out_trees.emplace_back(root);
+
+  try_next_family();
+  try_next_family();
+  try_next_family();
+
+  parent_stack.pop();
+  parent_stack.top()->child_nodes.erase(0);
+  out_trees.emplace_back(root);
+
+  parent_stack.pop();
+
+  next_family_flow = GetNextFamilyFlow(
+      parent_stack.top()->child_nodes.at(0).family_id, family_flows);
+
+  parent_stack.top()->child_nodes.clear();
+  out_trees.emplace_back(root);
+
+  parent_stack.emplace(
+      &parent_stack.top()->EmplaceChild(0, TreeNodeEx{**next_family_flow}));
+  out_trees.emplace_back(root);
+
+  return out_trees;
+
+  // parent_stack.pop();
+  // parent_stack.top()->child_nodes.erase(0);
+  // out_trees.emplace_back(root);
+
+  // parent_stack.pop();
+  // parent_stack.top()->child_nodes.clear();
+  // out_trees.emplace_back(root);
+
+  // auto next_family_flow =
+  //     GetNextFamilyFlow(parent_stack.top()->family_id, family_flows);
+
+  // parent_stack.pop();
+  // parent_stack.emplace(
+  //     &parent_stack.top()->EmplaceChild(0, TreeNodeEx{**next_family_flow}));
+  // out_trees.emplace_back(root);
+
+  // parent_stack.emplace(
+  //     &parent_stack.top()->EmplaceChild(0,
+  //     TreeNodeEx{family_flows.front()}));
+  // out_trees.emplace_back(root);
+
+  // try_next_family();
+  // try_next_family();
+  // try_next_family();
+
+  // parent_stack.pop();
+  // parent_stack.top()->child_nodes.erase(0);
+  // out_trees.emplace_back(root);
+
+  // parent_stack.pop();
+  // parent_stack.emplace(
+  //     &parent_stack.top()->EmplaceChild(1,
+  //     TreeNodeEx{family_flows.front()}));
+  // out_trees.emplace_back(root);
+
+  // parent_stack.emplace(
+  //     &parent_stack.top()->EmplaceChild(0,
+  //     TreeNodeEx{family_flows.front()}));
+  // out_trees.emplace_back(root);
+
+  // parent_stack.emplace(
+  //     &parent_stack.top()->EmplaceChild(0,
+  //     TreeNodeEx{family_flows.front()}));
+  // out_trees.emplace_back(root);
+
+  // try_next_family();
+  // try_next_family();
+  // try_next_family();
+
+  // parent_stack.pop();
+  // parent_stack.top()->child_nodes.erase(0);
+  // out_trees.emplace_back(root);
+
+  // parent_stack.pop();
+  // parent_stack.emplace(
+  //     &parent_stack.top()->EmplaceChild(1,
+  //     TreeNodeEx{family_flows.front()}));
+  // out_trees.emplace_back(root);
+
+  // parent_stack.emplace(
+  //     &parent_stack.top()->EmplaceChild(0,
+  //     TreeNodeEx{family_flows.front()}));
+  // out_trees.emplace_back(root);
+
+  // try_next_family();
+  // try_next_family();
+  // try_next_family();
+
+  // parent_stack.pop();
+  // parent_stack.top()->child_nodes.erase(0);
+  // out_trees.emplace_back(root);
+
+  // parent_stack.pop();
+
+  // next_family_flow = GetNextFamilyFlow(
+  //     parent_stack.top()->child_nodes.at(0).family_id, family_flows);
+
+  // parent_stack.top()->child_nodes.clear();
+  // out_trees.emplace_back(root);
+
+  // parent_stack.emplace(
+  //     &parent_stack.top()->EmplaceChild(0, TreeNodeEx{**next_family_flow}));
+  // out_trees.emplace_back(root);
+
+  // try_next_family();
+  // try_next_family();
+
+  // parent_stack.pop();
+  // parent_stack.top()->child_nodes.erase(0);
+  // out_trees.emplace_back(root);
+
+  // parent_stack.pop();
+
+  // next_family_flow = GetNextFamilyFlow(
+  //     parent_stack.top()->child_nodes.at(1).family_id, family_flows);
+
+  // parent_stack.emplace(
+  //     &parent_stack.top()->EmplaceChild(1, TreeNodeEx{**next_family_flow}));
+  // out_trees.emplace_back(root);
+
+  // parent_stack.emplace(
+  //     &parent_stack.top()->EmplaceChild(0,
+  //     TreeNodeEx{family_flows.front()}));
+  // out_trees.emplace_back(root);
+
+  // try_next_family();
+  // try_next_family();
+  // try_next_family();
+
+  // parent_stack.pop();
+  // parent_stack.top()->child_nodes.erase(0);
+  // out_trees.emplace_back(root);
+
+  // parent_stack.pop();
+
+  // next_family_flow = GetNextFamilyFlow(
+  //     parent_stack.top()->child_nodes.at(0).family_id, family_flows);
+
+  // parent_stack.top()->child_nodes.clear();
+  // out_trees.emplace_back(root);
+
+  // parent_stack.emplace(
+  //     &parent_stack.top()->EmplaceChild(0, TreeNodeEx{**next_family_flow}));
+  // out_trees.emplace_back(root);
+
+  // parent_stack.emplace(
+  //     &parent_stack.top()->EmplaceChild(0,
+  //     TreeNodeEx{family_flows.front()}));
+  // out_trees.emplace_back(root);
+
+  // try_next_family();
+  // try_next_family();
+  // try_next_family();
+
+  // parent_stack.pop();
+  // parent_stack.top()->child_nodes.erase(0);
+  // out_trees.emplace_back(root);
+
+  // parent_stack.pop();
+  // parent_stack.emplace(
+  //     &parent_stack.top()->EmplaceChild(1,
+  //     TreeNodeEx{family_flows.front()}));
+  // out_trees.emplace_back(root);
+
+  // parent_stack.emplace(
+  //     &parent_stack.top()->EmplaceChild(0,
+  //     TreeNodeEx{family_flows.front()}));
+  // out_trees.emplace_back(root);
+
+  // parent_stack.emplace(
+  //     &parent_stack.top()->EmplaceChild(0,
+  //     TreeNodeEx{family_flows.front()}));
+  // out_trees.emplace_back(root);
+
+  // try_next_family();
+  // try_next_family();
+  // try_next_family();
+
+  // parent_stack.pop();
+  // parent_stack.top()->child_nodes.erase(0);
+  // out_trees.emplace_back(root);
+
+  // parent_stack.pop();
+  // parent_stack.emplace(
+  //     &parent_stack.top()->EmplaceChild(1,
+  //     TreeNodeEx{family_flows.front()}));
+  // out_trees.emplace_back(root);
+
+  // parent_stack.emplace(
+  //     &parent_stack.top()->EmplaceChild(0,
+  //     TreeNodeEx{family_flows.front()}));
+  // out_trees.emplace_back(root);
+
+  // try_next_family();
+  // try_next_family();
+  // try_next_family();
+
+  // return out_trees;
+}
 }  // namespace
 
-auto TreeNodeEx::EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx & {
-  auto &new_child = child_nodes.emplace(index, std::move(child)).first->second;
+TreeNodeEx::TreeNodeEx(const FamilyFlow &family_flow)
+    : family_id{family_flow.family_id},
+      outputs{family_flow.outputs},
+      cost{family_flow.cost} {}
 
-  for (auto &output : new_child.outputs) {
+auto TreeNodeEx::HasOutputs(const std::vector<InputRange> &output_ranges) const
+    -> bool {
+  auto matching_pins = std::map<const InputRange *, std::vector<Pin>>{};
+
+  TraverseDepthFirstExConst(
+      *this,
+      [&output_ranges, &matching_pins](auto &tree_node) {
+        auto index = 0;
+
+        for (const auto output : tree_node.outputs) {
+          const auto index_scope = cpp::Scope{[&index]() { ++index; }};
+
+          if (tree_node.child_nodes.contains(index)) {
+            continue;
+          }
+
+          for (const auto &range : output_ranges) {
+            if (InRange(output, range)) {
+              matching_pins[&range].emplace_back(
+                  Pin{.tree_node = &tree_node, .index = index});
+            }
+          }
+        }
+      },
+      [](const auto &) {});
+
+  if (matching_pins.size() < output_ranges.size()) {
+    return false;
+  }
+
+  // VH: Here must be algorithm which would find a combination of pins which
+  // match all required inputs. Currently I assume that all ranges are the same
+  // so its enough to have the amount of unique pins same as amount of ranges.
+
+  auto unique_pins = std::vector<Pin>{};
+
+  for (const auto &[range, pins_in_range] : matching_pins) {
+    for (const auto &pin : pins_in_range) {
+      if (std::none_of(
+              unique_pins.begin(), unique_pins.end(),
+              [&pin](const auto &taken_pin) { return taken_pin == pin; })) {
+        unique_pins.emplace_back(pin);
+      }
+    }
+  }
+
+  return unique_pins.size() >= output_ranges.size();
+}
+
+auto TreeNodeEx::EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx & {
+  for (auto &output : child.outputs) {
     output += outputs[index];
   }
 
-  return new_child;
+  return child_nodes[index] = std::move(child);
 }
 
 auto TreeNodeEx::AreOutputsLessThan(float value) const -> bool {
@@ -217,6 +696,7 @@ auto Calculate(const CalculatorInput &input) -> std::vector<TreeNodeEx> {
   const auto &input_ranges = input.input_ranges;
 
   // return BuildAllValidTrees(family_flows, input_ranges);
-  return BuildAllValidTreesRecursive(family_flows, input_ranges);
+  // return BuildAllValidTreesRecursive(family_flows, input_ranges);
+  return NewAlg(family_flows, input_ranges);
 }
 }  // namespace vh::ponc::flow
