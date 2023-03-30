@@ -151,41 +151,26 @@ auto BuildAllValidTreesRecursiveStep(
   }
 
   const auto &family_flow = family_flows.front();
+  const auto num_outputs = static_cast<int>(last_child.outputs.size());
 
-  auto *new_last_child =
-      &last_child.EmplaceChild(0, TreeNodeEx{.family_id = family_flow.family_id,
-                                             .outputs = family_flow.outputs,
-                                             .cost = family_flow.cost});
+  for (auto child_index = 0; child_index < num_outputs; ++child_index) {
+    auto &new_last_child = last_child.EmplaceChild(
+        child_index, TreeNodeEx{.family_id = family_flow.family_id,
+                                .outputs = family_flow.outputs,
+                                .cost = family_flow.cost});
 
-  if (new_last_child->AreOutputsLessThan(min_output)) {
-    last_child.child_nodes.erase(0);
-    return Status::kNoSenseToAddFamiliesAtEnd;
-  }
+    if (new_last_child.AreOutputsLessThan(min_output)) {
+      last_child.child_nodes.erase(child_index);
+      return Status::kNoSenseToAddFamiliesAtEnd;
+    }
 
-  auto status =
-      BuildAllValidTreesRecursiveStep(out_trees, root, *new_last_child,
-                                      min_output, family_flows, output_ranges);
+    const auto status = BuildAllValidTreesRecursiveStep(
+        out_trees, root, new_last_child, min_output, family_flows,
+        output_ranges);
 
-  if (status != Status::kNoSenseToAddFamiliesAtEnd) {
-    return Status::kNothing;
-  }
-
-  new_last_child =
-      &last_child.EmplaceChild(1, TreeNodeEx{.family_id = family_flow.family_id,
-                                             .outputs = family_flow.outputs,
-                                             .cost = family_flow.cost});
-
-  if (new_last_child->AreOutputsLessThan(min_output)) {
-    last_child.child_nodes.erase(1);
-    return Status::kNoSenseToAddFamiliesAtEnd;
-  }
-
-  status =
-      BuildAllValidTreesRecursiveStep(out_trees, root, *new_last_child,
-                                      min_output, family_flows, output_ranges);
-
-  if (status != Status::kNoSenseToAddFamiliesAtEnd) {
-    return Status::kNothing;
+    if (status != Status::kNoSenseToAddFamiliesAtEnd) {
+      return Status::kNothing;
+    }
   }
 
   return Status::kNoSenseToAddFamiliesAtEnd;
