@@ -33,6 +33,7 @@ struct TreeNodeEx {
   auto GetNumChildren() const -> int;
   auto GetNumOutputs() const -> int;
   auto GetChildIndex(const TreeNodeEx *child) const -> int;
+  auto CalculateCost() const -> float;
 };
 
 struct CalculatorInput {

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <iterator>
 #include <limits>
 #include <set>
 #include <stack>
@@ -69,6 +70,17 @@ auto GetMinOutput(const std::vector<InputRange> &output_ranges) {
   return min_output;
 }
 
+auto GetFamilyIndex(core::FamilyId family_id,
+                    const std::vector<FamilyFlow> &family_flows) {
+  const auto family_flow =
+      std::find_if(family_flows.begin(), family_flows.end(),
+                   [family_id](const auto &family_flow) {
+                     return family_flow.family_id == family_id;
+                   });
+  Expects(family_flow != family_flows.end());
+  return static_cast<int>(std::distance(family_flows.begin(), family_flow));
+}
+
 auto GetNextFamilyFlow(core::FamilyId family_id,
                        const std::vector<FamilyFlow> &family_flows)
     -> std::optional<const FamilyFlow *> {
@@ -87,31 +99,33 @@ auto GetNextFamilyFlow(core::FamilyId family_id,
 }
 
 auto I = 0;
+auto DEPTH = 0;
+auto MIN_COST = 0.F;
 
 void IterateThroughOutputs(const std::vector<FamilyFlow> &family_flows,
                            std::vector<TreeNodeEx> &out_trees,
-                           const TreeNodeEx &root, TreeNodeEx &node, int depth);
+                           const TreeNodeEx &root, TreeNodeEx &node);
 
 void IterateThroughFamilies(const std::vector<FamilyFlow> &family_flows,
                             std::vector<TreeNodeEx> &out_trees,
-                            const TreeNodeEx &root, TreeNodeEx &node, int depth,
+                            const TreeNodeEx &root, TreeNodeEx &node,
                             int output_index) {
   if (output_index >= node.GetNumOutputs()) {
-    // std::cout << I++ << ": ";
+    std::cout << I++ << ": ";
 
-    ++depth;
+    ++DEPTH;
     for (auto i = 0; i < node.GetNumOutputs(); ++i) {
       if (node.child_nodes.contains(i)) {
-        // std::cout << node.child_nodes.at(i).family_id.Get();
+        std::cout << node.child_nodes.at(i).family_id.Get();
         IterateThroughOutputs(family_flows, out_trees, root,
-                              node.child_nodes.at(i), depth);
+                              node.child_nodes.at(i));
       } else {
-        // std::cout << 0;
+        std::cout << 0;
       }
     }
-    --depth;
+    --DEPTH;
 
-    // std::cout << " o: " << output_index << "\n";
+    std::cout << " o: " << output_index << "\n";
     out_trees.emplace_back(root);
 
     return;
@@ -120,7 +134,20 @@ void IterateThroughFamilies(const std::vector<FamilyFlow> &family_flows,
   const auto num_families = static_cast<int>(family_flows.size());
   const auto num_outputs = node.GetNumOutputs();
 
-  for (auto i = 0; i < num_families + 1; ++i) {
+  auto prev_child_family_index = 0;
+
+  if (output_index > 0) {
+    const auto prev_output_index = output_index - 1;
+
+    if (node.child_nodes.contains(prev_output_index)) {
+      prev_child_family_index =
+          GetFamilyIndex(node.child_nodes.at(output_index - 1).family_id,
+                         family_flows) +
+          1;
+    }
+  }
+
+  for (auto i = prev_child_family_index; i < num_families + 1; ++i) {
     if (i == 0) {
       node.child_nodes.erase(output_index);
     } else {
@@ -131,32 +158,48 @@ void IterateThroughFamilies(const std::vector<FamilyFlow> &family_flows,
       node.child_nodes.erase(i);
     }
 
-    IterateThroughFamilies(family_flows, out_trees, root, node, depth,
+    IterateThroughFamilies(family_flows, out_trees, root, node,
                            output_index + 1);
   }
 }
 
 void IterateThroughOutputs(const std::vector<FamilyFlow> &family_flows,
                            std::vector<TreeNodeEx> &out_trees,
-                           const TreeNodeEx &root, TreeNodeEx &node,
-                           int depth) {
-  if (depth >= 2) {
+                           const TreeNodeEx &root, TreeNodeEx &node) {
+  if (DEPTH >= 1) {
     return;
   }
 
-  IterateThroughFamilies(family_flows, out_trees, root, node, depth, 0);
+  // if (out_trees.size() >= 10) {
+  //   return;
+  // }
+
+  // const auto cost = root.CalculateCost();
+
+  // if (cost >= MIN_COST) {
+  //   return;
+  // }
+
+  // if (node.AreOutputsLessThan(-28)) {
+  //   MIN_COST = std::min(cost, MIN_COST);
+  //   return;
+  // }
+
+  IterateThroughFamilies(family_flows, out_trees, root, node, 0);
 }
 
 auto CalculateAllTrees(const std::vector<FamilyFlow> &family_flows,
                        const std::vector<InputRange> &output_ranges) {
   I = 0;
+  DEPTH = 0;
+  MIN_COST = std::numeric_limits<float>::max();
 
   auto out_trees = std::vector<TreeNodeEx>{};
   const auto min_output = GetMinOutput(output_ranges);
 
   for (const auto &family : family_flows) {
     auto root = TreeNodeEx{family};
-    IterateThroughOutputs(family_flows, out_trees, root, root, 0);
+    IterateThroughOutputs(family_flows, out_trees, root, root);
   }
 
   return out_trees;
@@ -182,6 +225,16 @@ auto TreeNodeEx::GetChildIndex(const TreeNodeEx *child) const -> int {
                    [child](const auto &pair) { return &pair.second == child; });
   Expects(found_child != child_nodes.end());
   return found_child->first;
+}
+
+auto TreeNodeEx::CalculateCost() const -> float {
+  auto cost = 0.F;
+
+  TraverseDepthFirstExConst(
+      *this, [&cost](const auto &tree_node) { cost += tree_node.cost; },
+      [](const auto &) {});
+
+  return cost;
 }
 
 auto TreeNodeEx::HasOutputs(const std::vector<InputRange> &output_ranges) const
