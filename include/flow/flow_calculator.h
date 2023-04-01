@@ -30,6 +30,9 @@ struct TreeNodeEx {
   auto EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx &;
   auto AreOutputsLessThan(float value) const -> bool;
   auto HasOutputs(const std::vector<InputRange> &output_ranges) const -> bool;
+  auto GetNumChildren() const -> int;
+  auto GetNumOutputs() const -> int;
+  auto GetChildIndex(const TreeNodeEx *child) const -> int;
 };
 
 struct CalculatorInput {

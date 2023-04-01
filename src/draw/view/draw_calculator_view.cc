@@ -113,7 +113,7 @@ auto MakeDiagrams(core::Project& project,
                   int trees_per_diagram) {
   auto diagrams = std::vector<core::Diagram>{};
 
-  const auto num_trees = static_cast<int>(roots.size());
+  const auto num_trees = std::min(static_cast<int>(roots.size()), 100);
 
   auto num_diagrams = num_trees / trees_per_diagram;
 
@@ -210,6 +210,10 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
   }
 
   const auto calculate_pressed = ImGui::Button("Calculate");
+  static auto SPLIT_BY = 30;
+
+  ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
+  ImGui::InputInt("Split by", &SPLIT_BY);
 
   // NOLINTBEGIN(*-signed-bitwise)
   const auto table_flags =
@@ -231,16 +235,16 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
           continue;
         }
 
-        if (!family->CreateUiTraits()->GetLabel().starts_with("Splitter")) {
+        const auto label = family->CreateUiTraits()->GetLabel();
+
+        if (!label.starts_with("Splitter")) {
           continue;
         }
 
-        // if (!family->CreateUiTraits()->GetLabel().starts_with("Splitter 1x2")
-        // ||
-        //     !family->CreateUiTraits()->GetLabel().starts_with("Splitter
-        //     1x4")) {
-        //   continue;
-        // }
+        if (!label.starts_with("Splitter 1x2") &&
+            !label.starts_with("Splitter 1x4")) {
+          continue;
+        }
 
         const auto sample_node = family->CreateSampleNode();
 
@@ -312,6 +316,6 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
 
   std::cout << "Calculated: " << result.size() << " trees\n";
 
-  callbacks.calculated_diagrams(MakeDiagrams(project, result, 20));
+  callbacks.calculated_diagrams(MakeDiagrams(project, result, SPLIT_BY));
 }
 }  // namespace vh::ponc::draw
