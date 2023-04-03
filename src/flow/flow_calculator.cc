@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <istream>
 #include <iterator>
 #include <limits>
 #include <set>
@@ -102,32 +103,70 @@ auto I = 0;
 auto DEPTH = 0;
 auto MIN_COST = 0.F;
 
-void IterateThroughOutputs(const std::vector<FamilyFlow> &family_flows,
-                           std::vector<TreeNodeEx> &out_trees,
-                           const TreeNodeEx &root, TreeNodeEx &node);
+auto Cout() -> std::ostream & {
+  struct S : public std::ostream {};
+  static auto s = S{};
+  return std::cout;
+  return s;
+}
+
+auto Print(const TreeNodeEx &tree) {
+  auto depth = 0;
+
+  TraverseDepthFirstExConst(
+      tree,
+      [&depth](const auto &node) {
+        Cout() << "[" << depth << "] ";
+        ++depth;
+        for (auto i = 0; i < node.GetNumOutputs(); ++i) {
+          if (node.child_nodes.contains(i)) {
+            Cout() << node.child_nodes.at(i).family_id.Get();
+          } else {
+            Cout() << 0;
+          }
+        }
+        
+        Cout() << " ";
+      },
+      [&depth](const auto &) { --depth; });
+  Cout() << "\n";
+}
 
 void IterateThroughFamilies(const std::vector<FamilyFlow> &family_flows,
                             std::vector<TreeNodeEx> &out_trees,
                             const TreeNodeEx &root, TreeNodeEx &node,
                             int output_index) {
+  if (DEPTH >= 2) {
+    return;
+  }
+
   if (output_index >= node.GetNumOutputs()) {
-    std::cout << I++ << ": ";
+    if (!node.child_nodes.empty()) {
+      ++DEPTH;
 
-    ++DEPTH;
-    for (auto i = 0; i < node.GetNumOutputs(); ++i) {
-      if (node.child_nodes.contains(i)) {
-        std::cout << node.child_nodes.at(i).family_id.Get();
-        IterateThroughOutputs(family_flows, out_trees, root,
-                              node.child_nodes.at(i));
-      } else {
-        std::cout << 0;
+      // if (DEPTH ==2){
+      Cout() << I++ << ": ";
+      Print(root);
+      out_trees.emplace_back(root);
+      // }
+      // if (DEPTH >= 3) {
+      //   return;
+      // }
+
+      for (auto i = 0; i < node.GetNumOutputs(); ++i) {
+        if (node.child_nodes.contains(i)) {
+          IterateThroughFamilies(family_flows, out_trees, root,
+                                 node.child_nodes.at(i), 0);
+        }
       }
+
+      // if (!out_trees.empty() && (root == out_trees.back())) {
+      //   Cout() << "VVVV\n";
+      //   return;
+      // }
+
+      --DEPTH;
     }
-    --DEPTH;
-
-    std::cout << " o: " << output_index << "\n";
-    out_trees.emplace_back(root);
-
     return;
   }
 
@@ -163,29 +202,27 @@ void IterateThroughFamilies(const std::vector<FamilyFlow> &family_flows,
   }
 }
 
-void IterateThroughOutputs(const std::vector<FamilyFlow> &family_flows,
-                           std::vector<TreeNodeEx> &out_trees,
-                           const TreeNodeEx &root, TreeNodeEx &node) {
-  if (DEPTH >= 1) {
-    return;
+void CheckUniqueness(const std::vector<TreeNodeEx> &out_trees) {
+  auto num_bad = 0;
+
+  for (auto i = 0; i < out_trees.size(); ++i) {
+    const auto &tree_i = out_trees[i];
+
+    for (auto j = i; j < out_trees.size(); ++j) {
+      if (j == i) {
+        continue;
+      }
+
+      if (out_trees[j] == tree_i) {
+        Cout() << "EQUAL BAD " << i << " " << j << "\n";
+        ++num_bad;
+      }
+    }
   }
 
-  // if (out_trees.size() >= 10) {
-  //   return;
-  // }
-
-  // const auto cost = root.CalculateCost();
-
-  // if (cost >= MIN_COST) {
-  //   return;
-  // }
-
-  // if (node.AreOutputsLessThan(-28)) {
-  //   MIN_COST = std::min(cost, MIN_COST);
-  //   return;
-  // }
-
-  IterateThroughFamilies(family_flows, out_trees, root, node, 0);
+  if (num_bad > 0) {
+    std::cout << "NUM BAD: " << num_bad << "\n";
+  }
 }
 
 auto CalculateAllTrees(const std::vector<FamilyFlow> &family_flows,
@@ -199,9 +236,13 @@ auto CalculateAllTrees(const std::vector<FamilyFlow> &family_flows,
 
   for (const auto &family : family_flows) {
     auto root = TreeNodeEx{family};
-    IterateThroughOutputs(family_flows, out_trees, root, root);
+    Cout() << I++ << ": ";
+    Print(root);
+    out_trees.emplace_back(root);
+    IterateThroughFamilies(family_flows, out_trees, root, root, 0);
   }
 
+  CheckUniqueness(out_trees);
   return out_trees;
 }
 }  // namespace

@@ -34,6 +34,11 @@ struct TreeNodeEx {
   auto GetNumOutputs() const -> int;
   auto GetChildIndex(const TreeNodeEx *child) const -> int;
   auto CalculateCost() const -> float;
+
+ private:
+  ///
+  friend auto operator==(const TreeNodeEx &, const TreeNodeEx &)
+      -> bool = default;
 };
 
 struct CalculatorInput {
