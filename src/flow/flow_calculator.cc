@@ -125,7 +125,7 @@ auto Print(const TreeNodeEx &tree) {
             Cout() << 0;
           }
         }
-        
+
         Cout() << " ";
       },
       [&depth](const auto &) { --depth; });
@@ -245,6 +245,147 @@ auto CalculateAllTrees(const std::vector<FamilyFlow> &family_flows,
   CheckUniqueness(out_trees);
   return out_trees;
 }
+
+void NewAlgStep(const std::vector<FamilyFlow> &family_flows,
+                std::vector<TreeNodeEx> &out_trees, const TreeNodeEx &root,
+                std::vector<TreeNodeEx *> &level_children);
+
+auto GetNodeIndex(const std::vector<TreeNodeEx *> &current_level, int index)
+    -> std::pair<TreeNodeEx *, int> {
+  auto start_index = 0;
+
+  for (auto *node : current_level) {
+    const auto num_outputs = node->GetNumOutputs();
+    const auto index_in_node = (index - start_index);
+
+    if (index_in_node < num_outputs) {
+      return std::pair{node, index_in_node};
+    }
+
+    start_index += num_outputs;
+  }
+
+  Expects(false);
+}
+
+auto Contains(const std::vector<TreeNodeEx *> &current_level, int index) {
+  const auto &[node, child_index] = GetNodeIndex(current_level, index);
+  return node->child_nodes.contains(child_index);
+}
+
+auto At(const std::vector<TreeNodeEx *> &current_level, int index) -> auto & {
+  const auto &[node, child_index] = GetNodeIndex(current_level, index);
+  return node->child_nodes.at(child_index);
+}
+
+void Erase(const std::vector<TreeNodeEx *> &current_level, int index) {
+  const auto &[node, child_index] = GetNodeIndex(current_level, index);
+  node->child_nodes.erase(child_index);
+}
+
+auto EmplaceChild(const std::vector<TreeNodeEx *> &current_level, int index,
+                  TreeNodeEx new_node) -> auto & {
+  const auto &[node, child_index] = GetNodeIndex(current_level, index);
+  return node->EmplaceChild(child_index, std::move(new_node));
+}
+
+auto CreateNextTransposition(const std::vector<FamilyFlow> &family_flows,
+                             std::vector<TreeNodeEx> &out_trees,
+                             const TreeNodeEx &root,
+                             const std::vector<TreeNodeEx *> &current_level,
+                             int output_index) -> bool {
+  if (DEPTH >= 2) {
+    return false;
+  }
+
+  auto num_outputs = 0;
+
+  for (auto *node : current_level) {
+    num_outputs += node->GetNumOutputs();
+  }
+
+  if (output_index >= num_outputs) {
+    ++DEPTH;
+    auto next_level = std::vector<TreeNodeEx *>{};
+
+    for (auto *child : current_level) {
+      for (auto &childs_child : child->child_nodes) {
+        next_level.emplace_back(&childs_child.second);
+      }
+    }
+
+    // here we must create a unique combination then go deep into it
+    // then create another unique combination
+
+    auto result =
+        CreateNextTransposition(family_flows, out_trees, root, next_level, 0);
+    --DEPTH;
+
+    if (!result) {
+    Cout() << I++ << ": ";
+    Print(root);
+    out_trees.emplace_back(root);
+    return true;
+    }
+
+return false;
+    return result;
+  }
+
+  const auto num_families = static_cast<int>(family_flows.size());
+
+  auto prev_child_family_index = 0;
+
+  if (output_index > 0) {
+    const auto prev_output_index = output_index - 1;
+
+    if (Contains(current_level, prev_output_index)) {
+      prev_child_family_index =
+          GetFamilyIndex(At(current_level, output_index - 1).family_id,
+                         family_flows) +
+          1;
+    }
+  }
+
+  auto result = false;
+
+  for (auto i = prev_child_family_index; i < num_families + 1; ++i) {
+    if (i == 0) {
+      Erase(current_level, output_index);
+    } else {
+      EmplaceChild(current_level, output_index,
+                   TreeNodeEx{family_flows[i - 1]});
+    }
+
+    for (auto i = output_index + 1; i < num_outputs; ++i) {
+      Erase(current_level, i);
+    }
+
+    result = CreateNextTransposition(family_flows, out_trees, root,
+                                     current_level, output_index + 1) ||
+             result;
+  }
+
+  return result;
+}
+
+auto NewAlg(const std::vector<FamilyFlow> &family_flows,
+            const std::vector<InputRange> &output_ranges) {
+  I = 0;
+  DEPTH = 0;
+  MIN_COST = std::numeric_limits<float>::max();
+
+  auto out_trees = std::vector<TreeNodeEx>{};
+
+  for (const auto &family : family_flows) {
+    auto root = TreeNodeEx{family};
+    CreateNextTransposition(family_flows, out_trees, root, std::vector{&root},
+                            0);
+  }
+
+  CheckUniqueness(out_trees);
+  return out_trees;
+}
 }  // namespace
 
 TreeNodeEx::TreeNodeEx(const FamilyFlow &family_flow)
@@ -342,6 +483,7 @@ auto TreeNodeEx::AreOutputsLessThan(float value) const -> bool {
 }
 
 auto Calculate(const CalculatorInput &input) -> std::vector<TreeNodeEx> {
-  return CalculateAllTrees(input.family_flows, input.input_ranges);
+  // return CalculateAllTrees(input.family_flows, input.input_ranges);
+  return NewAlg(input.family_flows, input.input_ranges);
 }
 }  // namespace vh::ponc::flow
