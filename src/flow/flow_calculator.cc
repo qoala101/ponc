@@ -93,26 +93,28 @@ auto Cout() -> std::ostream & {
   return s;
 }
 
-auto Print(const TreeNodeEx &tree) {
+auto ToString(const TreeNodeEx &tree) {
+  auto text = std::string{};
   auto depth = 0;
 
   TraverseDepthFirstExConst(
       tree,
-      [&depth](const auto &node) {
-        Cout() << "[" << depth << "] ";
+      [&text, &depth](const auto &node) {
+        text += "[" + std::to_string(depth) + "] ";
         ++depth;
         for (auto i = 0; i < node.GetNumOutputs(); ++i) {
           if (node.child_nodes.contains(i)) {
-            Cout() << node.child_nodes.at(i).family_id.Get();
+            text += std::to_string(node.child_nodes.at(i).family_id.Get());
           } else {
-            Cout() << 0;
+            text += "0";
           }
         }
 
-        Cout() << " ";
+        text += " ";
       },
       [&depth](const auto &) { --depth; });
-  Cout() << "\n";
+
+  return text;
 }
 
 void CheckUniqueness(const std::vector<TreeNodeEx> &out_trees) {
@@ -188,28 +190,46 @@ auto MakeGroups(const std::vector<TreeNodeEx *> &current_level) {
   return groups;
 }
 
-auto CreateNextTransposition(
+auto GetNextLevelNodes(
+    const std::map<float, std::vector<std::pair<TreeNodeEx *, int>>>
+        &current_level) {
+  auto next_level_nodes = std::vector<TreeNodeEx *>{};
+
+  for (const auto &group : current_level) {
+    for (const auto &[node, index] : group.second) {
+      if (node->child_nodes.contains(index)) {
+        next_level_nodes.emplace_back(&node->child_nodes.at(index));
+      }
+    }
+  }
+
+  return next_level_nodes;
+}
+
+void CreateNextTransposition(
     const std::vector<FamilyFlow> &family_flows,
     std::vector<TreeNodeEx> &out_trees, const TreeNodeEx &root,
     //  const std::vector<TreeNodeEx *> &current_level,
     const std::map<float, std::vector<std::pair<TreeNodeEx *, int>>>
         &current_level,
-    int output_index, int group_index) -> bool {
-  if (DEPTH >= 1) {
-    return false;
+    int output_index, int group_index) {
+  if (DEPTH >= 3) {
+    return;
   }
 
+  const auto num_groups = static_cast<int>(current_level.size());
   const auto num_outputs_in_group =
-      group_index < current_level.size()
-          ? std::next(current_level.begin(), group_index)->second.size()
+      group_index < num_groups
+          ? static_cast<int>(
+                std::next(current_level.begin(), group_index)->second.size())
           : 0;
 
   if (output_index >= num_outputs_in_group) {
-    if (group_index >= current_level.size()) {
+    if (group_index >= num_groups) {
       auto empty_transposition = true;
 
-      for (auto &group : current_level) {
-        for (auto &[node, index] : group.second) {
+      for (const auto &group : current_level) {
+        for (const auto &[node, index] : group.second) {
           if (node->child_nodes.contains(index)) {
             empty_transposition = false;
             break;
@@ -221,49 +241,24 @@ auto CreateNextTransposition(
         }
       }
 
-      for (auto &group : current_level) {
-        for (auto &[node, index] : group.second) {
-          if (node->child_nodes.contains(index)) {
-            node->child_nodes.at(index).child_nodes.clear();
-          }
-        }
-      }
+      const auto next_level_nodes = GetNextLevelNodes(current_level);
 
       if (!empty_transposition) {
-        Cout() << I++ << ": ";
-        Print(root);
+        for (auto *node : next_level_nodes) {
+          node->child_nodes.clear();
+        }
+
+        Cout() << I++ << ": " << ToString(root) << "\n";
         out_trees.emplace_back(root);
       }
 
       ++DEPTH;
-      Cout() << "go deper\n";
-      auto next_level_nodes = std::vector<TreeNodeEx *>{};
-
-      for (auto &group : current_level) {
-        for (auto &node : group.second) {
-          if (node.first->child_nodes.contains(node.second)) {
-            next_level_nodes.emplace_back(
-                &node.first->child_nodes.at(node.second));
-          }
-        }
-      }
-
       const auto next_level = MakeGroups(next_level_nodes);
 
-      auto result = CreateNextTransposition(family_flows, out_trees, root,
-                                            next_level, 0, 0);
+      CreateNextTransposition(family_flows, out_trees, root, next_level, 0, 0);
       --DEPTH;
-      return false;
+      return;
     }
-
-    // auto current_group_pair = std::next(current_level.begin(), group_index);
-
-    // for (auto next_group = std::next(current_group_pair);
-    //      next_group != current_level.end(); ++next_group) {
-    //   for (auto &[node, index] : next_group->second) {
-    //     node->child_nodes.clear();
-    //   }
-    // }
 
     return CreateNextTransposition(family_flows, out_trees, root, current_level,
                                    0, group_index + 1);
@@ -271,7 +266,7 @@ auto CreateNextTransposition(
 
   const auto num_families = static_cast<int>(family_flows.size());
   auto current_group_pair = std::next(current_level.begin(), group_index);
-  auto &current_group = current_group_pair->second;
+  const auto &current_group = current_group_pair->second;
 
   auto prev_child_family_index = 0;
 
@@ -286,41 +281,26 @@ auto CreateNextTransposition(
     }
   }
 
-  auto result = false;
-
   for (auto family_i = prev_child_family_index; family_i < num_families + 1;
        ++family_i) {
     if (family_i == 0) {
       Erase(current_group, output_index);
     } else {
-      if (I == 140) {
-        int a = 3;
-      }
       EmplaceChild(current_group, output_index,
                    TreeNodeEx{family_flows[family_i - 1]});
     }
-
-    // for (auto ouput_i = 0; ouput_i < output_index; ++ouput_i) {
-    //   if (Contains(current_group, ouput_i)) {
-    //     At(current_group, ouput_i).child_nodes.clear();
-    //   }
-    // }
 
     for (auto output_i = output_index + 1; output_i < num_outputs_in_group;
          ++output_i) {
       Erase(current_group, output_i);
     }
 
-    result =
-        CreateNextTransposition(family_flows, out_trees, root, current_level,
-                                output_index + 1, group_index) ||
-        result;
+    CreateNextTransposition(family_flows, out_trees, root, current_level,
+                            output_index + 1, group_index);
   }
-
-  return result;
 }
 
-auto NewAlg(const std::vector<FamilyFlow> &family_flows,
+auto NewAlg(TreeNodeEx root, const std::vector<FamilyFlow> &family_flows,
             const std::vector<InputRange> &output_ranges) {
   I = 0;
   DEPTH = 0;
@@ -328,15 +308,8 @@ auto NewAlg(const std::vector<FamilyFlow> &family_flows,
 
   auto out_trees = std::vector<TreeNodeEx>{};
 
-  for (const auto &family : family_flows) {
-    auto root = TreeNodeEx{family};
-    Cout() << I++ << ": ";
-    Print(root);
-    out_trees.emplace_back(root);
-    CreateNextTransposition(family_flows, out_trees, root, MakeGroups({&root}),
-                            0, 0);
-  }
-
+  CreateNextTransposition(family_flows, out_trees, root, MakeGroups({&root}), 0,
+                          0);
   CheckUniqueness(out_trees);
   return out_trees;
 }
@@ -437,7 +410,6 @@ auto TreeNodeEx::AreOutputsLessThan(float value) const -> bool {
 }
 
 auto Calculate(const CalculatorInput &input) -> std::vector<TreeNodeEx> {
-  // return CalculateAllTrees(input.family_flows, input.input_ranges);
-  return NewAlg(input.family_flows, input.input_ranges);
+  return NewAlg(input.root, input.family_flows, input.input_ranges);
 }
 }  // namespace vh::ponc::flow
