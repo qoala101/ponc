@@ -53,19 +53,21 @@ auto InRange(float value, const InputRange &range) {
   return (value >= range.min) && (value <= range.max);
 }
 
-struct Pin {
-  const TreeNodeEx *tree_node{};
-  int index{};
-
- private:
-  friend auto operator==(const Pin &, const Pin &) -> bool = default;
-};
-
 auto GetMinOutput(const std::vector<InputRange> &output_ranges) {
   auto min_output = std::numeric_limits<float>::max();
 
   for (const auto &range : output_ranges) {
     min_output = std::min(range.min, min_output);
+  }
+
+  return min_output;
+}
+
+auto GetMinDecrement(const std::vector<FamilyFlow> &family_flows) {
+  auto min_output = std::numeric_limits<float>::lowest();
+
+  for (const auto &family : family_flows) {
+    min_output = std::max(family.GetMinDecrementOutput(), min_output);
   }
 
   return min_output;
@@ -87,6 +89,11 @@ struct RunData {
   int DEPTH = 0;
   float MIN_COST = std::numeric_limits<float>::max();
   int NUM_CHECKED = 0;
+  std::vector<InputRange> sorted_output_ranges{};
+  std::vector<TreeNodeEx> out_trees{};
+  float min_output{};
+  float min_decrement{};
+  TreeNodeEx client{};
 };
 
 auto RUN = RunData{};
@@ -94,7 +101,7 @@ auto RUN = RunData{};
 auto Cout() -> std::ostream & {
   struct S : public std::ostream {};
   static auto s = S{};
-  return std::cout;
+  // return std::cout;
   return s;
 }
 
@@ -181,27 +188,36 @@ auto EmplaceChild(
   return node->EmplaceChild(child_index, std::move(new_node));
 }
 
-auto MakeGroups(const std::vector<TreeNodeEx *> &current_level) {
-  auto groups = std::map<float, std::vector<std::pair<TreeNodeEx *, int>>>{};
+struct Group {
+  std::vector<FamilyFlow> valid_families{};
+  std::vector<std::pair<TreeNodeEx *, int>> nodes{};
+};
 
-  for (auto *node : current_level) {
+auto MakeGroups(const std::vector<TreeNodeEx *> &level_nodes,
+                const std::vector<FamilyFlow> &family_flows) {
+  auto groups = std::map<float, Group>{};
+
+  for (auto *node : level_nodes) {
     auto index = 0;
 
     for (const auto output : node->outputs) {
-      groups[output].emplace_back(node, index++);
+      auto &group = groups[output];
+      group.nodes.emplace_back(node, index++);
     }
+  }
+
+  for (auto &[output, group] : groups) {
+    group.valid_families = family_flows;
   }
 
   return groups;
 }
 
-auto GetNextLevelNodes(
-    const std::map<float, std::vector<std::pair<TreeNodeEx *, int>>>
-        &current_level) {
+auto GetNextLevelNodes(const std::map<float, Group> &current_level) {
   auto next_level_nodes = std::vector<TreeNodeEx *>{};
 
   for (const auto &group : current_level) {
-    for (const auto &[node, index] : group.second) {
+    for (const auto &[node, index] : group.second.nodes) {
       if (node->child_nodes.contains(index)) {
         next_level_nodes.emplace_back(&node->child_nodes.at(index));
       }
@@ -211,11 +227,9 @@ auto GetNextLevelNodes(
   return next_level_nodes;
 }
 
-auto IsLevelEmpty(
-    const std::map<float, std::vector<std::pair<TreeNodeEx *, int>>>
-        &current_level_groups) {
+auto IsLevelEmpty(const std::map<float, Group> &current_level_groups) {
   for (const auto &group : current_level_groups) {
-    for (const auto &[node, index] : group.second) {
+    for (const auto &[node, index] : group.second.nodes) {
       if (!node->child_nodes.empty()) {
         return false;
       }
@@ -225,18 +239,106 @@ auto IsLevelEmpty(
   return true;
 }
 
-void CreateNextTransposition(
-    const std::vector<FamilyFlow> &family_flows,
-    std::vector<TreeNodeEx> &out_trees, const TreeNodeEx &root,
-    const std::map<float, std::vector<std::pair<TreeNodeEx *, int>>>
-        &current_level_groups,
-    int output_index, int group_index) {
+struct Ouput {
+  float value{};
+  TreeNodeEx *tree_node{};
+  int index{};
+};
+
+auto FindAndAddOutputs(TreeNodeEx &root) -> bool {
+  auto sorted_free_outputs = std::vector<Ouput>{};
+
+  TraverseDepthFirstEx(
+      root,
+      [&sorted_free_outputs](auto &tree_node) {
+        auto index = 0;
+
+        for (const auto output : tree_node.outputs) {
+          if (tree_node.child_nodes.contains(index)) {
+            continue;
+          }
+
+          sorted_free_outputs.emplace_back(
+              Ouput{.value = output, .tree_node = &tree_node, .index = index});
+        }
+      },
+      [](const auto &) {});
+
+  std::sort(sorted_free_outputs.begin(), sorted_free_outputs.end(),
+            [](const auto &left, const auto &right) {
+              return left.value < right.value;
+            });
+
+  // VH: Here must be algorithm which would find a combination
+  // of pins which match all required inputs. Currently I assume
+  // that all ranges are the same so its enough to have the
+  // amount of unique pins same as amount of ranges.
+  const auto &FIRST_RANGE = RUN.sorted_output_ranges.front();
+  const auto num_ranges = static_cast<int>(RUN.sorted_output_ranges.size());
+
+  auto num_matches = 0;
+
+  for (auto &output : sorted_free_outputs) {
+    if (InRange(output.value, FIRST_RANGE)) {
+      output.tree_node->EmplaceChild(output.index, RUN.client);
+      ++num_matches;
+
+      if (num_matches >= num_ranges) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+void RecordTreeAndChooseGroupsToProceedDeeper(
+    const TreeNodeEx &root, std::map<float, Group> &next_level_groups) {
+  ++RUN.NUM_CHECKED;
+
+  // Cout() << RUN.I++ << ": " << ToString(root) << "\n";
+  // RUN.out_trees.emplace_back(root);
+
+  // if (RUN.DEPTH > 1) {
+  //   // next_level_groups.clear();
+
+  //   for (auto &[ouput, group] : next_level_groups) {
+  //     group.valid_families.clear();
+  //   }
+  // }
+
+  // return;
+
+  for (auto &[ouput, group] : next_level_groups) {
+    auto valid_families = std::vector<FamilyFlow>{};
+
+    for (auto &family : group.valid_families) {
+      if ((ouput + family.GetMinDecrementOutput()) >= RUN.min_output) {
+        valid_families.emplace_back(std::move(family));
+      }
+    }
+
+    group.valid_families = std::move(valid_families);
+  }
+
+  auto root_copy = root;
+
+  if (FindAndAddOutputs(root_copy)) {
+    Cout() << RUN.I++ << ": " << ToString(root_copy) << "\n";
+    RUN.out_trees.emplace_back(root_copy);
+  }
+}
+
+void CreateNextTransposition(const std::vector<FamilyFlow> &family_flows,
+                             const TreeNodeEx &root,
+                             const std::map<float, Group> &current_level_groups,
+                             int output_index, int group_index) {
   const auto num_groups = static_cast<int>(current_level_groups.size());
   const auto num_outputs_in_group =
       group_index < num_groups
           ? static_cast<int>(
                 std::next(current_level_groups.begin(), group_index)
-                    ->second.size())
+                    ->second.nodes.size())
           : 0;
 
   if (output_index < num_outputs_in_group) {
@@ -248,83 +350,85 @@ void CreateNextTransposition(
     if (output_index > 0) {
       const auto prev_output_index = output_index - 1;
 
-      if (Contains(current_group, prev_output_index)) {
+      if (Contains(current_group.nodes, prev_output_index)) {
         prev_child_family_index =
-            GetFamilyIndex(At(current_group, output_index - 1).family_id,
-                           family_flows) +
+            GetFamilyIndex(At(current_group.nodes, output_index - 1).family_id,
+                           current_group.valid_families) +
             1;
       }
     }
 
-    const auto num_families = static_cast<int>(family_flows.size());
+    const auto num_families =
+        static_cast<int>(current_group.valid_families.size());
 
     for (auto family_i = prev_child_family_index; family_i < num_families + 1;
          ++family_i) {
       if (family_i == 0) {
-        Erase(current_group, output_index);
+        Erase(current_group.nodes, output_index);
       } else {
-        EmplaceChild(current_group, output_index,
-                     TreeNodeEx{family_flows[family_i - 1]});
+        EmplaceChild(current_group.nodes, output_index,
+                     TreeNodeEx{current_group.valid_families[family_i - 1]});
       }
 
       for (auto output_i = output_index + 1; output_i < num_outputs_in_group;
            ++output_i) {
-        Erase(current_group, output_i);
+        Erase(current_group.nodes, output_i);
       }
 
-      CreateNextTransposition(family_flows, out_trees, root,
-                              current_level_groups, output_index + 1,
-                              group_index);
+      CreateNextTransposition(family_flows, root, current_level_groups,
+                              output_index + 1, group_index);
     }
 
     return;
   }
 
   if (group_index < num_groups) {
-    return CreateNextTransposition(family_flows, out_trees, root,
-                                   current_level_groups, 0, group_index + 1);
+    return CreateNextTransposition(family_flows, root, current_level_groups, 0,
+                                   group_index + 1);
   }
 
   const auto first_empty_transposition = IsLevelEmpty(current_level_groups);
   const auto next_level_nodes = GetNextLevelNodes(current_level_groups);
+  auto next_level_groups = MakeGroups(next_level_nodes, family_flows);
 
   if (!first_empty_transposition) {
     for (auto *node : next_level_nodes) {
       node->child_nodes.clear();
     }
 
-    Cout() << RUN.I++ << ": " << ToString(root) << "\n";
-    out_trees.emplace_back(root);
-
-    ++RUN.NUM_CHECKED;
-
-    if (RUN.DEPTH >= 2) {
-      return;
-    }
+    RecordTreeAndChooseGroupsToProceedDeeper(root, next_level_groups);
   }
 
-  if (next_level_nodes.empty()) {
+  if (next_level_groups.empty()) {
     return;
   }
 
-  const auto next_level = MakeGroups(next_level_nodes);
-
   ++RUN.DEPTH;
-  CreateNextTransposition(family_flows, out_trees, root, next_level, 0, 0);
+  CreateNextTransposition(family_flows, root, next_level_groups, 0, 0);
   --RUN.DEPTH;
 }
 
-auto NewAlg(TreeNodeEx root, const std::vector<FamilyFlow> &family_flows,
+auto NewAlg(TreeNodeEx root, TreeNodeEx client,
+            const std::vector<FamilyFlow> &family_flows,
             const std::vector<InputRange> &output_ranges) {
   RUN = RunData{};
+  RUN.sorted_output_ranges = output_ranges;
+  RUN.out_trees = std::vector<TreeNodeEx>{};
+  RUN.min_output = GetMinOutput(output_ranges);
+  RUN.min_decrement = GetMinDecrement(family_flows);
+  RUN.client = client;
 
-  auto out_trees = std::vector<TreeNodeEx>{};
+  std::sort(
+      RUN.sorted_output_ranges.begin(), RUN.sorted_output_ranges.end(),
+      [](const auto &left, const auto &right) { return left.min < right.min; });
 
-  CreateNextTransposition(family_flows, out_trees, root, MakeGroups({&root}), 0,
-                          0);
-  CheckUniqueness(out_trees);
+  std::cout << "min_output: " << RUN.min_output << "\n";
+  std::cout << "min_step: " << RUN.min_decrement << "\n";
+  CreateNextTransposition(family_flows, root, MakeGroups({&root}, family_flows),
+                          0, 0);
+  CheckUniqueness(RUN.out_trees);
   Cout() << "NUM_CHECKED = " << RUN.NUM_CHECKED << "\n";
-  return out_trees;
+  return RUN.out_trees;
 }
 }  // namespace
 
@@ -359,56 +463,6 @@ auto TreeNodeEx::CalculateCost() const -> float {
   return cost;
 }
 
-auto TreeNodeEx::HasOutputs(const std::vector<InputRange> &output_ranges) const
-    -> bool {
-  auto matching_pins = std::map<const InputRange *, std::vector<Pin>>{};
-
-  TraverseDepthFirstExConst(
-      *this,
-      [&output_ranges, &matching_pins](auto &tree_node) {
-        auto index = 0;
-
-        for (const auto output : tree_node.outputs) {
-          const auto index_scope = cpp::Scope{[&index]() { ++index; }};
-
-          if (tree_node.child_nodes.contains(index)) {
-            continue;
-          }
-
-          for (const auto &range : output_ranges) {
-            if (InRange(output, range)) {
-              matching_pins[&range].emplace_back(
-                  Pin{.tree_node = &tree_node, .index = index});
-            }
-          }
-        }
-      },
-      [](const auto &) {});
-
-  if (matching_pins.size() < output_ranges.size()) {
-    return false;
-  }
-
-  // VH: Here must be algorithm which would find a combination
-  // of pins which match all required inputs. Currently I assume
-  // that all ranges are the same so its enough to have the
-  // amount of unique pins same as amount of ranges.
-
-  auto unique_pins = std::vector<Pin>{};
-
-  for (const auto &[range, pins_in_range] : matching_pins) {
-    for (const auto &pin : pins_in_range) {
-      if (std::none_of(
-              unique_pins.begin(), unique_pins.end(),
-              [&pin](const auto &taken_pin) { return taken_pin == pin; })) {
-        unique_pins.emplace_back(pin);
-      }
-    }
-  }
-
-  return unique_pins.size() >= output_ranges.size();
-}
-
 auto TreeNodeEx::EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx & {
   for (auto &output : child.outputs) {
     output += outputs[index];
@@ -422,7 +476,19 @@ auto TreeNodeEx::AreOutputsLessThan(float value) const -> bool {
                      [value](const auto output) { return output < value; });
 }
 
+auto FamilyFlow::GetMinDecrementOutput() const -> float {
+  auto min_output = std::numeric_limits<float>::lowest();
+
+  for (const auto output : outputs) {
+    Expects(output < 0);
+    min_output = std::max(output, min_output);
+  }
+
+  return min_output;
+}
+
 auto Calculate(const CalculatorInput &input) -> std::vector<TreeNodeEx> {
-  return NewAlg(input.root, input.family_flows, input.input_ranges);
+  return NewAlg(input.root, input.client, input.family_flows,
+                input.input_ranges);
 }
 }  // namespace vh::ponc::flow
