@@ -201,8 +201,8 @@ auto MakeGroups(const std::vector<TreeNodeEx *> &level_nodes,
     auto index = 0;
 
     for (const auto output : node->outputs) {
-      auto &group = groups[output];
-      group.nodes.emplace_back(node, index++);
+      groups[output].nodes.emplace_back(node, index);
+      ++index;
     }
   }
 
@@ -254,12 +254,12 @@ auto FindAndAddOutputs(TreeNodeEx &root) -> bool {
         auto index = 0;
 
         for (const auto output : tree_node.outputs) {
-          if (tree_node.child_nodes.contains(index)) {
-            continue;
+          if (!tree_node.child_nodes.contains(index)) {
+            sorted_free_outputs.emplace_back(Ouput{
+                .value = output, .tree_node = &tree_node, .index = index});
           }
 
-          sorted_free_outputs.emplace_back(
-              Ouput{.value = output, .tree_node = &tree_node, .index = index});
+          ++index;
         }
       },
       [](const auto &) {});
@@ -313,7 +313,10 @@ void RecordTreeAndChooseGroupsToProceedDeeper(
     auto valid_families = std::vector<FamilyFlow>{};
 
     for (auto &family : group.valid_families) {
-      if ((ouput + family.GetMinDecrementOutput()) >= RUN.min_output) {
+      const auto output_would_be_ok =
+          (ouput + family.GetMinDecrementOutput()) >= RUN.min_output;
+
+      if (output_would_be_ok) {
         valid_families.emplace_back(std::move(family));
       }
     }
@@ -324,6 +327,15 @@ void RecordTreeAndChooseGroupsToProceedDeeper(
   auto root_copy = root;
 
   if (FindAndAddOutputs(root_copy)) {
+    // const auto cost = root.CalculateCost();
+
+    // if (cost > RUN.MIN_COST) {
+    //   next_level_groups.clear();
+    //   return;
+    // }
+
+    // RUN.MIN_COST = std::min(cost, RUN.MIN_COST);
+
     Cout() << RUN.I++ << ": " << ToString(root_copy) << "\n";
     RUN.out_trees.emplace_back(root_copy);
   }

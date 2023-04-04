@@ -26,7 +26,7 @@ class CalculatorView : public IView {
   void Draw(core::Project &project, const Callbacks &callbacks);
 
  private:
-  int num_inputs_{};
+  int num_inputs_{3};
   std::vector<flow::FamilyFlow> family_flows_{};
   std::vector<flow::InputRange> required_inputs_{};
 };

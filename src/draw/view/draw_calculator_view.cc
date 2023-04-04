@@ -20,6 +20,7 @@
 #include "coreui_flow_tree.h"
 #include "coreui_i_family_traits.h"
 #include "cpp_assert.h"
+#include "cpp_scope.h"
 #include "draw_id_label.h"
 #include "draw_tree_node.h"
 #include "flow_algorithms.h"
@@ -113,7 +114,7 @@ auto MakeDiagrams(core::Project& project,
                   int trees_per_diagram) {
   auto diagrams = std::vector<core::Diagram>{};
 
-  const auto num_trees = std::min(static_cast<int>(roots.size()), 100);
+  const auto num_trees = std::min(static_cast<int>(roots.size()), 1000);
 
   auto num_diagrams = num_trees / trees_per_diagram;
 
@@ -205,8 +206,10 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
 
   if (static_cast<int>(required_inputs_.size()) != num_inputs_) {
     const auto& settings = project.GetSettings();
-    required_inputs_.resize(num_inputs_, {.min = settings.low_flow - 6,
-                                          .max = settings.high_flow - 6});
+    required_inputs_.resize(
+        num_inputs_,
+        // {.min = settings.low_flow, .max = settings.high_flow}
+        {.min = -4, .max = 0});
   }
 
   const auto calculate_pressed = ImGui::Button("Calculate");
@@ -230,6 +233,13 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
 
       auto index = 0;
 
+      auto good_fams = std::vector{
+          "Splitter 1x2",
+          // "Splitter 1x4",
+          "Coupler 5%-95%",
+          // "Coupler 45%-55%",
+      };
+
       for (const auto& family : project.GetFamilies()) {
         if (const auto family_is_default = family->GetType().has_value()) {
           continue;
@@ -237,19 +247,16 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
 
         const auto label = family->CreateUiTraits()->GetLabel();
 
-        if (!label.starts_with("Splitter")) {
-          continue;
-        }
-
-        if (!label.starts_with("Splitter 1x2") &&
-            !label.starts_with("Splitter 1x4")) {
+        if (std::none_of(good_fams.begin(), good_fams.end(),
+                         [label](const auto& fam) { return fam == label; })) {
           continue;
         }
 
         const auto sample_node = family->CreateSampleNode();
+        const auto& output_pin_ids = sample_node->GetOutputPinIds();
 
         if (!sample_node->GetInputPinId().has_value() ||
-            sample_node->GetOutputPinIds().empty()) {
+            output_pin_ids.empty()) {
           continue;
         }
 
@@ -257,9 +264,11 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
             sample_node->GetInitialFlow().output_pin_flows;
 
         auto outputs = std::vector<float>{};
-        std::transform(output_pin_flows.begin(), output_pin_flows.end(),
+        std::transform(output_pin_ids.begin(), output_pin_ids.end(),
                        std::back_inserter(outputs),
-                       [](const auto& pair) { return pair.second; });
+                       [&output_pin_flows](const auto pin_id) {
+                         return output_pin_flows.at(pin_id.Get());
+                       });
 
         const auto family_id = family->GetId().Get();
         auto& family_flow = (family_flows_.size() > index)
@@ -311,8 +320,13 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
     return;
   }
 
-  const auto result = flow::Calculate(
-      {.family_flows = family_flows_, .input_ranges = required_inputs_});
+  const auto result =
+      flow::Calculate({.root = flow::TreeNodeEx{flow::FamilyFlow{
+                           .family_id = 1, .outputs = {6.F}, .cost = 0}},
+                       .client = flow::TreeNodeEx{flow::FamilyFlow{
+                           .family_id = 2, .outputs = {0}, .cost = 0}},
+                       .family_flows = family_flows_,
+                       .input_ranges = required_inputs_});
 
   std::cout << "Calculated: " << result.size() << " trees\n";
 

@@ -17,6 +17,8 @@ struct FamilyFlow {
   core::FamilyId family_id{};
   std::vector<float> outputs{};
   float cost{};
+
+  auto GetMinDecrementOutput() const -> float;
 };
 
 struct TreeNodeEx {
@@ -29,7 +31,6 @@ struct TreeNodeEx {
   TreeNodeEx() = default;
   auto EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx &;
   auto AreOutputsLessThan(float value) const -> bool;
-  auto HasOutputs(const std::vector<InputRange> &output_ranges) const -> bool;
   auto GetNumChildren() const -> int;
   auto GetNumOutputs() const -> int;
   auto GetChildIndex(const TreeNodeEx *child) const -> int;
@@ -43,6 +44,7 @@ struct TreeNodeEx {
 
 struct CalculatorInput {
   TreeNodeEx root{};
+  TreeNodeEx client{};
   std::vector<FamilyFlow> family_flows{};
   std::vector<InputRange> input_ranges{};
 };
