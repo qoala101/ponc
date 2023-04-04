@@ -42,6 +42,7 @@ struct TreeNodeEx {
 };
 
 struct CalculatorInput {
+  TreeNodeEx root{};
   std::vector<FamilyFlow> family_flows{};
   std::vector<InputRange> input_ranges{};
 };
