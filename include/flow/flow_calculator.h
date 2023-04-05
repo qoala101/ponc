@@ -19,6 +19,7 @@ struct FamilyFlow {
   float cost{};
 
   auto GetMinDecrementOutput() const -> float;
+  auto GetMaxDecrementOutput() const -> float;
 };
 
 struct TreeNodeEx {

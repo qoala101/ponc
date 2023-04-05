@@ -207,9 +207,9 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
   if (static_cast<int>(required_inputs_.size()) != num_inputs_) {
     const auto& settings = project.GetSettings();
     required_inputs_.resize(
-        num_inputs_,
-        // {.min = settings.low_flow, .max = settings.high_flow}
-        {.min = -5, .max = -3});
+        num_inputs_, {.min = settings.low_flow, .max = settings.high_flow}
+        // {.min = -5, .max = -3}
+    );
   }
 
   const auto calculate_pressed = ImGui::Button("Calculate");
@@ -234,8 +234,8 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
       auto index = 0;
 
       auto good_fams = std::vector{
-          "Splitter 1x2",
-          "Splitter 1x4",
+          // "Splitter 1x2",
+          // "Splitter 1x4",
           "Coupler 5%-95%",
           "Coupler 45%-55%",
       };
@@ -249,14 +249,14 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
 
         if (std::none_of(good_fams.begin(), good_fams.end(),
                          [label](const auto& fam) { return fam == label; })) {
-          continue;
+          // continue;
         }
 
         const auto sample_node = family->CreateSampleNode();
         const auto& output_pin_ids = sample_node->GetOutputPinIds();
 
         if (!sample_node->GetInputPinId().has_value() ||
-            output_pin_ids.empty()) {
+            (output_pin_ids.size() < 2)) {
           continue;
         }
 

@@ -9,6 +9,7 @@
 #include <set>
 #include <stack>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "core_i_family.h"
@@ -121,9 +122,8 @@ struct RunData {
   std::vector<InputRange> sorted_output_ranges{};
   std::vector<TreeNodeEx> out_trees{};
   float min_output{};
-  float min_decrement{};
   TreeNodeEx client{};
-  MinCostTrees MIN_COST_TREES{10};
+  MinCostTrees MIN_COST_TREES{1};
 };
 
 auto RUN = RunData{};
@@ -131,7 +131,7 @@ auto RUN = RunData{};
 auto Cout() -> std::ostream & {
   struct S : public std::ostream {};
   static auto s = S{};
-  // return std::cout;
+  return std::cout;
   return s;
 }
 
@@ -225,7 +225,7 @@ struct Group {
 
 auto MakeGroups(const std::vector<TreeNodeEx *> &level_nodes,
                 const std::vector<FamilyFlow> &family_flows) {
-  auto groups = std::map<float, Group>{};
+  auto groups = std::map<float, Group, std::greater<>>{};
 
   for (auto *node : level_nodes) {
     auto index = 0;
@@ -243,7 +243,8 @@ auto MakeGroups(const std::vector<TreeNodeEx *> &level_nodes,
   return groups;
 }
 
-auto GetNextLevelNodes(const std::map<float, Group> &current_level) {
+auto GetNextLevelNodes(
+    const std::map<float, Group, std::greater<>> &current_level) {
   auto next_level_nodes = std::vector<TreeNodeEx *>{};
 
   for (const auto &group : current_level) {
@@ -257,7 +258,8 @@ auto GetNextLevelNodes(const std::map<float, Group> &current_level) {
   return next_level_nodes;
 }
 
-auto IsLevelEmpty(const std::map<float, Group> &current_level_groups) {
+auto IsLevelEmpty(
+    const std::map<float, Group, std::greater<>> &current_level_groups) {
   for (const auto &group : current_level_groups) {
     for (const auto &[node, index] : group.second.nodes) {
       if (!node->child_nodes.empty()) {
@@ -294,10 +296,10 @@ auto FindAndAddOutputs(TreeNodeEx &root) -> bool {
       },
       [](const auto &) {});
 
-  std::sort(sorted_free_outputs.begin(), sorted_free_outputs.end(),
-            [](const auto &left, const auto &right) {
-              return left.value < right.value;
-            });
+  std::stable_sort(sorted_free_outputs.begin(), sorted_free_outputs.end(),
+                   [](const auto &left, const auto &right) {
+                     return left.value < right.value;
+                   });
 
   // VH: Here must be algorithm which would find a combination
   // of pins which match all required inputs. Currently I assume
@@ -323,8 +325,16 @@ auto FindAndAddOutputs(TreeNodeEx &root) -> bool {
 }
 
 void RecordTreeAndChooseGroupsToProceedDeeper(
-    const TreeNodeEx &root, std::map<float, Group> &next_level_groups) {
+    const TreeNodeEx &root,
+    std::map<float, Group, std::greater<>> &next_level_groups) {
   ++RUN.NUM_CHECKED;
+
+  // if (RUN.DEPTH > 1 || RUN.out_trees.size() > 100) {
+  //   next_level_groups.clear();
+  // }
+  // Cout() << RUN.I++ << ": " << ToString(root) << "\n";
+  // RUN.out_trees.emplace_back(root);
+  // return;
 
   for (auto &[ouput, group] : next_level_groups) {
     auto valid_families = std::vector<FamilyFlow>{};
@@ -358,10 +368,17 @@ void RecordTreeAndChooseGroupsToProceedDeeper(
   }
 }
 
-void CreateNextTransposition(const std::vector<FamilyFlow> &family_flows,
-                             const TreeNodeEx &root,
-                             const std::map<float, Group> &current_level_groups,
-                             int output_index, int group_index) {
+void CreateNextTransposition(
+    const std::vector<FamilyFlow> &family_flows, const TreeNodeEx &root,
+    const std::map<float, Group, std::greater<>> &current_level_groups,
+    int output_index, int group_index) {
+  // if (RUN.NUM_CHECKED > 1000) {
+  //   return;
+  // }
+  // if (RUN.out_trees.size() > 182) {
+  //   return;
+  // }
+
   const auto num_groups = static_cast<int>(current_level_groups.size());
   const auto num_outputs_in_group =
       group_index < num_groups
@@ -444,17 +461,29 @@ auto NewAlg(TreeNodeEx root, TreeNodeEx client,
   RUN.sorted_output_ranges = output_ranges;
   RUN.out_trees = std::vector<TreeNodeEx>{};
   RUN.min_output = GetMinOutput(output_ranges);
-  RUN.min_decrement = GetMinDecrement(family_flows);
-  RUN.client = client;
+  RUN.client = std::move(client);
 
   std::sort(
       RUN.sorted_output_ranges.begin(), RUN.sorted_output_ranges.end(),
       [](const auto &left, const auto &right) { return left.min < right.min; });
 
+  auto sorted_family_flows = family_flows;
+  std::sort(sorted_family_flows.begin(), sorted_family_flows.end(),
+            [](const auto &left, const auto &right) {
+              return left.GetMaxDecrementOutput() <
+                     right.GetMaxDecrementOutput();
+            });
+
+  std::cout << "Sorted families: ";
+  for (const auto &family : sorted_family_flows) {
+    std::cout << family.family_id.Get() << "(" << family.GetMaxDecrementOutput()
+              << "), ";
+  }
+  std::cout << "\n";
+
   std::cout << "min_output: " << RUN.min_output << "\n";
-  std::cout << "min_step: " << RUN.min_decrement << "\n";
-  CreateNextTransposition(family_flows, root, MakeGroups({&root}, family_flows),
-                          0, 0);
+  CreateNextTransposition(sorted_family_flows, root,
+                          MakeGroups({&root}, sorted_family_flows), 0, 0);
   CheckUniqueness(RUN.out_trees);
   std::cout << "NUM_CHECKED = " << RUN.NUM_CHECKED << "\n";
 
@@ -463,6 +492,8 @@ auto NewAlg(TreeNodeEx root, TreeNodeEx client,
   for (const auto &[cost, index] : RUN.MIN_COST_TREES.trees_) {
     min_cost_trees.emplace_back(std::move(RUN.out_trees[index]));
   }
+
+  // min_cost_trees = RUN.out_trees;
 
   return min_cost_trees;
 }
@@ -521,6 +552,17 @@ auto FamilyFlow::GetMinDecrementOutput() const -> float {
   }
 
   return min_output;
+}
+
+auto FamilyFlow::GetMaxDecrementOutput() const -> float {
+  auto max_output = std::numeric_limits<float>::max();
+
+  for (const auto output : outputs) {
+    Expects(output < 0);
+    max_output = std::min(output, max_output);
+  }
+
+  return max_output;
 }
 
 auto Calculate(const CalculatorInput &input) -> std::vector<TreeNodeEx> {
