@@ -28,6 +28,8 @@ struct TreeNodeEx {
   float cost{};
   std::map<int, TreeNodeEx> child_nodes{};
 
+  float input{};
+
   explicit TreeNodeEx(const FamilyFlow &family_flow);
   TreeNodeEx() = default;
   auto EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx &;

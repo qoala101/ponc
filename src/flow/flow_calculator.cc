@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <iostream>
 #include <istream>
 #include <iterator>
@@ -123,7 +124,11 @@ struct RunData {
   std::vector<TreeNodeEx> out_trees{};
   float min_output{};
   TreeNodeEx client{};
-  MinCostTrees MIN_COST_TREES{1};
+  MinCostTrees MIN_COST_TREES{10};
+
+  std::set<float> unique_inputs{};
+  std::stack<float> UNIQUE_STACK{};
+  std::map<float, std::set<uintptr_t>> OUTPUT_TESTED_FAMILIES{};
 };
 
 auto RUN = RunData{};
@@ -131,7 +136,7 @@ auto RUN = RunData{};
 auto Cout() -> std::ostream & {
   struct S : public std::ostream {};
   static auto s = S{};
-  return std::cout;
+  // return std::cout;
   return s;
 }
 
@@ -493,9 +498,134 @@ auto NewAlg(TreeNodeEx root, TreeNodeEx client,
     min_cost_trees.emplace_back(std::move(RUN.out_trees[index]));
   }
 
-  // min_cost_trees = RUN.out_trees;
+  min_cost_trees = RUN.out_trees;
 
   return min_cost_trees;
+}
+
+void RememberAlgStep(const std::vector<FamilyFlow> &family_flows,
+                     const TreeNodeEx &root, TreeNodeEx &node,
+                     int output_index) {
+  const auto num_outputs = static_cast<int>(node.outputs.size());
+
+  if (output_index < num_outputs) {
+    // auto prev_child_family_index = 0;
+
+    // if (output_index > 0) {
+    //   const auto prev_output_index = output_index - 1;
+
+    //   if (node.child_nodes.contains(prev_output_index)) {
+    //     prev_child_family_index =
+    //         GetFamilyIndex(node.child_nodes.at(output_index - 1).family_id,
+    //                        family_flows) +
+    //         1;
+    //   }
+    // }
+
+    const auto output_value = node.outputs[output_index];
+
+    if (output_value < RUN.min_output) {
+      RememberAlgStep(family_flows, root, node, output_index + 1);
+      return;
+    }
+
+    if (RUN.unique_inputs.contains(output_value)) {
+      RememberAlgStep(family_flows, root, node, output_index + 1);
+      return;
+    }
+
+    RUN.unique_inputs.emplace(output_value);
+    RUN.UNIQUE_STACK.push(output_value);
+
+    const auto num_families = static_cast<int>(family_flows.size());
+
+    for (auto family_i = 0; family_i < num_families + 1; ++family_i) {
+      if (family_i == 0) {
+        node.child_nodes.erase(output_index);
+      } else {
+        node.EmplaceChild(output_index, TreeNodeEx{family_flows[family_i - 1]});
+
+        RUN.OUTPUT_TESTED_FAMILIES[output_value].emplace(
+            family_flows[family_i - 1].family_id.Get());
+      }
+
+      // for (auto output_i = output_index + 1; output_i < num_outputs;
+      //      ++output_i) {
+      //   node.child_nodes.erase(output_i);
+      // }
+
+      RememberAlgStep(family_flows, root, node, output_index + 1);
+    }
+
+    RUN.UNIQUE_STACK.pop();
+    return;
+  }
+
+  // if (!node.child_nodes.empty()) {
+  //   ++RUN.NUM_CHECKED;
+
+  //   // auto index = 0;
+
+  //   // for (const auto output : node.outputs) {
+  //   //   if (output <= RUN.min_output) {
+  //   //     if (node.child_nodes.contains(index)) {
+  //   //       node.child_nodes.erase(index);
+  //   //     }
+  //   //   }
+
+  //   //   ++index;
+  //   // }
+
+  //   // // if (next_level_children.empty()) {
+  //   Cout() << RUN.I++ << ": " << ToString(root) << "\n";
+  //   RUN.out_trees.emplace_back(root);
+  //   // RUN.unique_inputs.emplace(node.input);
+  //   // // }
+
+  //   if (RUN.DEPTH > 2) {
+  //     node.child_nodes.clear();
+  //   }
+  // }
+
+  Cout() << RUN.I++ << ": " << ToString(root) << "\n";
+  RUN.out_trees.emplace_back(root);
+
+  // if (RUN.DEPTH > 2) {
+  //   return;
+  // }
+
+  for (auto &child : node.child_nodes) {
+    ++RUN.DEPTH;
+    RememberAlgStep(family_flows, root, child.second, 0);
+    --RUN.DEPTH;
+  }
+}
+
+auto RememberAlg(TreeNodeEx root, TreeNodeEx client,
+                 const std::vector<FamilyFlow> &family_flows,
+                 const std::vector<InputRange> &output_ranges) {
+  RUN = RunData{};
+  RUN.sorted_output_ranges = output_ranges;
+  RUN.out_trees = std::vector<TreeNodeEx>{};
+  RUN.min_output = GetMinOutput(output_ranges);
+  RUN.client = std::move(client);
+
+  RememberAlgStep(family_flows, root, root, 0);
+  // CheckUniqueness(RUN.out_trees);
+
+  std::cout << "unique_inputs: ";
+  for (const auto input : RUN.unique_inputs) {
+    std::cout << input << ", ";
+  }
+  std::cout << "\n";
+
+  // std::cout << "OUTPUT_TESTED_FAMILIES: ";
+  // for (const auto &[output, set] : RUN.OUTPUT_TESTED_FAMILIES) {
+  //   std::cout << output << ": " << set.size() << ", ";
+  // }
+  // std::cout << "\n";
+
+  return RUN.out_trees;
 }
 }  // namespace
 
@@ -531,8 +661,10 @@ auto TreeNodeEx::CalculateCost() const -> float {
 }
 
 auto TreeNodeEx::EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx & {
+  child.input = outputs[index];
+
   for (auto &output : child.outputs) {
-    output += outputs[index];
+    output += child.input;
   }
 
   return child_nodes[index] = std::move(child);
@@ -566,7 +698,7 @@ auto FamilyFlow::GetMaxDecrementOutput() const -> float {
 }
 
 auto Calculate(const CalculatorInput &input) -> std::vector<TreeNodeEx> {
-  return NewAlg(input.root, input.client, input.family_flows,
-                input.input_ranges);
+  return RememberAlg(input.root, input.client, input.family_flows,
+                     input.input_ranges);
 }
 }  // namespace vh::ponc::flow
