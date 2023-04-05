@@ -84,16 +84,46 @@ auto GetFamilyIndex(core::FamilyId family_id,
   return static_cast<int>(std::distance(family_flows.begin(), family_flow));
 }
 
+class MinCostTrees {
+ public:
+  explicit MinCostTrees(int max_size) : max_size_{max_size} {}
+
+  auto GetMaxCost() const {
+    return trees_.empty() ? std::numeric_limits<float>::max()
+                          : trees_.back().first;
+  }
+
+  auto IsFull() const { return static_cast<int>(trees_.size()) >= max_size_; }
+
+  auto Emplace(float cost, int index) {
+    trees_.emplace_back(cost, index);
+
+    std::sort(trees_.begin(), trees_.end(),
+              [](const auto &left, const auto &right) {
+                return left.first < right.first;
+              });
+
+    if (static_cast<int>(trees_.size()) > max_size_) {
+      trees_.resize(max_size_);
+    }
+  }
+
+  std::vector<std::pair<float, int>> trees_{};
+
+ private:
+  int max_size_{};
+};
+
 struct RunData {
   int I = 0;
   int DEPTH = 0;
-  float MIN_COST = std::numeric_limits<float>::max();
   int NUM_CHECKED = 0;
   std::vector<InputRange> sorted_output_ranges{};
   std::vector<TreeNodeEx> out_trees{};
   float min_output{};
   float min_decrement{};
   TreeNodeEx client{};
+  MinCostTrees MIN_COST_TREES{10};
 };
 
 auto RUN = RunData{};
@@ -296,19 +326,6 @@ void RecordTreeAndChooseGroupsToProceedDeeper(
     const TreeNodeEx &root, std::map<float, Group> &next_level_groups) {
   ++RUN.NUM_CHECKED;
 
-  // Cout() << RUN.I++ << ": " << ToString(root) << "\n";
-  // RUN.out_trees.emplace_back(root);
-
-  // if (RUN.DEPTH > 1) {
-  //   // next_level_groups.clear();
-
-  //   for (auto &[ouput, group] : next_level_groups) {
-  //     group.valid_families.clear();
-  //   }
-  // }
-
-  // return;
-
   for (auto &[ouput, group] : next_level_groups) {
     auto valid_families = std::vector<FamilyFlow>{};
 
@@ -324,20 +341,20 @@ void RecordTreeAndChooseGroupsToProceedDeeper(
     group.valid_families = std::move(valid_families);
   }
 
+  const auto cost = root.CalculateCost();
+  const auto current_max_cost = RUN.MIN_COST_TREES.GetMaxCost();
+
+  if ((cost >= current_max_cost) && RUN.MIN_COST_TREES.IsFull()) {
+    next_level_groups.clear();
+    return;
+  }
+
   auto root_copy = root;
 
   if (FindAndAddOutputs(root_copy)) {
-    // const auto cost = root.CalculateCost();
-
-    // if (cost > RUN.MIN_COST) {
-    //   next_level_groups.clear();
-    //   return;
-    // }
-
-    // RUN.MIN_COST = std::min(cost, RUN.MIN_COST);
-
     Cout() << RUN.I++ << ": " << ToString(root_copy) << "\n";
-    RUN.out_trees.emplace_back(root_copy);
+    RUN.out_trees.emplace_back(std::move(root_copy));
+    RUN.MIN_COST_TREES.Emplace(cost, RUN.out_trees.size() - 1);
   }
 }
 
@@ -439,8 +456,15 @@ auto NewAlg(TreeNodeEx root, TreeNodeEx client,
   CreateNextTransposition(family_flows, root, MakeGroups({&root}, family_flows),
                           0, 0);
   CheckUniqueness(RUN.out_trees);
-  Cout() << "NUM_CHECKED = " << RUN.NUM_CHECKED << "\n";
-  return RUN.out_trees;
+  std::cout << "NUM_CHECKED = " << RUN.NUM_CHECKED << "\n";
+
+  auto min_cost_trees = std::vector<TreeNodeEx>{};
+
+  for (const auto &[cost, index] : RUN.MIN_COST_TREES.trees_) {
+    min_cost_trees.emplace_back(std::move(RUN.out_trees[index]));
+  }
+
+  return min_cost_trees;
 }
 }  // namespace
 

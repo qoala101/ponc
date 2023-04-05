@@ -209,7 +209,7 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
     required_inputs_.resize(
         num_inputs_,
         // {.min = settings.low_flow, .max = settings.high_flow}
-        {.min = -4, .max = 0});
+        {.min = -5, .max = -3});
   }
 
   const auto calculate_pressed = ImGui::Button("Calculate");
@@ -235,9 +235,9 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
 
       auto good_fams = std::vector{
           "Splitter 1x2",
-          // "Splitter 1x4",
+          "Splitter 1x4",
           "Coupler 5%-95%",
-          // "Coupler 45%-55%",
+          "Coupler 45%-55%",
       };
 
       for (const auto& family : project.GetFamilies()) {
