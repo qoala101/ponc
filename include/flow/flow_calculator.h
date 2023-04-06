@@ -29,6 +29,7 @@ struct TreeNodeEx {
   std::map<int, TreeNodeEx> child_nodes{};
 
   float input{};
+  const TreeNodeEx *parent{};
 
   explicit TreeNodeEx(const FamilyFlow &family_flow);
   TreeNodeEx() = default;

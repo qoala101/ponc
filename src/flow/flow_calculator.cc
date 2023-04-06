@@ -128,7 +128,8 @@ struct RunData {
 
   std::set<float> unique_inputs{};
   std::stack<float> UNIQUE_STACK{};
-  std::map<float, std::set<uintptr_t>> OUTPUT_TESTED_FAMILIES{};
+  std::map<float, int> OUTPUT_CHILDREN{};
+  std::map<float, std::set<uintptr_t>> OUPUT_FAMILIES{};
 };
 
 auto RUN = RunData{};
@@ -136,7 +137,7 @@ auto RUN = RunData{};
 auto Cout() -> std::ostream & {
   struct S : public std::ostream {};
   static auto s = S{};
-  // return std::cout;
+  return std::cout;
   return s;
 }
 
@@ -545,7 +546,7 @@ void RememberAlgStep(const std::vector<FamilyFlow> &family_flows,
       } else {
         node.EmplaceChild(output_index, TreeNodeEx{family_flows[family_i - 1]});
 
-        RUN.OUTPUT_TESTED_FAMILIES[output_value].emplace(
+        RUN.OUPUT_FAMILIES[output_value].insert(
             family_flows[family_i - 1].family_id.Get());
       }
 
@@ -558,6 +559,12 @@ void RememberAlgStep(const std::vector<FamilyFlow> &family_flows,
     }
 
     RUN.UNIQUE_STACK.pop();
+
+    if (!RUN.UNIQUE_STACK.empty()) {
+      RUN.OUTPUT_CHILDREN[RUN.UNIQUE_STACK.top()] +=
+          RUN.OUTPUT_CHILDREN[output_value];
+    }
+
     return;
   }
 
@@ -587,8 +594,8 @@ void RememberAlgStep(const std::vector<FamilyFlow> &family_flows,
   //   }
   // }
 
-  Cout() << RUN.I++ << ": " << ToString(root) << "\n";
-  RUN.out_trees.emplace_back(root);
+  // if (node.parent != nullptr) {
+  // }
 
   // if (RUN.DEPTH > 2) {
   //   return;
@@ -599,6 +606,25 @@ void RememberAlgStep(const std::vector<FamilyFlow> &family_flows,
     RememberAlgStep(family_flows, root, child.second, 0);
     --RUN.DEPTH;
   }
+
+  if (!node.child_nodes.empty()) {
+    node.child_nodes.clear();
+    return;
+  }
+
+  Cout() << RUN.I++ << ": " << RUN.DEPTH << " " << RUN.UNIQUE_STACK.top() << " "
+         << ToString(root) << "\n";
+  RUN.out_trees.emplace_back(root);
+
+  // ++RUN.OUTPUT_CHILDREN[RUN.UNIQUE_STACK.top()];
+
+  // std::cout << "UNIQUE_STACK: ";
+  // auto stack_copy = RUN.UNIQUE_STACK;
+  // while (!stack_copy.empty()) {
+  //   std::cout << stack_copy.top() << ", ";
+  //   stack_copy.pop();
+  // }
+  // std::cout << "\n";
 }
 
 auto RememberAlg(TreeNodeEx root, TreeNodeEx client,
@@ -611,7 +637,7 @@ auto RememberAlg(TreeNodeEx root, TreeNodeEx client,
   RUN.client = std::move(client);
 
   RememberAlgStep(family_flows, root, root, 0);
-  // CheckUniqueness(RUN.out_trees);
+  CheckUniqueness(RUN.out_trees);
 
   std::cout << "unique_inputs: ";
   for (const auto input : RUN.unique_inputs) {
@@ -619,11 +645,17 @@ auto RememberAlg(TreeNodeEx root, TreeNodeEx client,
   }
   std::cout << "\n";
 
-  // std::cout << "OUTPUT_TESTED_FAMILIES: ";
-  // for (const auto &[output, set] : RUN.OUTPUT_TESTED_FAMILIES) {
-  //   std::cout << output << ": " << set.size() << ", ";
+  // std::cout << "OUTPUT_CHILDREN: \n";
+  // for (const auto &[output, num_childs] : RUN.OUTPUT_CHILDREN) {
+  //   std::cout << output << ": " << num_childs << "\n";
   // }
-  // std::cout << "\n";
+  // std::cout << "END\n";
+
+  std::cout << "OUTPUT_FAMILIES: \n";
+  for (const auto &[output, num_childs] : RUN.OUPUT_FAMILIES) {
+    std::cout << output << ": " << num_childs.size() << "\n";
+  }
+  std::cout << "END\n";
 
   return RUN.out_trees;
 }
@@ -662,6 +694,7 @@ auto TreeNodeEx::CalculateCost() const -> float {
 
 auto TreeNodeEx::EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx & {
   child.input = outputs[index];
+  child.parent = this;
 
   for (auto &output : child.outputs) {
     output += child.input;
