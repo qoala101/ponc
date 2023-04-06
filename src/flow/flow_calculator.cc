@@ -128,10 +128,12 @@ struct RunData {
   MinCostTrees MIN_COST_TREES{10};
 
   InputRange RANGE{};
-  std::set<int> unique_outputs{};
+  std::set<int> visited_outputs{};
   std::stack<int> UNIQUE_STACK{};
   std::map<int, int> OUTPUT_CHILDREN{};
   std::map<int, std::set<uintptr_t>> OUPUT_FAMILIES{};
+
+  std::map<int, std::map<int, TreeNodeEx>> output_tree_per_num_clients{};
 };
 
 auto RUN = RunData{};
@@ -509,9 +511,9 @@ auto NewAlg(TreeNodeEx root, TreeNodeEx client,
 
 void RememberAlgStepSimple(const std::vector<FamilyFlow> &family_flows,
                            const TreeNodeEx &root, TreeNodeEx &node) {
-  Cout() << RUN.I++ << ": " << node.input << " " << RUN.DEPTH << " "
-         << ToString(root) << "\n";
-  RUN.out_trees.emplace_back(root);
+  // Cout() << RUN.I++ << ": " << node.input << " " << RUN.DEPTH << " "
+  //        << ToString(root) << "\n";
+  // RUN.out_trees.emplace_back(root);
 
   for (auto output_index = 0; output_index < node.outputs.size();
        ++output_index) {
@@ -521,12 +523,15 @@ void RememberAlgStepSimple(const std::vector<FamilyFlow> &family_flows,
       continue;
     }
 
-    if (RUN.unique_outputs.contains(output)) {
-      // RUN.OUTPUT_CHILDREN[node.input] += RUN.OUTPUT_CHILDREN[output];
+    if (RUN.visited_outputs.contains(output)) {
       continue;
     }
 
-    // RUN.UNIQUE_STACK.push(output);
+    RUN.visited_outputs.emplace(output);
+
+    if (InRange(output, RUN.RANGE)) {
+      RUN.output_tree_per_num_clients[output].emplace(1, RUN.client);
+    }
 
     for (auto family_i = 0; family_i < family_flows.size(); ++family_i) {
       auto &child =
@@ -536,13 +541,29 @@ void RememberAlgStepSimple(const std::vector<FamilyFlow> &family_flows,
       RememberAlgStepSimple(family_flows, root, child);
       --RUN.DEPTH;
     }
+  }
 
-    // if (InRange(output, RUN.RANGE)) {
-    //   ++RUN.OUTPUT_CHILDREN[output];
-    //   RUN.OUTPUT_CHILDREN[node.input] += RUN.OUTPUT_CHILDREN[output];
-    // }
+  auto node_copy = node;
+  node_copy.child_nodes.clear();
 
-    RUN.unique_outputs.emplace(output);
+  auto num_clients = 0;
+
+  for (auto output_index = 0; output_index < node_copy.outputs.size();
+       ++output_index) {
+    const auto output = node.outputs[output_index];
+    auto &output_client_variants = RUN.output_tree_per_num_clients[output];
+
+    if (!output_client_variants.empty()) {
+      const auto &[max_num_clients, max_clients_tree] =
+          *std::prev(output_client_variants.end());
+
+      num_clients += max_num_clients;
+      node_copy.child_nodes.emplace(output_index, max_clients_tree);
+    }
+  }
+
+  if (num_clients > 0) {
+    RUN.output_tree_per_num_clients[node.input].emplace(num_clients, node_copy);
   }
 }
 
@@ -572,7 +593,7 @@ void RememberAlgStep(const std::vector<FamilyFlow> &family_flows,
       return;
     }
 
-    if (RUN.unique_outputs.contains(output_value)) {
+    if (RUN.visited_outputs.contains(output_value)) {
       // std::cout << "stack contains: " << output_value << "\n";
       // std::cout << node.input << " + " << output_value << "("
       //           << RUN.OUTPUT_CHILDREN[output_value] << ")\n";
@@ -594,7 +615,7 @@ void RememberAlgStep(const std::vector<FamilyFlow> &family_flows,
     }
 
     // std::cout << "stack dont have: " << output_value << "\n";
-    RUN.unique_outputs.emplace(output_value);
+    RUN.visited_outputs.emplace(output_value);
     RUN.UNIQUE_STACK.push(output_value);
 
     const auto num_families = static_cast<int>(family_flows.size());
@@ -768,7 +789,7 @@ auto RememberAlg(TreeNodeEx root, TreeNodeEx client,
   CheckUniqueness(RUN.out_trees);
 
   std::cout << "unique_outputs: ";
-  for (const auto input : RUN.unique_outputs) {
+  for (const auto input : RUN.visited_outputs) {
     std::cout << input << ", ";
   }
   std::cout << "\n";
@@ -785,7 +806,13 @@ auto RememberAlg(TreeNodeEx root, TreeNodeEx client,
   }
   std::cout << "END\n";
 
-  return RUN.out_trees;
+  // return RUN.out_trees;
+
+  Expects(!RUN.output_tree_per_num_clients.empty());
+
+  const auto &[max_num_clients, max_clients_tree] = *std::prev(
+      std::prev(RUN.output_tree_per_num_clients.end())->second.end());
+  return std::vector<TreeNodeEx>{max_clients_tree};
 }
 }  // namespace
 
