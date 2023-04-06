@@ -127,7 +127,8 @@ struct RunData {
   TreeNodeEx client{};
   MinCostTrees MIN_COST_TREES{10};
 
-  std::set<int> unique_inputs{};
+  InputRange RANGE{};
+  std::set<int> unique_outputs{};
   std::stack<int> UNIQUE_STACK{};
   std::map<int, int> OUTPUT_CHILDREN{};
   std::map<int, std::set<uintptr_t>> OUPUT_FAMILIES{};
@@ -473,6 +474,7 @@ auto NewAlg(TreeNodeEx root, TreeNodeEx client,
   std::sort(
       RUN.sorted_output_ranges.begin(), RUN.sorted_output_ranges.end(),
       [](const auto &left, const auto &right) { return left.min < right.min; });
+  RUN.RANGE = RUN.sorted_output_ranges.front();
 
   auto sorted_family_flows = family_flows;
   std::sort(sorted_family_flows.begin(), sorted_family_flows.end(),
@@ -505,6 +507,45 @@ auto NewAlg(TreeNodeEx root, TreeNodeEx client,
   return min_cost_trees;
 }
 
+void RememberAlgStepSimple(const std::vector<FamilyFlow> &family_flows,
+                           const TreeNodeEx &root, TreeNodeEx &node) {
+  Cout() << RUN.I++ << ": " << node.input << " " << RUN.DEPTH << " "
+         << ToString(root) << "\n";
+  RUN.out_trees.emplace_back(root);
+
+  for (auto output_index = 0; output_index < node.outputs.size();
+       ++output_index) {
+    const auto output = node.outputs[output_index];
+
+    if (output < RUN.min_output) {
+      continue;
+    }
+
+    if (RUN.unique_outputs.contains(output)) {
+      // RUN.OUTPUT_CHILDREN[node.input] += RUN.OUTPUT_CHILDREN[output];
+      continue;
+    }
+
+    // RUN.UNIQUE_STACK.push(output);
+
+    for (auto family_i = 0; family_i < family_flows.size(); ++family_i) {
+      auto &child =
+          node.EmplaceChild(output_index, TreeNodeEx{family_flows[family_i]});
+
+      ++RUN.DEPTH;
+      RememberAlgStepSimple(family_flows, root, child);
+      --RUN.DEPTH;
+    }
+
+    // if (InRange(output, RUN.RANGE)) {
+    //   ++RUN.OUTPUT_CHILDREN[output];
+    //   RUN.OUTPUT_CHILDREN[node.input] += RUN.OUTPUT_CHILDREN[output];
+    // }
+
+    RUN.unique_outputs.emplace(output);
+  }
+}
+
 void RememberAlgStep(const std::vector<FamilyFlow> &family_flows,
                      const TreeNodeEx &root, TreeNodeEx &node,
                      int output_index) {
@@ -531,12 +572,29 @@ void RememberAlgStep(const std::vector<FamilyFlow> &family_flows,
       return;
     }
 
-    if (RUN.unique_inputs.contains(output_value)) {
+    if (RUN.unique_outputs.contains(output_value)) {
+      // std::cout << "stack contains: " << output_value << "\n";
+      // std::cout << node.input << " + " << output_value << "("
+      //           << RUN.OUTPUT_CHILDREN[output_value] << ")\n";
+      // RUN.OUTPUT_CHILDREN[node.input] += RUN.OUTPUT_CHILDREN[output_value];
+
+      // std::cout << "top: " << RUN.UNIQUE_STACK.top()
+      //           << "contains: " << output_value << "\n";
       RememberAlgStep(family_flows, root, node, output_index + 1);
+
+      // auto stack_copy = RUN.UNIQUE_STACK;
+      // stack_copy.pop();
+
+      // if (!stack_copy.empty()) {
+      //   RUN.OUTPUT_CHILDREN[stack_copy.top()] +=
+      //       RUN.OUTPUT_CHILDREN[output_value];
+      // }
+
       return;
     }
 
-    RUN.unique_inputs.emplace(output_value);
+    // std::cout << "stack dont have: " << output_value << "\n";
+    RUN.unique_outputs.emplace(output_value);
     RUN.UNIQUE_STACK.push(output_value);
 
     const auto num_families = static_cast<int>(family_flows.size());
@@ -613,10 +671,8 @@ void RememberAlgStep(const std::vector<FamilyFlow> &family_flows,
     return;
   }
 
-  Cout() << RUN.I++ << ": " << RUN.DEPTH
-         << " "
-         // << RUN.UNIQUE_STACK.size() << " "
-         << RUN.UNIQUE_STACK.top() << " " << ToString(root) << "\n";
+  Cout() << RUN.I++ << ": " << RUN.DEPTH << " " << RUN.UNIQUE_STACK.top() << " "
+         << ToString(root) << "\n";
   RUN.out_trees.emplace_back(root);
 
   std::cout << "UNIQUE_STACK: ";
@@ -627,16 +683,33 @@ void RememberAlgStep(const std::vector<FamilyFlow> &family_flows,
   }
   std::cout << "\n\n";
 
+  // const auto current_output = RUN.UNIQUE_STACK.top();
+  // const auto free_output = node.input != current_output;
+
+  // if (free_output) {
+  //   if (InRange(current_output, RUN.RANGE)) {
+  //     ++RUN.OUTPUT_CHILDREN[current_output];
+  //   }
+  // } else {
+  // Expects(node.input == free_output);
+
+  // for (const auto output : node.outputs) {
+  //   if (InRange(current_output, RUN.RANGE)) {
+  //     ++RUN.OUTPUT_CHILDREN[current_output];
+  //   }
+  // }
+  // }
+
   // const auto &FIRST_RANGE = RUN.sorted_output_ranges.front();
 
   // if (is_checking_empty_input) {
   //   if (InRange(RUN.UNIQUE_STACK.top(), FIRST_RANGE)) {
   //     ++RUN.OUTPUT_CHILDREN[RUN.UNIQUE_STACK.top()];
-      // auto stack_copy = RUN.UNIQUE_STACK;
-      // while (!stack_copy.empty()) {
-      //   ++RUN.OUTPUT_CHILDREN[stack_copy.top()];
-      //   stack_copy.pop();
-      // }
+  // auto stack_copy = RUN.UNIQUE_STACK;
+  // while (!stack_copy.empty()) {
+  //   ++RUN.OUTPUT_CHILDREN[stack_copy.top()];
+  //   stack_copy.pop();
+  // }
   //   }
   // }
 
@@ -687,12 +760,15 @@ auto RememberAlg(TreeNodeEx root, TreeNodeEx client,
   RUN.out_trees = std::vector<TreeNodeEx>{};
   RUN.min_output = GetMinOutput(output_ranges);
   RUN.client = std::move(client);
+  RUN.RANGE = RUN.sorted_output_ranges.front();
 
-  RememberAlgStep(family_flows, root, root, 0);
+  // RememberAlgStep(family_flows, root, root, 0);
+
+  RememberAlgStepSimple(family_flows, root, root);
   CheckUniqueness(RUN.out_trees);
 
-  std::cout << "unique_inputs: ";
-  for (const auto input : RUN.unique_inputs) {
+  std::cout << "unique_outputs: ";
+  for (const auto input : RUN.unique_outputs) {
     std::cout << input << ", ";
   }
   std::cout << "\n";
@@ -703,11 +779,11 @@ auto RememberAlg(TreeNodeEx root, TreeNodeEx client,
   }
   std::cout << "END\n";
 
-  // std::cout << "OUTPUT_FAMILIES: \n";
-  // for (const auto &[output, num_childs] : RUN.OUPUT_FAMILIES) {
-  //   std::cout << output << ": " << num_childs.size() << "\n";
-  // }
-  // std::cout << "END\n";
+  std::cout << "OUTPUT_FAMILIES: \n";
+  for (const auto &[output, num_childs] : RUN.OUPUT_FAMILIES) {
+    std::cout << output << ": " << num_childs.size() << "\n";
+  }
+  std::cout << "END\n";
 
   return RUN.out_trees;
 }
