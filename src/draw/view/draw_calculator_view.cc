@@ -40,7 +40,7 @@ void DrawFamily(const core::IFamily& family, flow::FamilyFlow& family_flow) {
 
   ImGui::TableNextColumn();
   ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-  ImGui::InputFloat(IdLabel(family.GetId()).c_str(), &family_flow.cost);
+  ImGui::InputInt(IdLabel(family.GetId()).c_str(), &family_flow.cost);
 }
 
 void TraverseDepthFirst(
@@ -207,9 +207,9 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
   if (static_cast<int>(required_inputs_.size()) != num_inputs_) {
     const auto& settings = project.GetSettings();
     required_inputs_.resize(
-        num_inputs_, {.min = settings.low_flow, .max = settings.high_flow}
-        // {.min = -5, .max = -3}
-    );
+        num_inputs_,
+        // {.min = settings.low_flow * 100, .max = settings.high_flow * 100}
+        {.min = -3 * 100, .max = -2 * 100});
   }
 
   const auto calculate_pressed = ImGui::Button("Calculate");
@@ -234,10 +234,10 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
       auto index = 0;
 
       auto good_fams = std::vector{
-          // "Splitter 1x2",
+          "Splitter 1x2",
           // "Splitter 1x4",
-          "Coupler 5%-95%",
-          "Coupler 45%-55%",
+          // "Coupler 5%-95%",
+          // "Coupler 45%-55%",
       };
 
       for (const auto& family : project.GetFamilies()) {
@@ -249,7 +249,7 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
 
         if (std::none_of(good_fams.begin(), good_fams.end(),
                          [label](const auto& fam) { return fam == label; })) {
-          // continue;
+          continue;
         }
 
         const auto sample_node = family->CreateSampleNode();
@@ -263,12 +263,13 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
         const auto output_pin_flows =
             sample_node->GetInitialFlow().output_pin_flows;
 
-        auto outputs = std::vector<float>{};
-        std::transform(output_pin_ids.begin(), output_pin_ids.end(),
-                       std::back_inserter(outputs),
-                       [&output_pin_flows](const auto pin_id) {
-                         return output_pin_flows.at(pin_id.Get());
-                       });
+        auto outputs = std::vector<int>{};
+        std::transform(
+            output_pin_ids.begin(), output_pin_ids.end(),
+            std::back_inserter(outputs),
+            [&output_pin_flows](const auto pin_id) {
+              return static_cast<int>(output_pin_flows.at(pin_id.Get()));
+            });
 
         const auto family_id = family->GetId().Get();
         auto& family_flow = (family_flows_.size() > index)
@@ -301,13 +302,11 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
 
         ImGui::TableNextColumn();
         ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-        ImGui::InputFloat((IdLabel(index) + "Min").c_str(), &required_input.min,
-                          0, 0, "%.3f");
+        ImGui::InputInt((IdLabel(index) + "Min").c_str(), &required_input.min);
 
         ImGui::TableNextColumn();
         ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-        ImGui::InputFloat((IdLabel(index) + "Max").c_str(), &required_input.max,
-                          0, 0, "%.3f");
+        ImGui::InputInt((IdLabel(index) + "Max").c_str(), &required_input.max);
 
         ++index;
       }
@@ -322,7 +321,7 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
 
   const auto result =
       flow::Calculate({.root = flow::TreeNodeEx{flow::FamilyFlow{
-                           .family_id = 1, .outputs = {6.F}, .cost = 0}},
+                           .family_id = 1, .outputs = {600}, .cost = 0}},
                        .client = flow::TreeNodeEx{flow::FamilyFlow{
                            .family_id = 2, .outputs = {0}, .cost = 0}},
                        .family_flows = family_flows_,

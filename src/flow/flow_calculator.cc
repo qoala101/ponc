@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <ios>
 #include <iostream>
 #include <istream>
 #include <iterator>
@@ -51,12 +52,12 @@ void TraverseDepthFirstEx(
   visitor_after_children(tree_node);
 }
 
-auto InRange(float value, const InputRange &range) {
+auto InRange(int value, const InputRange &range) {
   return (value >= range.min) && (value <= range.max);
 }
 
 auto GetMinOutput(const std::vector<InputRange> &output_ranges) {
-  auto min_output = std::numeric_limits<float>::max();
+  auto min_output = std::numeric_limits<int>::max();
 
   for (const auto &range : output_ranges) {
     min_output = std::min(range.min, min_output);
@@ -66,7 +67,7 @@ auto GetMinOutput(const std::vector<InputRange> &output_ranges) {
 }
 
 auto GetMinDecrement(const std::vector<FamilyFlow> &family_flows) {
-  auto min_output = std::numeric_limits<float>::lowest();
+  auto min_output = std::numeric_limits<int>::lowest();
 
   for (const auto &family : family_flows) {
     min_output = std::max(family.GetMinDecrementOutput(), min_output);
@@ -91,13 +92,13 @@ class MinCostTrees {
   explicit MinCostTrees(int max_size) : max_size_{max_size} {}
 
   auto GetMaxCost() const {
-    return trees_.empty() ? std::numeric_limits<float>::max()
+    return trees_.empty() ? std::numeric_limits<int>::max()
                           : trees_.back().first;
   }
 
   auto IsFull() const { return static_cast<int>(trees_.size()) >= max_size_; }
 
-  auto Emplace(float cost, int index) {
+  auto Emplace(int cost, int index) {
     trees_.emplace_back(cost, index);
 
     std::sort(trees_.begin(), trees_.end(),
@@ -110,7 +111,7 @@ class MinCostTrees {
     }
   }
 
-  std::vector<std::pair<float, int>> trees_{};
+  std::vector<std::pair<int, int>> trees_{};
 
  private:
   int max_size_{};
@@ -122,14 +123,14 @@ struct RunData {
   int NUM_CHECKED = 0;
   std::vector<InputRange> sorted_output_ranges{};
   std::vector<TreeNodeEx> out_trees{};
-  float min_output{};
+  int min_output{};
   TreeNodeEx client{};
   MinCostTrees MIN_COST_TREES{10};
 
-  std::set<float> unique_inputs{};
-  std::stack<float> UNIQUE_STACK{};
-  std::map<float, int> OUTPUT_CHILDREN{};
-  std::map<float, std::set<uintptr_t>> OUPUT_FAMILIES{};
+  std::set<int> unique_inputs{};
+  std::stack<int> UNIQUE_STACK{};
+  std::map<int, int> OUTPUT_CHILDREN{};
+  std::map<int, std::set<uintptr_t>> OUPUT_FAMILIES{};
 };
 
 auto RUN = RunData{};
@@ -231,7 +232,7 @@ struct Group {
 
 auto MakeGroups(const std::vector<TreeNodeEx *> &level_nodes,
                 const std::vector<FamilyFlow> &family_flows) {
-  auto groups = std::map<float, Group, std::greater<>>{};
+  auto groups = std::map<int, Group, std::greater<>>{};
 
   for (auto *node : level_nodes) {
     auto index = 0;
@@ -250,7 +251,7 @@ auto MakeGroups(const std::vector<TreeNodeEx *> &level_nodes,
 }
 
 auto GetNextLevelNodes(
-    const std::map<float, Group, std::greater<>> &current_level) {
+    const std::map<int, Group, std::greater<>> &current_level) {
   auto next_level_nodes = std::vector<TreeNodeEx *>{};
 
   for (const auto &group : current_level) {
@@ -265,7 +266,7 @@ auto GetNextLevelNodes(
 }
 
 auto IsLevelEmpty(
-    const std::map<float, Group, std::greater<>> &current_level_groups) {
+    const std::map<int, Group, std::greater<>> &current_level_groups) {
   for (const auto &group : current_level_groups) {
     for (const auto &[node, index] : group.second.nodes) {
       if (!node->child_nodes.empty()) {
@@ -278,7 +279,7 @@ auto IsLevelEmpty(
 }
 
 struct Ouput {
-  float value{};
+  int value{};
   TreeNodeEx *tree_node{};
   int index{};
 };
@@ -332,7 +333,7 @@ auto FindAndAddOutputs(TreeNodeEx &root) -> bool {
 
 void RecordTreeAndChooseGroupsToProceedDeeper(
     const TreeNodeEx &root,
-    std::map<float, Group, std::greater<>> &next_level_groups) {
+    std::map<int, Group, std::greater<>> &next_level_groups) {
   ++RUN.NUM_CHECKED;
 
   // if (RUN.DEPTH > 1 || RUN.out_trees.size() > 100) {
@@ -376,7 +377,7 @@ void RecordTreeAndChooseGroupsToProceedDeeper(
 
 void CreateNextTransposition(
     const std::vector<FamilyFlow> &family_flows, const TreeNodeEx &root,
-    const std::map<float, Group, std::greater<>> &current_level_groups,
+    const std::map<int, Group, std::greater<>> &current_level_groups,
     int output_index, int group_index) {
   // if (RUN.NUM_CHECKED > 1000) {
   //   return;
@@ -560,10 +561,10 @@ void RememberAlgStep(const std::vector<FamilyFlow> &family_flows,
 
     RUN.UNIQUE_STACK.pop();
 
-    if (!RUN.UNIQUE_STACK.empty()) {
-      RUN.OUTPUT_CHILDREN[RUN.UNIQUE_STACK.top()] +=
-          RUN.OUTPUT_CHILDREN[output_value];
-    }
+    // if (!RUN.UNIQUE_STACK.empty()) {
+    //   RUN.OUTPUT_CHILDREN[RUN.UNIQUE_STACK.top()] +=
+    //       RUN.OUTPUT_CHILDREN[output_value];
+    // }
 
     return;
   }
@@ -612,19 +613,70 @@ void RememberAlgStep(const std::vector<FamilyFlow> &family_flows,
     return;
   }
 
-  Cout() << RUN.I++ << ": " << RUN.DEPTH << " " << RUN.UNIQUE_STACK.top() << " "
-         << ToString(root) << "\n";
+  Cout() << RUN.I++ << ": " << RUN.DEPTH
+         << " "
+         // << RUN.UNIQUE_STACK.size() << " "
+         << RUN.UNIQUE_STACK.top() << " " << ToString(root) << "\n";
   RUN.out_trees.emplace_back(root);
 
-  // ++RUN.OUTPUT_CHILDREN[RUN.UNIQUE_STACK.top()];
+  std::cout << "UNIQUE_STACK: ";
+  auto stack_copy = RUN.UNIQUE_STACK;
+  while (!stack_copy.empty()) {
+    std::cout << stack_copy.top() << ", ";
+    stack_copy.pop();
+  }
+  std::cout << "\n\n";
 
-  // std::cout << "UNIQUE_STACK: ";
+  // const auto &FIRST_RANGE = RUN.sorted_output_ranges.front();
+
+  // if (is_checking_empty_input) {
+  //   if (InRange(RUN.UNIQUE_STACK.top(), FIRST_RANGE)) {
+  //     ++RUN.OUTPUT_CHILDREN[RUN.UNIQUE_STACK.top()];
+      // auto stack_copy = RUN.UNIQUE_STACK;
+      // while (!stack_copy.empty()) {
+      //   ++RUN.OUTPUT_CHILDREN[stack_copy.top()];
+      //   stack_copy.pop();
+      // }
+  //   }
+  // }
+
+  // if (node.input == RUN.UNIQUE_STACK.top()) {
+  //   for (const auto output : node.outputs) {
+  //     if (InRange(output, FIRST_RANGE)) {
+  //       auto stack_copy = RUN.UNIQUE_STACK;
+  //       while (!stack_copy.empty()) {
+  //         ++RUN.OUTPUT_CHILDREN[stack_copy.top()];
+  //         stack_copy.pop();
+  //       }
+  //     }
+  //   }
+  // } else {
+  //   if (InRange(RUN.UNIQUE_STACK.top(), FIRST_RANGE)) {
+  //     auto stack_copy = RUN.UNIQUE_STACK;
+  //     while (!stack_copy.empty()) {
+  //       ++RUN.OUTPUT_CHILDREN[stack_copy.top()];
+  //       stack_copy.pop();
+  //     }
+  //   }
+  // }
+
   // auto stack_copy = RUN.UNIQUE_STACK;
   // while (!stack_copy.empty()) {
-  //   std::cout << stack_copy.top() << ", ";
+  //   ++RUN.OUTPUT_CHILDREN[stack_copy.top()];
   //   stack_copy.pop();
   // }
-  // std::cout << "\n";
+
+  // auto node_copy = node;
+
+  // if (FindAndAddOutputs(node_copy)) {
+  //   auto stack_copy = RUN.UNIQUE_STACK;
+  //   while (!stack_copy.empty()) {
+  //     ++RUN.OUTPUT_CHILDREN[stack_copy.top()];
+  //     stack_copy.pop();
+  //   }
+  // }
+
+  // ++RUN.OUTPUT_CHILDREN[RUN.UNIQUE_STACK.top()];
 }
 
 auto RememberAlg(TreeNodeEx root, TreeNodeEx client,
@@ -645,17 +697,17 @@ auto RememberAlg(TreeNodeEx root, TreeNodeEx client,
   }
   std::cout << "\n";
 
-  // std::cout << "OUTPUT_CHILDREN: \n";
-  // for (const auto &[output, num_childs] : RUN.OUTPUT_CHILDREN) {
-  //   std::cout << output << ": " << num_childs << "\n";
-  // }
-  // std::cout << "END\n";
-
-  std::cout << "OUTPUT_FAMILIES: \n";
-  for (const auto &[output, num_childs] : RUN.OUPUT_FAMILIES) {
-    std::cout << output << ": " << num_childs.size() << "\n";
+  std::cout << "OUTPUT_CHILDREN: \n";
+  for (const auto &[output, num_childs] : RUN.OUTPUT_CHILDREN) {
+    std::cout << output << ": " << num_childs << "\n";
   }
   std::cout << "END\n";
+
+  // std::cout << "OUTPUT_FAMILIES: \n";
+  // for (const auto &[output, num_childs] : RUN.OUPUT_FAMILIES) {
+  //   std::cout << output << ": " << num_childs.size() << "\n";
+  // }
+  // std::cout << "END\n";
 
   return RUN.out_trees;
 }
@@ -682,8 +734,8 @@ auto TreeNodeEx::GetChildIndex(const TreeNodeEx *child) const -> int {
   return found_child->first;
 }
 
-auto TreeNodeEx::CalculateCost() const -> float {
-  auto cost = 0.F;
+auto TreeNodeEx::CalculateCost() const -> int {
+  auto cost = 0;
 
   TraverseDepthFirstExConst(
       *this, [&cost](const auto &tree_node) { cost += tree_node.cost; },
@@ -703,13 +755,13 @@ auto TreeNodeEx::EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx & {
   return child_nodes[index] = std::move(child);
 }
 
-auto TreeNodeEx::AreOutputsLessThan(float value) const -> bool {
+auto TreeNodeEx::AreOutputsLessThan(int value) const -> bool {
   return std::all_of(outputs.begin(), outputs.end(),
                      [value](const auto output) { return output < value; });
 }
 
-auto FamilyFlow::GetMinDecrementOutput() const -> float {
-  auto min_output = std::numeric_limits<float>::lowest();
+auto FamilyFlow::GetMinDecrementOutput() const -> int {
+  auto min_output = std::numeric_limits<int>::lowest();
 
   for (const auto output : outputs) {
     Expects(output < 0);
@@ -719,8 +771,8 @@ auto FamilyFlow::GetMinDecrementOutput() const -> float {
   return min_output;
 }
 
-auto FamilyFlow::GetMaxDecrementOutput() const -> float {
-  auto max_output = std::numeric_limits<float>::max();
+auto FamilyFlow::GetMaxDecrementOutput() const -> int {
+  auto max_output = std::numeric_limits<int>::max();
 
   for (const auto output : outputs) {
     Expects(output < 0);

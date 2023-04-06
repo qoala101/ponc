@@ -9,36 +9,36 @@
 
 namespace vh::ponc::flow {
 struct InputRange {
-  float min{};
-  float max{};
+  int min{};
+  int max{};
 };
 
 struct FamilyFlow {
   core::FamilyId family_id{};
-  std::vector<float> outputs{};
-  float cost{};
+  std::vector<int> outputs{};
+  int cost{};
 
-  auto GetMinDecrementOutput() const -> float;
-  auto GetMaxDecrementOutput() const -> float;
+  auto GetMinDecrementOutput() const -> int;
+  auto GetMaxDecrementOutput() const -> int;
 };
 
 struct TreeNodeEx {
   core::FamilyId family_id{};
-  std::vector<float> outputs{};
-  float cost{};
+  std::vector<int> outputs{};
+  int cost{};
   std::map<int, TreeNodeEx> child_nodes{};
 
-  float input{};
+  int input{};
   const TreeNodeEx *parent{};
 
   explicit TreeNodeEx(const FamilyFlow &family_flow);
   TreeNodeEx() = default;
   auto EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx &;
-  auto AreOutputsLessThan(float value) const -> bool;
+  auto AreOutputsLessThan(int value) const -> bool;
   auto GetNumChildren() const -> int;
   auto GetNumOutputs() const -> int;
   auto GetChildIndex(const TreeNodeEx *child) const -> int;
-  auto CalculateCost() const -> float;
+  auto CalculateCost() const -> int;
 
  private:
   ///
