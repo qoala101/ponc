@@ -128,6 +128,8 @@ struct RunData {
   MinCostTrees MIN_COST_TREES{10};
 
   InputRange RANGE{};
+  int NUM_CLIENTS{};
+
   std::set<int> visited_outputs{};
   std::stack<int> UNIQUE_STACK{};
   std::map<int, int> OUTPUT_CHILDREN{};
@@ -477,6 +479,7 @@ auto NewAlg(TreeNodeEx root, TreeNodeEx client,
       RUN.sorted_output_ranges.begin(), RUN.sorted_output_ranges.end(),
       [](const auto &left, const auto &right) { return left.min < right.min; });
   RUN.RANGE = RUN.sorted_output_ranges.front();
+  RUN.NUM_CLIENTS = RUN.sorted_output_ranges.size();
 
   auto sorted_family_flows = family_flows;
   std::sort(sorted_family_flows.begin(), sorted_family_flows.end(),
@@ -507,6 +510,168 @@ auto NewAlg(TreeNodeEx root, TreeNodeEx client,
   min_cost_trees = RUN.out_trees;
 
   return min_cost_trees;
+}
+
+void MAKE_TEST_COMBINATION(
+    const TreeNodeEx &node,
+    std::map<int /*ouput_index*/, std::pair<int, TreeNodeEx>> &combination,
+    int output_index) {
+  if (output_index < node.outputs.size()) {
+    const auto output = node.outputs[output_index];
+    const auto &output_combinations = RUN.output_tree_per_num_clients[output];
+
+    for (auto output_combination_index = 0;
+         output_combination_index <= output_combinations.size();
+         ++output_combination_index) {
+      if (output_combination_index == 0) {
+        combination.erase(output_index);
+      } else {
+        combination[output_index] = *std::next(output_combinations.begin(),
+                                               output_combination_index - 1);
+      }
+
+      MAKE_TEST_COMBINATION(node, combination, output_index + 1);
+    }
+
+    return;
+  }
+
+  // its just printing
+  for (auto output_index = 0; output_index < node.outputs.size();
+       ++output_index) {
+    std::cout << node.outputs[output_index] << ": ";
+
+    if (combination.contains(output_index)) {
+      std::cout << combination.at(output_index).first;
+    } else {
+      std::cout << 0;
+    }
+
+    std::cout << "\n";
+  }
+
+  std::cout << "\n";
+
+  auto clients_sum = 0;
+  auto total_cost = 0;
+
+  for (auto output_index = 0; output_index < node.outputs.size();
+       ++output_index) {
+    if (!combination.contains(output_index)) {
+      continue;
+    }
+
+    const auto &[num_clients, tree] = combination.at(output_index);
+    clients_sum += num_clients;
+    total_cost += tree.CalculateCost();
+  }
+
+  if (clients_sum == 0) {
+    return;
+  }
+
+  auto &input_client_variants = RUN.output_tree_per_num_clients[node.input];
+
+  if (input_client_variants.contains(clients_sum) &&
+      input_client_variants.at(clients_sum).CalculateCost() <= total_cost) {
+    return;
+  }
+
+  auto node_copy = node;
+
+  for (auto output_index = 0; output_index < node.outputs.size();
+       ++output_index) {
+    if (!combination.contains(output_index)) {
+      continue;
+    }
+
+    const auto &[num_clients, tree] = combination.at(output_index);
+    node_copy.EmplaceChild(output_index, tree);
+  }
+
+  input_client_variants[clients_sum] = std::move(node_copy);
+}
+
+auto TEST(TreeNodeEx root, TreeNodeEx client,
+          const std::vector<FamilyFlow> &family_flows,
+          const std::vector<InputRange> &output_ranges) {
+  RUN = RunData{};
+  RUN.sorted_output_ranges = output_ranges;
+  RUN.out_trees = std::vector<TreeNodeEx>{};
+  RUN.min_output = GetMinOutput(output_ranges);
+  RUN.client = std::move(client);
+  RUN.RANGE = RUN.sorted_output_ranges.front();
+  RUN.NUM_CLIENTS = RUN.sorted_output_ranges.size();
+
+  const auto &splitter_1_2 = family_flows[0];
+  const auto &splitter_1_4 = family_flows[1];
+  const auto &coupler_20_80 = family_flows[2];
+
+  for (auto ouput : coupler_20_80.outputs) {
+    auto splitter12 = TreeNodeEx{splitter_1_2};
+    splitter12.cost = 12;
+
+    splitter12.child_nodes[0] = TreeNodeEx{RUN.client};
+    RUN.output_tree_per_num_clients[ouput][1] = splitter12;
+
+    splitter12.child_nodes[1] = TreeNodeEx{RUN.client};
+    RUN.output_tree_per_num_clients[ouput][2] = splitter12;
+
+    auto splitter14 = TreeNodeEx{splitter_1_4};
+    splitter14.cost = 14;
+
+    splitter14.child_nodes[0] = TreeNodeEx{RUN.client};
+    splitter14.child_nodes[1] = TreeNodeEx{RUN.client};
+    splitter14.child_nodes[2] = TreeNodeEx{RUN.client};
+    RUN.output_tree_per_num_clients[ouput][3] = splitter14;
+
+    splitter14.child_nodes[3] = TreeNodeEx{RUN.client};
+    RUN.output_tree_per_num_clients[ouput][4] = splitter14;
+  }
+
+  const auto node = TreeNodeEx{coupler_20_80};
+  auto node_copy = node;
+
+  /// ALG BEGIN
+
+  // first iterate over the amount of clients we need
+  // for (auto num_clients = 1; num_clients <= RUN.NUM_CLIENTS; ++num_clients) {
+  // auto current_clients_sum = 0;
+
+  auto combination = std::map<int, std::pair<int, TreeNodeEx>>{};
+  MAKE_TEST_COMBINATION(node_copy, combination, 0);
+
+  // for (auto output_index = 0; output_index < node_copy.outputs.size();
+  //      ++output_index) {
+  //   const auto output = node_copy.outputs[output_index];
+  //   const auto &output_combinations =
+  //   RUN.output_tree_per_num_clients[output];
+
+  //   for (auto output_combination_index = 0;
+  //        output_combination_index <= output_combinations.size();
+  //        ++output_combination_index) {
+  //     if (output_combination_index == 0) {
+  //       std::cout << 0 << ", ";
+  //     } else {
+  //       const auto &[combination_num_clients, combination_tree] = *std::next(
+  //           output_combinations.begin(), output_combination_index - 1);
+  //       std::cout << combination_num_clients << ", ";
+  //     }
+  //   }
+
+  //   std::cout << "\n";
+  // }
+  // }
+
+  /// ALG END
+
+  auto &input_client_variants = RUN.output_tree_per_num_clients[node.input];
+
+  for (const auto &[i, tree] : input_client_variants) {
+    RUN.out_trees.emplace_back(tree);
+  }
+
+  return RUN.out_trees;
 }
 
 void RememberAlgStepSimple(const std::vector<FamilyFlow> &family_flows,
@@ -545,6 +710,45 @@ void RememberAlgStepSimple(const std::vector<FamilyFlow> &family_flows,
 
   auto node_copy = node;
   node_copy.child_nodes.clear();
+
+  /*
+  !!!
+  here we update the stuff for the node input
+  keep in mind that there would be other families for same input
+  so we need to take them into account
+  */
+
+  // first iterate over the amount of clients we need
+  for (auto num_clients = 1; num_clients <= RUN.NUM_CLIENTS; ++num_clients) {
+    auto current_clients_sum = 0;
+
+    for (auto output_index = 0; output_index < node_copy.outputs.size();
+         ++output_index) {
+      const auto output = node.outputs[output_index];
+      const auto &output_combinations = RUN.output_tree_per_num_clients[output];
+
+      for (auto output_combination_index = 0;
+           output_combination_index <= output_combinations.size();
+           ++output_combination_index) {
+        if (output_combination_index < output_combinations.size()) {
+          const auto &[combination_num_clients, combination_tree] =
+              *std::next(output_combinations.begin(), output_combination_index);
+          const auto would_be_clients_sum =
+              current_clients_sum + combination_num_clients;
+
+          if (would_be_clients_sum <= num_clients) {
+            node_copy.child_nodes.emplace(output_index, combination_tree);
+            current_clients_sum = would_be_clients_sum;
+          }
+        } else {
+          node_copy.child_nodes.erase(output_index);
+        }
+      }
+    }
+  }
+
+  // num children/cost/tree
+  auto m = std::map<int, std::map<int, TreeNodeEx>>{};
 
   auto num_clients = 0;
 
@@ -782,6 +986,7 @@ auto RememberAlg(TreeNodeEx root, TreeNodeEx client,
   RUN.min_output = GetMinOutput(output_ranges);
   RUN.client = std::move(client);
   RUN.RANGE = RUN.sorted_output_ranges.front();
+  RUN.NUM_CLIENTS = RUN.sorted_output_ranges.size();
 
   // RememberAlgStep(family_flows, root, root, 0);
 
@@ -886,6 +1091,7 @@ auto FamilyFlow::GetMaxDecrementOutput() const -> int {
 }
 
 auto Calculate(const CalculatorInput &input) -> std::vector<TreeNodeEx> {
+  return TEST(input.root, input.client, input.family_flows, input.input_ranges);
   return RememberAlg(input.root, input.client, input.family_flows,
                      input.input_ranges);
 }

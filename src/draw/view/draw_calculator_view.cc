@@ -235,7 +235,8 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
 
       auto good_fams = std::vector{
           "Splitter 1x2",
-          // "Splitter 1x4",
+          "Splitter 1x4",
+          "Coupler 20%-80%",
           // "Coupler 5%-95%",
           // "Coupler 45%-55%",
       };
