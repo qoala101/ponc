@@ -165,7 +165,7 @@ void MAKE_TEST_COMBINATION(
   // std::cout << "\n";
 
   auto clients_sum = 0;
-  auto total_cost = 0;
+  auto total_cost = node.cost;
 
   for (auto output_index = 0; output_index < node.outputs.size();
        ++output_index) {
@@ -194,6 +194,7 @@ void MAKE_TEST_COMBINATION(
   for (auto output_index = 0; output_index < node.outputs.size();
        ++output_index) {
     if (!combination.contains(output_index)) {
+      node_copy.child_nodes.erase(output_index);
       continue;
     }
 
@@ -202,58 +203,6 @@ void MAKE_TEST_COMBINATION(
   }
 
   input_client_variants[clients_sum] = std::move(node_copy);
-}
-
-auto TEST(TreeNodeEx root, TreeNodeEx client,
-          const std::vector<FamilyFlow> &family_flows,
-          const std::vector<InputRange> &output_ranges) {
-  RUN = RunData{};
-  RUN.sorted_output_ranges = output_ranges;
-  RUN.out_trees = std::vector<TreeNodeEx>{};
-  RUN.min_output = GetMinOutput(output_ranges);
-  RUN.client = std::move(client);
-  RUN.RANGE = RUN.sorted_output_ranges.front();
-  RUN.NUM_CLIENTS = RUN.sorted_output_ranges.size();
-
-  const auto &splitter_1_2 = family_flows[0];
-  const auto &splitter_1_4 = family_flows[1];
-  const auto &coupler_20_80 = family_flows[2];
-
-  for (auto ouput : coupler_20_80.outputs) {
-    auto splitter12 = TreeNodeEx{splitter_1_2};
-    splitter12.cost = 12;
-
-    splitter12.child_nodes[0] = TreeNodeEx{RUN.client};
-    RUN.output_tree_per_num_clients[ouput][1] = splitter12;
-
-    splitter12.child_nodes[1] = TreeNodeEx{RUN.client};
-    RUN.output_tree_per_num_clients[ouput][2] = splitter12;
-
-    auto splitter14 = TreeNodeEx{splitter_1_4};
-    splitter14.cost = 14;
-
-    splitter14.child_nodes[0] = TreeNodeEx{RUN.client};
-    splitter14.child_nodes[1] = TreeNodeEx{RUN.client};
-    splitter14.child_nodes[2] = TreeNodeEx{RUN.client};
-    RUN.output_tree_per_num_clients[ouput][3] = splitter14;
-
-    splitter14.child_nodes[3] = TreeNodeEx{RUN.client};
-    RUN.output_tree_per_num_clients[ouput][4] = splitter14;
-  }
-
-  const auto node = TreeNodeEx{coupler_20_80};
-  auto node_copy = node;
-
-  auto combination = std::map<int, std::pair<int, TreeNodeEx>>{};
-  MAKE_TEST_COMBINATION(node, combination, 0);
-
-  auto &input_client_variants = RUN.output_tree_per_num_clients[node.input];
-
-  for (const auto &[i, tree] : input_client_variants) {
-    RUN.out_trees.emplace_back(tree);
-  }
-
-  return RUN.out_trees;
 }
 
 void RememberAlgStepSimple(const std::vector<FamilyFlow> &family_flows,
