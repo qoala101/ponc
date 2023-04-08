@@ -209,7 +209,7 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
     required_inputs_.resize(
         num_inputs_,
         // {.min = settings.low_flow * 100, .max = settings.high_flow * 100}
-        {.min = -3 * 100, .max = -2 * 100});
+        {.min = -9 * 100, .max = -7 * 100});
   }
 
   const auto calculate_pressed = ImGui::Button("Calculate");
@@ -250,7 +250,7 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
 
         if (std::none_of(good_fams.begin(), good_fams.end(),
                          [label](const auto& fam) { return fam == label; })) {
-          continue;
+          // continue;
         }
 
         const auto sample_node = family->CreateSampleNode();
