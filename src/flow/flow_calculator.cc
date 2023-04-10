@@ -205,6 +205,78 @@ void MAKE_TEST_COMBINATION(
   input_client_variants[clients_sum] = std::move(node_copy);
 }
 
+void SAME_OUTPUTS(const TreeNodeEx &node) {
+  auto &input_client_variants = RUN.output_tree_per_num_clients[node.input];
+  const auto first_output = node.outputs.front();
+  const auto num_outputs = node.outputs.size();
+  const auto &tree_per_num_clients =
+      RUN.output_tree_per_num_clients[first_output];
+
+  if (tree_per_num_clients.empty()) {
+    return;
+  }
+
+  // auto tree_per_num_clients_sorted_by_avg_cost =
+  //     std::vector<std::pair<int, TreeNodeEx>>{};
+  // std::transform(tree_per_num_clients.begin(), tree_per_num_clients.end(),
+  //                std::back_inserter(tree_per_num_clients_sorted_by_avg_cost),
+  //                [](const auto &pair) { return pair; });
+  // std::sort(tree_per_num_clients_sorted_by_avg_cost.begin(),
+  //           tree_per_num_clients_sorted_by_avg_cost.end(),
+  //           [](const auto &left, const auto &right) {
+  //             const auto left_avg_cost =
+  //                 static_cast<float>(left.second.CalculateCost()) /
+  //                 left.first;
+  //             const auto right_avg_cost =
+  //                 static_cast<float>(right.second.CalculateCost()) /
+  //                 right.first;
+  //             return left_avg_cost < right_avg_cost;
+  //           });
+
+  if (node.input == 170) {
+    std::cout << "Num outputs: " << num_outputs << "\n";
+
+    for (const auto &pair : tree_per_num_clients) {
+      std::cout << pair.first << " " << pair.second.CalculateCost() << "\n";
+    }
+  }
+
+  for (auto num_clients = 1; num_clients <= RUN.NUM_CLIENTS; ++num_clients) {
+    auto node_copy = node;
+    node_copy.child_nodes.clear();
+
+    auto clients_sum = 0;
+    auto ouput_index = 0;
+    auto total_cost = node.cost;
+
+    while ((clients_sum < num_clients) && (ouput_index < num_outputs)) {
+      const auto need_more_clients = num_clients - clients_sum;
+
+      if (tree_per_num_clients.contains(need_more_clients)) {
+        const auto &tree = tree_per_num_clients.at(need_more_clients);
+        node_copy.EmplaceChild(ouput_index, tree);
+        clients_sum += need_more_clients;
+        total_cost += tree.CalculateCost();
+      } else {
+        const auto biggest = std::prev(tree_per_num_clients.end());
+        const auto &tree = biggest->second;
+        node_copy.EmplaceChild(ouput_index, biggest->second);
+        clients_sum += biggest->first;
+        total_cost += tree.CalculateCost();
+      }
+
+      ++ouput_index;
+    }
+
+    if (input_client_variants.contains(clients_sum) &&
+        input_client_variants.at(clients_sum).CalculateCost() <= total_cost) {
+      continue;
+    }
+
+    input_client_variants[clients_sum] = std::move(node_copy);
+  }
+}
+
 void RememberAlgStepSimple(const std::vector<FamilyFlow> &family_flows,
                            const TreeNodeEx &root, TreeNodeEx &node) {
   for (auto output_index = 0; output_index < node.outputs.size();
@@ -233,6 +305,16 @@ void RememberAlgStepSimple(const std::vector<FamilyFlow> &family_flows,
       RememberAlgStepSimple(family_flows, root, child);
       --RUN.DEPTH;
     }
+  }
+
+  const auto first_output = node.outputs.front();
+
+  if (std::all_of(node.outputs.begin(), node.outputs.end(),
+                  [first_output](const auto output) {
+                    return output == first_output;
+                  })) {
+    SAME_OUTPUTS(node);
+    return;
   }
 
   auto combination = std::map<int, std::pair<int, TreeNodeEx>>{};
