@@ -36,7 +36,8 @@ void DrawFamily(const core::IFamily& family, flow::FamilyFlow& family_flow) {
   ImGui::TableNextRow();
 
   ImGui::TableNextColumn();
-  ImGui::TextUnformatted(family.CreateUiTraits()->GetLabel().c_str());
+  ImGui::Checkbox(family.CreateUiTraits()->GetLabel().c_str(),
+                  &family_flow.CHECK);
 
   ImGui::TableNextColumn();
   ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
@@ -56,57 +57,6 @@ void TraverseDepthFirst(
   }
 
   visitor_after_children(tree_node);
-}
-
-auto MakeDiagram(core::Project& project, const flow::TreeNodeEx& diagram) {
-  auto new_diagram = core::Diagram{"new diag"};
-  auto parent_stack =
-      std::stack<std::pair<const flow::TreeNodeEx*, const core::INode*>>{};
-
-  TraverseDepthFirst(
-      diagram,
-      [&project, &new_diagram, &parent_stack](const auto& tree_node) {
-        auto& id_generator = project.GetIdGenerator();
-
-        const auto& family =
-            core::Project::FindFamily(project, tree_node.family_id);
-        const auto& node =
-            new_diagram.EmplaceNode(family.CreateNode(id_generator));
-
-        if (!parent_stack.empty()) {
-          const auto& [parent_tree_node, parent_node] = parent_stack.top();
-
-          for (const auto& child_node : parent_tree_node->child_nodes) {
-            if (&child_node.second != &tree_node) {
-              continue;
-            }
-
-            const auto parent_output_pins = parent_node->GetOutputPinIds();
-
-            Expects(static_cast<int>(parent_output_pins.size()) >
-                    child_node.first);
-            const auto parent_output_pin_to_this =
-                parent_output_pins[child_node.first];
-
-            const auto input_pin = node.GetInputPinId();
-            Expects(input_pin.has_value());
-
-            const auto link =
-                core::Link{.id = id_generator.Generate<ne::LinkId>(),
-                           .start_pin_id = parent_output_pin_to_this,
-                           .end_pin_id = *input_pin};
-
-            new_diagram.EmplaceLink(link);
-
-            break;
-          }
-        }
-
-        parent_stack.emplace(&tree_node, &node);
-      },
-      [&parent_stack](const auto&) { parent_stack.pop(); });
-
-  return new_diagram;
 }
 
 auto MakeDiagrams(core::Project& project,
@@ -197,26 +147,7 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
     return;
   }
 
-  ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-  ImGui::InputInt("", &num_inputs_);
-
-  if (num_inputs_ <= 0) {
-    num_inputs_ = 1;
-  }
-
-  if (static_cast<int>(required_inputs_.size()) != num_inputs_) {
-    const auto& settings = project.GetSettings();
-    required_inputs_.resize(
-        num_inputs_,
-        // {.min = settings.low_flow * 100, .max = settings.high_flow * 100}
-        {.min = -9 * 100, .max = -7 * 100});
-  }
-
   const auto calculate_pressed = ImGui::Button("Calculate");
-  static auto SPLIT_BY = 30;
-
-  ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-  ImGui::InputInt("Split by", &SPLIT_BY);
 
   // NOLINTBEGIN(*-signed-bitwise)
   const auto table_flags =
@@ -224,6 +155,52 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
       ImGuiTableFlags_Hideable | ImGuiTableFlags_ContextMenuInBody |
       ImGuiTableFlags_BordersH | ImGuiTableFlags_BordersOuter;
   // NOLINTEND(*-signed-bitwise)
+
+  if (ImGui::CollapsingHeader("Requirements", ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (ImGui::BeginTable("Requirements", 2, table_flags)) {
+      ImGui::TableNextRow();
+
+      ImGui::TableNextColumn();
+      ImGui::AlignTextToFramePadding();
+      ImGui::TextUnformatted("Input");
+
+      ImGui::TableNextColumn();
+      ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
+      ImGui::InputInt("##Input", &input_);
+
+      ImGui::TableNextRow();
+
+      ImGui::TableNextColumn();
+      ImGui::AlignTextToFramePadding();
+      ImGui::TextUnformatted("Min Ouput");
+
+      ImGui::TableNextColumn();
+      ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
+      ImGui::InputInt("##Min Ouput", &min_output_);
+
+      ImGui::TableNextRow();
+
+      ImGui::TableNextColumn();
+      ImGui::AlignTextToFramePadding();
+      ImGui::TextUnformatted("Max Ouput");
+
+      ImGui::TableNextColumn();
+      ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
+      ImGui::InputInt("##Max Ouput", &max_output_);
+
+      ImGui::TableNextRow();
+
+      ImGui::TableNextColumn();
+      ImGui::AlignTextToFramePadding();
+      ImGui::TextUnformatted("Clients");
+
+      ImGui::TableNextColumn();
+      ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
+      ImGui::InputInt("##Clients", &num_clients_);
+
+      ImGui::EndTable();
+    }
+  }
 
   if (ImGui::CollapsingHeader("Node Cost", ImGuiTreeNodeFlags_DefaultOpen)) {
     if (ImGui::BeginTable("Node Cost", 2, table_flags)) {
@@ -233,26 +210,12 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
 
       auto index = 0;
 
-      auto good_fams = std::vector{
-          "Splitter 1x2",
-          "Splitter 1x4",
-          "Coupler 20%-80%",
-          // "Coupler 5%-95%",
-          // "Coupler 45%-55%",
-      };
-
       for (const auto& family : project.GetFamilies()) {
         if (const auto family_is_default = family->GetType().has_value()) {
           continue;
         }
 
         const auto label = family->CreateUiTraits()->GetLabel();
-
-        if (std::none_of(good_fams.begin(), good_fams.end(),
-                         [label](const auto& fam) { return fam == label; })) {
-          // continue;
-        }
-
         const auto sample_node = family->CreateSampleNode();
         const auto& output_pin_ids = sample_node->GetOutputPinIds();
 
@@ -289,33 +252,6 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
     }
   }
 
-  if (ImGui::CollapsingHeader("Required Inputs",
-                              ImGuiTreeNodeFlags_DefaultOpen)) {
-    if (ImGui::BeginTable("Required Inputs", 2, table_flags)) {
-      ImGui::TableSetupColumn("Min");
-      ImGui::TableSetupColumn("Max");
-      ImGui::TableHeadersRow();
-
-      auto index = 0;
-
-      for (auto& required_input : required_inputs_) {
-        ImGui::TableNextRow();
-
-        ImGui::TableNextColumn();
-        ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-        ImGui::InputInt((IdLabel(index) + "Min").c_str(), &required_input.min);
-
-        ImGui::TableNextColumn();
-        ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-        ImGui::InputInt((IdLabel(index) + "Max").c_str(), &required_input.max);
-
-        ++index;
-      }
-
-      ImGui::EndTable();
-    }
-  }
-
   if (!calculate_pressed) {
     return;
   }
@@ -326,10 +262,11 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
                        .client = flow::TreeNodeEx{flow::FamilyFlow{
                            .family_id = 2, .outputs = {0}, .cost = 0}},
                        .family_flows = family_flows_,
-                       .input_ranges = required_inputs_});
+                       .num_clients = num_clients_,
+                       .range = {.min = min_output_, .max = max_output_}});
 
   std::cout << "Calculated: " << result.size() << " trees\n";
 
-  callbacks.calculated_diagrams(MakeDiagrams(project, result, SPLIT_BY));
+  callbacks.calculated_diagrams(MakeDiagrams(project, result, 30));
 }
 }  // namespace vh::ponc::draw

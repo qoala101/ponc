@@ -14,12 +14,10 @@ struct InputRange {
 };
 
 struct FamilyFlow {
+  bool CHECK{true};
   core::FamilyId family_id{};
   std::vector<int> outputs{};
   int cost{};
-
-  auto GetMinDecrementOutput() const -> int;
-  auto GetMaxDecrementOutput() const -> int;
 };
 
 struct TreeNodeEx {
@@ -34,10 +32,6 @@ struct TreeNodeEx {
   explicit TreeNodeEx(const FamilyFlow &family_flow);
   TreeNodeEx() = default;
   auto EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx &;
-  auto AreOutputsLessThan(int value) const -> bool;
-  auto GetNumChildren() const -> int;
-  auto GetNumOutputs() const -> int;
-  auto GetChildIndex(const TreeNodeEx *child) const -> int;
   auto CalculateCost() const -> int;
 
  private:
@@ -50,7 +44,8 @@ struct CalculatorInput {
   TreeNodeEx root{};
   TreeNodeEx client{};
   std::vector<FamilyFlow> family_flows{};
-  std::vector<InputRange> input_ranges{};
+  int num_clients{};
+  InputRange range{};
 };
 
 auto Calculate(const CalculatorInput &input) -> std::vector<TreeNodeEx>;
