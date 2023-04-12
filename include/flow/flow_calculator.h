@@ -3,52 +3,64 @@
 
 #include <cstdint>
 #include <map>
+#include <set>
+#include <stack>
 #include <unordered_map>
 
 #include "core_i_family.h"
 
 namespace vh::ponc::flow {
-struct InputRange {
-  int min{};
-  int max{};
+template <typename T>
+struct Range {
+  T min{};
+  T max{};
 };
 
-struct FamilyFlow {
-  bool CHECK{true};
+template <typename T>
+struct Family {
   core::FamilyId family_id{};
-  std::vector<int> outputs{};
-  int cost{};
+  std::vector<T> outputs{};
+  T cost{};
+};
+
+template <typename T>
+struct CalculatorInput {
+  core::FamilyId input_family_id{};
+  core::FamilyId output_family_id{};
+  T input{};
+  Range<T> output_range{};
+  int num_outputs{};
+  std::vector<Family<T>> family_flows{};
 };
 
 struct TreeNodeEx {
-  core::FamilyId family_id{};
-  std::vector<int> outputs{};
-  int cost{};
-  std::map<int, TreeNodeEx> child_nodes{};
+  static auto FromFamily(const Family<int> &family_flow) -> TreeNodeEx;
 
-  int input{};
-  const TreeNodeEx *parent{};
-
-  explicit TreeNodeEx(const FamilyFlow &family_flow);
-  TreeNodeEx() = default;
   auto EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx &;
   auto CalculateCost() const -> int;
 
+  core::FamilyId family_id{};
+  std::vector<int> outputs{};
+  int cost{};
+
+  int input{};
+  std::map<int, TreeNodeEx> child_nodes{};
+
  private:
-  ///
   friend auto operator==(const TreeNodeEx &, const TreeNodeEx &)
       -> bool = default;
 };
 
-struct CalculatorInput {
-  TreeNodeEx root{};
-  TreeNodeEx client{};
-  std::vector<FamilyFlow> family_flows{};
-  int num_clients{};
-  InputRange range{};
-};
+class Calculator {
+ public:
+  auto Start(const CalculatorInput<int> &data) -> std::vector<TreeNodeEx>;
+  auto Step() -> bool;
+  void Stop();
+  auto GetResult() -> TreeNodeEx;
 
-auto Calculate(const CalculatorInput &input) -> std::vector<TreeNodeEx>;
+ private:
+  CalculatorInput<int> data{};
+};
 }  // namespace vh::ponc::flow
 
 #endif  // VH_PONC_FLOW_CALCULATOR_H_

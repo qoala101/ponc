@@ -52,11 +52,11 @@ void TraverseDepthFirstEx(
   visitor_after_children(tree_node);
 }
 
-auto InRange(int value, const InputRange &range) {
+auto InRange(int value, const Range<int> &range) {
   return (value >= range.min) && (value <= range.max);
 }
 
-auto GetMinOutput(const std::vector<InputRange> &output_ranges) {
+auto GetMinOutput(const std::vector<Range<int>> &output_ranges) {
   auto min_output = std::numeric_limits<int>::max();
 
   for (const auto &range : output_ranges) {
@@ -74,13 +74,10 @@ struct RunData {
   int min_output{};
   TreeNodeEx client{};
 
-  InputRange RANGE{};
+  Range<int> RANGE{};
   int NUM_CLIENTS{};
 
   std::set<int> visited_outputs{};
-  std::stack<int> UNIQUE_STACK{};
-  std::map<int, int> OUTPUT_CHILDREN{};
-  std::map<int, std::set<uintptr_t>> OUPUT_FAMILIES{};
 
   std::map<int, std::map<int, TreeNodeEx>> output_tree_per_num_clients{};
 };
@@ -258,7 +255,7 @@ void MAKE_TEST_COMBINATION_FOR_SAME_OUTPUTS(
   input_client_variants[clients_sum] = std::move(node_copy);
 }
 
-void RememberAlgStepSimple(const std::vector<FamilyFlow> &family_flows,
+void RememberAlgStepSimple(const std::vector<Family<int>> &family_flows,
                            const TreeNodeEx &root, TreeNodeEx &node) {
   for (auto output_index = 0; output_index < node.outputs.size();
        ++output_index) {
@@ -283,8 +280,8 @@ void RememberAlgStepSimple(const std::vector<FamilyFlow> &family_flows,
     // amount of pins
 
     for (auto family_i = 0; family_i < family_flows.size(); ++family_i) {
-      auto &child =
-          node.EmplaceChild(output_index, TreeNodeEx{family_flows[family_i]});
+      auto &child = node.EmplaceChild(
+          output_index, TreeNodeEx::FromFamily(family_flows[family_i]));
 
       ++RUN.DEPTH;
       RememberAlgStepSimple(family_flows, root, child);
@@ -312,8 +309,8 @@ void RememberAlgStepSimple(const std::vector<FamilyFlow> &family_flows,
 }
 
 auto RememberAlg(TreeNodeEx root, TreeNodeEx client,
-                 const std::vector<FamilyFlow> &family_flows, int num_clients,
-                 const InputRange &range) {
+                 const std::vector<Family<int>> &family_flows, int num_clients,
+                 const Range<int> &range) {
   RUN = RunData{};
   RUN.out_trees = std::vector<TreeNodeEx>{};
   RUN.min_output = range.min;
@@ -342,10 +339,11 @@ auto RememberAlg(TreeNodeEx root, TreeNodeEx client,
 }
 }  // namespace
 
-TreeNodeEx::TreeNodeEx(const FamilyFlow &family_flow)
-    : family_id{family_flow.family_id},
-      outputs{family_flow.outputs},
-      cost{family_flow.cost} {}
+auto TreeNodeEx::FromFamily(const Family<int> &family_flow) -> TreeNodeEx {
+  return {.family_id = family_flow.family_id,
+          .outputs = family_flow.outputs,
+          .cost = family_flow.cost};
+}
 
 auto TreeNodeEx::CalculateCost() const -> int {
   auto cost = 0;
@@ -359,7 +357,6 @@ auto TreeNodeEx::CalculateCost() const -> int {
 
 auto TreeNodeEx::EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx & {
   child.input = outputs[index];
-  child.parent = this;
 
   for (auto &output : child.outputs) {
     output += child.input;
@@ -368,8 +365,11 @@ auto TreeNodeEx::EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx & {
   return child_nodes[index] = std::move(child);
 }
 
-auto Calculate(const CalculatorInput &input) -> std::vector<TreeNodeEx> {
-  return RememberAlg(input.root, input.client, input.family_flows,
-                     input.num_clients, input.range);
+auto Calculator::Start(const CalculatorInput<int> &data)
+    -> std::vector<TreeNodeEx> {
+  return RememberAlg(
+      TreeNodeEx{.family_id = data.input_family_id, .outputs = {data.input}},
+      TreeNodeEx{.family_id = data.output_family_id}, data.family_flows,
+      data.num_outputs, data.output_range);
 }
 }  // namespace vh::ponc::flow

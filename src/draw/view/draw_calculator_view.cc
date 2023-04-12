@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <future>
 #include <iostream>
 #include <iterator>
 #include <set>
@@ -32,16 +33,18 @@
 
 namespace vh::ponc::draw {
 namespace {
-void DrawFamily(const core::IFamily& family, flow::FamilyFlow& family_flow) {
+void DrawFamily(const core::IFamily& family,
+                std::pair<bool, flow::Family<float>>& family_flow) {
   ImGui::TableNextRow();
 
   ImGui::TableNextColumn();
   ImGui::Checkbox(family.CreateUiTraits()->GetLabel().c_str(),
-                  &family_flow.CHECK);
+                  &family_flow.first);
 
   ImGui::TableNextColumn();
   ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-  ImGui::InputInt(IdLabel(family.GetId()).c_str(), &family_flow.cost);
+  ImGui::InputFloat(IdLabel(family.GetId()).c_str(), &family_flow.second.cost,
+                    0, 0, "%.3f");
 }
 
 void TraverseDepthFirst(
@@ -149,6 +152,34 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
 
   const auto calculate_pressed = ImGui::Button("Calculate");
 
+  ImGui::BeginVertical("pr");
+  // Animate a simple progress bar
+  static float progress = 0.0f, progress_dir = 1.0f;
+  if (true) {
+    progress += progress_dir * 0.4f * ImGui::GetIO().DeltaTime;
+    if (progress >= +1.1f) {
+      progress = +1.1f;
+      progress_dir *= -1.0f;
+    }
+    if (progress <= -0.1f) {
+      progress = -0.1f;
+      progress_dir *= -1.0f;
+    }
+  }
+
+  // Typically we would use ImVec2(-1.0f,0.0f) or ImVec2(-FLT_MIN,0.0f) to use
+  // all available width, or ImVec2(width,0.0f) for a specified width.
+  // ImVec2(0.0f,0.0f) uses ItemWidth.
+  ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f));
+  ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
+  ImGui::Text("Progress Bar");
+
+  float progress_saturated = std::clamp(progress, 0.0f, 1.0f);
+  char buf[32];
+  sprintf(buf, "%d/%d", (int)(progress_saturated * 1753), 1753);
+  ImGui::ProgressBar(progress, ImVec2(0.f, 0.f), buf);
+  ImGui::EndVertical();
+
   // NOLINTBEGIN(*-signed-bitwise)
   const auto table_flags =
       ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
@@ -158,6 +189,10 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
 
   if (ImGui::CollapsingHeader("Requirements", ImGuiTreeNodeFlags_DefaultOpen)) {
     if (ImGui::BeginTable("Requirements", 2, table_flags)) {
+      ImGui::TableSetupColumn("Requirement",
+                              ImGuiTableColumnFlags_NoHeaderLabel);
+      ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_NoHeaderLabel);
+
       ImGui::TableNextRow();
 
       ImGui::TableNextColumn();
@@ -166,7 +201,7 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
 
       ImGui::TableNextColumn();
       ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-      ImGui::InputInt("##Input", &input_);
+      ImGui::InputFloat("##Input", &input_, 0, 0, "%.3f");
 
       ImGui::TableNextRow();
 
@@ -176,7 +211,7 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
 
       ImGui::TableNextColumn();
       ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-      ImGui::InputInt("##Min Ouput", &min_output_);
+      ImGui::InputFloat("##Min Ouput", &min_output_, 0, 0, "%.3f");
 
       ImGui::TableNextRow();
 
@@ -186,7 +221,7 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
 
       ImGui::TableNextColumn();
       ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-      ImGui::InputInt("##Max Ouput", &max_output_);
+      ImGui::InputFloat("##Max Ouput", &max_output_, 0, 0, "%.3f");
 
       ImGui::TableNextRow();
 
@@ -204,6 +239,7 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
 
   if (ImGui::CollapsingHeader("Node Cost", ImGuiTreeNodeFlags_DefaultOpen)) {
     if (ImGui::BeginTable("Node Cost", 2, table_flags)) {
+      ImGui::TableSetupScrollFreeze(0, 1);
       ImGui::TableSetupColumn("Node Type");
       ImGui::TableSetupColumn("Cost, $");
       ImGui::TableHeadersRow();
@@ -227,21 +263,21 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
         const auto output_pin_flows =
             sample_node->GetInitialFlow().output_pin_flows;
 
-        auto outputs = std::vector<int>{};
-        std::transform(
-            output_pin_ids.begin(), output_pin_ids.end(),
-            std::back_inserter(outputs),
-            [&output_pin_flows](const auto pin_id) {
-              return static_cast<int>(output_pin_flows.at(pin_id.Get()));
-            });
+        auto outputs = std::vector<float>{};
+        std::transform(output_pin_ids.begin(), output_pin_ids.end(),
+                       std::back_inserter(outputs),
+                       [&output_pin_flows](const auto pin_id) {
+                         return output_pin_flows.at(pin_id.Get());
+                       });
 
         const auto family_id = family->GetId().Get();
-        auto& family_flow = (family_flows_.size() > index)
-                                ? family_flows_[index]
-                                : family_flows_.emplace_back(flow::FamilyFlow{
-                                      .family_id = family_id,
-                                      .outputs = std::move(outputs),
-                                      .cost = 10});
+        auto& family_flow =
+            (family_flows_.size() > index)
+                ? family_flows_[index]
+                : family_flows_.emplace_back(
+                      true, flow::Family<float>{.family_id = family_id,
+                                                .outputs = std::move(outputs),
+                                                .cost = 100});
 
         DrawFamily(*family, family_flow);
 
@@ -256,14 +292,31 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
     return;
   }
 
-  const auto result =
-      flow::Calculate({.root = flow::TreeNodeEx{flow::FamilyFlow{
-                           .family_id = 1, .outputs = {600}, .cost = 0}},
-                       .client = flow::TreeNodeEx{flow::FamilyFlow{
-                           .family_id = 2, .outputs = {0}, .cost = 0}},
-                       .family_flows = family_flows_,
-                       .num_clients = num_clients_,
-                       .range = {.min = min_output_, .max = max_output_}});
+  auto family_flows = std::vector<flow::Family<int>>{};
+
+  for (const auto& [checked, family] : family_flows_) {
+    if (!checked) {
+      continue;
+    }
+
+    auto& int_family = family_flows.emplace_back(
+        flow::Family<int>{.family_id = family.family_id,
+                          .cost = static_cast<int>(family.cost * 100)});
+
+    for (const auto output : family.outputs) {
+      int_family.outputs.emplace_back(output * 100);
+    }
+  }
+
+  const auto result = flow::Calculator{}.Start(flow::CalculatorInput<int>{
+      .input_family_id = 1,
+      .output_family_id = 2,
+      .input = static_cast<int>(input_ * 100),
+      .output_range = {.min = static_cast<int>(min_output_ * 100),
+                       .max = static_cast<int>(max_output_ * 100)},
+      .num_outputs = num_clients_,
+      .family_flows = family_flows,
+  });
 
   std::cout << "Calculated: " << result.size() << " trees\n";
 

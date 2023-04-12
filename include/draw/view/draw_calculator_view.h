@@ -26,11 +26,11 @@ class CalculatorView : public IView {
   void Draw(core::Project &project, const Callbacks &callbacks);
 
  private:
-  std::vector<flow::FamilyFlow> family_flows_{};
+  std::vector<std::pair<bool, flow::Family<float>>> family_flows_{};
 
-  int input_{6000};
-  int min_output_{-2200};
-  int max_output_{-1800};
+  float input_{6};
+  float min_output_{-22};
+  float max_output_{-18};
   int num_clients_{6};
 };
 }  // namespace vh::ponc::draw
