@@ -59,7 +59,34 @@ class Calculator {
   auto GetResult() -> TreeNodeEx;
 
  private:
+  void MAKE_TEST_COMBINATION(
+      const TreeNodeEx &node,
+      std::map<int /*ouput_index*/, std::pair<int, TreeNodeEx>> &combination,
+      int output_index, int clients_sum);
+
+  void MAKE_TEST_COMBINATION_FOR_SAME_OUTPUTS(
+      const TreeNodeEx &node,
+      std::map<int /*ouput_index*/, std::pair<int, TreeNodeEx>> &combination,
+      int start_with_combination, int output_index, int clients_sum);
+
+  void RememberAlgStepSimple(const std::vector<Family<int>> &family_flows,
+                             const TreeNodeEx &root, TreeNodeEx &node);
+
   CalculatorInput<int> data{};
+
+  int I = 0;
+  int DEPTH = 0;
+  int NUM_CHECKED = 0;
+  std::vector<TreeNodeEx> out_trees{};
+  int min_output{};
+  TreeNodeEx client{};
+
+  Range<int> RANGE{};
+  int NUM_CLIENTS{};
+
+  std::set<int> visited_outputs{};
+
+  std::map<int, std::map<int, TreeNodeEx>> output_tree_per_num_clients{};
 };
 }  // namespace vh::ponc::flow
 
