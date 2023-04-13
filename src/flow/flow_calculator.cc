@@ -30,23 +30,9 @@ void TraverseDepthFirstExConst(
     const std::invocable<const TreeNodeEx &> auto &visitor_after_children) {
   visitor_before_children(tree_node);
 
-  for (const auto &child : tree_node.child_nodes) {
+  for (const auto &child : tree_node.GetChildren()) {
     TraverseDepthFirstExConst(child.second, visitor_before_children,
                               visitor_after_children);
-  }
-
-  visitor_after_children(tree_node);
-}
-
-void TraverseDepthFirstEx(
-    TreeNodeEx &tree_node,
-    const std::invocable<TreeNodeEx &> auto &visitor_before_children,
-    const std::invocable<TreeNodeEx &> auto &visitor_after_children) {
-  visitor_before_children(tree_node);
-
-  for (auto &child : tree_node.child_nodes) {
-    TraverseDepthFirstEx(child.second, visitor_before_children,
-                         visitor_after_children);
   }
 
   visitor_after_children(tree_node);
@@ -58,22 +44,35 @@ auto InRange(int value, const Range<int> &range) {
 }  // namespace
 
 auto TreeNodeEx::FromFamily(const Family<int> &family_flow) -> TreeNodeEx {
-  return {.family_id = family_flow.family_id,
-          .outputs = family_flow.outputs,
-          .cost = family_flow.cost};
+  auto a = TreeNodeEx{};
+
+  a.family_id = family_flow.family_id;
+  a.outputs = family_flow.outputs;
+  a.node_cost_ = family_flow.cost;
+
+  return a;
 }
 
 auto TreeNodeEx::CalculateCost() const -> int {
   auto cost = 0;
 
   TraverseDepthFirstExConst(
-      *this, [&cost](const auto &tree_node) { cost += tree_node.cost; },
+      *this,
+      [&cost](const auto &tree_node) { cost += tree_node.GetNodeCost(); },
       [](const auto &) {});
 
   return cost;
 }
 
+auto TreeNodeEx::GetNodeCost() const -> int { return node_cost_; }
+
+auto TreeNodeEx::GetChildren() const -> const std::map<int, TreeNodeEx> & {
+  return child_nodes;
+}
+
 auto TreeNodeEx::EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx & {
+  EraseChild(index);
+
   child.input = outputs[index];
 
   for (auto &output : child.outputs) {
@@ -83,15 +82,26 @@ auto TreeNodeEx::EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx & {
   return child_nodes[index] = std::move(child);
 }
 
+void TreeNodeEx::EraseChild(int index) {
+  if (!child_nodes.contains(index)) {
+    return;
+  }
+
+  child_nodes.erase(index);
+}
+
 auto Calculator::Start(const CalculatorInput<int> &data)
     -> std::vector<TreeNodeEx> {
   data_ = data;
 
-  auto root =
-      TreeNodeEx{.family_id = data.input_family_id, .outputs = {data.input}};
+  auto root = TreeNodeEx{};
+  root.family_id = data.input_family_id;
+  root.outputs = {data.input};
 
   out_trees = std::vector<TreeNodeEx>{};
-  client = TreeNodeEx{.family_id = data.output_family_id};
+
+  client_node_ = TreeNodeEx{};
+  client_node_.family_id = data.output_family_id;
 
   RememberAlgStepSimple(data.family_flows, root, root);
 
@@ -107,18 +117,21 @@ auto Calculator::Start(const CalculatorInput<int> &data)
 
   for (const auto &[i, tree] : input_client_variants) {
     auto &root_copy = out_trees.emplace_back(root);
-    root_copy.child_nodes[0] = tree;
+    root_copy.EmplaceChild(0, tree);
   }
 
   return out_trees;
 }
 
-void Calculator::MAKE_TEST_COMBINATION(
+void Calculator::MakeCombination(
     const TreeNodeEx &node,
-    std::map<int /*ouput_index*/, std::pair<int, TreeNodeEx>> &combination,
-    int start_with_combination, int output_index, int clients_sum,
-    bool same_outputs) {
-  if (output_index < node.outputs.size()) {
+    std::map<int /*ouput_index*/, std::pair<int /*num_clients*/, TreeNodeEx>>
+        &combination,
+    int output_index, int start_with_combination, int clients_sum,
+    int clients_cost, bool same_outputs) {
+  auto &input_client_variants = output_tree_per_num_clients[node.input];
+
+  if (output_index < static_cast<int>(node.outputs.size())) {
     const auto output = node.outputs[output_index];
     const auto &output_combinations = output_tree_per_num_clients[output];
 
@@ -126,24 +139,33 @@ void Calculator::MAKE_TEST_COMBINATION(
              same_outputs ? start_with_combination
                           : static_cast<int>(output_combinations.size());
          output_combination_index >= 0; --output_combination_index) {
-      auto num_added_clients = 0;
+      if (combination.contains(output_index)) {
+        clients_sum -= combination.at(output_index).first;
+        clients_cost -= combination.at(output_index).second.CalculateCost();
+      }
 
       if (output_combination_index == 0) {
         combination.erase(output_index);
       } else {
         combination[output_index] = *std::next(output_combinations.begin(),
                                                output_combination_index - 1);
-        num_added_clients = combination[output_index].first;
+        clients_sum += combination[output_index].first;
+        clients_cost += combination[output_index].second.CalculateCost();
       }
 
-      if ((clients_sum + num_added_clients) > data_.num_outputs) {
+      if (clients_sum > data_.num_outputs) {
         continue;
       }
 
-      clients_sum += num_added_clients;
-      MAKE_TEST_COMBINATION(node, combination, output_combination_index,
-                            output_index + 1, clients_sum, same_outputs);
-      clients_sum -= num_added_clients;
+      if (input_client_variants.contains(clients_sum) &&
+          (clients_cost >
+           input_client_variants.at(clients_sum).CalculateCost())) {
+        continue;
+      }
+
+      MakeCombination(node, combination, output_index + 1,
+                      output_combination_index, clients_sum, clients_cost,
+                      same_outputs);
     }
 
     return;
@@ -153,21 +175,7 @@ void Calculator::MAKE_TEST_COMBINATION(
     return;
   }
 
-  Expects(clients_sum <= data_.num_outputs);
-
-  auto total_cost = node.cost;
-
-  for (auto output_index = 0; output_index < node.outputs.size();
-       ++output_index) {
-    if (!combination.contains(output_index)) {
-      continue;
-    }
-
-    const auto &[num_clients, tree] = combination.at(output_index);
-    total_cost += tree.CalculateCost();
-  }
-
-  auto &input_client_variants = output_tree_per_num_clients[node.input];
+  auto total_cost = node.GetNodeCost() + clients_cost;
 
   if (same_outputs) {
     if (input_client_variants.contains(clients_sum)) {
@@ -211,7 +219,7 @@ void Calculator::MAKE_TEST_COMBINATION(
   for (auto output_index = 0; output_index < node.outputs.size();
        ++output_index) {
     if (!combination.contains(output_index)) {
-      node_copy.child_nodes.erase(output_index);
+      node_copy.EraseChild(output_index);
       continue;
     }
 
@@ -225,8 +233,8 @@ void Calculator::MAKE_TEST_COMBINATION(
 void Calculator::RememberAlgStepSimple(
     const std::vector<Family<int>> &family_flows, const TreeNodeEx &root,
     TreeNodeEx &node) {
-  for (auto output_index = 0; output_index < node.outputs.size();
-       ++output_index) {
+  for (auto output_index = 0;
+       output_index < static_cast<int>(node.outputs.size()); ++output_index) {
     const auto output = node.outputs[output_index];
 
     if (output < data_.output_range.min) {
@@ -240,16 +248,16 @@ void Calculator::RememberAlgStepSimple(
     visited_outputs.emplace(output);
 
     if (InRange(output, data_.output_range)) {
-      output_tree_per_num_clients[output].emplace(1, client);
+      output_tree_per_num_clients[output].emplace(1, client_node_);
     }
 
     // here we should chose how to traverse families.
     // we might sort them by the cost and then sort by other properties like
     // amount of pins
 
-    for (auto family_i = 0; family_i < family_flows.size(); ++family_i) {
-      auto &child = node.EmplaceChild(
-          output_index, TreeNodeEx::FromFamily(family_flows[family_i]));
+    for (const auto &family : family_flows) {
+      auto &child =
+          node.EmplaceChild(output_index, TreeNodeEx::FromFamily(family));
 
       RememberAlgStepSimple(family_flows, root, child);
     }
@@ -257,19 +265,12 @@ void Calculator::RememberAlgStepSimple(
 
   const auto first_output = node.outputs.front();
   const auto &output_combinations = output_tree_per_num_clients[first_output];
-
-  if (std::all_of(node.outputs.begin(), node.outputs.end(),
-                  [first_output](const auto output) {
-                    return output == first_output;
-                  })) {
-    auto combination = std::map<int, std::pair<int, TreeNodeEx>>{};
-    MAKE_TEST_COMBINATION(node, combination, output_combinations.size(), 0, 0,
-                          true);
-    return;
-  }
+  const auto same_outputs = std::all_of(
+      node.outputs.begin(), node.outputs.end(),
+      [first_output](const auto output) { return output == first_output; });
 
   auto combination = std::map<int, std::pair<int, TreeNodeEx>>{};
-  MAKE_TEST_COMBINATION(node, combination, output_combinations.size(), 0, 0,
-                        false);
+  MakeCombination(node, combination, 0, output_combinations.size(), 0, 0,
+                  same_outputs);
 }
 }  // namespace vh::ponc::flow

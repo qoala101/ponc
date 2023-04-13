@@ -37,16 +37,22 @@ struct TreeNodeEx {
   static auto FromFamily(const Family<int> &family_flow) -> TreeNodeEx;
 
   auto EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx &;
+  void EraseChild(int index);
+
   auto CalculateCost() const -> int;
 
   core::FamilyId family_id{};
   std::vector<int> outputs{};
-  int cost{};
+
+  auto GetNodeCost() const -> int;
+  auto GetChildren() const -> const std::map<int, TreeNodeEx> &;
 
   int input{};
-  std::map<int, TreeNodeEx> child_nodes{};
 
  private:
+  std::map<int, TreeNodeEx> child_nodes{};
+  int node_cost_{};
+
   friend auto operator==(const TreeNodeEx &, const TreeNodeEx &)
       -> bool = default;
 };
@@ -59,10 +65,10 @@ class Calculator {
   auto GetResult() -> TreeNodeEx;
 
  private:
-  void MAKE_TEST_COMBINATION(
+  void MakeCombination(
       const TreeNodeEx &node,
       std::map<int /*ouput_index*/, std::pair<int, TreeNodeEx>> &combination,
-      int start_with_combination, int output_index, int clients_sum,
+      int output_index, int start_with_combination, int clients_sum, int clients_cost,
       bool same_outputs);
 
   void RememberAlgStepSimple(const std::vector<Family<int>> &family_flows,
@@ -71,7 +77,7 @@ class Calculator {
   CalculatorInput<int> data_{};
 
   std::vector<TreeNodeEx> out_trees{};
-  TreeNodeEx client{};
+  TreeNodeEx client_node_{};
 
   std::set<int> visited_outputs{};
 
