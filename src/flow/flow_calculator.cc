@@ -24,20 +24,6 @@
 
 namespace vh::ponc::flow {
 namespace {
-void TraverseDepthFirstExConst(
-    const TreeNodeEx &tree_node,
-    const std::invocable<const TreeNodeEx &> auto &visitor_before_children,
-    const std::invocable<const TreeNodeEx &> auto &visitor_after_children) {
-  visitor_before_children(tree_node);
-
-  for (const auto &child : tree_node.GetChildren()) {
-    TraverseDepthFirstExConst(child.second, visitor_before_children,
-                              visitor_after_children);
-  }
-
-  visitor_after_children(tree_node);
-}
-
 auto InRange(int value, const Range<int> &range) {
   return (value >= range.min) && (value <= range.max);
 }
@@ -53,18 +39,11 @@ auto TreeNodeEx::FromFamily(const Family<int> &family_flow) -> TreeNodeEx {
   return a;
 }
 
-auto TreeNodeEx::CalculateCost() const -> int {
-  auto cost = 0;
-
-  TraverseDepthFirstExConst(
-      *this,
-      [&cost](const auto &tree_node) { cost += tree_node.GetNodeCost(); },
-      [](const auto &) {});
-
-  return cost;
-}
-
 auto TreeNodeEx::GetNodeCost() const -> int { return node_cost_; }
+
+auto TreeNodeEx::GetTreeCost() const -> int { return tree_cost_; }
+
+void TreeNodeEx::SetTreeCost(int cost) { tree_cost_ = cost; }
 
 auto TreeNodeEx::GetChildren() const -> const std::map<int, TreeNodeEx> & {
   return child_nodes;
@@ -141,7 +120,7 @@ void Calculator::MakeCombination(
          output_combination_index >= 0; --output_combination_index) {
       if (combination.contains(output_index)) {
         clients_sum -= combination.at(output_index).first;
-        clients_cost -= combination.at(output_index).second.CalculateCost();
+        clients_cost -= combination.at(output_index).second.GetTreeCost();
       }
 
       if (output_combination_index == 0) {
@@ -150,7 +129,7 @@ void Calculator::MakeCombination(
         combination[output_index] = *std::next(output_combinations.begin(),
                                                output_combination_index - 1);
         clients_sum += combination[output_index].first;
-        clients_cost += combination[output_index].second.CalculateCost();
+        clients_cost += combination[output_index].second.GetTreeCost();
       }
 
       if (clients_sum > data_.num_outputs) {
@@ -159,7 +138,7 @@ void Calculator::MakeCombination(
 
       if (input_client_variants.contains(clients_sum) &&
           (clients_cost >
-           input_client_variants.at(clients_sum).CalculateCost())) {
+           input_client_variants.at(clients_sum).GetTreeCost())) {
         continue;
       }
 
@@ -180,7 +159,7 @@ void Calculator::MakeCombination(
   if (same_outputs) {
     if (input_client_variants.contains(clients_sum)) {
       const auto existing_variant_cost =
-          input_client_variants.at(clients_sum).CalculateCost();
+          input_client_variants.at(clients_sum).GetTreeCost();
 
       if (existing_variant_cost < total_cost) {
         return;
@@ -191,7 +170,9 @@ void Calculator::MakeCombination(
         const auto PARAM_EQUAL_COST_CHOSE_MIN_CLIENTS_PER_OUTPUT =
             !PARAM_EQUAL_COST_CHOSE_MAX_CLIENTS_PER_OUTPUT;
         const auto PARAM_EQUAL_COST_CHOSE_MORE_AVERAGE =
-            true;  // not implemented
+            false;  // not implemented
+        const auto PARAM_EQUAL_COST_CHOSE_LESS_FREE_OUTPUTS =
+            false;  // not implemented
 
         // here <= or < controls. <= means that first variant would be chosen,
         // where single output has max clients. < means that last one would be
@@ -209,7 +190,7 @@ void Calculator::MakeCombination(
     // need to add some choosing here when cost is equal. Atleast
     // PARAM_EQUAL_COST_CHOSE_MORE_AVERAGE
     if (input_client_variants.contains(clients_sum) &&
-        input_client_variants.at(clients_sum).CalculateCost() <= total_cost) {
+        input_client_variants.at(clients_sum).GetTreeCost() <= total_cost) {
       return;
     }
   }
@@ -227,6 +208,7 @@ void Calculator::MakeCombination(
     node_copy.EmplaceChild(output_index, tree);
   }
 
+  node_copy.SetTreeCost(total_cost);
   input_client_variants[clients_sum] = std::move(node_copy);
 }
 
@@ -248,6 +230,8 @@ void Calculator::RememberAlgStepSimple(
     visited_outputs.emplace(output);
 
     if (InRange(output, data_.output_range)) {
+      // can here be any issues? like when ouput->client is ok and
+      // ouput->child->client is also ok
       output_tree_per_num_clients[output].emplace(1, client_node_);
     }
 

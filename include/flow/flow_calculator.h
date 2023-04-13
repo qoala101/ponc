@@ -39,12 +39,12 @@ struct TreeNodeEx {
   auto EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx &;
   void EraseChild(int index);
 
-  auto CalculateCost() const -> int;
-
   core::FamilyId family_id{};
   std::vector<int> outputs{};
 
   auto GetNodeCost() const -> int;
+  auto GetTreeCost() const -> int;
+  void SetTreeCost(int cost);
   auto GetChildren() const -> const std::map<int, TreeNodeEx> &;
 
   int input{};
@@ -52,6 +52,7 @@ struct TreeNodeEx {
  private:
   std::map<int, TreeNodeEx> child_nodes{};
   int node_cost_{};
+  int tree_cost_{};
 
   friend auto operator==(const TreeNodeEx &, const TreeNodeEx &)
       -> bool = default;
@@ -68,8 +69,8 @@ class Calculator {
   void MakeCombination(
       const TreeNodeEx &node,
       std::map<int /*ouput_index*/, std::pair<int, TreeNodeEx>> &combination,
-      int output_index, int start_with_combination, int clients_sum, int clients_cost,
-      bool same_outputs);
+      int output_index, int start_with_combination, int clients_sum,
+      int clients_cost, bool same_outputs);
 
   void RememberAlgStepSimple(const std::vector<Family<int>> &family_flows,
                              const TreeNodeEx &root, TreeNodeEx &node);
@@ -81,7 +82,9 @@ class Calculator {
 
   std::set<int> visited_outputs{};
 
-  std::map<int, std::map<int, TreeNodeEx>> output_tree_per_num_clients{};
+  std::map<int /*output value*/,
+           std::map<int /*num clients*/, TreeNodeEx /*cheapest tree*/>>
+      output_tree_per_num_clients{};
 };
 }  // namespace vh::ponc::flow
 
