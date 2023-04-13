@@ -85,13 +85,13 @@ auto TreeNodeEx::EmplaceChild(int index, TreeNodeEx child) -> TreeNodeEx & {
 
 auto Calculator::Start(const CalculatorInput<int> &data)
     -> std::vector<TreeNodeEx> {
+  data_ = data;
+
   auto root =
       TreeNodeEx{.family_id = data.input_family_id, .outputs = {data.input}};
+
   out_trees = std::vector<TreeNodeEx>{};
-  min_output = data.output_range.min;
   client = TreeNodeEx{.family_id = data.output_family_id};
-  RANGE = data.output_range;
-  NUM_CLIENTS = data.num_outputs;
 
   RememberAlgStepSimple(data.family_flows, root, root);
 
@@ -116,13 +116,15 @@ auto Calculator::Start(const CalculatorInput<int> &data)
 void Calculator::MAKE_TEST_COMBINATION(
     const TreeNodeEx &node,
     std::map<int /*ouput_index*/, std::pair<int, TreeNodeEx>> &combination,
-    int output_index, int clients_sum) {
+    int start_with_combination, int output_index, int clients_sum,
+    bool same_outputs) {
   if (output_index < node.outputs.size()) {
     const auto output = node.outputs[output_index];
     const auto &output_combinations = output_tree_per_num_clients[output];
 
     for (auto output_combination_index =
-             static_cast<int>(output_combinations.size());
+             same_outputs ? start_with_combination
+                          : static_cast<int>(output_combinations.size());
          output_combination_index >= 0; --output_combination_index) {
       auto num_added_clients = 0;
 
@@ -134,12 +136,13 @@ void Calculator::MAKE_TEST_COMBINATION(
         num_added_clients = combination[output_index].first;
       }
 
-      if ((clients_sum + num_added_clients) > NUM_CLIENTS) {
+      if ((clients_sum + num_added_clients) > data_.num_outputs) {
         continue;
       }
 
       clients_sum += num_added_clients;
-      MAKE_TEST_COMBINATION(node, combination, output_index + 1, clients_sum);
+      MAKE_TEST_COMBINATION(node, combination, output_combination_index,
+                            output_index + 1, clients_sum, same_outputs);
       clients_sum -= num_added_clients;
     }
 
@@ -150,7 +153,7 @@ void Calculator::MAKE_TEST_COMBINATION(
     return;
   }
 
-  Expects(clients_sum <= NUM_CLIENTS);
+  Expects(clients_sum <= data_.num_outputs);
 
   auto total_cost = node.cost;
 
@@ -166,105 +169,40 @@ void Calculator::MAKE_TEST_COMBINATION(
 
   auto &input_client_variants = output_tree_per_num_clients[node.input];
 
-  // need to add some choosing here when cost is equal. Atleast
-  // PARAM_EQUAL_COST_CHOSE_MORE_AVERAGE
-  if (input_client_variants.contains(clients_sum) &&
-      input_client_variants.at(clients_sum).CalculateCost() <= total_cost) {
-    return;
-  }
+  if (same_outputs) {
+    if (input_client_variants.contains(clients_sum)) {
+      const auto existing_variant_cost =
+          input_client_variants.at(clients_sum).CalculateCost();
 
-  auto node_copy = node;
-
-  for (auto output_index = 0; output_index < node.outputs.size();
-       ++output_index) {
-    if (!combination.contains(output_index)) {
-      node_copy.child_nodes.erase(output_index);
-      continue;
-    }
-
-    const auto &[num_clients, tree] = combination.at(output_index);
-    node_copy.EmplaceChild(output_index, tree);
-  }
-
-  input_client_variants[clients_sum] = std::move(node_copy);
-}
-
-void Calculator::MAKE_TEST_COMBINATION_FOR_SAME_OUTPUTS(
-    const TreeNodeEx &node,
-    std::map<int /*ouput_index*/, std::pair<int, TreeNodeEx>> &combination,
-    int start_with_combination, int output_index, int clients_sum) {
-  if (output_index < node.outputs.size()) {
-    const auto output = node.outputs[output_index];
-    const auto &output_combinations = output_tree_per_num_clients[output];
-
-    for (auto output_combination_index = start_with_combination;
-         output_combination_index >= 0; --output_combination_index) {
-      auto num_added_clients = 0;
-
-      if (output_combination_index == 0) {
-        combination.erase(output_index);
-      } else {
-        combination[output_index] = *std::next(output_combinations.begin(),
-                                               output_combination_index - 1);
-        num_added_clients = combination[output_index].first;
-      }
-
-      if ((clients_sum + num_added_clients) > NUM_CLIENTS) {
-        continue;
-      }
-
-      clients_sum += num_added_clients;
-      MAKE_TEST_COMBINATION_FOR_SAME_OUTPUTS(node, combination,
-                                             output_combination_index,
-                                             output_index + 1, clients_sum);
-      clients_sum -= num_added_clients;
-    }
-
-    return;
-  }
-
-  if (clients_sum <= 0) {
-    return;
-  }
-
-  Expects(clients_sum <= NUM_CLIENTS);
-
-  auto total_cost = node.cost;
-
-  for (auto output_index = 0; output_index < node.outputs.size();
-       ++output_index) {
-    if (!combination.contains(output_index)) {
-      continue;
-    }
-
-    const auto &[num_clients, tree] = combination.at(output_index);
-    total_cost += tree.CalculateCost();
-  }
-
-  auto &input_client_variants = output_tree_per_num_clients[node.input];
-
-  if (input_client_variants.contains(clients_sum)) {
-    const auto existing_variant_cost =
-        input_client_variants.at(clients_sum).CalculateCost();
-
-    if (existing_variant_cost < total_cost) {
-      return;
-    }
-
-    if (existing_variant_cost == total_cost) {
-      const auto PARAM_EQUAL_COST_CHOSE_MAX_CLIENTS_PER_OUTPUT = false;
-      const auto PARAM_EQUAL_COST_CHOSE_MIN_CLIENTS_PER_OUTPUT =
-          !PARAM_EQUAL_COST_CHOSE_MAX_CLIENTS_PER_OUTPUT;
-      const auto PARAM_EQUAL_COST_CHOSE_MORE_AVERAGE = true;  // not implemented
-
-      // here <= or < controls. <= means that first variant would be chosen,
-      // where single output has max clients. < means that last one would be
-      // chosen where clients are evenly split and also means that because we
-      // traverse from 1x16 to 1x2, 1x2 would be chosen as it comes last
-
-      if (PARAM_EQUAL_COST_CHOSE_MAX_CLIENTS_PER_OUTPUT) {
+      if (existing_variant_cost < total_cost) {
         return;
       }
+
+      if (existing_variant_cost == total_cost) {
+        const auto PARAM_EQUAL_COST_CHOSE_MAX_CLIENTS_PER_OUTPUT = false;
+        const auto PARAM_EQUAL_COST_CHOSE_MIN_CLIENTS_PER_OUTPUT =
+            !PARAM_EQUAL_COST_CHOSE_MAX_CLIENTS_PER_OUTPUT;
+        const auto PARAM_EQUAL_COST_CHOSE_MORE_AVERAGE =
+            true;  // not implemented
+
+        // here <= or < controls. <= means that first variant would be chosen,
+        // where single output has max clients. < means that last one would be
+        // chosen where clients are evenly split and also means that because we
+        // traverse from 1x16 to 1x2, 1x2 would be chosen as it comes last
+
+        // VH: something makes sense only for same_outputs?
+
+        if (PARAM_EQUAL_COST_CHOSE_MAX_CLIENTS_PER_OUTPUT) {
+          return;
+        }
+      }
+    }
+  } else {
+    // need to add some choosing here when cost is equal. Atleast
+    // PARAM_EQUAL_COST_CHOSE_MORE_AVERAGE
+    if (input_client_variants.contains(clients_sum) &&
+        input_client_variants.at(clients_sum).CalculateCost() <= total_cost) {
+      return;
     }
   }
 
@@ -291,7 +229,7 @@ void Calculator::RememberAlgStepSimple(
        ++output_index) {
     const auto output = node.outputs[output_index];
 
-    if (output < min_output) {
+    if (output < data_.output_range.min) {
       continue;
     }
 
@@ -301,7 +239,7 @@ void Calculator::RememberAlgStepSimple(
 
     visited_outputs.emplace(output);
 
-    if (InRange(output, RANGE)) {
+    if (InRange(output, data_.output_range)) {
       output_tree_per_num_clients[output].emplace(1, client);
     }
 
@@ -313,27 +251,25 @@ void Calculator::RememberAlgStepSimple(
       auto &child = node.EmplaceChild(
           output_index, TreeNodeEx::FromFamily(family_flows[family_i]));
 
-      ++DEPTH;
       RememberAlgStepSimple(family_flows, root, child);
-      --DEPTH;
     }
   }
 
   const auto first_output = node.outputs.front();
+  const auto &output_combinations = output_tree_per_num_clients[first_output];
 
   if (std::all_of(node.outputs.begin(), node.outputs.end(),
                   [first_output](const auto output) {
                     return output == first_output;
                   })) {
-    const auto &output_combinations = output_tree_per_num_clients[first_output];
-
     auto combination = std::map<int, std::pair<int, TreeNodeEx>>{};
-    MAKE_TEST_COMBINATION_FOR_SAME_OUTPUTS(node, combination,
-                                           output_combinations.size(), 0, 0);
+    MAKE_TEST_COMBINATION(node, combination, output_combinations.size(), 0, 0,
+                          true);
     return;
   }
 
   auto combination = std::map<int, std::pair<int, TreeNodeEx>>{};
-  MAKE_TEST_COMBINATION(node, combination, 0, 0);
+  MAKE_TEST_COMBINATION(node, combination, output_combinations.size(), 0, 0,
+                        false);
 }
 }  // namespace vh::ponc::flow
