@@ -17,8 +17,7 @@ class Project {
       -> IFamily &;
 
   ///
-  Project(const Settings &settings,
-          std::vector<std::unique_ptr<IFamily>> families,
+  Project(Settings settings, std::vector<std::unique_ptr<IFamily>> families,
           std::vector<Diagram> diagrams);
 
   ///

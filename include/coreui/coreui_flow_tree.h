@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "core_i_family.h"
+#include "core_id_value.h"
 #include "cpp_safe_ptr.h"
 
 namespace vh::ponc::coreui {
@@ -18,7 +20,8 @@ struct TreeNode {
   ///
   std::vector<TreeNode> child_nodes{};
   ///
-  std::unordered_map<uintptr_t, int> num_children_per_family{};
+  std::unordered_map<core::IdValue<core::FamilyId>, int>
+      num_children_per_family{};
 };
 
 ///

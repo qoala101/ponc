@@ -9,6 +9,7 @@
 #include <variant>
 #include <vector>
 
+#include "calc_settings.h"
 #include "core_diagram.h"
 #include "core_i_family_group.h"
 #include "core_id_generator.h"
@@ -34,13 +35,20 @@ auto Project::CreateProject() const {
                     std::move_iterator{group_families.end()});
   }
 
-  return core::Project{core::Settings{
-                           .min_flow = -27,
-                           .low_flow = -22,
-                           .high_flow = -18,
-                           .max_flow = 6,
-                       },
-                       std::move(families), std::vector<core::Diagram>(1)};
+  return core::Project{
+      {.min_flow = -27,
+       .low_flow = -22,
+       .high_flow = -18,
+       .max_flow = 6,
+       .calculator_settings = {.input = 6,
+                               .min_output = -22,
+                               .max_output = -18,
+                               .num_clients = 20,
+                               .family_settings =
+                                   calc::FamilySettings::FromFamilies(
+                                       families)}},
+      std::move(families),
+      std::vector<core::Diagram>(1)};
 }
 
 ///

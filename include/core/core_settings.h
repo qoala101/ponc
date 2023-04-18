@@ -1,7 +1,9 @@
 #ifndef VH_PONC_CORE_SETTINGS_H_
 #define VH_PONC_CORE_SETTINGS_H_
 
-#include "imgui.h"
+#include <imgui.h>
+
+#include "calc_settings.h"
 
 namespace vh::ponc::core {
 ///
@@ -19,6 +21,8 @@ struct Settings {
   float high_flow{};
   ///
   float max_flow{};
+  ///
+  calc::CalculatorSettings calculator_settings{};
 };
 }  // namespace vh::ponc::core
 

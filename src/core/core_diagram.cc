@@ -21,20 +21,18 @@ Diagram::Diagram(std::string name, std::vector<std::unique_ptr<INode>> nodes,
 
 ///
 auto Diagram::FindNode(const Diagram& diagram, ne::NodeId node_id) -> INode& {
-  const auto& nodes = diagram.GetNodes();
   const auto node = std::find_if(
-      nodes.begin(), nodes.end(),
+      diagram.nodes_.begin(), diagram.nodes_.end(),
       [node_id](const auto& node) { return node->GetId() == node_id; });
 
-  Expects(node != nodes.end());
+  Expects(node != diagram.nodes_.end());
   return **node;
 }
 
 ///
 auto Diagram::FindPinNode(const Diagram& diagram, ne::PinId pin_id) -> INode& {
-  const auto& nodes = diagram.GetNodes();
-  const auto pin_node =
-      std::find_if(nodes.begin(), nodes.end(), [pin_id](const auto& node) {
+  const auto pin_node = std::find_if(
+      diagram.nodes_.begin(), diagram.nodes_.end(), [pin_id](const auto& node) {
         const auto node_pins = INode::GetAllPins(*node);
 
         return std::any_of(node_pins.begin(), node_pins.end(),
@@ -43,18 +41,17 @@ auto Diagram::FindPinNode(const Diagram& diagram, ne::PinId pin_id) -> INode& {
                            });
       });
 
-  Expects(pin_node != nodes.end());
+  Expects(pin_node != diagram.nodes_.end());
   return **pin_node;
 }
 
 ///
 auto Diagram::FindLink(Diagram& diagram, ne::LinkId link_id) -> Link& {
-  auto& links = diagram.GetLinksImpl();
   const auto link =
-      std::find_if(links.begin(), links.end(),
+      std::find_if(diagram.links_.begin(), diagram.links_.end(),
                    [link_id](const auto& link) { return link.id == link_id; });
 
-  Expects(link != links.end());
+  Expects(link != diagram.links_.end());
   return *link;
 }
 
@@ -68,12 +65,11 @@ auto Diagram::FindPinLink(const Diagram& diagram, ne::PinId pin_id)
 ///
 auto Diagram::FindPinLink(Diagram& diagram, ne::PinId pin_id)
     -> std::optional<Link*> {
-  auto& links = diagram.GetLinksImpl();
   const auto pin_link = std::find_if(
-      links.begin(), links.end(),
+      diagram.links_.begin(), diagram.links_.end(),
       [pin_id](const auto& link) { return Link::HasPin(link, pin_id); });
 
-  if (pin_link == links.end()) {
+  if (pin_link == diagram.links_.end()) {
     return std::nullopt;
   }
 

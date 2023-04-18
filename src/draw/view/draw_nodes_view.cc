@@ -11,6 +11,7 @@
 #include "coreui_family.h"
 #include "draw_id_label.h"
 #include "draw_native_facade.h"
+#include "draw_table_flags.h"
 #include "draw_tree_node.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
@@ -20,7 +21,7 @@ namespace {
 ///
 void DrawSelectableName(
     const coreui::Family& family,
-    const std::unordered_set<uintptr_t>& selected_node_ids) {
+    const std::unordered_set<core::IdValue<ne::NodeId>>& selected_node_ids) {
   const auto& nodes = family.GetNodes();
   const auto label =
       family.GetLabel() + " (" + std::to_string(nodes.size()) + ")";
@@ -56,8 +57,9 @@ void DrawSelectableName(
 }
 
 ///
-void DrawFamily(const coreui::Family& family,
-                const std::unordered_set<uintptr_t>& selected_node_ids) {
+void DrawFamily(
+    const coreui::Family& family,
+    const std::unordered_set<core::IdValue<ne::NodeId>>& selected_node_ids) {
   const auto& nodes = family.GetNodes();
 
   if (nodes.empty()) {
@@ -96,15 +98,7 @@ void NodesView::Draw(const coreui::Diagram& diagram) {
     return;
   }
 
-  // NOLINTBEGIN(*-signed-bitwise)
-  const auto table_flags =
-      ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
-      ImGuiTableFlags_Hideable | ImGuiTableFlags_ContextMenuInBody |
-      ImGuiTableFlags_BordersH | ImGuiTableFlags_BordersOuter |
-      ImGuiTableFlags_ScrollY;
-  // NOLINTEND(*-signed-bitwise)
-
-  if (ImGui::BeginTable("Nodes", 3, table_flags)) {
+  if (ImGui::BeginTable("Nodes", 3, kExpandingTableFlags)) {
     ImGui::TableSetupScrollFreeze(0, 1);
     ImGui::TableSetupColumn("Node");
     ImGui::TableSetupColumn("Input");
@@ -113,7 +107,7 @@ void NodesView::Draw(const coreui::Diagram& diagram) {
 
     const auto selected_nodes = NativeFacade::GetSelectedNodes();
 
-    auto selected_node_ids = std::unordered_set<uintptr_t>{};
+    auto selected_node_ids = std::unordered_set<core::IdValue<ne::NodeId>>{};
     std::transform(selected_nodes.begin(), selected_nodes.end(),
                    std::inserter(selected_node_ids, selected_node_ids.begin()),
                    [](const auto node_id) { return node_id.Get(); });

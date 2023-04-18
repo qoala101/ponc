@@ -8,11 +8,13 @@
 #include <optional>
 #include <unordered_map>
 
+#include "core_id_value.h"
+
 namespace ne = ax::NodeEditor;
 
 namespace vh::ponc::flow {
 ///
-using PinFlow = std::pair<uintptr_t, float>;
+using PinFlow = std::pair<core::IdValue<ne::PinId>, float>;
 ///
 using PinFlows = std::unordered_map<PinFlow::first_type, PinFlow::second_type>;
 
@@ -38,7 +40,7 @@ struct NodeFlow {
 };
 
 ///
-using NodeFlows = std::unordered_map<uintptr_t, flow::NodeFlow>;
+using NodeFlows = std::unordered_map<core::IdValue<ne::NodeId>, flow::NodeFlow>;
 }  // namespace vh::ponc::flow
 
 #endif  // VH_PONC_FLOW_NODE_FLOW_H_

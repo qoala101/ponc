@@ -11,6 +11,7 @@
 
 #include "core_diagram.h"
 #include "core_id_generator.h"
+#include "core_id_value.h"
 #include "cpp_assert.h"
 #include "flow_tree_traversal.h"
 #include "imgui_node_editor.h"
@@ -18,7 +19,7 @@
 namespace vh::ponc::core {
 ///
 auto Project::FindMaxId() const {
-  auto max_id = uintptr_t{1};
+  auto max_id = UnspecifiedIdValue{1};
 
   for (const auto& family : families_) {
     max_id = std::max(family->GetId().Get(), max_id);
@@ -43,11 +44,11 @@ auto Project::FindMaxId() const {
 
 ///
 auto Project::IsEmpty(const Project& project) -> bool {
-  const auto& diagrams = project.GetDiagrams();
-
-  return std::all_of(diagrams.begin(), diagrams.end(), [](const auto& diagram) {
-    return diagram.GetNodes().empty() && diagram.GetLinks().empty();
-  });
+  return std::all_of(project.diagrams_.begin(), project.diagrams_.end(),
+                     [](const auto& diagram) {
+                       return diagram.GetNodes().empty() &&
+                              diagram.GetLinks().empty();
+                     });
 }
 
 ///
@@ -62,10 +63,10 @@ auto Project::FindFamily(const Project& project, core::FamilyId family_id)
 }
 
 ///
-Project::Project(const Settings& settings,
+Project::Project(Settings settings,
                  std::vector<std::unique_ptr<IFamily>> families,
                  std::vector<Diagram> diagrams)
-    : settings_{settings},
+    : settings_{std::move(settings)},
       families_{std::move(families)},
       diagrams_{std::move(diagrams)},
       id_generator_{FindMaxId() + 1} {

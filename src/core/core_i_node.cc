@@ -14,15 +14,13 @@ namespace vh::ponc::core {
 auto INode::GetAllPins(const INode& node)
     -> std::vector<std::pair<ne::PinId, ne::PinKind>> {
   auto pins = std::vector<std::pair<ne::PinId, ne::PinKind>>{};
+  pins.reserve(node.output_pin_ids_.size() + 1);
 
-  const auto& output_pins = node.GetOutputPinIds();
-  pins.reserve(output_pins.size() + 1);
-
-  if (const auto& input_pin_id = node.GetInputPinId()) {
-    pins.emplace_back(*input_pin_id, ne::PinKind::Input);
+  if (node.input_pin_id_.has_value()) {
+    pins.emplace_back(*node.input_pin_id_, ne::PinKind::Input);
   }
 
-  std::transform(output_pins.begin(), output_pins.end(),
+  std::transform(node.output_pin_ids_.begin(), node.output_pin_ids_.end(),
                  std::back_inserter(pins), [](const auto pin_id) {
                    return std::pair{pin_id, ne::PinKind::Output};
                  });
@@ -32,9 +30,7 @@ auto INode::GetAllPins(const INode& node)
 
 ///
 auto INode::GetPinKind(const INode& node, ne::PinId pin_id) -> ne::PinKind {
-  const auto& input_pin_id = node.GetInputPinId();
-
-  if (input_pin_id.has_value() && (*input_pin_id == pin_id)) {
+  if (node.input_pin_id_.has_value() && (*node.input_pin_id_ == pin_id)) {
     return ne::PinKind::Input;
   }
 
@@ -53,14 +49,14 @@ auto INode::GetFirstPinOfKind(const INode& node, ne::PinKind pin_kind)
 auto INode::FindFirstPinOfKind(const INode& node, ne::PinKind pin_kind)
     -> std::optional<ne::PinId> {
   if (pin_kind == ne::PinKind::Input) {
-    if (const auto& input_pin = node.GetInputPinId()) {
-      return *input_pin;
+    if (node.input_pin_id_.has_value()) {
+      return *node.input_pin_id_;
     }
 
     return std::nullopt;
   }
 
-  const auto& output_pins = node.GetOutputPinIds();
+  const auto& output_pins = node.output_pin_ids_;
 
   if (output_pins.empty()) {
     return std::nullopt;

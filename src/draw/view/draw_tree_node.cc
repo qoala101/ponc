@@ -34,7 +34,7 @@ void DrawSelectableName(ne::NodeId node_id, std::string_view node_label) {
 ///
 void DrawInputFlow(const coreui::TreeNode& tree_node) {
   if (const auto& input_flow = tree_node.node->GetData().flow.input_flow) {
-    ImGui::TextColored(input_flow->color, "%.3f", input_flow->value);
+    ImGui::TextColored(input_flow->color, "%.2f", input_flow->value);
   }
 }
 
@@ -47,13 +47,13 @@ void DrawOutputFlows(const coreui::TreeNode& tree_node) {
   auto output_flow = output_flows.begin();
 
   if (output_flow != output_flows_end) {
-    ImGui::TextColored(output_flow->color, "%.3f", output_flow->value);
+    ImGui::TextColored(output_flow->color, "%.2f", output_flow->value);
     ++output_flow;
   }
 
   for (; output_flow != output_flows_end; ++output_flow) {
     ImGui::TextUnformatted("/");
-    ImGui::TextColored(output_flow->color, "%.3f", output_flow->value);
+    ImGui::TextColored(output_flow->color, "%.2f", output_flow->value);
   }
 
   ImGui::EndHorizontal();

@@ -7,6 +7,7 @@
 #include <iterator>
 
 #include "core_concepts.h"
+#include "core_id_value.h"
 #include "core_link.h"
 #include "coreui_diagram.h"
 #include "imgui_node_editor.h"
@@ -18,13 +19,13 @@ template <typename T>
 void UnregisterDeletedItemsImpl(
     ItemDeleter::ItemIds &item_ids, const std::vector<T> &items,
     const std::invocable<const T &> auto &get_item_id,
-    const std::invocable<uintptr_t> auto &unregister_item) {
-  auto new_item_ids = std::set<uintptr_t>{};
+    const std::invocable<core::UnspecifiedIdValue> auto &unregister_item) {
+  auto new_item_ids = std::set<core::UnspecifiedIdValue>{};
   std::transform(items.begin(), items.end(),
                  std::inserter(new_item_ids, new_item_ids.begin()),
                  get_item_id);
 
-  auto deleted_item_ids = std::vector<uintptr_t>{};
+  auto deleted_item_ids = std::vector<core::UnspecifiedIdValue>{};
   std::set_difference(item_ids.registered_ids_.begin(),
                       item_ids.registered_ids_.end(), new_item_ids.begin(),
                       new_item_ids.end(), std::back_inserter(deleted_item_ids));

@@ -6,6 +6,7 @@
 #include <string>
 
 #include "coreui_flow_tree.h"
+#include "draw_table_flags.h"
 #include "draw_tree_node.h"
 
 namespace vh::ponc::draw {
@@ -20,15 +21,7 @@ void FlowTreeView::Draw(const coreui::FlowTree &flow_tree) {
     return;
   }
 
-  // NOLINTBEGIN(*-signed-bitwise)
-  const auto table_flags =
-      ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
-      ImGuiTableFlags_Hideable | ImGuiTableFlags_ContextMenuInBody |
-      ImGuiTableFlags_BordersH | ImGuiTableFlags_BordersOuter |
-      ImGuiTableFlags_ScrollY;
-  // NOLINTEND(*-signed-bitwise)
-
-  if (ImGui::BeginTable("Flow Tree", 3, table_flags)) {
+  if (ImGui::BeginTable("Flow Tree", 3, kExpandingTableFlags)) {
     ImGui::TableSetupScrollFreeze(0, 1);
     ImGui::TableSetupColumn("Node");
     ImGui::TableSetupColumn("Input");

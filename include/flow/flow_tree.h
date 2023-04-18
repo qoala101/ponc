@@ -10,6 +10,8 @@
 #include <optional>
 #include <vector>
 
+#include "core_id_value.h"
+
 namespace ne = ax::NodeEditor;
 
 namespace vh::ponc::flow {
@@ -18,7 +20,7 @@ struct TreeNode {
   ///
   ne::NodeId node_id{};
   ///
-  std::map<uintptr_t, TreeNode> child_nodes{};
+  std::map<core::IdValue<ne::PinId>, TreeNode> child_nodes{};
 
  private:
   ///

@@ -16,6 +16,10 @@ add_executable(ponc
   app/app_app.cc
   app/app_impl.cc
 
+  calc/calc_calculator.cc
+  calc/calc_settings.cc
+  calc/calc_tree_node.cc
+
   core/core_diagram.cc
   core/core_free_pin_family_group.cc
   core/core_gradient.cc
@@ -84,7 +88,6 @@ add_executable(ponc
   draw/draw_native_facade.cc
 
   flow/flow_algorithms.cc
-  flow/flow_calculator.cc
   flow/flow_node_flow.cc
   flow/flow_tree_traversal.cc
 
@@ -106,6 +109,7 @@ target_include_directories(ponc
   PRIVATE
   ${PROJECT_SOURCE_DIR}/include/app
   ${PROJECT_SOURCE_DIR}/include/app/family_group
+  ${PROJECT_SOURCE_DIR}/include/calc
   ${PROJECT_SOURCE_DIR}/include/core
   ${PROJECT_SOURCE_DIR}/include/coreui
   ${PROJECT_SOURCE_DIR}/include/coreui/event

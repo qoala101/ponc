@@ -7,6 +7,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "core_id_value.h"
 #include "coreui_event_loop.h"
 #include "coreui_linker.h"
 #include "cpp_safe_ptr.h"
@@ -54,11 +55,11 @@ class NodeMover {
   ///
   cpp::SafeOwner safe_owner_{};
   ///
-  std::unordered_set<uintptr_t> nodes_to_move_{};
+  std::unordered_set<core::IdValue<ne::NodeId>> nodes_to_move_{};
   ///
-  std::unordered_map<uintptr_t, ImVec2> node_sizes_{};
+  std::unordered_map<core::IdValue<ne::NodeId>, ImVec2> node_sizes_{};
   ///
-  std::unordered_map<uintptr_t, ImVec2> pin_poses_{};
+  std::unordered_map<core::IdValue<ne::PinId>, ImVec2> pin_poses_{};
 };
 }  // namespace vh::ponc::coreui
 

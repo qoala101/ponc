@@ -8,6 +8,7 @@
 #include "cpp_assert.h"
 #include "flow_node_flow.h"
 #include "flow_tree.h"
+#include "imgui_node_editor.h"
 
 namespace vh::ponc::flow {
 namespace {
@@ -106,7 +107,7 @@ auto BuildFlowTree(const core::Diagram &diagram) -> FlowTree {
   const auto &nodes = diagram.GetNodes();
 
   auto flow_tree = FlowTree{FindRootNodes(nodes, links)};
-  auto visited_nodes = std::unordered_set<uintptr_t>{};
+  auto visited_nodes = std::unordered_set<core::IdValue<ne::NodeId>>{};
   auto current_level_tree_nodes = std::vector<TreeNode *>{};
 
   for (auto &root_node : flow_tree.root_nodes) {

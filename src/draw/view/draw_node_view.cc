@@ -9,6 +9,7 @@
 
 #include "core_i_family.h"
 #include "coreui_family.h"
+#include "draw_table_flags.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
@@ -46,15 +47,7 @@ void NodeView::Draw(std::optional<const coreui::Node*> node,
 
   ImGui::TextUnformatted((*node)->GetData().label.c_str());
 
-  // NOLINTBEGIN(*-signed-bitwise)
-  const auto table_flags =
-      ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
-      ImGuiTableFlags_Hideable | ImGuiTableFlags_ContextMenuInBody |
-      ImGuiTableFlags_BordersH | ImGuiTableFlags_BordersOuter |
-      ImGuiTableFlags_ScrollY;
-  // NOLINTEND(*-signed-bitwise)
-
-  if (ImGui::BeginTable("Children", 2, table_flags)) {
+  if (ImGui::BeginTable("Children", 2, kExpandingTableFlags)) {
     ImGui::TableSetupScrollFreeze(0, 1);
     ImGui::TableSetupColumn("Child Type");
     ImGui::TableSetupColumn("Count");
