@@ -16,6 +16,7 @@ add_executable(ponc
   app/app_app.cc
   app/app_impl.cc
 
+  calc/calc_calculation_task.cc
   calc/calc_calculator.cc
   calc/calc_settings.cc
   calc/calc_tree_node.cc
@@ -76,6 +77,7 @@ add_executable(ponc
 
   draw/view/draw_calculator_view.cc
   draw/view/draw_diagrams_view.cc
+  draw/view/draw_disable_if.cc
   draw/view/draw_flow_tree_view.cc
   draw/view/draw_i_view.cc
   draw/view/draw_node_view.cc
