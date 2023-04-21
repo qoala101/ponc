@@ -51,7 +51,7 @@ auto CalculationTask::GetResult() -> std::optional<TreeNode> {
 auto CalculationTask::OnCalculationStep(const calc::Calculator &calculator)
     -> calc::Calculator::StepStatus {
   progress_ = calculator.GetProgress();
-  return stop_requested_ ? calc::Calculator::StepStatus::kCancelCalculation
+  return stop_requested_ ? calc::Calculator::StepStatus::kStopCalculation
                          : calc::Calculator::StepStatus::kContinueToNextStep;
 }
 }  // namespace vh::ponc::calc

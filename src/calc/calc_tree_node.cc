@@ -8,7 +8,8 @@ TreeNode::TreeNode(core::FamilyId family_id, std::vector<OutputIndex> outputs,
                    Cost node_cost)
     : family_id_{family_id},
       outputs_{std::move(outputs)},
-      node_cost_{node_cost} {}
+      node_cost_{node_cost},
+      tree_cost_{node_cost_} {}
 
 ///
 auto TreeNode::GetFamilyId() const -> core::FamilyId { return family_id_; }
@@ -25,10 +26,10 @@ auto TreeNode::GetNodeCost() const -> Cost { return node_cost_; }
 auto TreeNode::GetTreeCost() const -> Cost { return tree_cost_; }
 
 ///
-void TreeNode::SetTreeCost(Cost cost) { tree_cost_ = cost; }
+auto TreeNode::GetInput() const -> FlowValue { return input_; }
 
 ///
-auto TreeNode::GetInput() const -> FlowValue { return input_; }
+void TreeNode::SetInput(int input) { input_ = input; }
 
 ///
 auto TreeNode::GetChildren() const -> const std::map<OutputIndex, TreeNode> & {
@@ -36,23 +37,45 @@ auto TreeNode::GetChildren() const -> const std::map<OutputIndex, TreeNode> & {
 }
 
 ///
-auto TreeNode::EmplaceChild(OutputIndex index, TreeNode child) -> TreeNode & {
+void TreeNode::ClearChildren() {
+  child_nodes_.clear();
+  tree_cost_ = node_cost_;
+  num_clients_ = 0;
+}
+
+///
+auto TreeNode::EmplaceChild(OutputIndex index, TreeNode child_node)
+    -> TreeNode & {
   Expects(index >= 0);
   Expects(index < static_cast<OutputIndex>(outputs_.size()));
 
   EraseChild(index);
 
-  child.input_ = outputs_[index];
+  child_node.input_ = outputs_[index];
 
-  for (auto &child_output : child.outputs_) {
-    child_output += child.input_;
+  for (auto &child_output : child_node.outputs_) {
+    child_output += child_node.input_;
   }
 
-  return child_nodes_.emplace(index, std::move(child)).first->second;
+  tree_cost_ += child_node.tree_cost_;
+  num_clients_ += child_node.num_clients_;
+
+  return child_nodes_.emplace(index, std::move(child_node)).first->second;
 }
 
 ///
-void TreeNode::EraseChild(OutputIndex index) { child_nodes_.erase(index); }
+void TreeNode::EraseChild(OutputIndex index) {
+  const auto child_node = child_nodes_.find(index);
+
+  if (child_node == child_nodes_.end()) {
+    return;
+  }
+
+  tree_cost_ -= child_node->second.tree_cost_;
+  num_clients_ -= child_node->second.num_clients_;
+
+  child_nodes_.erase(index);
+}
 
 ///
 auto TreeNode::GetNumClients() const -> NumClients { return num_clients_; }

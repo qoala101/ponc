@@ -3,9 +3,6 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
-#include <ios>
-#include <iostream>
-#include <istream>
 #include <iterator>
 #include <limits>
 #include <set>
@@ -16,17 +13,16 @@
 
 #include "calc_tree_node.h"
 #include "core_i_family.h"
-#include "core_id_generator.h"
 #include "cpp_assert.h"
-#include "cpp_scope.h"
-#include "flow_tree.h"
-#include "flow_tree_traversal.h"
 #include "imgui_node_editor.h"
 
 namespace vh::ponc::calc {
 namespace {
 ///
 auto ToInt(float value) { return static_cast<int>(value * 100); }
+
+///
+auto ToFloat(int value) { return static_cast<float>(value) / 100.F; }
 
 ///
 auto FamilyNodesFrom(const Calculator::ConstructorArgs &args) {
@@ -63,6 +59,7 @@ auto FamilyNodesFrom(const Calculator::ConstructorArgs &args) {
 }
 }  // namespace
 
+///
 Calculator::Calculator(const ConstructorArgs &args)
     : min_output_{ToInt(args.settings.min_output)},
       max_output_{ToInt(args.settings.max_output)},
@@ -71,41 +68,29 @@ Calculator::Calculator(const ConstructorArgs &args)
       client_node_{args.client_family_id},
       family_nodes_{FamilyNodesFrom(args)},
       step_callback_{args.step_callback} {
-  TraverseNode(input_node_);
-
-  std::cout << "unique_outputs: ";
-  for (const auto input : visited_outputs) {
-    std::cout << input << ", ";
-  }
-  std::cout << "\n";
-
-  // if (!output_tree_per_num_clients.contains(data_.input)) {
-  //   return;
-  // }
-
-  // // auto &input_client_variants =
-  // output_tree_per_num_clients.at(data_.input);
-
-  // auto &input_client_variants =
-  //     std::prev(output_tree_per_num_clients.end())->second;
-
-  // if (input_client_variants.empty()) {
-  //   return;
-  // }
-
-  // auto &[num_clients, tree] = *std::prev(input_client_variants.end());
-  // result_.EmplaceChild(0, std::move(tree));
-
-  // progress_.READY = true;
-  // step_callback_(*this);
+  client_node_.SetNumClients(1);
+  VisitOutput(input_node_, 0);
 }
 
-auto Calculator::IsReady() const -> bool { return ready_; }
+///
+auto Calculator::GetProgress() const -> float {
+  return static_cast<float>(GetLastResult().GetInput() - min_output_) /
+         static_cast<float>(input_node_.GetOutputs()[0] - min_output_);
+}
 
-auto Calculator::GetProgress() const -> float { return progress_; }
-
+///
 auto Calculator::GetLastResult() const -> const TreeNode & {
-  return input_node_;
+  if (best_tree_per_num_clients_per_output_.empty()) {
+    return input_node_;
+  }
+
+  const auto &biggest_output_trees =
+      std::prev(best_tree_per_num_clients_per_output_.cend())->second;
+  Expects(!biggest_output_trees.empty());
+
+  const auto &most_clients_tree =
+      std::prev(biggest_output_trees.cend())->second;
+  return most_clients_tree;
 }
 
 ///
@@ -113,128 +98,40 @@ auto Calculator::IsOutputInRange(FlowValue ouput) const {
   return (ouput >= min_output_) && (ouput <= max_output_);
 }
 
-void Calculator::MakeCombination(
-    const TreeNode &node,
-    std::map<OutputIndex, std::pair<NumClients, TreeNode>> &combination,
-    OutputIndex output_index, int start_with_combination,
-    NumClients clients_sum, Cost clients_cost, bool same_outputs) {
-  const auto &outputs = node.GetOutputs();
-  const auto output = outputs[output_index];
-  const auto &output_combinations = cheapest_trees_per_output[output];
-  const auto num_outputs = static_cast<int>(outputs.size());
-
-  auto &input_client_variants = cheapest_trees_per_output[node.GetInput()];
-
-  for (auto output_combination_index =
-           same_outputs ? start_with_combination
-                        : static_cast<int>(output_combinations.size());
-       output_combination_index >= 0; --output_combination_index) {
-    if (combination.contains(output_index)) {
-      clients_sum -= combination.at(output_index).first;
-      clients_cost -= combination.at(output_index).second.GetTreeCost();
-    }
-
-    if (output_combination_index == 0) {
-      combination.erase(output_index);
-    } else {
-      combination[output_index] =
-          *std::next(output_combinations.begin(), output_combination_index - 1);
-      clients_sum += combination[output_index].first;
-      clients_cost += combination[output_index].second.GetTreeCost();
-    }
-
-    if (clients_sum > num_clients_) {
-      continue;
-    }
-
-    if (input_client_variants.contains(clients_sum) &&
-        (clients_cost > input_client_variants.at(clients_sum).GetTreeCost())) {
-      continue;
-    }
-
-    const auto next_output_index = output_index + 1;
-
-    if (next_output_index < num_outputs) {
-      MakeCombination(node, combination, next_output_index,
-                      output_combination_index, clients_sum, clients_cost,
-                      same_outputs);
-      continue;
-    }
-
-    TestCombination(node, combination, clients_sum, clients_cost, same_outputs);
-  }
+///
+auto Calculator::IsStopped() {
+  return step_callback_(*this) == StepStatus::kStopCalculation;
 }
 
-void Calculator::TestCombination(
-    const TreeNode &node,
-    const std::map<OutputIndex, std::pair<NumClients, TreeNode>> &combination,
-    NumClients clients_sum, Cost clients_cost, bool same_outputs) {
-  if (clients_sum <= 0) {
+///
+// NOLINTNEXTLINE(*-no-recursion)
+void Calculator::TraverseNode(TreeNode &node) {
+  if (IsStopped()) {
     return;
   }
 
-  auto total_cost = node.GetNodeCost() + clients_cost;
-  auto &input_client_variants = cheapest_trees_per_output[node.GetInput()];
+  const auto &outputs = node.GetOutputs();
 
-  if (same_outputs) {
-    if (input_client_variants.contains(clients_sum)) {
-      const auto existing_variant_cost =
-          input_client_variants.at(clients_sum).GetTreeCost();
-
-      if (existing_variant_cost < total_cost) {
-        return;
-      }
-
-      if (existing_variant_cost == total_cost) {
-        const auto PARAM_EQUAL_COST_CHOSE_MAX_CLIENTS_PER_OUTPUT = false;
-        const auto PARAM_EQUAL_COST_CHOSE_MIN_CLIENTS_PER_OUTPUT =
-            !PARAM_EQUAL_COST_CHOSE_MAX_CLIENTS_PER_OUTPUT;
-        const auto PARAM_EQUAL_COST_CHOSE_MORE_AVERAGE =
-            false;  // not implemented
-        const auto PARAM_EQUAL_COST_CHOSE_LESS_FREE_OUTPUTS =
-            false;  // not implemented
-
-        // here <= or < controls. <= means that first variant would be chosen,
-        // where single output has max clients. < means that last one would be
-        // chosen where clients are evenly split and also means that because we
-        // traverse from 1x16 to 1x2, 1x2 would be chosen as it comes last
-
-        // VH: something makes sense only for same_outputs?
-
-        if (PARAM_EQUAL_COST_CHOSE_MAX_CLIENTS_PER_OUTPUT) {
-          return;
-        }
-      }
-    }
-  } else {
-    // need to add some choosing here when cost is equal. Atleast
-    // PARAM_EQUAL_COST_CHOSE_MORE_AVERAGE
-    if (input_client_variants.contains(clients_sum) &&
-        input_client_variants.at(clients_sum).GetTreeCost() <= total_cost) {
+  for (auto output_index = 0;
+       output_index < static_cast<OutputIndex>(outputs.size());
+       ++output_index) {
+    if (IsStopped()) {
       return;
     }
+
+    VisitOutput(node, output_index);
   }
 
-  auto node_copy = node;
-
-  for (auto output_index = 0; output_index < node.GetOutputs().size();
-       ++output_index) {
-    if (!combination.contains(output_index)) {
-      node_copy.EraseChild(output_index);
-      continue;
-    }
-
-    const auto &[num_clients, tree] = combination.at(output_index);
-    node_copy.EmplaceChild(output_index, tree);
-  }
-
-  node_copy.SetTreeCost(total_cost);
-  input_client_variants[clients_sum] = std::move(node_copy);
+  FindBestChildPermutationForNode(node);
 }
 
 ///
 // NOLINTNEXTLINE(*-no-recursion)
 void Calculator::VisitOutput(TreeNode &node, OutputIndex output_index) {
+  if (IsStopped()) {
+    return;
+  }
+
   const auto &outputs = node.GetOutputs();
   const auto output = outputs[output_index];
 
@@ -242,43 +139,159 @@ void Calculator::VisitOutput(TreeNode &node, OutputIndex output_index) {
     return;
   }
 
-  if (visited_outputs.contains(output)) {
+  if (visited_outputs_.contains(output)) {
     return;
   }
 
-  visited_outputs.emplace(output);
+  visited_outputs_.emplace(output);
 
   if (IsOutputInRange(output)) {
-    cheapest_trees_per_output.emplace(output,
-                                      std::map{std::pair{1, client_node_}});
+    best_tree_per_num_clients_per_output_.emplace(
+        output, std::map{std::pair{1, client_node_}});
   }
 
   for (const auto &family_node : family_nodes_) {
+    if (IsStopped()) {
+      return;
+    }
+
     auto &child = node.EmplaceChild(output_index, family_node);
     TraverseNode(child);
   }
 }
 
-void Calculator::TraverseNode(TreeNode &node) {
-  const auto &outputs = node.GetOutputs();
-
-  for (auto output_index = 0;
-       output_index < static_cast<OutputIndex>(outputs.size());
-       ++output_index) {
-    VisitOutput(node, output_index);
+///
+void Calculator::FindBestChildPermutationForNode(const TreeNode &node) {
+  if (IsStopped()) {
+    return;
   }
 
-  Expects(!outputs.empty());
-  const auto first_output = outputs.front();
-  const auto same_outputs = std::all_of(
-      outputs.begin(), outputs.end(),
-      [first_output](const auto output) { return output == first_output; });
+  const auto &outputs = node.GetOutputs();
+  const auto first_greater_than_min_ouput =
+      std::find_if(outputs.cbegin(), outputs.cend(),
+                   [min_ouput = min_output_](const auto output) {
+                     return output >= min_ouput;
+                   });
 
-  // Expects(cheapest_trees_per_output.contains(first_output));
-  const auto &output_combinations = cheapest_trees_per_output[first_output];
+  if (first_greater_than_min_ouput == outputs.end()) {
+    return;
+  }
 
-  auto combination = std::map<FlowValue, std::pair<NumClients, TreeNode>>{};
-  MakeCombination(node, combination, 0, output_combinations.size(), 0, 0,
-                  same_outputs);
+  const auto first_output = *first_greater_than_min_ouput;
+
+  auto state = RecursionState{
+      .node = node,
+      .node_has_same_outputs = std::all_of(
+          outputs.cbegin(), outputs.cend(),
+          [first_output, min_output = min_output_](const auto output) {
+            return (output < min_output) || (output == first_output);
+          })};
+  state.node.ClearChildren();
+
+  Expects(best_tree_per_num_clients_per_output_.contains(first_output));
+
+  const auto first_output_index = static_cast<int>(
+      std::distance(outputs.begin(), first_greater_than_min_ouput));
+  const auto num_ouput_trees = static_cast<int>(
+      best_tree_per_num_clients_per_output_.at(first_output).size());
+
+  MakeNextChildPermutation(state, first_output_index, num_ouput_trees);
+}
+
+///
+// NOLINTNEXTLINE(*-no-recursion)
+void Calculator::MakeNextChildPermutation(RecursionState &state,
+                                          OutputIndex output_index,
+                                          TreeIndex prev_output_tree_index) {
+  if (IsStopped()) {
+    return;
+  }
+
+  const auto &outputs = state.node.GetOutputs();
+  const auto num_outputs = static_cast<int>(outputs.size());
+
+  Expects(output_index >= 0);
+  Expects(output_index < num_outputs);
+  const auto output = outputs[output_index];
+
+  if (output < min_output_) {
+    return;
+  }
+
+  Expects(best_tree_per_num_clients_per_output_.contains(output));
+  const auto &best_output_trees =
+      best_tree_per_num_clients_per_output_.at(output);
+
+  for (auto tree_index = state.node_has_same_outputs
+                             ? prev_output_tree_index
+                             : static_cast<int>(best_output_trees.size());
+       tree_index >= 0; --tree_index) {
+    if (IsStopped()) {
+      return;
+    }
+
+    if (tree_index == 0) {
+      state.node.EraseChild(output_index);
+    } else {
+      const auto &tree =
+          std::next(best_output_trees.cbegin(), tree_index - 1)->second;
+      state.node.EmplaceChild(output_index, tree);
+    }
+
+    const auto next_output_index = output_index + 1;
+
+    if (next_output_index < num_outputs) {
+      MakeNextChildPermutation(state, next_output_index, tree_index);
+      continue;
+    }
+
+    TestChildPermutation(state.node);
+  }
+}
+
+///
+void Calculator::TestChildPermutation(const TreeNode &node) {
+  if (IsStopped()) {
+    return;
+  }
+
+  const auto num_clients = node.GetNumClients();
+
+  if ((num_clients <= 0) || (num_clients > num_clients_)) {
+    return;
+  }
+
+  const auto best_input_trees =
+      best_tree_per_num_clients_per_output_.find(node.GetInput());
+
+  if (best_input_trees == best_tree_per_num_clients_per_output_.cend()) {
+    RecordChildPermutation(node);
+    return;
+  }
+
+  if (!best_input_trees->second.contains(num_clients)) {
+    RecordChildPermutation(node);
+    return;
+  }
+
+  const auto &best_tree = best_input_trees->second.at(num_clients);
+  const auto best_tree_cost = best_tree.GetTreeCost();
+  const auto new_tree_cost = node.GetTreeCost();
+
+  if (new_tree_cost > best_tree_cost) {
+    return;
+  }
+
+  RecordChildPermutation(node);
+}
+
+///
+void Calculator::RecordChildPermutation(const TreeNode &node) {
+  if (IsStopped()) {
+    return;
+  }
+
+  best_tree_per_num_clients_per_output_[node.GetInput()][node.GetNumClients()] =
+      node;
 }
 }  // namespace vh::ponc::calc

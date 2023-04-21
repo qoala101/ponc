@@ -33,11 +33,13 @@ class TreeNode {
   ///
   auto GetTreeCost() const -> Cost;
   ///
-  void SetTreeCost(Cost cost);
-  ///
   auto GetInput() const -> FlowValue;
   ///
+  void SetInput(int input);
+  ///
   auto GetChildren() const -> const std::map<OutputIndex, TreeNode> &;
+  ///
+  void ClearChildren();
   ///
   auto EmplaceChild(OutputIndex index, TreeNode child) -> TreeNode &;
   ///
