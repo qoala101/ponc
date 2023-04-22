@@ -181,7 +181,7 @@ void Calculator::FindBestChildPermutationForNode(const TreeNode &node) {
 
   auto state = RecursionState{
       .node = node,
-      .node_has_same_outputs = std::all_of(
+      .node_has_same_valid_outputs = std::all_of(
           outputs.cbegin(), outputs.cend(),
           [first_output, min_output = min_output_](const auto output) {
             return (output < min_output) || (output == first_output);
@@ -214,18 +214,18 @@ void Calculator::MakeNextChildPermutation(RecursionState &state,
   Expects(output_index < num_outputs);
   const auto output = outputs[output_index];
 
-  if (output < min_output_) {
-    return;
+  const auto &best_output_trees =
+      best_tree_per_num_clients_per_output_.find(output);
+
+  auto tree_index = 0;
+
+  if (best_output_trees != best_tree_per_num_clients_per_output_.end()) {
+    tree_index = state.node_has_same_valid_outputs
+                     ? prev_output_tree_index
+                     : static_cast<int>(best_output_trees->second.size());
   }
 
-  Expects(best_tree_per_num_clients_per_output_.contains(output));
-  const auto &best_output_trees =
-      best_tree_per_num_clients_per_output_.at(output);
-
-  for (auto tree_index = state.node_has_same_outputs
-                             ? prev_output_tree_index
-                             : static_cast<int>(best_output_trees.size());
-       tree_index >= 0; --tree_index) {
+  for (; tree_index >= 0; --tree_index) {
     if (IsStopped()) {
       return;
     }
@@ -234,7 +234,7 @@ void Calculator::MakeNextChildPermutation(RecursionState &state,
       state.node.EraseChild(output_index);
     } else {
       const auto &tree =
-          std::next(best_output_trees.cbegin(), tree_index - 1)->second;
+          std::next(best_output_trees->second.cbegin(), tree_index - 1)->second;
       state.node.EmplaceChild(output_index, tree);
     }
 

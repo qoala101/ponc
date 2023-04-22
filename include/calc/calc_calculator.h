@@ -54,7 +54,7 @@ class Calculator {
     ///
     TreeNode node{};
     ///
-    bool node_has_same_outputs{};
+    bool node_has_same_valid_outputs{};
   };
 
   ///
