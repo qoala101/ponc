@@ -33,7 +33,7 @@ void SettingsView::Draw(core::Settings& settings) {
                        ImColor{0.F, 1.F, 1.F});
     ImGui::SameLine();
     ImGui::SliderFloat("Low", &settings.low_flow, settings.min_flow,
-                       settings.high_flow);
+                       settings.high_flow, "%.2f");
 
     ImGui::ColorButton(IdLabel(color_button_id++).c_str(),
                        ImColor{0.F, 1.F, 0.F});
@@ -48,7 +48,7 @@ void SettingsView::Draw(core::Settings& settings) {
                        ImColor{1.F, 1.F, 0.F});
     ImGui::SameLine();
     ImGui::SliderFloat("High", &settings.high_flow, settings.low_flow,
-                       settings.max_flow);
+                       settings.max_flow, "%.2f");
 
     ImGui::ColorButton(IdLabel(color_button_id++).c_str(),
                        ImColor{1.F, 0.F, 0.F});
@@ -57,6 +57,10 @@ void SettingsView::Draw(core::Settings& settings) {
                      std::numeric_limits<float>::max(), "%.2f");
 
     ImGui::TreePop();
+  }
+
+  if (ImGui::Button("Reset To Default")) {
+    core::Settings::ResetToDefault(settings);
   }
 }
 }  // namespace vh::ponc::draw

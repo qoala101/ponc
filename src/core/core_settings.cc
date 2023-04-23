@@ -1,8 +1,18 @@
 #include "core_settings.h"
 
+#include "calc_settings.h"
 #include "core_gradient.h"
 
 namespace vh::ponc::core {
+///
+void Settings::ResetToDefault(Settings &settings) {
+  settings.min_flow = -27;
+  settings.low_flow = -22;
+  settings.high_flow = -18;
+  settings.max_flow = 6;
+  calc::CalculatorSettings::ResetToDefault(settings.calculator_settings);
+}
+
 ///
 auto Settings::GetFlowColor(const Settings &settings, float flow) -> ImColor {
   const auto blue = ImColor{0.F, 0.F, 1.F};

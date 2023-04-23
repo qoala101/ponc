@@ -22,6 +22,9 @@ struct FamilySettings {
 ///
 struct CalculatorSettings {
   ///
+  static void ResetToDefault(CalculatorSettings &settings);
+
+  ///
   float input{};
   ///
   float min_output{};

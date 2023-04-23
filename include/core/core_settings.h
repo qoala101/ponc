@@ -9,6 +9,8 @@ namespace vh::ponc::core {
 ///
 struct Settings {
   ///
+  static void ResetToDefault(Settings &settings);
+  ///
   static auto GetFlowColor(const Settings &settings, float flow) -> ImColor;
 
   ///

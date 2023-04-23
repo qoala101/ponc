@@ -22,10 +22,22 @@ auto FamilySettings::FromFamilies(
       continue;
     }
 
-    family_settings.emplace_back(FamilySettings{
-        .family_id = family->GetId(), .enabled = true, .cost = 100.F});
+    family_settings.emplace_back(FamilySettings{.family_id = family->GetId()});
   }
 
   return family_settings;
+}
+
+///
+void CalculatorSettings::ResetToDefault(CalculatorSettings& settings) {
+  settings.input = 6;
+  settings.min_output = -22;
+  settings.max_output = -18;
+  settings.num_clients = 20;
+
+  for (auto& family_settings : settings.family_settings) {
+    family_settings.enabled = true;
+    family_settings.cost = 100;
+  }
 }
 }  // namespace vh::ponc::calc
