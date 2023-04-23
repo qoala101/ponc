@@ -168,8 +168,6 @@ void NodeMover::MakeTree(const flow::TreeNode& tree_node) {
 
 ///
 void NodeMover::MakeTrees(const std::vector<flow::TreeNode>& tree_nodes) {
-  const auto& diagram = parent_diagram_->GetDiagram();
-
   auto last_tree_rect = std::optional<ImRect>{};
 
   for (const auto& tree_node : tree_nodes) {
@@ -181,12 +179,7 @@ void NodeMover::MakeTrees(const std::vector<flow::TreeNode>& tree_nodes) {
       continue;
     }
 
-    const auto& node = core::Diagram::FindNode(diagram, tree_node.node_id);
-    MoveNodeTo(tree_node.node_id,
-               {last_tree_rect->Min.x,
-                node.GetPos().y - tree_rect.Min.y + last_tree_rect->Max.y});
-
-    MakeTreeImpl(tree_node);
+    MoveTreeTo(tree_node, {last_tree_rect->Min.x, last_tree_rect->Max.y});
     last_tree_rect = GetTreeRect(tree_node);
   }
 }
