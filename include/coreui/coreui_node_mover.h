@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "core_id_value.h"
-#include "coreui_event_loop.h"
 #include "coreui_linker.h"
 #include "cpp_safe_ptr.h"
 #include "flow_tree.h"
@@ -24,9 +23,9 @@ class NodeMover {
   ///
   void OnFrame();
   ///
-  void MoveNode(ne::NodeId node_id);
+  void MoveNodeTo(ne::NodeId node_id, const ImVec2 &pos);
   ///
-  void MoveNodesTo(const std::vector<ne::NodeId> &node_ids, ImVec2 pos);
+  void MoveNodesTo(const std::vector<ne::NodeId> &node_ids, const ImVec2 &pos);
   ///
   void MovePinTo(ne::PinId pin_id, const ImVec2 &pos);
   ///
@@ -44,11 +43,21 @@ class NodeMover {
 
  private:
   ///
-  void MoveNewNodes();
+  void MoveTreeTo(const flow::TreeNode &tree_node, const ImVec2 &pos);
+  ///
+  void MarkToMove(ne::NodeId node_id);
+  ///
+  void MarkNewNodesToMove();
   ///
   void ApplyMoves() const;
   ///
-  auto MakeTreeImpl(const flow::TreeNode &tree_node);
+  auto GetNodePos(ne::NodeId node_id);
+  ///
+  auto GetNodeRect(ne::NodeId node_id);
+  ///
+  auto GetTreeRect(const flow::TreeNode &tree_node);
+  ///
+  void MakeTreeImpl(const flow::TreeNode &tree_node);
 
   ///
   cpp::SafePtr<Diagram> parent_diagram_;

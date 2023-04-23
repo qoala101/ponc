@@ -4,48 +4,25 @@
 #include <numeric>
 
 #include "core_diagram.h"
+#include "core_id_value.h"
 #include "cpp_assert.h"
+#include "imgui_node_editor.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "core_i_node.h"
 #include "coreui_diagram.h"
 #include "coreui_node_mover.h"
+#include "flow_tree.h"
 #include "flow_tree_traversal.h"
 #include "imgui.h"
 
 namespace vh::ponc::coreui {
-namespace {
-///
-auto GetNodesPerLevel(const flow::TreeNode& tree_node,
-                      const core::Diagram& diagram) {
-  auto level = 0;
-  auto nodes_per_level = std::vector<std::vector<core::INode*>>{};
-
-  flow::TraverseDepthFirst(
-      tree_node,
-      [&diagram, &level, &nodes_per_level](const auto& tree_node) {
-        auto& node = core::Diagram::FindNode(diagram, tree_node.node_id);
-
-        if ((static_cast<int>(nodes_per_level.size()) - 1) < level) {
-          nodes_per_level.emplace_back().emplace_back(&node);
-        } else {
-          nodes_per_level[level].emplace_back(&node);
-        }
-
-        ++level;
-      },
-      [&level](const auto&) { --level; });
-
-  return nodes_per_level;
-}
-}  // namespace
-
 ///
 NodeMover::NodeMover(cpp::SafePtr<Diagram> parent_diagram)
     : parent_diagram_{std::move(parent_diagram)} {}
 
 ///
 void NodeMover::OnFrame() {
-  MoveNewNodes();
+  MarkNewNodesToMove();
   ApplyMoves();
 
   nodes_to_move_.clear();
@@ -54,73 +31,94 @@ void NodeMover::OnFrame() {
 }
 
 ///
-void NodeMover::MoveNode(ne::NodeId node_id) {
-  nodes_to_move_.insert(node_id.Get());
+void NodeMover::MoveNodeTo(ne::NodeId node_id, const ImVec2& pos) {
+  const auto& diagram = parent_diagram_->GetDiagram();
+  auto& node = core::Diagram::FindNode(diagram, node_id);
+
+  node.SetPos(pos);
+  MarkToMove(node_id);
 }
 
 ///
 void NodeMover::MoveNodesTo(const std::vector<ne::NodeId>& node_ids,
-                            ImVec2 pos) {
-  const auto& diagram = parent_diagram_->GetDiagram();
+                            const ImVec2& pos) {
+  auto next_node_pos = pos;
 
   for (const auto node_id : node_ids) {
-    auto& node = core::Diagram::FindNode(diagram, node_id);
-    node.SetPos(pos);
-    MoveNode(node_id);
-
-    pos.y += GetNodeSize(node_id).y;
+    MoveNodeTo(node_id, next_node_pos);
+    next_node_pos.y += GetNodeSize(node_id).y;
   }
 }
 
 ///
-auto NodeMover::MakeTreeImpl(const flow::TreeNode& tree_node) {
-  const auto nodes_per_level =
-      GetNodesPerLevel(tree_node, parent_diagram_->GetDiagram());
+auto NodeMover::GetNodePos(ne::NodeId node_id) {
+  const auto& diagram = parent_diagram_->GetDiagram();
+  const auto& node = core::Diagram::FindNode(diagram, node_id);
+  return node.GetPos();
+}
 
-  Expects(!nodes_per_level.front().empty());
+///
+auto NodeMover::GetNodeRect(ne::NodeId node_id) {
+  auto rect = ImRect{{}, GetNodeSize(node_id)};
+  rect.Translate(GetNodePos(node_id));
+  return rect;
+}
 
-  const auto* root_node = nodes_per_level.front().front();
-  const auto root_pos = root_node->GetPos();
+///
+auto NodeMover::GetTreeRect(const flow::TreeNode& tree_node) {
+  auto rect = GetNodeRect(tree_node.node_id);
 
-  auto previous_level_rect = ImRect{{}, GetNodeSize(root_node->GetId())};
-  previous_level_rect.Translate(root_pos);
+  flow::TraverseDepthFirst(
+      tree_node,
+      [this, &rect](const auto& tree_node) {
+        rect.Add(GetNodeRect(tree_node.node_id));
+      },
+      [](const auto&) {});
 
-  auto tree_rect = previous_level_rect;
+  return rect;
+}
 
-  for (auto nodes = nodes_per_level.begin() + 1; nodes != nodes_per_level.end();
-       ++nodes) {
-    const auto level_height =
-        std::accumulate(nodes->begin(), nodes->end(), 0.F,
-                        [this](const auto height, const auto* node) {
-                          return height + GetNodeSize(node->GetId()).y;
-                        });
+///
+void NodeMover::MakeTreeImpl(const flow::TreeNode& tree_node) {
+  flow::TraverseDepthFirst(
+      tree_node, [](const auto&) {},
+      [this](const auto& tree_node) {
+        if (tree_node.child_nodes.empty()) {
+          return;
+        }
 
-    const auto level_width = std::transform_reduce(
-        nodes->begin(), nodes->end(), 0.F,
-        [](const auto max_width, const auto node_width) {
-          return std::max(max_width, node_width);
-        },
-        [this](const auto* node) { return GetNodeSize(node->GetId()).x; });
+        const auto node_rect = GetNodeRect(tree_node.node_id);
+        const auto next_child_x = node_rect.Max.x;
 
-    auto level_rect = ImRect{{}, {level_width, level_height}};
-    level_rect.Translate(
-        {previous_level_rect.Max.x,
-         previous_level_rect.GetCenter().y - level_rect.GetCenter().y});
+        const auto& first_child = tree_node.child_nodes.cbegin()->second;
+        const auto tree_top_to_first_child_distance =
+            GetNodeRect(first_child.node_id).Min.y -
+            GetTreeRect(first_child).Min.y;
 
-    auto next_node_y = level_rect.Min.y;
+        const auto& last_child =
+            std::prev(tree_node.child_nodes.cend())->second;
+        const auto last_child_to_tree_bot_distance =
+            GetTreeRect(last_child).Max.y -
+            GetNodeRect(last_child.node_id).Max.y;
 
-    for (auto* node : *nodes) {
-      node->SetPos({level_rect.Min.x, next_node_y});
-      MoveNode(node->GetId());
+        const auto direct_children_height = std::accumulate(
+            tree_node.child_nodes.cbegin(), tree_node.child_nodes.cend(),
+            -tree_top_to_first_child_distance - last_child_to_tree_bot_distance,
+            [this](const auto height, const auto& child_node) {
+              return height + GetTreeRect(child_node.second).GetHeight();
+            });
 
-      next_node_y += GetNodeSize(node->GetId()).y;
-    }
+        auto next_child_y = node_rect.GetCenter().y -
+                            tree_top_to_first_child_distance -
+                            direct_children_height / 2;
 
-    previous_level_rect = level_rect;
-    tree_rect.Add(level_rect);
-  }
+        for (const auto& child_node : tree_node.child_nodes) {
+          MoveTreeTo(child_node.second, {next_child_x, next_child_y});
 
-  return tree_rect;
+          const auto child_tree_rect = GetTreeRect(child_node.second);
+          next_child_y += child_tree_rect.GetHeight();
+        }
+      });
 }
 
 ///
@@ -130,37 +128,37 @@ void NodeMover::MakeTree(const flow::TreeNode& tree_node) {
 
 ///
 void NodeMover::MakeTrees(const std::vector<flow::TreeNode>& tree_nodes) {
-  auto last_tree_rect = std::optional<ImRect>{};
   const auto& diagram = parent_diagram_->GetDiagram();
 
+  auto last_tree_rect = std::optional<ImRect>{};
+
   for (const auto& tree_node : tree_nodes) {
-    const auto tree_rect = MakeTreeImpl(tree_node);
+    MakeTreeImpl(tree_node);
+    const auto tree_rect = GetTreeRect(tree_node);
 
     if (!last_tree_rect.has_value()) {
       last_tree_rect = tree_rect;
       continue;
     }
 
-    auto& node = core::Diagram::FindNode(diagram, tree_node.node_id);
+    const auto& node = core::Diagram::FindNode(diagram, tree_node.node_id);
+    MoveNodeTo(tree_node.node_id,
+               {last_tree_rect->Min.x,
+                node.GetPos().y - tree_rect.Min.y + last_tree_rect->Max.y});
 
-    node.SetPos({last_tree_rect->Min.x,
-                 node.GetPos().y - tree_rect.Min.y + last_tree_rect->Max.y});
-    MoveNode(tree_node.node_id);
-
-    last_tree_rect = MakeTreeImpl(tree_node);
+    MakeTreeImpl(tree_node);
+    last_tree_rect = GetTreeRect(tree_node);
   }
 }
 
 ///
 void NodeMover::MovePinTo(ne::PinId pin_id, const ImVec2& pos) {
   const auto current_pin_pos = GetPinPos(pin_id);
-
-  auto& node =
+  const auto& node =
       core::Diagram::FindPinNode(parent_diagram_->GetDiagram(), pin_id);
   const auto matching_node_pos = node.GetPos() - current_pin_pos + pos;
 
-  node.SetPos(matching_node_pos);
-  MoveNode(node.GetId());
+  MoveNodeTo(node.GetId(), matching_node_pos);
 }
 
 ///
@@ -188,14 +186,31 @@ void NodeMover::SetPinPos(ne::PinId pin_id, const ImVec2& pos) {
 }
 
 ///
-void NodeMover::MoveNewNodes() {
+void NodeMover::MoveTreeTo(const flow::TreeNode& tree_node, const ImVec2& pos) {
+  const auto delta = pos - GetTreeRect(tree_node).Min;
+
+  flow::TraverseDepthFirst(
+      tree_node,
+      [this, &delta](const auto& tree_node) {
+        MoveNodeTo(tree_node.node_id, GetNodePos(tree_node.node_id) + delta);
+      },
+      [](const auto&) {});
+}
+
+///
+void NodeMover::MarkToMove(ne::NodeId node_id) {
+  nodes_to_move_.insert(node_id.Get());
+}
+
+///
+void NodeMover::MarkNewNodesToMove() {
   const auto& diagram = parent_diagram_->GetDiagram();
 
   for (const auto& node : diagram.GetNodes()) {
     const auto node_id = node->GetId();
 
     if (const auto node_is_new = !node_sizes_.contains(node_id.Get())) {
-      MoveNode(node_id);
+      MarkToMove(node_id);
     }
   }
 }
