@@ -51,11 +51,18 @@ class NodeMover {
   ///
   void ApplyMoves() const;
   ///
-  auto GetNodePos(ne::NodeId node_id);
+  auto GetNodePos(ne::NodeId node_id) const;
   ///
-  auto GetNodeRect(ne::NodeId node_id);
+  auto GetNodeRect(ne::NodeId node_id) const;
   ///
-  auto GetTreeRect(const flow::TreeNode &tree_node);
+  auto GetTreeRect(const flow::TreeNode &tree_node) const;
+  ///
+  auto GetOtherPinPos(ne::PinId pin_id) const -> const ImVec2 &;
+  ///
+  auto GetTakenPinsRect(const flow::TreeNode &tree_node) const
+      -> std::optional<ImRect>;
+  ///
+  void MakeTreeVisitNode(const flow::TreeNode &tree_node);
   ///
   void MakeTreeImpl(const flow::TreeNode &tree_node);
 
