@@ -35,20 +35,13 @@ auto Project::CreateProject() const {
                     std::move_iterator{group_families.end()});
   }
 
-  return core::Project{
-      {.min_flow = -27,
-       .low_flow = -22,
-       .high_flow = -18,
-       .max_flow = 6,
-       .calculator_settings = {.input = 6,
-                               .min_output = -22,
-                               .max_output = -18,
-                               .num_clients = 20,
-                               .family_settings =
-                                   calc::FamilySettings::FromFamilies(
-                                       families)}},
-      std::move(families),
-      std::vector<core::Diagram>(1)};
+  auto settings = core::Settings{
+      .calculator_settings = {
+          .family_settings = calc::FamilySettings::FromFamilies(families)}};
+  core::Settings::ResetToDefault(settings);
+
+  return core::Project{std::move(settings), std::move(families),
+                       std::vector<core::Diagram>(1)};
 }
 
 ///

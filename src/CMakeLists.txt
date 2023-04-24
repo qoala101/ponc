@@ -82,6 +82,7 @@ add_executable(ponc
   draw/view/draw_i_view.cc
   draw/view/draw_node_view.cc
   draw/view/draw_nodes_view.cc
+  draw/view/draw_settings_table_row.cc
   draw/view/draw_settings_view.cc
   draw/view/draw_tree_node.cc
 

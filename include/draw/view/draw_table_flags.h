@@ -13,6 +13,9 @@ static constexpr auto kFixedTableFlags =
 ///
 static constexpr auto kExpandingTableFlags =
     kFixedTableFlags | ImGuiTableFlags_ScrollY;
+///
+static constexpr auto kSettingsTableFlags =
+    ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersInner;
 // NOLINTEND(*-signed-bitwise)
 }  // namespace vh::ponc::draw
 

@@ -30,6 +30,7 @@
 #include "cpp_assert.h"
 #include "draw_disable_if.h"
 #include "draw_id_label.h"
+#include "draw_settings_table_row.h"
 #include "draw_table_flags.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
@@ -37,35 +38,23 @@
 namespace vh::ponc::draw {
 namespace {
 ///
-void DrawRequirement(std::string_view name) {
-  ImGui::TableNextRow();
-
-  ImGui::TableNextColumn();
-  ImGui::AlignTextToFramePadding();
-  ImGui::TextUnformatted(name.data());
-
-  ImGui::TableNextColumn();
-  ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-}
-
-///
 void DrawRequirements(calc::CalculatorSettings& settings) {
   if (ImGui::CollapsingHeader("Requirements", ImGuiTreeNodeFlags_DefaultOpen)) {
-    if (ImGui::BeginTable("Requirements", 2, kFixedTableFlags)) {
+    if (ImGui::BeginTable("Requirements", 2, kSettingsTableFlags)) {
       ImGui::TableSetupColumn("Requirement",
                               ImGuiTableColumnFlags_NoHeaderLabel);
       ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_NoHeaderLabel);
 
-      DrawRequirement("Input");
+      DrawSettingsTableRow("Input");
       ImGui::InputFloat("##Input", &settings.input, 0, 0, "%.2f");
 
-      DrawRequirement("Min Ouput");
+      DrawSettingsTableRow("Min Ouput");
       ImGui::InputFloat("##Min Ouput", &settings.min_output, 0, 0, "%.2f");
 
-      DrawRequirement("Max Ouput");
+      DrawSettingsTableRow("Max Ouput");
       ImGui::InputFloat("##Max Ouput", &settings.max_output, 0, 0, "%.2f");
 
-      DrawRequirement("Clients");
+      DrawSettingsTableRow("Clients");
       ImGui::InputInt("##Clients", &settings.num_clients);
 
       ImGui::EndTable();
@@ -90,7 +79,7 @@ void DrawFamilySettings(std::string_view label,
 ///
 void DrawFamilies(core::Project& project) {
   if (ImGui::CollapsingHeader("Node Cost", ImGuiTreeNodeFlags_DefaultOpen)) {
-    if (ImGui::BeginTable("Node Cost", 2, kExpandingTableFlags)) {
+    if (ImGui::BeginTable("Node Cost", 2, kSettingsTableFlags)) {
       ImGui::TableSetupScrollFreeze(0, 1);
       ImGui::TableSetupColumn("Node Type");
       ImGui::TableSetupColumn("Cost, $");

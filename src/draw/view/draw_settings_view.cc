@@ -6,6 +6,8 @@
 
 #include "core_settings.h"
 #include "draw_id_label.h"
+#include "draw_settings_table_row.h"
+#include "draw_table_flags.h"
 
 namespace vh::ponc::draw {
 ///
@@ -55,6 +57,30 @@ void SettingsView::Draw(core::Settings& settings) {
     ImGui::SameLine();
     ImGui::DragFloat("Very High", &settings.max_flow, 0.01F, settings.high_flow,
                      std::numeric_limits<float>::max(), "%.2f");
+
+    ImGui::TreePop();
+  }
+
+  if (ImGui::TreeNodeEx("Calculator", ImGuiTreeNodeFlags_DefaultOpen)) {
+    ImGui::TextUnformatted("See View->Calculator");
+    ImGui::TreePop();
+  }
+
+  if (ImGui::TreeNodeEx("Other", ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (ImGui::BeginTable("Other", 2, kSettingsTableFlags)) {
+      ImGui::TableSetupColumn("Setting", ImGuiTableColumnFlags_NoHeaderLabel);
+      ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_NoHeaderLabel);
+
+      DrawSettingsTableRow("Arrange Horizontal Spacing, px");
+      ImGui::InputInt("##Arrange Horizontal Spacing, px",
+                      &settings.arrange_horizontal_spacing, 0);
+
+      DrawSettingsTableRow("Arrange Vertical Spacing, px");
+      ImGui::InputInt("##Arrange Vertical Spacing, px",
+                      &settings.arrange_vertical_spacing, 0);
+
+      ImGui::EndTable();
+    }
 
     ImGui::TreePop();
   }

@@ -24,6 +24,10 @@ struct Settings {
   ///
   float max_flow{};
   ///
+  int arrange_horizontal_spacing{};
+  ///
+  int arrange_vertical_spacing{};
+  ///
   calc::CalculatorSettings calculator_settings{};
 };
 }  // namespace vh::ponc::core
