@@ -50,9 +50,11 @@ void MainMenuBar::Draw(coreui::Project &project) {
   if (ImGui::BeginMainMenuBar()) {
     DrawFileMenu(project);
     DrawViewMenu();
+    ImGui::Separator();
 
     ImGui::MenuItem("Color Flow", nullptr,
                     &project.GetProject().GetSettings().color_flow);
+    ImGui::Separator();
 
     if (ImGui::MenuItem("Zoom To Content")) {
       ne::NavigateToContent();
@@ -107,13 +109,12 @@ void MainMenuBar::DrawViewMenu() {
     DrawViewMenuItem(nodes_view_);
     DrawViewMenuItem(diagrams_view_);
     DrawViewMenuItem(flow_tree_view_);
-
     ImGui::Separator();
+
     DrawViewMenuItem(calculator_view_);
-
     ImGui::Separator();
-    DrawViewMenuItem(settings_view_);
 
+    DrawViewMenuItem(settings_view_);
     ImGui::EndMenu();
   }
 }
