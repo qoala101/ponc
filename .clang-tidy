@@ -1,5 +1,5 @@
 ---
-Checks: "*, -fuchsia-trailing-return, -fuchsia-default-arguments-declarations, -readability-identifier-length, -llvmlibc-restrict-system-libc-headers, -llvmlibc-implementation-in-namespace, -llvmlibc-callee-namespace, -fuchsia-default-arguments-calls, -altera-unroll-loops, -fuchsia-overloaded-operator, -altera-id-dependent-backward-branch, -altera-struct-pack-align, -modernize-use-nodiscard"
+Checks: "*, -fuchsia-trailing-return, -fuchsia-default-arguments-declarations, -readability-identifier-length, -llvmlibc-restrict-system-libc-headers, -llvmlibc-implementation-in-namespace, -llvmlibc-callee-namespace, -fuchsia-default-arguments-calls, -altera-unroll-loops, -fuchsia-overloaded-operator, -altera-id-dependent-backward-branch, -altera-struct-pack-align, -modernize-use-nodiscard, -hicpp-no-array-decay, -cppcoreguidelines-pro-bounds-array-to-pointer-decay"
 CheckOptions:
   - {
       key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic,
