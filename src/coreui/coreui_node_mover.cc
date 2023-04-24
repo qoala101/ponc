@@ -10,6 +10,7 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "core_i_node.h"
 #include "coreui_diagram.h"
+#include "coreui_i_node_traits.h"
 #include "coreui_node_mover.h"
 #include "flow_tree.h"
 #include "flow_tree_traversal.h"
@@ -17,8 +18,10 @@
 
 namespace vh::ponc::coreui {
 ///
-NodeMover::NodeMover(cpp::SafePtr<Diagram> parent_diagram)
-    : parent_diagram_{std::move(parent_diagram)} {}
+NodeMover::NodeMover(cpp::SafePtr<Diagram> parent_diagram,
+                     cpp::SafePtr<core::Settings> settings)
+    : parent_diagram_{std::move(parent_diagram)},
+      settings_{std::move(settings)} {}
 
 ///
 void NodeMover::OnFrame() {
@@ -40,13 +43,35 @@ void NodeMover::MoveNodeTo(ne::NodeId node_id, const ImVec2& pos) {
 }
 
 ///
-void NodeMover::MoveNodesTo(const std::vector<ne::NodeId>& node_ids,
-                            const ImVec2& pos) {
+auto NodeMover::DoNodesNeedSpacing(ne::NodeId first_node,
+                                   ne::NodeId second_node) const {
+  const auto node_ids = std::array{first_node, second_node};
+  const auto& diagram = parent_diagram_->GetDiagram();
+
+  return std::any_of(
+      node_ids.cbegin(), node_ids.cend(), [&diagram](const auto node_id) {
+        const auto& node = core::Diagram::FindNode(diagram, node_id);
+        const auto node_has_header =
+            node.CreateUiTraits()->CreateHeaderTraits().has_value();
+        return node_has_header;
+      });
+}
+
+///
+void NodeMover::ArrangeVerticallyAt(const std::vector<ne::NodeId>& node_ids,
+                                    const ImVec2& pos) {
   auto next_node_pos = pos;
 
-  for (const auto node_id : node_ids) {
-    MoveNodeTo(node_id, next_node_pos);
-    next_node_pos.y += GetNodeSize(node_id).y;
+  for (auto node_id = node_ids.cbegin(); node_id != node_ids.end(); ++node_id) {
+    MoveNodeTo(*node_id, next_node_pos);
+    next_node_pos.y += GetNodeSize(*node_id).y;
+
+    const auto next_id = std::next(node_id);
+
+    if ((next_id != node_ids.end()) && DoNodesNeedSpacing(*node_id, *next_id)) {
+      next_node_pos.y +=
+          static_cast<float>(settings_->arrange_vertical_spacing);
+    }
   }
 }
 
@@ -113,7 +138,41 @@ auto NodeMover::GetTakenPinsRect(const flow::TreeNode& tree_node) const
 }
 
 ///
-void NodeMover::MakeTreeVisitNode(const flow::TreeNode& tree_node) {
+auto NodeMover::DoesChildNeedSpacing(
+    const flow::TreeNode& tree_node,
+    decltype(flow::TreeNode::child_nodes)::const_iterator child_node) const {
+  const auto next_node = std::next(child_node);
+
+  if (next_node == tree_node.child_nodes.cend()) {
+    return false;
+  }
+
+  if (!child_node->second.child_nodes.empty()) {
+    return true;
+  }
+
+  return DoNodesNeedSpacing(child_node->second.node_id,
+                            next_node->second.node_id);
+}
+
+///
+auto NodeMover::GetChildrenNeedingSpacing(
+    const flow::TreeNode& tree_node) const {
+  auto children_needing_spacing =
+      std::unordered_set<core::IdValue<ne::NodeId>>{};
+
+  for (auto child_node = tree_node.child_nodes.cbegin();
+       child_node != tree_node.child_nodes.cend(); ++child_node) {
+    if (DoesChildNeedSpacing(tree_node, child_node)) {
+      children_needing_spacing.emplace(child_node->second.node_id);
+    }
+  }
+
+  return children_needing_spacing;
+}
+
+///
+void NodeMover::ArrangeAsTreeVisitNode(const flow::TreeNode& tree_node) {
   const auto& child_nodes = tree_node.child_nodes;
 
   if (child_nodes.empty()) {
@@ -121,7 +180,13 @@ void NodeMover::MakeTreeVisitNode(const flow::TreeNode& tree_node) {
   }
 
   const auto node_rect = GetNodeRect(tree_node.node_id);
-  const auto next_child_x = node_rect.Max.x;
+  const auto next_child_x =
+      node_rect.Max.x +
+      static_cast<float>(settings_->arrange_horizontal_spacing);
+
+  const auto children_needing_spacing = GetChildrenNeedingSpacing(tree_node);
+  const auto vertical_spacing =
+      static_cast<float>(settings_->arrange_vertical_spacing);
 
   const auto& [first_output_pin, first_child] = *child_nodes.cbegin();
   const auto tree_top_to_first_input_pin_distance =
@@ -133,7 +198,8 @@ void NodeMover::MakeTreeVisitNode(const flow::TreeNode& tree_node) {
 
   const auto direct_children_height = std::accumulate(
       child_nodes.cbegin(), child_nodes.cend(),
-      -tree_top_to_first_input_pin_distance -
+      vertical_spacing * static_cast<float>(children_needing_spacing.size()) -
+          tree_top_to_first_input_pin_distance -
           last_input_pin_to_tree_bot_distance,
       [this](const auto height, const auto& child_node) {
         return height + GetTreeRect(child_node.second).GetHeight();
@@ -151,27 +217,31 @@ void NodeMover::MakeTreeVisitNode(const flow::TreeNode& tree_node) {
 
     const auto child_tree_rect = GetTreeRect(child_node.second);
     next_child_y += child_tree_rect.GetHeight();
+
+    if (children_needing_spacing.contains(child_node.second.node_id.Get())) {
+      next_child_y += vertical_spacing;
+    }
   }
 }
 
 ///
-void NodeMover::MakeTreeImpl(const flow::TreeNode& tree_node) {
+void NodeMover::ArrangeAsTreeImpl(const flow::TreeNode& tree_node) {
   flow::TraverseDepthFirst(
       tree_node, [](const auto&) {},
-      std::bind_front(&NodeMover::MakeTreeVisitNode, this));
+      std::bind_front(&NodeMover::ArrangeAsTreeVisitNode, this));
 }
 
 ///
-void NodeMover::MakeTree(const flow::TreeNode& tree_node) {
-  MakeTreeImpl(tree_node);
+void NodeMover::ArrangeAsTree(const flow::TreeNode& tree_node) {
+  ArrangeAsTreeImpl(tree_node);
 }
 
 ///
-void NodeMover::MakeTrees(const std::vector<flow::TreeNode>& tree_nodes) {
+void NodeMover::ArrangeAsTrees(const std::vector<flow::TreeNode>& tree_nodes) {
   auto last_tree_rect = std::optional<ImRect>{};
 
   for (const auto& tree_node : tree_nodes) {
-    MakeTreeImpl(tree_node);
+    ArrangeAsTreeImpl(tree_node);
     const auto tree_rect = GetTreeRect(tree_node);
 
     if (!last_tree_rect.has_value()) {

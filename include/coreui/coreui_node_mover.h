@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "core_id_value.h"
+#include "core_settings.h"
 #include "coreui_linker.h"
 #include "cpp_safe_ptr.h"
 #include "flow_tree.h"
@@ -18,20 +19,22 @@ namespace vh::ponc::coreui {
 class NodeMover {
  public:
   ///
-  explicit NodeMover(cpp::SafePtr<Diagram> parent_diagram);
+  NodeMover(cpp::SafePtr<Diagram> parent_diagram,
+            cpp::SafePtr<core::Settings> settings);
 
   ///
   void OnFrame();
   ///
   void MoveNodeTo(ne::NodeId node_id, const ImVec2 &pos);
   ///
-  void MoveNodesTo(const std::vector<ne::NodeId> &node_ids, const ImVec2 &pos);
+  void ArrangeVerticallyAt(const std::vector<ne::NodeId> &node_ids,
+                           const ImVec2 &pos);
   ///
   void MovePinTo(ne::PinId pin_id, const ImVec2 &pos);
   ///
-  void MakeTree(const flow::TreeNode &tree_node);
+  void ArrangeAsTree(const flow::TreeNode &tree_node);
   ///
-  void MakeTrees(const std::vector<flow::TreeNode> &tree_nodes);
+  void ArrangeAsTrees(const std::vector<flow::TreeNode> &tree_nodes);
   ///
   auto GetNodeSize(ne::NodeId node_id) const -> const ImVec2 &;
   ///
@@ -62,12 +65,22 @@ class NodeMover {
   auto GetTakenPinsRect(const flow::TreeNode &tree_node) const
       -> std::optional<ImRect>;
   ///
-  void MakeTreeVisitNode(const flow::TreeNode &tree_node);
+  auto DoNodesNeedSpacing(ne::NodeId first_node, ne::NodeId second_node) const;
   ///
-  void MakeTreeImpl(const flow::TreeNode &tree_node);
+  auto DoesChildNeedSpacing(
+      const flow::TreeNode &tree_node,
+      decltype(flow::TreeNode::child_nodes)::const_iterator child_node) const;
+  ///
+  auto GetChildrenNeedingSpacing(const flow::TreeNode &tree_node) const;
+  ///
+  void ArrangeAsTreeVisitNode(const flow::TreeNode &tree_node);
+  ///
+  void ArrangeAsTreeImpl(const flow::TreeNode &tree_node);
 
   ///
   cpp::SafePtr<Diagram> parent_diagram_;
+  ///
+  cpp::SafePtr<core::Settings> settings_;
   ///
   cpp::SafeOwner safe_owner_{};
   ///

@@ -63,7 +63,9 @@ Diagram::Diagram(cpp::SafePtr<Project> parent_project,
                  cpp::SafePtr<core::Diagram> diagram)
     : parent_project_{std::move(parent_project)},
       diagram_{std::move(diagram)},
-      node_mover_{safe_owner_.MakeSafe(this)},
+      node_mover_{
+          safe_owner_.MakeSafe(this),
+          safe_owner_.MakeSafe(&parent_project_->GetProject().GetSettings())},
       linker_{safe_owner_.MakeSafe(this)} {}
 
 ///

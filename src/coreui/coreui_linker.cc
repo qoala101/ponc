@@ -255,8 +255,8 @@ void Linker::AcceptCreateNode(const Family& family) {
     const auto& first_node = core::Diagram::FindNode(
         parent_diagram->GetDiagram(), created_nodes.front());
 
-    parent_diagram->GetNodeMover().MoveNodesTo(created_nodes,
-                                               first_node.GetPos());
+    parent_diagram->GetNodeMover().ArrangeVerticallyAt(created_nodes,
+                                                       first_node.GetPos());
   });
 }
 
