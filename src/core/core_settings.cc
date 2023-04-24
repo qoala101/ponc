@@ -12,7 +12,7 @@ void Settings::ResetToDefault(Settings &settings) {
   settings.high_flow = -18;
   settings.max_flow = 6;
   settings.arrange_horizontal_spacing = 80;
-  settings.arrange_vertical_spacing = 0;
+  settings.arrange_vertical_spacing = 20;
   calc::CalculatorSettings::ResetToDefault(settings.calculator_settings);
 }
 

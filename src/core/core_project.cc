@@ -69,11 +69,7 @@ Project::Project(Settings settings,
     : settings_{std::move(settings)},
       families_{std::move(families)},
       diagrams_{std::move(diagrams)},
-      id_generator_{FindMaxId() + 1} {
-  for (auto& diagram : diagrams_) {
-    SetDefaultNameIfEmpty(diagram);
-  }
-}
+      id_generator_{FindMaxId() + 1} {}
 
 ///
 auto Project::GetIdGenerator() const -> const IdGenerator& {
@@ -101,7 +97,6 @@ auto Project::GetDiagrams() -> std::vector<Diagram>& { return diagrams_; }
 
 ///
 auto Project::EmplaceDiagram(Diagram diagram) -> Diagram& {
-  SetDefaultNameIfEmpty(diagram);
   return diagrams_.emplace_back(std::move(diagram));
 }
 
@@ -119,11 +114,4 @@ auto Project::GetSettings() const -> const Settings& {
 
 ///
 auto Project::GetSettings() -> Settings& { return settings_; }
-
-///
-void Project::SetDefaultNameIfEmpty(Diagram& diagram) {
-  if (diagram.GetName().empty()) {
-    diagram.SetName("Diagram #" + std::to_string(id_generator_.Generate()));
-  }
-}
 }  // namespace vh::ponc::core

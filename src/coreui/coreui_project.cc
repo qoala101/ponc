@@ -175,7 +175,6 @@ auto Project::CanSave() const -> bool { return !file_path_.empty(); }
 ///
 auto Project::Save() -> Event& {
   Expects(!file_path_.empty());
-
   return SaveToFile(file_path_);
 }
 

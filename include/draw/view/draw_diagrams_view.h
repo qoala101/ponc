@@ -15,6 +15,10 @@ class DiagramsView : public IView {
 
   ///
   void Draw(coreui::Project &project);
+
+ private:
+  ///
+  std::string rename_buffer_{};
 };
 }  // namespace vh::ponc::draw
 
