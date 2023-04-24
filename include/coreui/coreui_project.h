@@ -46,6 +46,8 @@ class Project {
   ///
   auto AddDiagram(core::Diagram diagram) -> Event &;
   ///
+  auto CloneDiagram(const core::Diagram &diagram) -> Event &;
+  ///
   auto DeleteDiagram(int index) -> Event &;
   ///
   auto SetDiagram(int index) -> Event &;

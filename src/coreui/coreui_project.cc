@@ -20,6 +20,7 @@
 #include "coreui_event_loop.h"
 #include "cpp_assert.h"
 #include "cpp_share.h"
+#include "json_diagram_serializer.h"
 #include "json_project_serializer.h"
 
 namespace vh::ponc::coreui {
@@ -99,6 +100,14 @@ auto Project::AddDiagram(core::Diagram diagram) -> Event& {
         safe_this->diagram_ = std::make_unique<Diagram>(
             safe_this, safe_this->safe_owner_.MakeSafe(&added_diagram));
       });
+}
+
+///
+auto Project::CloneDiagram(const core::Diagram& diagram) -> Event& {
+  const auto json = json::DiagramSerializer::WriteToJson(diagram);
+  auto clone =
+      json::DiagramSerializer::ParseFromJson(json, project_.GetFamilies());
+  return AddDiagram(std::move(clone));
 }
 
 ///

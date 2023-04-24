@@ -108,7 +108,7 @@ void DiagramsView::Draw(coreui::Project& project) {
       }
 
       if (clone_diagram) {
-        // TODO(vh):
+        project.CloneDiagram(diagram);
         continue;
       }
 
