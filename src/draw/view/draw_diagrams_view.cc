@@ -81,7 +81,13 @@ void DiagramsView::Draw(coreui::Project& project) {
 
   ImGui::EndHorizontal();
 
-  if (ImGui::BeginTable("Diagrams", 1, kExpandingTableFlags)) {
+  // NOLINTBEGIN(*-signed-bitwise)
+  const auto table_flags = ImGuiTableFlags_BordersH |
+                           ImGuiTableFlags_BordersOuter |
+                           ImGuiTableFlags_ScrollY;
+  // NOLINTEND(*-signed-bitwise)
+
+  if (ImGui::BeginTable("Diagrams", 1, table_flags)) {
     auto& diagrams = project.GetProject().GetDiagrams();
 
     for (auto i = 0; i < static_cast<int>(diagrams.size()); ++i) {
