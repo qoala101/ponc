@@ -30,7 +30,6 @@ auto FamilySettings::FromFamilies(
 
 ///
 void CalculatorSettings::ResetToDefault(CalculatorSettings& settings) {
-  settings.input = 6;
   settings.min_output = -22;
   settings.max_output = -18;
   settings.num_clients = 20;

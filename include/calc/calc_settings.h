@@ -25,8 +25,6 @@ struct CalculatorSettings {
   static void ResetToDefault(CalculatorSettings &settings);
 
   ///
-  float input{};
-  ///
   float min_output{};
   ///
   float max_output{};

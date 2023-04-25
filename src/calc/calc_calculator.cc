@@ -11,6 +11,7 @@
 #include <utility>
 #include <vector>
 
+#include "calc_resolution.h"
 #include "calc_tree_node.h"
 #include "core_i_family.h"
 #include "cpp_assert.h"
@@ -18,12 +19,6 @@
 
 namespace vh::ponc::calc {
 namespace {
-///
-auto ToInt(float value) { return static_cast<int>(value * 100); }
-
-///
-auto ToFloat(int value) { return static_cast<float>(value) / 100.F; }
-
 ///
 auto FamilyNodesFrom(const Calculator::ConstructorArgs &args) {
   auto family_nodes = std::vector<TreeNode>{};
@@ -34,18 +29,10 @@ auto FamilyNodesFrom(const Calculator::ConstructorArgs &args) {
     }
 
     const auto family_id = settings.family_id.Get();
-
     Expects(args.family_outputs.contains(family_id));
-    const auto &float_outputs = args.family_outputs.at(family_id);
 
-    auto outputs = std::vector<FlowValue>{};
-    outputs.reserve(float_outputs.size());
-
-    std::transform(float_outputs.begin(), float_outputs.end(),
-                   std::back_inserter(outputs), &ToInt);
-
-    family_nodes.emplace_back(settings.family_id, std::move(outputs),
-                              settings.cost);
+    const auto &outputs = args.family_outputs.at(family_id);
+    family_nodes.emplace_back(settings.family_id, outputs, settings.cost);
   }
 
   std::stable_sort(
@@ -61,27 +48,27 @@ auto FamilyNodesFrom(const Calculator::ConstructorArgs &args) {
 
 ///
 Calculator::Calculator(const ConstructorArgs &args)
-    : min_output_{ToInt(args.settings.min_output)},
-      max_output_{ToInt(args.settings.max_output)},
+    : min_output_{ToCalculatorResolution(args.settings.min_output)},
+      max_output_{ToCalculatorResolution(args.settings.max_output)},
       num_clients_{args.settings.num_clients},
-      input_node_{{}, {ToInt(args.settings.input)}},
-      client_node_{args.client_family_id},
+      input_trees_{args.input_trees},
+      client_node_{args.client_node},
       family_nodes_{FamilyNodesFrom(args)},
       step_callback_{args.step_callback} {
   client_node_.SetNumClients(1);
-  VisitOutput(input_node_, 0);
+  VisitOutput(input_trees_[0], 0);
 }
 
 ///
 auto Calculator::GetProgress() const -> float {
   return static_cast<float>(GetLastResult().GetInput() - min_output_) /
-         static_cast<float>(input_node_.GetOutputs()[0] - min_output_);
+         static_cast<float>(input_trees_[0].GetOutputs()[0] - min_output_);
 }
 
 ///
 auto Calculator::GetLastResult() const -> const TreeNode & {
   if (best_tree_per_num_clients_per_output_.empty()) {
-    return input_node_;
+    return input_trees_[0];
   }
 
   const auto &biggest_output_trees =

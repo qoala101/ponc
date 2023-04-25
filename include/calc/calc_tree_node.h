@@ -22,7 +22,8 @@ class TreeNode {
   TreeNode() = default;
   ///
   explicit TreeNode(core::FamilyId family_id,
-                    std::vector<FlowValue> outputs = {}, Cost node_cost = {});
+                    const std::vector<float> &outputs = {},
+                    float node_cost = {});
 
   ///
   auto GetFamilyId() const -> core::FamilyId;

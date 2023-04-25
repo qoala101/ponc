@@ -28,7 +28,9 @@ class Calculator {
     ///
     CalculatorSettings settings{};
     ///
-    core::FamilyId client_family_id{};
+    std::vector<TreeNode> input_trees{};
+    ///
+    TreeNode client_node{};
     ///
     std::unordered_map<core::IdValue<core::FamilyId>, std::vector<float>>
         family_outputs{};
@@ -80,7 +82,7 @@ class Calculator {
   ///
   NumClients num_clients_{};
   ///
-  TreeNode input_node_;
+  std::vector<TreeNode> input_trees_;
   ///
   TreeNode client_node_;
   ///

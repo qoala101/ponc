@@ -30,7 +30,7 @@ auto CalculationTask::IsRunning() const -> bool {
 }
 
 ///
-auto CalculationTask::GetProgress() -> float { return progress_; }
+auto CalculationTask::GetProgress() const -> float { return progress_; }
 
 ///
 auto CalculationTask::GetResult() -> std::optional<TreeNode> {

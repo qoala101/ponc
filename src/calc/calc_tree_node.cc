@@ -1,14 +1,32 @@
 #include "calc_tree_node.h"
 
+#include <algorithm>
+
+#include "calc_resolution.h"
 #include "cpp_assert.h"
 
 namespace vh::ponc::calc {
+namespace {
 ///
-TreeNode::TreeNode(core::FamilyId family_id, std::vector<OutputIndex> outputs,
-                   Cost node_cost)
+auto ToCalculatorResolution(const std::vector<float> &values) {
+  auto calc_values = std::vector<int>{};
+  calc_values.reserve(values.size());
+
+  std::transform(values.cbegin(), values.cend(),
+                 std::back_inserter(calc_values), [](const auto value) {
+                   return vh::ponc::calc::ToCalculatorResolution(value);
+                 });
+
+  return calc_values;
+}
+}  // namespace
+
+///
+TreeNode::TreeNode(core::FamilyId family_id, const std::vector<float> &outputs,
+                   float node_cost)
     : family_id_{family_id},
-      outputs_{std::move(outputs)},
-      node_cost_{node_cost},
+      outputs_{ToCalculatorResolution(outputs)},
+      node_cost_{ToCalculatorResolution(node_cost)},
       tree_cost_{node_cost_} {}
 
 ///

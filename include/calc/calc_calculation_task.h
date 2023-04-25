@@ -33,7 +33,7 @@ class CalculationTask {
   auto IsRunning() const -> bool;
 
   ///
-  auto GetProgress() -> float;
+  auto GetProgress() const -> float;
 
   ///
   auto GetResult() -> std::optional<TreeNode>;

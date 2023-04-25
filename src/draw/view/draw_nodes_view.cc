@@ -108,6 +108,8 @@ void NodesView::Draw(const coreui::Diagram& diagram) {
     const auto selected_nodes = NativeFacade::GetSelectedNodes();
 
     auto selected_node_ids = std::unordered_set<core::IdValue<ne::NodeId>>{};
+    selected_node_ids.reserve(selected_nodes.size());
+
     std::transform(selected_nodes.begin(), selected_nodes.end(),
                    std::inserter(selected_node_ids, selected_node_ids.begin()),
                    [](const auto node_id) { return node_id.Get(); });

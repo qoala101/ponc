@@ -7,9 +7,7 @@
 #include <vector>
 
 #include "calc_calculation_task.h"
-#include "calc_settings.h"
-#include "core_project.h"
-#include "cpp_callbacks.h"
+#include "coreui_project.h"
 #include "draw_i_view.h"
 
 namespace vh::ponc::draw {
@@ -17,19 +15,13 @@ namespace vh::ponc::draw {
 class CalculatorView : public IView {
  public:
   ///
-  struct Callbacks {
-    ///
-    cpp::Signal<std::vector<core::Diagram>> calculated_diagrams{};
-  };
-
-  ///
   auto GetLabel() const -> std::string override;
   ///
-  void Draw(core::Project &project, const Callbacks &callbacks);
+  void Draw(coreui::Project& project);
 
  private:
   ///
-  void DrawProgressBar();
+  void DrawProgressBar() const;
 
   ///
   std::optional<calc::CalculationTask> calculation_task_{};
