@@ -16,9 +16,9 @@ auto FindTreeNode(const TreeNode &tree_node, ne::NodeId node_id)
 }
 
 ///
-auto FindTreeNode(const FlowTree &flow_tree, ne::NodeId node_id)
+auto FindTreeNode(const std::vector<TreeNode> &flow_trees, ne::NodeId node_id)
     -> const TreeNode & {
-  for (const auto &root : flow_tree.root_nodes) {
+  for (const auto &root : flow_trees) {
     if (const auto found_node =
             FindTreeNode(root, [node_id](const auto &tree_node) {
               return tree_node.node_id == node_id;

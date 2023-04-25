@@ -5,7 +5,7 @@
 #include <numeric>
 #include <string>
 
-#include "coreui_flow_tree.h"
+#include "coreui_flow_tree_node.h"
 #include "draw_table_flags.h"
 #include "draw_tree_node.h"
 
@@ -14,7 +14,7 @@ namespace vh::ponc::draw {
 auto FlowTreeView::GetLabel() const -> std::string { return "Flow Tree"; }
 
 ///
-void FlowTreeView::Draw(const coreui::FlowTree &flow_tree) {
+void FlowTreeView::Draw(const std::vector<coreui::TreeNode>& flow_trees) {
   const auto content_scope = DrawContentScope();
 
   if (!IsOpened()) {
@@ -28,7 +28,7 @@ void FlowTreeView::Draw(const coreui::FlowTree &flow_tree) {
     ImGui::TableSetupColumn("Output");
     ImGui::TableHeadersRow();
 
-    for (const auto &root_node : flow_tree.root_nodes) {
+    for (const auto& root_node : flow_trees) {
       DrawTreeNode(root_node);
     }
 

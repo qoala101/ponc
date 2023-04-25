@@ -7,7 +7,7 @@
 #include "core_diagram.h"
 #include "cpp_assert.h"
 #include "flow_node_flow.h"
-#include "flow_tree.h"
+#include "flow_tree_node.h"
 #include "imgui_node_editor.h"
 
 namespace vh::ponc::flow {
@@ -102,15 +102,15 @@ void CalculateNodeFlow(
 }  // namespace
 
 ///
-auto BuildFlowTree(const core::Diagram &diagram) -> FlowTree {
+auto BuildFlowTrees(const core::Diagram &diagram) -> std::vector<TreeNode> {
   const auto &links = diagram.GetLinks();
   const auto &nodes = diagram.GetNodes();
 
-  auto flow_tree = FlowTree{FindRootNodes(nodes, links)};
+  auto root_nodes = FindRootNodes(nodes, links);
   auto visited_nodes = std::unordered_set<core::IdValue<ne::NodeId>>{};
   auto current_level_tree_nodes = std::vector<TreeNode *>{};
 
-  for (auto &root_node : flow_tree.root_nodes) {
+  for (auto &root_node : root_nodes) {
     visited_nodes.emplace(root_node.node_id);
     current_level_tree_nodes.emplace_back(&root_node);
   }
@@ -153,17 +153,17 @@ auto BuildFlowTree(const core::Diagram &diagram) -> FlowTree {
     }
   }
 
-  return flow_tree;
+  return root_nodes;
 }
 
 ///
 auto CalculateNodeFlows(
-    const FlowTree &flow_tree,
+    const std::vector<TreeNode> &flow_trees,
     const cpp::Query<NodeFlow, ne::NodeId> &get_initial_node_flow)
     -> flow::NodeFlows {
   auto node_flows = flow::NodeFlows{};
 
-  for (const auto &node : flow_tree.root_nodes) {
+  for (const auto &node : flow_trees) {
     CalculateNodeFlow(node_flows, node, get_initial_node_flow);
   }
 

@@ -23,12 +23,6 @@ struct TreeNode {
   std::unordered_map<core::IdValue<core::FamilyId>, int>
       num_children_per_family{};
 };
-
-///
-struct FlowTree {
-  ///
-  std::vector<TreeNode> root_nodes{};
-};
 }  // namespace vh::ponc::coreui
 
 #endif  // VH_PONC_COREUI_FLOW_TREE_H_

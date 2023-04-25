@@ -12,7 +12,7 @@
 #include "coreui_diagram.h"
 #include "coreui_i_node_traits.h"
 #include "coreui_node_mover.h"
-#include "flow_tree.h"
+#include "flow_tree_node.h"
 #include "flow_tree_traversal.h"
 #include "imgui.h"
 

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stack>
 
-#include "coreui_flow_tree.h"
+#include "coreui_flow_tree_node.h"
 #include "coreui_node.h"
 #include "flow_tree_traversal.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -35,7 +35,7 @@
 #include "cpp_share.h"
 #include "flow_algorithms.h"
 #include "flow_node_flow.h"
-#include "flow_tree.h"
+#include "flow_tree_node.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
@@ -72,16 +72,16 @@ Diagram::Diagram(cpp::SafePtr<Project> parent_project,
 void Diagram::OnFrame() {
   node_mover_.OnFrame();
 
-  const auto flow_tree = flow::BuildFlowTree(*diagram_);
+  const auto flow_trees = flow::BuildFlowTrees(*diagram_);
   const auto node_flows = flow::CalculateNodeFlows(
-      flow_tree, [&diagram = *diagram_](const auto node_id) {
+      flow_trees, [&diagram = *diagram_](const auto node_id) {
         return core::Diagram::FindNode(diagram, node_id).GetInitialFlow();
       });
 
   UpdateLinks(node_flows);
   UpdateNodes(node_flows);
   UpdateFamilyGroups();
-  UpdateFlowTree(flow_tree);
+  UpdateFlowTrees(flow_trees);
 }
 
 ///
@@ -320,7 +320,9 @@ auto Diagram::DeleteLink(ne::LinkId link_id) const -> Event& {
 }
 
 ///
-auto Diagram::GetFlowTree() const -> const FlowTree& { return flow_tree_; }
+auto Diagram::GetFlowTrees() const -> const std::vector<TreeNode>& {
+  return flow_trees_;
+}
 
 ///
 auto Diagram::GetFlowColor(float flow) const {
@@ -588,19 +590,19 @@ void Diagram::UpdateTreeNode(TreeNode& tree_node) {
 }
 
 ///
-void Diagram::UpdateFlowTree(const flow::FlowTree& core_tree) {
-  flow_tree_.root_nodes.clear();
+void Diagram::UpdateFlowTrees(const std::vector<flow::TreeNode>& core_trees) {
+  flow_trees_.clear();
 
   auto parent_stack = std::stack<TreeNode*>{};
 
-  for (const auto& root_node : core_tree.root_nodes) {
+  for (const auto& root_node : core_trees) {
     flow::TraverseDepthFirst(
         root_node,
         [this, &parent_stack](const auto& core_tree_node) {
           auto& node = FindNode(*this, core_tree_node.node_id);
           auto& tree_node =
               parent_stack.empty()
-                  ? flow_tree_.root_nodes.emplace_back(
+                  ? flow_trees_.emplace_back(
                         TreeNode{.node = safe_owner_.MakeSafe(&node)})
                   : parent_stack.top()->child_nodes.emplace_back(
                         TreeNode{.node = safe_owner_.MakeSafe(&node)});
@@ -609,7 +611,7 @@ void Diagram::UpdateFlowTree(const flow::FlowTree& core_tree) {
         [&parent_stack](const auto&) { parent_stack.pop(); });
   }
 
-  for (auto& root_node : flow_tree_.root_nodes) {
+  for (auto& root_node : flow_trees_) {
     UpdateTreeNode(root_node);
   }
 }

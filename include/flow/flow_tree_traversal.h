@@ -3,7 +3,7 @@
 
 #include <queue>
 
-#include "flow_tree.h"
+#include "flow_tree_node.h"
 #include "imgui_node_editor.h"
 
 namespace vh::ponc::flow {
@@ -67,10 +67,10 @@ auto FindTreeNode(const TreeNode &tree_node, ne::NodeId node_id)
     -> const TreeNode &;
 
 ///
-auto FindTreeNode(const FlowTree &flow_tree,
+auto FindTreeNode(const std::vector<TreeNode> &flow_trees,
                   const std::invocable<const TreeNode &> auto &predicate)
     -> std::optional<const TreeNode *> {
-  for (const auto &root : flow_tree.root_nodes) {
+  for (const auto &root : flow_trees) {
     if (const auto found_node = FindTreeNode(root, predicate)) {
       return found_node;
     }
@@ -80,7 +80,7 @@ auto FindTreeNode(const FlowTree &flow_tree,
 }
 
 ///
-auto FindTreeNode(const FlowTree &flow_tree, ne::NodeId node_id)
+auto FindTreeNode(const std::vector<TreeNode> &flow_trees, ne::NodeId node_id)
     -> const TreeNode &;
 }  // namespace vh::ponc::flow
 

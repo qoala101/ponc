@@ -18,7 +18,7 @@
 #include "core_link.h"
 #include "coreui_event.h"
 #include "coreui_family.h"
-#include "coreui_flow_tree.h"
+#include "coreui_flow_tree_node.h"
 #include "coreui_i_header_traits.h"
 #include "coreui_i_pin_traits.h"
 #include "coreui_link.h"
@@ -26,7 +26,7 @@
 #include "coreui_node.h"
 #include "coreui_node_mover.h"
 #include "cpp_safe_ptr.h"
-#include "flow_tree.h"
+#include "flow_tree_node.h"
 
 namespace vh::ponc::coreui {
 ///
@@ -86,7 +86,7 @@ class Diagram {
   ///
   auto DeleteLink(ne::LinkId link_id) const -> Event &;
   ///
-  auto GetFlowTree() const -> const FlowTree &;
+  auto GetFlowTrees() const -> const std::vector<TreeNode> &;
 
  private:
   ///
@@ -118,7 +118,7 @@ class Diagram {
   ///
   void UpdateTreeNode(TreeNode &tree_node);
   ///
-  void UpdateFlowTree(const flow::FlowTree &core_tree);
+  void UpdateFlowTrees(const std::vector<flow::TreeNode> &core_trees);
   ///
   auto GetFreePinFamily(ne::PinKind pin_kind) const -> auto &;
   ///
@@ -145,7 +145,7 @@ class Diagram {
   ///
   std::vector<Link> links_{};
   ///
-  FlowTree flow_tree_{};
+  std::vector<TreeNode> flow_trees_{};
 };
 }  // namespace vh::ponc::coreui
 

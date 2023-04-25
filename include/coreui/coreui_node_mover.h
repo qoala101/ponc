@@ -11,7 +11,7 @@
 #include "core_settings.h"
 #include "coreui_linker.h"
 #include "cpp_safe_ptr.h"
-#include "flow_tree.h"
+#include "flow_tree_node.h"
 #include "imgui.h"
 
 namespace vh::ponc::coreui {

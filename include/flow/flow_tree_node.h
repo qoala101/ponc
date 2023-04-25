@@ -26,12 +26,6 @@ struct TreeNode {
   ///
   friend auto operator==(const TreeNode &, const TreeNode &) -> bool = default;
 };
-
-///
-struct FlowTree {
-  ///
-  std::vector<TreeNode> root_nodes{};
-};
 }  // namespace vh::ponc::flow
 
 #endif  // VH_PONC_FLOW_TREE_H_
