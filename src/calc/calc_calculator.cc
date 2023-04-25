@@ -64,7 +64,7 @@ Calculator::Calculator(const ConstructorArgs &args)
     : min_output_{ToInt(args.settings.min_output)},
       max_output_{ToInt(args.settings.max_output)},
       num_clients_{args.settings.num_clients},
-      input_node_{args.input_family_id, {ToInt(args.settings.input)}},
+      input_node_{{}, {ToInt(args.settings.input)}},
       client_node_{args.client_family_id},
       family_nodes_{FamilyNodesFrom(args)},
       step_callback_{args.step_callback} {

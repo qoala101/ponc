@@ -28,8 +28,6 @@ class Calculator {
     ///
     CalculatorSettings settings{};
     ///
-    core::FamilyId input_family_id{};
-    ///
     core::FamilyId client_family_id{};
     ///
     std::unordered_map<core::IdValue<core::FamilyId>, std::vector<float>>

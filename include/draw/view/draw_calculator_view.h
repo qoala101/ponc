@@ -29,7 +29,7 @@ class CalculatorView : public IView {
 
  private:
   ///
-  void DrawProgressBar(const calc::CalculatorSettings &settings);
+  void DrawProgressBar();
 
   ///
   std::optional<calc::CalculationTask> calculation_task_{};

@@ -3,7 +3,6 @@
 #include <memory>
 
 #include "core_free_pin_family_group.h"
-#include "core_hub_family_group.h"
 
 namespace vh::ponc::core {
 ///

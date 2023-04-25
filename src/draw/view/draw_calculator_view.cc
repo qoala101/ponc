@@ -38,6 +38,19 @@
 namespace vh::ponc::draw {
 namespace {
 ///
+auto GetClientFamilyId(core::Project& project) {
+  const auto& families = project.GetFamilies();
+  const auto client_family =
+      std::find_if(families.cbegin(), families.cend(), [](const auto& family) {
+        const auto& type = family->GetType();
+        return type.has_value() && (*type == core::FamilyType::kClient);
+      });
+
+  Expects(client_family != families.end());
+  return (*client_family)->GetId();
+}
+
+///
 void DrawRequirements(calc::CalculatorSettings& settings) {
   if (ImGui::CollapsingHeader("Requirements", ImGuiTreeNodeFlags_DefaultOpen)) {
     if (ImGui::BeginTable("Requirements", 2, kSettingsTableFlags)) {
@@ -249,8 +262,7 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
     if (ImGui::Button("Calculate")) {
       calculation_task_.emplace(calc::Calculator::ConstructorArgs{
           .settings = settings,
-          .input_family_id = 1,   // TODO(vh):
-          .client_family_id = 2,  // TODO(vh):
+          .client_family_id = GetClientFamilyId(project),
           .family_outputs = GetFamilyOutputs(project.GetFamilies())});
     }
   }
@@ -266,13 +278,13 @@ void CalculatorView::Draw(core::Project& project, const Callbacks& callbacks) {
     }
   }
 
-  DrawProgressBar(settings);
+  DrawProgressBar();
   DrawRequirements(settings);
   DrawFamilies(project);
 }
 
 ///
-void CalculatorView::DrawProgressBar(const calc::CalculatorSettings& settings) {
+void CalculatorView::DrawProgressBar() {
   if (!calculation_task_.has_value()) {
     return;
   }

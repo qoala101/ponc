@@ -36,7 +36,7 @@ struct FamilyId : public ne::Details::SafePointerType<FamilyId> {
 };
 
 ///
-enum class FamilyType { kFreePin, kHub };
+enum class FamilyType { kClient, kFreePin };
 
 ///
 class IFamily : public cpp::Interface {
