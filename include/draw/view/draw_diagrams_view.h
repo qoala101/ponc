@@ -14,9 +14,24 @@ class DiagramsView : public IView {
   auto GetLabel() const -> std::string override;
 
   ///
-  void Draw(coreui::Project &project);
+  void Draw(coreui::Project& project);
 
  private:
+  ///
+  enum class Action { kClone, kStartRenaming, kConfirmRename, kDelete };
+
+  ///
+  auto GetTrimmedRenameBuffer() const;
+  ///
+  auto DrawRenamePopup();
+  ///
+  auto DrawControls(coreui::Project& project);
+  ///
+  void ApplyAction(coreui::Project& project, int diagram_index, Action action);
+  ///
+  void DrawDiagrams(coreui::Project& project,
+                    std::optional<Action> selected_action);
+
   ///
   std::string rename_buffer_{};
 };
