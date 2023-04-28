@@ -22,7 +22,7 @@ Calculator::Calculator(const ConstructorArgs &args)
     : min_output_{ToCalculatorResolution(args.settings.min_output)},
       max_output_{ToCalculatorResolution(args.settings.max_output)},
       num_clients_{args.settings.num_clients},
-      input_trees_{args.input_trees},
+      input_node_{args.input_node},
       client_node_{args.client_node},
       family_nodes_{args.family_nodes},
       step_callback_{args.step_callback} {
@@ -34,19 +34,19 @@ Calculator::Calculator(const ConstructorArgs &args)
       });
 
   client_node_.SetNumClients(1);
-  VisitOutput(input_trees_[0], 0);
+  TraverseNode(input_node_);
 }
 
 ///
 auto Calculator::GetProgress() const -> float {
   return static_cast<float>(GetLastResult().GetInput() - min_output_) /
-         static_cast<float>(input_trees_[0].GetOutputs()[0] - min_output_);
+         static_cast<float>(input_node_.GetOutputs()[0] - min_output_);
 }
 
 ///
 auto Calculator::GetLastResult() const -> const TreeNode & {
   if (best_tree_per_num_clients_per_output_.empty()) {
-    return input_trees_[0];
+    return input_node_;
   }
 
   const auto &biggest_output_trees =

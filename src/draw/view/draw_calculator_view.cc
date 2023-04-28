@@ -116,57 +116,47 @@ auto GetChildIndex(const flow::TreeNode& flow_tree, ne::NodeId child_id) {
 }
 
 ///
-auto ToCalcTree(const flow::TreeNode& flow_tree, const core::Diagram& diagram) {
-  auto calc_root = calc::TreeNode{};
-  auto parent_stack =
-      std::stack<std::pair<calc::TreeNode*, const flow::TreeNode*>>{};
+auto GetFreeOutputs(const flow::TreeNode& flow_tree,
+                    const core::Diagram& diagram) {
+  auto free_outputs = std::vector<float>{};
 
   flow::TraverseDepthFirst(
       flow_tree,
-      [&diagram, &calc_root, &parent_stack](const auto& flow_node) {
-        const auto& node = core::Diagram::FindNode(diagram, flow_node.node_id);
-        auto calc_node =
-            calc::TreeNode{node.GetFamilyId(), GetNodeOutputs(node)};
+      [&diagram, &free_outputs](const auto& flow_node) {
+        const core::INode& node =
+            core::Diagram::FindNode(diagram, flow_node.node_id);
+        const auto output_pins = node.GetOutputPinIds();
+        const auto output_pin_flows = node.GetInitialFlow().output_pin_flows;
 
-        if (parent_stack.empty()) {
-          calc_root = std::move(calc_node);
-          parent_stack.emplace(&calc_root, &flow_node);
-          return;
+        for (const auto pin_id : output_pins) {
+          const auto pin_id_value = pin_id.Get();
+
+          if (flow_node.child_nodes.contains(pin_id_value)) {
+            continue;
+          }
+
+          Expects(output_pin_flows.contains(pin_id_value));
+          free_outputs.emplace_back(output_pin_flows.at(pin_id_value));
         }
-
-        auto& [parent_calc_node, parent_flow_node] = parent_stack.top();
-
-        const auto child_index =
-            GetChildIndex(*parent_flow_node, flow_node.node_id);
-
-        auto& child_node =
-            parent_calc_node->EmplaceChild(child_index, std::move(calc_node));
-
-        parent_stack.emplace(&child_node, &flow_node);
       },
-      [&parent_stack](const auto&) { parent_stack.pop(); });
+      [](const auto&) {});
 
-  return calc_root;
+  return free_outputs;
 }
 
 ///
-auto ToCalcTrees(const core::Diagram& diagram) -> std::vector<calc::TreeNode> {
+auto GetFreeOutputs(const core::Diagram& diagram) {
   const auto flow_trees = flow::BuildFlowTrees(diagram);
 
-  if (flow_trees.empty()) {
-    return {};
+  auto free_outputs = std::vector<float>{};
+
+  for (const auto& flow_tree : flow_trees) {
+    const auto tree_outputs = GetFreeOutputs(flow_tree, diagram);
+    free_outputs.insert(free_outputs.cend(), tree_outputs.cbegin(),
+                        tree_outputs.cend());
   }
 
-  auto calc_trees = std::vector<calc::TreeNode>{};
-  calc_trees.reserve(flow_trees.size());
-
-  std::transform(flow_trees.begin(), flow_trees.end(),
-                 std::back_inserter(calc_trees),
-                 [&diagram](const auto& flow_tree) {
-                   return ToCalcTree(flow_tree, diagram);
-                 });
-
-  return calc_trees;
+  return free_outputs;
 }
 
 ///
@@ -358,7 +348,9 @@ void CalculatorView::Draw(coreui::Project& project) {
     if (ImGui::Button("Calculate")) {
       calculation_task_.emplace(calc::Calculator::ConstructorArgs{
           .settings = settings,
-          .input_trees = ToCalcTrees(project.GetDiagram().GetDiagram()),
+          .input_node =
+              calc::TreeNode{{},
+                             GetFreeOutputs(project.GetDiagram().GetDiagram())},
           .client_node = calc::TreeNode{GetClientFamilyId(core_project)},
           .family_nodes = AsFamilyNodes(core_project.GetFamilies(),
                                         settings.family_settings)});

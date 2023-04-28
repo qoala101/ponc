@@ -28,7 +28,7 @@ class Calculator {
     ///
     CalculatorSettings settings{};
     ///
-    std::vector<TreeNode> input_trees{};
+    TreeNode input_node{};
     ///
     TreeNode client_node{};
     ///
@@ -81,7 +81,7 @@ class Calculator {
   ///
   NumClients num_clients_{};
   ///
-  std::vector<TreeNode> input_trees_;
+  TreeNode input_node_;
   ///
   TreeNode client_node_;
   ///
