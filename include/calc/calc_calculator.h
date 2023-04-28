@@ -32,8 +32,7 @@ class Calculator {
     ///
     TreeNode client_node{};
     ///
-    std::unordered_map<core::IdValue<core::FamilyId>, std::vector<float>>
-        family_outputs{};
+    std::vector<TreeNode> family_nodes{};
     ///
     std::function<auto(const Calculator &)->StepStatus> step_callback{};
   };

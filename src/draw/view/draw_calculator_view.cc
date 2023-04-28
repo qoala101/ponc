@@ -78,21 +78,29 @@ auto GetNodeOutputs(const core::INode& node) -> std::vector<float> {
 }
 
 ///
-auto GetFamilyOutputs(
-    const std::vector<std::unique_ptr<core::IFamily>>& families) {
-  auto family_outputs =
-      std::unordered_map<core::IdValue<core::FamilyId>, std::vector<float>>{};
+auto AsFamilyNodes(const std::vector<std::unique_ptr<core::IFamily>>& families,
+                   const std::vector<calc::FamilySettings>& family_settings) {
+  auto family_nodes = std::vector<calc::TreeNode>{};
 
-  for (const auto& family : families) {
-    const auto sample_node = family->CreateSampleNode();
+  for (const auto& settings : family_settings) {
+    if (!settings.enabled) {
+      continue;
+    }
+
+    const auto family = std::find_if(
+        families.cbegin(), families.cend(), [&settings](const auto& family) {
+          return family->GetId() == settings.family_id;
+        });
+    Expects(family != families.cend());
+
+    const auto sample_node = (*family)->CreateSampleNode();
     auto outputs = GetNodeOutputs(*sample_node);
 
-    if (!outputs.empty()) {
-      family_outputs.emplace(family->GetId().Get(), std::move(outputs));
-    }
+    family_nodes.emplace_back(settings.family_id, std::move(outputs),
+                              settings.cost);
   }
 
-  return family_outputs;
+  return family_nodes;
 }
 
 ///
@@ -352,7 +360,8 @@ void CalculatorView::Draw(coreui::Project& project) {
           .settings = settings,
           .input_trees = ToCalcTrees(project.GetDiagram().GetDiagram()),
           .client_node = calc::TreeNode{GetClientFamilyId(core_project)},
-          .family_outputs = GetFamilyOutputs(core_project.GetFamilies())});
+          .family_nodes = AsFamilyNodes(core_project.GetFamilies(),
+                                        settings.family_settings)});
     }
   }
 

@@ -12,40 +12,11 @@
 #include <vector>
 
 #include "calc_resolution.h"
+#include "calc_settings.h"
 #include "calc_tree_node.h"
-#include "core_i_family.h"
 #include "cpp_assert.h"
-#include "imgui_node_editor.h"
 
 namespace vh::ponc::calc {
-namespace {
-///
-auto FamilyNodesFrom(const Calculator::ConstructorArgs &args) {
-  auto family_nodes = std::vector<TreeNode>{};
-
-  for (const auto &settings : args.settings.family_settings) {
-    if (!settings.enabled) {
-      continue;
-    }
-
-    const auto family_id = settings.family_id.Get();
-    Expects(args.family_outputs.contains(family_id));
-
-    const auto &outputs = args.family_outputs.at(family_id);
-    family_nodes.emplace_back(settings.family_id, outputs, settings.cost);
-  }
-
-  std::stable_sort(
-      family_nodes.begin(), family_nodes.end(),
-      [](const auto &left, const auto &right) {
-        return std::pair{left.GetNodeCost(), left.GetOutputs().size()} <
-               std::pair{right.GetNodeCost(), right.GetOutputs().size()};
-      });
-
-  return family_nodes;
-}
-}  // namespace
-
 ///
 Calculator::Calculator(const ConstructorArgs &args)
     : min_output_{ToCalculatorResolution(args.settings.min_output)},
@@ -53,8 +24,15 @@ Calculator::Calculator(const ConstructorArgs &args)
       num_clients_{args.settings.num_clients},
       input_trees_{args.input_trees},
       client_node_{args.client_node},
-      family_nodes_{FamilyNodesFrom(args)},
+      family_nodes_{args.family_nodes},
       step_callback_{args.step_callback} {
+  std::stable_sort(
+      family_nodes_.begin(), family_nodes_.end(),
+      [](const auto &left, const auto &right) {
+        return std::pair{left.GetNodeCost(), left.GetOutputs().size()} <
+               std::pair{right.GetNodeCost(), right.GetOutputs().size()};
+      });
+
   client_node_.SetNumClients(1);
   VisitOutput(input_trees_[0], 0);
 }
