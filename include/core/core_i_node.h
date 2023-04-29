@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "core_i_family.h"
+#include "core_id_ptr.h"
 #include "cpp_interface.h"
 #include "flow_node_flow.h"
 #include "imgui.h"
@@ -64,6 +65,8 @@ class INode : public cpp::Interface {
 
   ///
   auto GetId() const -> ne::NodeId;
+  ///
+  auto GetIds() -> std::vector<IdPtr>;
   ///
   auto GetFamilyId() const -> FamilyId;
   ///

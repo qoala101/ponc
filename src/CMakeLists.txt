@@ -29,6 +29,7 @@ add_executable(ponc
   core/core_i_family.cc
   core/core_i_node.cc
   core/core_id_generator.cc
+  core/core_id_ptr.cc
   core/core_link.cc
   core/core_pin.cc
   core/core_project.cc

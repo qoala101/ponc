@@ -20,6 +20,23 @@ Diagram::Diagram(std::string name, std::vector<std::unique_ptr<INode>> nodes,
       links_{std::move(links)} {}
 
 ///
+auto Diagram::GetIds(Diagram& diagram) -> std::vector<IdPtr> {
+  auto ids = std::vector<IdPtr>{};
+
+  for (const auto& node : diagram.nodes_) {
+    const auto node_ids = node->GetIds();
+    std::copy(node_ids.begin(), node_ids.end(), std::back_inserter(ids));
+  }
+
+  for (auto& link : diagram.links_) {
+    const auto link_ids = Link::GetIds(link);
+    std::copy(link_ids.begin(), link_ids.end(), std::back_inserter(ids));
+  }
+
+  return ids;
+}
+
+///
 auto Diagram::FindNode(const Diagram& diagram, ne::NodeId node_id) -> INode& {
   const auto node = std::find_if(
       diagram.nodes_.begin(), diagram.nodes_.end(),

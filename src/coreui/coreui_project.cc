@@ -13,6 +13,8 @@
 #include "core_diagram.h"
 #include "core_i_family_group.h"
 #include "core_id_generator.h"
+#include "core_id_ptr.h"
+#include "core_id_value.h"
 #include "core_project.h"
 #include "core_settings.h"
 #include "coreui_diagram.h"
@@ -107,6 +109,10 @@ auto Project::CloneDiagram(const core::Diagram& diagram) -> Event& {
   const auto json = json::DiagramSerializer::WriteToJson(diagram);
   auto clone =
       json::DiagramSerializer::ParseFromJson(json, project_.GetFamilies());
+
+  const auto ids = core::Diagram::GetIds(clone);
+  RewireIds(ids);
+
   return AddDiagram(std::move(clone));
 }
 
@@ -204,6 +210,29 @@ auto Project::GetName() const -> std::string {
   }
 
   return file_path_.filename().string();
+}
+
+///
+void Project::RewireIds(const std::vector<core::IdPtr>& ids) {
+  if (ids.empty()) {
+    return;
+  }
+
+  auto& id_generator = project_.GetIdGenerator();
+  const auto next_id = id_generator.GetNextId();
+
+  const auto [min_id, max_id] = std::minmax_element(
+      ids.cbegin(), ids.cend(), [](const auto& left, const auto& right) {
+        return GetValue(left) < GetValue(right);
+      });
+  const auto min_id_value = core::GetValue(*min_id);
+  const auto max_id_value = core::GetValue(*max_id);
+
+  for (const auto& id : ids) {
+    core::SetValue(id, core::GetValue(id) + next_id - min_id_value);
+  }
+
+  id_generator = core::IdGenerator{next_id - min_id_value + max_id_value + 1};
 }
 
 ///

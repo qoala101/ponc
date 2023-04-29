@@ -3,6 +3,7 @@
 #include <imgui_node_editor.h>
 
 #include <algorithm>
+#include <iterator>
 #include <optional>
 #include <ranges>
 #include <vector>
@@ -69,6 +70,21 @@ auto INode::FindFirstPinOfKind(const INode& node, ne::PinKind pin_kind)
 auto INode::GetId() const -> ne::NodeId { return id_; }
 
 ///
+auto INode::GetIds() -> std::vector<IdPtr> {
+  auto ids = std::vector<IdPtr>{&id_};
+  ids.reserve(output_pin_ids_.size() + 2);
+
+  if (input_pin_id_.has_value()) {
+    ids.emplace_back(&*input_pin_id_);
+  }
+
+  std::transform(output_pin_ids_.begin(), output_pin_ids_.end(),
+                 std::back_inserter(ids), [](auto& pin_id) { return &pin_id; });
+
+  return ids;
+}
+
+///
 auto INode::GetFamilyId() const -> FamilyId { return family_id_; }
 
 ///
@@ -95,9 +111,12 @@ auto INode::GetInitialFlow() const -> flow::NodeFlow {
     initial_flow.input_pin_flow.emplace(input_pin_id_->Get(), 0);
   }
 
-  for (const auto pin_id : output_pin_ids_) {
-    initial_flow.output_pin_flows.emplace(pin_id, 0);
-  }
+  std::transform(output_pin_ids_.begin(), output_pin_ids_.end(),
+                 std::inserter(initial_flow.output_pin_flows,
+                               initial_flow.output_pin_flows.begin()),
+                 [](const auto pin_id) {
+                   return std::pair{pin_id.Get(), 0};
+                 });
 
   SetInitialFlowValues(initial_flow);
   return initial_flow;

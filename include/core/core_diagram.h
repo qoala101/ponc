@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "core_i_node.h"
+#include "core_id_ptr.h"
 #include "core_link.h"
 #include "cpp_safe_ptr.h"
 #include "imgui_node_editor.h"
@@ -18,6 +19,8 @@ class Diagram {
                    std::vector<std::unique_ptr<INode>> nodes = {},
                    std::vector<Link> links = {});
 
+  ///
+  static auto GetIds(Diagram &diagram) -> std::vector<IdPtr>;
   ///
   static auto FindNode(const Diagram &diagram, ne::NodeId node_id) -> INode &;
   ///

@@ -74,6 +74,8 @@ class Project {
   ///
   auto GetName() const -> std::string;
   ///
+  void RewireIds(const std::vector<core::IdPtr> &ids);
+  ///
   void SetDiagramImpl(int index);
   ///
   void SetFilePath(std::filesystem::path file_path);

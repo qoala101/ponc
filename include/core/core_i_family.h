@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "core_id_generator.h"
+#include "core_id_ptr.h"
 #include "cpp_interface.h"
 
 namespace ne = ax::NodeEditor;
@@ -57,6 +58,8 @@ class IFamily : public cpp::Interface {
 
   ///
   auto GetId() const -> FamilyId;
+  ///
+  auto GetIds() -> std::vector<IdPtr>;
   ///
   auto CreateSampleNode() const -> std::unique_ptr<INode>;
 
