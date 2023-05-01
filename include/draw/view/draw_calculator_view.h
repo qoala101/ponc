@@ -23,11 +23,15 @@ class CalculatorView : public IView {
 
  private:
   ///
-  void PopulateOutput(const calc::TreeNode& output_tree, ne::PinId output_pin,
+  auto PopulateOutput(const calc::TreeNode& output_tree, ne::PinId output_pin,
                       core::Project& project);
   ///
-  void PopulateDiagram(const calc::TreeNode& calculated_tree,
+  auto PopulateDiagram(const calc::TreeNode& calculated_tree,
                        core::Project& project);
+  ///
+  auto FindOutputTrees(
+      const std::map<core::IdValue<ne::PinId>, core::IdValue<ne::NodeId>>&
+          output_root_ids) const;
   ///
   void ProcessResult(coreui::Project& project);
   ///
