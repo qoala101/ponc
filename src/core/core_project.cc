@@ -63,22 +63,26 @@ auto Project::FindFamily(const Project& project, core::FamilyId family_id)
 }
 
 ///
-Project::Project(Settings settings,
+Project::Project(Version version, Settings settings,
                  std::vector<std::unique_ptr<IFamily>> families,
                  std::vector<Diagram> diagrams)
-    : settings_{std::move(settings)},
+    : version_{version},
+      settings_{std::move(settings)},
       families_{std::move(families)},
       diagrams_{std::move(diagrams)},
       id_generator_{FindMaxId() + 1} {}
 
 ///
-auto Project::GetIdGenerator() const -> const IdGenerator& {
+auto Project::GetVersion() const -> Version { return version_; }
+
+///
+auto Project::GetSettings() const -> const Settings& {
   // NOLINTNEXTLINE(*-const-cast)
-  return const_cast<Project*>(this)->GetIdGenerator();
+  return const_cast<Project*>(this)->GetSettings();
 }
 
 ///
-auto Project::GetIdGenerator() -> IdGenerator& { return id_generator_; }
+auto Project::GetSettings() -> Settings& { return settings_; }
 
 ///
 auto Project::GetFamilies() const
@@ -107,11 +111,11 @@ void Project::DeleteDiagram(int index) {
 }
 
 ///
-auto Project::GetSettings() const -> const Settings& {
+auto Project::GetIdGenerator() const -> const IdGenerator& {
   // NOLINTNEXTLINE(*-const-cast)
-  return const_cast<Project*>(this)->GetSettings();
+  return const_cast<Project*>(this)->GetIdGenerator();
 }
 
 ///
-auto Project::GetSettings() -> Settings& { return settings_; }
+auto Project::GetIdGenerator() -> IdGenerator& { return id_generator_; }
 }  // namespace vh::ponc::core

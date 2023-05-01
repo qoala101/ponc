@@ -6,6 +6,7 @@
 #include "core_diagram.h"
 #include "core_i_family.h"
 #include "core_project.h"
+#include "core_version.h"
 #include "cpp_assert.h"
 #include "crude_json.h"
 #include "json_container_serializer.h"
@@ -15,6 +16,15 @@
 
 namespace vh::ponc::json {
 namespace {
+///
+auto ParseVersion(const crude_json::value& json) {
+  if (!json.contains("version")) {
+    return core::Version::kPreCalculator;
+  }
+
+  return static_cast<core::Version>(json["version"].get<crude_json::number>());
+}
+
 ///
 auto ParseFamily(
     const crude_json::value& json,
@@ -36,6 +46,7 @@ auto ProjectSerializer::ParseFromJson(
     const crude_json::value& json,
     const std::vector<std::unique_ptr<IFamilyParser>>& family_parsers)
     -> core::Project {
+  const auto version = ParseVersion(json);
   const auto settings = SettingsSerializer::ParseFromJson(json["settings"]);
 
   auto families =
@@ -50,7 +61,8 @@ auto ProjectSerializer::ParseFromJson(
       });
 
   ;
-  return core::Project{settings, std::move(families), std::move(diagrams)};
+  return core::Project{version, settings, std::move(families),
+                       std::move(diagrams)};
 }
 
 ///
