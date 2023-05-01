@@ -13,7 +13,6 @@
 #include <vector>
 
 #include "calc_resolution.h"
-#include "calc_settings.h"
 #include "calc_tree_node.h"
 #include "cpp_assert.h"
 

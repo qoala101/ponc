@@ -20,7 +20,6 @@
 #include <vector>
 
 #include "calc_calculator.h"
-#include "calc_settings.h"
 #include "calc_tree_node.h"
 #include "core_diagram.h"
 #include "core_i_family.h"
@@ -81,8 +80,9 @@ auto GetNodeOutputs(const core::INode& node) -> std::vector<float> {
 }
 
 ///
-auto AsFamilyNodes(const std::vector<std::unique_ptr<core::IFamily>>& families,
-                   const std::vector<calc::FamilySettings>& family_settings) {
+auto AsFamilyNodes(
+    const std::vector<std::unique_ptr<core::IFamily>>& families,
+    const std::vector<core::CalculatorFamilySettings>& family_settings) {
   auto family_nodes = std::vector<calc::TreeNode>{};
 
   for (const auto& settings : family_settings) {
@@ -176,7 +176,7 @@ auto GetChildOutputIndex(const calc::TreeNode& parent,
 }
 
 ///
-void DrawRequirements(calc::CalculatorSettings& settings) {
+void DrawRequirements(core::CalculatorSettings& settings) {
   if (ImGui::CollapsingHeader("Requirements", ImGuiTreeNodeFlags_DefaultOpen)) {
     if (ImGui::BeginTable("Requirements", 2, kSettingsTableFlags)) {
       ImGui::TableSetupColumn("Requirement",
@@ -199,15 +199,15 @@ void DrawRequirements(calc::CalculatorSettings& settings) {
 
 ///
 void DrawFamilySettings(std::string_view label,
-                        calc::FamilySettings& settings) {
+                        core::CalculatorFamilySettings& setings) {
   ImGui::TableNextRow();
 
   ImGui::TableNextColumn();
-  ImGui::Checkbox(label.data(), &settings.enabled);
+  ImGui::Checkbox(label.data(), &setings.enabled);
 
   ImGui::TableNextColumn();
   ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-  ImGui::InputFloat(IdLabel(settings.family_id).c_str(), &settings.cost, 0, 0,
+  ImGui::InputFloat(IdLabel(setings.family_id).c_str(), &setings.cost, 0, 0,
                     "%.2f");
 }
 

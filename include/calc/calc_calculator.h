@@ -11,8 +11,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "calc_settings.h"
 #include "calc_tree_node.h"
+#include "core_settings.h"
 
 namespace vh::ponc::calc {
 ///
@@ -24,7 +24,7 @@ class Calculator {
   ///
   struct ConstructorArgs {
     ///
-    CalculatorSettings settings{};
+    core::CalculatorSettings settings{};
     ///
     TreeNode input_node{};
     ///

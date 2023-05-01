@@ -9,7 +9,6 @@
 #include <variant>
 #include <vector>
 
-#include "calc_settings.h"
 #include "core_diagram.h"
 #include "core_i_family_group.h"
 #include "core_id_generator.h"
@@ -17,6 +16,8 @@
 #include "core_id_value.h"
 #include "core_project.h"
 #include "core_settings.h"
+#include "core_version.h"
+#include "coreui_cloner.h"
 #include "coreui_diagram.h"
 #include "coreui_event.h"
 #include "coreui_event_loop.h"
@@ -40,11 +41,12 @@ auto Project::CreateProject() const {
 
   auto settings = core::Settings{
       .calculator_settings = {
-          .family_settings = calc::FamilySettings::FromFamilies(families)}};
+          .family_settings =
+              core::CalculatorFamilySettings::FromFamilies(families)}};
   core::Settings::ResetToDefault(settings);
 
-  return core::Project{std::move(settings), std::move(families),
-                       std::vector<core::Diagram>(1)};
+  return core::Project{core::GetCurrentVersion(), std::move(settings),
+                       std::move(families), std::vector<core::Diagram>(1)};
 }
 
 ///

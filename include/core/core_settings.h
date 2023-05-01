@@ -3,9 +3,36 @@
 
 #include <imgui.h>
 
-#include "calc_settings.h"
+#include "core_i_family.h"
 
 namespace vh::ponc::core {
+///
+struct CalculatorFamilySettings {
+  ///
+  static auto FromFamilies(
+      const std::vector<std::unique_ptr<core::IFamily>> &families)
+      -> std::vector<CalculatorFamilySettings>;
+
+  ///
+  core::FamilyId family_id{};
+  ///
+  bool enabled{};
+  ///
+  float cost{};
+};
+
+///
+struct CalculatorSettings {
+  ///
+  float min_output{};
+  ///
+  float max_output{};
+  ///
+  int num_clients{};
+  ///
+  std::vector<CalculatorFamilySettings> family_settings{};
+};
+
 ///
 struct Settings {
   ///
@@ -28,7 +55,7 @@ struct Settings {
   ///
   int arrange_vertical_spacing{};
   ///
-  calc::CalculatorSettings calculator_settings{};
+  CalculatorSettings calculator_settings{};
 };
 }  // namespace vh::ponc::core
 
