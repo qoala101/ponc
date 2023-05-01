@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <concepts>
 #include <cstdint>
 #include <cstdio>
 #include <future>
@@ -26,6 +27,7 @@
 #include "core_i_node.h"
 #include "core_link.h"
 #include "core_project.h"
+#include "coreui_cloner.h"
 #include "coreui_i_family_traits.h"
 #include "cpp_assert.h"
 #include "draw_disable_if.h"
@@ -33,6 +35,7 @@
 #include "draw_settings_table_row.h"
 #include "draw_table_flags.h"
 #include "flow_algorithms.h"
+#include "flow_node_flow.h"
 #include "flow_tree_node.h"
 #include "flow_tree_traversal.h"
 #include "imgui.h"
@@ -104,29 +107,21 @@ auto AsFamilyNodes(const std::vector<std::unique_ptr<core::IFamily>>& families,
 }
 
 ///
-auto GetChildIndex(const flow::TreeNode& flow_tree, ne::NodeId child_id) {
-  const auto child =
-      std::find_if(flow_tree.child_nodes.cbegin(), flow_tree.child_nodes.cend(),
-                   [child_id](const auto& child_node) {
-                     return child_node.second.node_id == child_id;
-                   });
-
-  Expects(child != flow_tree.child_nodes.cend());
-  return std::distance(flow_tree.child_nodes.begin(), child);
-}
-
-///
-auto GetFreeOutputs(const flow::TreeNode& flow_tree,
-                    const core::Diagram& diagram) {
-  auto free_outputs = std::vector<float>{};
-
+void TraverseFreeOutputs(const core::Diagram& diagram,
+                         const std::invocable<flow::PinFlow> auto& visitor,
+                         const flow::TreeNode& flow_tree,
+                         const flow::NodeFlows& node_flows) {
   flow::TraverseDepthFirst(
       flow_tree,
-      [&diagram, &free_outputs](const auto& flow_node) {
+      [&diagram, &visitor, &node_flows](const auto& flow_node) {
         const core::INode& node =
             core::Diagram::FindNode(diagram, flow_node.node_id);
         const auto output_pins = node.GetOutputPinIds();
         const auto output_pin_flows = node.GetInitialFlow().output_pin_flows;
+
+        const auto node_id = flow_node.node_id.Get();
+        Expects(node_flows.contains(node_id));
+        const auto& node_flow = node_flows.at(node_id);
 
         for (const auto pin_id : output_pins) {
           const auto pin_id_value = pin_id.Get();
@@ -135,28 +130,49 @@ auto GetFreeOutputs(const flow::TreeNode& flow_tree,
             continue;
           }
 
-          Expects(output_pin_flows.contains(pin_id_value));
-          free_outputs.emplace_back(output_pin_flows.at(pin_id_value));
+          const auto pin_flow = node_flow.output_pin_flows.find(pin_id_value);
+          Expects(pin_flow != node_flow.output_pin_flows.cend());
+          visitor(*pin_flow);
         }
       },
       [](const auto&) {});
+}
+
+///
+void TraverseFreeOutputs(const core::Diagram& diagram,
+                         const std::invocable<flow::PinFlow> auto& visitor) {
+  const auto flow_trees = flow::BuildFlowTrees(diagram);
+  const auto node_flows =
+      flow::CalculateNodeFlows(flow_trees, [&diagram](const auto node_id) {
+        return core::Diagram::FindNode(diagram, node_id).GetInitialFlow();
+      });
+
+  for (const auto& flow_tree : flow_trees) {
+    TraverseFreeOutputs(diagram, visitor, flow_tree, node_flows);
+  }
+}
+
+///
+auto GetFreeOutputs(const core::Diagram& diagram) {
+  auto free_outputs = std::vector<float>{};
+
+  TraverseFreeOutputs(diagram, [&free_outputs](const auto& pin_flow) {
+    free_outputs.emplace_back(pin_flow.second);
+  });
 
   return free_outputs;
 }
 
 ///
-auto GetFreeOutputs(const core::Diagram& diagram) {
-  const auto flow_trees = flow::BuildFlowTrees(diagram);
+auto GetChildOutputIndex(const calc::TreeNode& parent,
+                         const calc::TreeNode* child) {
+  const auto& parent_children = parent.GetChildren();
+  const auto child_node = std::find_if(
+      parent_children.cbegin(), parent_children.cend(),
+      [child](const auto& child_node) { return &child_node.second == child; });
 
-  auto free_outputs = std::vector<float>{};
-
-  for (const auto& flow_tree : flow_trees) {
-    const auto tree_outputs = GetFreeOutputs(flow_tree, diagram);
-    free_outputs.insert(free_outputs.cend(), tree_outputs.cbegin(),
-                        tree_outputs.cend());
-  }
-
-  return free_outputs;
+  Expects(child_node != parent_children.cend());
+  return child_node->first;
 }
 
 ///
@@ -230,82 +246,6 @@ void TraverseDepthFirstEx(
 
   visitor_after_children(tree_node);
 }
-
-auto MakeDiagrams(core::Project& project,
-                  const std::vector<calc::TreeNode>& roots,
-                  int trees_per_diagram) {
-  auto diagrams = std::vector<core::Diagram>{};
-
-  const auto num_trees = std::min(static_cast<int>(roots.size()), 1000);
-
-  auto num_diagrams = num_trees / trees_per_diagram;
-
-  if (num_diagrams * trees_per_diagram < num_trees) {
-    ++num_diagrams;
-  }
-
-  for (auto diagram_index = 0; diagram_index < num_diagrams; ++diagram_index) {
-    const auto start_tree_index = diagram_index * trees_per_diagram;
-    const auto end_tree_index =
-        std::min((diagram_index + 1) * trees_per_diagram, num_trees) - 1;
-    auto new_diagram =
-        core::Diagram{"Calc trees " + std::to_string(start_tree_index) + "-" +
-                      std::to_string(end_tree_index)};
-
-    for (auto i = start_tree_index; i <= end_tree_index; ++i) {
-      const auto& root = roots[i];
-      auto parent_stack =
-          std::stack<std::pair<const calc::TreeNode*, const core::INode*>>{};
-
-      TraverseDepthFirstEx(
-          root,
-          [&project, &new_diagram, &parent_stack](const auto& tree_node) {
-            auto& id_generator = project.GetIdGenerator();
-
-            const auto& family =
-                core::Project::FindFamily(project, tree_node.GetFamilyId());
-            const auto& node =
-                new_diagram.EmplaceNode(family.CreateNode(id_generator));
-
-            if (!parent_stack.empty()) {
-              const auto& [parent_tree_node, parent_node] = parent_stack.top();
-
-              for (const auto& child_node : parent_tree_node->GetChildren()) {
-                if (&child_node.second != &tree_node) {
-                  continue;
-                }
-
-                const auto parent_output_pins = parent_node->GetOutputPinIds();
-
-                Expects(static_cast<int>(parent_output_pins.size()) >
-                        child_node.first);
-                const auto parent_output_pin_to_this =
-                    parent_output_pins[child_node.first];
-
-                const auto input_pin = node.GetInputPinId();
-                Expects(input_pin.has_value());
-
-                const auto link =
-                    core::Link{.id = id_generator.Generate<ne::LinkId>(),
-                               .start_pin_id = parent_output_pin_to_this,
-                               .end_pin_id = *input_pin};
-
-                new_diagram.EmplaceLink(link);
-
-                break;
-              }
-            }
-
-            parent_stack.emplace(&tree_node, &node);
-          },
-          [&parent_stack](const auto&) { parent_stack.pop(); });
-    }
-
-    diagrams.emplace_back(std::move(new_diagram));
-  }
-
-  return diagrams;
-}
 }  // namespace
 
 ///
@@ -317,17 +257,18 @@ void CalculatorView::Draw(coreui::Project& project) {
 
   if (calculation_task_.has_value()) {
     if (const auto& result = calculation_task_->GetResult()) {
-      for (auto& diagram : MakeDiagrams(core_project, {*result}, 30)) {
-        project.AddDiagram(std::move(diagram))
-            // .Then([safe_this = safe_owner_.MakeSafe(this)]() {
-            //   const auto flow_trees =
-            //       flow::BuildFlowTrees(safe_this->diagram_->GetDiagram());
-            //   safe_this->diagram_->GetNodeMover().ArrangeAsTrees(flow_trees);
-            // })
-            // .Then(([]() { ne::NavigateToContent(); }))
-            ;
-      }
+      Expects(diagram_copy_.has_value());
+      PopulateDiagram(*result, core_project);
+      project.AddDiagram(std::move(*diagram_copy_))
+          // .Then([safe_this = safe_owner_.MakeSafe(this)]() {
+          //   const auto flow_trees =
+          //       flow::BuildFlowTrees(safe_this->diagram_->GetDiagram());
+          //   safe_this->diagram_->GetNodeMover().ArrangeAsTrees(flow_trees);
+          // })
+          // .Then(([]() { ne::NavigateToContent(); }))
+          ;
 
+      diagram_copy_.reset();
       calculation_task_.reset();
     }
   }
@@ -346,11 +287,12 @@ void CalculatorView::Draw(coreui::Project& project) {
     const auto disable_scope = EnableIf(!calculation_running);
 
     if (ImGui::Button("Calculate")) {
+      const auto& diagram = project.GetDiagram().GetDiagram();
+      diagram_copy_.emplace(coreui::Cloner::Clone(diagram, core_project));
+
       calculation_task_.emplace(calc::Calculator::ConstructorArgs{
           .settings = settings,
-          .input_node =
-              calc::TreeNode{{},
-                             GetFreeOutputs(project.GetDiagram().GetDiagram())},
+          .input_node = calc::TreeNode{{}, GetFreeOutputs(diagram)},
           .client_node = calc::TreeNode{GetClientFamilyId(core_project)},
           .family_nodes = AsFamilyNodes(core_project.GetFamilies(),
                                         settings.family_settings)});
@@ -371,6 +313,70 @@ void CalculatorView::Draw(coreui::Project& project) {
   DrawProgressBar();
   DrawRequirements(settings);
   DrawFamilies(core_project);
+}
+
+///
+void CalculatorView::PopulateOutput(const calc::TreeNode& output_tree,
+                                    ne::PinId output_pin,
+                                    core::Project& project) {
+  auto& id_generator = project.GetIdGenerator();
+  auto parent_stack =
+      std::stack<std::pair<const calc::TreeNode*, const core::INode*>>{};
+
+  TraverseDepthFirstEx(
+      output_tree,
+      [output_pin, &project, &id_generator, &parent_stack,
+       &diagram_copy = diagram_copy_](const auto& tree_node) {
+        const auto& family =
+            core::Project::FindFamily(project, tree_node.GetFamilyId());
+        const auto& node =
+            diagram_copy->EmplaceNode(family.CreateNode(id_generator));
+
+        auto parent_output_pin = output_pin;
+
+        if (!parent_stack.empty()) {
+          const auto& [parent_tree_node, parent_node] = parent_stack.top();
+          const auto parent_output_pins = parent_node->GetOutputPinIds();
+          const auto output_index =
+              GetChildOutputIndex(*parent_tree_node, &tree_node);
+
+          Expects(output_index < static_cast<int>(parent_output_pins.size()));
+          parent_output_pin = parent_output_pins[output_index];
+        }
+
+        const auto input_pin = node.GetInputPinId();
+        Expects(input_pin.has_value());
+
+        const auto link = core::Link{.id = id_generator.Generate<ne::LinkId>(),
+                                     .start_pin_id = parent_output_pin,
+                                     .end_pin_id = *input_pin};
+
+        diagram_copy->EmplaceLink(link);
+
+        parent_stack.emplace(&tree_node, &node);
+      },
+      [&parent_stack](const auto&) { parent_stack.pop(); });
+}
+
+///
+void CalculatorView::PopulateDiagram(const calc::TreeNode& calculated_tree,
+                                     core::Project& project) {
+  Expects(diagram_copy_.has_value());
+  coreui::Cloner::RewireIds(*diagram_copy_, project);
+
+  auto output_index = 0;
+
+  TraverseFreeOutputs(*diagram_copy_, [this, &calculated_tree, &project,
+                                       &output_index](const auto& pin_flow) {
+    const auto& output_trees = calculated_tree.GetChildren();
+    const auto output_tree = output_trees.find(output_index);
+
+    if (output_tree != output_trees.cend()) {
+      PopulateOutput(output_tree->second, pin_flow.first, project);
+    }
+
+    ++output_index;
+  });
 }
 
 ///

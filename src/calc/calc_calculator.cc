@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <iostream>
 #include <iterator>
 #include <limits>
 #include <set>
@@ -26,6 +27,8 @@ Calculator::Calculator(const ConstructorArgs &args)
       client_node_{args.client_node},
       family_nodes_{args.family_nodes},
       step_callback_{args.step_callback} {
+  input_node_.SetInput(std::numeric_limits<FlowValue>::max());
+
   std::stable_sort(
       family_nodes_.begin(), family_nodes_.end(),
       [](const auto &left, const auto &right) {
@@ -38,24 +41,21 @@ Calculator::Calculator(const ConstructorArgs &args)
 }
 
 ///
-auto Calculator::GetProgress() const -> float {
-  return static_cast<float>(GetLastResult().GetInput() - min_output_) /
-         static_cast<float>(input_node_.GetOutputs()[0] - min_output_);
-}
+auto Calculator::GetProgress() const -> float { return 0.5F; }
 
 ///
-auto Calculator::GetLastResult() const -> const TreeNode & {
-  if (best_tree_per_num_clients_per_output_.empty()) {
+auto Calculator::GetResult() const -> const TreeNode & {
+  const auto best_trees =
+      best_tree_per_num_clients_per_output_.find(input_node_.GetInput());
+
+  if (best_trees == best_tree_per_num_clients_per_output_.cend()) {
     return input_node_;
   }
 
-  const auto &biggest_output_trees =
-      std::prev(best_tree_per_num_clients_per_output_.cend())->second;
-  Expects(!biggest_output_trees.empty());
+  Expects(!best_trees->second.empty());
+  const auto &biggest_tree = std::prev(best_trees->second.cend())->second;
 
-  const auto &most_clients_tree =
-      std::prev(biggest_output_trees.cend())->second;
-  return most_clients_tree;
+  return biggest_tree;
 }
 
 ///

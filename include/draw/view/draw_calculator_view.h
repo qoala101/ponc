@@ -7,6 +7,8 @@
 #include <vector>
 
 #include "calc_calculation_task.h"
+#include "calc_tree_node.h"
+#include "core_diagram.h"
 #include "coreui_project.h"
 #include "draw_i_view.h"
 
@@ -21,8 +23,16 @@ class CalculatorView : public IView {
 
  private:
   ///
+  void PopulateOutput(const calc::TreeNode& output_tree, ne::PinId output_pin,
+                      core::Project& project);
+  ///
+  void PopulateDiagram(const calc::TreeNode& calculated_tree,
+                       core::Project& project);
+  ///
   void DrawProgressBar() const;
 
+  ///
+  std::optional<core::Diagram> diagram_copy_{};
   ///
   std::optional<calc::CalculationTask> calculation_task_{};
 };

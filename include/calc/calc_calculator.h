@@ -13,8 +13,6 @@
 
 #include "calc_settings.h"
 #include "calc_tree_node.h"
-#include "core_i_family.h"
-#include "core_id_value.h"
 
 namespace vh::ponc::calc {
 ///
@@ -43,7 +41,7 @@ class Calculator {
   ///
   auto GetProgress() const -> float;
   ///
-  auto GetLastResult() const -> const TreeNode &;
+  auto GetResult() const -> const TreeNode &;
 
  private:
   ///

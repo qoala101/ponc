@@ -8,7 +8,7 @@ CalculationTask::CalculationTask(Calculator::ConstructorArgs args) {
 
   task_ = std::async(std::launch::async, [args = std::move(args)]() {
     const auto calculator = calc::Calculator{args};
-    return calculator.GetLastResult();
+    return calculator.GetResult();
   });
 }
 
