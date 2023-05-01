@@ -29,7 +29,7 @@ auto WriteFamilySettingsToJson(const core::CalculatorFamilySettings& settings) {
 ///
 auto SettingsSerializer::ParseFromJson(const crude_json::value& json)
     -> core::Settings {
-  const auto& calculator_json = json["calculator_setings"];
+  const auto& calculator_json = json["calculator_settings"];
 
   return {.color_flow = json["color_flow"].get<crude_json::boolean>(),
           .min_flow =

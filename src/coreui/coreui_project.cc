@@ -16,7 +16,6 @@
 #include "core_id_value.h"
 #include "core_project.h"
 #include "core_settings.h"
-#include "core_version.h"
 #include "coreui_cloner.h"
 #include "coreui_diagram.h"
 #include "coreui_event.h"
@@ -45,8 +44,8 @@ auto Project::CreateProject() const {
               core::CalculatorFamilySettings::FromFamilies(families)}};
   core::Settings::ResetToDefault(settings);
 
-  return core::Project{core::GetCurrentVersion(), std::move(settings),
-                       std::move(families), std::vector<core::Diagram>(1)};
+  return core::Project{std::move(settings), std::move(families),
+                       std::vector<core::Diagram>(1)};
 }
 
 ///

@@ -33,7 +33,6 @@ add_executable(ponc
   core/core_pin.cc
   core/core_project.cc
   core/core_settings.cc
-  core/core_version.cc
 
   coreui/event/coreui_event_loop.cc
   coreui/event/coreui_event.cc

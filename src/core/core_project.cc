@@ -63,17 +63,13 @@ auto Project::FindFamily(const Project& project, core::FamilyId family_id)
 }
 
 ///
-Project::Project(Version version, Settings settings,
+Project::Project(Settings settings,
                  std::vector<std::unique_ptr<IFamily>> families,
                  std::vector<Diagram> diagrams)
-    : version_{version},
-      settings_{std::move(settings)},
+    : settings_{std::move(settings)},
       families_{std::move(families)},
       diagrams_{std::move(diagrams)},
       id_generator_{FindMaxId() + 1} {}
-
-///
-auto Project::GetVersion() const -> Version { return version_; }
 
 ///
 auto Project::GetSettings() const -> const Settings& {
