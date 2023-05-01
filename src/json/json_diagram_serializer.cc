@@ -40,9 +40,7 @@ auto DiagramSerializer::ParseFromJson(
     const crude_json::value& json,
     const std::vector<std::unique_ptr<core::IFamily>>& families)
     -> core::Diagram {
-  auto name = json.contains("name") ? json["name"].get<crude_json::string>()
-                                    : std::string{};
-
+  auto name = json["name"].get<crude_json::string>();
   auto nodes = ContainerSerializer::ParseFromJson<std::unique_ptr<core::INode>>(
       json, "nodes",
       [&families](const auto& json) { return ParseNode(json, families); });

@@ -40,6 +40,8 @@ void Upgrade0(crude_json::value& project_json) {
       static_cast<float>(settings_json["max_flow"].get<crude_json::number>());
 
   settings_json = SettingsSerializer::WriteToJson(settings);
+
+  project_json["diagrams"][0]["name"] = "Diagram";
 }
 
 ///
