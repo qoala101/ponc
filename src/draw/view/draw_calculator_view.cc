@@ -21,6 +21,7 @@
 
 #include "calc_calculator.h"
 #include "calc_tree_node.h"
+#include "calc_tree_traversal.h"
 #include "core_diagram.h"
 #include "core_i_family.h"
 #include "core_i_node.h"
@@ -232,20 +233,6 @@ void DrawFamilies(core::Project& project) {
     }
   }
 }
-
-void TraverseDepthFirstEx(
-    const calc::TreeNode& tree_node,
-    const std::invocable<const calc::TreeNode&> auto& visitor_before_children,
-    const std::invocable<const calc::TreeNode&> auto& visitor_after_children) {
-  visitor_before_children(tree_node);
-
-  for (const auto& child : tree_node.GetChildren()) {
-    TraverseDepthFirstEx(child.second, visitor_before_children,
-                         visitor_after_children);
-  }
-
-  visitor_after_children(tree_node);
-}
 }  // namespace
 
 ///
@@ -253,25 +240,7 @@ auto CalculatorView::GetLabel() const -> std::string { return "Calculator"; }
 
 ///
 void CalculatorView::Draw(coreui::Project& project) {
-  auto& core_project = project.GetProject();
-
-  if (calculation_task_.has_value()) {
-    if (const auto& result = calculation_task_->GetResult()) {
-      Expects(diagram_copy_.has_value());
-      PopulateDiagram(*result, core_project);
-      project.AddDiagram(std::move(*diagram_copy_))
-          // .Then([safe_this = safe_owner_.MakeSafe(this)]() {
-          //   const auto flow_trees =
-          //       flow::BuildFlowTrees(safe_this->diagram_->GetDiagram());
-          //   safe_this->diagram_->GetNodeMover().ArrangeAsTrees(flow_trees);
-          // })
-          // .Then(([]() { ne::NavigateToContent(); }))
-          ;
-
-      diagram_copy_.reset();
-      calculation_task_.reset();
-    }
-  }
+  ProcessResult(project);
 
   const auto content_scope = DrawContentScope();
 
@@ -279,6 +248,7 @@ void CalculatorView::Draw(coreui::Project& project) {
     return;
   }
 
+  auto& core_project = project.GetProject();
   auto& settings = core_project.GetSettings().calculator_settings;
   const auto calculation_running =
       calculation_task_.has_value() && calculation_task_->IsRunning();
@@ -323,7 +293,7 @@ void CalculatorView::PopulateOutput(const calc::TreeNode& output_tree,
   auto parent_stack =
       std::stack<std::pair<const calc::TreeNode*, const core::INode*>>{};
 
-  TraverseDepthFirstEx(
+  TraverseDepthFirst(
       output_tree,
       [output_pin, &project, &id_generator, &parent_stack,
        &diagram_copy = diagram_copy_](const auto& tree_node) {
@@ -377,6 +347,34 @@ void CalculatorView::PopulateDiagram(const calc::TreeNode& calculated_tree,
 
     ++output_index;
   });
+}
+
+///
+void CalculatorView::ProcessResult(coreui::Project& project) {
+  if (!calculation_task_.has_value()) {
+    return;
+  }
+
+  const auto& result = calculation_task_->GetResult();
+
+  if (!result.has_value()) {
+    return;
+  }
+
+  PopulateDiagram(*result, project.GetProject());
+
+  Expects(diagram_copy_.has_value());
+  project
+      .AddDiagram(std::move(*diagram_copy_))
+      // .Then([safe_this = safe_owner_.MakeSafe(this)]() {
+      //   const auto flow_trees =
+      //       flow::BuildFlowTrees(safe_this->diagram_->GetDiagram());
+      //   safe_this->diagram_->GetNodeMover().ArrangeAsTrees(flow_trees);
+      // })
+      .Then(([]() { ne::NavigateToContent(); }));
+
+  diagram_copy_.reset();
+  calculation_task_.reset();
 }
 
 ///

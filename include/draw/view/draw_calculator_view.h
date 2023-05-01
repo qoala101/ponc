@@ -29,6 +29,8 @@ class CalculatorView : public IView {
   void PopulateDiagram(const calc::TreeNode& calculated_tree,
                        core::Project& project);
   ///
+  void ProcessResult(coreui::Project& project);
+  ///
   void DrawProgressBar() const;
 
   ///
