@@ -12,9 +12,11 @@ namespace vh::ponc::json {
 ///
 auto LinkSerializer::ParseFromJson(const crude_json::value& json)
     -> core::Link {
-  return {IdSerializer::ParseFromJson<ne::LinkId>(json["id"]),
+  return {
+      .id = IdSerializer::ParseFromJson<ne::LinkId>(json["id"]),
+      .start_pin_id =
           IdSerializer::ParseFromJson<ne::PinId>(json["start_pin_id"]),
-          IdSerializer::ParseFromJson<ne::PinId>(json["end_pin_id"])};
+      .end_pin_id = IdSerializer::ParseFromJson<ne::PinId>(json["end_pin_id"])};
 }
 
 ///

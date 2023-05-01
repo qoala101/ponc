@@ -23,8 +23,8 @@
 #include "coreui_event_loop.h"
 #include "cpp_assert.h"
 #include "cpp_share.h"
-#include "json_diagram_serializer.h"
 #include "json_project_serializer.h"
+#include "json_versifier.h"
 
 namespace vh::ponc::coreui {
 ///
@@ -108,12 +108,10 @@ auto Project::AddDiagram(core::Diagram diagram) -> Event& {
 
 ///
 auto Project::CloneDiagram(const core::Diagram& diagram) -> Event& {
-  const auto json = json::DiagramSerializer::WriteToJson(diagram);
-  auto clone =
-      json::DiagramSerializer::ParseFromJson(json, project_.GetFamilies());
+  auto& project = GetProject();
 
-  const auto ids = core::Diagram::GetIds(clone);
-  RewireIds(ids);
+  auto clone = Cloner::Clone(diagram, GetProject());
+  Cloner::RewireIds(clone, project);
 
   return AddDiagram(std::move(clone));
 }
@@ -178,9 +176,12 @@ auto Project::OpenFromFile(std::filesystem::path file_path) -> Event& {
       [safe_this = safe_owner_.MakeSafe(this),
        family_parsers = cpp::Share(CreateFamilyParsers()),
        file_path = std::move(file_path)]() mutable {
-        const auto json = crude_json::value::load(file_path.string()).first;
+        auto json = crude_json::value::load(file_path.string()).first;
+        json::Versifier::UpgradeToCurrentVersion(json);
+
         safe_this->project_ =
             json::ProjectSerializer::ParseFromJson(json, *family_parsers);
+
         safe_this->SetDiagramImpl(0);
         safe_this->SetFilePath(std::move(file_path));
       });
@@ -212,29 +213,6 @@ auto Project::GetName() const -> std::string {
   }
 
   return file_path_.filename().string();
-}
-
-///
-void Project::RewireIds(const std::vector<core::IdPtr>& ids) {
-  if (ids.empty()) {
-    return;
-  }
-
-  auto& id_generator = project_.GetIdGenerator();
-  const auto next_id = id_generator.GetNextId();
-
-  const auto [min_id, max_id] = std::minmax_element(
-      ids.cbegin(), ids.cend(), [](const auto& left, const auto& right) {
-        return GetValue(left) < GetValue(right);
-      });
-  const auto min_id_value = core::GetValue(*min_id);
-  const auto max_id_value = core::GetValue(*max_id);
-
-  for (const auto& id : ids) {
-    core::SetValue(id, core::GetValue(id) + next_id - min_id_value);
-  }
-
-  id_generator = core::IdGenerator{next_id - min_id_value + max_id_value + 1};
 }
 
 ///

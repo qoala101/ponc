@@ -9,4 +9,5 @@ auto GetCurrentVersion() -> Version {
 
   return static_cast<Version>(static_cast<T>(Version::kAfterCurrent) - 1);
 }
+
 }  // namespace vh::ponc::core

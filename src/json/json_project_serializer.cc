@@ -60,7 +60,6 @@ auto ProjectSerializer::ParseFromJson(
         return DiagramSerializer::ParseFromJson(json, families);
       });
 
-  ;
   return core::Project{version, settings, std::move(families),
                        std::move(diagrams)};
 }
@@ -69,6 +68,7 @@ auto ProjectSerializer::ParseFromJson(
 auto ProjectSerializer::WriteToJson(const core::Project& project)
     -> crude_json::value {
   auto json = crude_json::value{};
+  json["version"] = static_cast<crude_json::number>(project.GetVersion());
   json["settings"] = SettingsSerializer::WriteToJson(project.GetSettings());
 
   ContainerSerializer::WriteToJson(

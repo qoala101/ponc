@@ -103,6 +103,7 @@ add_executable(ponc
   json/json_link_serializer.cc
   json/json_project_serializer.cc
   json/json_settings_serializer.cc
+  json/json_versifier.cc
 
   resource/node_header_texture.png
 
