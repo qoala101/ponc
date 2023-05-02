@@ -249,7 +249,10 @@ void NodeMover::ArrangeAsTrees(const std::vector<flow::TreeNode>& tree_nodes) {
       continue;
     }
 
-    MoveTreeTo(tree_node, {last_tree_rect->Min.x, last_tree_rect->Max.y});
+    MoveTreeTo(tree_node,
+               {last_tree_rect->Min.x,
+                last_tree_rect->Max.y +
+                    static_cast<float>(settings_->arrange_vertical_spacing)});
     last_tree_rect = GetTreeRect(tree_node);
   }
 }
