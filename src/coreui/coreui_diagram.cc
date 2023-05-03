@@ -209,6 +209,36 @@ auto Diagram::DeleteNodeWithLinks(ne::NodeId node_id) const -> Event& {
 }
 
 ///
+void Diagram::TreeSelect(const std::vector<ne::NodeId>& node_ids) {
+  const auto flow_trees = flow::BuildFlowTrees(*diagram_);
+
+  for (const auto node_id : node_ids) {
+    const auto& tree_node = flow::FindTreeNode(flow_trees, node_id);
+
+    flow::TraverseDepthFirst(
+        tree_node,
+        [](const auto& tree_node) { ne::SelectNode(tree_node.node_id, true); },
+        [](const auto&) {});
+  }
+}
+
+///
+void Diagram::TreeArrange(const std::vector<ne::NodeId>& node_ids) {
+  const auto flow_trees = flow::BuildFlowTrees(*diagram_);
+
+  for (const auto node_id : node_ids) {
+    const auto& tree_node = flow::FindTreeNode(flow_trees, node_id);
+
+    flow::TraverseDepthFirst(
+        tree_node,
+        [&node_mover = node_mover_](const auto& tree_node) {
+          node_mover.ArrangeAsTree(tree_node);
+        },
+        [](const auto&) {});
+  }
+}
+
+///
 auto Diagram::CanReplaceNode(const core::INode& source_node,
                              const core::INode& target_node) -> bool {
   if (const auto same_family =

@@ -326,11 +326,18 @@ void NodeMover::MoveTreesToRightOf(
       node_rect.Max.x +
       static_cast<float>(settings_->arrange_horizontal_spacing);
 
-  // std::sort(output_tree_parents.begin(), output_tree_parents.end(),
-  //           [this](const auto& left, const auto& right) {
-  //             return GetNodePos(left.node_id).y <
-  //             GetNodePos(right.node_id).y;
-  //           });
+  auto comp = [this](const flow::TreeNode& left, const flow::TreeNode& right) {
+    Expects(!left.child_nodes.empty());
+    const auto first_left_pin = left.child_nodes.cbegin()->first;
+
+    Expects(!right.child_nodes.empty());
+    const auto first_right_pin = right.child_nodes.cbegin()->first;
+
+    return GetPinPos(first_left_pin).y < GetPinPos(first_right_pin).y;
+  };
+
+  std::stable_sort(output_tree_parents.begin(), output_tree_parents.end(),
+                   comp);
 
   ArrangeAsTrees(output_tree_parents);
 

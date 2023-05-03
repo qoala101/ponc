@@ -56,6 +56,16 @@ void NodePopup::Draw(coreui::Diagram& diagram) {
     }
   }
 
+  ImGui::Separator();
+
+  if (ImGui::MenuItem("Tree Select")) {
+    diagram.TreeSelect(selected_nodes);
+  }
+
+  if (ImGui::MenuItem("Tree Arrange")) {
+    diagram.TreeArrange(selected_nodes);
+  }
+
   if (selected_nodes.size() > 1) {
     return;
   }

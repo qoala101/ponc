@@ -70,6 +70,10 @@ class Diagram {
   ///
   auto DeleteNodeWithLinks(ne::NodeId node_id) const -> Event &;
   ///
+  void TreeSelect(const std::vector<ne::NodeId> &node_ids);
+  ///
+  void TreeArrange(const std::vector<ne::NodeId> &node_ids);
+  ///
   auto CanReplaceNode(const core::INode &source_node,
                       const core::INode &target_node) -> bool;
   ///

@@ -60,12 +60,6 @@ void MainMenuBar::Draw(coreui::Project &project) {
       ne::NavigateToContent();
     }
 
-    if (ImGui::MenuItem("Arrange As Tree")) {
-      auto &diagram = project.GetDiagram();
-      const auto flow_trees = flow::BuildFlowTrees(diagram.GetDiagram());
-      diagram.GetNodeMover().ArrangeAsTrees(flow_trees);
-    }
-
     ImGui::EndMainMenuBar();
   }
 
