@@ -2,9 +2,12 @@
 #include <functional>
 #include <iostream>
 #include <numeric>
+#include <unordered_map>
+#include <vector>
 
 #include "core_diagram.h"
 #include "core_id_value.h"
+#include "coreui_flow_tree_node.h"
 #include "cpp_assert.h"
 #include "imgui_node_editor.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -38,6 +41,7 @@ void NodeMover::MoveNodeTo(ne::NodeId node_id, const ImVec2& pos) {
   const auto& diagram = parent_diagram_->GetDiagram();
   auto& node = core::Diagram::FindNode(diagram, node_id);
 
+  MoveNodePinPoses(node, pos);
   node.SetPos(pos);
   MarkToMove(node_id);
 }
@@ -257,6 +261,150 @@ void NodeMover::ArrangeAsTrees(const std::vector<flow::TreeNode>& tree_nodes) {
   }
 }
 
+void NodeMover::MoveTreesToRightOf(
+    const std::vector<flow::TreeNode>& fixed_trees,
+    const std::vector<flow::TreeNode>& moved_trees) {
+  const auto& child_nodes = moved_trees;
+
+  if (fixed_trees.empty() || child_nodes.empty()) {
+    return;
+  }
+
+  auto rect = GetNodeRect(fixed_trees[0].node_id);
+  auto old_node_poses = std::unordered_map<core::IdValue<ne::NodeId>, ImVec2>{};
+  auto output_tree_parents = std::vector<flow::TreeNode>{};
+
+  for (const auto& tree_node : fixed_trees) {
+    auto traversing_moved_tree_id = std::optional<ne::NodeId>{};
+
+    flow::TraverseDepthFirst(
+        tree_node,
+        [this, &moved_trees, &rect, &old_node_poses, &traversing_moved_tree_id,
+         &output_tree_parents](const auto& tree_node) {
+          auto tree_copy = tree_node;
+          tree_copy.child_nodes.clear();
+
+          for (const auto& child : tree_node.child_nodes) {
+            if (std::any_of(moved_trees.cbegin(), moved_trees.cend(),
+                            [&child](const auto& moved_tree) {
+                              return moved_tree.node_id == child.second.node_id;
+                            })) {
+              tree_copy.child_nodes.emplace(child);
+            }
+          }
+
+          if (!tree_copy.child_nodes.empty()) {
+            output_tree_parents.emplace_back(std::move(tree_copy));
+          }
+
+          if (traversing_moved_tree_id.has_value()) {
+            return;
+          }
+
+          if (std::any_of(moved_trees.cbegin(), moved_trees.cend(),
+                          [&tree_node](const auto& moved_tree) {
+                            return moved_tree.node_id == tree_node.node_id;
+                          })) {
+            traversing_moved_tree_id = tree_node.node_id;
+            return;
+          }
+
+          rect.Add(GetNodeRect(tree_node.node_id));
+          old_node_poses.emplace(tree_node.node_id,
+                                 GetNodePos(tree_node.node_id));
+        },
+        [&traversing_moved_tree_id](const auto& tree_node) {
+          if (traversing_moved_tree_id.has_value() &&
+              (tree_node.node_id == *traversing_moved_tree_id)) {
+            traversing_moved_tree_id.reset();
+          }
+        });
+  }
+
+  const auto node_rect = rect;
+  const auto next_child_x =
+      node_rect.Max.x +
+      static_cast<float>(settings_->arrange_horizontal_spacing);
+
+  // std::sort(output_tree_parents.begin(), output_tree_parents.end(),
+  //           [this](const auto& left, const auto& right) {
+  //             return GetNodePos(left.node_id).y <
+  //             GetNodePos(right.node_id).y;
+  //           });
+
+  ArrangeAsTrees(output_tree_parents);
+
+  for (const auto& [node_id, node_pos] : old_node_poses) {
+    MoveNodeTo(node_id, node_pos);
+  }
+
+  const auto vertical_spacing =
+      static_cast<float>(settings_->arrange_vertical_spacing);
+
+  const auto& [first_output_pin, first_child] =
+      *output_tree_parents.front().child_nodes.cbegin();
+  const auto tree_top_to_first_input_pin_distance =
+      GetOtherPinPos(first_output_pin).y - GetTreeRect(first_child).Min.y;
+
+  // std::cout << GetNodePos(480).y << " " << GetPinPos(481).y << "\n";
+
+  const auto [last_output_pin, last_child] =
+      *std::prev(output_tree_parents.back().child_nodes.cend());
+  const auto last_input_pin_to_tree_bot_distance =
+      GetTreeRect(last_child).Max.y - GetOtherPinPos(last_output_pin).y;
+
+  auto direct_children_height =
+      vertical_spacing * (static_cast<float>(output_tree_parents.size()) - 1) -
+      tree_top_to_first_input_pin_distance -
+      last_input_pin_to_tree_bot_distance;
+
+  for (const auto& output_tree_parent : output_tree_parents) {
+    Expects(!output_tree_parent.child_nodes.empty());
+    const auto first_child = output_tree_parent.child_nodes.cbegin();
+    const auto last_child = std::prev(output_tree_parent.child_nodes.cend());
+    direct_children_height += GetTreeRect(last_child->second).Max.y -
+                              GetTreeRect(first_child->second).Min.y;
+  }
+
+  auto taken_pins_rect = std::optional<ImRect>{};
+
+  for (const auto& output_tree_parent : output_tree_parents) {
+    for (const auto& [pin_id, child_node] : output_tree_parent.child_nodes) {
+      const auto pin_pos = GetPinPos(pin_id);
+
+      if (taken_pins_rect.has_value()) {
+        taken_pins_rect->Add(pin_pos);
+        continue;
+      }
+
+      taken_pins_rect.emplace(pin_pos, pin_pos);
+    }
+  }
+
+  std::cout << tree_top_to_first_input_pin_distance << " "
+            << direct_children_height << " " << taken_pins_rect->GetHeight()
+            << "\n";
+
+  auto next_child_y = taken_pins_rect->GetCenter().y -
+                      tree_top_to_first_input_pin_distance -
+                      direct_children_height / 2;
+
+  for (const auto& output_tree_parent : output_tree_parents) {
+    Expects(!output_tree_parent.child_nodes.empty());
+    const auto first_child = output_tree_parent.child_nodes.cbegin();
+    const auto shift = ImVec2{next_child_x, next_child_y} -
+                       GetTreeRect(first_child->second).Min;
+
+    for (const auto& [pin_id, output_tree] : output_tree_parent.child_nodes) {
+      MoveTreeTo(output_tree, GetTreeRect(output_tree).Min + shift);
+    }
+
+    const auto last_child = std::prev(output_tree_parent.child_nodes.cend());
+    next_child_y = GetTreeRect(last_child->second).Max.y +
+                   static_cast<float>(settings_->arrange_vertical_spacing);
+  }
+}
+
 ///
 void NodeMover::MovePinTo(ne::PinId pin_id, const ImVec2& pos) {
   const auto current_pin_pos = GetPinPos(pin_id);
@@ -289,6 +437,19 @@ auto NodeMover::GetPinPos(ne::PinId pin_id) const -> const ImVec2& {
 ///
 void NodeMover::SetPinPos(ne::PinId pin_id, const ImVec2& pos) {
   pin_poses_.emplace(pin_id, pos);
+}
+
+///
+void NodeMover::MoveNodePinPoses(const core::INode& node, const ImVec2& pos) {
+  const auto delta = pos - node.GetPos();
+
+  for (const auto& [pin_id, pin_kind] : core::INode::GetAllPins(node)) {
+    const auto pin_pos = pin_poses_.find(pin_id.Get());
+
+    if (pin_pos != pin_poses_.end()) {
+      pin_pos->second += delta;
+    }
+  }
 }
 
 ///

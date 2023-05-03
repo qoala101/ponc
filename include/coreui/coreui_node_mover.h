@@ -7,6 +7,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "core_i_node.h"
 #include "core_id_value.h"
 #include "core_settings.h"
 #include "coreui_linker.h"
@@ -35,6 +36,8 @@ class NodeMover {
   void ArrangeAsTree(const flow::TreeNode &tree_node);
   ///
   void ArrangeAsTrees(const std::vector<flow::TreeNode> &tree_nodes);
+  void MoveTreesToRightOf(const std::vector<flow::TreeNode> &fixed_trees,
+                          const std::vector<flow::TreeNode> &moved_trees);
   ///
   auto GetNodeSize(ne::NodeId node_id) const -> const ImVec2 &;
   ///
@@ -45,6 +48,8 @@ class NodeMover {
   void SetPinPos(ne::PinId pin_id, const ImVec2 &pos);
 
  private:
+  ///
+  void MoveNodePinPoses(const core::INode &node, const ImVec2 &pos);
   ///
   void MoveTreeTo(const flow::TreeNode &tree_node, const ImVec2 &pos);
   ///
