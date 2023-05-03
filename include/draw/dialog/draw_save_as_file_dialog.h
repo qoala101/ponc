@@ -9,6 +9,10 @@ class SaveAsFileDialog : public IFileDialog {
  public:
   ///
   SaveAsFileDialog();
+
+ private:
+  ///
+  auto GetTitle() const -> std::string override;
 };
 }  // namespace vh::ponc::draw
 

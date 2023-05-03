@@ -18,6 +18,9 @@ class OpenFileDialog : public IFileDialog {
 
  private:
   ///
+  auto GetTitle() const -> std::string override;
+
+  ///
   QuestionDialog confirmation_dialog_;
   ///
   std::filesystem::path selected_file_path_{};

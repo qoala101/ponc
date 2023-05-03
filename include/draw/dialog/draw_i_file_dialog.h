@@ -3,6 +3,7 @@
 
 // clang-format off
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <imfilebrowser.h>
 // clang-format on
 
@@ -32,7 +33,15 @@ class IFileDialog : public cpp::Interface {
 
  private:
   ///
+  virtual auto GetTitle() const -> std::string = 0;
+
+  ///
+  void FixWindowFlags();
+
+  ///
   ImGui::FileBrowser dialog_{};
+  ///
+  ImGuiWindow *dialog_window_{};
 };
 }  // namespace vh::ponc::draw
 
