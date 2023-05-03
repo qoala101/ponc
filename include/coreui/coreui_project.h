@@ -65,6 +65,8 @@ class Project {
   auto Save() -> Event &;
   ///
   auto SaveToFile(std::filesystem::path file_path) -> Event &;
+  ///
+  auto SafeFromThis() -> cpp::SafePtr<Project>;
 
  private:
   ///

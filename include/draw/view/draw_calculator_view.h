@@ -29,10 +29,6 @@ class CalculatorView : public IView {
   auto PopulateDiagram(const calc::TreeNode& calculated_tree,
                        core::Project& project);
   ///
-  auto FindOutputTrees(
-      const std::map<core::IdValue<ne::PinId>, core::IdValue<ne::NodeId>>&
-          output_root_ids) const;
-  ///
   void ProcessResult(coreui::Project& project);
   ///
   void DrawProgressBar() const;

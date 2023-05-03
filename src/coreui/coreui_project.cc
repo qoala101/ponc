@@ -95,7 +95,7 @@ auto Project::GetDiagram() -> Diagram& { return *diagram_; }
 ///
 auto Project::AddDiagram(core::Diagram diagram) -> Event& {
   return event_loop_.PostEvent(
-      [safe_this = safe_owner_.MakeSafe(this),
+      [safe_this = SafeFromThis(),
        diagram = cpp::Share(std::move(diagram))]() mutable {
         auto& added_diagram =
             safe_this->project_.EmplaceDiagram(std::move(*diagram));
@@ -117,24 +117,22 @@ auto Project::CloneDiagram(const core::Diagram& diagram) -> Event& {
 
 ///
 auto Project::DeleteDiagram(int index) -> Event& {
-  return event_loop_.PostEvent(
-      [index, safe_this = safe_owner_.MakeSafe(this)]() mutable {
-        safe_this->project_.DeleteDiagram(index);
+  return event_loop_.PostEvent([index, safe_this = SafeFromThis()]() mutable {
+    safe_this->project_.DeleteDiagram(index);
 
-        const auto num_diagrams =
-            static_cast<int>(safe_this->project_.GetDiagrams().size());
-        const auto next_index = std::min(index, num_diagrams - 1);
+    const auto num_diagrams =
+        static_cast<int>(safe_this->project_.GetDiagrams().size());
+    const auto next_index = std::min(index, num_diagrams - 1);
 
-        safe_this->SetDiagramImpl(next_index);
-      });
+    safe_this->SetDiagramImpl(next_index);
+  });
 }
 
 ///
 auto Project::SetDiagram(int index) -> Event& {
-  return event_loop_.PostEvent(
-      [index, safe_this = safe_owner_.MakeSafe(this)]() {
-        safe_this->SetDiagramImpl(index);
-      });
+  return event_loop_.PostEvent([index, safe_this = SafeFromThis()]() {
+    safe_this->SetDiagramImpl(index);
+  });
 }
 
 ///
@@ -161,7 +159,7 @@ auto Project::CreateFamilyParsers() const {
 
 ///
 auto Project::Reset() -> Event& {
-  return event_loop_.PostEvent([safe_this = safe_owner_.MakeSafe(this),
+  return event_loop_.PostEvent([safe_this = SafeFromThis(),
                                 new_project = cpp::Share(CreateProject())]() {
     safe_this->project_ = std::move(*new_project);
     safe_this->SetDiagramImpl(0);
@@ -172,7 +170,7 @@ auto Project::Reset() -> Event& {
 ///
 auto Project::OpenFromFile(std::filesystem::path file_path) -> Event& {
   return event_loop_.PostEvent(
-      [safe_this = safe_owner_.MakeSafe(this),
+      [safe_this = SafeFromThis(),
        family_parsers = cpp::Share(CreateFamilyParsers()),
        file_path = std::move(file_path)]() mutable {
         auto json = crude_json::value::load(file_path.string()).first;
@@ -197,12 +195,17 @@ auto Project::Save() -> Event& {
 
 ///
 auto Project::SaveToFile(std::filesystem::path file_path) -> Event& {
-  return event_loop_.PostEvent([safe_this = safe_owner_.MakeSafe(this),
+  return event_loop_.PostEvent([safe_this = SafeFromThis(),
                                 file_path = std::move(file_path)]() mutable {
     const auto json = json::ProjectSerializer::WriteToJson(safe_this->project_);
     json.save(file_path.string());
     safe_this->SetFilePath(std::move(file_path));
   });
+}
+
+///
+auto Project::SafeFromThis() -> cpp::SafePtr<Project> {
+  return safe_owner_.MakeSafe(this);
 }
 
 ///
@@ -219,7 +222,7 @@ void Project::SetDiagramImpl(int index) {
   auto& diagrams = project_.GetDiagrams();
   Expects(static_cast<int>(diagrams.size()) > index);
 
-  diagram_ = std::make_unique<Diagram>(safe_owner_.MakeSafe(this),
+  diagram_ = std::make_unique<Diagram>(SafeFromThis(),
                                        safe_owner_.MakeSafe(&diagrams[index]));
 }
 

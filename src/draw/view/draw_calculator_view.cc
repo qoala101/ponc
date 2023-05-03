@@ -363,13 +363,10 @@ auto CalculatorView::PopulateDiagram(const calc::TreeNode& calculated_tree,
   return output_root_ids;
 }
 
-///
-auto CalculatorView::FindOutputTrees(
+auto FindOutputTrees(
+    const std::vector<flow::TreeNode>& flow_trees,
     const std::map<core::IdValue<ne::PinId>, core::IdValue<ne::NodeId>>&
-        output_root_ids) const {
-  Expects(diagram_copy_.has_value());
-  const auto flow_trees = flow::BuildFlowTrees(*diagram_copy_);
-
+        output_root_ids) {
   auto output_trees = std::vector<flow::TreeNode>{};
   output_trees.reserve(output_root_ids.size());
 
@@ -382,7 +379,6 @@ auto CalculatorView::FindOutputTrees(
   return output_trees;
 }
 
-///
 void CalculatorView::ProcessResult(coreui::Project& project) {
   if (!calculation_task_.has_value()) {
     return;
@@ -395,18 +391,33 @@ void CalculatorView::ProcessResult(coreui::Project& project) {
   }
 
   const auto output_root_ids = PopulateDiagram(*result, project.GetProject());
-  auto output_trees = FindOutputTrees(output_root_ids);
+
+  Expects(diagram_copy_.has_value());
+  auto flow_trees = flow::BuildFlowTrees(*diagram_copy_);
+  auto output_trees = FindOutputTrees(flow_trees, output_root_ids);
 
   Expects(diagram_copy_.has_value());
   project.AddDiagram(std::move(*diagram_copy_))
-      .Then([&project,  // TODO(vh): Replace with safe pointer.
-             output_trees = std::move(output_trees)]() {
-        project.GetDiagram().GetNodeMover().ArrangeAsTrees(output_trees);
+      .Then([project = project.SafeFromThis(),
+             flow_trees = std::move(flow_trees), output_trees
+             // = std::move(output_trees)
+  ]() {
+        auto& node_mover = project->GetDiagram().GetNodeMover();
+        node_mover.MoveTreesToRightOf(flow_trees, output_trees);
       })
-      .Then(([]() {
-        // ne::NavigateToSelection();
-        ne::NavigateToContent();
-      }));
+      .Then([project = project.SafeFromThis(),
+             output_trees = std::move(output_trees)]() {
+        for (const auto& tree_node : output_trees) {
+          flow::TraverseDepthFirst(
+              tree_node,
+              [](const auto& tree_node) {
+                ne::SelectNode(tree_node.node_id, true);
+              },
+              [](const auto&) {});
+
+          ne::NavigateToSelection();
+        }
+      });
 
   diagram_copy_.reset();
   calculation_task_.reset();
