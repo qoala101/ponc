@@ -403,7 +403,7 @@ void CalculatorView::ProcessResult(coreui::Project& project) {
              // = std::move(output_trees)
   ]() {
         auto& node_mover = project->GetDiagram().GetNodeMover();
-        node_mover.MoveTreesToRightOf(flow_trees, output_trees);
+        node_mover.ArrangeAsNewTrees(output_trees);
       })
       .Then([project = project.SafeFromThis(),
              output_trees = std::move(output_trees)]() {
@@ -414,9 +414,9 @@ void CalculatorView::ProcessResult(coreui::Project& project) {
                 ne::SelectNode(tree_node.node_id, true);
               },
               [](const auto&) {});
-
-          ne::NavigateToSelection();
         }
+
+        ne::NavigateToSelection();
       });
 
   diagram_copy_.reset();

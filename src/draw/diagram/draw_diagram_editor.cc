@@ -5,6 +5,7 @@
 
 #include "core_diagram.h"
 #include "coreui_diagram.h"
+#include "cpp_assert.h"
 #include "cpp_scope.h"
 #include "draw_create_node_popup.h"
 #include "draw_link.h"
@@ -17,11 +18,7 @@ namespace {
 ///
 auto IsHoveringOverChildWindow() {
   const auto *context = ImGui::GetCurrentContext();
-
-  if (context == nullptr) {
-    return false;
-  }
-
+  Expects(context != nullptr);
   return context->HoveredWindow != ImGui::GetCurrentWindow();
 }
 }  // namespace

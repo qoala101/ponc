@@ -262,30 +262,31 @@ void NodeMover::ArrangeAsTrees(const std::vector<flow::TreeNode>& tree_nodes) {
 }
 
 void NodeMover::MoveTreesToRightOf(
-    const std::vector<flow::TreeNode>& fixed_trees,
-    const std::vector<flow::TreeNode>& moved_trees) {
-  const auto& child_nodes = moved_trees;
+    const std::vector<flow::TreeNode>& initial_trees,
+    const std::vector<flow::TreeNode>& combined_trees,
+    const std::vector<flow::TreeNode>& output_trees) {
+  const auto& child_nodes = output_trees;
 
-  if (fixed_trees.empty() || child_nodes.empty()) {
+  if (combined_trees.empty() || child_nodes.empty()) {
     return;
   }
 
-  auto rect = GetNodeRect(fixed_trees[0].node_id);
+  auto rect = GetNodeRect(combined_trees[0].node_id);
   auto old_node_poses = std::unordered_map<core::IdValue<ne::NodeId>, ImVec2>{};
   auto output_tree_parents = std::vector<flow::TreeNode>{};
 
-  for (const auto& tree_node : fixed_trees) {
+  for (const auto& tree_node : combined_trees) {
     auto traversing_moved_tree_id = std::optional<ne::NodeId>{};
 
     flow::TraverseDepthFirst(
         tree_node,
-        [this, &moved_trees, &rect, &old_node_poses, &traversing_moved_tree_id,
+        [this, &output_trees, &rect, &old_node_poses, &traversing_moved_tree_id,
          &output_tree_parents](const auto& tree_node) {
           auto tree_copy = tree_node;
           tree_copy.child_nodes.clear();
 
           for (const auto& child : tree_node.child_nodes) {
-            if (std::any_of(moved_trees.cbegin(), moved_trees.cend(),
+            if (std::any_of(output_trees.cbegin(), output_trees.cend(),
                             [&child](const auto& moved_tree) {
                               return moved_tree.node_id == child.second.node_id;
                             })) {
@@ -301,7 +302,7 @@ void NodeMover::MoveTreesToRightOf(
             return;
           }
 
-          if (std::any_of(moved_trees.cbegin(), moved_trees.cend(),
+          if (std::any_of(output_trees.cbegin(), output_trees.cend(),
                           [&tree_node](const auto& moved_tree) {
                             return moved_tree.node_id == tree_node.node_id;
                           })) {
@@ -353,8 +354,6 @@ void NodeMover::MoveTreesToRightOf(
   const auto tree_top_to_first_input_pin_distance =
       GetOtherPinPos(first_output_pin).y - GetTreeRect(first_child).Min.y;
 
-  // std::cout << GetNodePos(480).y << " " << GetPinPos(481).y << "\n";
-
   const auto [last_output_pin, last_child] =
       *std::prev(output_tree_parents.back().child_nodes.cend());
   const auto last_input_pin_to_tree_bot_distance =
@@ -387,10 +386,6 @@ void NodeMover::MoveTreesToRightOf(
       taken_pins_rect.emplace(pin_pos, pin_pos);
     }
   }
-
-  std::cout << tree_top_to_first_input_pin_distance << " "
-            << direct_children_height << " " << taken_pins_rect->GetHeight()
-            << "\n";
 
   auto next_child_y = taken_pins_rect->GetCenter().y -
                       tree_top_to_first_input_pin_distance -

@@ -36,8 +36,8 @@ class NodeMover {
   void ArrangeAsTree(const flow::TreeNode &tree_node);
   ///
   void ArrangeAsTrees(const std::vector<flow::TreeNode> &tree_nodes);
-  void MoveTreesToRightOf(const std::vector<flow::TreeNode> &fixed_trees,
-                          const std::vector<flow::TreeNode> &moved_trees);
+  ///
+  void ArrangeAsNewTrees(const std::vector<flow::TreeNode> &tree_nodes);
   ///
   auto GetNodeSize(ne::NodeId node_id) const -> const ImVec2 &;
   ///
