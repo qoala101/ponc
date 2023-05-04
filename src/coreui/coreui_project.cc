@@ -108,10 +108,8 @@ auto Project::AddDiagram(core::Diagram diagram) -> Event& {
 
 ///
 auto Project::CloneDiagram(const core::Diagram& diagram) -> Event& {
-  auto& project = GetProject();
-
-  auto clone = Cloner::Clone(diagram, GetProject());
-  Cloner::RewireIds(clone, project);
+  auto clone = Cloner::Clone(diagram, project_.GetFamilies());
+  Cloner::RewireIds(core::Diagram::GetIds(clone), project_.GetIdGenerator());
 
   return AddDiagram(std::move(clone));
 }

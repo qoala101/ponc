@@ -45,6 +45,7 @@ add_executable(ponc
   coreui/traits/coreui_i_pin_traits.cc
 
   coreui/coreui_calculator.cc
+  coreui/coreui_cloner.cc
   coreui/coreui_diagram.cc
   coreui/coreui_family.cc
   coreui/coreui_linker.cc

@@ -25,7 +25,6 @@ auto CalculationTask::IsRunning() const -> bool {
   }
 
   const auto calculation_status = task_.wait_for(std::chrono::seconds::zero());
-
   return calculation_status != std::future_status::ready;
 }
 

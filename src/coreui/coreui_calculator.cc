@@ -199,7 +199,8 @@ auto Calculator::PopulateOutput(const calc::TreeNode& output_tree,
 ///
 auto Calculator::PopulateDiagram(const calc::TreeNode& calculated_tree) {
   Expects(diagram_copy_.has_value());
-  coreui::Cloner::RewireIds(*diagram_copy_, parent_project_->GetProject());
+  coreui::Cloner::RewireIds(core::Diagram::GetIds(*diagram_copy_),
+                            parent_project_->GetProject().GetIdGenerator());
 
   auto output_root_ids =
       std::map<core::IdValue<ne::PinId>, core::IdValue<ne::NodeId>>{};
@@ -287,9 +288,12 @@ void Calculator::OnFrame() {
 void Calculator::Calculate() {
   const auto& diagram = parent_project_->GetDiagram().GetDiagram();
   auto& core_project = parent_project_->GetProject();
-  diagram_copy_.emplace(coreui::Cloner::Clone(diagram, core_project));
+
+  diagram_copy_.emplace(
+      coreui::Cloner::Clone(diagram, core_project.GetFamilies()));
 
   auto& settings = core_project.GetSettings().calculator_settings;
+
   calculation_task_.emplace(calc::Calculator::ConstructorArgs{
       .settings = settings,
       .input_node = calc::TreeNode{{}, GetFreeOutputs(diagram)},
