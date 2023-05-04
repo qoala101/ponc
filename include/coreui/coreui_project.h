@@ -13,6 +13,7 @@
 
 #include "core_i_family_group.h"
 #include "core_project.h"
+#include "coreui_calculator.h"
 #include "coreui_diagram.h"
 #include "coreui_event_loop.h"
 #include "coreui_textures_handle.h"
@@ -54,6 +55,8 @@ class Project {
   ///
   auto GetTexturesHandle() -> TexturesHandle &;
   ///
+  auto GetCalculator() -> Calculator &;
+  ///
   auto GetEventLoop() -> EventLoop &;
   ///
   auto Reset() -> Event &;
@@ -65,8 +68,6 @@ class Project {
   auto Save() -> Event &;
   ///
   auto SaveToFile(std::filesystem::path file_path) -> Event &;
-  ///
-  auto SafeFromThis() -> cpp::SafePtr<Project>;
 
  private:
   ///
@@ -98,6 +99,8 @@ class Project {
   core::Project project_;
   ///
   std::unique_ptr<Diagram> diagram_{};
+  ///
+  Calculator calculator_;
 };
 }  // namespace vh::ponc::coreui
 

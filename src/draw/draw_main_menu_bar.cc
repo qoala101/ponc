@@ -151,7 +151,10 @@ void MainMenuBar::DrawViews(coreui::Project &project) {
   nodes_view_.Draw(diagram);
   diagrams_view_.Draw(project);
   flow_tree_view_.Draw(diagram.GetFlowTrees());
-  calculator_view_.Draw(project);
-  settings_view_.Draw(project.GetProject().GetSettings());
+
+  auto &core_project = project.GetProject();
+
+  calculator_view_.Draw(project.GetCalculator(), core_project);
+  settings_view_.Draw(core_project.GetSettings());
 }
 }  // namespace vh::ponc::draw
