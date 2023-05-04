@@ -112,6 +112,10 @@ class Family : public core::IFamily {
  public:
   explicit Family(core::FamilyId id) : IFamily{id} {}
 
+  auto GetType() const -> std::optional<core::FamilyType> override {
+    return core::FamilyType::kClient;
+  }
+
   auto CreateNode(core::IdGenerator& id_generator) const
       -> std::unique_ptr<core::INode> override {
     return std::make_unique<Node>(core::INode::ConstructorArgs{

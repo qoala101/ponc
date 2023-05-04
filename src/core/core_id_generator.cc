@@ -1,6 +1,8 @@
 #include "core_id_generator.h"
 
+#include "core_id_value.h"
+
 namespace vh::ponc::core {
 ///
-IdGenerator::IdGenerator(uintptr_t next_id) : next_id_{next_id} {}
+IdGenerator::IdGenerator(UnspecifiedIdValue next_id) : next_id_{next_id} {}
 }  // namespace vh::ponc::core

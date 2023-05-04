@@ -16,6 +16,7 @@
 #include "draw_open_file_dialog.h"
 #include "draw_question_dialog.h"
 #include "draw_save_as_file_dialog.h"
+#include "flow_algorithms.h"
 #include "imgui_node_editor.h"
 
 namespace vh::ponc::draw {
@@ -46,22 +47,24 @@ MainMenuBar::MainMenuBar()
 
 ///
 void MainMenuBar::Draw(coreui::Project &project) {
-  auto &settings = project.GetProject().GetSettings();
-
   if (ImGui::BeginMainMenuBar()) {
     DrawFileMenu(project);
     DrawViewMenu();
+    ImGui::Separator();
 
-    if (ImGui::MenuItem("Zoom to Content")) {
+    ImGui::MenuItem("Color Flow", nullptr,
+                    &project.GetProject().GetSettings().color_flow);
+    ImGui::Separator();
+
+    if (ImGui::MenuItem("Zoom To Content")) {
       ne::NavigateToContent();
     }
 
-    ImGui::MenuItem("Color Flow", nullptr, &settings.color_flow);
     ImGui::EndMainMenuBar();
   }
 
   DrawDialogs(project);
-  DrawViews(project.GetDiagram(), settings);
+  DrawViews(project);
 }
 
 ///
@@ -98,11 +101,14 @@ void MainMenuBar::DrawViewMenu() {
   if (ImGui::BeginMenu("View")) {
     DrawViewMenuItem(node_view_);
     DrawViewMenuItem(nodes_view_);
+    DrawViewMenuItem(diagrams_view_);
     DrawViewMenuItem(flow_tree_view_);
-
     ImGui::Separator();
-    DrawViewMenuItem(settings_view_);
 
+    DrawViewMenuItem(calculator_view_);
+    ImGui::Separator();
+
+    DrawViewMenuItem(settings_view_);
     ImGui::EndMenu();
   }
 }
@@ -114,11 +120,14 @@ void MainMenuBar::DrawDialogs(coreui::Project &project) {
   const auto requires_confirmation =
       !core::Project::IsEmpty(project.GetProject());
 
-  open_file_dialog_.Draw({.file_selected =
-                              [&project](auto file_path) {
-                                project.OpenFromFile(std::move(file_path));
-                              }},
-                         requires_confirmation);
+  open_file_dialog_.Draw(
+      {.file_selected =
+           [&project](auto file_path) {
+             project.OpenFromFile(std::move(file_path)).Then(([]() {
+               ne::NavigateToContent();
+             }));
+           }},
+      requires_confirmation);
 
   save_as_file_dialog_.Draw({.file_selected = [&project](auto file_path) {
     if (AsLowerCase(file_path.extension().string()) != ".json") {
@@ -130,8 +139,8 @@ void MainMenuBar::DrawDialogs(coreui::Project &project) {
 }
 
 ///
-void MainMenuBar::DrawViews(const coreui::Diagram &diagram,
-                            core::Settings &settings) {
+void MainMenuBar::DrawViews(coreui::Project &project) {
+  const auto &diagram = project.GetDiagram();
   const auto selected_nodes = NativeFacade::GetSelectedNodes();
   const auto selected_node =
       (selected_nodes.size() == 1)
@@ -140,7 +149,12 @@ void MainMenuBar::DrawViews(const coreui::Diagram &diagram,
 
   node_view_.Draw(selected_node, diagram.GetFamilyGroups());
   nodes_view_.Draw(diagram);
-  flow_tree_view_.Draw(diagram.GetFlowTree());
-  settings_view_.Draw(settings);
+  diagrams_view_.Draw(project);
+  flow_tree_view_.Draw(diagram.GetFlowTrees());
+
+  auto &core_project = project.GetProject();
+
+  calculator_view_.Draw(project.GetCalculator(), core_project);
+  settings_view_.Draw(core_project.GetSettings());
 }
 }  // namespace vh::ponc::draw

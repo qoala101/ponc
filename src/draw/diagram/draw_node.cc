@@ -46,15 +46,15 @@ void DrawPinField(const coreui::Pin& pin) {
 
   if (std::holds_alternative<float>(pin.value)) {
     const auto float_value = std::get<float>(pin.value);
-    ImGui::Text("%.3f", float_value);
+    ImGui::Text("%.2f", float_value);
     return;
   }
 
   Expects(std::holds_alternative<float*>(pin.value));
 
   auto* float_value = std::get<float*>(pin.value);
-  ImGui::SetNextItemWidth(100);
-  ImGui::InputFloat("", float_value, 0, 0, "%.3f");
+  ImGui::SetNextItemWidth(75);
+  ImGui::InputFloat("", float_value, 0, 0, "%.2f");
 }
 
 auto DrawPinIconArea(const coreui::Pin& pin, ne::PinKind pin_kind)

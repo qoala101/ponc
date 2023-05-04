@@ -1,11 +1,14 @@
 #include "flow_algorithms.h"
 
+#include <cstdint>
 #include <unordered_map>
 #include <unordered_set>
 
+#include "core_diagram.h"
 #include "cpp_assert.h"
 #include "flow_node_flow.h"
-#include "flow_tree.h"
+#include "flow_tree_node.h"
+#include "imgui_node_editor.h"
 
 namespace vh::ponc::flow {
 namespace {
@@ -22,8 +25,7 @@ auto HasLinkFromParent(const NodeFlow &node_flow,
 
 ///
 auto FindRootNodes(const std::vector<std::unique_ptr<core::INode>> &nodes,
-                   const std::vector<core::Link> &links,
-                   const cpp::SafeOwner &safe_owner) {
+                   const std::vector<core::Link> &links) {
   auto root_nodes = std::vector<TreeNode>{};
 
   for (const auto &node : nodes) {
@@ -31,7 +33,7 @@ auto FindRootNodes(const std::vector<std::unique_ptr<core::INode>> &nodes,
 
     if (!pin_flows.input_pin_flow.has_value() ||
         !HasLinkFromParent(pin_flows, links)) {
-      root_nodes.emplace_back(TreeNode{.node = safe_owner.MakeSafe(&*node)});
+      root_nodes.emplace_back(TreeNode{.node_id = node->GetId()});
     }
   }
 
@@ -73,15 +75,15 @@ auto FindLinkFromParentToChild(const PinFlows &parent_output_pins,
 
 ///
 // NOLINTNEXTLINE(*-no-recursion)
-void CalculateNodeFlow(flow::NodeFlows &node_flows_, const TreeNode &node,
-                       float input_from_parent = 0) {
-  const auto node_id = node.node->GetId();
-
-  auto calculated_flow = node_flows_.find(node_id.Get());
-  const auto initial_flow = node.node->GetInitialFlow();
+void CalculateNodeFlow(
+    flow::NodeFlows &node_flows_, const TreeNode &node,
+    const cpp::Query<NodeFlow, ne::NodeId> &get_initial_node_flow,
+    float input_from_parent = 0) {
+  auto calculated_flow = node_flows_.find(node.node_id.Get());
+  const auto initial_flow = get_initial_node_flow(node.node_id);
 
   if (calculated_flow == node_flows_.end()) {
-    calculated_flow = node_flows_.emplace(node_id, initial_flow).first;
+    calculated_flow = node_flows_.emplace(node.node_id, initial_flow).first;
   } else {
     calculated_flow->second += initial_flow;
   }
@@ -93,23 +95,23 @@ void CalculateNodeFlow(flow::NodeFlows &node_flows_, const TreeNode &node,
     const auto added_flow =
         calculated_flow->second.output_pin_flows.at(child_pin);
 
-    CalculateNodeFlow(node_flows_, child_node, added_flow);
+    CalculateNodeFlow(node_flows_, child_node, get_initial_node_flow,
+                      added_flow);
   }
 }
 }  // namespace
 
 ///
-auto BuildFlowTree(const core::Diagram &diagram,
-                   const cpp::SafeOwner &safe_owner) -> FlowTree {
+auto BuildFlowTrees(const core::Diagram &diagram) -> std::vector<TreeNode> {
   const auto &links = diagram.GetLinks();
   const auto &nodes = diagram.GetNodes();
 
-  auto flow_tree = FlowTree{FindRootNodes(nodes, links, safe_owner)};
-  auto visited_nodes = std::unordered_set<const core::INode *>{};
+  auto root_nodes = FindRootNodes(nodes, links);
+  auto visited_nodes = std::unordered_set<core::IdValue<ne::NodeId>>{};
   auto current_level_tree_nodes = std::vector<TreeNode *>{};
 
-  for (auto &root_node : flow_tree.root_nodes) {
-    visited_nodes.emplace(&*root_node.node);
+  for (auto &root_node : root_nodes) {
+    visited_nodes.emplace(root_node.node_id);
     current_level_tree_nodes.emplace_back(&root_node);
   }
 
@@ -117,7 +119,9 @@ auto BuildFlowTree(const core::Diagram &diagram,
     const auto previous_level_tree_nodes = std::move(current_level_tree_nodes);
 
     for (const auto &node : nodes) {
-      if (visited_nodes.contains(node.get())) {
+      const auto node_id = node->GetId();
+
+      if (visited_nodes.contains(node_id.Get())) {
         continue;
       }
 
@@ -125,9 +129,10 @@ auto BuildFlowTree(const core::Diagram &diagram,
       Expects(node_input_pin.has_value());
 
       for (const auto &possible_parent : previous_level_tree_nodes) {
+        const auto &parent_node =
+            core::Diagram::FindNode(diagram, possible_parent->node_id);
         const auto parent_output_pins =
-            possible_parent->node->GetInitialFlow().output_pin_flows;
-
+            parent_node.GetInitialFlow().output_pin_flows;
         const auto link_to_parent = FindLinkFromParentToChild(
             parent_output_pins, node_input_pin->first, links);
 
@@ -138,25 +143,28 @@ auto BuildFlowTree(const core::Diagram &diagram,
         auto &[pin_id, tree_node] =
             *possible_parent->child_nodes
                  .emplace((*link_to_parent)->start_pin_id,
-                          TreeNode{safe_owner.MakeSafe(&*node)})
+                          TreeNode{.node_id = node_id})
                  .first;
 
         current_level_tree_nodes.emplace_back(&tree_node);
-        visited_nodes.emplace(node.get());
+        visited_nodes.emplace(node_id);
         break;
       }
     }
   }
 
-  return flow_tree;
+  return root_nodes;
 }
 
 ///
-auto CalculateNodeFlows(const FlowTree &flow_tree) -> flow::NodeFlows {
+auto CalculateNodeFlows(
+    const std::vector<TreeNode> &flow_trees,
+    const cpp::Query<NodeFlow, ne::NodeId> &get_initial_node_flow)
+    -> flow::NodeFlows {
   auto node_flows = flow::NodeFlows{};
 
-  for (const auto &node : flow_tree.root_nodes) {
-    CalculateNodeFlow(node_flows, node);
+  for (const auto &node : flow_trees) {
+    CalculateNodeFlow(node_flows, node, get_initial_node_flow);
   }
 
   return node_flows;

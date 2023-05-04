@@ -4,6 +4,7 @@
 #include <set>
 
 #include "core_diagram.h"
+#include "core_id_value.h"
 #include "coreui_diagram.h"
 
 namespace vh::ponc::draw {
@@ -13,9 +14,9 @@ class ItemDeleter {
   ///
   struct ItemIds {
     ///
-    std::set<uintptr_t> registered_ids_{};
+    std::set<core::UnspecifiedIdValue> registered_ids_{};
     ///
-    std::set<uintptr_t> unregistered_ids_{};
+    std::set<core::UnspecifiedIdValue> unregistered_ids_{};
   };
 
   ///

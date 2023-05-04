@@ -12,6 +12,7 @@
 #include "json_diagram_serializer.h"
 #include "json_i_family_writer.h"
 #include "json_setings_serializer.h"
+#include "json_versifier.h"
 
 namespace vh::ponc::json {
 namespace {
@@ -49,7 +50,6 @@ auto ProjectSerializer::ParseFromJson(
         return DiagramSerializer::ParseFromJson(json, families);
       });
 
-  ;
   return core::Project{settings, std::move(families), std::move(diagrams)};
 }
 
@@ -57,6 +57,8 @@ auto ProjectSerializer::ParseFromJson(
 auto ProjectSerializer::WriteToJson(const core::Project& project)
     -> crude_json::value {
   auto json = crude_json::value{};
+  json["version"] =
+      static_cast<crude_json::number>(Versifier::GetCurrentVersion());
   json["settings"] = SettingsSerializer::WriteToJson(project.GetSettings());
 
   ContainerSerializer::WriteToJson(

@@ -7,8 +7,11 @@
 #include "core_i_node.h"
 #include "coreui_family.h"
 #include "coreui_i_node_traits.h"
+#include "cpp_assert.h"
 #include "draw_family_groups_menu.h"
 #include "draw_native_facade.h"
+#include "flow_algorithms.h"
+#include "flow_tree_traversal.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
@@ -51,6 +54,16 @@ void NodePopup::Draw(coreui::Diagram& diagram) {
     for (const auto node_id : selected_nodes) {
       diagram.DeleteNodeWithLinks(node_id);
     }
+  }
+
+  ImGui::Separator();
+
+  if (ImGui::MenuItem("Tree Select")) {
+    diagram.TreeSelect(selected_nodes);
+  }
+
+  if (ImGui::MenuItem("Tree Arrange")) {
+    diagram.TreeArrange(selected_nodes);
   }
 
   if (selected_nodes.size() > 1) {

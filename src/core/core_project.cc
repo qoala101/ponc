@@ -5,16 +5,21 @@
 #include <cstdio>
 #include <iostream>
 #include <iterator>
+#include <stack>
 #include <string>
 #include <vector>
 
 #include "core_diagram.h"
 #include "core_id_generator.h"
+#include "core_id_value.h"
+#include "cpp_assert.h"
+#include "flow_tree_traversal.h"
+#include "imgui_node_editor.h"
 
 namespace vh::ponc::core {
 ///
 auto Project::FindMaxId() const {
-  auto max_id = uintptr_t{1};
+  auto max_id = UnspecifiedIdValue{1};
 
   for (const auto& family : families_) {
     max_id = std::max(family->GetId().Get(), max_id);
@@ -39,30 +44,41 @@ auto Project::FindMaxId() const {
 
 ///
 auto Project::IsEmpty(const Project& project) -> bool {
-  const auto& diagrams = project.GetDiagrams();
-
-  return std::all_of(diagrams.begin(), diagrams.end(), [](const auto& diagram) {
-    return diagram.GetNodes().empty() && diagram.GetLinks().empty();
-  });
+  return std::all_of(project.diagrams_.begin(), project.diagrams_.end(),
+                     [](const auto& diagram) {
+                       return diagram.GetNodes().empty() &&
+                              diagram.GetLinks().empty();
+                     });
 }
 
 ///
-Project::Project(const Settings& settings,
+auto Project::FindFamily(const Project& project, core::FamilyId family_id)
+    -> IFamily& {
+  const auto family = std::find_if(
+      project.families_.begin(), project.families_.end(),
+      [family_id](const auto& family) { return family->GetId() == family_id; });
+
+  Expects(family != project.families_.end());
+  return **family;
+}
+
+///
+Project::Project(Settings settings,
                  std::vector<std::unique_ptr<IFamily>> families,
                  std::vector<Diagram> diagrams)
-    : settings_{settings},
+    : settings_{std::move(settings)},
       families_{std::move(families)},
       diagrams_{std::move(diagrams)},
       id_generator_{FindMaxId() + 1} {}
 
 ///
-auto Project::GetIdGenerator() const -> const IdGenerator& {
+auto Project::GetSettings() const -> const Settings& {
   // NOLINTNEXTLINE(*-const-cast)
-  return const_cast<Project*>(this)->GetIdGenerator();
+  return const_cast<Project*>(this)->GetSettings();
 }
 
 ///
-auto Project::GetIdGenerator() -> IdGenerator& { return id_generator_; }
+auto Project::GetSettings() -> Settings& { return settings_; }
 
 ///
 auto Project::GetFamilies() const
@@ -80,11 +96,22 @@ auto Project::GetDiagrams() const -> const std::vector<Diagram>& {
 auto Project::GetDiagrams() -> std::vector<Diagram>& { return diagrams_; }
 
 ///
-auto Project::GetSettings() const -> const Settings& {
-  // NOLINTNEXTLINE(*-const-cast)
-  return const_cast<Project*>(this)->GetSettings();
+auto Project::EmplaceDiagram(Diagram diagram) -> Diagram& {
+  return diagrams_.emplace_back(std::move(diagram));
 }
 
 ///
-auto Project::GetSettings() -> Settings& { return settings_; }
+void Project::DeleteDiagram(int index) {
+  Expects(static_cast<int>(diagrams_.size()) > index);
+  diagrams_.erase(diagrams_.begin() + index);
+}
+
+///
+auto Project::GetIdGenerator() const -> const IdGenerator& {
+  // NOLINTNEXTLINE(*-const-cast)
+  return const_cast<Project*>(this)->GetIdGenerator();
+}
+
+///
+auto Project::GetIdGenerator() -> IdGenerator& { return id_generator_; }
 }  // namespace vh::ponc::core

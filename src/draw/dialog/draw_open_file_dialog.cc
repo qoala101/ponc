@@ -7,7 +7,6 @@ namespace vh::ponc::draw {
 OpenFileDialog::OpenFileDialog()
     : IFileDialog{[]() {
         auto dialog = ImGui::FileBrowser{ImGuiFileBrowserFlags_CloseOnEsc};
-        dialog.SetTitle("Open Project JSON");
         dialog.SetTypeFilters({".json"});
         return dialog;
       }()},
@@ -37,5 +36,10 @@ void OpenFileDialog::Draw(const Callbacks &callbacks,
       {.accepted = [&callbacks, &selected_file_path = selected_file_path_]() {
         callbacks.file_selected(std::move(selected_file_path));
       }});
+}
+
+///
+auto OpenFileDialog::GetTitle() const -> std::string {
+  return "Open Project JSON";
 }
 }  // namespace vh::ponc::draw

@@ -3,11 +3,18 @@
 
 #include <imgui_node_editor.h>
 
+#include <vector>
+
+#include "core_id_ptr.h"
+#include "core_id_value.h"
+
 namespace ne = ax::NodeEditor;
 
 namespace vh::ponc::core {
 ///
 struct Link {
+  ///
+  static auto GetIds(Link &link) -> std::vector<IdPtr>;
   ///
   static auto HasPin(const Link &link, ne::PinId pin_id) -> bool;
   ///

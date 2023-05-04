@@ -4,11 +4,15 @@ namespace vh::ponc::draw {
 ///
 SaveAsFileDialog::SaveAsFileDialog()
     : IFileDialog{[]() {
-        auto dialog =
-            ImGui::FileBrowser{ImGuiFileBrowserFlags_EnterNewFilename |
-                               ImGuiFileBrowserFlags_CreateNewDir |
-                               ImGuiFileBrowserFlags_CloseOnEsc};
-        dialog.SetTitle("Save Project As JSON");
-        return dialog;
+        // NOLINTBEGIN(*-signed-bitwise)
+        return ImGui::FileBrowser{ImGuiFileBrowserFlags_EnterNewFilename |
+                                  ImGuiFileBrowserFlags_CreateNewDir |
+                                  ImGuiFileBrowserFlags_CloseOnEsc};
+        // NOLINTEND(*-signed-bitwise)
       }()} {}
+
+///
+auto SaveAsFileDialog::GetTitle() const -> std::string {
+  return "Save Project As JSON";
+}
 }  // namespace vh::ponc::draw

@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "coreui_flow_tree.h"
+#include "coreui_flow_tree_node.h"
 #include "draw_i_view.h"
 
 namespace vh::ponc::draw {
@@ -14,7 +14,7 @@ class FlowTreeView : public IView {
   auto GetLabel() const -> std::string override;
 
   ///
-  void Draw(const coreui::FlowTree& flow_tree);
+  void Draw(const std::vector<coreui::TreeNode>& flow_trees);
 };
 }  // namespace vh::ponc::draw
 

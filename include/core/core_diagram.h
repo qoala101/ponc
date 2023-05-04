@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "core_i_node.h"
+#include "core_id_ptr.h"
 #include "core_link.h"
 #include "cpp_safe_ptr.h"
 #include "imgui_node_editor.h"
@@ -14,9 +15,12 @@ namespace vh::ponc::core {
 class Diagram {
  public:
   ///
-  explicit Diagram(std::vector<std::unique_ptr<INode>> nodes = {},
+  explicit Diagram(std::string name = "Diagram",
+                   std::vector<std::unique_ptr<INode>> nodes = {},
                    std::vector<Link> links = {});
 
+  ///
+  static auto GetIds(Diagram &diagram) -> std::vector<IdPtr>;
   ///
   static auto FindNode(const Diagram &diagram, ne::NodeId node_id) -> INode &;
   ///
@@ -32,6 +36,10 @@ class Diagram {
   ///
   static auto HasLink(const Diagram &diagram, ne::PinId pin_id) -> bool;
 
+  ///
+  auto GetName() const -> const std::string &;
+  ///
+  void SetName(std::string name);
   ///
   auto GetNodes() const -> const std::vector<std::unique_ptr<INode>> &;
   ///
@@ -49,6 +57,8 @@ class Diagram {
   ///
   auto GetLinksImpl() -> std::vector<Link> &;
 
+  ///
+  std::string name_{};
   ///
   std::vector<std::unique_ptr<INode>> nodes_{};
   ///

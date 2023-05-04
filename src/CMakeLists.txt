@@ -16,6 +16,11 @@ add_executable(ponc
   app/app_app.cc
   app/app_impl.cc
 
+  calc/calc_calculation_task.cc
+  calc/calc_calculator.cc
+  calc/calc_resolution.cc
+  calc/calc_tree_node.cc
+
   core/core_diagram.cc
   core/core_free_pin_family_group.cc
   core/core_gradient.cc
@@ -23,6 +28,7 @@ add_executable(ponc
   core/core_i_family.cc
   core/core_i_node.cc
   core/core_id_generator.cc
+  core/core_id_ptr.cc
   core/core_link.cc
   core/core_pin.cc
   core/core_project.cc
@@ -38,6 +44,8 @@ add_executable(ponc
   coreui/traits/coreui_i_node_traits.cc
   coreui/traits/coreui_i_pin_traits.cc
 
+  coreui/coreui_calculator.cc
+  coreui/coreui_cloner.cc
   coreui/coreui_diagram.cc
   coreui/coreui_family.cc
   coreui/coreui_linker.cc
@@ -69,10 +77,14 @@ add_executable(ponc
   draw/dialog/draw_question_dialog.cc
   draw/dialog/draw_save_as_file_dialog.cc
 
+  draw/view/draw_calculator_view.cc
+  draw/view/draw_diagrams_view.cc
+  draw/view/draw_disable_if.cc
   draw/view/draw_flow_tree_view.cc
   draw/view/draw_i_view.cc
   draw/view/draw_node_view.cc
   draw/view/draw_nodes_view.cc
+  draw/view/draw_settings_table_row.cc
   draw/view/draw_settings_view.cc
   draw/view/draw_tree_node.cc
 
@@ -92,6 +104,7 @@ add_executable(ponc
   json/json_link_serializer.cc
   json/json_project_serializer.cc
   json/json_settings_serializer.cc
+  json/json_versifier.cc
 
   resource/node_header_texture.png
 
@@ -102,6 +115,7 @@ target_include_directories(ponc
   PRIVATE
   ${PROJECT_SOURCE_DIR}/include/app
   ${PROJECT_SOURCE_DIR}/include/app/family_group
+  ${PROJECT_SOURCE_DIR}/include/calc
   ${PROJECT_SOURCE_DIR}/include/core
   ${PROJECT_SOURCE_DIR}/include/coreui
   ${PROJECT_SOURCE_DIR}/include/coreui/event

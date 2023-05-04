@@ -1,6 +1,7 @@
 #ifndef VH_PONC_JSON_ID_SERIALIZER_H_
 #define VH_PONC_JSON_ID_SERIALIZER_H_
 
+#include "core_id_value.h"
 #include "cpp_no_instances.h"
 #include "crude_json.h"
 
@@ -10,7 +11,8 @@ struct IdSerializer : public cpp::NoInstances {
   ///
   template <typename Id>
   static auto ParseFromJson(const crude_json::value &json) {
-    return Id{static_cast<uintptr_t>(json.get<crude_json::number>())};
+    return Id{
+        static_cast<core::UnspecifiedIdValue>(json.get<crude_json::number>())};
   }
 
   ///

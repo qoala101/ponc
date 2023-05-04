@@ -7,9 +7,12 @@
 #include <unordered_set>
 #include <vector>
 
-#include "coreui_event_loop.h"
+#include "core_i_node.h"
+#include "core_id_value.h"
+#include "core_settings.h"
 #include "coreui_linker.h"
 #include "cpp_safe_ptr.h"
+#include "flow_tree_node.h"
 #include "imgui.h"
 
 namespace vh::ponc::coreui {
@@ -17,16 +20,24 @@ namespace vh::ponc::coreui {
 class NodeMover {
  public:
   ///
-  explicit NodeMover(cpp::SafePtr<Diagram> parent_diagram);
+  NodeMover(cpp::SafePtr<Diagram> parent_diagram,
+            cpp::SafePtr<core::Settings> settings);
 
   ///
   void OnFrame();
   ///
-  void MoveNode(ne::NodeId node_id);
+  void MoveNodeTo(ne::NodeId node_id, const ImVec2 &pos);
   ///
-  void MoveNodesTo(const std::vector<ne::NodeId> &node_ids, ImVec2 pos);
+  void ArrangeVerticallyAt(const std::vector<ne::NodeId> &node_ids,
+                           const ImVec2 &pos);
   ///
   void MovePinTo(ne::PinId pin_id, const ImVec2 &pos);
+  ///
+  void ArrangeAsTree(const flow::TreeNode &tree_node);
+  ///
+  void ArrangeAsTrees(const std::vector<flow::TreeNode> &tree_nodes);
+  ///
+  void ArrangeAsNewTrees(const std::vector<flow::TreeNode> &tree_nodes);
   ///
   auto GetNodeSize(ne::NodeId node_id) const -> const ImVec2 &;
   ///
@@ -38,20 +49,58 @@ class NodeMover {
 
  private:
   ///
-  void MoveNewNodes();
+  void MoveNodePinPoses(const core::INode &node, const ImVec2 &pos);
+  ///
+  void MoveTreeTo(const flow::TreeNode &tree_node, const ImVec2 &pos);
+  ///
+  void MoveChildTreesTo(const flow::TreeNode &tree_node, const ImVec2 &pos);
+  ///
+  void MarkToMove(ne::NodeId node_id);
+  ///
+  void MarkNewNodesToMove();
   ///
   void ApplyMoves() const;
+  ///
+  auto GetNodePos(ne::NodeId node_id) const;
+  ///
+  auto GetNodeRect(ne::NodeId node_id) const;
+  ///
+  auto GetTreeRect(const flow::TreeNode &tree_node) const;
+  ///
+  auto GetOtherPinPos(ne::PinId pin_id) const -> const ImVec2 &;
+  ///
+  auto DoNodesNeedSpacing(ne::NodeId first_node, ne::NodeId second_node) const;
+  ///
+  auto DoesChildNeedSpacing(
+      const flow::TreeNode &tree_node,
+      decltype(flow::TreeNode::child_nodes)::const_iterator child_node) const;
+  ///
+  auto GetTakenPinsRect(const std::vector<flow::TreeNode> &tree_nodes) const;
+  ///
+  auto CalculateArrangedChildrenY(
+      const std::vector<flow::TreeNode> &parent_trees) const;
+  ///
+  void ArrangeAsTreeVisitNode(const flow::TreeNode &tree_node);
+  ///
+  void ArrangeAsTreeImpl(const flow::TreeNode &tree_node);
+  ///
+  void ArrangeChildrenAsTrees(const std::vector<flow::TreeNode> &tree_nodes);
+  ///
+  auto TakenPinPosLess(const flow::TreeNode &left,
+                       const flow::TreeNode &right) const;
 
   ///
   cpp::SafePtr<Diagram> parent_diagram_;
   ///
+  cpp::SafePtr<core::Settings> settings_;
+  ///
   cpp::SafeOwner safe_owner_{};
   ///
-  std::unordered_set<uintptr_t> nodes_to_move_{};
+  std::unordered_set<core::IdValue<ne::NodeId>> nodes_to_move_{};
   ///
-  std::unordered_map<uintptr_t, ImVec2> node_sizes_{};
+  std::unordered_map<core::IdValue<ne::NodeId>, ImVec2> node_sizes_{};
   ///
-  std::unordered_map<uintptr_t, ImVec2> pin_poses_{};
+  std::unordered_map<core::IdValue<ne::PinId>, ImVec2> pin_poses_{};
 };
 }  // namespace vh::ponc::coreui
 

@@ -13,26 +13,43 @@
 
 namespace vh::ponc::core {
 ///
-Diagram::Diagram(std::vector<std::unique_ptr<INode>> nodes,
+Diagram::Diagram(std::string name, std::vector<std::unique_ptr<INode>> nodes,
                  std::vector<Link> links)
-    : nodes_{std::move(nodes)}, links_{std::move(links)} {}
+    : name_{std::move(name)},
+      nodes_{std::move(nodes)},
+      links_{std::move(links)} {}
+
+///
+auto Diagram::GetIds(Diagram& diagram) -> std::vector<IdPtr> {
+  auto ids = std::vector<IdPtr>{};
+
+  for (const auto& node : diagram.nodes_) {
+    const auto node_ids = node->GetIds();
+    std::copy(node_ids.begin(), node_ids.end(), std::back_inserter(ids));
+  }
+
+  for (auto& link : diagram.links_) {
+    const auto link_ids = Link::GetIds(link);
+    std::copy(link_ids.begin(), link_ids.end(), std::back_inserter(ids));
+  }
+
+  return ids;
+}
 
 ///
 auto Diagram::FindNode(const Diagram& diagram, ne::NodeId node_id) -> INode& {
-  const auto& nodes = diagram.GetNodes();
   const auto node = std::find_if(
-      nodes.begin(), nodes.end(),
+      diagram.nodes_.begin(), diagram.nodes_.end(),
       [node_id](const auto& node) { return node->GetId() == node_id; });
 
-  Expects(node != nodes.end());
+  Expects(node != diagram.nodes_.end());
   return **node;
 }
 
 ///
 auto Diagram::FindPinNode(const Diagram& diagram, ne::PinId pin_id) -> INode& {
-  const auto& nodes = diagram.GetNodes();
-  const auto pin_node =
-      std::find_if(nodes.begin(), nodes.end(), [pin_id](const auto& node) {
+  const auto pin_node = std::find_if(
+      diagram.nodes_.begin(), diagram.nodes_.end(), [pin_id](const auto& node) {
         const auto node_pins = INode::GetAllPins(*node);
 
         return std::any_of(node_pins.begin(), node_pins.end(),
@@ -41,18 +58,17 @@ auto Diagram::FindPinNode(const Diagram& diagram, ne::PinId pin_id) -> INode& {
                            });
       });
 
-  Expects(pin_node != nodes.end());
+  Expects(pin_node != diagram.nodes_.end());
   return **pin_node;
 }
 
 ///
 auto Diagram::FindLink(Diagram& diagram, ne::LinkId link_id) -> Link& {
-  auto& links = diagram.GetLinksImpl();
   const auto link =
-      std::find_if(links.begin(), links.end(),
+      std::find_if(diagram.links_.begin(), diagram.links_.end(),
                    [link_id](const auto& link) { return link.id == link_id; });
 
-  Expects(link != links.end());
+  Expects(link != diagram.links_.end());
   return *link;
 }
 
@@ -66,12 +82,11 @@ auto Diagram::FindPinLink(const Diagram& diagram, ne::PinId pin_id)
 ///
 auto Diagram::FindPinLink(Diagram& diagram, ne::PinId pin_id)
     -> std::optional<Link*> {
-  auto& links = diagram.GetLinksImpl();
   const auto pin_link = std::find_if(
-      links.begin(), links.end(),
+      diagram.links_.begin(), diagram.links_.end(),
       [pin_id](const auto& link) { return Link::HasPin(link, pin_id); });
 
-  if (pin_link == links.end()) {
+  if (pin_link == diagram.links_.end()) {
     return std::nullopt;
   }
 
@@ -82,6 +97,12 @@ auto Diagram::FindPinLink(Diagram& diagram, ne::PinId pin_id)
 auto Diagram::HasLink(const Diagram& diagram, ne::PinId pin_id) -> bool {
   return FindPinLink(diagram, pin_id).has_value();
 }
+
+///
+auto Diagram::GetName() const -> const std::string& { return name_; }
+
+///
+void Diagram::SetName(std::string name) { name_ = std::move(name); }
 
 ///
 auto Diagram::GetNodes() const -> const std::vector<std::unique_ptr<INode>>& {

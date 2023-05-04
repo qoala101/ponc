@@ -3,6 +3,7 @@
 #include <imgui_node_editor.h>
 
 #include <algorithm>
+#include <iterator>
 #include <optional>
 #include <ranges>
 #include <vector>
@@ -14,15 +15,13 @@ namespace vh::ponc::core {
 auto INode::GetAllPins(const INode& node)
     -> std::vector<std::pair<ne::PinId, ne::PinKind>> {
   auto pins = std::vector<std::pair<ne::PinId, ne::PinKind>>{};
+  pins.reserve(node.output_pin_ids_.size() + 1);
 
-  const auto& output_pins = node.GetOutputPinIds();
-  pins.reserve(output_pins.size() + 1);
-
-  if (const auto& input_pin_id = node.GetInputPinId()) {
-    pins.emplace_back(*input_pin_id, ne::PinKind::Input);
+  if (node.input_pin_id_.has_value()) {
+    pins.emplace_back(*node.input_pin_id_, ne::PinKind::Input);
   }
 
-  std::transform(output_pins.begin(), output_pins.end(),
+  std::transform(node.output_pin_ids_.begin(), node.output_pin_ids_.end(),
                  std::back_inserter(pins), [](const auto pin_id) {
                    return std::pair{pin_id, ne::PinKind::Output};
                  });
@@ -32,9 +31,7 @@ auto INode::GetAllPins(const INode& node)
 
 ///
 auto INode::GetPinKind(const INode& node, ne::PinId pin_id) -> ne::PinKind {
-  const auto& input_pin_id = node.GetInputPinId();
-
-  if (input_pin_id.has_value() && (*input_pin_id == pin_id)) {
+  if (node.input_pin_id_.has_value() && (*node.input_pin_id_ == pin_id)) {
     return ne::PinKind::Input;
   }
 
@@ -53,14 +50,14 @@ auto INode::GetFirstPinOfKind(const INode& node, ne::PinKind pin_kind)
 auto INode::FindFirstPinOfKind(const INode& node, ne::PinKind pin_kind)
     -> std::optional<ne::PinId> {
   if (pin_kind == ne::PinKind::Input) {
-    if (const auto& input_pin = node.GetInputPinId()) {
-      return *input_pin;
+    if (node.input_pin_id_.has_value()) {
+      return *node.input_pin_id_;
     }
 
     return std::nullopt;
   }
 
-  const auto& output_pins = node.GetOutputPinIds();
+  const auto& output_pins = node.output_pin_ids_;
 
   if (output_pins.empty()) {
     return std::nullopt;
@@ -71,6 +68,21 @@ auto INode::FindFirstPinOfKind(const INode& node, ne::PinKind pin_kind)
 
 ///
 auto INode::GetId() const -> ne::NodeId { return id_; }
+
+///
+auto INode::GetIds() -> std::vector<IdPtr> {
+  auto ids = std::vector<IdPtr>{&id_};
+  ids.reserve(output_pin_ids_.size() + 2);
+
+  if (input_pin_id_.has_value()) {
+    ids.emplace_back(&*input_pin_id_);
+  }
+
+  std::transform(output_pin_ids_.begin(), output_pin_ids_.end(),
+                 std::back_inserter(ids), [](auto& pin_id) { return &pin_id; });
+
+  return ids;
+}
 
 ///
 auto INode::GetFamilyId() const -> FamilyId { return family_id_; }
@@ -99,9 +111,12 @@ auto INode::GetInitialFlow() const -> flow::NodeFlow {
     initial_flow.input_pin_flow.emplace(input_pin_id_->Get(), 0);
   }
 
-  for (const auto pin_id : output_pin_ids_) {
-    initial_flow.output_pin_flows.emplace(pin_id, 0);
-  }
+  std::transform(output_pin_ids_.begin(), output_pin_ids_.end(),
+                 std::inserter(initial_flow.output_pin_flows,
+                               initial_flow.output_pin_flows.begin()),
+                 [](const auto pin_id) {
+                   return std::pair{pin_id.Get(), 0};
+                 });
 
   SetInitialFlowValues(initial_flow);
   return initial_flow;

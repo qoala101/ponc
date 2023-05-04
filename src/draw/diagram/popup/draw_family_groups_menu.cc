@@ -2,15 +2,18 @@
 
 #include <unordered_set>
 
+#include "core_i_family.h"
+#include "core_id_value.h"
+
 namespace vh::ponc::draw {
 ///
 auto FamilyGroupsMenu::GetDisabledFamilies(
     const std::vector<coreui::Family>& families, const Callbacks& callbacks) {
   if (!callbacks.is_family_enabled.has_value()) {
-    return std::unordered_set<uintptr_t>{};
+    return std::unordered_set<core::IdValue<core::FamilyId>>{};
   }
 
-  auto disabled_families = std::unordered_set<uintptr_t>{};
+  auto disabled_families = std::unordered_set<core::IdValue<core::FamilyId>>{};
 
   for (const auto& family : families) {
     const auto& core_family = family.GetFamily();

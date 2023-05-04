@@ -4,6 +4,11 @@
 
 namespace vh::ponc::core {
 ///
+auto Link::GetIds(Link &link) -> std::vector<IdPtr> {
+  return {&link.id, &link.start_pin_id, &link.end_pin_id};
+}
+
+///
 auto Link::HasPin(const Link &link, ne::PinId pin_id) -> bool {
   return (pin_id == link.start_pin_id) || (pin_id == link.end_pin_id);
 }

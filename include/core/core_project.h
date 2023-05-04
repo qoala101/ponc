@@ -12,10 +12,12 @@ class Project {
  public:
   ///
   static auto IsEmpty(const Project &project) -> bool;
+  ///
+  static auto FindFamily(const Project &project, core::FamilyId family_id)
+      -> IFamily &;
 
   ///
-  Project(const Settings &settings,
-          std::vector<std::unique_ptr<IFamily>> families,
+  Project(Settings settings, std::vector<std::unique_ptr<IFamily>> families,
           std::vector<Diagram> diagrams);
 
   ///
@@ -28,6 +30,10 @@ class Project {
   auto GetDiagrams() const -> const std::vector<Diagram> &;
   ///
   auto GetDiagrams() -> std::vector<Diagram> &;
+  ///
+  auto EmplaceDiagram(Diagram diagram) -> Diagram &;
+  ///
+  void DeleteDiagram(int index);
   ///
   auto GetIdGenerator() const -> const IdGenerator &;
   ///

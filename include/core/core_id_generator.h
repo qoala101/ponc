@@ -7,13 +7,14 @@
 #include <vector>
 
 #include "core_concepts.h"
+#include "core_id_value.h"
 
 namespace vh::ponc::core {
 ///
 class IdGenerator {
  public:
   ///
-  explicit IdGenerator(uintptr_t next_id = 1);
+  explicit IdGenerator(UnspecifiedIdValue next_id = 1);
 
   ///
   template <Id T>
@@ -30,11 +31,14 @@ class IdGenerator {
   }
 
   ///
+  auto Generate() { return next_id_++; }
+
+  ///
   auto GetNextId() const { return next_id_; }
 
  private:
   ///
-  uintptr_t next_id_{};
+  UnspecifiedIdValue next_id_{};
 };
 }  // namespace vh::ponc::core
 

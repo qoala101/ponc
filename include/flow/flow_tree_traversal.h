@@ -1,17 +1,25 @@
 #ifndef VH_PONC_FLOW_TREE_TRAVERSAL_H_
 #define VH_PONC_FLOW_TREE_TRAVERSAL_H_
 
-#include "flow_tree.h"
+#include <queue>
+
+#include "flow_tree_node.h"
+#include "imgui_node_editor.h"
 
 namespace vh::ponc::flow {
+namespace detail {
 ///
-struct FindById {
-  ///
-  auto operator()(const TreeNode &tree_node) const -> bool;
-
-  ///
-  ne::NodeId node_id{};
-};
+void TraverseBreadthFirstImpl(
+    std::queue<const TreeNode *> &queue,
+    const std::invocable<const TreeNode &> auto &visitor) {
+  while (!queue.empty()) {
+    for (const auto &child : queue.front()->child_nodes) {
+      visitor(child);
+      queue.emplace(&child.second);
+    }
+  }
+}
+}  // namespace detail
 
 ///
 void TraverseDepthFirst(
@@ -26,6 +34,15 @@ void TraverseDepthFirst(
   }
 
   visitor_after_children(tree_node);
+}
+
+///
+void TraverseBreadthFirst(
+    const TreeNode &tree_node,
+    const std::invocable<const TreeNode &> auto &visitor) {
+  auto queue = std::queue<const TreeNode *>{};
+  queue.emplace(&tree_node);
+  TraverseBreadthFirstImpl(queue, visitor);
 }
 
 ///
@@ -46,10 +63,14 @@ auto FindTreeNode(const TreeNode &tree_node,
 }
 
 ///
-auto FindTreeNode(const FlowTree &tree,
+auto FindTreeNode(const TreeNode &tree_node, ne::NodeId node_id)
+    -> const TreeNode &;
+
+///
+auto FindTreeNode(const std::vector<TreeNode> &flow_trees,
                   const std::invocable<const TreeNode &> auto &predicate)
     -> std::optional<const TreeNode *> {
-  for (const auto &root : tree.root_nodes) {
+  for (const auto &root : flow_trees) {
     if (const auto found_node = FindTreeNode(root, predicate)) {
       return found_node;
     }
@@ -57,6 +78,10 @@ auto FindTreeNode(const FlowTree &tree,
 
   return std::nullopt;
 }
+
+///
+auto FindTreeNode(const std::vector<TreeNode> &flow_trees, ne::NodeId node_id)
+    -> const TreeNode &;
 }  // namespace vh::ponc::flow
 
 #endif  // VH_PONC_FLOW_TREE_TRAVERSAL_H_

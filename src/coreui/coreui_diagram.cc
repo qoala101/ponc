@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stack>
 
-#include "coreui_flow_tree.h"
+#include "coreui_flow_tree_node.h"
 #include "coreui_node.h"
 #include "flow_tree_traversal.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -35,7 +35,7 @@
 #include "cpp_share.h"
 #include "flow_algorithms.h"
 #include "flow_node_flow.h"
-#include "flow_tree.h"
+#include "flow_tree_node.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
@@ -63,20 +63,25 @@ Diagram::Diagram(cpp::SafePtr<Project> parent_project,
                  cpp::SafePtr<core::Diagram> diagram)
     : parent_project_{std::move(parent_project)},
       diagram_{std::move(diagram)},
-      node_mover_{safe_owner_.MakeSafe(this)},
+      node_mover_{
+          safe_owner_.MakeSafe(this),
+          safe_owner_.MakeSafe(&parent_project_->GetProject().GetSettings())},
       linker_{safe_owner_.MakeSafe(this)} {}
 
 ///
 void Diagram::OnFrame() {
   node_mover_.OnFrame();
 
-  const auto flow_tree = flow::BuildFlowTree(*diagram_, safe_owner_);
-  const auto node_flows = flow::CalculateNodeFlows(flow_tree);
+  const auto flow_trees = flow::BuildFlowTrees(*diagram_);
+  const auto node_flows = flow::CalculateNodeFlows(
+      flow_trees, [&diagram = *diagram_](const auto node_id) {
+        return core::Diagram::FindNode(diagram, node_id).GetInitialFlow();
+      });
 
   UpdateLinks(node_flows);
   UpdateNodes(node_flows);
   UpdateFamilyGroups();
-  UpdateFlowTree(flow_tree);
+  UpdateFlowTrees(flow_trees);
 }
 
 ///
@@ -117,9 +122,8 @@ auto Diagram::GetNodes() -> std::vector<Node>& { return nodes_; }
 ///
 auto Diagram::AddNode(std::unique_ptr<core::INode> node) -> Event& {
   return parent_project_->GetEventLoop().PostEvent(
-      [safe_this = safe_owner_.MakeSafe(this),
-       node = cpp::Share(std::move(node))]() {
-        safe_this->diagram_->EmplaceNode(std::move(*node));
+      [diagram = diagram_, node = cpp::Share(std::move(node))]() {
+        diagram->EmplaceNode(std::move(*node));
       });
 }
 
@@ -202,6 +206,38 @@ auto Diagram::DeleteNodeWithLinks(ne::NodeId node_id) const -> Event& {
 
         diagram->DeleteNode(node_id);
       });
+}
+
+///
+void Diagram::TreeSelect(const std::vector<ne::NodeId>& node_ids) {
+  if (node_ids.empty()) {
+    return;
+  }
+
+  const auto flow_trees = flow::BuildFlowTrees(*diagram_);
+
+  for (const auto node_id : node_ids) {
+    const auto& tree_node = flow::FindTreeNode(flow_trees, node_id);
+
+    flow::TraverseDepthFirst(
+        tree_node,
+        [](const auto& tree_node) { ne::SelectNode(tree_node.node_id, true); },
+        [](const auto&) {});
+  }
+}
+
+///
+void Diagram::TreeArrange(const std::vector<ne::NodeId>& node_ids) {
+  if (node_ids.empty()) {
+    return;
+  }
+
+  const auto flow_trees = flow::BuildFlowTrees(*diagram_);
+
+  for (const auto node_id : node_ids) {
+    const auto& tree_node = flow::FindTreeNode(flow_trees, node_id);
+    node_mover_.ArrangeAsTree(tree_node);
+  }
 }
 
 ///
@@ -316,7 +352,9 @@ auto Diagram::DeleteLink(ne::LinkId link_id) const -> Event& {
 }
 
 ///
-auto Diagram::GetFlowTree() const -> const FlowTree& { return flow_tree_; }
+auto Diagram::GetFlowTrees() const -> const std::vector<TreeNode>& {
+  return flow_trees_;
+}
 
 ///
 auto Diagram::GetFlowColor(float flow) const {
@@ -584,19 +622,23 @@ void Diagram::UpdateTreeNode(TreeNode& tree_node) {
 }
 
 ///
-void Diagram::UpdateFlowTree(const flow::FlowTree& core_tree) {
-  flow_tree_.root_nodes.clear();
+void Diagram::UpdateFlowTrees(const std::vector<flow::TreeNode>& core_trees) {
+  flow_trees_.clear();
+
+  if (core_trees.empty()) {
+    return;
+  }
 
   auto parent_stack = std::stack<TreeNode*>{};
 
-  for (const auto& root_node : core_tree.root_nodes) {
+  for (const auto& root_node : core_trees) {
     flow::TraverseDepthFirst(
         root_node,
         [this, &parent_stack](const auto& core_tree_node) {
-          auto& node = FindNode(*this, core_tree_node.node->GetId());
+          auto& node = FindNode(*this, core_tree_node.node_id);
           auto& tree_node =
               parent_stack.empty()
-                  ? flow_tree_.root_nodes.emplace_back(
+                  ? flow_trees_.emplace_back(
                         TreeNode{.node = safe_owner_.MakeSafe(&node)})
                   : parent_stack.top()->child_nodes.emplace_back(
                         TreeNode{.node = safe_owner_.MakeSafe(&node)});
@@ -605,7 +647,7 @@ void Diagram::UpdateFlowTree(const flow::FlowTree& core_tree) {
         [&parent_stack](const auto&) { parent_stack.pop(); });
   }
 
-  for (auto& root_node : flow_tree_.root_nodes) {
+  for (auto& root_node : flow_trees_) {
     UpdateTreeNode(root_node);
   }
 }
