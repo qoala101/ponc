@@ -141,6 +141,23 @@ auto GetChildOutputIndex(const calc::TreeNode& parent,
   Expects(child_node != parent_children.cend());
   return child_node->first;
 }
+
+///
+auto GetOutputTrees(
+    const std::vector<flow::TreeNode>& flow_trees,
+    const std::map<core::IdValue<ne::PinId>, core::IdValue<ne::NodeId>>&
+        output_root_ids) {
+  auto output_trees = std::vector<flow::TreeNode>{};
+  output_trees.reserve(output_root_ids.size());
+
+  std::transform(output_root_ids.cbegin(), output_root_ids.end(),
+                 std::back_inserter(output_trees),
+                 [&flow_trees](const auto& output_root) {
+                   return flow::FindTreeNode(flow_trees, output_root.second);
+                 });
+
+  return output_trees;
+}
 }  // namespace
 
 ///
@@ -224,22 +241,7 @@ auto Calculator::PopulateDiagram(const calc::TreeNode& calculated_tree) {
   return output_root_ids;
 }
 
-auto TEMP_FindOutputTrees(
-    const std::vector<flow::TreeNode>& flow_trees,
-    const std::map<core::IdValue<ne::PinId>, core::IdValue<ne::NodeId>>&
-        output_root_ids) {
-  auto output_trees = std::vector<flow::TreeNode>{};
-  output_trees.reserve(output_root_ids.size());
-
-  std::transform(output_root_ids.cbegin(), output_root_ids.end(),
-                 std::back_inserter(output_trees),
-                 [&flow_trees](const auto& output_root) {
-                   return flow::FindTreeNode(flow_trees, output_root.second);
-                 });
-
-  return output_trees;
-}
-
+///
 void Calculator::OnFrame() {
   if (!calculation_task_.has_value()) {
     return;
@@ -251,37 +253,7 @@ void Calculator::OnFrame() {
     return;
   }
 
-  const auto output_root_ids = PopulateDiagram(*result);
-
-  Expects(diagram_copy_.has_value());
-  auto flow_trees = flow::BuildFlowTrees(*diagram_copy_);
-  auto output_trees = TEMP_FindOutputTrees(flow_trees, output_root_ids);
-
-  Expects(diagram_copy_.has_value());
-  parent_project_->AddDiagram(std::move(*diagram_copy_))
-      .Then([project = parent_project_, flow_trees = std::move(flow_trees),
-             output_trees
-             // = std::move(output_trees)
-  ]() {
-        auto& node_mover = project->GetDiagram().GetNodeMover();
-        node_mover.ArrangeAsNewTrees(output_trees);
-      })
-      .Then([project = parent_project_,
-             output_trees = std::move(output_trees)]() {
-        for (const auto& tree_node : output_trees) {
-          flow::TraverseDepthFirst(
-              tree_node,
-              [](const auto& tree_node) {
-                ne::SelectNode(tree_node.node_id, true);
-              },
-              [](const auto&) {});
-        }
-
-        ne::NavigateToSelection();
-      });
-
-  diagram_copy_.reset();
-  calculation_task_.reset();
+  ProcessResult(*result);
 }
 
 ///
@@ -303,7 +275,10 @@ void Calculator::Calculate() {
 }
 
 ///
-void Calculator::Cancel() { calculation_task_.reset(); }
+void Calculator::Cancel() {
+  diagram_copy_.reset();
+  calculation_task_.reset();
+}
 
 ///
 auto Calculator::IsRunning() const -> bool {
@@ -314,5 +289,37 @@ auto Calculator::IsRunning() const -> bool {
 auto Calculator::GetProgress() const -> float {
   Expects(calculation_task_.has_value());
   return calculation_task_->GetProgress();
+}
+
+///
+void Calculator::ProcessResult(const calc::TreeNode& calculated_tree) {
+  Expects(diagram_copy_.has_value());
+  auto flow_trees = flow::BuildFlowTrees(*diagram_copy_);
+
+  const auto output_root_ids = PopulateDiagram(calculated_tree);
+  auto output_trees = GetOutputTrees(flow_trees, output_root_ids);
+
+  parent_project_->AddDiagram(std::move(*diagram_copy_))
+      .Then([parent_project = parent_project_, output_trees,
+             flow_trees = std::move(flow_trees)]() {
+        auto& node_mover = parent_project->GetDiagram().GetNodeMover();
+        node_mover.ArrangeAsNewTrees(output_trees);
+      })
+      .Then([parent_project = parent_project_,
+             output_trees = std::move(output_trees)]() {
+        for (const auto& tree_node : output_trees) {
+          flow::TraverseDepthFirst(
+              tree_node,
+              [](const auto& tree_node) {
+                ne::SelectNode(tree_node.node_id, true);
+              },
+              [](const auto&) {});
+        }
+
+        ne::NavigateToSelection();
+      });
+
+  diagram_copy_.reset();
+  calculation_task_.reset();
 }
 }  // namespace vh::ponc::coreui

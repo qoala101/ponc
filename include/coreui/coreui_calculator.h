@@ -32,6 +32,8 @@ class Calculator {
   auto PopulateOutput(const calc::TreeNode& output_tree, ne::PinId output_pin);
   ///
   auto PopulateDiagram(const calc::TreeNode& calculated_tree);
+  ///
+  void ProcessResult(const calc::TreeNode& calculated_tree);
 
   ///
   cpp::SafePtr<Project> parent_project_;
