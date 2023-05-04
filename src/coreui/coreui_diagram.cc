@@ -210,6 +210,10 @@ auto Diagram::DeleteNodeWithLinks(ne::NodeId node_id) const -> Event& {
 
 ///
 void Diagram::TreeSelect(const std::vector<ne::NodeId>& node_ids) {
+  if (node_ids.empty()) {
+    return;
+  }
+
   const auto flow_trees = flow::BuildFlowTrees(*diagram_);
 
   for (const auto node_id : node_ids) {
@@ -224,17 +228,15 @@ void Diagram::TreeSelect(const std::vector<ne::NodeId>& node_ids) {
 
 ///
 void Diagram::TreeArrange(const std::vector<ne::NodeId>& node_ids) {
+  if (node_ids.empty()) {
+    return;
+  }
+
   const auto flow_trees = flow::BuildFlowTrees(*diagram_);
 
   for (const auto node_id : node_ids) {
     const auto& tree_node = flow::FindTreeNode(flow_trees, node_id);
-
-    flow::TraverseDepthFirst(
-        tree_node,
-        [&node_mover = node_mover_](const auto& tree_node) {
-          node_mover.ArrangeAsTree(tree_node);
-        },
-        [](const auto&) {});
+    node_mover_.ArrangeAsTree(tree_node);
   }
 }
 
@@ -622,6 +624,10 @@ void Diagram::UpdateTreeNode(TreeNode& tree_node) {
 ///
 void Diagram::UpdateFlowTrees(const std::vector<flow::TreeNode>& core_trees) {
   flow_trees_.clear();
+
+  if (core_trees.empty()) {
+    return;
+  }
 
   auto parent_stack = std::stack<TreeNode*>{};
 

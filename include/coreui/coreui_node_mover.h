@@ -53,6 +53,8 @@ class NodeMover {
   ///
   void MoveTreeTo(const flow::TreeNode &tree_node, const ImVec2 &pos);
   ///
+  void MoveChildTreesTo(const flow::TreeNode &tree_node, const ImVec2 &pos);
+  ///
   void MarkToMove(ne::NodeId node_id);
   ///
   void MarkNewNodesToMove();
@@ -67,20 +69,25 @@ class NodeMover {
   ///
   auto GetOtherPinPos(ne::PinId pin_id) const -> const ImVec2 &;
   ///
-  auto GetTakenPinsRect(const flow::TreeNode &tree_node) const
-      -> std::optional<ImRect>;
-  ///
   auto DoNodesNeedSpacing(ne::NodeId first_node, ne::NodeId second_node) const;
   ///
   auto DoesChildNeedSpacing(
       const flow::TreeNode &tree_node,
       decltype(flow::TreeNode::child_nodes)::const_iterator child_node) const;
   ///
-  auto GetChildrenNeedingSpacing(const flow::TreeNode &tree_node) const;
+  auto GetTakenPinsRect(const std::vector<flow::TreeNode> &tree_nodes) const;
+  ///
+  auto CalculateArrangedChildrenY(
+      const std::vector<flow::TreeNode> &parent_trees) const;
   ///
   void ArrangeAsTreeVisitNode(const flow::TreeNode &tree_node);
   ///
   void ArrangeAsTreeImpl(const flow::TreeNode &tree_node);
+  ///
+  void ArrangeChildrenAsTrees(const std::vector<flow::TreeNode> &tree_nodes);
+  ///
+  auto TakenPinPosLess(const flow::TreeNode &left,
+                       const flow::TreeNode &right) const;
 
   ///
   cpp::SafePtr<Diagram> parent_diagram_;

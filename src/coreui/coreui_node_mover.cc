@@ -5,21 +5,95 @@
 #include <unordered_map>
 #include <vector>
 
-#include "core_diagram.h"
-#include "core_id_value.h"
-#include "coreui_flow_tree_node.h"
-#include "cpp_assert.h"
-#include "imgui_node_editor.h"
-#define IMGUI_DEFINE_MATH_OPERATORS
-#include "core_i_node.h"
-#include "coreui_diagram.h"
 #include "coreui_i_node_traits.h"
+#include "flow_algorithms.h"
+#include "imgui.h"
+
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include <imgui_internal.h>
+#include <imgui_node_editor.h>
+
+#include "core_diagram.h"
+#include "core_i_node.h"
+#include "core_id_value.h"
+#include "coreui_diagram.h"
 #include "coreui_node_mover.h"
+#include "cpp_assert.h"
 #include "flow_tree_node.h"
 #include "flow_tree_traversal.h"
 #include "imgui.h"
+#include "imgui_internal.h"
+#include "imgui_node_editor.h"
 
 namespace vh::ponc::coreui {
+namespace {
+///
+void TraverseOtherNodes(
+    const std::vector<flow::TreeNode>& tree_nodes,
+    const std::vector<flow::TreeNode>& skip_trees,
+    const std::invocable<const flow::TreeNode&> auto& visitor) {
+  for (const auto& tree_node : tree_nodes) {
+    auto skip_node_id = std::optional<ne::NodeId>{};
+
+    flow::TraverseDepthFirst(
+        tree_node,
+        [&skip_trees, &visitor, &skip_node_id](const auto& tree_node) {
+          if (skip_node_id.has_value()) {
+            return;
+          }
+
+          if (std::any_of(skip_trees.cbegin(), skip_trees.cend(),
+                          [&tree_node](const auto& skip_tree) {
+                            return skip_tree.node_id == tree_node.node_id;
+                          })) {
+            skip_node_id = tree_node.node_id;
+            return;
+          }
+
+          visitor(tree_node);
+        },
+        [&skip_node_id](const auto& tree_node) {
+          if (skip_node_id.has_value() &&
+              (tree_node.node_id == *skip_node_id)) {
+            skip_node_id.reset();
+          }
+        });
+  }
+}
+
+///
+auto GetParentTrees(const std::vector<flow::TreeNode>& tree_nodes,
+                    const std::vector<flow::TreeNode>& child_trees) {
+  if (child_trees.empty()) {
+    return std::vector<flow::TreeNode>{};
+  }
+
+  auto parent_trees = std::vector<flow::TreeNode>{};
+
+  TraverseOtherNodes(
+      tree_nodes, child_trees,
+      [&child_trees, &parent_trees](const auto& tree_node) {
+        auto parent_tree = flow::TreeNode{.node_id = tree_node.node_id};
+
+        for (const auto& child_node : tree_node.child_nodes) {
+          if (std::any_of(child_trees.cbegin(), child_trees.cend(),
+                          [&child_node](const auto& child_tree) {
+                            return child_tree.node_id ==
+                                   child_node.second.node_id;
+                          })) {
+            parent_tree.child_nodes.emplace(child_node);
+          }
+        }
+
+        if (!parent_tree.child_nodes.empty()) {
+          parent_trees.emplace_back(std::move(parent_tree));
+        }
+      });
+
+  return parent_trees;
+}
+}  // namespace
+
 ///
 NodeMover::NodeMover(cpp::SafePtr<Diagram> parent_diagram,
                      cpp::SafePtr<core::Settings> settings)
@@ -64,6 +138,10 @@ auto NodeMover::DoNodesNeedSpacing(ne::NodeId first_node,
 ///
 void NodeMover::ArrangeVerticallyAt(const std::vector<ne::NodeId>& node_ids,
                                     const ImVec2& pos) {
+  if (node_ids.empty()) {
+    return;
+  }
+
   auto next_node_pos = pos;
 
   for (auto node_id = node_ids.cbegin(); node_id != node_ids.end(); ++node_id) {
@@ -119,29 +197,6 @@ auto NodeMover::GetOtherPinPos(ne::PinId pin_id) const -> const ImVec2& {
 }
 
 ///
-auto NodeMover::GetTakenPinsRect(const flow::TreeNode& tree_node) const
-    -> std::optional<ImRect> {
-  if (tree_node.child_nodes.empty()) {
-    return std::nullopt;
-  }
-
-  auto rect = std::optional<ImRect>{};
-
-  for (const auto& [pin_id, child_node] : tree_node.child_nodes) {
-    const auto pin_pos = GetPinPos(pin_id);
-
-    if (rect.has_value()) {
-      rect->Add(pin_pos);
-      continue;
-    }
-
-    rect.emplace(pin_pos, pin_pos);
-  }
-
-  return rect;
-}
-
-///
 auto NodeMover::DoesChildNeedSpacing(
     const flow::TreeNode& tree_node,
     decltype(flow::TreeNode::child_nodes)::const_iterator child_node) const {
@@ -160,19 +215,66 @@ auto NodeMover::DoesChildNeedSpacing(
 }
 
 ///
-auto NodeMover::GetChildrenNeedingSpacing(
-    const flow::TreeNode& tree_node) const {
-  auto children_needing_spacing =
-      std::unordered_set<core::IdValue<ne::NodeId>>{};
+auto NodeMover::GetTakenPinsRect(
+    const std::vector<flow::TreeNode>& tree_nodes) const {
+  auto rect = std::optional<ImRect>{};
 
-  for (auto child_node = tree_node.child_nodes.cbegin();
-       child_node != tree_node.child_nodes.cend(); ++child_node) {
-    if (DoesChildNeedSpacing(tree_node, child_node)) {
-      children_needing_spacing.emplace(child_node->second.node_id);
+  for (const auto& tree_node : tree_nodes) {
+    for (const auto& [pin_id, child_node] : tree_node.child_nodes) {
+      const auto pin_pos = GetPinPos(pin_id);
+
+      if (rect.has_value()) {
+        rect->Add(pin_pos);
+        continue;
+      }
+
+      rect.emplace(pin_pos, pin_pos);
     }
   }
 
-  return children_needing_spacing;
+  return rect;
+}
+
+///
+auto NodeMover::CalculateArrangedChildrenY(
+    const std::vector<flow::TreeNode>& parent_trees) const {
+  Expects(!parent_trees.empty());
+
+  const auto& [first_output_pin, first_child] =
+      *parent_trees.front().child_nodes.cbegin();
+  const auto tree_top_to_first_input_pin_distance =
+      GetOtherPinPos(first_output_pin).y - GetTreeRect(first_child).Min.y;
+
+  const auto [last_output_pin, last_child] =
+      *std::prev(parent_trees.back().child_nodes.cend());
+  const auto last_input_pin_to_tree_bot_distance =
+      GetTreeRect(last_child).Max.y - GetOtherPinPos(last_output_pin).y;
+
+  const auto margins = tree_top_to_first_input_pin_distance +
+                       last_input_pin_to_tree_bot_distance;
+
+  const auto spacing = static_cast<float>(settings_->arrange_vertical_spacing) *
+                       static_cast<float>(parent_trees.size() - 1);
+
+  const auto child_pins_height = std::accumulate(
+      parent_trees.cbegin(), parent_trees.cend(), spacing - margins,
+      [this](const auto height, const auto& output_tree_parent) {
+        Expects(!output_tree_parent.child_nodes.empty());
+
+        const auto& [first_pin, first_child] =
+            *output_tree_parent.child_nodes.cbegin();
+        const auto [last_pin, last_child] =
+            *std::prev(output_tree_parent.child_nodes.cend());
+
+        return height + GetTreeRect(last_child).Max.y -
+               GetTreeRect(first_child).Min.y;
+      });
+
+  const auto parent_pins_rect = GetTakenPinsRect(parent_trees);
+  Expects(parent_pins_rect.has_value());
+
+  return parent_pins_rect->GetCenter().y - child_pins_height / 2 -
+         tree_top_to_first_input_pin_distance;
 }
 
 ///
@@ -183,49 +285,26 @@ void NodeMover::ArrangeAsTreeVisitNode(const flow::TreeNode& tree_node) {
     return;
   }
 
-  const auto node_rect = GetNodeRect(tree_node.node_id);
-  const auto next_child_x =
-      node_rect.Max.x +
-      static_cast<float>(settings_->arrange_horizontal_spacing);
+  auto next_child_y = 0.F;
 
-  const auto children_needing_spacing = GetChildrenNeedingSpacing(tree_node);
-  const auto vertical_spacing =
-      static_cast<float>(settings_->arrange_vertical_spacing);
+  for (auto child_node = child_nodes.cbegin(); child_node != child_nodes.cend();
+       ++child_node) {
+    MoveTreeTo(child_node->second, {0.F, next_child_y});
 
-  const auto& [first_output_pin, first_child] = *child_nodes.cbegin();
-  const auto tree_top_to_first_input_pin_distance =
-      GetOtherPinPos(first_output_pin).y - GetTreeRect(first_child).Min.y;
-
-  const auto& [last_output_pin, last_child] = *std::prev(child_nodes.cend());
-  const auto last_input_pin_to_tree_bot_distance =
-      GetTreeRect(last_child).Max.y - GetOtherPinPos(last_output_pin).y;
-
-  const auto direct_children_height = std::accumulate(
-      child_nodes.cbegin(), child_nodes.cend(),
-      vertical_spacing * static_cast<float>(children_needing_spacing.size()) -
-          tree_top_to_first_input_pin_distance -
-          last_input_pin_to_tree_bot_distance,
-      [this](const auto height, const auto& child_node) {
-        return height + GetTreeRect(child_node.second).GetHeight();
-      });
-
-  const auto taken_pins_rect = GetTakenPinsRect(tree_node);
-  Expects(taken_pins_rect.has_value());
-
-  auto next_child_y = taken_pins_rect->GetCenter().y -
-                      tree_top_to_first_input_pin_distance -
-                      direct_children_height / 2;
-
-  for (const auto& child_node : child_nodes) {
-    MoveTreeTo(child_node.second, {next_child_x, next_child_y});
-
-    const auto child_tree_rect = GetTreeRect(child_node.second);
+    const auto child_tree_rect = GetTreeRect(child_node->second);
     next_child_y += child_tree_rect.GetHeight();
 
-    if (children_needing_spacing.contains(child_node.second.node_id.Get())) {
-      next_child_y += vertical_spacing;
+    if (DoesChildNeedSpacing(tree_node, child_node)) {
+      next_child_y += static_cast<float>(settings_->arrange_vertical_spacing);
     }
   }
+
+  const auto children_x =
+      GetNodeRect(tree_node.node_id).Max.x +
+      static_cast<float>(settings_->arrange_horizontal_spacing);
+  const auto children_y = CalculateArrangedChildrenY({tree_node});
+
+  MoveChildTreesTo(tree_node, ImVec2{children_x, children_y});
 }
 
 ///
@@ -242,6 +321,10 @@ void NodeMover::ArrangeAsTree(const flow::TreeNode& tree_node) {
 
 ///
 void NodeMover::ArrangeAsTrees(const std::vector<flow::TreeNode>& tree_nodes) {
+  if (tree_nodes.empty()) {
+    return;
+  }
+
   auto last_tree_rect = std::optional<ImRect>{};
 
   for (const auto& tree_node : tree_nodes) {
@@ -261,147 +344,72 @@ void NodeMover::ArrangeAsTrees(const std::vector<flow::TreeNode>& tree_nodes) {
   }
 }
 
-void NodeMover::MoveTreesToRightOf(
-    const std::vector<flow::TreeNode>& initial_trees,
-    const std::vector<flow::TreeNode>& combined_trees,
-    const std::vector<flow::TreeNode>& output_trees) {
-  const auto& child_nodes = output_trees;
+///
+void NodeMover::ArrangeChildrenAsTrees(
+    const std::vector<flow::TreeNode>& tree_nodes) {
+  auto parent_node_poses =
+      std::unordered_map<core::IdValue<ne::NodeId>, ImVec2>{};
+  parent_node_poses.reserve(tree_nodes.size());
 
-  if (combined_trees.empty() || child_nodes.empty()) {
+  std::transform(tree_nodes.cbegin(), tree_nodes.cend(),
+                 std::inserter(parent_node_poses, parent_node_poses.begin()),
+                 [this](const auto& tree_node) {
+                   return std::pair{tree_node.node_id.Get(),
+                                    GetNodePos(tree_node.node_id)};
+                 });
+
+  ArrangeAsTrees(tree_nodes);
+
+  for (const auto& [node_id, node_pos] : parent_node_poses) {
+    MoveNodeTo(node_id, node_pos);
+  }
+}
+
+///
+auto NodeMover::TakenPinPosLess(const flow::TreeNode& left,
+                                const flow::TreeNode& right) const {
+  Expects(!left.child_nodes.empty());
+  const auto first_left_pin = left.child_nodes.cbegin()->first;
+
+  Expects(!right.child_nodes.empty());
+  const auto first_right_pin = right.child_nodes.cbegin()->first;
+
+  return GetPinPos(first_left_pin).y < GetPinPos(first_right_pin).y;
+}
+
+///
+void NodeMover::ArrangeAsNewTrees(
+    const std::vector<flow::TreeNode>& tree_nodes) {
+  if (tree_nodes.empty()) {
     return;
   }
 
-  auto rect = GetNodeRect(combined_trees[0].node_id);
-  auto old_node_poses = std::unordered_map<core::IdValue<ne::NodeId>, ImVec2>{};
-  auto output_tree_parents = std::vector<flow::TreeNode>{};
+  const auto flow_trees = flow::BuildFlowTrees(parent_diagram_->GetDiagram());
 
-  for (const auto& tree_node : combined_trees) {
-    auto traversing_moved_tree_id = std::optional<ne::NodeId>{};
+  auto parent_trees = GetParentTrees(flow_trees, tree_nodes);
+  std::stable_sort(parent_trees.begin(), parent_trees.end(),
+                   std::bind_front(&NodeMover::TakenPinPosLess, this));
 
-    flow::TraverseDepthFirst(
-        tree_node,
-        [this, &output_trees, &rect, &old_node_poses, &traversing_moved_tree_id,
-         &output_tree_parents](const auto& tree_node) {
-          auto tree_copy = tree_node;
-          tree_copy.child_nodes.clear();
+  Expects(!flow_trees.empty());
+  auto other_nodes_rect = GetNodeRect(flow_trees.front().node_id);
+  TraverseOtherNodes(flow_trees, tree_nodes,
+                     [this, &other_nodes_rect](const auto& tree_node) {
+                       other_nodes_rect.Add(GetNodeRect(tree_node.node_id));
+                     });
 
-          for (const auto& child : tree_node.child_nodes) {
-            if (std::any_of(output_trees.cbegin(), output_trees.cend(),
-                            [&child](const auto& moved_tree) {
-                              return moved_tree.node_id == child.second.node_id;
-                            })) {
-              tree_copy.child_nodes.emplace(child);
-            }
-          }
-
-          if (!tree_copy.child_nodes.empty()) {
-            output_tree_parents.emplace_back(std::move(tree_copy));
-          }
-
-          if (traversing_moved_tree_id.has_value()) {
-            return;
-          }
-
-          if (std::any_of(output_trees.cbegin(), output_trees.cend(),
-                          [&tree_node](const auto& moved_tree) {
-                            return moved_tree.node_id == tree_node.node_id;
-                          })) {
-            traversing_moved_tree_id = tree_node.node_id;
-            return;
-          }
-
-          rect.Add(GetNodeRect(tree_node.node_id));
-          old_node_poses.emplace(tree_node.node_id,
-                                 GetNodePos(tree_node.node_id));
-        },
-        [&traversing_moved_tree_id](const auto& tree_node) {
-          if (traversing_moved_tree_id.has_value() &&
-              (tree_node.node_id == *traversing_moved_tree_id)) {
-            traversing_moved_tree_id.reset();
-          }
-        });
-  }
-
-  const auto node_rect = rect;
   const auto next_child_x =
-      node_rect.Max.x +
+      other_nodes_rect.Max.x +
       static_cast<float>(settings_->arrange_horizontal_spacing);
 
-  auto comp = [this](const flow::TreeNode& left, const flow::TreeNode& right) {
-    Expects(!left.child_nodes.empty());
-    const auto first_left_pin = left.child_nodes.cbegin()->first;
+  ArrangeChildrenAsTrees(parent_trees);
+  auto next_child_y = CalculateArrangedChildrenY(parent_trees);
 
-    Expects(!right.child_nodes.empty());
-    const auto first_right_pin = right.child_nodes.cbegin()->first;
+  for (const auto& output_tree_parent : parent_trees) {
+    MoveChildTreesTo(output_tree_parent, ImVec2{next_child_x, next_child_y});
 
-    return GetPinPos(first_left_pin).y < GetPinPos(first_right_pin).y;
-  };
-
-  std::stable_sort(output_tree_parents.begin(), output_tree_parents.end(),
-                   comp);
-
-  ArrangeAsTrees(output_tree_parents);
-
-  for (const auto& [node_id, node_pos] : old_node_poses) {
-    MoveNodeTo(node_id, node_pos);
-  }
-
-  const auto vertical_spacing =
-      static_cast<float>(settings_->arrange_vertical_spacing);
-
-  const auto& [first_output_pin, first_child] =
-      *output_tree_parents.front().child_nodes.cbegin();
-  const auto tree_top_to_first_input_pin_distance =
-      GetOtherPinPos(first_output_pin).y - GetTreeRect(first_child).Min.y;
-
-  const auto [last_output_pin, last_child] =
-      *std::prev(output_tree_parents.back().child_nodes.cend());
-  const auto last_input_pin_to_tree_bot_distance =
-      GetTreeRect(last_child).Max.y - GetOtherPinPos(last_output_pin).y;
-
-  auto direct_children_height =
-      vertical_spacing * (static_cast<float>(output_tree_parents.size()) - 1) -
-      tree_top_to_first_input_pin_distance -
-      last_input_pin_to_tree_bot_distance;
-
-  for (const auto& output_tree_parent : output_tree_parents) {
     Expects(!output_tree_parent.child_nodes.empty());
-    const auto first_child = output_tree_parent.child_nodes.cbegin();
     const auto last_child = std::prev(output_tree_parent.child_nodes.cend());
-    direct_children_height += GetTreeRect(last_child->second).Max.y -
-                              GetTreeRect(first_child->second).Min.y;
-  }
 
-  auto taken_pins_rect = std::optional<ImRect>{};
-
-  for (const auto& output_tree_parent : output_tree_parents) {
-    for (const auto& [pin_id, child_node] : output_tree_parent.child_nodes) {
-      const auto pin_pos = GetPinPos(pin_id);
-
-      if (taken_pins_rect.has_value()) {
-        taken_pins_rect->Add(pin_pos);
-        continue;
-      }
-
-      taken_pins_rect.emplace(pin_pos, pin_pos);
-    }
-  }
-
-  auto next_child_y = taken_pins_rect->GetCenter().y -
-                      tree_top_to_first_input_pin_distance -
-                      direct_children_height / 2;
-
-  for (const auto& output_tree_parent : output_tree_parents) {
-    Expects(!output_tree_parent.child_nodes.empty());
-    const auto first_child = output_tree_parent.child_nodes.cbegin();
-    const auto shift = ImVec2{next_child_x, next_child_y} -
-                       GetTreeRect(first_child->second).Min;
-
-    for (const auto& [pin_id, output_tree] : output_tree_parent.child_nodes) {
-      MoveTreeTo(output_tree, GetTreeRect(output_tree).Min + shift);
-    }
-
-    const auto last_child = std::prev(output_tree_parent.child_nodes.cend());
     next_child_y = GetTreeRect(last_child->second).Max.y +
                    static_cast<float>(settings_->arrange_vertical_spacing);
   }
@@ -464,6 +472,21 @@ void NodeMover::MoveTreeTo(const flow::TreeNode& tree_node, const ImVec2& pos) {
         MoveNodeTo(tree_node.node_id, GetNodePos(tree_node.node_id) + delta);
       },
       [](const auto&) {});
+}
+
+///
+void NodeMover::MoveChildTreesTo(const flow::TreeNode& tree_node,
+                                 const ImVec2& pos) {
+  if (tree_node.child_nodes.empty()) {
+    return;
+  }
+
+  const auto first_child = tree_node.child_nodes.cbegin();
+  const auto delta = pos - GetTreeRect(first_child->second).Min;
+
+  for (const auto& [pin_id, output_tree] : tree_node.child_nodes) {
+    MoveTreeTo(output_tree, GetTreeRect(output_tree).Min + delta);
+  }
 }
 
 ///
