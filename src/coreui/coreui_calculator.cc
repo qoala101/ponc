@@ -293,10 +293,10 @@ auto Calculator::GetProgress() const -> float {
 
 ///
 void Calculator::ProcessResult(const calc::TreeNode& calculated_tree) {
+  const auto output_root_ids = PopulateDiagram(calculated_tree);
+
   Expects(diagram_copy_.has_value());
   auto flow_trees = flow::BuildFlowTrees(*diagram_copy_);
-
-  const auto output_root_ids = PopulateDiagram(calculated_tree);
   auto output_trees = GetOutputTrees(flow_trees, output_root_ids);
 
   parent_project_->AddDiagram(std::move(*diagram_copy_))
