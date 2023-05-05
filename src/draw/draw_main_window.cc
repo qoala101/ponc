@@ -5,8 +5,9 @@
 
 namespace vh::ponc::draw {
 ///
-void MainWindow::Draw(coreui::Project &project) {
+void MainWindow::Draw(coreui::Project& project) {
   diagram_editor_.Draw(project.GetDiagram());
   main_menu_bar_.Draw(project);
+  recent_log_.Draw(project.GetLog());
 }
 }  // namespace vh::ponc::draw

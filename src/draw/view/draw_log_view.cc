@@ -53,6 +53,26 @@ void AutoScrollAtBottom() {
 }  // namespace
 
 ///
+void LogView::DrawMessages(const std::vector<coreui::LogMessage>& messages,
+                           bool wrap_text) {
+  auto layout_id = 0;
+
+  for (const auto& message : messages) {
+    ImGui::BeginHorizontal(layout_id);
+    ImGui::TextUnformatted(ToString(message.time).c_str());
+    ImGui::TextColored(GetLogColor(message.level), ToString(message.level));
+
+    if (wrap_text) {
+      ImGui::TextWrapped(message.text.c_str());
+    } else {
+      ImGui::TextUnformatted(message.text.c_str());
+    }
+
+    ImGui::EndHorizontal();
+  }
+}
+
+///
 auto LogView::GetLabel() const -> std::string { return "Messages"; }
 
 ///
@@ -63,16 +83,7 @@ void LogView::Draw(const coreui::Log& log) {
     return;
   }
 
-  auto layout_id = 0;
-
-  for (const auto& message : log.GetMessages()) {
-    ImGui::BeginHorizontal(layout_id);
-    ImGui::TextUnformatted(ToString(message.time).c_str());
-    ImGui::TextColored(GetLogColor(message.level), ToString(message.level));
-    ImGui::TextUnformatted(message.text.c_str());
-    ImGui::EndHorizontal();
-  }
-
+  DrawMessages(log.GetMessages(), true);
   AutoScrollAtBottom();
 }
 }  // namespace vh::ponc::draw

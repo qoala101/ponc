@@ -250,14 +250,13 @@ auto NodeMover::CalculateArrangedChildrenY(
   const auto last_input_pin_to_tree_bot_distance =
       GetTreeRect(last_child).Max.y - GetOtherPinPos(last_output_pin).y;
 
-  const auto margins = tree_top_to_first_input_pin_distance +
+  const auto padding = tree_top_to_first_input_pin_distance +
                        last_input_pin_to_tree_bot_distance;
-
   const auto spacing = static_cast<float>(settings_->arrange_vertical_spacing) *
                        static_cast<float>(parent_trees.size() - 1);
 
   const auto child_pins_height = std::accumulate(
-      parent_trees.cbegin(), parent_trees.cend(), spacing - margins,
+      parent_trees.cbegin(), parent_trees.cend(), spacing - padding,
       [this](const auto height, const auto& output_tree_parent) {
         Expects(!output_tree_parent.child_nodes.empty());
 
