@@ -27,7 +27,8 @@ void DrawRecentLog(const coreui::Log& log, const LogView& log_view) {
   const auto window_pivot = ImVec2{0.F, 1.F};
 
   ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pivot);
-  ImGui::SetNextWindowSizeConstraints(ImVec2{-1, 0}, ImVec2{-1, 200});
+  ImGui::SetNextWindowSizeConstraints(ImVec2{0, 0},
+                                      viewport->WorkSize - padding * 2);
 
   // NOLINTBEGIN(*-signed-bitwise)
   auto window_flags = ImGuiWindowFlags_NoMove |
