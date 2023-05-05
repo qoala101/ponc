@@ -7,6 +7,7 @@
 #include "draw_calculator_view.h"
 #include "draw_diagrams_view.h"
 #include "draw_flow_tree_view.h"
+#include "draw_log_view.h"
 #include "draw_node_view.h"
 #include "draw_nodes_view.h"
 #include "draw_open_file_dialog.h"
@@ -52,6 +53,8 @@ class MainMenuBar {
   CalculatorView calculator_view_{};
   ///
   SettingsView settings_view_{};
+  ///
+  LogView log_view_{};
 };
 }  // namespace vh::ponc::draw
 

@@ -145,6 +145,9 @@ auto Project::GetTexturesHandle() -> TexturesHandle& {
 auto Project::GetCalculator() -> Calculator& { return calculator_; }
 
 ///
+auto Project::GetLog() -> Log& { return log_; }
+
+///
 auto Project::GetEventLoop() -> EventLoop& { return event_loop_; }
 
 ///

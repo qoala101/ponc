@@ -16,6 +16,7 @@
 #include "coreui_calculator.h"
 #include "coreui_diagram.h"
 #include "coreui_event_loop.h"
+#include "coreui_log.h"
 #include "coreui_textures_handle.h"
 #include "cpp_callbacks.h"
 #include "cpp_safe_ptr.h"
@@ -56,6 +57,8 @@ class Project {
   auto GetTexturesHandle() -> TexturesHandle &;
   ///
   auto GetCalculator() -> Calculator &;
+  ///
+  auto GetLog() -> Log &;
   ///
   auto GetEventLoop() -> EventLoop &;
   ///
@@ -101,6 +104,8 @@ class Project {
   std::unique_ptr<Diagram> diagram_{};
   ///
   Calculator calculator_;
+  ///
+  Log log_{};
 };
 }  // namespace vh::ponc::coreui
 

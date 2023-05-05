@@ -49,6 +49,7 @@ add_executable(ponc
   coreui/coreui_diagram.cc
   coreui/coreui_family.cc
   coreui/coreui_linker.cc
+  coreui/coreui_log.cc
   coreui/coreui_node_mover.cc
   coreui/coreui_node.cc
   coreui/coreui_project.cc
@@ -82,6 +83,7 @@ add_executable(ponc
   draw/view/draw_disable_if.cc
   draw/view/draw_flow_tree_view.cc
   draw/view/draw_i_view.cc
+  draw/view/draw_log_view.cc
   draw/view/draw_node_view.cc
   draw/view/draw_nodes_view.cc
   draw/view/draw_settings_table_row.cc
