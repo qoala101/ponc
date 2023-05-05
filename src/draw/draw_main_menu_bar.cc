@@ -68,6 +68,9 @@ void MainMenuBar::Draw(coreui::Project &project) {
 }
 
 ///
+auto MainMenuBar::GetLogView() const -> const LogView & { return log_view_; }
+
+///
 void MainMenuBar::DrawFileMenu(coreui::Project &project) {
   if (ImGui::BeginMenu("File")) {
     if (ImGui::MenuItem("New...")) {

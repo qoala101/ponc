@@ -70,6 +70,8 @@ void LogView::DrawMessages(const std::vector<coreui::LogMessage>& messages,
 
     ImGui::EndHorizontal();
   }
+
+  AutoScrollAtBottom();
 }
 
 ///
@@ -84,6 +86,5 @@ void LogView::Draw(const coreui::Log& log) {
   }
 
   DrawMessages(log.GetMessages(), true);
-  AutoScrollAtBottom();
 }
 }  // namespace vh::ponc::draw

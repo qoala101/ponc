@@ -9,7 +9,17 @@
 
 namespace vh::ponc::draw {
 ///
-void RecentLog::Draw(const coreui::Log& log) {
+void DrawRecentLog(const coreui::Log& log, const LogView& log_view) {
+  if (log_view.IsOpened()) {
+    return;
+  }
+
+  const auto messages = log.GetRecentMessages();
+
+  if (messages.empty()) {
+    return;
+  }
+
   const auto* viewport = ImGui::GetMainViewport();
   const auto padding = ImGui::GetStyle().WindowPadding * 2;
   const auto window_pos =
@@ -17,24 +27,18 @@ void RecentLog::Draw(const coreui::Log& log) {
   const auto window_pivot = ImVec2{0.F, 1.F};
 
   ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pivot);
+  ImGui::SetNextWindowSizeConstraints(ImVec2{-1, 0}, ImVec2{-1, 200});
 
   // NOLINTBEGIN(*-signed-bitwise)
-  const auto window_flags =
-      ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize |
-      ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoNav |
-      ImGuiWindowFlags_NoDecoration;
+  auto window_flags = ImGuiWindowFlags_NoMove |
+                      ImGuiWindowFlags_AlwaysAutoResize |
+                      ImGuiWindowFlags_NoSavedSettings |
+                      ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration;
+  window_flags &= ~ImGuiWindowFlags_NoScrollbar;
   // NOLINTEND(*-signed-bitwise)
 
-  if (ImGui::Begin("Recent Log", &opened_, window_flags)) {
+  if (ImGui::Begin("Recent Log", nullptr, window_flags)) {
     LogView::DrawMessages(log.GetRecentMessages(), false);
-
-    if (ImGui::BeginPopupContextWindow()) {
-      if (ImGui::MenuItem("Close")) {
-        opened_ = false;
-      }
-
-      ImGui::EndPopup();
-    }
   }
 
   ImGui::End();

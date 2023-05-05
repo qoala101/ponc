@@ -3,13 +3,9 @@
 
 #include <imgui_node_editor.h>
 
-#include <optional>
-#include <unordered_map>
-
 #include "coreui_project.h"
 #include "draw_diagram_editor.h"
 #include "draw_main_menu_bar.h"
-#include "draw_recent_log.h"
 
 namespace vh::ponc::draw {
 ///
@@ -23,8 +19,6 @@ class MainWindow {
   DiagramEditor diagram_editor_{};
   ///
   MainMenuBar main_menu_bar_{};
-  ///
-  RecentLog recent_log_{};
 };
 }  // namespace vh::ponc::draw
 

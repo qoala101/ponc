@@ -93,6 +93,7 @@ add_executable(ponc
   draw/draw_main_menu_bar.cc
   draw/draw_main_window.cc
   draw/draw_native_facade.cc
+  draw/draw_recent_log.cc
 
   flow/flow_algorithms.cc
   flow/flow_node_flow.cc

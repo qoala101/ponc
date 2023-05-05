@@ -25,12 +25,12 @@ auto Diagram::GetIds(Diagram& diagram) -> std::vector<IdPtr> {
 
   for (const auto& node : diagram.nodes_) {
     const auto node_ids = node->GetIds();
-    std::copy(node_ids.begin(), node_ids.end(), std::back_inserter(ids));
+    ids.insert(ids.end(), node_ids.begin(), node_ids.end());
   }
 
   for (auto& link : diagram.links_) {
     const auto link_ids = Link::GetIds(link);
-    std::copy(link_ids.begin(), link_ids.end(), std::back_inserter(ids));
+    ids.insert(ids.end(), link_ids.begin(), link_ids.end());
   }
 
   return ids;

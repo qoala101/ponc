@@ -1,8 +1,6 @@
 #ifndef VH_PONC_DRAW_MAIN_MENU_BAR_H_
 #define VH_PONC_DRAW_MAIN_MENU_BAR_H_
 
-#include "core_settings.h"
-#include "coreui_diagram.h"
 #include "coreui_project.h"
 #include "draw_calculator_view.h"
 #include "draw_diagrams_view.h"
@@ -24,6 +22,8 @@ class MainMenuBar {
 
   ///
   void Draw(coreui::Project &project);
+  ///
+  auto GetLogView() const -> const LogView &;
 
  private:
   ///

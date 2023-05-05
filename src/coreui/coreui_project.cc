@@ -19,6 +19,7 @@
 #include "coreui_diagram.h"
 #include "coreui_event.h"
 #include "coreui_event_loop.h"
+#include "coreui_log.h"
 #include "cpp_assert.h"
 #include "cpp_share.h"
 #include "json_project_serializer.h"
@@ -171,24 +172,29 @@ auto Project::Reset() -> Event& {
     safe_this->project_ = std::move(*new_project);
     safe_this->SetDiagramImpl(0);
     safe_this->SetFilePath({});
+
+    safe_this->log_.Write(LogLevel::kInfo, "Created new project");
   });
 }
 
 ///
 auto Project::OpenFromFile(std::filesystem::path file_path) -> Event& {
-  return event_loop_.PostEvent(
-      [safe_this = safe_owner_.MakeSafe(this),
-       family_parsers = cpp::Share(CreateFamilyParsers()),
-       file_path = std::move(file_path)]() mutable {
-        auto json = crude_json::value::load(file_path.string()).first;
-        json::Versifier::UpgradeToCurrentVersion(json);
+  return event_loop_.PostEvent([safe_this = safe_owner_.MakeSafe(this),
+                                family_parsers =
+                                    cpp::Share(CreateFamilyParsers()),
+                                file_path = std::move(file_path)]() mutable {
+    auto json = crude_json::value::load(file_path.string()).first;
+    json::Versifier::UpgradeToCurrentVersion(json);
 
-        safe_this->project_ =
-            json::ProjectSerializer::ParseFromJson(json, *family_parsers);
+    safe_this->project_ =
+        json::ProjectSerializer::ParseFromJson(json, *family_parsers);
 
-        safe_this->SetDiagramImpl(0);
-        safe_this->SetFilePath(std::move(file_path));
-      });
+    safe_this->SetDiagramImpl(0);
+    safe_this->SetFilePath(std::move(file_path));
+
+    safe_this->log_.Write(LogLevel::kInfo, "Opened project from " +
+                                               safe_this->file_path_.string());
+  });
 }
 
 ///
@@ -207,6 +213,9 @@ auto Project::SaveToFile(std::filesystem::path file_path) -> Event& {
     const auto json = json::ProjectSerializer::WriteToJson(safe_this->project_);
     json.save(file_path.string());
     safe_this->SetFilePath(std::move(file_path));
+
+    safe_this->log_.Write(LogLevel::kInfo,
+                          "Save project to " + safe_this->file_path_.string());
   });
 }
 
