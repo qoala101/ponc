@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iterator>
 #include <optional>
+#include <stack>
 #include <vector>
 
 #include "core_diagram.h"
@@ -12,11 +13,33 @@
 #include "core_pin.h"
 #include "coreui_diagram.h"
 #include "coreui_event.h"
+#include "coreui_flow_tree_node.h"
 #include "cpp_assert.h"
+#include "flow_algorithms.h"
+#include "flow_tree_traversal.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 
 namespace vh::ponc::coreui {
+namespace {
+///
+auto FindRootParent(ne::NodeId node_id,
+                    const std::vector<flow::TreeNode>& flow_trees) -> auto& {
+  const auto root_parent = std::find_if(
+      flow_trees.cbegin(), flow_trees.cend(), [node_id](const auto& tree_node) {
+        const auto found_node =
+            flow::FindTreeNode(tree_node, [node_id](const auto& tree_node) {
+              return tree_node.node_id == node_id;
+            });
+
+        return found_node.has_value();
+      });
+
+  Expects(root_parent != flow_trees.cend());
+  return *root_parent;
+}
+}  // namespace
+
 ///
 Linker::Linker(cpp::SafePtr<Diagram> parent_diagram)
     : parent_diagram_{std::move(parent_diagram)} {}
@@ -62,6 +85,8 @@ void Linker::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
     UpdateManualLinks();
   }
 
+  linking_data_->circular_pins_ = FindCircularPins();
+
   if (!hovering_over_pin.has_value()) {
     return;
   }
@@ -90,6 +115,50 @@ auto Linker::GetSourcePinData() const -> auto& {
   }
 
   return linking_data_->dragged_from_pin_data;
+}
+
+///
+auto Linker::FindCircularPins() const
+    -> std::unordered_set<core::IdValue<ne::PinId>> {
+  const auto& source_pin = GetSourcePinData();
+  const auto& diagram = parent_diagram_->GetDiagram();
+  const auto flow_trees = flow::BuildFlowTrees(diagram);
+
+  if (source_pin.kind == ne::PinKind::Output) {
+    const auto& root_parent = FindRootParent(source_pin.node_id, flow_trees);
+    const auto& source_node =
+        core::Diagram::FindNode(diagram, root_parent.node_id);
+
+    if (const auto input_pin = source_node.GetInputPinId()) {
+      return {input_pin->Get()};
+    }
+
+    return {};
+  }
+
+  Expects(linking_data_.has_value());
+  const auto is_repinning = linking_data_->repinning_data.has_value();
+  const auto& root_parent =
+      is_repinning ? flow::FindTreeNode(flow_trees, source_pin.node_id)
+                   : FindRootParent(source_pin.node_id, flow_trees);
+
+  auto circular_pins = std::unordered_set<core::IdValue<ne::PinId>>{};
+
+  flow::TraverseDepthFirst(
+      root_parent,
+      [&diagram, &circular_pins](const auto& tree_node) {
+        const auto& node = core::Diagram::FindNode(diagram, tree_node.node_id);
+        const auto& output_pins = node.GetOutputPinIds();
+
+        for (const auto pin_id : output_pins) {
+          if (!tree_node.child_nodes.contains(pin_id.Get())) {
+            circular_pins.emplace(pin_id);
+          }
+        }
+      },
+      [](const auto&) {});
+
+  return circular_pins;
 }
 
 ///
@@ -268,6 +337,10 @@ auto Linker::GetCanConnectToPinReason(ne::PinId pin_id) const
     -> std::pair<bool, std::string> {
   if (!linking_data_.has_value()) {
     return {true, {}};
+  }
+
+  if (linking_data_->circular_pins_.contains(pin_id.Get())) {
+    return {false, "Same Tree"};
   }
 
   const auto& diagram = parent_diagram_->GetDiagram();

@@ -163,8 +163,8 @@ auto CalculateNodeFlows(
     -> flow::NodeFlows {
   auto node_flows = flow::NodeFlows{};
 
-  for (const auto &node : flow_trees) {
-    CalculateNodeFlow(node_flows, node, get_initial_node_flow);
+  for (const auto &flow_tree : flow_trees) {
+    CalculateNodeFlow(node_flows, flow_tree, get_initial_node_flow);
   }
 
   return node_flows;

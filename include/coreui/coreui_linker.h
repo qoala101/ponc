@@ -8,11 +8,13 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_set>
 #include <variant>
 #include <vector>
 
 #include "core_i_family.h"
 #include "core_i_node.h"
+#include "core_id_value.h"
 #include "coreui_event.h"
 #include "coreui_family.h"
 #include "cpp_safe_ptr.h"
@@ -124,10 +126,14 @@ class Linker {
     std::optional<RepinningData> repinning_data{};
     ///
     std::optional<CreatingData> creating_data{};
+    ///
+    std::unordered_set<core::IdValue<ne::PinId>> circular_pins_{};
   };
 
   ///
   auto GetSourcePinData() const -> auto&;
+  ///
+  auto FindCircularPins() const -> std::unordered_set<core::IdValue<ne::PinId>>;
   ///
   auto GetCanConnectToPinReason(ne::PinId pin_id) const
       -> std::pair<bool, std::string>;
