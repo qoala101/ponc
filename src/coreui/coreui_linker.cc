@@ -338,10 +338,10 @@ auto Linker::GetRepinningLinkColor() const {
   }
 
   if (const auto can_link_to_hovered_pin = GetCanCreateLinkReason().first) {
-    return ImColor{1.F / 2, 1.F, 1.F / 2};
+    return ImColor{0.5F, 1.F, 0.5F};
   }
 
-  return ImColor{1.F, 1.F / 2, 1.F / 2};
+  return ImColor{1.F, 0.5F, 0.5F};
 }
 
 ///

@@ -108,8 +108,8 @@ void MainMenuBar::DrawViewMenu() {
     DrawViewMenuItem(calculator_view_);
     ImGui::Separator();
 
-    DrawViewMenuItem(settings_view_);
     DrawViewMenuItem(log_view_);
+    DrawViewMenuItem(settings_view_);
     ImGui::EndMenu();
   }
 }
@@ -156,7 +156,7 @@ void MainMenuBar::DrawViews(coreui::Project &project) {
   auto &core_project = project.GetProject();
 
   calculator_view_.Draw(project.GetCalculator(), core_project);
-  settings_view_.Draw(core_project.GetSettings());
   log_view_.Draw(project.GetLog());
+  settings_view_.Draw(core_project.GetSettings());
 }
 }  // namespace vh::ponc::draw

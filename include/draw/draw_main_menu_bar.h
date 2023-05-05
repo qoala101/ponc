@@ -52,9 +52,9 @@ class MainMenuBar {
   ///
   CalculatorView calculator_view_{};
   ///
-  SettingsView settings_view_{};
-  ///
   LogView log_view_{};
+  ///
+  SettingsView settings_view_{};
 };
 }  // namespace vh::ponc::draw
 

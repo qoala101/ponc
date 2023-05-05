@@ -17,8 +17,8 @@ void DrawNewLinkQuery(coreui::Linker &linker, float new_link_alpha) {
   const auto [can_create_link, reason] = linker.GetCanCreateLinkReason();
 
   if (!can_create_link) {
-    DrawTooltip(reason, {1.F / 3, 0.F, 0.F, 1.F * 3 / 4});
-    ne::RejectNewItem({1.F, 1.F / 2, 1.F / 2, new_link_alpha}, 4);
+    DrawTooltip(reason, {0.33F, 0.F, 0.F, 0.75F});
+    ne::RejectNewItem({1.F, 0.5F, 0.5F, new_link_alpha}, 4);
     return;
   }
 
@@ -26,9 +26,9 @@ void DrawNewLinkQuery(coreui::Linker &linker, float new_link_alpha) {
     return;
   }
 
-  DrawTooltip(reason.c_str(), {0.F, 1.F / 3, 0.F, 1.F * 3 / 4});
+  DrawTooltip(reason.c_str(), {0.F, 0.33F, 0.F, 0.75F});
 
-  if (!ne::AcceptNewItem({1.F / 2, 1.F, 1.F / 2, new_link_alpha}, 4)) {
+  if (!ne::AcceptNewItem({0.5F, 1.F, 0.5F, new_link_alpha}, 4)) {
     return;
   }
 
@@ -108,7 +108,7 @@ void Linker::Draw(coreui::Linker &linker,
 ///
 void Linker::DrawNewNodeQuery(coreui::Linker &linker,
                               const ImVec2 &new_node_pos) {
-  DrawTooltip(ConnectNodePopup::GetLabel(), {0.F, 1.F / 3, 0.F, 1.F * 3 / 4});
+  DrawTooltip(ConnectNodePopup::GetLabel(), {0.F, 0.33F, 0.F, 0.75F});
 
   if (!ne::AcceptNewItem()) {
     return;

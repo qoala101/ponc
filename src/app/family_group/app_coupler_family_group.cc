@@ -166,7 +166,7 @@ class HeaderUiTraits : public coreui::IHeaderTraits {
   auto GetColor() const -> ImColor override {
     return core::GetGradient(
         {0.5F, 0.F, 0.5F}, {1.F, 0.F, 1.F},
-        1.F - static_cast<float>(node_->GetPercentageIndex()) * 1.F / 10);
+        1.F - static_cast<float>(node_->GetPercentageIndex()) * 0.1F);
   }
 
  private:

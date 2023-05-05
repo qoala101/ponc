@@ -115,7 +115,7 @@ class HeaderUiTraits : public coreui::IHeaderTraits {
     }
 
     return core::GetGradient({0.F, 0.F, 0.5F}, {0.F, 0.F, 1.F},
-                             1.F - index * 1.F / 4);
+                             1.F - index * 0.25F);
   }
 
  private:

@@ -11,5 +11,7 @@ void Log::Write(LogLevel level, std::string text) {
 }
 
 ///
-auto Log::GetMessages() -> const std::vector<LogMessage>& { return messages_; }
+auto Log::GetMessages() const -> const std::vector<LogMessage>& {
+  return messages_;
+}
 }  // namespace vh::ponc::coreui

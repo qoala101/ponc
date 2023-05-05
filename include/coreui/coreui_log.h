@@ -25,7 +25,7 @@ class Log {
   ///
   void Write(LogLevel level, std::string text);
   ///
-  auto GetMessages() -> const std::vector<LogMessage> &;
+  auto GetMessages() const -> const std::vector<LogMessage> &;
 
  private:
   ///

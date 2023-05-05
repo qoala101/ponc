@@ -376,7 +376,7 @@ auto Diagram::LinkFrom(const core::Link& core_link,
   };
 
   const auto link_alpha =
-      linker_.IsRepiningLink(link.core_link.id) ? 1.F / 2 : 1.F;
+      linker_.IsRepiningLink(link.core_link.id) ? 0.5F : 1.F;
 
   if (!parent_project_->GetProject().GetSettings().color_flow) {
     link.color = {1.F, 1.F, 1.F, link_alpha};
@@ -461,7 +461,7 @@ auto Diagram::PinFrom(const IPinTraits& pin_traits,
   }
 
   if (!linker_.CanConnectToPin(pin_id)) {
-    pin.flow_data->color.Value.w = 1.F / 4;
+    pin.flow_data->color.Value.w = 0.25F;
   }
 
   if (std::holds_alternative<PinFlow>(pin_value)) {

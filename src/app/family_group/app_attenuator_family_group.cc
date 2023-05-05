@@ -102,7 +102,7 @@ class DropPinTraits : public coreui::IPinTraits {
 
 class HeaderUiTraits : public coreui::IHeaderTraits {
  public:
-  auto GetColor() const -> ImColor override { return {1.F / 3, 0.F, 1.F / 3}; }
+  auto GetColor() const -> ImColor override { return {0.33F, 0.F, 0.33F}; }
 };
 
 class NodeUiTraits : public coreui::INodeTraits {
