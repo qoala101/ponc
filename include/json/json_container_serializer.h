@@ -32,12 +32,10 @@ struct ContainerSerializer : public cpp::NoInstances {
                           const std::vector<Item>& items,
                           const crude_json::string& items_name,
                           const auto& item_writer) {
-    const auto items_size = items.size();
-
-    json[items_name + "_size"] = static_cast<crude_json::number>(items_size);
+    json[items_name + "_size"] = static_cast<crude_json::number>(items.size());
     auto& items_json = json[items_name];
 
-    for (auto i = 0; i < static_cast<int>(items_size); ++i) {
+    for (auto i = 0; i < static_cast<int>(items.size()); ++i) {
       items_json[i] = item_writer(items[i]);
     }
   }

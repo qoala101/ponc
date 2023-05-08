@@ -23,9 +23,7 @@ auto GetTitle(const std::vector<ne::NodeId>& nodes) {
     return std::string{};
   }
 
-  const auto num_nodes = nodes.size();
-
-  if (num_nodes == 1) {
+  if (nodes.size() == 1) {
     return "Node #" + std::to_string(nodes.front().Get());
   }
 

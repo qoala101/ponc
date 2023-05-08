@@ -26,7 +26,7 @@ class Calculator {
     ///
     core::CalculatorSettings settings{};
     ///
-    TreeNode input_node{};
+    std::vector<TreeNode> input_nodes{};
     ///
     TreeNode client_node{};
     ///
@@ -79,15 +79,15 @@ class Calculator {
   ///
   NumClients num_clients_{};
   ///
-  TreeNode input_node_;
+  std::vector<TreeNode> input_nodes_{};
   ///
-  TreeNode client_node_;
+  TreeNode client_node_{};
   ///
   std::vector<TreeNode> family_nodes_{};
   ///
   std::function<auto(const Calculator &)->StepStatus> step_callback_{};
   ///
-  std::unordered_set<OutputIndex> visited_outputs_{};
+  std::unordered_set<FlowValue> visited_outputs_{};
   ///
   std::map<FlowValue, std::map<NumClients, TreeNode>>
       best_tree_per_num_clients_per_output_{};

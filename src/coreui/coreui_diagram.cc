@@ -257,10 +257,10 @@ auto Diagram::CanReplaceNode(const core::INode& source_node,
     return false;
   }
 
-  const auto num_target_output_pins = target_node.GetOutputPinIds().size();
+  const auto& target_output_pins = target_node.GetOutputPinIds();
   const auto& source_output_pins = source_node.GetOutputPinIds();
 
-  if (num_target_output_pins >= source_output_pins.size()) {
+  if (target_output_pins.size() >= source_output_pins.size()) {
     return true;
   }
 
@@ -270,7 +270,7 @@ auto Diagram::CanReplaceNode(const core::INode& source_node,
                       return core::Diagram::HasLink(*diagram, pin_id);
                     });
 
-  return static_cast<int>(num_target_output_pins) >= num_linked_output_pins;
+  return static_cast<int>(target_output_pins.size()) >= num_linked_output_pins;
 }
 
 ///
@@ -287,7 +287,6 @@ auto Diagram::ReplaceNode(const core::INode& source_node,
   }
 
   const auto& target_pins = target_node->GetOutputPinIds();
-  const auto target_pins_end = target_pins.end();
   auto next_target_pin = target_pins.begin();
 
   for (const auto source_pin : source_node.GetOutputPinIds()) {
@@ -295,7 +294,7 @@ auto Diagram::ReplaceNode(const core::INode& source_node,
       continue;
     }
 
-    Expects(next_target_pin != target_pins_end);
+    Expects(next_target_pin != target_pins.end());
     MoveLink(source_pin, *next_target_pin);
     ++next_target_pin;
   }

@@ -11,9 +11,7 @@ auto GetTitle(const std::vector<ne::LinkId>& links) {
     return std::string{};
   }
 
-  const auto num_links = links.size();
-
-  if (num_links == 1) {
+  if (links.size() == 1) {
     return "Link #" + std::to_string(links.front().Get());
   }
 
