@@ -212,6 +212,16 @@ void Calculator::MakeBestTreesPermutation(
 void Calculator::TestBestTreesPermutation(
     int output, const TreeNode &family_node,
     const std::vector<std::optional<const TreeNode *>> &permutation) {
+  std::cout << "permutation: ";
+  for (const auto &best_output_tree : permutation) {
+    if (!best_output_tree.has_value()) {
+      std::cout << 0 << ", ";
+    } else {
+      std::cout << (*best_output_tree)->num_clients_ << ", ";
+    }
+  }
+  std::cout << "\n";
+
   auto permutation_tree_cost = family_node.node_cost_;
   auto permutation_num_clients = 0;
 
