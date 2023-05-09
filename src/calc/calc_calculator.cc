@@ -169,48 +169,66 @@ void Calculator::FindBestTrees() {
 }
 
 ///
-void Calculator::FindBestTreesForOutput(int output,
+void Calculator::FindBestTreesForOutput(FlowValue output,
                                         const TreeNode &family_node) {
   auto permutation =
       std::vector<std::optional<const TreeNode *>>(family_node.outputs_.size());
+  auto num_clients_indices = std::unordered_map<FlowValue, NumClientsIndex>{};
 
-  MakeBestTreesPermutation(output, family_node, permutation, 0);
+  for (const auto family_output : family_node.outputs_) {
+    const auto output_sum = output + family_output;
+    num_clients_indices.emplace(output_sum, 0);
+  }
+
+  MakeBestTreesPermutation(output, family_node, permutation, 0,
+                           num_clients_indices);
 }
 
 ///
 // NOLINTNEXTLINE(*-no-recursion)
 void Calculator::MakeBestTreesPermutation(
-    int output, const TreeNode &family_node,
+    FlowValue output, const TreeNode &family_node,
     std::vector<std::optional<const TreeNode *>> &permutation,
-    int output_index) {
+    FlowValue output_index,
+    std::unordered_map<FlowValue, NumClientsIndex> num_clients_indices) {
   if (const auto permutation_is_ready =
           output_index >= static_cast<int>(family_node.outputs_.size())) {
     TestBestTreesPermutation(output, family_node, permutation);
     return;
   }
 
+  const auto next_ouput_index = output_index + 1;
+
   Expects(output_index >= 0);
   const auto output_sum = output + family_node.outputs_[output_index];
   const auto best_output_trees = best_trees_.find(output_sum);
 
   if (best_output_trees != best_trees_.end()) {
+    const auto num_clients_index = num_clients_indices.find(output_sum);
+    Expects(num_clients_index != num_clients_indices.end());
+
+    auto best_output_tree = best_output_trees->second.crbegin();
+    std::advance(best_output_tree, num_clients_index->second);
+
     // NOLINTNEXTLINE(*-loop-convert)
-    for (auto best_output_tree = best_output_trees->second.crbegin();
-         best_output_tree != best_output_trees->second.crend();
+    for (; best_output_tree != best_output_trees->second.crend();
          ++best_output_tree) {
       permutation[output_index] = &best_output_tree->second;
       MakeBestTreesPermutation(output, family_node, permutation,
-                               output_index + 1);
+                               next_ouput_index, num_clients_indices);
+
+      ++num_clients_index->second;
     }
   }
 
   permutation[output_index] = std::nullopt;
-  MakeBestTreesPermutation(output, family_node, permutation, output_index + 1);
+  MakeBestTreesPermutation(output, family_node, permutation, next_ouput_index,
+                           num_clients_indices);
 }
 
 ///
 void Calculator::TestBestTreesPermutation(
-    int output, const TreeNode &family_node,
+    FlowValue output, const TreeNode &family_node,
     const std::vector<std::optional<const TreeNode *>> &permutation) {
   std::cout << "permutation: ";
   for (const auto &best_output_tree : permutation) {

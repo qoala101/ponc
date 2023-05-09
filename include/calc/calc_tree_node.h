@@ -14,6 +14,8 @@ using FlowValue = int;
 using NumClients = int;
 ///
 using OutputIndex = int;
+///
+using NumClientsIndex = int;
 
 ///
 struct TreeNode {

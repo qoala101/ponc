@@ -55,15 +55,16 @@ class Calculator {
   ///
   void FindBestTrees();
   ///
-  void FindBestTreesForOutput(int output, const TreeNode &family_node);
+  void FindBestTreesForOutput(FlowValue output, const TreeNode &family_node);
   ///
   void MakeBestTreesPermutation(
-      int output, const TreeNode &family_node,
+      FlowValue output, const TreeNode &family_node,
       std::vector<std::optional<const TreeNode *>> &permutation,
-      int output_index);
+      OutputIndex output_index,
+      std::unordered_map<FlowValue, NumClientsIndex> num_clients_indices);
   ///
   void TestBestTreesPermutation(
-      int output, const TreeNode &family_node,
+      FlowValue output, const TreeNode &family_node,
       const std::vector<std::optional<const TreeNode *>> &permutation);
 
   ///
