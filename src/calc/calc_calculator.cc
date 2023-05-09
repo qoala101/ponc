@@ -191,9 +191,47 @@ void Calculator::MakeBestTreesPermutation(
     std::vector<std::optional<const TreeNode *>> &permutation,
     FlowValue output_index,
     std::unordered_map<FlowValue, NumClientsIndex> num_clients_indices) {
+  auto permutation_num_clients = 0;
+  auto permutation_tree_cost = family_node.node_cost_;
+
+  for (const auto &best_output_tree : permutation) {
+    if (!best_output_tree.has_value()) {
+      continue;
+    }
+
+    permutation_num_clients += (*best_output_tree)->num_clients_;
+    permutation_tree_cost += (*best_output_tree)->tree_cost_;
+  }
+
+  if (permutation_num_clients > num_clients_) {
+    return;
+  }
+
+  const auto best_existing_tree = GetBestTree(output, permutation_num_clients);
+
+  if (best_existing_tree.has_value() &&
+      permutation_tree_cost > (*best_existing_tree)->tree_cost_) {
+    return;
+  }
+
   if (const auto permutation_is_ready =
           output_index >= static_cast<int>(family_node.outputs_.size())) {
-    TestBestTreesPermutation(output, family_node, permutation);
+    if (permutation_num_clients <= 0) {
+      return;
+    }
+
+    if (!best_existing_tree.has_value()) {
+      best_trees_[output][permutation_num_clients] =
+          MakePermutationTree(family_node, permutation);
+      return;
+    }
+
+    if (permutation_tree_cost < (*best_existing_tree)->tree_cost_) {
+      **best_existing_tree = MakePermutationTree(family_node, permutation);
+      return;
+    }
+
+    // TODO(vh): Compare equal cost trees.
     return;
   }
 
@@ -227,61 +265,21 @@ void Calculator::MakeBestTreesPermutation(
 }
 
 ///
-void Calculator::TestBestTreesPermutation(
-    FlowValue output, const TreeNode &family_node,
-    const std::vector<std::optional<const TreeNode *>> &permutation) {
-  std::cout << "permutation: ";
-  for (const auto &best_output_tree : permutation) {
-    if (!best_output_tree.has_value()) {
-      std::cout << 0 << ", ";
-    } else {
-      std::cout << (*best_output_tree)->num_clients_ << ", ";
-    }
-  }
-  std::cout << "\n";
-
-  auto permutation_tree_cost = family_node.node_cost_;
-  auto permutation_num_clients = 0;
-
-  for (const auto &best_output_tree : permutation) {
-    if (!best_output_tree.has_value()) {
-      continue;
-    }
-
-    permutation_tree_cost += (*best_output_tree)->tree_cost_;
-    permutation_num_clients += (*best_output_tree)->num_clients_;
-  }
-
-  if ((permutation_num_clients <= 0) ||
-      (permutation_num_clients > num_clients_)) {
-    return;
-  }
-
+auto Calculator::GetBestTree(FlowValue output, NumClients num_clients)
+    -> std::optional<TreeNode *> {
   const auto best_output_trees = best_trees_.find(output);
 
   if (best_output_trees == best_trees_.end()) {
-    best_trees_.emplace(
-        output,
-        std::map{std::pair{permutation_num_clients,
-                           MakePermutationTree(family_node, permutation)}});
-    return;
+    return std::nullopt;
   }
 
   const auto best_num_clients_tree =
-      best_output_trees->second.find(permutation_num_clients);
+      best_output_trees->second.find(num_clients);
 
   if (best_num_clients_tree == best_output_trees->second.end()) {
-    best_output_trees->second.emplace(
-        permutation_num_clients, MakePermutationTree(family_node, permutation));
-    return;
+    return std::nullopt;
   }
 
-  if (permutation_tree_cost < best_num_clients_tree->second.tree_cost_) {
-    best_num_clients_tree->second =
-        MakePermutationTree(family_node, permutation);
-    return;
-  }
-
-  // TODO(vh): Compare equal cost trees.
+  return &best_num_clients_tree->second;
 }
 }  // namespace vh::ponc::calc

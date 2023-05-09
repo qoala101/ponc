@@ -63,9 +63,8 @@ class Calculator {
       OutputIndex output_index,
       std::unordered_map<FlowValue, NumClientsIndex> num_clients_indices);
   ///
-  void TestBestTreesPermutation(
-      FlowValue output, const TreeNode &family_node,
-      const std::vector<std::optional<const TreeNode *>> &permutation);
+  auto GetBestTree(FlowValue output, NumClients num_clients)
+      -> std::optional<TreeNode *>;
 
   ///
   FlowValue min_output_{};
