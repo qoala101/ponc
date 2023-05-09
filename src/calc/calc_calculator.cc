@@ -191,20 +191,17 @@ void Calculator::MakeBestTreesPermutation(
 
   Expects(output_index >= 0);
   const auto output_sum = output + family_node.outputs_[output_index];
+  const auto best_output_trees = best_trees_.find(output_sum);
 
-  if (!unique_outputs_.contains(output_sum)) {
-    return;
-  }
-
-  Expects(best_trees_.contains(output_sum));
-  const auto &best_output_trees = best_trees_.at(output_sum);
-
-  // NOLINTNEXTLINE(*-loop-convert)
-  for (auto best_output_tree = best_output_trees.crbegin();
-       best_output_tree != best_output_trees.crend(); ++best_output_tree) {
-    permutation[output_index] = &best_output_tree->second;
-    MakeBestTreesPermutation(output, family_node, permutation,
-                             output_index + 1);
+  if (best_output_trees != best_trees_.end()) {
+    // NOLINTNEXTLINE(*-loop-convert)
+    for (auto best_output_tree = best_output_trees->second.crbegin();
+         best_output_tree != best_output_trees->second.crend();
+         ++best_output_tree) {
+      permutation[output_index] = &best_output_tree->second;
+      MakeBestTreesPermutation(output, family_node, permutation,
+                               output_index + 1);
+    }
   }
 
   permutation[output_index] = std::nullopt;
