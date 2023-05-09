@@ -165,12 +165,11 @@ auto GetClientFamilyId(core::Project& project) {
 ///
 auto GetChildOutputIndex(const calc::TreeNode& parent,
                          const calc::TreeNode* child) {
-  const auto& parent_children = parent.GetChildren();
   const auto child_node = std::find_if(
-      parent_children.cbegin(), parent_children.cend(),
+      parent.child_nodes_.cbegin(), parent.child_nodes_.cend(),
       [child](const auto& child_node) { return &child_node.second == child; });
 
-  Expects(child_node != parent_children.cend());
+  Expects(child_node != parent.child_nodes_.cend());
   return child_node->first;
 }
 
@@ -211,7 +210,7 @@ auto Calculator::PopulateOutput(const calc::TreeNode& output_tree,
       [output_pin, &project, &id_generator, &parent_stack, &output_root_id,
        &diagram_copy = diagram_copy_](const auto& tree_node) {
         const auto& family =
-            core::Project::FindFamily(project, tree_node.GetFamilyId());
+            core::Project::FindFamily(project, tree_node.family_id_);
         const auto& node =
             diagram_copy->EmplaceNode(family.CreateNode(id_generator));
 
@@ -245,7 +244,6 @@ auto Calculator::PopulateOutput(const calc::TreeNode& output_tree,
   return output_root_id;
 }
 
-///
 auto Calculator::PopulateDiagram(const calc::TreeNode& calculated_tree) {
   Expects(diagram_copy_.has_value());
   coreui::Cloner::RewireIds(core::Diagram::GetIds(*diagram_copy_),
@@ -255,20 +253,21 @@ auto Calculator::PopulateDiagram(const calc::TreeNode& calculated_tree) {
       std::map<core::IdValue<ne::PinId>, core::IdValue<ne::NodeId>>{};
   auto output_index = 0;
 
-  TraverseFreeOutputs(*diagram_copy_, [this, &calculated_tree, &output_root_ids,
-                                       &output_index](const auto& pin_flow) {
-    const auto& output_trees = calculated_tree.GetChildren();
-    const auto output_tree = output_trees.find(output_index);
+  TraverseFreeOutputs(
+      *diagram_copy_, [this, &calculated_tree, &output_root_ids, &output_index](
+                          const auto&, const auto& pin_flow) {
+        const auto& output_trees = calculated_tree.child_nodes_;
+        const auto output_tree = output_trees.find(output_index);
 
-    if (output_tree != output_trees.cend()) {
-      const auto output_root_id =
-          PopulateOutput(output_tree->second, pin_flow.first);
+        if (output_tree != output_trees.cend()) {
+          const auto output_root_id =
+              PopulateOutput(output_tree->second, pin_flow.first);
 
-      output_root_ids.emplace(pin_flow.first, output_root_id);
-    }
+          output_root_ids.emplace(pin_flow.first, output_root_id);
+        }
 
-    ++output_index;
-  });
+        ++output_index;
+      });
 
   return output_root_ids;
 }

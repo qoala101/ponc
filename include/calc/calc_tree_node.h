@@ -16,41 +16,18 @@ using NumClients = int;
 using OutputIndex = int;
 
 ///
-class TreeNode {
- public:
+struct TreeNode {
   ///
   TreeNode() = default;
   ///
-  explicit TreeNode(core::FamilyId family_id,
-                    const std::vector<float> &outputs = {},
-                    float node_cost = {});
+  explicit TreeNode(core::FamilyId family_id);
+  ///
+  TreeNode(core::FamilyId family_id, const std::vector<int> &outputs,
+           int node_cost = {});
+  ///
+  TreeNode(core::FamilyId family_id, const std::vector<float> &outputs,
+           float node_cost = {});
 
-  ///
-  auto GetFamilyId() const -> core::FamilyId;
-  ///
-  auto GetOutputs() const -> const std::vector<FlowValue> &;
-  ///
-  auto GetNodeCost() const -> Cost;
-  ///
-  auto GetTreeCost() const -> Cost;
-  ///
-  auto GetInput() const -> FlowValue;
-  ///
-  void SetInput(int input);
-  ///
-  auto GetChildren() const -> const std::map<OutputIndex, TreeNode> &;
-  ///
-  void ClearChildren();
-  ///
-  auto EmplaceChild(OutputIndex index, TreeNode child) -> TreeNode &;
-  ///
-  void EraseChild(OutputIndex index);
-  ///
-  auto GetNumClients() const -> NumClients;
-  ///
-  void SetNumClients(NumClients num_clients);
-
- private:
   ///
   core::FamilyId family_id_{};
   ///

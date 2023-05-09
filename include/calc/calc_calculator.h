@@ -5,7 +5,6 @@
 #include <cstdint>
 #include <functional>
 #include <map>
-#include <mutex>
 #include <set>
 #include <stack>
 #include <unordered_map>
@@ -47,30 +46,25 @@ class Calculator {
   ///
   using TreeIndex = int;
 
-  struct RecursionState {
-    ///
-    TreeNode node{};
-    ///
-    bool node_has_same_valid_outputs{};
-  };
-
   ///
   auto IsOutputInRange(FlowValue ouput) const;
   ///
   auto IsStopped();
   ///
-  void TraverseNode(TreeNode &node);
+  void FindUniqueOutputs();
   ///
-  void VisitOutput(TreeNode &node, OutputIndex output_index);
+  void FindBestTrees();
   ///
-  void FindBestChildPermutationForNode(const TreeNode &node);
+  void FindBestTreesForOutput(int output, const TreeNode &family_node);
   ///
-  void MakeNextChildPermutation(RecursionState &state, OutputIndex output_index,
-                                TreeIndex prev_output_tree_index);
+  void MakeBestTreesPermutation(
+      int output, const TreeNode &family_node,
+      std::vector<std::optional<const TreeNode *>> &permutation,
+      int output_index);
   ///
-  void TestChildPermutation(const TreeNode &node);
-  ///
-  void RecordChildPermutation(const TreeNode &node);
+  void TestBestTreesPermutation(
+      int output, const TreeNode &family_node,
+      const std::vector<std::optional<const TreeNode *>> &permutation);
 
   ///
   FlowValue min_output_{};
@@ -87,10 +81,9 @@ class Calculator {
   ///
   std::function<auto(const Calculator &)->StepStatus> step_callback_{};
   ///
-  std::unordered_set<FlowValue> visited_outputs_{};
+  std::set<FlowValue> unique_outputs_{};
   ///
-  std::map<FlowValue, std::map<NumClients, TreeNode>>
-      best_tree_per_num_clients_per_output_{};
+  std::map<FlowValue, std::map<NumClients, TreeNode>> best_trees_{};
 };
 }  // namespace vh::ponc::calc
 
