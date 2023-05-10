@@ -12,6 +12,7 @@
 #include "core_project.h"
 #include "coreui_cloner.h"
 #include "coreui_log.h"
+#include "coreui_native_facade.h"
 #include "coreui_project.h"
 #include "cpp_assert.h"
 #include "cpp_scope.h"
@@ -465,7 +466,7 @@ void Calculator::ProcessResult(
           flow::TraverseDepthFirst(
               tree_node,
               [](const auto& tree_node) {
-                ne::SelectNode(tree_node.node_id, true);
+                NativeFacade::SelectNode(tree_node.node_id, true);
               },
               [](const auto&) {});
         }

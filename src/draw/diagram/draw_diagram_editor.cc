@@ -5,6 +5,7 @@
 
 #include "core_diagram.h"
 #include "coreui_diagram.h"
+#include "coreui_native_facade.h"
 #include "cpp_assert.h"
 #include "cpp_scope.h"
 #include "draw_create_node_popup.h"
@@ -82,7 +83,7 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
 
   if (requested_node_popup) {
     if (!ne::IsNodeSelected(node_id)) {
-      ne::SelectNode(node_id);
+      coreui::NativeFacade::SelectNode(node_id);
     }
 
     node_popup_.Open();

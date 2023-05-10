@@ -9,8 +9,8 @@
 
 #include "core_i_family.h"
 #include "coreui_family.h"
+#include "coreui_native_facade.h"
 #include "draw_id_label.h"
-#include "draw_native_facade.h"
 #include "draw_table_flags.h"
 #include "draw_tree_node.h"
 #include "imgui.h"
@@ -37,7 +37,7 @@ void DrawSelectableName(
     if (ctrl_pressed) {
       if (item_is_selected) {
         for (const auto& node : nodes) {
-          ne::SelectNode(node->GetNode().GetId(), true);
+          coreui::NativeFacade::SelectNode(node->GetNode().GetId(), true);
         }
       } else {
         for (const auto& node : nodes) {
@@ -48,7 +48,7 @@ void DrawSelectableName(
       ne::ClearSelection();
 
       for (const auto& node : nodes) {
-        ne::SelectNode(node->GetNode().GetId(), true);
+        coreui::NativeFacade::SelectNode(node->GetNode().GetId(), true);
       }
     }
 
@@ -105,7 +105,7 @@ void NodesView::Draw(const coreui::Diagram& diagram) {
     ImGui::TableSetupColumn("Output");
     ImGui::TableHeadersRow();
 
-    const auto selected_nodes = NativeFacade::GetSelectedNodes();
+    const auto selected_nodes = coreui::NativeFacade::GetSelectedNodes();
 
     auto selected_node_ids = std::unordered_set<core::IdValue<ne::NodeId>>{};
     selected_node_ids.reserve(selected_nodes.size());

@@ -7,9 +7,9 @@
 #include "core_i_node.h"
 #include "coreui_family.h"
 #include "coreui_i_node_traits.h"
+#include "coreui_native_facade.h"
 #include "cpp_assert.h"
 #include "draw_family_groups_menu.h"
-#include "draw_native_facade.h"
 #include "flow_algorithms.h"
 #include "flow_tree_traversal.h"
 #include "imgui.h"
@@ -33,8 +33,9 @@ auto GetTitle(const std::vector<ne::NodeId>& nodes) {
 
 ///
 void NodePopup::Draw(coreui::Diagram& diagram) {
-  const auto selected_nodes =
-      IsOpened() ? NativeFacade::GetSelectedNodes() : std::vector<ne::NodeId>{};
+  const auto selected_nodes = IsOpened()
+                                  ? coreui::NativeFacade::GetSelectedNodes()
+                                  : std::vector<ne::NodeId>{};
   const auto title = GetTitle(selected_nodes);
   const auto content_scope = DrawContentScope(title);
 

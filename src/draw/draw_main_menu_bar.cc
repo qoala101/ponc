@@ -10,9 +10,9 @@
 #include "core_project.h"
 #include "core_settings.h"
 #include "coreui_diagram.h"
+#include "coreui_native_facade.h"
 #include "coreui_project.h"
 #include "draw_i_view.h"
-#include "draw_native_facade.h"
 #include "draw_open_file_dialog.h"
 #include "draw_question_dialog.h"
 #include "draw_save_as_file_dialog.h"
@@ -145,7 +145,7 @@ void MainMenuBar::DrawDialogs(coreui::Project &project) {
 ///
 void MainMenuBar::DrawViews(coreui::Project &project) {
   const auto &diagram = project.GetDiagram();
-  const auto selected_nodes = NativeFacade::GetSelectedNodes();
+  const auto selected_nodes = coreui::NativeFacade::GetSelectedNodes();
   const auto selected_node =
       (selected_nodes.size() == 1)
           ? &coreui::Diagram::FindNode(diagram, selected_nodes.front())

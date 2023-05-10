@@ -1,6 +1,6 @@
 #include "draw_link_popup.h"
 
-#include "draw_native_facade.h"
+#include "coreui_native_facade.h"
 #include "imgui_node_editor.h"
 
 namespace vh::ponc::draw {
@@ -21,8 +21,9 @@ auto GetTitle(const std::vector<ne::LinkId>& links) {
 
 ///
 void LinkPopup::Draw(const Callbacks& callbacks) {
-  const auto selected_links =
-      IsOpened() ? NativeFacade::GetSelectedLinks() : std::vector<ne::LinkId>{};
+  const auto selected_links = IsOpened()
+                                  ? coreui::NativeFacade::GetSelectedLinks()
+                                  : std::vector<ne::LinkId>{};
   const auto title = GetTitle(selected_links);
   const auto content_scope = DrawContentScope(title);
 

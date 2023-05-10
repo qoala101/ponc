@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string_view>
 
+#include "coreui_native_facade.h"
 #include "coreui_node.h"
 #include "draw_id_label.h"
 #include "imgui_node_editor.h"
@@ -18,12 +19,12 @@ void DrawSelectableName(ne::NodeId node_id, std::string_view node_label) {
 
     if (ctrl_pressed) {
       if (selected) {
-        ne::SelectNode(node_id, true);
+        coreui::NativeFacade::SelectNode(node_id, true);
       } else {
         ne::DeselectNode(node_id);
       }
     } else {
-      ne::SelectNode(node_id, false);
+      coreui::NativeFacade::SelectNode(node_id, false);
     }
 
     ne::NavigateToSelection();

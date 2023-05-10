@@ -49,6 +49,7 @@ add_executable(ponc
   coreui/coreui_family.cc
   coreui/coreui_linker.cc
   coreui/coreui_log.cc
+  coreui/coreui_native_facade.cc
   coreui/coreui_node_mover.cc
   coreui/coreui_node.cc
   coreui/coreui_project.cc
@@ -91,7 +92,6 @@ add_executable(ponc
 
   draw/draw_main_menu_bar.cc
   draw/draw_main_window.cc
-  draw/draw_native_facade.cc
   draw/draw_recent_log.cc
 
   flow/flow_algorithms.cc

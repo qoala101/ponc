@@ -2,6 +2,7 @@
 #include <stack>
 
 #include "coreui_flow_tree_node.h"
+#include "coreui_native_facade.h"
 #include "coreui_node.h"
 #include "flow_tree_traversal.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -221,7 +222,9 @@ void Diagram::TreeSelect(const std::vector<ne::NodeId>& node_ids) {
 
     flow::TraverseDepthFirst(
         tree_node,
-        [](const auto& tree_node) { ne::SelectNode(tree_node.node_id, true); },
+        [](const auto& tree_node) {
+          NativeFacade::SelectNode(tree_node.node_id, true);
+        },
         [](const auto&) {});
   }
 }
