@@ -53,9 +53,17 @@ class Calculator {
   ///
   void FindUniqueOutputs();
   ///
-  void FindBestTrees();
+  void FindBestOutputTrees();
   ///
   void FindBestTreesForOutput(FlowValue output, const TreeNode &family_node);
+  ///
+  auto GetBestTree(FlowValue output, NumClients num_clients)
+      -> std::optional<TreeNode *>;
+  ///
+  auto TestBestTreesPermutation(
+      FlowValue output, const TreeNode &family_node,
+      std::vector<std::optional<const TreeNode *>> &permutation,
+      OutputIndex output_index);
   ///
   void MakeBestTreesPermutation(
       FlowValue output, const TreeNode &family_node,
@@ -63,8 +71,7 @@ class Calculator {
       OutputIndex output_index,
       std::unordered_map<FlowValue, NumClientsIndex> num_clients_indices);
   ///
-  auto GetBestTree(FlowValue output, NumClients num_clients)
-      -> std::optional<TreeNode *>;
+  void FindBestRootTree();
 
   ///
   FlowValue min_output_{};
@@ -83,10 +90,7 @@ class Calculator {
   ///
   std::set<FlowValue> unique_outputs_{};
   ///
-  std::unordered_map<FlowValue, std::map<NumClients, TreeNode>> best_trees_{};
-
-  TreeNode root_{};
-  FlowValue root_input_{};
+  std::map<FlowValue, std::map<NumClients, TreeNode>> best_trees_{};
 };
 }  // namespace vh::ponc::calc
 
