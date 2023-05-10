@@ -12,6 +12,7 @@
 #include <unordered_set>
 
 #include "core_diagram.h"
+#include "core_project.h"
 #include "cpp_assert.h"
 #include "cpp_scope.h"
 #include "cpp_scope_function.h"
@@ -73,12 +74,14 @@ auto DiagramsView::DrawRenamePopup() {
 
 ///
 auto DiagramsView::DrawControls(coreui::Project& project) {
+  const auto& core_project = project.GetProject();
   auto selected_action = std::optional<Action>{};
 
   ImGui::BeginHorizontal("Controls");
 
   if (ImGui::Button("Create")) {
-    project.AddDiagram(core::Diagram{"New Diagram"});
+    project.AddDiagram(
+        core::Diagram{core::Project::MakeUniqueDiagramName(core_project)});
   }
 
   if (ImGui::Button("Clone")) {
@@ -95,7 +98,7 @@ auto DiagramsView::DrawControls(coreui::Project& project) {
     selected_action = Action::kConfirmRename;
   }
 
-  const auto& diagrams = project.GetProject().GetDiagrams();
+  const auto& diagrams = core_project.GetDiagrams();
 
   {
     const auto disable_scope = DisableIf(diagrams.size() <= 1);
@@ -137,10 +140,11 @@ void DiagramsView::ApplyAction(coreui::Project& project, int diagram_index,
       project.CloneDiagram(diagram);
       break;
     case Action::kStartRenaming: {
-      rename_buffer_ = diagram.GetName();
+      static constexpr auto kMaxNameLength = 255;
 
-      static constexpr auto kMaxNameLength = 256;
-      rename_buffer_.resize(kMaxNameLength);
+      rename_buffer_ = diagram.GetName();
+      rename_buffer_.resize(std::max(
+          static_cast<int>(rename_buffer_.size() + 1), kMaxNameLength));
       break;
     }
     case Action::kConfirmRename:

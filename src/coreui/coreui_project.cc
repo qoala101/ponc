@@ -112,6 +112,10 @@ auto Project::CloneDiagram(const core::Diagram& diagram) -> Event& {
   auto clone = Cloner::Clone(diagram, project_.GetFamilies());
   Cloner::RewireIds(core::Diagram::GetIds(clone), project_.GetIdGenerator());
 
+  auto new_name =
+      core::Project::MakeUniqueDiagramName(project_, diagram.GetName(), "copy");
+  clone.SetName(std::move(new_name));
+
   return AddDiagram(std::move(clone));
 }
 

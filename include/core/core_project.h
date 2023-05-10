@@ -15,6 +15,11 @@ class Project {
   ///
   static auto FindFamily(const Project &project, core::FamilyId family_id)
       -> IFamily &;
+  ///
+  static auto MakeUniqueDiagramName(const Project &project,
+                                    std::string source_name = "Diagram",
+                                    std::string_view postfix = {})
+      -> std::string;
 
   ///
   Project(Settings settings, std::vector<std::unique_ptr<IFamily>> families,
