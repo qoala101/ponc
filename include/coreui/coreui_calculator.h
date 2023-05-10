@@ -38,6 +38,13 @@ class Calculator {
   ///
   auto PopulateDiagram(const std::vector<calc::TreeNode>& calculated_trees);
   ///
+  auto ValidateResult(
+      const std::map<core::IdValue<ne::PinId>, core::IdValue<ne::NodeId>>&
+          output_root_ids) const;
+  ///
+  void LogResult(const std::vector<calc::TreeNode>& calculated_trees,
+                 std::string_view diagram_name) const;
+  ///
   void ProcessResult(const std::vector<calc::TreeNode>& calculated_trees);
 
   ///

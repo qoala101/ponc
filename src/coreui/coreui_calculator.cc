@@ -1,15 +1,20 @@
 #include "coreui_calculator.h"
 
+#include <numeric>
 #include <optional>
+#include <sstream>
+#include <string>
 #include <vector>
 
 #include "calc_resolution.h"
 #include "calc_tree_node.h"
 #include "calc_tree_traversal.h"
+#include "core_project.h"
 #include "coreui_cloner.h"
 #include "coreui_log.h"
 #include "coreui_project.h"
 #include "cpp_assert.h"
+#include "cpp_scope.h"
 #include "flow_algorithms.h"
 #include "flow_tree_traversal.h"
 #include "imgui_node_editor.h"
@@ -390,13 +395,63 @@ auto Calculator::GetProgress() const -> float {
 }
 
 ///
+void Calculator::LogResult(const std::vector<calc::TreeNode>& calculated_trees,
+                           std::string_view diagram_name) const {
+  const auto total_cost = calc::FromCalculatorResolution(
+      std::accumulate(calculated_trees.cbegin(), calculated_trees.cend(), 0,
+                      [](const auto total_cost, const auto& tree) {
+                        return total_cost + tree.tree_cost;
+                      }));
+
+  const auto num_clients =
+      std::accumulate(calculated_trees.cbegin(), calculated_trees.cend(), 0,
+                      [](const auto num_clients, const auto& tree) {
+                        return num_clients + tree.num_clients;
+                      });
+
+  auto log_stream = std::ostringstream{};
+  log_stream << "Calculator: Added " << num_clients << " clients for "
+             << total_cost << "$ (" << diagram_name.data() << ")";
+
+  parent_project_->GetLog().Write(LogLevel::kDone, log_stream.str());
+}
+
+///
+auto Calculator::ValidateResult(
+    const std::map<core::IdValue<ne::PinId>, core::IdValue<ne::NodeId>>&
+        output_root_ids) const {
+  if (output_root_ids.empty()) {
+    parent_project_->GetLog().Write(
+        LogLevel::kDone, "Calculator: Couldn't fit any more clients.");
+    return false;
+  }
+
+  return true;
+}
+
+///
 void Calculator::ProcessResult(
     const std::vector<calc::TreeNode>& calculated_trees) {
+  const auto reset_scope = cpp::Scope{[this]() {
+    diagram_copy_.reset();
+    calculation_task_.reset();
+  }};
+
   const auto output_root_ids = PopulateDiagram(calculated_trees);
+
+  if (!ValidateResult(output_root_ids)) {
+    return;
+  }
 
   Expects(diagram_copy_.has_value());
   auto flow_trees = flow::BuildFlowTrees(*diagram_copy_);
   auto output_trees = GetOutputTrees(flow_trees, output_root_ids);
+
+  auto new_diagram_name = core::Project::MakeUniqueDiagramName(
+      parent_project_->GetProject(), diagram_copy_->GetName(), "calc.");
+
+  LogResult(calculated_trees, new_diagram_name);
+  diagram_copy_->SetName(std::move(new_diagram_name));
 
   parent_project_->AddDiagram(std::move(*diagram_copy_))
       .Then([parent_project = parent_project_, output_trees,
@@ -417,8 +472,5 @@ void Calculator::ProcessResult(
 
         ne::NavigateToSelection();
       });
-
-  diagram_copy_.reset();
-  calculation_task_.reset();
 }
 }  // namespace vh::ponc::coreui
