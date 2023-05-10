@@ -34,6 +34,8 @@ class DiagramsView : public IView {
 
   ///
   std::string rename_buffer_{};
+  ///
+  bool focus_name_input_{};
 };
 }  // namespace vh::ponc::draw
 

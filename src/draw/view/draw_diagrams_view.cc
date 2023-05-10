@@ -33,22 +33,41 @@ auto DiagramsView::DrawRenamePopup() {
   auto rename_confirmed = false;
 
   if (ImGui::BeginPopup("Rename Diagram")) {
-    ImGui::InputText("##Diagram Name", rename_buffer_.data(),
-                     rename_buffer_.size());
+    if (focus_name_input_) {
+      ImGui::SetKeyboardFocusHere();
+    }
+
+    const auto name_is_empty = GetTrimmedRenameBuffer().empty();
+
+    if (ImGui::InputText("##Diagram Name", rename_buffer_.data(),
+                         rename_buffer_.size(),
+                         ImGuiInputTextFlags_AutoSelectAll |
+                             ImGuiInputTextFlags_EnterReturnsTrue)) {
+      if (!name_is_empty) {
+        rename_confirmed = true;
+      } else {
+        ImGui::SetKeyboardFocusHere(-1);
+      }
+    }
+
     ImGui::SameLine();
 
     {
-      const auto disable_scope = DisableIf(GetTrimmedRenameBuffer().empty());
+      const auto disable_scope = DisableIf(name_is_empty);
 
       if (ImGui::Button("OK")) {
         rename_confirmed = true;
-        ImGui::CloseCurrentPopup();
       }
+    }
+
+    if (rename_confirmed) {
+      ImGui::CloseCurrentPopup();
     }
 
     ImGui::EndPopup();
   }
 
+  focus_name_input_ = false;
   return rename_confirmed;
 }
 
@@ -68,6 +87,7 @@ auto DiagramsView::DrawControls(coreui::Project& project) {
 
   if (ImGui::Button("Rename")) {
     selected_action = Action::kStartRenaming;
+    focus_name_input_ = true;
     ImGui::OpenPopup("Rename Diagram");
   }
 
