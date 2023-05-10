@@ -7,6 +7,9 @@ namespace vh::ponc::calc {
 ///
 auto ToCalculatorResolution(float value) -> int;
 ///
+auto ToCalculatorResolution(const std::vector<float> &values)
+    -> std::vector<int>;
+///
 auto FromCalculatorResolution(int value) -> float;
 }  // namespace vh::ponc::calc
 

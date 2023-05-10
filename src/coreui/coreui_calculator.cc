@@ -3,6 +3,7 @@
 #include <optional>
 #include <vector>
 
+#include "calc_resolution.h"
 #include "calc_tree_node.h"
 #include "calc_tree_traversal.h"
 #include "coreui_cloner.h"
@@ -55,11 +56,15 @@ auto AsFamilyNodes(
         });
     Expects(family != families.cend());
 
+    const auto cost = calc::ToCalculatorResolution(settings.cost);
     const auto sample_node = (*family)->CreateSampleNode();
-    auto outputs = GetNodeOutputs(*sample_node);
+    const auto outputs = GetNodeOutputs(*sample_node);
 
-    family_nodes.emplace_back(settings.family_id, std::move(outputs),
-                              settings.cost);
+    family_nodes.emplace_back(
+        calc::TreeNode{.family_id_ = settings.family_id,
+                       .node_cost_ = cost,
+                       .tree_cost_ = cost,
+                       .outputs_ = calc::ToCalculatorResolution(outputs)});
   }
 
   return family_nodes;
@@ -136,14 +141,15 @@ auto GetFreeOutputs(const core::Diagram& diagram) {
 
 ///
 auto GetInputNodes(const core::Diagram& diagram) {
-  auto free_outputs = GetFreeOutputs(diagram);
+  const auto free_outputs = GetFreeOutputs(diagram);
 
   auto input_nodes = std::vector<calc::TreeNode>{};
   input_nodes.reserve(free_outputs.size());
 
   std::transform(free_outputs.begin(), free_outputs.end(),
-                 std::back_inserter(input_nodes), [](auto& free_outputs) {
-                   return calc::TreeNode{{}, std::move(free_outputs)};
+                 std::back_inserter(input_nodes), [](const auto& free_outputs) {
+                   return calc::TreeNode{
+                       .outputs_ = calc::ToCalculatorResolution(free_outputs)};
                  });
 
   return input_nodes;
@@ -324,7 +330,8 @@ void Calculator::Calculate() {
   calculation_task_.emplace(calc::Calculator::ConstructorArgs{
       .settings = settings,
       .input_nodes = GetInputNodes(diagram),
-      .client_node = calc::TreeNode{GetClientFamilyId(core_project)},
+      .client_node =
+          calc::TreeNode{.family_id_ = GetClientFamilyId(core_project)},
       .family_nodes =
           AsFamilyNodes(core_project.GetFamilies(), settings.family_settings)});
 }

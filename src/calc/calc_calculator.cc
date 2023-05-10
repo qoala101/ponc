@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
-#include <iostream>
 #include <iterator>
 #include <limits>
 #include <numeric>
@@ -68,9 +67,19 @@ Calculator::Calculator(const ConstructorArgs &args)
   FindBestRootTree();
 }
 
+///
 auto Calculator::GetProgress() const -> float {
-  // TODO(vh): Use latest best_trees_ entry between min max of unique outputs.
-  return 0.5F;
+  if (unique_outputs_.empty() || best_trees_.empty()) {
+    return 0;
+  }
+
+  const auto min_output = *unique_outputs_.cbegin();
+  const auto max_output = *std::prev(unique_outputs_.cend());
+  const auto working_on_output =
+      std::clamp(std::prev(best_trees_.cend())->first, min_output, max_output);
+
+  return static_cast<float>(working_on_output - min_output) /
+         static_cast<float>(max_output - min_output);
 }
 
 ///
@@ -142,18 +151,14 @@ void Calculator::FindUniqueOutputs() {
       visited_outputs.emplace(output);
     }
   }
-
-  std::cout << "unique outputs: ";
-  for (const auto ouput : unique_outputs_) {
-    std::cout << ouput << ", ";
-  }
-  std::cout << "\n";
 }
 
 ///
 void Calculator::FindBestOutputTrees() {
   for (const auto output : unique_outputs_) {
-    std::cout << "working on output: " << output << "\n";
+    if (IsStopped()) {
+      return;
+    }
 
     if (IsOutputInRange(output)) {
       best_trees_.emplace(output, std::map{std::pair{1, client_node_}});
@@ -163,8 +168,6 @@ void Calculator::FindBestOutputTrees() {
       FindBestTreesForOutput(output, family_node);
     }
   }
-
-  std::cout << "done\n";
 }
 
 ///
@@ -241,6 +244,10 @@ void Calculator::MakeBestTreesPermutation(
     std::vector<std::optional<const TreeNode *>> &permutation,
     FlowValue output_index,
     std::unordered_map<FlowValue, NumClientsIndex> num_clients_indices) {
+  if (IsStopped()) {
+    return;
+  }
+
   if (!TestBestTreesPermutation(output, family_node, permutation,
                                 output_index)) {
     return;

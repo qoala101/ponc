@@ -19,7 +19,6 @@ add_executable(ponc
   calc/calc_calculation_task.cc
   calc/calc_calculator.cc
   calc/calc_resolution.cc
-  calc/calc_tree_node.cc
 
   core/core_diagram.cc
   core/core_free_pin_family_group.cc
