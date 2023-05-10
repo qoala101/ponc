@@ -29,6 +29,11 @@ class Calculator {
 
  private:
   ///
+  auto ValidateInputs(const std::vector<calc::TreeNode>& input_nodes) const;
+  ///
+  auto AsFamilyNodes(
+      const std::vector<std::unique_ptr<core::IFamily>>& families) const;
+  ///
   auto PopulateOutput(const calc::TreeNode& output_tree, ne::PinId output_pin);
   ///
   auto PopulateDiagram(const std::vector<calc::TreeNode>& calculated_trees);

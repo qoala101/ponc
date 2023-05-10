@@ -7,6 +7,7 @@
 #include "calc_tree_node.h"
 #include "calc_tree_traversal.h"
 #include "coreui_cloner.h"
+#include "coreui_log.h"
 #include "coreui_project.h"
 #include "cpp_assert.h"
 #include "flow_algorithms.h"
@@ -37,37 +38,6 @@ auto GetNodeOutputs(const core::INode& node) {
                  });
 
   return outputs;
-}
-
-///
-auto AsFamilyNodes(
-    const std::vector<std::unique_ptr<core::IFamily>>& families,
-    const std::vector<core::CalculatorFamilySettings>& family_settings) {
-  auto family_nodes = std::vector<calc::TreeNode>{};
-
-  for (const auto& settings : family_settings) {
-    if (!settings.enabled) {
-      continue;
-    }
-
-    const auto family = std::find_if(
-        families.cbegin(), families.cend(), [&settings](const auto& family) {
-          return family->GetId() == settings.family_id;
-        });
-    Expects(family != families.cend());
-
-    const auto cost = calc::ToCalculatorResolution(settings.cost);
-    const auto sample_node = (*family)->CreateSampleNode();
-    const auto outputs = GetNodeOutputs(*sample_node);
-
-    family_nodes.emplace_back(
-        calc::TreeNode{.family_id = settings.family_id,
-                       .node_cost = cost,
-                       .tree_cost = cost,
-                       .outputs = calc::ToCalculatorResolution(outputs)});
-  }
-
-  return family_nodes;
 }
 
 ///
@@ -318,23 +288,88 @@ void Calculator::OnFrame() {
 }
 
 ///
+auto Calculator::ValidateInputs(
+    const std::vector<calc::TreeNode>& input_nodes) const {
+  if (input_nodes.empty()) {
+    parent_project_->GetLog().Write(
+        LogLevel::kError, "Calculator: Diagram should have free outputs.");
+    return false;
+  }
+
+  const auto& settings =
+      parent_project_->GetProject().GetSettings().calculator_settings;
+
+  if (settings.min_output > settings.max_output) {
+    parent_project_->GetLog().Write(
+        LogLevel::kError, "Calculator: Min Output should be <= Max Output.");
+    return false;
+  }
+
+  if (settings.num_clients <= 0) {
+    parent_project_->GetLog().Write(LogLevel::kError,
+                                    "Calculator: Clients should be > 0.");
+    return false;
+  }
+
+  return true;
+}
+
+///
+auto Calculator::AsFamilyNodes(
+    const std::vector<std::unique_ptr<core::IFamily>>& families) const {
+  const auto& family_settings = parent_project_->GetProject()
+                                    .GetSettings()
+                                    .calculator_settings.family_settings;
+
+  auto family_nodes = std::vector<calc::TreeNode>{};
+
+  for (const auto& settings : family_settings) {
+    if (!settings.enabled) {
+      continue;
+    }
+
+    const auto family = std::find_if(
+        families.cbegin(), families.cend(), [&settings](const auto& family) {
+          return family->GetId() == settings.family_id;
+        });
+    Expects(family != families.cend());
+
+    const auto cost = calc::ToCalculatorResolution(settings.cost);
+    const auto sample_node = (*family)->CreateSampleNode();
+    const auto outputs = GetNodeOutputs(*sample_node);
+
+    family_nodes.emplace_back(
+        calc::TreeNode{.family_id = settings.family_id,
+                       .node_cost = cost,
+                       .tree_cost = cost,
+                       .outputs = calc::ToCalculatorResolution(outputs)});
+  }
+
+  return family_nodes;
+}
+
+///
 void Calculator::Calculate() {
   const auto& diagram = parent_project_->GetDiagram().GetDiagram();
+
+  auto input_nodes = GetInputNodes(diagram);
+
+  if (!ValidateInputs(input_nodes)) {
+    return;
+  }
+
   auto& core_project = parent_project_->GetProject();
+  const auto& families = core_project.GetFamilies();
 
-  diagram_copy_.emplace(
-      coreui::Cloner::Clone(diagram, core_project.GetFamilies()));
-
-  auto& settings = core_project.GetSettings().calculator_settings;
+  diagram_copy_.emplace(coreui::Cloner::Clone(diagram, families));
 
   calculation_task_.emplace(calc::Calculator::ConstructorArgs{
-      .settings = settings,
-      .input_nodes = GetInputNodes(diagram),
+      .settings = core_project.GetSettings().calculator_settings,
+      .input_nodes = std::move(input_nodes),
       .client_node =
           calc::TreeNode{.family_id = GetClientFamilyId(core_project),
                          .num_clients = 1},
-      .family_nodes =
-          AsFamilyNodes(core_project.GetFamilies(), settings.family_settings)});
+      .family_nodes = AsFamilyNodes(families)});
 }
 
 ///

@@ -29,6 +29,8 @@ auto GetLogColor(coreui::LogLevel log_level) {
       return ImColor{1.F, 1.F, 0.5F};
     case coreui::LogLevel::kError:
       return ImColor{1.F, 0.5F, 0.5F};
+    case coreui::LogLevel::kDone:
+      return ImColor{0.5F, 1.F, 0.5F};
   }
 }
 
@@ -41,6 +43,8 @@ auto ToString(coreui::LogLevel log_level) {
       return "[warning]";
     case coreui::LogLevel::kError:
       return "[error]";
+    case coreui::LogLevel::kDone:
+      return "[done]";
   }
 }
 
