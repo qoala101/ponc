@@ -40,7 +40,7 @@ class Calculator {
   ///
   auto GetProgress() const -> float;
   ///
-  auto GetResult() const -> const TreeNode &;
+  auto TakeResult() -> std::vector<TreeNode>;
 
  private:
   ///
@@ -83,7 +83,10 @@ class Calculator {
   ///
   std::set<FlowValue> unique_outputs_{};
   ///
-  std::map<FlowValue, std::map<NumClients, TreeNode>> best_trees_{};
+  std::unordered_map<FlowValue, std::map<NumClients, TreeNode>> best_trees_{};
+
+  TreeNode root_{};
+  FlowValue root_input_{};
 };
 }  // namespace vh::ponc::calc
 

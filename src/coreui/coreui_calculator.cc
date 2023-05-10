@@ -189,6 +189,32 @@ auto GetOutputTrees(
 
   return output_trees;
 }
+
+///
+auto GetFirstLevelChild(const std::vector<calc::TreeNode>& tree_nodes,
+                        int output_index)
+    -> std::optional<const calc::TreeNode*> {
+  auto delta = 0;
+
+  for (const auto& tree_node : tree_nodes) {
+    const auto next_delta = delta + static_cast<int>(tree_node.outputs_.size());
+
+    if (output_index < next_delta) {
+      const auto child_index = output_index - delta;
+      const auto child_tree = tree_node.child_nodes_.find(child_index);
+
+      if (child_tree == tree_node.child_nodes_.cend()) {
+        return std::nullopt;
+      }
+
+      return &child_tree->second;
+    }
+
+    delta = next_delta;
+  }
+
+  Expects(false);
+}
 }  // namespace
 
 ///
@@ -244,7 +270,9 @@ auto Calculator::PopulateOutput(const calc::TreeNode& output_tree,
   return output_root_id;
 }
 
-auto Calculator::PopulateDiagram(const calc::TreeNode& calculated_tree) {
+///
+auto Calculator::PopulateDiagram(
+    const std::vector<calc::TreeNode>& calculated_trees) {
   Expects(diagram_copy_.has_value());
   coreui::Cloner::RewireIds(core::Diagram::GetIds(*diagram_copy_),
                             parent_project_->GetProject().GetIdGenerator());
@@ -253,21 +281,17 @@ auto Calculator::PopulateDiagram(const calc::TreeNode& calculated_tree) {
       std::map<core::IdValue<ne::PinId>, core::IdValue<ne::NodeId>>{};
   auto output_index = 0;
 
-  TraverseFreeOutputs(
-      *diagram_copy_, [this, &calculated_tree, &output_root_ids, &output_index](
-                          const auto&, const auto& pin_flow) {
-        const auto& output_trees = calculated_tree.child_nodes_;
-        const auto output_tree = output_trees.find(output_index);
+  TraverseFreeOutputs(*diagram_copy_, [this, &calculated_trees,
+                                       &output_root_ids, &output_index](
+                                          const auto&, const auto& pin_flow) {
+    if (const auto output_tree =
+            GetFirstLevelChild(calculated_trees, output_index)) {
+      const auto output_root_id = PopulateOutput(**output_tree, pin_flow.first);
+      output_root_ids.emplace(pin_flow.first, output_root_id);
+    }
 
-        if (output_tree != output_trees.cend()) {
-          const auto output_root_id =
-              PopulateOutput(output_tree->second, pin_flow.first);
-
-          output_root_ids.emplace(pin_flow.first, output_root_id);
-        }
-
-        ++output_index;
-      });
+    ++output_index;
+  });
 
   return output_root_ids;
 }
@@ -278,7 +302,7 @@ void Calculator::OnFrame() {
     return;
   }
 
-  const auto& result = calculation_task_->GetResult();
+  const auto result = calculation_task_->GetResult();
 
   if (!result.has_value()) {
     return;
@@ -323,8 +347,9 @@ auto Calculator::GetProgress() const -> float {
 }
 
 ///
-void Calculator::ProcessResult(const calc::TreeNode& calculated_tree) {
-  const auto output_root_ids = PopulateDiagram(calculated_tree);
+void Calculator::ProcessResult(
+    const std::vector<calc::TreeNode>& calculated_trees) {
+  const auto output_root_ids = PopulateDiagram(calculated_trees);
 
   Expects(diagram_copy_.has_value());
   auto flow_trees = flow::BuildFlowTrees(*diagram_copy_);

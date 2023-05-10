@@ -7,8 +7,7 @@ CalculationTask::CalculationTask(Calculator::ConstructorArgs args) {
       std::bind_front(&CalculationTask::OnCalculationStep, this);
 
   task_ = std::async(std::launch::async, [args = std::move(args)]() {
-    const auto calculator = calc::Calculator{args};
-    return calculator.GetResult();
+    return calc::Calculator{args}.TakeResult();
   });
 }
 
@@ -32,14 +31,14 @@ auto CalculationTask::IsRunning() const -> bool {
 auto CalculationTask::GetProgress() const -> float { return progress_; }
 
 ///
-auto CalculationTask::GetResult() -> std::optional<TreeNode> {
+auto CalculationTask::GetResult() -> std::optional<std::vector<TreeNode>> {
   if (!task_.valid() || IsRunning()) {
     return std::nullopt;
   }
 
   auto result = task_.get();
 
-  task_ = std::future<calc::TreeNode>{};
+  task_ = std::future<std::vector<TreeNode>>{};
   stop_requested_ = false;
   progress_ = 0;
 

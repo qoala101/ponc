@@ -215,7 +215,7 @@ auto Project::SaveToFile(std::filesystem::path file_path) -> Event& {
     safe_this->SetFilePath(std::move(file_path));
 
     safe_this->log_.Write(LogLevel::kInfo,
-                          "Save project to " + safe_this->file_path_.string());
+                          "Saved project to " + safe_this->file_path_.string());
   });
 }
 

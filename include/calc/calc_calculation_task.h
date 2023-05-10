@@ -28,15 +28,12 @@ class CalculationTask {
 
   ///
   void Stop();
-
   ///
   auto IsRunning() const -> bool;
-
   ///
   auto GetProgress() const -> float;
-
   ///
-  auto GetResult() -> std::optional<TreeNode>;
+  auto GetResult() -> std::optional<std::vector<calc::TreeNode>>;
 
  private:
   ///
@@ -44,7 +41,7 @@ class CalculationTask {
       -> calc::Calculator::StepStatus;
 
   ///
-  std::future<calc::TreeNode> task_{};
+  std::future<std::vector<calc::TreeNode>> task_{};
   ///
   std::atomic<bool> stop_requested_{};
   ///

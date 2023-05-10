@@ -43,7 +43,6 @@ auto MakePermutationTree(
 }
 }  // namespace
 
-///
 Calculator::Calculator(const ConstructorArgs &args)
     : min_output_{ToCalculatorResolution(args.settings.min_output)},
       max_output_{ToCalculatorResolution(args.settings.max_output)},
@@ -63,45 +62,62 @@ Calculator::Calculator(const ConstructorArgs &args)
   FindUniqueOutputs();
   FindBestTrees();
 
-  const auto output = input_nodes_[0].outputs_[0];
-  const auto best_output_trees = best_trees_.find(output);
+  root_input_ = 1000000;
 
-  if (best_output_trees == best_trees_.end()) {
-    Expects(false);
+  auto next_node_output = root_input_ - 1;
+
+  for (const auto &input_node : input_nodes_) {
+    root_.outputs_.emplace_back(next_node_output - root_input_);
+
+    auto input_node_family = input_node;
+
+    for (auto &output : input_node_family.outputs_) {
+      output -= next_node_output;
+    }
+
+    FindBestTreesForOutput(next_node_output, input_node_family);
+
+    --next_node_output;
   }
 
-  const auto best_output_tree = std::prev(best_output_trees->second.end());
-
-  if (best_output_tree == best_output_trees->second.end()) {
-    Expects(false);
-  }
-
-  auto result = input_nodes_[0];
-  result.child_nodes_[0] = std::move(best_output_tree->second);
-  best_output_tree->second = std::move(result);
+  FindBestTreesForOutput(root_input_, root_);
 }
 
-///
 auto Calculator::GetProgress() const -> float {
   // TODO(vh): Use latest best_trees_ entry.
   return 0.5F;
 }
 
-auto Calculator::GetResult() const -> const TreeNode & {
-  const auto output = input_nodes_[0].outputs_[0];
-  const auto best_output_trees = best_trees_.find(output);
+auto Calculator::TakeResult() -> std::vector<TreeNode> {
+  // input_nodes_[0].child_nodes_.emplace(0, family_nodes_[0]);
+  // input_nodes_[1].child_nodes_.emplace(1, client_node_);
+  // input_nodes_[2].child_nodes_.emplace(3, client_node_);
+  // return input_nodes_;
+
+  const auto best_output_trees = best_trees_.find(root_input_);
 
   if (best_output_trees == best_trees_.end()) {
-    Expects(false);
+    return {};
   }
 
+  Expects(!best_output_trees->second.empty());
   const auto best_output_tree = std::prev(best_output_trees->second.end());
 
-  if (best_output_tree == best_output_trees->second.end()) {
-    Expects(false);
+  Expects(best_output_tree->second.outputs_.size() == input_nodes_.size());
+  auto calculated_trees = std::vector<TreeNode>{};
+
+  for (auto i = 0; i < input_nodes_.size(); ++i) {
+    const auto calculated_tree = best_output_tree->second.child_nodes_.find(i);
+
+    if (calculated_tree == best_output_tree->second.child_nodes_.cend()) {
+      calculated_trees.emplace_back(std::move(input_nodes_[i]));
+      continue;
+    }
+
+    calculated_trees.emplace_back(std::move(calculated_tree->second));
   }
 
-  return best_output_tree->second;
+  return calculated_trees;
 }
 
 ///
