@@ -61,10 +61,10 @@ auto AsFamilyNodes(
     const auto outputs = GetNodeOutputs(*sample_node);
 
     family_nodes.emplace_back(
-        calc::TreeNode{.family_id_ = settings.family_id,
-                       .node_cost_ = cost,
-                       .tree_cost_ = cost,
-                       .outputs_ = calc::ToCalculatorResolution(outputs)});
+        calc::TreeNode{.family_id = settings.family_id,
+                       .node_cost = cost,
+                       .tree_cost = cost,
+                       .outputs = calc::ToCalculatorResolution(outputs)});
   }
 
   return family_nodes;
@@ -149,7 +149,7 @@ auto GetInputNodes(const core::Diagram& diagram) {
   std::transform(free_outputs.begin(), free_outputs.end(),
                  std::back_inserter(input_nodes), [](const auto& free_outputs) {
                    return calc::TreeNode{
-                       .outputs_ = calc::ToCalculatorResolution(free_outputs)};
+                       .outputs = calc::ToCalculatorResolution(free_outputs)};
                  });
 
   return input_nodes;
@@ -172,10 +172,10 @@ auto GetClientFamilyId(core::Project& project) {
 auto GetChildOutputIndex(const calc::TreeNode& parent,
                          const calc::TreeNode* child) {
   const auto child_node = std::find_if(
-      parent.child_nodes_.cbegin(), parent.child_nodes_.cend(),
+      parent.child_nodes.cbegin(), parent.child_nodes.cend(),
       [child](const auto& child_node) { return &child_node.second == child; });
 
-  Expects(child_node != parent.child_nodes_.cend());
+  Expects(child_node != parent.child_nodes.cend());
   return child_node->first;
 }
 
@@ -203,13 +203,13 @@ auto GetFirstLevelChild(const std::vector<calc::TreeNode>& tree_nodes,
   auto delta = 0;
 
   for (const auto& tree_node : tree_nodes) {
-    const auto next_delta = delta + static_cast<int>(tree_node.outputs_.size());
+    const auto next_delta = delta + static_cast<int>(tree_node.outputs.size());
 
     if (output_index < next_delta) {
       const auto child_index = output_index - delta;
-      const auto child_tree = tree_node.child_nodes_.find(child_index);
+      const auto child_tree = tree_node.child_nodes.find(child_index);
 
-      if (child_tree == tree_node.child_nodes_.cend()) {
+      if (child_tree == tree_node.child_nodes.cend()) {
         return std::nullopt;
       }
 
@@ -242,7 +242,7 @@ auto Calculator::PopulateOutput(const calc::TreeNode& output_tree,
       [output_pin, &project, &id_generator, &parent_stack, &output_root_id,
        &diagram_copy = diagram_copy_](const auto& tree_node) {
         const auto& family =
-            core::Project::FindFamily(project, tree_node.family_id_);
+            core::Project::FindFamily(project, tree_node.family_id);
         const auto& node =
             diagram_copy->EmplaceNode(family.CreateNode(id_generator));
 
@@ -331,7 +331,8 @@ void Calculator::Calculate() {
       .settings = settings,
       .input_nodes = GetInputNodes(diagram),
       .client_node =
-          calc::TreeNode{.family_id_ = GetClientFamilyId(core_project)},
+          calc::TreeNode{.family_id = GetClientFamilyId(core_project),
+                         .num_clients = 1},
       .family_nodes =
           AsFamilyNodes(core_project.GetFamilies(), settings.family_settings)});
 }

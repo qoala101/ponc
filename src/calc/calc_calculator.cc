@@ -26,16 +26,17 @@ auto MakePermutationTree(
   auto permutation_tree = family_node;
 
   for (auto output_index = 0;
-       output_index < static_cast<int>(permutation.size()); ++output_index) {
+       output_index < static_cast<OutputIndex>(permutation.size());
+       ++output_index) {
     const auto &best_output_tree = permutation[output_index];
 
     if (!best_output_tree.has_value()) {
       continue;
     }
 
-    permutation_tree.tree_cost_ += (*best_output_tree)->tree_cost_;
-    permutation_tree.num_clients_ += (*best_output_tree)->num_clients_;
-    permutation_tree.child_nodes_.emplace(output_index, **best_output_tree);
+    permutation_tree.tree_cost += (*best_output_tree)->tree_cost;
+    permutation_tree.num_clients += (*best_output_tree)->num_clients;
+    permutation_tree.child_nodes.emplace(output_index, **best_output_tree);
   }
 
   return permutation_tree;
@@ -54,12 +55,10 @@ Calculator::Calculator(const ConstructorArgs &args)
       client_node_{args.client_node},
       family_nodes_{args.family_nodes},
       step_callback_{args.step_callback} {
-  client_node_.num_clients_ = 1;
-
   std::stable_sort(family_nodes_.begin(), family_nodes_.end(),
                    [](const auto &left, const auto &right) {
-                     return std::pair{left.node_cost_, left.outputs_.size()} <
-                            std::pair{right.node_cost_, right.outputs_.size()};
+                     return std::pair{left.node_cost, left.outputs.size()} <
+                            std::pair{right.node_cost, right.outputs.size()};
                    });
 
   FindUniqueOutputs();
@@ -93,15 +92,16 @@ auto Calculator::TakeResult() -> std::vector<TreeNode> {
   Expects(!best_output_trees->second.empty());
   const auto best_output_tree = std::prev(best_output_trees->second.end());
 
-  Expects(best_output_tree->second.outputs_.size() == input_nodes_.size());
+  Expects(best_output_tree->second.outputs.size() == input_nodes_.size());
   auto calculated_trees = std::vector<TreeNode>{};
 
   for (auto output_index = 0;
-       output_index < static_cast<int>(input_nodes_.size()); ++output_index) {
+       output_index < static_cast<OutputIndex>(input_nodes_.size());
+       ++output_index) {
     const auto calculated_tree =
-        best_output_tree->second.child_nodes_.find(output_index);
+        best_output_tree->second.child_nodes.find(output_index);
 
-    if (calculated_tree == best_output_tree->second.child_nodes_.cend()) {
+    if (calculated_tree == best_output_tree->second.child_nodes.cend()) {
       calculated_trees.emplace_back(std::move(input_nodes_[output_index]));
       continue;
     }
@@ -125,7 +125,7 @@ auto Calculator::IsStopped() {
 ///
 void Calculator::FindUniqueOutputs() {
   for (const auto &input_node : input_nodes_) {
-    for (const auto output : input_node.outputs_) {
+    for (const auto output : input_node.outputs) {
       unique_outputs_.emplace(output);
     }
   }
@@ -139,7 +139,7 @@ void Calculator::FindUniqueOutputs() {
       }
 
       for (const auto &family_node : family_nodes_) {
-        for (const auto family_output : family_node.outputs_) {
+        for (const auto family_output : family_node.outputs) {
           const auto output_sum = output + family_output;
 
           if (output_sum >= min_output_) {
@@ -161,7 +161,8 @@ void Calculator::FindBestOutputTrees() {
     }
 
     if (IsOutputInRange(output)) {
-      best_trees_.emplace(output, std::map{std::pair{1, client_node_}});
+      best_trees_.emplace(
+          output, std::map{std::pair{client_node_.num_clients, client_node_}});
     }
 
     for (const auto &family_node : family_nodes_) {
@@ -174,10 +175,10 @@ void Calculator::FindBestOutputTrees() {
 void Calculator::FindBestTreesForOutput(FlowValue output,
                                         const TreeNode &family_node) {
   auto permutation =
-      std::vector<std::optional<const TreeNode *>>(family_node.outputs_.size());
+      std::vector<std::optional<const TreeNode *>>(family_node.outputs.size());
   auto num_clients_indices = std::unordered_map<FlowValue, NumClientsIndex>{};
 
-  for (const auto family_output : family_node.outputs_) {
+  for (const auto family_output : family_node.outputs) {
     const auto output_sum = output + family_output;
     num_clients_indices.emplace(output_sum, 0);
   }
@@ -192,15 +193,15 @@ auto Calculator::TestBestTreesPermutation(
     std::vector<std::optional<const TreeNode *>> &permutation,
     FlowValue output_index) {
   auto permutation_num_clients = 0;
-  auto permutation_tree_cost = family_node.node_cost_;
+  auto permutation_tree_cost = family_node.node_cost;
 
   for (const auto &best_output_tree : permutation) {
     if (!best_output_tree.has_value()) {
       continue;
     }
 
-    permutation_num_clients += (*best_output_tree)->num_clients_;
-    permutation_tree_cost += (*best_output_tree)->tree_cost_;
+    permutation_num_clients += (*best_output_tree)->num_clients;
+    permutation_tree_cost += (*best_output_tree)->tree_cost;
   }
 
   if (permutation_num_clients > num_clients_) {
@@ -210,12 +211,13 @@ auto Calculator::TestBestTreesPermutation(
   const auto best_existing_tree = GetBestTree(output, permutation_num_clients);
 
   if (best_existing_tree.has_value() &&
-      permutation_tree_cost > (*best_existing_tree)->tree_cost_) {
+      permutation_tree_cost > (*best_existing_tree)->tree_cost) {
     return false;
   }
 
   if (const auto permutation_is_ready =
-          output_index >= static_cast<int>(family_node.outputs_.size())) {
+          output_index >=
+          static_cast<OutputIndex>(family_node.outputs.size())) {
     if (permutation_num_clients <= 0) {
       return false;
     }
@@ -226,7 +228,7 @@ auto Calculator::TestBestTreesPermutation(
       return false;
     }
 
-    if (permutation_tree_cost < (*best_existing_tree)->tree_cost_) {
+    if (permutation_tree_cost < (*best_existing_tree)->tree_cost) {
       **best_existing_tree = MakePermutationTree(family_node, permutation);
     }
 
@@ -256,7 +258,7 @@ void Calculator::MakeBestTreesPermutation(
   const auto next_ouput_index = output_index + 1;
 
   Expects(output_index >= 0);
-  const auto output_sum = output + family_node.outputs_[output_index];
+  const auto output_sum = output + family_node.outputs[output_index];
   const auto best_output_trees = best_trees_.find(output_sum);
 
   if (best_output_trees != best_trees_.end()) {
@@ -306,11 +308,11 @@ void Calculator::FindBestRootTree() {
   auto next_node_input = kRootInput - 1;
 
   for (const auto &input_node : input_nodes_) {
-    root_family.outputs_.emplace_back(next_node_input - kRootInput);
+    root_family.outputs.emplace_back(next_node_input - kRootInput);
 
     auto input_node_family = input_node;
 
-    for (auto &output : input_node_family.outputs_) {
+    for (auto &output : input_node_family.outputs) {
       output -= next_node_input;
     }
 

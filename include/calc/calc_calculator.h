@@ -44,9 +44,6 @@ class Calculator {
 
  private:
   ///
-  using TreeIndex = int;
-
-  ///
   auto IsOutputInRange(FlowValue ouput) const;
   ///
   auto IsStopped();

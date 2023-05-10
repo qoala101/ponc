@@ -10,17 +10,17 @@ namespace vh::ponc::calc {
 ///
 struct TreeNode {
   ///
-  core::FamilyId family_id_{};
+  core::FamilyId family_id{};
   ///
-  Cost node_cost_{};
+  Cost node_cost{};
   ///
-  Cost tree_cost_{};
+  Cost tree_cost{};
   ///
-  NumClients num_clients_{};
+  NumClients num_clients{};
   ///
-  std::vector<OutputIndex> outputs_{};
+  std::vector<OutputIndex> outputs{};
   ///
-  std::map<OutputIndex, TreeNode> child_nodes_{};
+  std::map<OutputIndex, TreeNode> child_nodes{};
 };
 }  // namespace vh::ponc::calc
 
