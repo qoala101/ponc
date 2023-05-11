@@ -2,6 +2,7 @@
 #define VH_PONC_CORE_DIAGRAM_H_
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "core_i_node.h"

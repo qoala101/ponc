@@ -22,7 +22,7 @@ void Upgrade0(crude_json::value& project_json) {
 
   for (auto family_id = 3; family_id <= 16; ++family_id) {
     settings.calculator_settings.family_settings.emplace_back(
-        core::CalculatorFamilySettings{family_id});
+        core::CalculatorFamilySettings{static_cast<core::FamilyId>(family_id)});
   }
 
   core::Settings::ResetToDefault(settings);

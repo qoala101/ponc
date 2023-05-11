@@ -1,5 +1,8 @@
 #include "calc_resolution.h"
 
+#include <algorithm>
+#include <iterator>
+
 namespace vh::ponc::calc {
 namespace {
 ///
