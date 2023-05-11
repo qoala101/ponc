@@ -13,7 +13,7 @@ OpenFileDialog::OpenFileDialog()
       confirmation_dialog_{
           {.title = "Open Project",
            .question = "Current project would not be saved.\nProceed?",
-           .ok_label = "Open Project"}} {}
+           .accept = "Open Project"}} {}
 
 ///
 void OpenFileDialog::Draw(const Callbacks &callbacks,

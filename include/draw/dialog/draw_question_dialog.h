@@ -16,13 +16,17 @@ class QuestionDialog {
     cpp::Signal<> accepted{};
   };
 
-  struct ConstructorArgs {
+  ///
+  struct Labels {
+    ///
     std::string title{};
+    ///
     std::string question{};
-    std::string ok_label{};
+    ///
+    std::string accept{};
   };
 
-  explicit QuestionDialog(const ConstructorArgs &args);
+  explicit QuestionDialog(Labels labels);
 
   ///
   void Open();
@@ -33,9 +37,7 @@ class QuestionDialog {
   ///
   bool open_requested_{};
   ///
-  std::string title_{};
-  std::string question_{};
-  std::string ok_label_{};
+  Labels labels_{};
 };
 }  // namespace vh::ponc::draw
 

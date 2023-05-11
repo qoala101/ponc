@@ -4,15 +4,15 @@
 #include "imgui.h"
 
 namespace vh::ponc::draw {
-QuestionDialog::QuestionDialog(const ConstructorArgs &args)
-    : title_{args.title}, question_{args.question}, ok_label_{args.ok_label} {}
+///
+QuestionDialog::QuestionDialog(Labels labels) : labels_{std::move(labels)} {}
 
 ///
 void QuestionDialog::Open() { open_requested_ = true; }
 
 ///
 void QuestionDialog::Draw(const Callbacks &callbacks) {
-  const auto *title_data = title_.c_str();
+  const auto *title_data = labels_.title.c_str();
 
   if (open_requested_) {
     ImGui::OpenPopup(title_data);
@@ -27,11 +27,11 @@ void QuestionDialog::Draw(const Callbacks &callbacks) {
 
   if (ImGui::BeginPopupModal(title_data, nullptr,
                              ImGuiWindowFlags_AlwaysAutoResize)) {
-    ImGui::TextUnformatted(question_.data());
+    ImGui::TextUnformatted(labels_.question.data());
     ImGui::Separator();
     ImGui::BeginHorizontal("Buttons");
 
-    if (ImGui::Button(ok_label_.c_str())) {
+    if (ImGui::Button(labels_.accept.c_str())) {
       callbacks.accepted();
       ImGui::CloseCurrentPopup();
     }

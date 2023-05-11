@@ -12,7 +12,6 @@ struct Cloner : public cpp::NoInstances {
   static auto Clone(const core::Diagram& diagram,
                     const std::vector<std::unique_ptr<core::IFamily>>& families)
       -> core::Diagram;
-
   ///
   static void RewireIds(const std::vector<core::IdPtr>& ids,
                         core::IdGenerator& id_generator);

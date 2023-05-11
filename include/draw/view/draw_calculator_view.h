@@ -11,6 +11,7 @@ class CalculatorView : public IView {
  public:
   ///
   auto GetLabel() const -> std::string override;
+
   ///
   void Draw(coreui::Calculator& calculator, core::Project& project);
 };

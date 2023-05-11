@@ -29,6 +29,45 @@ auto GetTitle(const std::vector<ne::NodeId>& nodes) {
 
   return "Nodes (" + std::to_string(nodes.size()) + ")";
 }
+
+///
+void DrawReplaceActions(coreui::Diagram& diagram, const core::INode& node) {
+  ImGui::Separator();
+
+  if (ImGui::BeginMenu("Replace With")) {
+    FamilyGroupsMenu::Draw(
+        diagram.GetFamilyGroups(),
+        {.is_family_enabled =
+             [&diagram, &node](const auto& family) {
+               const auto sample_node = family.CreateSampleNode();
+               return diagram.CanReplaceNode(node, *sample_node);
+             },
+         .family_selected =
+             [&diagram, &node](const auto& family) {
+               diagram.ReplaceNode(node, family.CreateNode());
+             }});
+
+    ImGui::EndMenu();
+  }
+}
+
+///
+void DrawNodeActions(const core::INode& node) {
+  const auto node_traits = node.CreateUiTraits();
+  const auto node_action_names = node_traits->GetActionNames();
+
+  if (node_action_names.empty()) {
+    return;
+  }
+
+  ImGui::Separator();
+
+  for (const auto& action_name : node_action_names) {
+    if (ImGui::MenuItem(action_name.c_str())) {
+      node_traits->ExecuteAction(action_name);
+    }
+  }
+}
 }  // namespace
 
 ///
@@ -69,40 +108,10 @@ void NodePopup::Draw(coreui::Diagram& diagram) {
     return;
   }
 
-  ImGui::Separator();
-
   const auto& node =
       core::Diagram::FindNode(diagram.GetDiagram(), selected_nodes.front());
 
-  if (ImGui::BeginMenu("Replace With")) {
-    FamilyGroupsMenu::Draw(
-        diagram.GetFamilyGroups(),
-        {.is_family_enabled =
-             [&diagram, &node](const auto& family) {
-               const auto sample_node = family.CreateSampleNode();
-               return diagram.CanReplaceNode(node, *sample_node);
-             },
-         .family_selected =
-             [&diagram, &node](const auto& family) {
-               diagram.ReplaceNode(node, family.CreateNode());
-             }});
-
-    ImGui::EndMenu();
-  }
-
-  const auto node_traits = node.CreateUiTraits();
-  const auto node_action_names = node_traits->GetActionNames();
-
-  if (node_action_names.empty()) {
-    return;
-  }
-
-  ImGui::Separator();
-
-  for (const auto& action_name : node_action_names) {
-    if (ImGui::MenuItem(action_name.c_str())) {
-      node_traits->ExecuteAction(action_name);
-    }
-  }
+  DrawReplaceActions(diagram, node);
+  DrawNodeActions(node);
 }
 }  // namespace vh::ponc::draw

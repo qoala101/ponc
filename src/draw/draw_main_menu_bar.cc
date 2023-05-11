@@ -43,7 +43,7 @@ MainMenuBar::MainMenuBar()
     : new_project_dialog_{
           {.title = "New Project",
            .question = "Current project would not be saved.\nProceed?",
-           .ok_label = "New Project"}} {}
+           .accept = "New Project"}} {}
 
 ///
 void MainMenuBar::Draw(coreui::Project &project) {
