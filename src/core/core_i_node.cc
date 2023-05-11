@@ -123,11 +123,11 @@ auto INode::GetInitialFlow() const -> flow::NodeFlow {
 }
 
 ///
-INode::INode(ConstructorArgs args)
+INode::INode(const ConstructorArgs& args)
     : id_{args.id},
       family_id_{args.family_id},
       input_pin_id_{args.input_pin_id},
-      output_pin_ids_{std::move(args.output_pin_ids)},
+      output_pin_ids_{args.output_pin_ids},
       pos_{args.pos} {}
 
 ///

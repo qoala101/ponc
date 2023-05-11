@@ -82,7 +82,7 @@ class INode : public cpp::Interface {
 
  protected:
   ///
-  explicit INode(ConstructorArgs args);
+  explicit INode(const ConstructorArgs &args);
 
  private:
   ///

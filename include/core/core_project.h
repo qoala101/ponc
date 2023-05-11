@@ -23,7 +23,7 @@ class Project {
 
   ///
   Project(Settings settings, std::vector<std::unique_ptr<IFamily>> families,
-          std::vector<Diagram> diagrams);
+          std::vector<Diagram> diagrams = {});
 
   ///
   auto GetSettings() const -> const Settings &;

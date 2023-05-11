@@ -16,7 +16,7 @@ namespace vh::ponc::core {
 class Diagram {
  public:
   ///
-  explicit Diagram(std::string name = "Diagram",
+  explicit Diagram(std::string name = {},
                    std::vector<std::unique_ptr<INode>> nodes = {},
                    std::vector<Link> links = {});
 

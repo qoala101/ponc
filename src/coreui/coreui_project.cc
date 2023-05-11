@@ -44,8 +44,11 @@ auto Project::CreateProject() const {
               core::CalculatorFamilySettings::FromFamilies(families)}};
   core::Settings::ResetToDefault(settings);
 
-  return core::Project{std::move(settings), std::move(families),
-                       std::vector<core::Diagram>(1)};
+  auto project = core::Project{std::move(settings), std::move(families), {}};
+  project.EmplaceDiagram(
+      core::Diagram{core::Project::MakeUniqueDiagramName(project)});
+
+  return project;
 }
 
 ///
