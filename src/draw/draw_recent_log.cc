@@ -24,7 +24,7 @@ void DrawRecentLog(const coreui::Log& log, const LogView& log_view) {
   const auto padding = ImGui::GetStyle().WindowPadding * 2;
   const auto window_pos =
       viewport->WorkPos + ImVec2{padding.x, viewport->WorkSize.y - padding.y};
-  const auto window_pivot = ImVec2{0.F, 1.F};
+  const auto window_pivot = ImVec2{0, 1};
 
   ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pivot);
   ImGui::SetNextWindowSizeConstraints(ImVec2{0, 0},

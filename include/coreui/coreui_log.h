@@ -7,7 +7,7 @@
 
 namespace vh::ponc::coreui {
 ///
-enum class LogLevel { kInfo, kWarning, kError, kDone };
+enum class LogLevel { kInfo, kError, kDone };
 
 ///
 struct LogMessage {

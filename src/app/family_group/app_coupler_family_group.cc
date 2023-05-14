@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <memory>
 
-#include "core_gradient.h"
 #include "core_i_node.h"
 #include "core_id_generator.h"
 #include "coreui_empty_pin_traits.h"
@@ -18,6 +17,8 @@
 #include "json_i_family_writer.h"
 #include "json_i_node_parser.h"
 #include "json_i_node_writer.h"
+#include "style_tailwind_colors.h"
+#include "style_utils.h"
 
 namespace vh::ponc {
 namespace {
@@ -164,8 +165,8 @@ class HeaderUiTraits : public coreui::IHeaderTraits {
   explicit HeaderUiTraits(cpp::SafePtr<Node> node) : node_{std::move(node)} {}
 
   auto GetColor() const -> ImColor override {
-    return core::GetGradient(
-        {0.5F, 0.F, 0.5F}, {1.F, 0.F, 1.F},
+    return style::GetGradient(
+        style::TailwindColors::kPurple800, style::TailwindColors::kPurple600,
         1.F - static_cast<float>(node_->GetPercentageIndex()) * 0.1F);
   }
 

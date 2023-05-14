@@ -19,6 +19,7 @@
 #include "json_i_family_writer.h"
 #include "json_i_node_parser.h"
 #include "json_i_node_writer.h"
+#include "style_default_colors.h"
 
 namespace vh::ponc::core {
 namespace {
@@ -75,7 +76,7 @@ class PinTraits : public coreui::FlowPinTraits {
   auto GetValue() const -> coreui::PinValueVariant override { return {}; }
 
   auto GetLabel() const -> std::optional<coreui::PinLabel> override {
-    return coreui::PinLabel{.color = {1.F, 1.F, 1.F}};
+    return coreui::PinLabel{.color = style::DefaultColors::kWhite};
   }
 };
 

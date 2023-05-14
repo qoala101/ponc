@@ -5,6 +5,7 @@
 #include "coreui_native_facade.h"
 #include "coreui_node.h"
 #include "flow_tree_traversal.h"
+#include "style_utils.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
 
 #include <algorithm>
@@ -39,6 +40,7 @@
 #include "flow_tree_node.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
+#include "style_default_colors.h"
 
 namespace vh::ponc::coreui {
 ///
@@ -363,7 +365,7 @@ auto Diagram::GetFlowColor(float flow) const {
   const auto& settings = parent_project_->GetProject().GetSettings();
 
   if (!settings.color_flow) {
-    return ImColor{1.F, 1.F, 1.F};
+    return ImColor{style::DefaultColors::kWhite};
   }
 
   return core::Settings::GetFlowColor(settings, flow);
@@ -381,7 +383,7 @@ auto Diagram::LinkFrom(const core::Link& core_link,
       linker_.IsRepiningLink(link.core_link.id) ? 0.5F : 1.F;
 
   if (!parent_project_->GetProject().GetSettings().color_flow) {
-    link.color = {1.F, 1.F, 1.F, link_alpha};
+    link.color = style::WithAlpha(style::DefaultColors::kWhite, link_alpha);
     return link;
   }
 
@@ -427,7 +429,7 @@ auto Diagram::GetHeaderColor(const IHeaderTraits& header_traits,
     return GetFlowColor(input_flow->second);
   }
 
-  return ImColor{1.F, 1.F, 1.F};
+  return ImColor{style::DefaultColors::kWhite};
 }
 
 ///

@@ -23,7 +23,7 @@ void QuestionDialog::Draw(const Callbacks &callbacks) {
   Expects(viewport != nullptr);
 
   ImGui::SetNextWindowPos(viewport->GetCenter(), ImGuiCond_Appearing,
-                          ImVec2{0.5F, 0.5F});
+                          ImVec2{0.5, 0.5});
 
   if (ImGui::BeginPopupModal(title_data, nullptr,
                              ImGuiWindowFlags_AlwaysAutoResize)) {

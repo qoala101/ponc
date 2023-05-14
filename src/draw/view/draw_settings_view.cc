@@ -7,24 +7,25 @@
 #include "core_settings.h"
 #include "draw_settings_table_row.h"
 #include "draw_table_flags.h"
+#include "style_flow_colors.h"
 
 namespace vh::ponc::draw {
 namespace {
 ///
 void DrawFlowColors(core::Settings& settings) {
   if (ImGui::TreeNodeEx("Flow Colors", ImGuiTreeNodeFlags_DefaultOpen)) {
-    ImGui::ColorButton("##Very Low", ImColor{0.F, 0.F, 1.F});
+    ImGui::ColorButton("##Very Low", ImColor{style::FlowColors::kMin});
     ImGui::SameLine();
-    ImGui::DragFloat("Very Low", &settings.min_flow, 0.01F,
+    ImGui::DragFloat("Very Low", &settings.min_flow, 0.01,
                      -std::numeric_limits<float>::max(), settings.low_flow,
                      "%.2f");
 
-    ImGui::ColorButton("##Low", ImColor{0.F, 1.F, 1.F});
+    ImGui::ColorButton("##Low", ImColor{style::FlowColors::kLow});
     ImGui::SameLine();
     ImGui::SliderFloat("Low", &settings.low_flow, settings.min_flow,
                        settings.high_flow, "%.2f");
 
-    ImGui::ColorButton("##Good", ImColor{0.F, 1.F, 0.F});
+    ImGui::ColorButton("##Good", ImColor{style::FlowColors::kGood});
     ImGui::SameLine();
 
     const auto good_flow =
@@ -32,14 +33,14 @@ void DrawFlowColors(core::Settings& settings) {
 
     ImGui::Text("%.3f Good", good_flow);
 
-    ImGui::ColorButton("##High", ImColor{1.F, 1.F, 0.F});
+    ImGui::ColorButton("##High", ImColor{style::FlowColors::kHigh});
     ImGui::SameLine();
     ImGui::SliderFloat("High", &settings.high_flow, settings.low_flow,
                        settings.max_flow, "%.2f");
 
-    ImGui::ColorButton("##Very High", ImColor{1.F, 0.F, 0.F});
+    ImGui::ColorButton("##Very High", ImColor{style::FlowColors::kMax});
     ImGui::SameLine();
-    ImGui::DragFloat("Very High", &settings.max_flow, 0.01F, settings.high_flow,
+    ImGui::DragFloat("Very High", &settings.max_flow, 0.01, settings.high_flow,
                      std::numeric_limits<float>::max(), "%.2f");
 
     ImGui::TreePop();

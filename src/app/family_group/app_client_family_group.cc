@@ -18,6 +18,7 @@
 #include "json_i_family_writer.h"
 #include "json_i_node_parser.h"
 #include "json_i_node_writer.h"
+#include "style_tailwind_colors.h"
 
 namespace vh::ponc {
 namespace {
@@ -72,7 +73,8 @@ class PinTraits : public coreui::FlowPinTraits {
   using FlowPinTraits::FlowPinTraits;
 
   auto GetLabel() const -> std::optional<coreui::PinLabel> override {
-    return coreui::PinLabel{.text = "Client", .color = {0.F, 0.5F, 0.F}};
+    return coreui::PinLabel{.text = "Client",
+                            .color = style::TailwindColors::kEmerald700};
   }
 };
 

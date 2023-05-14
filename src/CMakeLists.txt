@@ -22,7 +22,6 @@ add_executable(ponc
 
   core/core_diagram.cc
   core/core_free_pin_family_group.cc
-  core/core_gradient.cc
   core/core_i_family_group.cc
   core/core_i_family.cc
   core/core_i_node.cc
@@ -110,6 +109,8 @@ add_executable(ponc
 
   resource/node_header_texture.png
 
+  style/style_utils.cc
+
   main.cc
 )
 
@@ -130,6 +131,7 @@ target_include_directories(ponc
   ${PROJECT_SOURCE_DIR}/include/draw/view
   ${PROJECT_SOURCE_DIR}/include/flow
   ${PROJECT_SOURCE_DIR}/include/json
+  ${PROJECT_SOURCE_DIR}/include/style
 )
 
 target_link_libraries(ponc

@@ -289,7 +289,7 @@ void NodeMover::ArrangeAsTreeVisitNode(const flow::TreeNode& tree_node) {
 
   for (auto child_node = child_nodes.cbegin(); child_node != child_nodes.cend();
        ++child_node) {
-    MoveTreeTo(child_node->second, {0.F, next_child_y});
+    MoveTreeTo(child_node->second, {0, next_child_y});
 
     const auto child_tree_rect = GetTreeRect(child_node->second);
     next_child_y += child_tree_rect.GetHeight();

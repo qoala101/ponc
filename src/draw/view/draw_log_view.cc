@@ -6,6 +6,8 @@
 #include <limits>
 
 #include "coreui_log.h"
+#include "style_default_colors.h"
+#include "style_tailwind_colors.h"
 
 namespace vh::ponc::draw {
 namespace {
@@ -21,16 +23,14 @@ auto ToString(std::chrono::time_point<std::chrono::system_clock> time) {
 }
 
 ///
-auto GetLogColor(coreui::LogLevel log_level) {
+auto GetLogColor(coreui::LogLevel log_level) -> ImColor {
   switch (log_level) {
     case coreui::LogLevel::kInfo:
-      return ImColor{0.5F, 0.5F, 1.F};
-    case coreui::LogLevel::kWarning:
-      return ImColor{1.F, 1.F, 0.5F};
+      return style::TailwindColors::kBlue500;
     case coreui::LogLevel::kError:
-      return ImColor{1.F, 0.5F, 0.5F};
+      return style::DefaultColors::kError;
     case coreui::LogLevel::kDone:
-      return ImColor{0.5F, 1.F, 0.5F};
+      return style::DefaultColors::kSuccess;
   }
 }
 
@@ -39,8 +39,6 @@ auto ToString(coreui::LogLevel log_level) {
   switch (log_level) {
     case coreui::LogLevel::kInfo:
       return "[info]";
-    case coreui::LogLevel::kWarning:
-      return "[warning]";
     case coreui::LogLevel::kError:
       return "[error]";
     case coreui::LogLevel::kDone:

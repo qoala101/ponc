@@ -15,6 +15,7 @@
 #include "json_i_family_writer.h"
 #include "json_i_node_parser.h"
 #include "json_i_node_writer.h"
+#include "style_tailwind_colors.h"
 
 namespace vh::ponc {
 namespace {
@@ -98,7 +99,9 @@ class ValuePinTraits : public coreui::IPinTraits {
 
 class HeaderUiTraits : public coreui::IHeaderTraits {
  public:
-  auto GetColor() const -> ImColor override { return {1.F, 0.F, 0.F}; }
+  auto GetColor() const -> ImColor override {
+    return style::TailwindColors::kRose700;
+  }
 };
 
 class NodeUiTraits : public coreui::INodeTraits {

@@ -1,14 +1,16 @@
+#include "style_tailwind_colors.h"
+#include "style_utils.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include "draw_linker.h"
-
 #include <variant>
 
 #include "coreui_linker.h"
 #include "draw_connect_node_popup.h"
+#include "draw_linker.h"
 #include "draw_tooltip.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
 #include "imgui_node_editor_internal.h"
+#include "style_default_colors.h"
 
 namespace vh::ponc::draw {
 namespace {
@@ -17,8 +19,9 @@ void DrawNewLinkQuery(coreui::Linker &linker, float new_link_alpha) {
   const auto [can_create_link, reason] = linker.GetCanCreateLinkReason();
 
   if (!can_create_link) {
-    DrawTooltip(reason, {0.33F, 0.F, 0.F, 0.75F});
-    ne::RejectNewItem({1.F, 0.5F, 0.5F, new_link_alpha}, 4);
+    DrawTooltip(reason, style::WithAlpha(style::DefaultColors::kError, 0.75));
+    ne::RejectNewItem(
+        style::WithAlpha(style::DefaultColors::kError, new_link_alpha), 4);
     return;
   }
 
@@ -26,9 +29,11 @@ void DrawNewLinkQuery(coreui::Linker &linker, float new_link_alpha) {
     return;
   }
 
-  DrawTooltip(reason.c_str(), {0.F, 0.33F, 0.F, 0.75F});
+  DrawTooltip(reason, style::WithAlpha(style::DefaultColors::kSuccess, 0.75));
 
-  if (!ne::AcceptNewItem({0.5F, 1.F, 0.5F, new_link_alpha}, 4)) {
+  if (!ne::AcceptNewItem(
+          style::WithAlpha(style::DefaultColors::kSuccess, new_link_alpha),
+          4)) {
     return;
   }
 
@@ -81,7 +86,8 @@ void Linker::Draw(coreui::Linker &linker,
   const auto &manual_links = linker.GetManualLinks();
   const auto new_link_alpha = manual_links.empty() ? 1.F : 0.F;
 
-  if (ne::BeginCreate({1.F, 1.F, 1.F, new_link_alpha}, 3)) {
+  if (ne::BeginCreate(
+          style::WithAlpha(style::DefaultColors::kWhite, new_link_alpha), 3)) {
     auto dragged_from_pin = ne::PinId{};
     auto hovering_over_pin = ne::PinId{};
 
@@ -108,7 +114,8 @@ void Linker::Draw(coreui::Linker &linker,
 ///
 void Linker::DrawNewNodeQuery(coreui::Linker &linker,
                               const ImVec2 &new_node_pos) {
-  DrawTooltip(ConnectNodePopup::GetLabel(), {0.F, 0.33F, 0.F, 0.75F});
+  DrawTooltip(ConnectNodePopup::GetLabel(),
+              style::WithAlpha(style::DefaultColors::kSuccess, 0.75));
 
   if (!ne::AcceptNewItem()) {
     return;

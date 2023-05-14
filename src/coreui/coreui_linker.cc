@@ -19,6 +19,7 @@
 #include "flow_tree_traversal.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
+#include "style_default_colors.h"
 
 namespace vh::ponc::coreui {
 namespace {
@@ -81,24 +82,22 @@ void Linker::SetPins(const std::optional<ne::PinId>& dragged_from_pin,
             .id = fixed_pin,
             .kind = core::Link::GetPinKind(**link_to_repin, fixed_pin),
             .node_id = core::Diagram::FindPinNode(diagram, fixed_pin).GetId()}};
-
-    UpdateManualLinks();
   }
 
   linking_data_->circular_pins_ = FindCircularPins();
 
-  if (!hovering_over_pin.has_value()) {
-    return;
+  if (hovering_over_pin.has_value()) {
+    const auto& hovering_over_pin_node =
+        core::Diagram::FindPinNode(diagram, *hovering_over_pin);
+
+    linking_data_->hovering_data = HoveringData{
+        .hovering_over_pin = *hovering_over_pin,
+        .hovering_over_pin_kind =
+            core::INode::GetPinKind(hovering_over_pin_node, *hovering_over_pin),
+        .reason = GetCanConnectToPinReason(*hovering_over_pin).second};
   }
 
-  const auto& hovering_over_pin_node =
-      core::Diagram::FindPinNode(diagram, *hovering_over_pin);
-
-  linking_data_->hovering_data = HoveringData{
-      .hovering_over_pin = *hovering_over_pin,
-      .hovering_over_pin_kind =
-          core::INode::GetPinKind(hovering_over_pin_node, *hovering_over_pin),
-      .reason = GetCanConnectToPinReason(*hovering_over_pin).second};
+  UpdateManualLinks();
 }
 
 ///
@@ -405,16 +404,18 @@ auto Linker::CreateManualLink(ne::PinId source_pin,
 auto Linker::GetRepinningLinkColor() const {
   Expects(linking_data_.has_value());
 
-  if (const auto not_hovering_over_pin =
-          !linking_data_->hovering_data.has_value()) {
-    return ImColor{1.F, 1.F, 1.F};
+  const auto& hovering_data = linking_data_->hovering_data;
+
+  if (!hovering_data.has_value() || (hovering_data->hovering_over_pin ==
+                                     linking_data_->dragged_from_pin_data.id)) {
+    return style::DefaultColors::kWhite;
   }
 
   if (const auto can_link_to_hovered_pin = GetCanCreateLinkReason().first) {
-    return ImColor{0.5F, 1.F, 0.5F};
+    return style::DefaultColors::kSuccess;
   }
 
-  return ImColor{1.F, 0.5F, 0.5F};
+  return style::DefaultColors::kError;
 }
 
 ///
@@ -439,7 +440,7 @@ void Linker::UpdateManualLinks() {
   }
 
   const auto& new_node_pos = creating_data->new_node_pos;
-  const auto creating_link_color = ImColor{1.F, 1.F, 1.F};
+  const auto creating_link_color = style::DefaultColors::kWhite;
 
   if (!creating_data->create_for_all_pins) {
     const auto creating_link = CreateManualLink(
