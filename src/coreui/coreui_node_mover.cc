@@ -384,7 +384,7 @@ void NodeMover::ArrangeAsNewTrees(
     return;
   }
 
-  const auto flow_trees = flow::BuildFlowTrees(parent_diagram_->GetDiagram());
+  const auto& flow_trees = parent_diagram_->GetFlowTrees();
 
   auto parent_trees = GetParentTrees(flow_trees, tree_nodes);
   std::stable_sort(parent_trees.begin(), parent_trees.end(),

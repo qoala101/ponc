@@ -154,7 +154,7 @@ void MainMenuBar::DrawViews(coreui::Project &project) {
   node_view_.Draw(selected_node, diagram.GetFamilyGroups());
   nodes_view_.Draw(diagram);
   diagrams_view_.Draw(project);
-  flow_tree_view_.Draw(diagram.GetFlowTrees());
+  flow_tree_view_.Draw(diagram.GetNodeTrees());
 
   auto &core_project = project.GetProject();
 

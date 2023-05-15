@@ -73,22 +73,28 @@ Diagram::Diagram(cpp::SafePtr<Project> parent_project,
 
 ///
 void Diagram::OnFrame() {
+  flow::RebuildFlowTrees(*diagram_, flow_trees_);
+
   node_mover_.OnFrame();
 
-  const auto flow_trees = flow::BuildFlowTrees(*diagram_);
   const auto node_flows = flow::CalculateNodeFlows(
-      flow_trees, [&diagram = *diagram_](const auto node_id) {
+      flow_trees_, [&diagram = *diagram_](const auto node_id) {
         return core::Diagram::FindNode(diagram, node_id).GetInitialFlow();
       });
 
   UpdateLinks(node_flows);
   UpdateNodes(node_flows);
   UpdateFamilyGroups();
-  UpdateFlowTrees(flow_trees);
+  UpdateNodeTrees();
 }
 
 ///
 auto Diagram::GetDiagram() const -> core::Diagram& { return *diagram_; }
+
+///
+auto Diagram::GetFlowTrees() const -> const std::vector<flow::TreeNode>& {
+  return flow_trees_;
+}
 
 ///
 auto Diagram::GetNodeMover() const -> const NodeMover& {
@@ -217,10 +223,8 @@ void Diagram::TreeSelect(const std::vector<ne::NodeId>& node_ids) {
     return;
   }
 
-  const auto flow_trees = flow::BuildFlowTrees(*diagram_);
-
   for (const auto node_id : node_ids) {
-    const auto& tree_node = flow::FindTreeNode(flow_trees, node_id);
+    const auto& tree_node = flow::FindTreeNode(flow_trees_, node_id);
 
     flow::TraverseDepthFirst(
         tree_node,
@@ -237,10 +241,8 @@ void Diagram::TreeArrange(const std::vector<ne::NodeId>& node_ids) {
     return;
   }
 
-  const auto flow_trees = flow::BuildFlowTrees(*diagram_);
-
   for (const auto node_id : node_ids) {
-    const auto& tree_node = flow::FindTreeNode(flow_trees, node_id);
+    const auto& tree_node = flow::FindTreeNode(flow_trees_, node_id);
     node_mover_.ArrangeAsTree(tree_node);
   }
 }
@@ -356,8 +358,8 @@ auto Diagram::DeleteLink(ne::LinkId link_id) const -> Event& {
 }
 
 ///
-auto Diagram::GetFlowTrees() const -> const std::vector<TreeNode>& {
-  return flow_trees_;
+auto Diagram::GetNodeTrees() const -> const std::vector<TreeNode>& {
+  return node_trees_;
 }
 
 ///
@@ -626,23 +628,23 @@ void Diagram::UpdateTreeNode(TreeNode& tree_node) {
 }
 
 ///
-void Diagram::UpdateFlowTrees(const std::vector<flow::TreeNode>& core_trees) {
-  flow_trees_.clear();
+void Diagram::UpdateNodeTrees() {
+  node_trees_.clear();
 
-  if (core_trees.empty()) {
+  if (flow_trees_.empty()) {
     return;
   }
 
   auto parent_stack = std::stack<TreeNode*>{};
 
-  for (const auto& root_node : core_trees) {
+  for (const auto& root_node : flow_trees_) {
     flow::TraverseDepthFirst(
         root_node,
         [this, &parent_stack](const auto& core_tree_node) {
           auto& node = FindNode(*this, core_tree_node.node_id);
           auto& tree_node =
               parent_stack.empty()
-                  ? flow_trees_.emplace_back(
+                  ? node_trees_.emplace_back(
                         TreeNode{.node = safe_owner_.MakeSafe(&node)})
                   : parent_stack.top()->child_nodes.emplace_back(
                         TreeNode{.node = safe_owner_.MakeSafe(&node)});
@@ -651,7 +653,7 @@ void Diagram::UpdateFlowTrees(const std::vector<flow::TreeNode>& core_trees) {
         [&parent_stack](const auto&) { parent_stack.pop(); });
   }
 
-  for (auto& root_node : flow_trees_) {
+  for (auto& root_node : node_trees_) {
     UpdateTreeNode(root_node);
   }
 }

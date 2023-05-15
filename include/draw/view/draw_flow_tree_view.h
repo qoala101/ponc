@@ -14,7 +14,7 @@ class FlowTreeView : public IView {
   auto GetLabel() const -> std::string override;
 
   ///
-  void Draw(const std::vector<coreui::TreeNode>& flow_trees);
+  void Draw(const std::vector<coreui::TreeNode>& node_trees);
 };
 }  // namespace vh::ponc::draw
 

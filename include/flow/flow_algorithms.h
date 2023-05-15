@@ -13,6 +13,9 @@ namespace vh::ponc::flow {
 ///
 auto BuildFlowTrees(const core::Diagram &diagram) -> std::vector<TreeNode>;
 ///
+void RebuildFlowTrees(const core::Diagram &diagram,
+                      std::vector<TreeNode> &flow_trees);
+///
 auto CalculateNodeFlows(
     const std::vector<TreeNode> &flow_trees,
     const cpp::Query<NodeFlow, ne::NodeId> &get_initial_node_flow) -> NodeFlows;

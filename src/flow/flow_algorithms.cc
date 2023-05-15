@@ -1,13 +1,18 @@
 #include "flow_algorithms.h"
 
 #include <cstdint>
+#include <iostream>
+#include <optional>
+#include <set>
 #include <unordered_map>
 #include <unordered_set>
 
 #include "core_diagram.h"
+#include "core_id_value.h"
 #include "cpp_assert.h"
 #include "flow_node_flow.h"
 #include "flow_tree_node.h"
+#include "flow_tree_traversal.h"
 #include "imgui_node_editor.h"
 
 namespace vh::ponc::flow {
@@ -99,6 +104,86 @@ void CalculateNodeFlow(
                       added_flow);
   }
 }
+
+///
+auto FindNodeIfExists(const core::Diagram &diagram, ne::NodeId node_id)
+    -> std::optional<const core::INode *> {
+  const auto &nodes = diagram.GetNodes();
+  const auto node = std::find_if(
+      nodes.begin(), nodes.end(),
+      [node_id](const auto &node) { return node->GetId() == node_id; });
+
+  if (node == nodes.cend()) {
+    return std::nullopt;
+  }
+
+  return &**node;
+}
+
+///
+auto DoFlowTreesMatchDiagram(const std::vector<TreeNode> &flow_trees,
+                             const core::Diagram &diagram) {
+  auto child_is_missing = false;
+  auto flow_tree_node_ids = std::set<core::IdValue<ne::NodeId>>{};
+  auto flow_tree_link_pins =
+      std::set<std::pair<core::IdValue<ne::PinId>, core::IdValue<ne::PinId>>>{};
+
+  for (const auto &flow_tree : flow_trees) {
+    TraverseDepthFirst(
+        flow_tree,
+        [&diagram, &child_is_missing, &flow_tree_node_ids,
+         &flow_tree_link_pins](const auto &tree_node) {
+          if (child_is_missing) {
+            return;
+          }
+
+          flow_tree_node_ids.emplace(tree_node.node_id);
+
+          for (const auto &[pin_to_child, child_node] : tree_node.child_nodes) {
+            const auto child = FindNodeIfExists(diagram, child_node.node_id);
+
+            if (!child.has_value()) {
+              child_is_missing = true;
+              break;
+            }
+
+            const auto &child_pin = (*child)->GetInputPinId();
+            Expects(child_pin.has_value());
+
+            flow_tree_link_pins.emplace(pin_to_child, *child_pin);
+          }
+        },
+        [](const auto &) {});
+  }
+
+  if (child_is_missing) {
+    return false;
+  }
+
+  const auto &nodes = diagram.GetNodes();
+
+  auto diagram_node_ids = std::set<core::IdValue<ne::NodeId>>{};
+  std::transform(nodes.cbegin(), nodes.cend(),
+                 std::inserter(diagram_node_ids, diagram_node_ids.begin()),
+                 [](const auto &node) { return node->GetId().Get(); });
+
+  if (diagram_node_ids != flow_tree_node_ids) {
+    return false;
+  }
+
+  const auto &links = diagram.GetLinks();
+
+  auto diagram_link_pins =
+      std::set<std::pair<core::IdValue<ne::PinId>, core::IdValue<ne::PinId>>>{};
+  std::transform(
+      links.cbegin(), links.cend(),
+      std::inserter(diagram_link_pins, diagram_link_pins.begin()),
+      [](const auto &link) {
+        return std::pair{link.start_pin_id.Get(), link.end_pin_id.Get()};
+      });
+
+  return diagram_link_pins == flow_tree_link_pins;
+}
 }  // namespace
 
 ///
@@ -154,6 +239,14 @@ auto BuildFlowTrees(const core::Diagram &diagram) -> std::vector<TreeNode> {
   }
 
   return root_nodes;
+}
+
+///
+void RebuildFlowTrees(const core::Diagram &diagram,
+                      std::vector<TreeNode> &flow_trees) {
+  if (!DoFlowTreesMatchDiagram(flow_trees, diagram)) {
+    flow_trees = BuildFlowTrees(diagram);
+  }
 }
 
 ///

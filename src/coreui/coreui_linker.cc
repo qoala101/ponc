@@ -120,8 +120,8 @@ auto Linker::GetSourcePinData() const -> auto& {
 auto Linker::FindCircularPins() const
     -> std::unordered_set<core::IdValue<ne::PinId>> {
   const auto& source_pin = GetSourcePinData();
+  const auto& flow_trees = parent_diagram_->GetFlowTrees();
   const auto& diagram = parent_diagram_->GetDiagram();
-  const auto flow_trees = flow::BuildFlowTrees(diagram);
 
   if (source_pin.kind == ne::PinKind::Output) {
     const auto& root_parent = FindRootParent(source_pin.node_id, flow_trees);

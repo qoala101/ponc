@@ -50,6 +50,8 @@ class Diagram {
   ///
   auto GetDiagram() const -> core::Diagram &;
   ///
+  auto GetFlowTrees() const -> const std::vector<flow::TreeNode> &;
+  ///
   auto GetNodeMover() const -> const NodeMover &;
   ///
   auto GetNodeMover() -> NodeMover &;
@@ -90,7 +92,7 @@ class Diagram {
   ///
   auto DeleteLink(ne::LinkId link_id) const -> Event &;
   ///
-  auto GetFlowTrees() const -> const std::vector<TreeNode> &;
+  auto GetNodeTrees() const -> const std::vector<TreeNode> &;
 
  private:
   ///
@@ -122,7 +124,7 @@ class Diagram {
   ///
   void UpdateTreeNode(TreeNode &tree_node);
   ///
-  void UpdateFlowTrees(const std::vector<flow::TreeNode> &core_trees);
+  void UpdateNodeTrees();
   ///
   auto GetFreePinFamily(ne::PinKind pin_kind) const -> auto &;
   ///
@@ -139,6 +141,8 @@ class Diagram {
   ///
   cpp::SafeOwner safe_owner_{};
   ///
+  std::vector<flow::TreeNode> flow_trees_{};
+  ///
   NodeMover node_mover_;
   ///
   Linker linker_;
@@ -149,7 +153,7 @@ class Diagram {
   ///
   std::vector<Link> links_{};
   ///
-  std::vector<TreeNode> flow_trees_{};
+  std::vector<TreeNode> node_trees_{};
 };
 }  // namespace vh::ponc::coreui
 

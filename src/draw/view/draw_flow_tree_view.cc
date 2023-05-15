@@ -14,7 +14,7 @@ namespace vh::ponc::draw {
 auto FlowTreeView::GetLabel() const -> std::string { return "Flow Tree"; }
 
 ///
-void FlowTreeView::Draw(const std::vector<coreui::TreeNode>& flow_trees) {
+void FlowTreeView::Draw(const std::vector<coreui::TreeNode>& node_trees) {
   const auto content_scope = DrawContentScope();
 
   if (!IsOpened()) {
@@ -28,7 +28,7 @@ void FlowTreeView::Draw(const std::vector<coreui::TreeNode>& flow_trees) {
     ImGui::TableSetupColumn("Output");
     ImGui::TableHeadersRow();
 
-    for (const auto& root_node : flow_trees) {
+    for (const auto& root_node : node_trees) {
       DrawTreeNode(root_node);
     }
 
