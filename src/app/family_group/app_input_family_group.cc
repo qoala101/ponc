@@ -48,7 +48,9 @@ class Node : public core::INode {
 
   ///
   void SetInitialFlowValues(flow::NodeFlow& node_flow) const override {
-    node_flow.output_pin_flows.at(GetOutputPinIds().front().Get()) = value_;
+    node_flow.output_pin_flows.at(
+        core::INode::GetFirstPinOfKind(*this, ne::PinKind::Output).Get()) =
+        value_;
   }
 
   ///

@@ -9,6 +9,7 @@
 #include "calc_resolution.h"
 #include "calc_tree_node.h"
 #include "calc_tree_traversal.h"
+#include "core_i_node.h"
 #include "core_project.h"
 #include "coreui_cloner.h"
 #include "coreui_log.h"
@@ -236,12 +237,11 @@ auto Calculator::PopulateOutput(const calc::TreeNode& output_tree,
           parent_output_pin = parent_output_pins[output_index];
         }
 
-        const auto input_pin = node.GetInputPinId();
-        Expects(input_pin.has_value());
-
+        const auto input_pin =
+            core::INode::GetFirstPinOfKind(node, ne::PinKind::Input);
         const auto link = core::Link{.id = id_generator.Generate<ne::LinkId>(),
                                      .start_pin_id = parent_output_pin,
-                                     .end_pin_id = *input_pin};
+                                     .end_pin_id = input_pin};
 
         diagram_copy->EmplaceLink(link);
 

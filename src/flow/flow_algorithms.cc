@@ -8,6 +8,7 @@
 #include <unordered_set>
 
 #include "core_diagram.h"
+#include "core_i_node.h"
 #include "core_id_value.h"
 #include "cpp_assert.h"
 #include "flow_node_flow.h"
@@ -147,10 +148,10 @@ auto DoFlowTreesMatchDiagram(const std::vector<TreeNode> &flow_trees,
               break;
             }
 
-            const auto &child_pin = (*child)->GetInputPinId();
-            Expects(child_pin.has_value());
+            const auto &child_pin =
+                core::INode::GetFirstPinOfKind(**child, ne::PinKind::Input);
 
-            flow_tree_link_pins.emplace(pin_to_child, *child_pin);
+            flow_tree_link_pins.emplace(pin_to_child, child_pin);
           }
         },
         [](const auto &) {});

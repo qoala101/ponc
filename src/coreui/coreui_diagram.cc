@@ -286,10 +286,10 @@ auto Diagram::ReplaceNode(const core::INode& source_node,
   if (const auto& source_input_pin = source_node.GetInputPinId()) {
     if (const auto input_link =
             core::Diagram::FindPinLink(*diagram_, *source_input_pin)) {
-      const auto target_input_pin = target_node->GetInputPinId();
-      Expects(target_input_pin.has_value());
+      const auto target_input_pin =
+          core::INode::GetFirstPinOfKind(*target_node, ne::PinKind::Input);
 
-      MoveLink(*source_input_pin, *target_input_pin);
+      MoveLink(*source_input_pin, target_input_pin);
     }
   }
 
