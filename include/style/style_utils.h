@@ -5,6 +5,12 @@
 
 namespace vh::ponc::style {
 ///
+constexpr auto FromRgb(int r, int g, int b) {
+  // NOLINTNEXTLINE(*-signed-bitwise)
+  return IM_COL32(r, g, b, 255);
+}
+
+///
 auto WithAlpha(ImColor color, float alpha) -> ImColor;
 ///
 auto GetGradient(const ImColor& start_color, const ImColor& end_color,
