@@ -20,8 +20,11 @@ auto ParseVersion(const crude_json::value& json) {
 void Upgrade0(crude_json::value& project_json) {
   auto settings = core::Settings{};
 
+  auto& family_settings = settings.calculator_settings.family_settings;
+  family_settings.reserve(16);
+
   for (auto family_id = 3; family_id <= 16; ++family_id) {
-    settings.calculator_settings.family_settings.emplace_back(
+    family_settings.emplace_back(
         core::CalculatorFamilySettings{static_cast<core::FamilyId>(family_id)});
   }
 

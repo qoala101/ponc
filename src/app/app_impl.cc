@@ -18,12 +18,15 @@ AppImpl::AppImpl(coreui::Project::Callbacks project_callbacks)
           []() {
             auto family_groups =
                 std::vector<std::unique_ptr<core::IFamilyGroup>>{};
+            family_groups.reserve(5);
+
             family_groups.emplace_back(std::make_unique<InputFamilyGroup>());
             family_groups.emplace_back(std::make_unique<ClientFamilyGroup>());
             family_groups.emplace_back(std::make_unique<SplitterFamilyGroup>());
             family_groups.emplace_back(std::make_unique<CouplerFamilyGroup>());
             family_groups.emplace_back(
                 std::make_unique<AttenuatorFamilyGroup>());
+
             return family_groups;
           }(),
           std::move(project_callbacks)} {}

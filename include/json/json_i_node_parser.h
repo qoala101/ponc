@@ -17,7 +17,7 @@ class INodeParser : public cpp::Interface {
 
  private:
   ///
-  virtual auto ParseFromJson(core::INode::ConstructorArgs parsed_args,
+  virtual auto ParseFromJson(const core::INode::ConstructorArgs &parsed_args,
                              const crude_json::value &json) const
       -> std::unique_ptr<core::INode> = 0;
 };

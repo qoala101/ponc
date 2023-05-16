@@ -36,6 +36,7 @@ add_executable(ponc
   coreui/event/coreui_event.cc
 
   coreui/traits/coreui_empy_pin_traits.cc
+  coreui/traits/coreui_float_pin_traits.cc
   coreui/traits/coreui_flow_pin_traits.cc
   coreui/traits/coreui_i_family_traits.cc
   coreui/traits/coreui_i_node_traits.cc

@@ -93,7 +93,9 @@ auto Calculator::TakeResult() -> std::vector<TreeNode> {
   const auto best_output_tree = std::prev(best_output_trees->second.end());
 
   Expects(best_output_tree->second.outputs.size() == input_nodes_.size());
+
   auto calculated_trees = std::vector<TreeNode>{};
+  calculated_trees.reserve(input_nodes_.size());
 
   for (auto output_index = 0;
        output_index < static_cast<OutputIndex>(input_nodes_.size());
@@ -305,6 +307,8 @@ auto Calculator::GetBestTree(FlowValue output, NumClients num_clients)
 ///
 void Calculator::FindBestRootTree() {
   auto root_family = TreeNode{};
+  root_family.outputs.reserve(input_nodes_.size());
+
   auto next_node_input = kRootInput - 1;
 
   for (const auto &input_node : input_nodes_) {

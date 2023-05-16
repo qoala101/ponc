@@ -283,6 +283,8 @@ void Linker::AcceptCreateNode(const Family& family) {
                                : std::vector{source_pin_data.id};
 
   auto created_nodes = std::vector<ne::NodeId>{};
+  created_nodes.reserve(source_pins.size());
+
   auto first_created_node_pin = std::optional<ne::PinId>{};
   auto* last_link_created_event = static_cast<Event*>(nullptr);
 

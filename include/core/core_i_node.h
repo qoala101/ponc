@@ -58,7 +58,7 @@ class INode : public cpp::Interface {
       -> std::optional<ne::PinId>;
 
   ///
-  virtual auto CreateWriter() const -> std::unique_ptr<json::INodeWriter> = 0;
+  virtual auto CreateWriter() const -> std::unique_ptr<json::INodeWriter>;
   ///
   virtual auto CreateUiTraits() const
       -> std::unique_ptr<coreui::INodeTraits> = 0;

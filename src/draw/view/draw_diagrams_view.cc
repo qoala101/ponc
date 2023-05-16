@@ -140,11 +140,11 @@ void DiagramsView::ApplyAction(coreui::Project& project, int diagram_index,
       project.CloneDiagram(diagram);
       break;
     case Action::kStartRenaming: {
-      static constexpr auto kMaxNameLength = 255;
+      const auto max_name_length = 255;
 
       rename_buffer_ = diagram.GetName();
       rename_buffer_.resize(std::max(
-          static_cast<int>(rename_buffer_.size() + 1), kMaxNameLength));
+          static_cast<int>(rename_buffer_.size() + 1), max_name_length));
       break;
     }
     case Action::kConfirmRename:

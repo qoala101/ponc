@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "cpp_assert.h"
+#include "json_i_node_writer.h"
 
 namespace vh::ponc::core {
 ///
@@ -64,6 +65,10 @@ auto INode::FindFirstPinOfKind(const INode& node, ne::PinKind pin_kind)
   }
 
   return output_pins.front();
+}
+
+auto INode::CreateWriter() const -> std::unique_ptr<json::INodeWriter> {
+  return std::make_unique<json::INodeWriter>();
 }
 
 ///

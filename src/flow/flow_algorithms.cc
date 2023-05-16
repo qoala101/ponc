@@ -193,7 +193,9 @@ auto BuildFlowTrees(const core::Diagram &diagram) -> std::vector<TreeNode> {
 
   auto root_nodes = FindRootNodes(nodes, links);
   auto visited_nodes = std::unordered_set<core::IdValue<ne::NodeId>>{};
+
   auto current_level_tree_nodes = std::vector<TreeNode *>{};
+  current_level_tree_nodes.reserve(root_nodes.size());
 
   for (auto &root_node : root_nodes) {
     visited_nodes.emplace(root_node.node_id);
