@@ -17,7 +17,7 @@
 #include "json_i_family_writer.h"
 #include "json_i_node_parser.h"
 #include "json_i_node_writer.h"
-#include "style_tailwind_colors.h"
+#include "style_tailwind.h"
 #include "style_utils.h"
 
 namespace vh::ponc {
@@ -115,9 +115,12 @@ class HeaderUiTraits : public coreui::IHeaderTraits {
         break;
     }
 
-    return style::GetGradient(style::TailwindColors::kBlue800,
-                              style::TailwindColors::kBlue600,
-                              1.F - index * 0.25F);
+    return style::GetGradient(
+        style::Tailwind::GetColor(style::Tailwind::Color::kBlue,
+                                  style::Tailwind::Shade::k800),
+        style::Tailwind::GetColor(style::Tailwind::Color::kBlue,
+                                  style::Tailwind::Shade::k600),
+        1.F - index * 0.25F);
   }
 
  private:

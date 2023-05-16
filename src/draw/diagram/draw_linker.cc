@@ -1,4 +1,4 @@
-#include "style_tailwind_colors.h"
+#include "style_tailwind.h"
 #include "style_utils.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <variant>

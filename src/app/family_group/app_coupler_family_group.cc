@@ -17,7 +17,7 @@
 #include "json_i_family_writer.h"
 #include "json_i_node_parser.h"
 #include "json_i_node_writer.h"
-#include "style_tailwind_colors.h"
+#include "style_tailwind.h"
 #include "style_utils.h"
 
 namespace vh::ponc {
@@ -166,7 +166,10 @@ class HeaderUiTraits : public coreui::IHeaderTraits {
 
   auto GetColor() const -> ImColor override {
     return style::GetGradient(
-        style::TailwindColors::kPurple800, style::TailwindColors::kPurple600,
+        style::Tailwind::GetColor(style::Tailwind::Color::kPurple,
+                                  style::Tailwind::Shade::k800),
+        style::Tailwind::GetColor(style::Tailwind::Color::kPurple,
+                                  style::Tailwind::Shade::k600),
         1.F - static_cast<float>(node_->GetPercentageIndex()) * 0.1F);
   }
 

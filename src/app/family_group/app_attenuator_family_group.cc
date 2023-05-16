@@ -17,7 +17,7 @@
 #include "json_i_family_writer.h"
 #include "json_i_node_parser.h"
 #include "json_i_node_writer.h"
-#include "style_tailwind_colors.h"
+#include "style_tailwind.h"
 
 namespace vh::ponc {
 namespace {
@@ -104,7 +104,8 @@ class DropPinTraits : public coreui::IPinTraits {
 class HeaderUiTraits : public coreui::IHeaderTraits {
  public:
   auto GetColor() const -> ImColor override {
-    return style::TailwindColors::kIndigo700;
+    return style::Tailwind::GetColor(style::Tailwind::Color::kIndigo,
+                                     style::Tailwind::Shade::k700);
   }
 };
 
