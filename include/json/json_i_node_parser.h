@@ -4,12 +4,12 @@
 #include <memory>
 
 #include "core_i_node.h"
-#include "cpp_interface.h"
+#include "cpp_non_copyable.h"
 #include "crude_json.h"
 
 namespace vh::ponc::json {
 ///
-class INodeParser : public cpp::Interface {
+class INodeParser : public cpp::NonCopyable {
  public:
   ///
   auto ParseFromJson(const crude_json::value &json) const

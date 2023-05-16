@@ -2,12 +2,12 @@
 #define VH_PONC_JSON_SETINGS_SERIALIZER_H_
 
 #include "core_settings.h"
-#include "cpp_no_instances.h"
+#include "cpp_static_api.h"
 #include "crude_json.h"
 
 namespace vh::ponc::json {
 ///
-struct SettingsSerializer : public cpp::NoInstances {
+struct SettingsSerializer : public cpp::StaticApi {
   ///
   static auto ParseFromJson(const crude_json::value &json) -> core::Settings;
   ///

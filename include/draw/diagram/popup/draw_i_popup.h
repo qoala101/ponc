@@ -5,13 +5,13 @@
 #include <string>
 
 #include "cpp_callbacks.h"
-#include "cpp_interface.h"
+#include "cpp_non_copyable.h"
 #include "cpp_scope_function.h"
 #include "imgui.h"
 
 namespace vh::ponc::draw {
 ///
-class IPopup : public cpp::Interface {
+class IPopup : public cpp::NonCopyable {
  public:
   ///
   struct Callbacks {

@@ -10,11 +10,11 @@
 #include <functional>
 
 #include "cpp_callbacks.h"
-#include "cpp_interface.h"
+#include "cpp_non_copyable.h"
 
 namespace vh::ponc::draw {
 ///
-class IFileDialog : public cpp::Interface {
+class IFileDialog : public cpp::NonCopyable {
  public:
   ///
   struct Callbacks {

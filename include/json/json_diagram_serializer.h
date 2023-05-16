@@ -5,12 +5,12 @@
 
 #include "core_diagram.h"
 #include "core_i_family.h"
-#include "cpp_no_instances.h"
+#include "cpp_static_api.h"
 #include "crude_json.h"
 
 namespace vh::ponc::json {
 ///
-struct DiagramSerializer : public cpp::NoInstances {
+struct DiagramSerializer : public cpp::StaticApi {
   ///
   static auto ParseFromJson(
       const crude_json::value &json,

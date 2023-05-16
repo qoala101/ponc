@@ -7,11 +7,11 @@
 
 #include "coreui_i_header_traits.h"
 #include "coreui_i_pin_traits.h"
-#include "cpp_interface.h"
+#include "cpp_non_copyable.h"
 
 namespace vh::ponc::coreui {
 ///
-class INodeTraits : public cpp::Interface {
+class INodeTraits : public cpp::NonCopyable {
  public:
   ///
   virtual auto GetLabel() const -> std::string = 0;

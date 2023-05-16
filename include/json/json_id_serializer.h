@@ -3,12 +3,12 @@
 
 #include "core_concepts.h"
 #include "core_id_value.h"
-#include "cpp_no_instances.h"
+#include "cpp_static_api.h"
 #include "crude_json.h"
 
 namespace vh::ponc::json {
 ///
-struct IdSerializer : public cpp::NoInstances {
+struct IdSerializer : public cpp::StaticApi {
   ///
   template <core::Id Id>
   static auto ParseFromJson(const crude_json::value &json) {

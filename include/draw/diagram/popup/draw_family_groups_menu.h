@@ -3,11 +3,11 @@
 
 #include "coreui_family.h"
 #include "cpp_callbacks.h"
-#include "cpp_no_instances.h"
+#include "cpp_static_api.h"
 
 namespace vh::ponc::draw {
 ///
-struct FamilyGroupsMenu : public cpp::NoInstances {
+struct FamilyGroupsMenu : public cpp::StaticApi {
   ///
   struct Callbacks {
     ///

@@ -8,7 +8,7 @@
 #include <variant>
 
 #include "core_i_node.h"
-#include "cpp_interface.h"
+#include "cpp_non_copyable.h"
 #include "imgui.h"
 
 namespace ne = ax::NodeEditor;
@@ -29,7 +29,7 @@ struct PinFlow {};
 using PinValueVariant = std::variant<std::monostate, PinFlow, float, float*>;
 
 ///
-class IPinTraits : public cpp::Interface {
+class IPinTraits : public cpp::NonCopyable {
  public:
   ///
   static auto GetPinKind(const coreui::IPinTraits& pin_traits,

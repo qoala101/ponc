@@ -2,13 +2,13 @@
 #define VH_PONC_JSON_PROJECT_SERIALIZER_H_
 
 #include "core_project.h"
-#include "cpp_no_instances.h"
+#include "cpp_static_api.h"
 #include "crude_json.h"
 #include "json_i_family_parser.h"
 
 namespace vh::ponc::json {
 ///
-struct ProjectSerializer : public cpp::NoInstances {
+struct ProjectSerializer : public cpp::StaticApi {
   ///
   static auto ParseFromJson(
       const crude_json::value &json,

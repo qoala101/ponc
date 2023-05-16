@@ -3,11 +3,11 @@
 
 #include "core_diagram.h"
 #include "core_id_generator.h"
-#include "cpp_no_instances.h"
+#include "cpp_static_api.h"
 
 namespace vh::ponc::coreui {
 ///
-struct Cloner : public cpp::NoInstances {
+struct Cloner : public cpp::StaticApi {
   ///
   static auto Clone(const core::Diagram& diagram,
                     const std::vector<std::unique_ptr<core::IFamily>>& families)

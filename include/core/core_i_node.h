@@ -10,7 +10,7 @@
 
 #include "core_i_family.h"
 #include "core_id_ptr.h"
-#include "cpp_interface.h"
+#include "cpp_non_copyable.h"
 #include "flow_node_flow.h"
 #include "imgui.h"
 
@@ -29,7 +29,7 @@ class INodeTraits;
 
 namespace core {
 ///
-class INode : public cpp::Interface {
+class INode : public cpp::NonCopyable {
  public:
   ///
   struct ConstructorArgs {

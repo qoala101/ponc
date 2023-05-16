@@ -4,12 +4,12 @@
 #include <imgui.h>
 
 #include "cpp_assert.h"
-#include "cpp_no_instances.h"
+#include "cpp_static_api.h"
 #include "style_tailwind_colors.h"
 
 namespace vh::ponc::style {
 ///
-struct Tailwind : cpp::NoInstances {
+struct Tailwind : cpp::StaticApi {
   ///
   enum class Color {
     kSlate = 0,

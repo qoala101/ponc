@@ -3,11 +3,11 @@
 
 #include <string>
 
-#include "cpp_interface.h"
+#include "cpp_non_copyable.h"
 
 namespace vh::ponc::coreui {
 ///
-class IFamilyTraits : public cpp::Interface {
+class IFamilyTraits : public cpp::NonCopyable {
  public:
   ///
   virtual auto GetLabel() const -> std::string = 0;

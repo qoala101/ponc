@@ -2,12 +2,12 @@
 #define VH_PONC_JSON_I_FAMILY_WRITER_H_
 
 #include "core_i_family.h"
-#include "cpp_interface.h"
+#include "cpp_non_copyable.h"
 #include "crude_json.h"
 
 namespace vh::ponc::json {
 ///
-class IFamilyWriter : public cpp::Interface {
+class IFamilyWriter : public cpp::NonCopyable {
  public:
   ///
   auto WriteToJson(const core::IFamily &family) const -> crude_json::value;

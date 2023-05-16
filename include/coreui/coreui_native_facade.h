@@ -5,13 +5,13 @@
 
 #include <vector>
 
-#include "cpp_no_instances.h"
+#include "cpp_static_api.h"
 
 namespace ne = ax::NodeEditor;
 
 namespace vh::ponc::coreui {
 ///
-struct NativeFacade : public cpp::NoInstances {
+struct NativeFacade : public cpp::StaticApi {
   ///
   static auto GetSelectedNodes() -> std::vector<ne::NodeId>;
   ///

@@ -6,12 +6,12 @@
 
 #include "core_i_family.h"
 #include "core_id_generator.h"
-#include "cpp_interface.h"
+#include "cpp_non_copyable.h"
 #include "json_i_family_parser.h"
 
 namespace vh::ponc::core {
 ///
-class IFamilyGroup : public cpp::Interface {
+class IFamilyGroup : public cpp::NonCopyable {
  public:
   ///
   static auto CreateDefaultFamilyGroups()

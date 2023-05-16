@@ -1,12 +1,12 @@
 #ifndef VH_PONC_JSON_CONTAINER_SERIALIZER_H_
 #define VH_PONC_JSON_CONTAINER_SERIALIZER_H_
 
-#include "cpp_no_instances.h"
+#include "cpp_static_api.h"
 #include "crude_json.h"
 
 namespace vh::ponc::json {
 ///
-struct ContainerSerializer : public cpp::NoInstances {
+struct ContainerSerializer : public cpp::StaticApi {
   ///
   template <typename Item>
   static auto ParseFromJson(const crude_json::value& json,

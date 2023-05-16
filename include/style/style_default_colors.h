@@ -5,7 +5,7 @@
 
 namespace vh::ponc::style {
 ///
-struct DefaultColors : cpp::NoInstances {
+struct DefaultColors : cpp::StaticApi {
   ///
   static constexpr auto kWhite =
       Tailwind::GetColor(Tailwind::Color::kZinc, Tailwind::Shade::k50);

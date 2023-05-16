@@ -4,12 +4,12 @@
 #include <memory>
 
 #include "core_i_node.h"
-#include "cpp_interface.h"
+#include "cpp_non_copyable.h"
 #include "crude_json.h"
 
 namespace vh::ponc::json {
 ///
-class INodeWriter : public cpp::Interface {
+class INodeWriter : public cpp::NonCopyable {
  public:
   ///
   auto WriteToJson(const core::INode &node) const -> crude_json::value;

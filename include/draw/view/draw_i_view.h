@@ -3,12 +3,12 @@
 
 #include <string>
 
-#include "cpp_interface.h"
+#include "cpp_non_copyable.h"
 #include "cpp_scope_function.h"
 
 namespace vh::ponc::draw {
 ///
-class IView : public cpp::Interface {
+class IView : public cpp::NonCopyable {
  public:
   ///
   virtual auto GetLabel() const -> std::string = 0;

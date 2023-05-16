@@ -9,7 +9,7 @@
 
 #include "core_id_generator.h"
 #include "core_id_ptr.h"
-#include "cpp_interface.h"
+#include "cpp_non_copyable.h"
 
 namespace ne = ax::NodeEditor;
 
@@ -40,7 +40,7 @@ struct FamilyId : public ne::Details::SafePointerType<FamilyId> {
 enum class FamilyType { kClient, kFreePin };
 
 ///
-class IFamily : public cpp::Interface {
+class IFamily : public cpp::NonCopyable {
  public:
   ///
   virtual auto GetType() const -> std::optional<FamilyType>;

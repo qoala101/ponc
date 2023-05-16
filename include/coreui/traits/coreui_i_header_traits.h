@@ -3,12 +3,12 @@
 
 #include <string>
 
-#include "cpp_interface.h"
+#include "cpp_non_copyable.h"
 #include "imgui.h"
 
 namespace vh::ponc::coreui {
 ///
-class IHeaderTraits : public cpp::Interface {
+class IHeaderTraits : public cpp::NonCopyable {
  public:
   ///
   virtual auto GetColor() const -> ImColor = 0;

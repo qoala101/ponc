@@ -1,12 +1,12 @@
 #ifndef VH_PONC_STYLE_FLOW_COLORS_H_
 #define VH_PONC_STYLE_FLOW_COLORS_H_
 
-#include "cpp_no_instances.h"
+#include "cpp_static_api.h"
 #include "imgui.h"
 
 namespace vh::ponc::style {
 ///
-struct FlowColors : cpp::NoInstances {
+struct FlowColors : cpp::StaticApi {
   ///
   static constexpr auto kMin = IM_COL32(0, 0, 255, 255);
   ///
