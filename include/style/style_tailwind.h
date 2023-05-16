@@ -12,7 +12,11 @@ namespace vh::ponc::style {
 struct Tailwind : cpp::NoInstances {
   ///
   enum class Color {
-    kZinc = 0,
+    kSlate = 0,
+    kGray,
+    kZinc,
+    kNeutral,
+    kStone,
     kRed,
     kOrange,
     kAmber,
@@ -35,17 +39,17 @@ struct Tailwind : cpp::NoInstances {
 
   ///
   enum class Shade {
-    k950 = 0,
-    k900,
-    k800,
-    k700,
-    k600,
-    k500,
-    k400,
-    k300,
-    k200,
+    k50 = 0,
     k100,
-    k50,
+    k200,
+    k300,
+    k400,
+    k500,
+    k600,
+    k700,
+    k800,
+    k900,
+    k950,
     kNumShades
   };
 
