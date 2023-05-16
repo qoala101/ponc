@@ -125,11 +125,11 @@ void NodeMover::MoveNodeTo(ne::NodeId node_id, const ImVec2& pos) {
 auto NodeMover::DoNodesNeedSpacing(ne::NodeId first_node,
                                    ne::NodeId second_node) const {
   const auto node_ids = std::array{first_node, second_node};
-  const auto& diagram = parent_diagram_->GetDiagram();
+  auto& diagram = parent_diagram_->GetDiagram();
 
   return std::any_of(
       node_ids.cbegin(), node_ids.cend(), [&diagram](const auto node_id) {
-        const auto& node = core::Diagram::FindNode(diagram, node_id);
+        auto& node = core::Diagram::FindNode(diagram, node_id);
         const auto node_has_header =
             node.CreateUiTraits()->CreateHeaderTraits().has_value();
         return node_has_header;

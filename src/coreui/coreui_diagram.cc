@@ -596,8 +596,7 @@ void Diagram::UpdateFamilyGroups() {
 ///
 // NOLINTNEXTLINE(*-no-recursion)
 void Diagram::UpdateTreeNode(TreeNode& tree_node) {
-  tree_node.node->SetTreeNode(
-      safe_owner_.MakeSafe(&const_cast<const TreeNode&>(tree_node)));
+  tree_node.node->SetTreeNode(safe_owner_.MakeSafe(&tree_node));
 
   for (auto& child : tree_node.child_nodes) {
     UpdateTreeNode(child);

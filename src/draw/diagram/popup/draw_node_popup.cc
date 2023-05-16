@@ -52,7 +52,7 @@ void DrawReplaceActions(coreui::Diagram& diagram, const core::INode& node) {
 }
 
 ///
-void DrawNodeActions(const core::INode& node) {
+void DrawNodeActions(core::INode& node) {
   const auto node_traits = node.CreateUiTraits();
   const auto node_action_names = node_traits->GetActionNames();
 
@@ -108,7 +108,7 @@ void NodePopup::Draw(coreui::Diagram& diagram) {
     return;
   }
 
-  const auto& node =
+  auto& node =
       core::Diagram::FindNode(diagram.GetDiagram(), selected_nodes.front());
 
   DrawReplaceActions(diagram, node);

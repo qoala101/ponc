@@ -28,7 +28,7 @@ class Node;
 auto CreateNodeWriter(cpp::SafePtr<const Node> node)
     -> std::unique_ptr<json::INodeWriter>;
 ///
-auto CreateNodeUiTraits(cpp::SafePtr<const Node> node)
+auto CreateNodeUiTraits(cpp::SafePtr<Node> node)
     -> std::unique_ptr<coreui::INodeTraits>;
 
 ///
@@ -44,7 +44,7 @@ class Node : public core::INode {
   }
 
   ///
-  auto CreateUiTraits() const -> std::unique_ptr<coreui::INodeTraits> override {
+  auto CreateUiTraits() -> std::unique_ptr<coreui::INodeTraits> override {
     return CreateNodeUiTraits(safe_owner_.MakeSafe(this));
   }
 
@@ -56,11 +56,14 @@ class Node : public core::INode {
   }
 
   ///
-  auto GetDrop() const -> auto& { return drop_; }
+  auto GetDrop() const { return drop_; }
+
+  ///
+  auto GetDrop() -> auto& { return drop_; }
 
  private:
   ///
-  mutable float drop_{};
+  float drop_{};
   ///
   cpp::SafeOwner safe_owner_{};
 };
@@ -115,8 +118,7 @@ class HeaderUiTraits : public coreui::IHeaderTraits {
 class DropPinTraits : public coreui::IPinTraits {
  public:
   ///
-  explicit DropPinTraits(cpp::SafePtr<const Node> node)
-      : node_{std::move(node)} {}
+  explicit DropPinTraits(cpp::SafePtr<Node> node) : node_{std::move(node)} {}
 
   ///
   auto GetPin() const -> std::variant<ne::PinId, ne::PinKind> override {
@@ -130,7 +132,7 @@ class DropPinTraits : public coreui::IPinTraits {
 
  private:
   ///
-  cpp::SafePtr<const Node> node_;
+  cpp::SafePtr<Node> node_;
 };
 
 constexpr auto kLabel = "Attenuator";
@@ -139,8 +141,7 @@ constexpr auto kLabel = "Attenuator";
 class NodeUiTraits : public coreui::INodeTraits {
  public:
   ///
-  explicit NodeUiTraits(cpp::SafePtr<const Node> node)
-      : node_{std::move(node)} {}
+  explicit NodeUiTraits(cpp::SafePtr<Node> node) : node_{std::move(node)} {}
 
   ///
   auto GetLabel() const -> std::string override { return kLabel; }
@@ -170,11 +171,11 @@ class NodeUiTraits : public coreui::INodeTraits {
 
  private:
   ///
-  cpp::SafePtr<const Node> node_;
+  cpp::SafePtr<Node> node_;
 };
 
 ///
-auto CreateNodeUiTraits(cpp::SafePtr<const Node> node)
+auto CreateNodeUiTraits(cpp::SafePtr<Node> node)
     -> std::unique_ptr<coreui::INodeTraits> {
   return std::make_unique<NodeUiTraits>(std::move(node));
 }

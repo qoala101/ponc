@@ -12,6 +12,14 @@ template <typename T>
 class SafePtr {
  public:
   ///
+  template <typename U, typename = std::enable_if_t<
+                            std::is_same_v<U, std::remove_const_t<T>>>>
+  // NOLINTNEXTLINE(*-explicit-constructor
+  SafePtr(const SafePtr<U> &other)
+      // NOLINTNEXTLINE(*-const-cast)
+      : t_{const_cast<const T *>(other.t_)}, owner_{other.owner_} {}
+
+  ///
   auto operator*() const -> auto & {
     // NOLINTNEXTLINE(*-const-cast)
     return const_cast<SafePtr *>(this)->operator*();
@@ -37,10 +45,14 @@ class SafePtr {
 
  private:
   ///
+  friend class SafePtr<const T>;
+  ///
   friend class SafeOwner;
 
   ///
   SafePtr(T *t, const std::shared_ptr<void *> &owner) : t_{t}, owner_{owner} {}
+  ///
+  SafePtr(T *t, const std::weak_ptr<void *> &owner) : t_{t}, owner_{owner} {}
 
   ///
   T *t_{};

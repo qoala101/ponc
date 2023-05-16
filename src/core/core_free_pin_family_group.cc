@@ -37,7 +37,7 @@ class Node : public core::INode {
   explicit Node(const ConstructorArgs& args) : INode{args} {}
 
   ///
-  auto CreateUiTraits() const -> std::unique_ptr<coreui::INodeTraits> override {
+  auto CreateUiTraits() -> std::unique_ptr<coreui::INodeTraits> override {
     return CreateNodeUiTraits(safe_owner_.MakeSafe(this));
   }
 

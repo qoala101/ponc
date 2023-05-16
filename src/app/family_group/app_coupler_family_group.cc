@@ -13,6 +13,7 @@
 #include "coreui_i_pin_traits.h"
 #include "coreui_project.h"
 #include "cpp_assert.h"
+#include "cpp_safe_ptr.h"
 #include "crude_json.h"
 #include "imgui_node_editor.h"
 #include "json_i_family_writer.h"
@@ -43,11 +44,11 @@ struct Drop {
 
 ///
 constexpr auto kDrops = std::array{
-    Drop{.small = 0.4F, .big = -13.8F},  Drop{.small = -0.7F, .big = -10.6F},
-    Drop{.small = -0.95F, .big = -8.8F}, Drop{.small = -1.2F, .big = -7.5F},
-    Drop{.small = -1.55F, .big = -6.5F}, Drop{.small = -1.85F, .big = -5.7F},
-    Drop{.small = -2.2F, .big = -5.F},   Drop{.small = -2.6F, .big = -4.4F},
-    Drop{.small = -3.F, .big = -3.9F},   Drop{.small = -3.4F, .big = -3.4F},
+    Drop{.small = -0.4, .big = -13.8}, Drop{.small = -0.7, .big = -10.6},
+    Drop{.small = -0.95, .big = -8.8}, Drop{.small = -1.2, .big = -7.5},
+    Drop{.small = -1.55, .big = -6.5}, Drop{.small = -1.85, .big = -5.7},
+    Drop{.small = -2.2, .big = -5},    Drop{.small = -2.6, .big = -4.4},
+    Drop{.small = -3, .big = -3.9},    Drop{.small = -3.4, .big = -3.4},
 };
 
 ///
@@ -66,9 +67,8 @@ class Node : public core::INode {
   }
 
   ///
-  auto CreateUiTraits() const -> std::unique_ptr<coreui::INodeTraits> override {
-    // TODO mutable. Remove safe_owner_?
-    return CreateNodeUiTraits(safe_owner_.MakeSafe(const_cast<Node*>(this)));
+  auto CreateUiTraits() -> std::unique_ptr<coreui::INodeTraits> override {
+    return CreateNodeUiTraits(safe_owner_.MakeSafe(this));
   }
 
   ///
@@ -207,9 +207,7 @@ class NodeUiTraits : public coreui::INodeTraits {
   ///
   auto CreateHeaderTraits() const
       -> std::optional<std::unique_ptr<coreui::IHeaderTraits>> override {
-    // TODO mutable
-    // return std::make_unique<HeaderUiTraits>(
-    //     static_cast<cpp::SafePtr<const Node>>(node_));
+    return std::make_unique<HeaderUiTraits>(node_);
   }
 
   ///
