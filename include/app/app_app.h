@@ -27,9 +27,6 @@ class App : public Application {
 
  private:
   ///
-  auto LoadTexture(std::string_view file_path);
-
-  ///
   cpp::SafeOwner safe_owner_{};
   ///
   std::optional<AppImpl> app_{};

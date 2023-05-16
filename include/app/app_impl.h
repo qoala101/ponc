@@ -4,7 +4,6 @@
 #include <application.h>
 
 #include "coreui_project.h"
-#include "coreui_textures_handle.h"
 #include "draw_main_window.h"
 
 namespace vh::ponc {
@@ -12,8 +11,7 @@ namespace vh::ponc {
 class AppImpl {
  public:
   ///
-  AppImpl(coreui::TexturesHandle textures_handle,
-          coreui::Project::Callbacks project_callbacks);
+  explicit AppImpl(coreui::Project::Callbacks project_callbacks);
 
   ///
   void OnFrame();

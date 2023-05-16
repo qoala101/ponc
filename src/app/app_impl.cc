@@ -13,8 +13,7 @@
 
 namespace vh::ponc {
 ///
-AppImpl::AppImpl(coreui::TexturesHandle textures_handle,
-                 coreui::Project::Callbacks project_callbacks)
+AppImpl::AppImpl(coreui::Project::Callbacks project_callbacks)
     : project_{
           []() {
             auto family_groups =
@@ -27,7 +26,7 @@ AppImpl::AppImpl(coreui::TexturesHandle textures_handle,
                 std::make_unique<AttenuatorFamilyGroup>());
             return family_groups;
           }(),
-          std::move(textures_handle), std::move(project_callbacks)} {}
+          std::move(project_callbacks)} {}
 
 ///
 void AppImpl::OnFrame() {

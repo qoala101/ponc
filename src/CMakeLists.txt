@@ -38,7 +38,6 @@ add_executable(ponc
   coreui/traits/coreui_empy_pin_traits.cc
   coreui/traits/coreui_flow_pin_traits.cc
   coreui/traits/coreui_i_family_traits.cc
-  coreui/traits/coreui_i_header_traits.cc
   coreui/traits/coreui_i_node_traits.cc
   coreui/traits/coreui_i_pin_traits.cc
 
@@ -52,7 +51,6 @@ add_executable(ponc
   coreui/coreui_node_mover.cc
   coreui/coreui_node.cc
   coreui/coreui_project.cc
-  coreui/coreui_textures_handle.cc
 
   cpp/cpp_scope_function.cc
 
@@ -107,8 +105,6 @@ add_executable(ponc
   json/json_settings_serializer.cc
   json/json_versifier.cc
 
-  resource/node_header_texture.png
-
   style/style_utils.cc
 
   main.cc
@@ -155,6 +151,8 @@ add_custom_command(TARGET ponc POST_BUILD
   $<TARGET_PROPERTY:thirdparty::application,SOURCE_DIR>/../data/Cuprum-OFL.txt
   $<TARGET_PROPERTY:thirdparty::application,SOURCE_DIR>/../data/Play-Regular.ttf
   $<TARGET_PROPERTY:thirdparty::application,SOURCE_DIR>/../data/Play-OFL.txt
-  ${CMAKE_CURRENT_SOURCE_DIR}/resource/node_header_texture.png
+
+  # vh: Use to copy resources.
+  # ${CMAKE_CURRENT_SOURCE_DIR}/resource/RESOURCE_FILE
   $<TARGET_FILE_DIR:ponc>/data
 )

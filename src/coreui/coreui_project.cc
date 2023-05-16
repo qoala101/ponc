@@ -53,7 +53,7 @@ auto Project::CreateProject() const {
 
 ///
 Project::Project(std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups,
-                 TexturesHandle textures_handle, Callbacks callbacks)
+                 Callbacks callbacks)
     : family_groups_{[&family_groups]() {
         auto default_family_groups =
             core::IFamilyGroup::CreateDefaultFamilyGroups();
@@ -64,7 +64,6 @@ Project::Project(std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups,
 
         return std::move(family_groups);
       }()},
-      textures_handle_{std::move(textures_handle)},
       callbacks_{std::move(callbacks)},
       project_{CreateProject()},
       calculator_{safe_owner_.MakeSafe(this)} {
@@ -142,11 +141,6 @@ auto Project::SetDiagram(int index) -> Event& {
       [index, safe_this = safe_owner_.MakeSafe(this)]() {
         safe_this->SetDiagramImpl(index);
       });
-}
-
-///
-auto Project::GetTexturesHandle() -> TexturesHandle& {
-  return textures_handle_;
 }
 
 ///

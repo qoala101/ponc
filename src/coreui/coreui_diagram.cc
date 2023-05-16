@@ -518,13 +518,8 @@ auto Diagram::NodeFrom(core::INode& core_node,
                .flow = NodeFlowFrom(core_node, node_flow)};
 
   if (const auto header_traits = node_traits->CreateHeaderTraits()) {
-    const auto texture_file_path = (*header_traits)->GetTextureFilePath();
-
     node_data.header = Header{
-        .label = label,
-        .color = GetHeaderColor(**header_traits, node_flow),
-        .texture =
-            parent_project_->GetTexturesHandle().GetTexture(texture_file_path)};
+        .label = label, .color = GetHeaderColor(**header_traits, node_flow)};
   }
 
   for (const auto& pin_traits : node_traits->CreatePinTraits()) {

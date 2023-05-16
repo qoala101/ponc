@@ -17,7 +17,6 @@
 #include "coreui_diagram.h"
 #include "coreui_event_loop.h"
 #include "coreui_log.h"
-#include "coreui_textures_handle.h"
 #include "cpp_callbacks.h"
 #include "cpp_safe_ptr.h"
 
@@ -33,7 +32,7 @@ class Project {
 
   ///
   Project(std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups,
-          TexturesHandle textures_handle, Callbacks callbacks);
+          Callbacks callbacks);
 
   ///
   void OnFrame();
@@ -53,8 +52,6 @@ class Project {
   auto DeleteDiagram(int index) -> Event &;
   ///
   auto SetDiagram(int index) -> Event &;
-  ///
-  auto GetTexturesHandle() -> TexturesHandle &;
   ///
   auto GetCalculator() -> Calculator &;
   ///
@@ -88,8 +85,6 @@ class Project {
 
   ///
   std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups_{};
-  ///
-  TexturesHandle textures_handle_;
   ///
   Callbacks callbacks_{};
   ///

@@ -80,6 +80,8 @@ auto DrawPinIconArea(const coreui::Pin& pin, ne::PinKind pin_kind)
 }  // namespace
 
 void DrawNode(coreui::Node& node, coreui::NodeMover& node_mover) {
+  ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4);
+
   auto& core_node = node.GetNode();
   const auto& node_data = node.GetData();
   const auto node_id = core_node.GetId();
@@ -147,7 +149,9 @@ void DrawNode(coreui::Node& node, coreui::NodeMover& node_mover) {
       if (const auto& label = pin.label) {
         auto pos = ImGui::GetCursorPos();
         pos.y += frame_padding.y;
-        DrawColoredText(label->text, label->color, pos);
+        auto color = label->color;
+        color.Value.w = 0.75;
+        DrawColoredText(label->text, color, pos);
         ImGui::Spring(0);
       }
 
@@ -235,32 +239,29 @@ void DrawNode(coreui::Node& node, coreui::NodeMover& node_mover) {
   if (header_rect.has_value()) {
     auto* drawList = ne::GetNodeBackgroundDrawList(node_id);
 
-    const auto texture_uv = ImVec2{
-        header_rect->GetWidth() /
-            (4.F * static_cast<float>(node_data.header->texture.width)),
-        header_rect->GetHeight() /
-            (4.F * static_cast<float>(node_data.header->texture.height))};
-    const auto alpha = static_cast<int>(255 * ImGui::GetStyle().Alpha);
+    const auto alpha = static_cast<int>(255 * 0.75);
     const auto header_color =
         IM_COL32(0, 0, 0, alpha) |
         (node_data.header->color & IM_COL32(255, 255, 255, 0));
     const auto& style = ne::GetStyle();
     const auto half_border_width = style.NodeBorderWidth * 0.5f;
 
-    drawList->AddImageRounded(
-        node_data.header->texture.id,
+    header_rect->Min += ImVec2{0.5, 0.5};
+    header_rect->Max -= ImVec2{0.5, 0.5};
+
+    drawList->AddRectFilled(
         header_rect->Min - ImVec2{8 - half_border_width, 4 - half_border_width},
-        header_rect->Max + ImVec2{8 - half_border_width, 0}, ImVec2{0.F, 0.F},
-        texture_uv, header_color, style.NodeRounding,
-        ImDrawFlags_RoundCornersTop);
+        header_rect->Max + ImVec2{8 - half_border_width, 0}, header_color,
+        style.NodeRounding, ImDrawFlags_RoundCornersTop);
 
     drawList->AddLine(
-        header_rect->GetBL() + ImVec2{(half_border_width - 8), -0.5F},
-        header_rect->GetBR() + ImVec2{(8 - half_border_width), -0.5F},
+        header_rect->GetBL() + ImVec2{(half_border_width - 8), -0.5},
+        header_rect->GetBR() + ImVec2{(8 - half_border_width), -0.5},
         ImColor{255, 255, 255, 96 * alpha / (3 * 255)}, 1.F);
   }
 
   ImGui::PopID();
   ne::PopStyleVar();
+  ImGui::PopStyleVar();
 }
 }  // namespace vh::ponc::draw

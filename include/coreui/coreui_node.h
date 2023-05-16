@@ -14,7 +14,6 @@
 #include "core_i_node.h"
 #include "coreui_flow_tree_node.h"
 #include "coreui_pin.h"
-#include "coreui_texture.h"
 #include "cpp_safe_ptr.h"
 
 namespace vh::ponc::coreui {
@@ -24,8 +23,6 @@ struct Header {
   std::string label{};
   ///
   ImColor color{};
-  ///
-  Texture texture{};
 };
 
 ///

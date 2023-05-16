@@ -12,8 +12,6 @@ class IHeaderTraits : public cpp::Interface {
  public:
   ///
   virtual auto GetColor() const -> ImColor = 0;
-  ///
-  virtual auto GetTextureFilePath() const -> std::string;
 };
 }  // namespace vh::ponc::coreui
 
