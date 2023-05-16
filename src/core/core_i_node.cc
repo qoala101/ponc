@@ -22,7 +22,7 @@ auto INode::GetAllPins(const INode& node)
     pins.emplace_back(*node.input_pin_id_, ne::PinKind::Input);
   }
 
-  std::transform(node.output_pin_ids_.begin(), node.output_pin_ids_.end(),
+  std::transform(node.output_pin_ids_.cbegin(), node.output_pin_ids_.cend(),
                  std::back_inserter(pins), [](const auto pin_id) {
                    return std::pair{pin_id, ne::PinKind::Output};
                  });
@@ -116,7 +116,7 @@ auto INode::GetInitialFlow() const -> flow::NodeFlow {
     initial_flow.input_pin_flow.emplace(input_pin_id_->Get(), 0);
   }
 
-  std::transform(output_pin_ids_.begin(), output_pin_ids_.end(),
+  std::transform(output_pin_ids_.cbegin(), output_pin_ids_.cend(),
                  std::inserter(initial_flow.output_pin_flows,
                                initial_flow.output_pin_flows.begin()),
                  [](const auto pin_id) {

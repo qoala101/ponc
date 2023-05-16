@@ -24,7 +24,7 @@ auto HasLinkFromParent(const NodeFlow &node_flow,
   Expects(node_flow.input_pin_flow.has_value());
 
   return std::any_of(
-      links.begin(), links.end(), [&node_flow](const auto &link) {
+      links.cbegin(), links.cend(), [&node_flow](const auto &link) {
         return link.end_pin_id.Get() == node_flow.input_pin_flow->first;
       });
 }
@@ -51,11 +51,11 @@ auto FindLinkConnectingPins(ne::PinId start_pin, ne::PinId end_pin,
                             const std::vector<core::Link> &links)
     -> std::optional<const core::Link *> {
   const auto link = std::find_if(
-      links.begin(), links.end(), [start_pin, end_pin](const auto &link) {
+      links.cbegin(), links.cend(), [start_pin, end_pin](const auto &link) {
         return (link.start_pin_id == start_pin) && (link.end_pin_id == end_pin);
       });
 
-  if (link == links.end()) {
+  if (link == links.cend()) {
     return std::nullopt;
   }
 
@@ -88,7 +88,7 @@ void CalculateNodeFlow(
   auto calculated_flow = node_flows_.find(node.node_id.Get());
   const auto initial_flow = get_initial_node_flow(node.node_id);
 
-  if (calculated_flow == node_flows_.end()) {
+  if (calculated_flow == node_flows_.cend()) {
     calculated_flow = node_flows_.emplace(node.node_id, initial_flow).first;
   } else {
     calculated_flow->second += initial_flow;
@@ -111,7 +111,7 @@ auto FindNodeIfExists(const core::Diagram &diagram, ne::NodeId node_id)
     -> std::optional<const core::INode *> {
   const auto &nodes = diagram.GetNodes();
   const auto node = std::find_if(
-      nodes.begin(), nodes.end(),
+      nodes.cbegin(), nodes.cend(),
       [node_id](const auto &node) { return node->GetId() == node_id; });
 
   if (node == nodes.cend()) {
@@ -165,7 +165,7 @@ auto DoFlowTreesMatchDiagram(const std::vector<TreeNode> &flow_trees,
 
   auto diagram_node_ids = std::set<core::IdValue<ne::NodeId>>{};
   std::transform(nodes.cbegin(), nodes.cend(),
-                 std::inserter(diagram_node_ids, diagram_node_ids.begin()),
+                 std::inserter(diagram_node_ids, diagram_node_ids.cbegin()),
                  [](const auto &node) { return node->GetId().Get(); });
 
   if (diagram_node_ids != flow_tree_node_ids) {
@@ -178,7 +178,7 @@ auto DoFlowTreesMatchDiagram(const std::vector<TreeNode> &flow_trees,
       std::set<std::pair<core::IdValue<ne::PinId>, core::IdValue<ne::PinId>>>{};
   std::transform(
       links.cbegin(), links.cend(),
-      std::inserter(diagram_link_pins, diagram_link_pins.begin()),
+      std::inserter(diagram_link_pins, diagram_link_pins.cbegin()),
       [](const auto &link) {
         return std::pair{link.start_pin_id.Get(), link.end_pin_id.Get()};
       });

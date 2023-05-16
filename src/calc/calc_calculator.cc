@@ -85,12 +85,12 @@ auto Calculator::GetProgress() const -> float {
 auto Calculator::TakeResult() -> std::vector<TreeNode> {
   const auto best_output_trees = best_trees_.find(kRootInput);
 
-  if (best_output_trees == best_trees_.end()) {
+  if (best_output_trees == best_trees_.cend()) {
     return std::move(input_nodes_);
   }
 
   Expects(!best_output_trees->second.empty());
-  const auto best_output_tree = std::prev(best_output_trees->second.end());
+  const auto best_output_tree = std::prev(best_output_trees->second.cend());
 
   Expects(best_output_tree->second.outputs.size() == input_nodes_.size());
 
@@ -263,9 +263,9 @@ void Calculator::MakeBestTreesPermutation(
   const auto output_sum = output + family_node.outputs[output_index];
   const auto best_output_trees = best_trees_.find(output_sum);
 
-  if (best_output_trees != best_trees_.end()) {
+  if (best_output_trees != best_trees_.cend()) {
     const auto num_clients_index = num_clients_indices.find(output_sum);
-    Expects(num_clients_index != num_clients_indices.end());
+    Expects(num_clients_index != num_clients_indices.cend());
 
     auto best_output_tree = best_output_trees->second.crbegin();
     std::advance(best_output_tree, num_clients_index->second);
@@ -290,14 +290,14 @@ auto Calculator::GetBestTree(FlowValue output, NumClients num_clients)
     -> std::optional<TreeNode *> {
   const auto best_output_trees = best_trees_.find(output);
 
-  if (best_output_trees == best_trees_.end()) {
+  if (best_output_trees == best_trees_.cend()) {
     return std::nullopt;
   }
 
   const auto best_num_clients_tree =
       best_output_trees->second.find(num_clients);
 
-  if (best_num_clients_tree == best_output_trees->second.end()) {
+  if (best_num_clients_tree == best_output_trees->second.cend()) {
     return std::nullopt;
   }
 

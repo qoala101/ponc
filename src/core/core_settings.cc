@@ -78,14 +78,14 @@ auto Settings::GetFlowColor(const Settings& settings, float flow) -> ImColor {
   if (value_min_max_percentage >= high_percentage) {
     return style::GetGradient(
         style::FlowColors::kHigh, style::FlowColors::kMax,
-        (value_min_max_percentage - high_percentage) / (1.F - high_percentage));
+        (value_min_max_percentage - high_percentage) / (1 - high_percentage));
   }
 
   const auto low_high_range = (high_percentage - low_percentage);
   const auto value_high_low_percentage =
       (value_min_max_percentage - low_percentage) / low_high_range;
 
-  if (value_high_low_percentage < 0.5F) {
+  if (value_high_low_percentage < 0.5) {
     return style::GetGradient(style::FlowColors::kLow, style::FlowColors::kGood,
                               value_high_low_percentage * 2);
   }

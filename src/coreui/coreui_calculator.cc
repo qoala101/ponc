@@ -36,7 +36,7 @@ auto GetNodeOutputs(const core::INode& node) {
   auto outputs = std::vector<float>{};
   outputs.reserve(output_pins.size());
 
-  std::transform(output_pins.begin(), output_pins.end(),
+  std::transform(output_pins.cbegin(), output_pins.cend(),
                  std::back_inserter(outputs),
                  [&output_pin_flows](const auto pin_id) {
                    const auto pin_id_value = pin_id.Get();
@@ -123,7 +123,7 @@ auto GetInputNodes(const core::Diagram& diagram) {
   auto input_nodes = std::vector<calc::TreeNode>{};
   input_nodes.reserve(free_outputs.size());
 
-  std::transform(free_outputs.begin(), free_outputs.end(),
+  std::transform(free_outputs.cbegin(), free_outputs.cend(),
                  std::back_inserter(input_nodes), [](const auto& free_outputs) {
                    return calc::TreeNode{
                        .outputs = calc::ToCalculatorResolution(free_outputs)};
@@ -141,7 +141,7 @@ auto GetClientFamilyId(core::Project& project) {
         return type.has_value() && (*type == core::FamilyType::kClient);
       });
 
-  Expects(client_family != families.end());
+  Expects(client_family != families.cend());
   return (*client_family)->GetId();
 }
 
@@ -164,7 +164,7 @@ auto GetOutputTrees(
   auto output_trees = std::vector<flow::TreeNode>{};
   output_trees.reserve(output_root_ids.size());
 
-  std::transform(output_root_ids.cbegin(), output_root_ids.end(),
+  std::transform(output_root_ids.cbegin(), output_root_ids.cend(),
                  std::back_inserter(output_trees),
                  [&flow_trees](const auto& output_root) {
                    return flow::FindTreeNode(flow_trees, output_root.second);

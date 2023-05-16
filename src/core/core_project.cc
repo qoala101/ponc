@@ -85,7 +85,7 @@ auto Project::FindMaxId() const {
 
 ///
 auto Project::IsEmpty(const Project& project) -> bool {
-  return std::all_of(project.diagrams_.begin(), project.diagrams_.end(),
+  return std::all_of(project.diagrams_.cbegin(), project.diagrams_.cend(),
                      [](const auto& diagram) {
                        return diagram.GetNodes().empty() &&
                               diagram.GetLinks().empty();
@@ -96,10 +96,10 @@ auto Project::IsEmpty(const Project& project) -> bool {
 auto Project::FindFamily(const Project& project, core::FamilyId family_id)
     -> IFamily& {
   const auto family = std::find_if(
-      project.families_.begin(), project.families_.end(),
+      project.families_.cbegin(), project.families_.cend(),
       [family_id](const auto& family) { return family->GetId() == family_id; });
 
-  Expects(family != project.families_.end());
+  Expects(family != project.families_.cend());
   return **family;
 }
 
@@ -180,7 +180,7 @@ auto Project::EmplaceDiagram(Diagram diagram) -> Diagram& {
 ///
 void Project::DeleteDiagram(int index) {
   Expects(static_cast<int>(diagrams_.size()) > index);
-  diagrams_.erase(diagrams_.begin() + index);
+  diagrams_.erase(diagrams_.cbegin() + index);
 }
 
 ///

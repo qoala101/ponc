@@ -25,12 +25,12 @@ auto Diagram::GetIds(Diagram& diagram) -> std::vector<IdPtr> {
 
   for (const auto& node : diagram.nodes_) {
     const auto node_ids = node->GetIds();
-    ids.insert(ids.end(), node_ids.begin(), node_ids.end());
+    ids.insert(ids.cend(), node_ids.cbegin(), node_ids.cend());
   }
 
   for (auto& link : diagram.links_) {
     const auto link_ids = Link::GetIds(link);
-    ids.insert(ids.end(), link_ids.begin(), link_ids.end());
+    ids.insert(ids.cend(), link_ids.cbegin(), link_ids.cend());
   }
 
   return ids;
@@ -39,26 +39,27 @@ auto Diagram::GetIds(Diagram& diagram) -> std::vector<IdPtr> {
 ///
 auto Diagram::FindNode(const Diagram& diagram, ne::NodeId node_id) -> INode& {
   const auto node = std::find_if(
-      diagram.nodes_.begin(), diagram.nodes_.end(),
+      diagram.nodes_.cbegin(), diagram.nodes_.cend(),
       [node_id](const auto& node) { return node->GetId() == node_id; });
 
-  Expects(node != diagram.nodes_.end());
+  Expects(node != diagram.nodes_.cend());
   return **node;
 }
 
 ///
 auto Diagram::FindPinNode(const Diagram& diagram, ne::PinId pin_id) -> INode& {
-  const auto pin_node = std::find_if(
-      diagram.nodes_.begin(), diagram.nodes_.end(), [pin_id](const auto& node) {
-        const auto node_pins = INode::GetAllPins(*node);
+  const auto pin_node =
+      std::find_if(diagram.nodes_.cbegin(), diagram.nodes_.cend(),
+                   [pin_id](const auto& node) {
+                     const auto node_pins = INode::GetAllPins(*node);
 
-        return std::any_of(node_pins.begin(), node_pins.end(),
-                           [pin_id](const auto& node_pin) {
-                             return node_pin.first == pin_id;
-                           });
-      });
+                     return std::any_of(node_pins.cbegin(), node_pins.cend(),
+                                        [pin_id](const auto& node_pin) {
+                                          return node_pin.first == pin_id;
+                                        });
+                   });
 
-  Expects(pin_node != diagram.nodes_.end());
+  Expects(pin_node != diagram.nodes_.cend());
   return **pin_node;
 }
 
@@ -68,7 +69,7 @@ auto Diagram::FindLink(Diagram& diagram, ne::LinkId link_id) -> Link& {
       std::find_if(diagram.links_.begin(), diagram.links_.end(),
                    [link_id](const auto& link) { return link.id == link_id; });
 
-  Expects(link != diagram.links_.end());
+  Expects(link != diagram.links_.cend());
   return *link;
 }
 
@@ -86,7 +87,7 @@ auto Diagram::FindPinLink(Diagram& diagram, ne::PinId pin_id)
       diagram.links_.begin(), diagram.links_.end(),
       [pin_id](const auto& link) { return Link::HasPin(link, pin_id); });
 
-  if (pin_link == diagram.links_.end()) {
+  if (pin_link == diagram.links_.cend()) {
     return std::nullopt;
   }
 
@@ -119,10 +120,10 @@ void Diagram::DeleteNode(ne::NodeId node_id) {
   Expects(!nodes_.empty());
 
   const auto found_node = std::find_if(
-      nodes_.begin(), nodes_.end(),
+      nodes_.cbegin(), nodes_.cend(),
       [node_id](const auto& node) { return node->GetId() == node_id; });
 
-  Expects(found_node != nodes_.end());
+  Expects(found_node != nodes_.cend());
   nodes_.erase(found_node);
 }
 
@@ -142,10 +143,10 @@ void Diagram::DeleteLink(ne::LinkId link_id) {
   Expects(!links_.empty());
 
   const auto found_link =
-      std::find_if(links_.begin(), links_.end(),
+      std::find_if(links_.cbegin(), links_.cend(),
                    [link_id](const auto& link) { return link.id == link_id; });
 
-  Expects(found_link != links_.end());
+  Expects(found_link != links_.cend());
   links_.erase(found_link);
 }
 

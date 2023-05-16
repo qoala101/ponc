@@ -127,7 +127,7 @@ void DrawNode(coreui::Node& node, coreui::NodeMover& node_mover) {
     //   ImGui::Spring(1, 0);
     // }
 
-    ne::PushStyleVar(ne::StyleVar_PivotAlignment, {0, 0.5F});
+    ne::PushStyleVar(ne::StyleVar_PivotAlignment, {0, 0.5});
     ne::PushStyleVar(ne::StyleVar_PivotSize, {0, 0});
 
     for (const auto& pin : node_data.input_pins) {
@@ -257,7 +257,7 @@ void DrawNode(coreui::Node& node, coreui::NodeMover& node_mover) {
     drawList->AddLine(
         header_rect->GetBL() + ImVec2{(half_border_width - 8), -0.5},
         header_rect->GetBR() + ImVec2{(8 - half_border_width), -0.5},
-        ImColor{255, 255, 255, 96 * alpha / (3 * 255)}, 1.F);
+        ImColor{255, 255, 255, 96 * alpha / (3 * 255)}, 1);
   }
 
   ImGui::PopID();

@@ -34,7 +34,7 @@ auto Project::CreateProject() const {
   for (const auto& family_group : family_groups_) {
     auto group_families = family_group->CreateFamilies(id_generator);
 
-    families.insert(families.end(), std::move_iterator{group_families.begin()},
+    families.insert(families.cend(), std::move_iterator{group_families.begin()},
                     std::move_iterator{group_families.end()});
   }
 
@@ -58,7 +58,7 @@ Project::Project(std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups,
         auto default_family_groups =
             core::IFamilyGroup::CreateDefaultFamilyGroups();
 
-        family_groups.insert(family_groups.end(),
+        family_groups.insert(family_groups.cend(),
                              std::move_iterator{default_family_groups.begin()},
                              std::move_iterator{default_family_groups.end()});
 
@@ -157,7 +157,7 @@ auto Project::CreateFamilyParsers() const {
   auto family_parsers = std::vector<std::unique_ptr<json::IFamilyParser>>{};
   family_parsers.reserve(family_groups_.size());
 
-  std::transform(family_groups_.begin(), family_groups_.end(),
+  std::transform(family_groups_.cbegin(), family_groups_.cend(),
                  std::back_inserter(family_parsers),
                  [](const auto& family_group) {
                    return family_group->CreateFamilyParser();

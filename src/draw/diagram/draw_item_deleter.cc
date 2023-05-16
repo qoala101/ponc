@@ -21,14 +21,15 @@ void UnregisterDeletedItemsImpl(
     const std::invocable<const T &> auto &get_item_id,
     const std::invocable<core::UnspecifiedIdValue> auto &unregister_item) {
   auto new_item_ids = std::set<core::UnspecifiedIdValue>{};
-  std::transform(items.begin(), items.end(),
-                 std::inserter(new_item_ids, new_item_ids.begin()),
+  std::transform(items.cbegin(), items.cend(),
+                 std::inserter(new_item_ids, new_item_ids.cbegin()),
                  get_item_id);
 
   auto deleted_item_ids = std::vector<core::UnspecifiedIdValue>{};
-  std::set_difference(item_ids.registered_ids_.begin(),
-                      item_ids.registered_ids_.end(), new_item_ids.begin(),
-                      new_item_ids.end(), std::back_inserter(deleted_item_ids));
+  std::set_difference(item_ids.registered_ids_.cbegin(),
+                      item_ids.registered_ids_.cend(), new_item_ids.cbegin(),
+                      new_item_ids.cend(),
+                      std::back_inserter(deleted_item_ids));
 
   for (const auto deleted_id : deleted_item_ids) {
     unregister_item(deleted_id);

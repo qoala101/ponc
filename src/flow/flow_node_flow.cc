@@ -17,12 +17,12 @@ auto NodeFlow::GetPinFlow(const NodeFlow &flow, ne::PinId pin_id) -> float {
   }
 
   const auto pin_flow =
-      std::find_if(flow.output_pin_flows.begin(), flow.output_pin_flows.end(),
+      std::find_if(flow.output_pin_flows.cbegin(), flow.output_pin_flows.cend(),
                    [pin_id_value](const auto &output_pin) {
                      return output_pin.first == pin_id_value;
                    });
 
-  Expects(pin_flow != flow.output_pin_flows.end());
+  Expects(pin_flow != flow.output_pin_flows.cend());
   return pin_flow->second;
 }
 

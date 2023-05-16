@@ -44,14 +44,14 @@ void DrawOutputFlows(const coreui::TreeNode& tree_node) {
   ImGui::BeginHorizontal(tree_node.node->GetNode().GetId().AsPointer());
 
   const auto& output_flows = tree_node.node->GetData().flow.output_flows;
-  auto output_flow = output_flows.begin();
+  auto output_flow = output_flows.cbegin();
 
-  if (output_flow != output_flows.end()) {
+  if (output_flow != output_flows.cend()) {
     ImGui::TextColored(output_flow->color, "%.2f", output_flow->value);
     ++output_flow;
   }
 
-  for (; output_flow != output_flows.end(); ++output_flow) {
+  for (; output_flow != output_flows.cend(); ++output_flow) {
     ImGui::TextUnformatted("/");
     ImGui::TextColored(output_flow->color, "%.2f", output_flow->value);
   }

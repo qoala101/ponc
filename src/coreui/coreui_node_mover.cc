@@ -145,13 +145,15 @@ void NodeMover::ArrangeVerticallyAt(const std::vector<ne::NodeId>& node_ids,
 
   auto next_node_pos = pos;
 
-  for (auto node_id = node_ids.cbegin(); node_id != node_ids.end(); ++node_id) {
+  for (auto node_id = node_ids.cbegin(); node_id != node_ids.cend();
+       ++node_id) {
     MoveNodeTo(*node_id, next_node_pos);
     next_node_pos.y += GetNodeSize(*node_id).y;
 
     const auto next_id = std::next(node_id);
 
-    if ((next_id != node_ids.end()) && DoNodesNeedSpacing(*node_id, *next_id)) {
+    if ((next_id != node_ids.cend()) &&
+        DoNodesNeedSpacing(*node_id, *next_id)) {
       next_node_pos.y +=
           static_cast<float>(settings_->arrange_vertical_spacing);
     }
@@ -456,7 +458,7 @@ void NodeMover::MoveNodePinPoses(const core::INode& node, const ImVec2& pos) {
   for (const auto& [pin_id, pin_kind] : core::INode::GetAllPins(node)) {
     const auto pin_pos = pin_poses_.find(pin_id.Get());
 
-    if (pin_pos != pin_poses_.end()) {
+    if (pin_pos != pin_poses_.cend()) {
       pin_pos->second += delta;
     }
   }

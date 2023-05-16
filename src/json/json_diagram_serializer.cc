@@ -19,9 +19,9 @@ namespace {
 auto FindFamily(const std::vector<std::unique_ptr<core::IFamily>>& families,
                 core::FamilyId family_id) -> auto& {
   const auto family = std::find_if(
-      families.begin(), families.end(),
+      families.cbegin(), families.cend(),
       [family_id](const auto& family) { return family->GetId() == family_id; });
-  Expects(family != families.end());
+  Expects(family != families.cend());
   return *family;
 }
 

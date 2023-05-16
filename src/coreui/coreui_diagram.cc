@@ -57,7 +57,7 @@ auto Diagram::FindNode(Diagram& diagram, ne::NodeId node_id) -> Node& {
                                    return node.GetNode().GetId() == node_id;
                                  });
 
-  Expects(node != diagram.nodes_.end());
+  Expects(node != diagram.nodes_.cend());
   return *node;
 }
 
@@ -140,7 +140,7 @@ auto Diagram::AddNode(std::unique_ptr<core::INode> node) -> Event& {
 auto Diagram::GetFreePinFamily(ne::PinKind pin_kind) const -> auto& {
   for (const auto& group : family_groups_) {
     const auto free_pin_family = std::find_if(
-        group.families.begin(), group.families.end(),
+        group.families.cbegin(), group.families.cend(),
         [pin_kind](const auto& family) {
           const auto& core_family = family.GetFamily();
 
@@ -152,7 +152,7 @@ auto Diagram::GetFreePinFamily(ne::PinKind pin_kind) const -> auto& {
           return core::INode::FindFirstPinOfKind(*node, pin_kind).has_value();
         });
 
-    if (free_pin_family != group.families.end()) {
+    if (free_pin_family != group.families.cend()) {
       return *free_pin_family;
     }
   }
@@ -272,7 +272,7 @@ auto Diagram::CanReplaceNode(const core::INode& source_node,
   }
 
   const auto num_linked_output_pins =
-      std::count_if(source_output_pins.begin(), source_output_pins.end(),
+      std::count_if(source_output_pins.cbegin(), source_output_pins.cend(),
                     [&diagram = diagram_](const auto pin_id) {
                       return core::Diagram::HasLink(*diagram, pin_id);
                     });
@@ -294,14 +294,14 @@ auto Diagram::ReplaceNode(const core::INode& source_node,
   }
 
   const auto& target_pins = target_node->GetOutputPinIds();
-  auto next_target_pin = target_pins.begin();
+  auto next_target_pin = target_pins.cbegin();
 
   for (const auto source_pin : source_node.GetOutputPinIds()) {
     if (!core::Diagram::HasLink(*diagram_, source_pin)) {
       continue;
     }
 
-    Expects(next_target_pin != target_pins.end());
+    Expects(next_target_pin != target_pins.cend());
     MoveLink(source_pin, *next_target_pin);
     ++next_target_pin;
   }
@@ -412,7 +412,7 @@ void Diagram::UpdateLinks(const flow::NodeFlows& node_flows) {
   const auto& links = diagram_->GetLinks();
   links_.reserve(links.size());
 
-  std::transform(links.begin(), links.end(), std::back_inserter(links_),
+  std::transform(links.cbegin(), links.cend(), std::back_inserter(links_),
                  [this, &node_flows](const auto& link) {
                    return LinkFrom(link, node_flows);
                  });
@@ -467,7 +467,7 @@ auto Diagram::PinFrom(const IPinTraits& pin_traits,
   }
 
   if (!linker_.CanConnectToPin(pin_id)) {
-    pin.flow_data->color.Value.w = 0.25F;
+    pin.flow_data->color.Value.w = 0.25;
   }
 
   if (std::holds_alternative<PinFlow>(pin_value)) {
@@ -492,7 +492,7 @@ auto Diagram::NodeFlowFrom(const core::INode& core_node,
   for (const auto output_pin : core_node.GetOutputPinIds()) {
     const auto output_flow = flow::NodeFlow::GetPinFlow(core_flow, output_pin);
 
-    if (std::none_of(output_flows.begin(), output_flows.end(),
+    if (std::none_of(output_flows.cbegin(), output_flows.cend(),
                      [output_flow](const auto& other_flow) {
                        return other_flow.value == output_flow;
                      })) {
@@ -541,7 +541,7 @@ void Diagram::UpdateNodes(const flow::NodeFlows& node_flows) {
   const auto& nodes = diagram_->GetNodes();
   nodes_.reserve(nodes.size());
 
-  std::transform(nodes.begin(), nodes.end(), std::back_inserter(nodes_),
+  std::transform(nodes.cbegin(), nodes.cend(), std::back_inserter(nodes_),
                  [this, &node_flows](const auto& node) {
                    const auto node_id = node->GetId().Get();
                    Expects(node_flows.contains(node_id));
@@ -582,7 +582,7 @@ void Diagram::UpdateFamilyGroups() {
                        return group.label == group_label;
                      });
 
-    if (group != family_groups_.end()) {
+    if (group != family_groups_.cend()) {
       group->families.emplace_back(std::move(family));
       continue;
     }
@@ -612,11 +612,11 @@ void Diagram::UpdateTreeNode(TreeNode& tree_node) {
     }
 
     const auto child_family = std::find_if(
-        families.begin(), families.end(),
+        families.cbegin(), families.cend(),
         [child_family_id = child_node.node->GetNode().GetFamilyId()](
             const auto& family) { return family->GetId() == child_family_id; });
 
-    Expects(child_family != families.end());
+    Expects(child_family != families.cend());
     ++num_children_per_family[(*child_family)->GetId().Get()];
   }
 }

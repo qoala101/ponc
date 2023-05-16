@@ -168,7 +168,7 @@ class HeaderUiTraits : public coreui::IHeaderTraits {
                                   style::Tailwind::Shade::k800),
         style::Tailwind::GetColor(style::Tailwind::Color::kPurple,
                                   style::Tailwind::Shade::k600),
-        1.F - static_cast<float>(node_->GetPercentageIndex()) * 0.1F);
+        1 - static_cast<float>(node_->GetPercentageIndex()) * 0.1F);
   }
 
  private:

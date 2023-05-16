@@ -27,7 +27,7 @@ void DrawSelectableName(
       family.GetLabel() + " (" + std::to_string(nodes.size()) + ")";
 
   auto item_is_selected = std::all_of(
-      nodes.begin(), nodes.end(), [&selected_node_ids](const auto& node) {
+      nodes.cbegin(), nodes.cend(), [&selected_node_ids](const auto& node) {
         return selected_node_ids.contains(node->GetNode().GetId().Get());
       });
 
@@ -110,7 +110,7 @@ void NodesView::Draw(const coreui::Diagram& diagram) {
     auto selected_node_ids = std::unordered_set<core::IdValue<ne::NodeId>>{};
     selected_node_ids.reserve(selected_nodes.size());
 
-    std::transform(selected_nodes.begin(), selected_nodes.end(),
+    std::transform(selected_nodes.cbegin(), selected_nodes.cend(),
                    std::inserter(selected_node_ids, selected_node_ids.begin()),
                    [](const auto node_id) { return node_id.Get(); });
 
