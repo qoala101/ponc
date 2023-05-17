@@ -24,8 +24,7 @@ auto CalculatorFamilySettings::FromFamilies(
       continue;
     }
 
-    family_settings.emplace_back(
-        CalculatorFamilySettings{.family_id = family->GetId()});
+    family_settings.emplace_back(CalculatorFamilySettings{family->GetId()});
   }
 
   return family_settings;

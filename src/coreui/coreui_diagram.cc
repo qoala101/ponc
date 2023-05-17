@@ -636,12 +636,11 @@ void Diagram::UpdateNodeTrees() {
         root_node,
         [this, &parent_stack](const auto& core_tree_node) {
           auto& node = FindNode(*this, core_tree_node.node_id);
-          auto& tree_node =
-              parent_stack.empty()
-                  ? node_trees_.emplace_back(
-                        TreeNode{.node = safe_owner_.MakeSafe(&node)})
-                  : parent_stack.top()->child_nodes.emplace_back(
-                        TreeNode{.node = safe_owner_.MakeSafe(&node)});
+          auto& tree_node = parent_stack.empty()
+                                ? node_trees_.emplace_back(
+                                      TreeNode{safe_owner_.MakeSafe(&node)})
+                                : parent_stack.top()->child_nodes.emplace_back(
+                                      TreeNode{safe_owner_.MakeSafe(&node)});
           parent_stack.emplace(&tree_node);
         },
         [&parent_stack](const auto&) { parent_stack.pop(); });

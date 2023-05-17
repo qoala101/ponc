@@ -74,7 +74,7 @@ auto GetParentTrees(const std::vector<flow::TreeNode>& tree_nodes,
   TraverseOtherNodes(
       tree_nodes, child_trees,
       [&child_trees, &parent_trees](const auto& tree_node) {
-        auto parent_tree = flow::TreeNode{.node_id = tree_node.node_id};
+        auto parent_tree = flow::TreeNode{tree_node.node_id};
 
         for (const auto& child_node : tree_node.child_nodes) {
           if (std::any_of(child_trees.cbegin(), child_trees.cend(),

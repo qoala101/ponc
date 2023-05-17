@@ -7,11 +7,12 @@ namespace vh::ponc::style {
 ///
 struct DefaultColors : cpp::StaticApi {
   ///
-  static constexpr auto kWhite =
-      Tailwind::GetColor(Tailwind::Color::kZinc, Tailwind::Shade::k50);
+  static constexpr auto kGray = Tailwind::Color::kZinc;
   ///
-  static constexpr auto kBlack =
-      Tailwind::GetColor(Tailwind::Color::kZinc, Tailwind::Shade::k900);
+  static constexpr auto kAccent = Tailwind::Color::kSky;
+  ///
+  static constexpr auto kWhite =
+      Tailwind::GetColor(kGray, Tailwind::Shade::k50);
   ///
   static constexpr auto kError =
       Tailwind::GetColor(Tailwind::Color::kRed, Tailwind::Shade::k500);

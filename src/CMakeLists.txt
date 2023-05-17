@@ -106,6 +106,7 @@ add_executable(ponc
   json/json_settings_serializer.cc
   json/json_versifier.cc
 
+  style/style_update_styles.cc
   style/style_utils.cc
 
   main.cc

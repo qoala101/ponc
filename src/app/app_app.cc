@@ -2,6 +2,8 @@
 
 #include "coreui_project.h"
 #include "cpp_assert.h"
+#include "imgui.h"
+#include "style_update_styles.h"
 
 namespace vh::ponc {
 ///
@@ -16,7 +18,7 @@ auto App::GetWindowFlags() const -> ImGuiWindowFlags {
 
 ///
 void App::OnStart() {
-  Expects(!app_.has_value());
+  style::UpdateStyle(ImGui::GetStyle());
 
   app_.emplace(coreui::Project::Callbacks{
       .name_changed = [safe_this = safe_owner_.MakeSafe(this)](auto file_name) {
@@ -26,16 +28,11 @@ void App::OnStart() {
 }
 
 ///
-void App::OnStop() {
-  Expects(app_.has_value());
-
-  app_.reset();
-}
+void App::OnStop() { app_.reset(); }
 
 ///
 void App::OnFrame(float /*unused*/) {
   Expects(app_.has_value());
-
   app_->OnFrame();
 }
 }  // namespace vh::ponc

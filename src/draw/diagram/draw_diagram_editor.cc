@@ -15,8 +15,7 @@
 #include "draw_node.h"
 #include "imgui.h"
 #include "imgui_node_editor.h"
-#include "style_tailwind.h"
-#include "style_utils.h"
+#include "style_update_styles.h"
 
 namespace vh::ponc::draw {
 namespace {
@@ -26,57 +25,13 @@ auto IsHoveringOverChildWindow() {
   Expects(context != nullptr);
   return context->HoveredWindow != ImGui::GetCurrentWindow();
 }
-
-void UpdateStyle() {
-  auto &style = ne::GetStyle();
-
-  style.NodeRounding = 8;
-  style.NodeBorderWidth = 1;
-  style.HoveredNodeBorderWidth = 4;
-  style.SelectedNodeBorderWidth = 4;
-  style.ScrollDuration = 0.25;
-
-  using Color = style::Tailwind::Color;
-  using Shade = style::Tailwind::Shade;
-
-  constexpr const auto gray = Color::kZinc;
-
-  struct Theme {
-    ne::StyleColor type{};
-    Color color{};
-    Shade shade{};
-    float alpha{1};
-  };
-
-  constexpr const auto themes = std::array{
-      Theme{ne::StyleColor_Bg, gray, Shade::k600},
-      Theme{ne::StyleColor_Grid, gray, Shade::k700},
-      Theme{ne::StyleColor_NodeBg, gray, Shade::k900, 0.75},
-      Theme{ne::StyleColor_NodeBorder, gray, Shade::k500, 0.75},
-      Theme{ne::StyleColor_HovNodeBorder, Color::kCyan, Shade::k500},
-      Theme{ne::StyleColor_SelNodeBorder, Color::kAmber, Shade::k500},
-      Theme{ne::StyleColor_NodeSelRect, Color::kBlue, Shade::k500, 0.25},
-      Theme{ne::StyleColor_NodeSelRectBorder, Color::kBlue, Shade::k500},
-      Theme{ne::StyleColor_HovLinkBorder, Color::kCyan, Shade::k500},
-      Theme{ne::StyleColor_SelLinkBorder, Color::kAmber, Shade::k500},
-      Theme{ne::StyleColor_PinRect, Color::kCyan, Shade::k500, 0.5},
-  };
-
-  auto &colors = style.Colors;
-  Expects(std::size(colors) >= ne::StyleColor_Count);
-
-  for (const auto &theme : themes) {
-    colors[theme.type] = style::WithAlpha(
-        style::Tailwind::GetColor(theme.color, theme.shade), theme.alpha);
-  }
-}
 }  // namespace
 
 ///
 DiagramEditor::DiagramEditor()
     : context_{ne::CreateEditor(), &ne::DestroyEditor} {
   ne::SetCurrentEditor(context_.get());
-  UpdateStyle();
+  style::UpdateStyle(ne::GetStyle());
 }
 
 ///

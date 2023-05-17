@@ -202,10 +202,7 @@ auto Project::OpenFromFile(std::filesystem::path file_path) -> Event& {
 auto Project::CanSave() const -> bool { return !file_path_.empty(); }
 
 ///
-auto Project::Save() -> Event& {
-  Expects(!file_path_.empty());
-  return SaveToFile(file_path_);
-}
+auto Project::Save() -> Event& { return SaveToFile(file_path_); }
 
 ///
 auto Project::SaveToFile(std::filesystem::path file_path) -> Event& {

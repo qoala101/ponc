@@ -44,11 +44,9 @@ struct Drop {
 
 ///
 constexpr auto kDrops = std::array{
-    Drop{.small = -0.4, .big = -13.8}, Drop{.small = -0.7, .big = -10.6},
-    Drop{.small = -0.95, .big = -8.8}, Drop{.small = -1.2, .big = -7.5},
-    Drop{.small = -1.55, .big = -6.5}, Drop{.small = -1.85, .big = -5.7},
-    Drop{.small = -2.2, .big = -5},    Drop{.small = -2.6, .big = -4.4},
-    Drop{.small = -3, .big = -3.9},    Drop{.small = -3.4, .big = -3.4},
+    Drop{-0.4, -13.8}, Drop{-0.7, -10.6}, Drop{-0.95, -8.8}, Drop{-1.2, -7.5},
+    Drop{-1.55, -6.5}, Drop{-1.85, -5.7}, Drop{-2.2, -5},    Drop{-2.6, -4.4},
+    Drop{-3, -3.9},    Drop{-3.4, -3.4},
 };
 
 ///

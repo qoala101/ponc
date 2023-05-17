@@ -39,7 +39,7 @@ auto FindRootNodes(const std::vector<std::unique_ptr<core::INode>> &nodes,
 
     if (!pin_flows.input_pin_flow.has_value() ||
         !HasLinkFromParent(pin_flows, links)) {
-      root_nodes.emplace_back(TreeNode{.node_id = node->GetId()});
+      root_nodes.emplace_back(TreeNode{node->GetId()});
     }
   }
 
@@ -230,8 +230,7 @@ auto BuildFlowTrees(const core::Diagram &diagram) -> std::vector<TreeNode> {
 
         auto &[pin_id, tree_node] =
             *possible_parent->child_nodes
-                 .emplace((*link_to_parent)->start_pin_id,
-                          TreeNode{.node_id = node_id})
+                 .emplace((*link_to_parent)->start_pin_id, TreeNode{node_id})
                  .first;
 
         current_level_tree_nodes.emplace_back(&tree_node);

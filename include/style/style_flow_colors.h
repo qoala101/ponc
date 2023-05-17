@@ -3,20 +3,21 @@
 
 #include "cpp_static_api.h"
 #include "imgui.h"
+#include "style_utils.h"
 
 namespace vh::ponc::style {
 ///
 struct FlowColors : cpp::StaticApi {
   ///
-  static constexpr auto kMin = IM_COL32(0, 0, 255, 255);
+  static constexpr auto kMin = FromRgb(0, 0, 255);
   ///
-  static constexpr auto kLow = IM_COL32(0, 255, 255, 255);
+  static constexpr auto kLow = FromRgb(0, 255, 255);
   ///
-  static constexpr auto kGood = IM_COL32(0, 255, 0, 255);
+  static constexpr auto kGood = FromRgb(0, 255, 0);
   ///
-  static constexpr auto kHigh = IM_COL32(255, 255, 0, 255);
+  static constexpr auto kHigh = FromRgb(255, 255, 0);
   ///
-  static constexpr auto kMax = IM_COL32(255, 0, 0, 255);
+  static constexpr auto kMax = FromRgb(255, 0, 0);
 };
 }  // namespace vh::ponc::style
 
