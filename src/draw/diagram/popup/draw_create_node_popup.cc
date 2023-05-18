@@ -1,3 +1,9 @@
+/**
+ * PON Calculator https://github.com/qoala101/ponc
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ * @copyright Copyright (c) 2023, MIT License
+ */
+
 #include "draw_create_node_popup.h"
 
 #include <cstdint>

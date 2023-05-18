@@ -1,3 +1,9 @@
+/**
+ * PON Calculator https://github.com/qoala101/ponc
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ * @copyright Copyright (c) 2023, MIT License
+ */
+
 #include "coreui_float_pin_traits.h"
 
 #include "coreui_i_pin_traits.h"

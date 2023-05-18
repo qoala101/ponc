@@ -1,3 +1,9 @@
+/**
+ * PON Calculator https://github.com/qoala101/ponc
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ * @copyright Copyright (c) 2023, MIT License
+ */
+
 #include "style_update_styles.h"
 
 #include "style_default_colors.h"

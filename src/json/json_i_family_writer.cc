@@ -1,3 +1,9 @@
+/**
+ * PON Calculator https://github.com/qoala101/ponc
+ * @author Volodymyr Hromakov (4y5t6r@gmail.com)
+ * @copyright Copyright (c) 2023, MIT License
+ */
+
 #include "json_i_family_writer.h"
 
 #include "json_id_serializer.h"
