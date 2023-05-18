@@ -135,6 +135,7 @@ class DropPinTraits : public coreui::IPinTraits {
   cpp::SafePtr<Node> node_;
 };
 
+///
 constexpr auto kLabel = "Attenuator";
 
 ///

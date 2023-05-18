@@ -5,6 +5,7 @@
 #include "coreui_node_mover.h"
 
 namespace vh::ponc::draw {
+///
 void DrawNode(coreui::Node &node, coreui::NodeMover &node_mover);
 }  // namespace vh::ponc::draw
 

@@ -12,7 +12,7 @@ using Shade = style::Tailwind::Shade;
 ///
 void UpdateStyle(ImGuiStyle& style) {
   struct Item {
-    ImGuiCol_ item{};
+    ImGuiCol_ index{};
     Color color{};
     Shade shade{};
     float alpha{1};
@@ -79,7 +79,7 @@ void UpdateStyle(ImGuiStyle& style) {
 
   for (const auto& item : items) {
     // NOLINTNEXTLINE(*-constant-array-index)
-    style.Colors[item.item] = style::WithAlpha(
+    style.Colors[item.index] = style::WithAlpha(
         style::Tailwind::GetColor(item.color, item.shade), item.alpha);
   }
 }
@@ -93,7 +93,7 @@ void UpdateStyle(ne::Style& style) {
   style.ScrollDuration = 0.25;
 
   struct Item {
-    ne::StyleColor item{};
+    ne::StyleColor index{};
     Color color{};
     Shade shade{};
     float alpha{1};
@@ -115,10 +115,10 @@ void UpdateStyle(ne::Style& style) {
 
   Expects(std::size(style.Colors) >= ne::StyleColor_Count);
 
-  for (const auto& theme : items) {
+  for (const auto& item : items) {
     // NOLINTNEXTLINE(*-constant-array-index)
-    style.Colors[theme.item] = style::WithAlpha(
-        style::Tailwind::GetColor(theme.color, theme.shade), theme.alpha);
+    style.Colors[item.index] = style::WithAlpha(
+        style::Tailwind::GetColor(item.color, item.shade), item.alpha);
   }
 }
 }  // namespace vh::ponc::style

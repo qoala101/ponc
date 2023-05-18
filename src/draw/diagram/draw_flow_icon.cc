@@ -23,11 +23,11 @@ void DrawIconPath(ImDrawList& draw_list, ImVec2 pos, ImVec2 size) {
   const auto arrow_tip = ImVec2{top_left.x + size.x, top_left.y + size.y / 2};
   draw_list.PathLineTo(arrow_tip);
 
-  const auto bottom_middle = ImVec2{top_middle.x, top_middle.y + size.y};
-  draw_list.PathLineTo(bottom_middle);
+  const auto bot_middle = ImVec2{top_middle.x, top_middle.y + size.y};
+  draw_list.PathLineTo(bot_middle);
 
-  const auto bottom_left = ImVec2{pos.x, pos.y + size.y};
-  draw_list.PathLineTo(bottom_left);
+  const auto bot_left = ImVec2{pos.x, pos.y + size.y};
+  draw_list.PathLineTo(bot_left);
 }
 }  // namespace
 
