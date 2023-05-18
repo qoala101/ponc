@@ -20,6 +20,7 @@
 #include "imgui.h"
 #include "imgui_node_editor.h"
 #include "style_default_colors.h"
+#include "style_default_sizes.h"
 
 namespace vh::ponc::coreui {
 namespace {
@@ -385,7 +386,8 @@ auto Linker::GetCanConnectToPinReason(ne::PinId pin_id) const
 auto Linker::CreateManualLink(ne::PinId source_pin,
                               const PosVariant& target_pos,
                               const ImColor& color) const {
-  auto manual_link = ManualLink{.color = color, .thickness = 4};
+  auto manual_link = ManualLink{
+      .color = color, .thickness = style::DefaultSizes::kBoldThickness};
 
   const auto source_kind = GetSourcePinData().kind;
   const auto source_pos =

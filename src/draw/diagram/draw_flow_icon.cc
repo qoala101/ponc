@@ -2,6 +2,7 @@
 
 #include "cpp_assert.h"
 #include "imgui.h"
+#include "style_default_sizes.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
@@ -46,7 +47,7 @@ void DrawFlowIcon(ImVec2 size, const ImColor& color, bool filled) {
   auto* draw_list = ImGui::GetWindowDrawList();
   Expects(draw_list != nullptr);
 
-  const auto thickness = 2;
+  const auto thickness = style::DefaultSizes::kNormalThickness;
   auto pos = ImGui::GetCursorScreenPos();
 
   if (filled) {

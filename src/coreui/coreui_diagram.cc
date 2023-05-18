@@ -41,6 +41,7 @@
 #include "imgui.h"
 #include "imgui_node_editor.h"
 #include "style_default_colors.h"
+#include "style_default_sizes.h"
 
 namespace vh::ponc::coreui {
 ///
@@ -378,7 +379,7 @@ auto Diagram::LinkFrom(const core::Link& core_link,
                        const flow::NodeFlows& node_flows) const {
   auto link = Link{
       .core_link = core_link,
-      .thickness = 2,
+      .thickness = style::DefaultSizes::kNormalThickness,
   };
 
   const auto link_alpha =
