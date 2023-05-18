@@ -6,6 +6,8 @@
 
 #include "draw_item_deleter.h"
 
+#include <imgui_node_editor.h>
+
 #include <concepts>
 #include <cstdint>
 #include <functional>
@@ -16,7 +18,6 @@
 #include "core_id_value.h"
 #include "core_link.h"
 #include "coreui_diagram.h"
-#include "imgui_node_editor.h"
 
 namespace vh::ponc::draw {
 namespace {

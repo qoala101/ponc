@@ -7,6 +7,7 @@
 #ifndef VH_PONC_COREUI_NODE_MOVER_H_
 #define VH_PONC_COREUI_NODE_MOVER_H_
 
+#include <imgui.h>
 #include <imgui_node_editor.h>
 
 #include <cstdint>
@@ -19,7 +20,6 @@
 #include "coreui_linker.h"
 #include "cpp_safe_ptr.h"
 #include "flow_tree_node.h"
-#include "imgui.h"
 
 namespace vh::ponc::coreui {
 ///

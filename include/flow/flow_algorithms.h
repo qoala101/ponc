@@ -7,13 +7,14 @@
 #ifndef VH_PONC_FLOW_ALGORITHMS_H_
 #define VH_PONC_FLOW_ALGORITHMS_H_
 
+#include <imgui_node_editor.h>
+
 #include <vector>
 
 #include "core_diagram.h"
 #include "cpp_callbacks.h"
 #include "flow_node_flow.h"
 #include "flow_tree_node.h"
-#include "imgui_node_editor.h"
 
 namespace vh::ponc::flow {
 ///

@@ -6,13 +6,14 @@
 
 #include "draw_tree_node.h"
 
+#include <imgui_node_editor.h>
+
 #include <iostream>
 #include <string_view>
 
 #include "coreui_native_facade.h"
 #include "coreui_node.h"
 #include "draw_id_label.h"
-#include "imgui_node_editor.h"
 
 namespace vh::ponc::draw {
 namespace {

@@ -6,8 +6,9 @@
 
 #include "coreui_flow_pin_traits.h"
 
+#include <imgui_node_editor.h>
+
 #include "coreui_i_pin_traits.h"
-#include "imgui_node_editor.h"
 
 namespace vh::ponc::coreui {
 ///

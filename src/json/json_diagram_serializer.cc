@@ -6,13 +6,14 @@
 
 #include "json_diagram_serializer.h"
 
+#include <crude_json.h>
+
 #include <memory>
 
 #include "core_diagram.h"
 #include "core_i_node.h"
 #include "core_link.h"
 #include "cpp_assert.h"
-#include "crude_json.h"
 #include "json_container_serializer.h"
 #include "json_i_node_parser.h"
 #include "json_i_node_writer.h"

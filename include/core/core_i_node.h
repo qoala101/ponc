@@ -7,6 +7,7 @@
 #ifndef VH_PONC_CORE_I_NODE_H_
 #define VH_PONC_CORE_I_NODE_H_
 
+#include <imgui.h>
 #include <imgui_node_editor.h>
 
 #include <map>
@@ -18,7 +19,6 @@
 #include "core_id_ptr.h"
 #include "cpp_non_copyable.h"
 #include "flow_node_flow.h"
-#include "imgui.h"
 
 namespace ne = ax::NodeEditor;
 

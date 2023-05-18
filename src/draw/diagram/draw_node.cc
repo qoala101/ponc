@@ -9,6 +9,7 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <imgui_node_editor.h>
 
 #include <cstdint>
 #include <iostream>
@@ -28,7 +29,6 @@
 #include "draw_colored_text.h"
 #include "draw_flow_icon.h"
 #include "draw_node.h"
-#include "imgui_node_editor.h"
 #include "style_utils.h"
 
 namespace vh::ponc::draw {

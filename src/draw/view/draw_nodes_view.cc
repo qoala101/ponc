@@ -6,6 +6,9 @@
 
 #include "draw_nodes_view.h"
 
+#include <imgui.h>
+#include <imgui_node_editor.h>
+
 #include <algorithm>
 #include <cstdint>
 #include <iterator>
@@ -19,8 +22,6 @@
 #include "draw_id_label.h"
 #include "draw_table_flags.h"
 #include "draw_tree_node.h"
-#include "imgui.h"
-#include "imgui_node_editor.h"
 
 namespace vh::ponc::draw {
 namespace {

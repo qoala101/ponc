@@ -7,9 +7,10 @@
 #ifndef VH_PONC_JSON_SETINGS_SERIALIZER_H_
 #define VH_PONC_JSON_SETINGS_SERIALIZER_H_
 
+#include <crude_json.h>
+
 #include "core_settings.h"
 #include "cpp_static_api.h"
-#include "crude_json.h"
 
 namespace vh::ponc::json {
 ///

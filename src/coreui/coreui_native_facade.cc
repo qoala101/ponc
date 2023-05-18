@@ -6,10 +6,11 @@
 
 #include "coreui_native_facade.h"
 
+#include <imgui_node_editor.h>
+
 #include <concepts>
 
 #include "core_concepts.h"
-#include "imgui_node_editor.h"
 
 namespace vh::ponc::coreui {
 namespace {

@@ -6,12 +6,13 @@
 
 #include "coreui_i_pin_traits.h"
 
+#include <imgui_node_editor.h>
+
 #include <optional>
 #include <variant>
 
 #include "core_i_node.h"
 #include "cpp_assert.h"
-#include "imgui_node_editor.h"
 
 namespace vh::ponc::coreui {
 ///

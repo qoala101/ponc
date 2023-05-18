@@ -4,6 +4,8 @@
  * @copyright Copyright (c) 2023, MIT License
  */
 
+#include <imgui.h>
+
 #include <algorithm>
 #include <array>
 #include <functional>
@@ -14,9 +16,9 @@
 
 #include "coreui_i_node_traits.h"
 #include "flow_algorithms.h"
-#include "imgui.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
+#include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_node_editor.h>
 
@@ -28,9 +30,7 @@
 #include "cpp_assert.h"
 #include "flow_tree_node.h"
 #include "flow_tree_traversal.h"
-#include "imgui.h"
-#include "imgui_internal.h"
-#include "imgui_node_editor.h"
+#include <imgui_internal.h>
 
 namespace vh::ponc::coreui {
 namespace {

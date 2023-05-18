@@ -14,6 +14,9 @@
 #include "style_utils.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
 
+#include <imgui.h>
+#include <imgui_node_editor.h>
+
 #include <algorithm>
 #include <array>
 #include <iterator>
@@ -44,8 +47,6 @@
 #include "flow_algorithms.h"
 #include "flow_node_flow.h"
 #include "flow_tree_node.h"
-#include "imgui.h"
-#include "imgui_node_editor.h"
 #include "style_default_colors.h"
 #include "style_default_sizes.h"
 

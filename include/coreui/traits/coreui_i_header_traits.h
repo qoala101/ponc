@@ -7,10 +7,11 @@
 #ifndef VH_PONC_COREUI_I_HEADER_TRAITS_H_
 #define VH_PONC_COREUI_I_HEADER_TRAITS_H_
 
+#include <imgui.h>
+
 #include <string>
 
 #include "cpp_non_copyable.h"
-#include "imgui.h"
 
 namespace vh::ponc::coreui {
 ///

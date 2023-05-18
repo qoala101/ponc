@@ -6,6 +6,9 @@
 
 #include "app_splitter_family_group.h"
 
+#include <crude_json.h>
+#include <imgui_node_editor.h>
+
 #include <cmath>
 #include <cstdint>
 #include <memory>
@@ -21,8 +24,6 @@
 #include "coreui_i_pin_traits.h"
 #include "coreui_project.h"
 #include "cpp_assert.h"
-#include "crude_json.h"
-#include "imgui_node_editor.h"
 #include "json_i_family_writer.h"
 #include "json_i_node_parser.h"
 #include "style_tailwind.h"

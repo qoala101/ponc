@@ -6,6 +6,9 @@
 
 #include "coreui_linker.h"
 
+#include <imgui.h>
+#include <imgui_node_editor.h>
+
 #include <algorithm>
 #include <iostream>
 #include <iterator>
@@ -23,8 +26,6 @@
 #include "cpp_assert.h"
 #include "flow_algorithms.h"
 #include "flow_tree_traversal.h"
-#include "imgui.h"
-#include "imgui_node_editor.h"
 #include "style_default_colors.h"
 #include "style_default_sizes.h"
 

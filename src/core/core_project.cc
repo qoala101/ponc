@@ -6,6 +6,8 @@
 
 #include "core_project.h"
 
+#include <imgui_node_editor.h>
+
 #include <algorithm>
 #include <concepts>
 #include <cstdio>
@@ -20,7 +22,6 @@
 #include "core_id_generator.h"
 #include "core_id_value.h"
 #include "cpp_assert.h"
-#include "imgui_node_editor.h"
 
 namespace vh::ponc::core {
 namespace {

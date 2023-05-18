@@ -6,6 +6,8 @@
 
 #include "coreui_calculator.h"
 
+#include <imgui_node_editor.h>
+
 #include <numeric>
 #include <optional>
 #include <sstream>
@@ -25,7 +27,6 @@
 #include "cpp_scope.h"
 #include "flow_algorithms.h"
 #include "flow_tree_traversal.h"
-#include "imgui_node_editor.h"
 
 namespace vh::ponc::coreui {
 namespace {

@@ -7,9 +7,10 @@
 #ifndef VH_PONC_JSON_LINK_SERIALIZER_H_
 #define VH_PONC_JSON_LINK_SERIALIZER_H_
 
+#include <crude_json.h>
+
 #include "core_link.h"
 #include "cpp_static_api.h"
-#include "crude_json.h"
 
 namespace vh::ponc::json {
 ///

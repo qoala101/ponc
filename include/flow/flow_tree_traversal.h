@@ -7,10 +7,11 @@
 #ifndef VH_PONC_FLOW_TREE_TRAVERSAL_H_
 #define VH_PONC_FLOW_TREE_TRAVERSAL_H_
 
+#include <imgui_node_editor.h>
+
 #include <queue>
 
 #include "flow_tree_node.h"
-#include "imgui_node_editor.h"
 
 namespace vh::ponc::flow {
 namespace detail {

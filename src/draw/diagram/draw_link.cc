@@ -8,12 +8,12 @@
 
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <imgui_node_editor.h>
 
 #include <variant>
 
 #include "core_link.h"
 #include "coreui_link.h"
-#include "imgui_node_editor.h"
 
 namespace vh::ponc::draw {
 ///

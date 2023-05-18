@@ -7,11 +7,12 @@
 #ifndef VH_PONC_JSON_I_NODE_PARSER_H_
 #define VH_PONC_JSON_I_NODE_PARSER_H_
 
+#include <crude_json.h>
+
 #include <memory>
 
 #include "core_i_node.h"
 #include "cpp_non_copyable.h"
-#include "crude_json.h"
 
 namespace vh::ponc::json {
 ///

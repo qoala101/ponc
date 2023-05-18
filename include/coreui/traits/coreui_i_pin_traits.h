@@ -7,6 +7,7 @@
 #ifndef VH_PONC_COREUI_I_PIN_TRAITS_H_
 #define VH_PONC_COREUI_I_PIN_TRAITS_H_
 
+#include <imgui.h>
 #include <imgui_node_editor.h>
 
 #include <optional>
@@ -15,7 +16,6 @@
 
 #include "core_i_node.h"
 #include "cpp_non_copyable.h"
-#include "imgui.h"
 
 namespace ne = ax::NodeEditor;
 

@@ -6,7 +6,7 @@
 
 #include "core_link.h"
 
-#include "imgui_node_editor.h"
+#include <imgui_node_editor.h>
 
 namespace vh::ponc::core {
 ///

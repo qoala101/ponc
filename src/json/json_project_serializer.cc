@@ -6,6 +6,8 @@
 
 #include "json_project_serializer.h"
 
+#include <crude_json.h>
+
 #include <cstdint>
 #include <memory>
 
@@ -13,7 +15,6 @@
 #include "core_i_family.h"
 #include "core_project.h"
 #include "cpp_assert.h"
-#include "crude_json.h"
 #include "json_container_serializer.h"
 #include "json_diagram_serializer.h"
 #include "json_i_family_writer.h"

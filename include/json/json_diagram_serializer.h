@@ -7,12 +7,13 @@
 #ifndef VH_PONC_JSON_DIAGRAM_SERIALIZER_H_
 #define VH_PONC_JSON_DIAGRAM_SERIALIZER_H_
 
+#include <crude_json.h>
+
 #include <memory>
 
 #include "core_diagram.h"
 #include "core_i_family.h"
 #include "cpp_static_api.h"
-#include "crude_json.h"
 
 namespace vh::ponc::json {
 ///

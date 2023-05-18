@@ -6,6 +6,9 @@
 
 #include "draw_diagram_editor.h"
 
+#include <imgui.h>
+#include <imgui_node_editor.h>
+
 #include <functional>
 #include <iterator>
 #include <memory>
@@ -19,8 +22,6 @@
 #include "draw_link.h"
 #include "draw_linker.h"
 #include "draw_node.h"
-#include "imgui.h"
-#include "imgui_node_editor.h"
 #include "style_update_styles.h"
 
 namespace vh::ponc::draw {

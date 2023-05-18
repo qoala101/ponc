@@ -7,6 +7,8 @@
 #ifndef VH_PONC_CORE_DIAGRAM_H_
 #define VH_PONC_CORE_DIAGRAM_H_
 
+#include <imgui_node_editor.h>
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -15,7 +17,6 @@
 #include "core_id_ptr.h"
 #include "core_link.h"
 #include "cpp_safe_ptr.h"
-#include "imgui_node_editor.h"
 
 namespace vh::ponc::core {
 ///

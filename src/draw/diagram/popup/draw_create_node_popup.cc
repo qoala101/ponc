@@ -6,6 +6,8 @@
 
 #include "draw_create_node_popup.h"
 
+#include <imgui.h>
+
 #include <cstdint>
 #include <limits>
 #include <memory>
@@ -15,7 +17,6 @@
 #include "coreui_diagram.h"
 #include "coreui_family.h"
 #include "draw_family_groups_menu.h"
-#include "imgui.h"
 
 namespace vh::ponc::draw {
 ///

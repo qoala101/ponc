@@ -6,6 +6,9 @@
 
 #include "draw_node_popup.h"
 
+#include <imgui.h>
+#include <imgui_node_editor.h>
+
 #include <string>
 #include <vector>
 
@@ -18,8 +21,6 @@
 #include "draw_family_groups_menu.h"
 #include "flow_algorithms.h"
 #include "flow_tree_traversal.h"
-#include "imgui.h"
-#include "imgui_node_editor.h"
 
 namespace vh::ponc::draw {
 namespace {

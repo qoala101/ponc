@@ -6,6 +6,8 @@
 
 #include "flow_algorithms.h"
 
+#include <imgui_node_editor.h>
+
 #include <cstdint>
 #include <iostream>
 #include <optional>
@@ -20,7 +22,6 @@
 #include "flow_node_flow.h"
 #include "flow_tree_node.h"
 #include "flow_tree_traversal.h"
-#include "imgui_node_editor.h"
 
 namespace vh::ponc::flow {
 namespace {

@@ -7,6 +7,7 @@
 #include "draw_main_menu_bar.h"
 
 #include <imgui.h>
+#include <imgui_node_editor.h>
 
 #include <filesystem>
 #include <functional>
@@ -22,7 +23,6 @@
 #include "draw_open_file_dialog.h"
 #include "draw_question_dialog.h"
 #include "draw_save_as_file_dialog.h"
-#include "imgui_node_editor.h"
 
 namespace vh::ponc::draw {
 namespace {

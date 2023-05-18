@@ -6,7 +6,7 @@
 
 #include "style_utils.h"
 
-#include "imgui.h"
+#include <imgui.h>
 
 namespace vh::ponc::style {
 namespace {

@@ -7,8 +7,9 @@
 #ifndef VH_PONC_STYLE_FLOW_COLORS_H_
 #define VH_PONC_STYLE_FLOW_COLORS_H_
 
+#include <imgui.h>
+
 #include "cpp_static_api.h"
-#include "imgui.h"
 #include "style_utils.h"
 
 namespace vh::ponc::style {
