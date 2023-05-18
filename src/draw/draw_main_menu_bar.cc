@@ -16,7 +16,6 @@
 #include "draw_open_file_dialog.h"
 #include "draw_question_dialog.h"
 #include "draw_save_as_file_dialog.h"
-#include "flow_algorithms.h"
 #include "imgui_node_editor.h"
 
 namespace vh::ponc::draw {
@@ -50,11 +49,9 @@ void MainMenuBar::Draw(coreui::Project &project) {
   if (ImGui::BeginMainMenuBar()) {
     DrawFileMenu(project);
     DrawViewMenu();
-    ImGui::Separator();
 
     ImGui::MenuItem("Color Flow", nullptr,
                     &project.GetProject().GetSettings().color_flow);
-    ImGui::Separator();
 
     if (ImGui::MenuItem("Zoom To Content")) {
       ne::NavigateToContent();
