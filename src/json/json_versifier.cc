@@ -49,7 +49,7 @@ void Upgrade0(crude_json::value& project_json) {
 
 ///
 void Upgrade1(crude_json::value& /*unused*/) {
-  // TODO(vh): Implement when adding new version.
+  // vh: Implement when adding new version.
 }
 }  // namespace
 

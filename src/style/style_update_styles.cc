@@ -104,13 +104,13 @@ void UpdateStyle(ne::Style& style) {
       Item{ne::StyleColor_Grid, DefaultColors::kGray, Shade::k700},
       Item{ne::StyleColor_NodeBg, DefaultColors::kGray, Shade::k900, 0.75},
       Item{ne::StyleColor_NodeBorder, DefaultColors::kGray, Shade::k500, 0.75},
-      Item{ne::StyleColor_HovNodeBorder, Color::kCyan, Shade::k500},
-      Item{ne::StyleColor_SelNodeBorder, Color::kAmber, Shade::k500},
+      Item{ne::StyleColor_HovNodeBorder, Color::kSky, Shade::k400},
+      Item{ne::StyleColor_SelNodeBorder, Color::kAmber, Shade::k400},
       Item{ne::StyleColor_NodeSelRect, Color::kBlue, Shade::k500, 0.25},
       Item{ne::StyleColor_NodeSelRectBorder, Color::kBlue, Shade::k500},
-      Item{ne::StyleColor_HovLinkBorder, Color::kCyan, Shade::k500},
-      Item{ne::StyleColor_SelLinkBorder, Color::kAmber, Shade::k500},
-      Item{ne::StyleColor_PinRect, Color::kCyan, Shade::k500, 0.5},
+      Item{ne::StyleColor_HovLinkBorder, Color::kSky, Shade::k400},
+      Item{ne::StyleColor_SelLinkBorder, Color::kAmber, Shade::k400},
+      Item{ne::StyleColor_PinRect, Color::kSky, Shade::k400, 0.5},
   };
 
   Expects(std::size(style.Colors) >= ne::StyleColor_Count);

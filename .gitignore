@@ -1,8 +1,5 @@
 /.cache
-/.TODO
-/.vs
 /.vscode
 /bin
 /build
 /lib
-/out

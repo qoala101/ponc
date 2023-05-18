@@ -10,7 +10,9 @@ namespace vh::ponc::draw {
 namespace {
 ///
 void DrawIconPath(ImDrawList& draw_list, ImVec2 pos, ImVec2 size) {
-  const auto padding = ImVec2{4, 4};
+  const auto frame_padding = ImGui::GetStyle().FramePadding;
+  const auto padding = ImVec2{frame_padding.x, frame_padding.x};
+
   pos += padding;
   size -= padding * 2;
 
@@ -29,21 +31,35 @@ void DrawIconPath(ImDrawList& draw_list, ImVec2 pos, ImVec2 size) {
   const auto bot_left = ImVec2{pos.x, pos.y + size.y};
   draw_list.PathLineTo(bot_left);
 }
+
+///
+void ExpandToMatchStrokedPath(ImVec2& pos, ImVec2& size, float thickness) {
+  const auto half_thickness = thickness / 2;
+
+  pos -= ImVec2{half_thickness, half_thickness};
+  size += ImVec2{thickness, thickness};
+}
 }  // namespace
 
 ///
-void DrawFlowIcon(const ImVec2& size, const ImColor& color, bool filled) {
+void DrawFlowIcon(ImVec2 size, const ImColor& color, bool filled) {
   auto* draw_list = ImGui::GetWindowDrawList();
   Expects(draw_list != nullptr);
 
-  const auto pos = ImGui::GetCursorScreenPos();
+  const auto thickness = 2;
+  auto pos = ImGui::GetCursorScreenPos();
 
   if (filled) {
-    DrawIconPath(*draw_list, pos, size);
-    draw_list->PathFillConvex(color);
+    ExpandToMatchStrokedPath(pos, size, thickness);
   }
 
   DrawIconPath(*draw_list, pos, size);
-  draw_list->PathStroke(color, ImDrawFlags_Closed, 2);
+
+  if (filled) {
+    draw_list->PathFillConvex(color);
+    return;
+  }
+
+  draw_list->PathStroke(color, ImDrawFlags_Closed, thickness);
 }
 }  // namespace vh::ponc::draw
