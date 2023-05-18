@@ -251,7 +251,7 @@ auto DrawOutputPins(const coreui::NodeData& node_data)
     }
 
     DrawPinField(pin, ne::PinKind::Output);
-    const auto pin_pos = DrawPinIconArea(pin, ne::PinKind::Input);
+    const auto pin_pos = DrawPinIconArea(pin, ne::PinKind::Output);
 
     if (pin_is_flow) {
       ne::EndPin();
