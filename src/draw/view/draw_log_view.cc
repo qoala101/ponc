@@ -69,10 +69,11 @@ void LogView::DrawMessages(const std::vector<coreui::LogMessage>& messages,
   for (const auto& message : messages) {
     ImGui::BeginHorizontal(layout_id);
     ImGui::TextUnformatted(ToString(message.time).c_str());
-    ImGui::TextColored(GetLogColor(message.level), ToString(message.level));
+    ImGui::TextColored(GetLogColor(message.level), "%s",
+                       ToString(message.level));
 
     if (wrap_text) {
-      ImGui::TextWrapped(message.text.c_str());
+      ImGui::TextWrapped("%s", message.text.c_str());
     } else {
       ImGui::TextUnformatted(message.text.c_str());
     }
