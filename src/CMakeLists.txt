@@ -71,6 +71,7 @@ add_executable(ponc
   draw/diagram/draw_node.cc
   draw/diagram/draw_tooltip.cc
 
+  draw/dialog/draw_about_dialog.cc
   draw/dialog/draw_i_file_dialog.cc
   draw/dialog/draw_open_file_dialog.cc
   draw/dialog/draw_question_dialog.cc

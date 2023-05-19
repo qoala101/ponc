@@ -8,6 +8,7 @@
 #define VH_PONC_DRAW_MAIN_MENU_BAR_H_
 
 #include "coreui_project.h"
+#include "draw_about_dialog.h"
 #include "draw_calculator_view.h"
 #include "draw_diagrams_view.h"
 #include "draw_flow_tree_view.h"
@@ -61,6 +62,8 @@ class MainMenuBar {
   LogView log_view_{};
   ///
   SettingsView settings_view_{};
+  ///
+  AboutDialog about_dialog_{};
 };
 }  // namespace vh::ponc::draw
 

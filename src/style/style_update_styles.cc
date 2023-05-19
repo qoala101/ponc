@@ -116,7 +116,7 @@ void UpdateStyle(ne::Style& style) {
       Item{ne::StyleColor_NodeSelRectBorder, Color::kBlue, Shade::k500},
       Item{ne::StyleColor_HovLinkBorder, Color::kSky, Shade::k400},
       Item{ne::StyleColor_SelLinkBorder, Color::kAmber, Shade::k400},
-      Item{ne::StyleColor_PinRect, Color::kSky, Shade::k400, 0.5},
+      Item{ne::StyleColor_PinRect, Color::kSky, Shade::k500, 0.5},
   };
 
   Expects(std::size(style.Colors) >= ne::StyleColor_Count);

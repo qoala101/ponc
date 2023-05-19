@@ -19,6 +19,7 @@
 #include "coreui_diagram.h"
 #include "coreui_native_facade.h"
 #include "coreui_project.h"
+#include "draw_about_dialog.h"
 #include "draw_i_view.h"
 #include "draw_open_file_dialog.h"
 #include "draw_question_dialog.h"
@@ -61,6 +62,10 @@ void MainMenuBar::Draw(coreui::Project &project) {
 
     if (ImGui::MenuItem("Zoom To Content")) {
       ne::NavigateToContent();
+    }
+
+    if (ImGui::MenuItem("About")) {
+      about_dialog_.Open();
     }
 
     ImGui::EndMainMenuBar();
@@ -143,6 +148,8 @@ void MainMenuBar::DrawDialogs(coreui::Project &project) {
 
     project.SaveToFile(std::move(file_path));
   }});
+
+  about_dialog_.Draw();
 }
 
 ///
