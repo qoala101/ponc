@@ -8,12 +8,13 @@
 #define VH_PONC_DRAW_I_FILE_DIALOG_H_
 
 // clang-format off
-#include <imgui.h>
-#include <imgui_internal.h>
+#include <imgui.h>  // IWYU pragma: keep
 #include <imfilebrowser.h>
+#include <imgui_internal.h>
 // clang-format on
 
-#include <functional>
+#include <filesystem>
+#include <string>
 
 #include "cpp_callbacks.h"
 #include "cpp_non_copyable.h"

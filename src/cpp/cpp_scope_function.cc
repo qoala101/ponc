@@ -6,6 +6,8 @@
 
 #include "cpp_scope_function.h"
 
+#include <utility>
+
 namespace vh::ponc::cpp {
 ///
 ScopeFunction::ScopeFunction(std::function<void()> destructor)

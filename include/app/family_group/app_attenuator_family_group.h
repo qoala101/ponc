@@ -8,9 +8,11 @@
 #define VH_PONC_APP_ATTENUATOR_FAMILY_GROUP_H_
 
 #include <memory>
+#include <vector>
 
 #include "core_i_family.h"
 #include "core_i_family_group.h"
+#include "core_id_generator.h"
 #include "json_i_family_parser.h"
 
 namespace vh::ponc {

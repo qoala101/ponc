@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "core_i_family.h"
 #include "core_i_node.h"

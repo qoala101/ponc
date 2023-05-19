@@ -7,8 +7,6 @@
 #ifndef VH_PONC_APP_IMPL_H_
 #define VH_PONC_APP_IMPL_H_
 
-#include <application.h>
-
 #include "coreui_project.h"
 #include "draw_main_window.h"
 

@@ -6,8 +6,12 @@
 
 #include "json_versifier.h"
 
-#include <type_traits>
+#include <crude_json.h>
 
+#include <type_traits>
+#include <vector>
+
+#include "core_i_family.h"
 #include "core_settings.h"
 #include "json_setings_serializer.h"
 

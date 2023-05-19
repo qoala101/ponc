@@ -7,10 +7,7 @@
 #include "draw_link.h"
 
 #include <imgui.h>
-#include <imgui_internal.h>
 #include <imgui_node_editor.h>
-
-#include <variant>
 
 #include "core_link.h"
 #include "coreui_link.h"

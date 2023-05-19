@@ -6,12 +6,14 @@
 
 #include "core_i_node.h"
 
+#include <imgui.h>
 #include <imgui_node_editor.h>
 
 #include <algorithm>
 #include <iterator>
 #include <optional>
-#include <ranges>
+#include <unordered_map>
+#include <variant>
 #include <vector>
 
 #include "cpp_assert.h"

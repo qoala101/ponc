@@ -6,7 +6,10 @@
 
 #include "draw_link_popup.h"
 
+#include <imgui.h>
 #include <imgui_node_editor.h>
+
+#include <string>
 
 #include "coreui_native_facade.h"
 

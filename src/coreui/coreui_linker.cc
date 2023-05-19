@@ -10,10 +10,10 @@
 #include <imgui_node_editor.h>
 
 #include <algorithm>
-#include <iostream>
-#include <iterator>
+#include <map>
+#include <memory>
 #include <optional>
-#include <stack>
+#include <type_traits>
 #include <vector>
 
 #include "core_diagram.h"
@@ -22,9 +22,9 @@
 #include "core_pin.h"
 #include "coreui_diagram.h"
 #include "coreui_event.h"
-#include "coreui_flow_tree_node.h"
+#include "coreui_node_mover.h"
 #include "cpp_assert.h"
-#include "flow_algorithms.h"
+#include "flow_tree_node.h"
 #include "flow_tree_traversal.h"
 #include "style_default_colors.h"
 #include "style_default_sizes.h"

@@ -6,6 +6,10 @@
 
 #include "json_i_family_writer.h"
 
+#include <crude_json.h>
+
+#include <memory>
+
 #include "json_id_serializer.h"
 
 namespace vh::ponc::json {

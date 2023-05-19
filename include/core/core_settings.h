@@ -9,6 +9,9 @@
 
 #include <imgui.h>
 
+#include <memory>
+#include <vector>
+
 #include "core_i_family.h"
 
 namespace vh::ponc::core {

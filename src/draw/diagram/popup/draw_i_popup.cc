@@ -9,6 +9,9 @@
 #include <imgui.h>
 #include <imgui_node_editor.h>
 
+#include <functional>
+#include <string>
+
 #include "cpp_scope_function.h"
 #include "draw_id_label.h"
 

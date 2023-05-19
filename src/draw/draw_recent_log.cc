@@ -11,7 +11,8 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include <imgui_internal.h>
-#include <imgui_node_editor.h>
+
+#include <vector>
 
 namespace vh::ponc::draw {
 ///

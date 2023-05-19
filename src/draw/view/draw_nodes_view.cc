@@ -10,15 +10,18 @@
 #include <imgui_node_editor.h>
 
 #include <algorithm>
-#include <cstdint>
 #include <iterator>
-#include <set>
 #include <string>
 #include <unordered_set>
+#include <vector>
 
 #include "core_i_family.h"
+#include "core_i_node.h"
+#include "core_id_value.h"
 #include "coreui_family.h"
 #include "coreui_native_facade.h"
+#include "coreui_node.h"
+#include "cpp_safe_ptr.h"
 #include "draw_id_label.h"
 #include "draw_table_flags.h"
 #include "draw_tree_node.h"

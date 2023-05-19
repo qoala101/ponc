@@ -8,15 +8,15 @@
 
 #include <imgui_node_editor.h>
 
+#include <algorithm>
 #include <concepts>
-#include <cstdint>
 #include <functional>
-#include <iostream>
 #include <iterator>
+#include <utility>
+#include <vector>
 
 #include "core_concepts.h"
 #include "core_id_value.h"
-#include "core_link.h"
 #include "coreui_diagram.h"
 
 namespace vh::ponc::draw {

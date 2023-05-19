@@ -7,7 +7,10 @@
 #ifndef VH_PONC_CALC_CALCULATION_TASK_H_
 #define VH_PONC_CALC_CALCULATION_TASK_H_
 
+#include <atomic>
 #include <future>
+#include <optional>
+#include <vector>
 
 #include "calc_calculator.h"
 #include "calc_tree_node.h"

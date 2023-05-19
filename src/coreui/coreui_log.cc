@@ -8,7 +8,9 @@
 
 #include <algorithm>
 #include <chrono>
+#include <compare>
 #include <iterator>
+#include <utility>
 
 namespace vh::ponc::coreui {
 ///

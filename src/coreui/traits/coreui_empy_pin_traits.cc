@@ -6,6 +6,8 @@
 
 #include <imgui_node_editor.h>
 
+#include <variant>
+
 #include "coreui_empty_pin_traits.h"
 
 namespace vh::ponc::coreui {

@@ -7,6 +7,8 @@
 #ifndef VH_PONC_DRAW_CALCULATOR_VIEW_H_
 #define VH_PONC_DRAW_CALCULATOR_VIEW_H_
 
+#include <string>
+
 #include "core_project.h"
 #include "coreui_calculator.h"
 #include "draw_i_view.h"

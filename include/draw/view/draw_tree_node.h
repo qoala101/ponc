@@ -8,6 +8,7 @@
 #define VH_PONC_DRAW_TREE_NODE_H_
 
 #include <functional>
+#include <vector>
 
 #include "coreui_flow_tree_node.h"
 

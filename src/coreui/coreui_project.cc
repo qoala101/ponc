@@ -6,19 +6,21 @@
 
 #include "coreui_project.h"
 
+#include <crude_json.h>
+
 #include <algorithm>
 #include <filesystem>
 #include <functional>
 #include <iterator>
 #include <memory>
+#include <type_traits>
 #include <utility>
-#include <variant>
 #include <vector>
 
 #include "core_diagram.h"
+#include "core_i_family.h"
 #include "core_i_family_group.h"
 #include "core_id_generator.h"
-#include "core_id_value.h"
 #include "core_project.h"
 #include "core_settings.h"
 #include "coreui_cloner.h"
@@ -28,6 +30,7 @@
 #include "coreui_log.h"
 #include "cpp_assert.h"
 #include "cpp_share.h"
+#include "json_i_family_parser.h"
 #include "json_project_serializer.h"
 #include "json_versifier.h"
 

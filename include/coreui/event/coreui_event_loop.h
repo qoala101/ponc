@@ -8,6 +8,7 @@
 #define VH_PONC_COREUI_EVENT_LOOP_H_
 
 #include <functional>
+#include <vector>
 
 #include "coreui_event.h"
 

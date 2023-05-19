@@ -9,6 +9,8 @@
 
 #include <imgui_node_editor.h>
 
+#include <vector>
+
 #include "cpp_callbacks.h"
 #include "draw_i_popup.h"
 

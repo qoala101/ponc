@@ -8,6 +8,8 @@
 
 #include <imgui.h>
 
+#include <functional>
+
 namespace vh::ponc::draw {
 ///
 auto IView::IsOpened() const -> bool { return opened_; }

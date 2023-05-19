@@ -9,6 +9,9 @@
 
 #include <crude_json.h>
 
+#include <memory>
+#include <vector>
+
 #include "core_project.h"
 #include "cpp_static_api.h"
 #include "json_i_family_parser.h"

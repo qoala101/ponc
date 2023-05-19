@@ -9,6 +9,8 @@
 
 #include <imgui_node_editor.h>
 
+#include <variant>
+
 #include "coreui_i_pin_traits.h"
 
 namespace vh::ponc::coreui {

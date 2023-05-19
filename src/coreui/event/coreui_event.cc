@@ -6,6 +6,8 @@
 
 #include "coreui_event.h"
 
+#include <utility>
+
 namespace vh::ponc::coreui {
 ///
 Event::Event(std::function<void()> event) : event_{std::move(event)} {}

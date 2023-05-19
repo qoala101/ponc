@@ -8,9 +8,6 @@
 #define VH_PONC_DRAW_CREATE_NODE_POPUP_H_
 
 #include <imgui.h>
-#include <imgui_node_editor.h>
-
-#include <memory>
 
 #include "coreui_diagram.h"
 #include "draw_i_popup.h"

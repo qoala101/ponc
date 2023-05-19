@@ -6,6 +6,8 @@
 
 #include "coreui_cloner.h"
 
+#include <algorithm>
+
 #include "json_diagram_serializer.h"
 
 namespace vh::ponc::coreui {

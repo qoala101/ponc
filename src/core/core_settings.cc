@@ -6,6 +6,10 @@
 
 #include "core_settings.h"
 
+#include <imgui.h>
+
+#include <optional>
+
 #include "core_i_node.h"
 #include "style_flow_colors.h"
 #include "style_utils.h"

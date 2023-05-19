@@ -6,8 +6,16 @@
 
 #include "style_update_styles.h"
 
+#include <imgui.h>
+#include <imgui_node_editor.h>
+
+#include <array>
+#include <iterator>
+
+#include "cpp_assert.h"
 #include "style_default_colors.h"
 #include "style_tailwind.h"
+#include "style_utils.h"
 
 namespace vh::ponc::style {
 ///

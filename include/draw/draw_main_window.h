@@ -7,8 +7,6 @@
 #ifndef VH_PONC_DRAW_MAIN_WINDOW_H_
 #define VH_PONC_DRAW_MAIN_WINDOW_H_
 
-#include <imgui_node_editor.h>
-
 #include "coreui_project.h"
 #include "draw_diagram_editor.h"
 #include "draw_main_menu_bar.h"

@@ -4,22 +4,20 @@
  * @copyright Copyright (c) 2023, MIT License
  */
 
-#include <limits>
-
 #define IMGUI_DEFINE_MATH_OPERATORS
+#include "draw_node.h"
+
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_node_editor.h>
 
-#include <cstdint>
-#include <iostream>
-#include <memory>
 #include <optional>
-#include <string_view>
+#include <string>
 #include <unordered_map>
 #include <variant>
 #include <vector>
 
+#include "core_i_node.h"
 #include "core_id_value.h"
 #include "coreui_i_pin_traits.h"
 #include "coreui_node.h"
@@ -28,7 +26,6 @@
 #include "cpp_scope.h"
 #include "draw_colored_text.h"
 #include "draw_flow_icon.h"
-#include "draw_node.h"
 #include "style_utils.h"
 
 namespace vh::ponc::draw {

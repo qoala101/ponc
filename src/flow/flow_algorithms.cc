@@ -8,16 +8,19 @@
 
 #include <imgui_node_editor.h>
 
-#include <cstdint>
-#include <iostream>
+#include <algorithm>
+#include <iterator>
+#include <map>
+#include <memory>
 #include <optional>
 #include <set>
-#include <unordered_map>
 #include <unordered_set>
+#include <utility>
 
 #include "core_diagram.h"
 #include "core_i_node.h"
 #include "core_id_value.h"
+#include "core_link.h"
 #include "cpp_assert.h"
 #include "flow_node_flow.h"
 #include "flow_tree_node.h"

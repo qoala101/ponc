@@ -6,6 +6,11 @@
 
 #include "draw_open_file_dialog.h"
 
+#include <imfilebrowser.h>
+
+#include <utility>
+
+#include "cpp_callbacks.h"
 #include "draw_i_file_dialog.h"
 
 namespace vh::ponc::draw {

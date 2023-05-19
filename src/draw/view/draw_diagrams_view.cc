@@ -9,19 +9,14 @@
 #include <imgui.h>
 
 #include <algorithm>
-#include <cstdint>
-#include <iostream>
-#include <iterator>
 #include <optional>
-#include <set>
 #include <string>
-#include <unordered_set>
+#include <vector>
 
 #include "core_diagram.h"
 #include "core_project.h"
+#include "coreui_diagram.h"
 #include "cpp_assert.h"
-#include "cpp_scope.h"
-#include "cpp_scope_function.h"
 #include "draw_disable_if.h"
 #include "draw_id_label.h"
 

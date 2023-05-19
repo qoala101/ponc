@@ -6,7 +6,11 @@
 
 #include "draw_i_file_dialog.h"
 
+#include <imgui.h>
+#include <imgui_internal.h>
+
 #include <string>
+#include <string_view>
 
 namespace vh::ponc::draw {
 ///

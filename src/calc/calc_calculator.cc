@@ -7,14 +7,11 @@
 #include "calc_calculator.h"
 
 #include <algorithm>
-#include <cmath>
-#include <cstdint>
+#include <compare>
 #include <iterator>
 #include <limits>
-#include <numeric>
 #include <optional>
 #include <set>
-#include <stack>
 #include <unordered_set>
 #include <utility>
 #include <vector>

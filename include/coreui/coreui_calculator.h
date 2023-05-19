@@ -7,10 +7,20 @@
 #ifndef VH_PONC_COREUI_CALCULATOR_H_
 #define VH_PONC_COREUI_CALCULATOR_H_
 
+#include <imgui_node_editor.h>
+
+#include <map>
+#include <memory>
 #include <optional>
+#include <string_view>
+#include <vector>
 
 #include "calc_calculation_task.h"
+#include "calc_tree_node.h"
 #include "core_diagram.h"
+#include "core_i_family.h"
+#include "core_id_value.h"
+#include "cpp_safe_ptr.h"
 
 namespace vh::ponc::coreui {
 ///

@@ -6,6 +6,8 @@
 
 #include "json_i_family_parser.h"
 
+#include <crude_json.h>
+
 #include <memory>
 
 #include "json_id_serializer.h"

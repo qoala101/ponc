@@ -6,9 +6,7 @@
 
 #include "core_id_ptr.h"
 
-#include <type_traits>
-
-#include "core_i_family.h"
+#include "core_i_family.h"  // IWYU pragma: keep
 
 namespace vh::ponc::core {
 ///

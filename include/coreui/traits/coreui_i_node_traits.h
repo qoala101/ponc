@@ -8,7 +8,9 @@
 #define VH_PONC_COREUI_I_NODE_TRAITS_H_
 
 #include <memory>
+#include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "coreui_i_header_traits.h"

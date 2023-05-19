@@ -8,8 +8,9 @@
 
 #include <crude_json.h>
 
-#include <cstdint>
 #include <memory>
+#include <optional>
+#include <utility>
 
 #include "core_diagram.h"
 #include "core_i_family.h"
@@ -17,7 +18,7 @@
 #include "cpp_assert.h"
 #include "json_container_serializer.h"
 #include "json_diagram_serializer.h"
-#include "json_i_family_writer.h"
+#include "json_i_family_writer.h"  // IWYU pragma: keep
 #include "json_setings_serializer.h"
 #include "json_versifier.h"
 

@@ -6,6 +6,8 @@
 
 #include "core_pin.h"
 
+#include <imgui_node_editor.h>
+
 namespace vh::ponc::core {
 ///
 auto Pin::GetOppositeKind(ne::PinKind pin_kind) -> ne::PinKind {

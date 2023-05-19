@@ -8,6 +8,7 @@
 #define VH_PONC_DRAW_OPEN_FILE_DIALOG_H_
 
 #include <filesystem>
+#include <string>
 
 #include "draw_i_file_dialog.h"
 #include "draw_question_dialog.h"

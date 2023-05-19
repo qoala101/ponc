@@ -7,16 +7,15 @@
 #ifndef VH_PONC_CALC_CALCULATOR_H_
 #define VH_PONC_CALC_CALCULATOR_H_
 
-#include <atomic>
-#include <cstdint>
 #include <functional>
 #include <map>
+#include <optional>
 #include <set>
-#include <stack>
 #include <unordered_map>
-#include <unordered_set>
+#include <vector>
 
 #include "calc_tree_node.h"
+#include "calc_types.h"
 #include "core_settings.h"
 
 namespace vh::ponc::calc {

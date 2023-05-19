@@ -9,18 +9,16 @@
 #include <imgui_node_editor.h>
 
 #include <algorithm>
-#include <concepts>
-#include <cstdio>
 #include <exception>
-#include <iostream>
-#include <iterator>
-#include <stack>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "core_diagram.h"
+#include "core_i_node.h"
 #include "core_id_generator.h"
 #include "core_id_value.h"
+#include "core_link.h"
 #include "cpp_assert.h"
 
 namespace vh::ponc::core {

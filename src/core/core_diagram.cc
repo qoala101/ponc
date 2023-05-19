@@ -7,11 +7,10 @@
 #include "core_diagram.h"
 
 #include <imgui_node_editor.h>
-#include <imgui_node_editor_internal.h>
 
 #include <algorithm>
-#include <cstddef>
 #include <memory>
+#include <utility>
 
 #include "core_i_node.h"
 #include "core_link.h"

@@ -7,17 +7,13 @@
 #include "draw_node_view.h"
 
 #include <imgui.h>
-#include <imgui_node_editor.h>
 
-#include <algorithm>
-#include <cstdint>
-#include <set>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 
 #include "core_i_family.h"
 #include "coreui_family.h"
+#include "coreui_flow_tree_node.h"
 #include "draw_table_flags.h"
 
 namespace vh::ponc::draw {

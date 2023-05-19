@@ -7,9 +7,6 @@
 #ifndef VH_PONC_CORE_ID_GENERATOR_H_
 #define VH_PONC_CORE_ID_GENERATOR_H_
 
-#include <imgui_node_editor.h>
-
-#include <algorithm>
 #include <vector>
 
 #include "core_concepts.h"

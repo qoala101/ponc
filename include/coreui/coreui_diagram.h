@@ -7,15 +7,10 @@
 #ifndef VH_PONC_COREUI_DIAGRAM_H_
 #define VH_PONC_COREUI_DIAGRAM_H_
 
+#include <imgui.h>
 #include <imgui_node_editor.h>
 
-#include <cstdint>
-#include <functional>
 #include <memory>
-#include <optional>
-#include <string>
-#include <unordered_set>
-#include <variant>
 #include <vector>
 
 #include "core_diagram.h"
@@ -31,13 +26,12 @@
 #include "coreui_linker.h"
 #include "coreui_node.h"
 #include "coreui_node_mover.h"
+#include "coreui_pin.h"
 #include "cpp_safe_ptr.h"
+#include "flow_node_flow.h"
 #include "flow_tree_node.h"
 
 namespace vh::ponc::coreui {
-///
-class Project;
-
 ///
 class Diagram {
  public:

@@ -7,9 +7,12 @@
 #ifndef VH_PONC_DRAW_NODE_VIEW_H_
 #define VH_PONC_DRAW_NODE_VIEW_H_
 
+#include <optional>
 #include <string>
+#include <vector>
 
 #include "coreui_family.h"
+#include "coreui_node.h"
 #include "draw_i_view.h"
 
 namespace vh::ponc::draw {

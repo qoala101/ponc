@@ -7,13 +7,14 @@
 #include "draw_diagram_editor.h"
 
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <imgui_node_editor.h>
 
-#include <functional>
-#include <iterator>
 #include <memory>
+#include <vector>
 
 #include "core_diagram.h"
+#include "core_i_node.h"
 #include "coreui_diagram.h"
 #include "coreui_native_facade.h"
 #include "cpp_assert.h"

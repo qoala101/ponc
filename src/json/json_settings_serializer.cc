@@ -6,6 +6,8 @@
 
 #include <crude_json.h>
 
+#include <memory>
+
 #include "core_i_family.h"
 #include "core_settings.h"
 #include "json_container_serializer.h"

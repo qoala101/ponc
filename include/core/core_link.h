@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "core_id_ptr.h"
-#include "core_id_value.h"
 
 namespace ne = ax::NodeEditor;
 

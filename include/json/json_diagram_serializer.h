@@ -10,6 +10,7 @@
 #include <crude_json.h>
 
 #include <memory>
+#include <vector>
 
 #include "core_diagram.h"
 #include "core_i_family.h"

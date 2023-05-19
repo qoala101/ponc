@@ -6,8 +6,10 @@
 
 #include "draw_disable_if.h"
 
-#include <imgui.h>
+#include <imgui.h>  // IWYU pragma: keep
 #include <imgui_internal.h>
+
+#include <functional>
 
 #include "cpp_scope_function.h"
 

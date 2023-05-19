@@ -10,7 +10,6 @@
 #include <functional>
 #include <memory>
 #include <optional>
-#include <utility>
 
 namespace vh::ponc::coreui {
 ///

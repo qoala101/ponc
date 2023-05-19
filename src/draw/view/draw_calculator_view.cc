@@ -6,8 +6,16 @@
 
 #include "draw_calculator_view.h"
 
+#include <imgui.h>
+
+#include <limits>
+#include <memory>
+#include <string_view>
+#include <vector>
+
 #include "core_i_family.h"
 #include "core_project.h"
+#include "core_settings.h"
 #include "coreui_calculator.h"
 #include "coreui_i_family_traits.h"
 #include "draw_disable_if.h"

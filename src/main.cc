@@ -4,6 +4,8 @@
  * @copyright Copyright (c) 2023, MIT License
  */
 
+#include <application.h>
+
 #include <cstdlib>
 
 #include "app_app.h"

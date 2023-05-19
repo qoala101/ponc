@@ -6,6 +6,8 @@
 
 #include "flow_tree_traversal.h"
 
+#include <imgui_node_editor.h>
+
 #include "cpp_assert.h"
 
 namespace vh::ponc::flow {

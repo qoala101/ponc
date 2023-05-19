@@ -6,6 +6,10 @@
 
 #include "draw_family_groups_menu.h"
 
+#include <imgui.h>
+
+#include <functional>
+#include <string>
 #include <unordered_set>
 
 #include "core_i_family.h"

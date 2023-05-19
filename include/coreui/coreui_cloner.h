@@ -7,8 +7,13 @@
 #ifndef VH_PONC_COREUI_CLONER_H_
 #define VH_PONC_COREUI_CLONER_H_
 
+#include <memory>
+#include <vector>
+
 #include "core_diagram.h"
+#include "core_i_family.h"
 #include "core_id_generator.h"
+#include "core_id_ptr.h"
 #include "cpp_static_api.h"
 
 namespace vh::ponc::coreui {

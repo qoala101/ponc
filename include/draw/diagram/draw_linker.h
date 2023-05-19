@@ -7,6 +7,8 @@
 #ifndef VH_PONC_DRAW_LINKER_H_
 #define VH_PONC_DRAW_LINKER_H_
 
+#include <imgui.h>
+
 #include <vector>
 
 #include "coreui_family.h"

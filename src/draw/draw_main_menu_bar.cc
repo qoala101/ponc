@@ -9,15 +9,18 @@
 #include <imgui.h>
 #include <imgui_node_editor.h>
 
+#include <cctype>
 #include <filesystem>
-#include <functional>
 #include <optional>
-#include <variant>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "core_project.h"
 #include "core_settings.h"
 #include "coreui_diagram.h"
 #include "coreui_native_facade.h"
+#include "coreui_node.h"
 #include "coreui_project.h"
 #include "draw_about_dialog.h"
 #include "draw_i_view.h"

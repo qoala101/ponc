@@ -9,8 +9,6 @@
 
 #include <crude_json.h>
 
-#include <memory>
-
 #include "core_i_node.h"
 #include "cpp_non_copyable.h"
 

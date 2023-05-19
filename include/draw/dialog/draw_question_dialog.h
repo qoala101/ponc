@@ -8,7 +8,6 @@
 #define VH_PONC_DRAW_QUESTION_DIALOG_H_
 
 #include <string>
-#include <string_view>
 
 #include "cpp_callbacks.h"
 

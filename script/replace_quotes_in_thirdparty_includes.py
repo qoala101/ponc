@@ -19,6 +19,8 @@ third_party_headers = GetFilesWithExtension("./build/_deps", "h", False)
 project_files = GetFilesWithExtension(
     "./include", "h", True) + GetFilesWithExtension("./src", "cc", True)
 
+print("Replacing third-party headers...")
+
 for file in project_files:
     stream = open(file, "rt")
     data = stream.read()
@@ -31,3 +33,5 @@ for file in project_files:
     stream = open(file, "wt")
     stream.write(data)
     stream.close()
+
+print("Done")

@@ -8,13 +8,9 @@
 #define VH_PONC_COREUI_NODE_H_
 
 #include <imgui.h>
-#include <imgui_internal.h>
 
-#include <functional>
-#include <memory>
 #include <optional>
 #include <string>
-#include <variant>
 #include <vector>
 
 #include "core_i_node.h"

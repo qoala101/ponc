@@ -9,10 +9,9 @@
 
 #include <imgui_node_editor.h>
 
-#include <cstdint>
-#include <map>
 #include <optional>
 #include <unordered_map>
+#include <utility>
 
 #include "core_id_value.h"
 

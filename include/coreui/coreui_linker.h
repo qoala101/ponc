@@ -10,16 +10,14 @@
 #include <imgui.h>
 #include <imgui_node_editor.h>
 
-#include <functional>
-#include <memory>
 #include <optional>
 #include <string>
 #include <unordered_set>
+#include <utility>
 #include <variant>
 #include <vector>
 
 #include "core_i_family.h"
-#include "core_i_node.h"
 #include "core_id_value.h"
 #include "coreui_event.h"
 #include "coreui_family.h"

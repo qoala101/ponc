@@ -8,9 +8,11 @@
 #define VH_PONC_COREUI_NODE_MOVER_H_
 
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <imgui_node_editor.h>
 
-#include <cstdint>
+#include <optional>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 

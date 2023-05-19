@@ -9,7 +9,12 @@
 
 #include <imgui_node_editor.h>
 
+#include <concepts>
+#include <map>
+#include <optional>
 #include <queue>
+#include <utility>
+#include <vector>
 
 #include "flow_tree_node.h"
 

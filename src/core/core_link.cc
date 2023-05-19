@@ -8,6 +8,8 @@
 
 #include <imgui_node_editor.h>
 
+#include <variant>
+
 namespace vh::ponc::core {
 ///
 auto Link::GetIds(Link &link) -> std::vector<IdPtr> {

@@ -7,7 +7,10 @@
 #include "json_i_node_writer.h"
 
 #include <crude_json.h>
+#include <imgui.h>
 #include <imgui_node_editor.h>
+
+#include <memory>
 
 #include "core_i_node.h"
 #include "json_container_serializer.h"

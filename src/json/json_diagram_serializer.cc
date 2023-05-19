@@ -7,8 +7,11 @@
 #include "json_diagram_serializer.h"
 
 #include <crude_json.h>
+#include <imgui_node_editor.h>
 
+#include <algorithm>
 #include <memory>
+#include <utility>
 
 #include "core_diagram.h"
 #include "core_i_node.h"
@@ -16,7 +19,7 @@
 #include "cpp_assert.h"
 #include "json_container_serializer.h"
 #include "json_i_node_parser.h"
-#include "json_i_node_writer.h"
+#include "json_i_node_writer.h"  // IWYU pragma: keep
 #include "json_id_serializer.h"
 #include "json_link_serializer.h"
 

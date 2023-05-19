@@ -12,8 +12,6 @@
 #include <imgui_internal.h>
 #include <imgui_node_editor.h>
 
-#include <utility>
-
 namespace ne = ax::NodeEditor;
 
 namespace vh::ponc::draw {

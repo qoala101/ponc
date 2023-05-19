@@ -10,13 +10,13 @@
 #include <imgui_node_editor.h>
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
 #include "core_i_node.h"
 #include "core_id_ptr.h"
 #include "core_link.h"
-#include "cpp_safe_ptr.h"
 
 namespace vh::ponc::core {
 ///

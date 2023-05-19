@@ -7,6 +7,11 @@
 #ifndef VH_PONC_DRAW_FAMILY_GROUPS_MENU_H_
 #define VH_PONC_DRAW_FAMILY_GROUPS_MENU_H_
 
+#include <optional>
+#include <unordered_set>
+#include <vector>
+
+#include "core_i_family.h"
 #include "coreui_family.h"
 #include "cpp_callbacks.h"
 #include "cpp_static_api.h"

@@ -6,6 +6,8 @@
 
 #include "draw_save_as_file_dialog.h"
 
+#include <imfilebrowser.h>
+
 namespace vh::ponc::draw {
 ///
 SaveAsFileDialog::SaveAsFileDialog()

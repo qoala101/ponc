@@ -8,7 +8,6 @@
 
 #include <imgui.h>
 
-#include <numeric>
 #include <string>
 
 #include "coreui_flow_tree_node.h"

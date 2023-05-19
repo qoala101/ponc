@@ -6,7 +6,10 @@
 
 #include "app_app.h"
 
+#include <application.h>
 #include <imgui.h>
+
+#include <string>
 
 #include "coreui_project.h"
 #include "cpp_assert.h"

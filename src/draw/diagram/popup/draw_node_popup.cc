@@ -9,6 +9,7 @@
 #include <imgui.h>
 #include <imgui_node_editor.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -17,10 +18,8 @@
 #include "coreui_family.h"
 #include "coreui_i_node_traits.h"
 #include "coreui_native_facade.h"
-#include "cpp_assert.h"
+#include "cpp_callbacks.h"
 #include "draw_family_groups_menu.h"
-#include "flow_algorithms.h"
-#include "flow_tree_traversal.h"
 
 namespace vh::ponc::draw {
 namespace {

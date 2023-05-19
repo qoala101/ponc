@@ -7,20 +7,18 @@
 #ifndef VH_PONC_COREUI_PROJECT_H_
 #define VH_PONC_COREUI_PROJECT_H_
 
-#include <imgui_node_editor.h>
-
 #include <filesystem>
-#include <functional>
 #include <memory>
-#include <optional>
 #include <string>
-#include <variant>
 #include <vector>
 
+#include "core_diagram.h"
 #include "core_i_family_group.h"
+#include "core_id_ptr.h"
 #include "core_project.h"
 #include "coreui_calculator.h"
 #include "coreui_diagram.h"
+#include "coreui_event.h"
 #include "coreui_event_loop.h"
 #include "coreui_log.h"
 #include "cpp_callbacks.h"

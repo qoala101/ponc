@@ -10,7 +10,7 @@
 #include <imgui.h>
 
 #include <optional>
-#include <string>
+#include <string_view>
 
 #include "cpp_callbacks.h"
 #include "cpp_non_copyable.h"

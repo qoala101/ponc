@@ -8,11 +8,7 @@
 
 #include <imgui.h>
 
-#include <cstdint>
-#include <limits>
-#include <memory>
-#include <string>
-#include <vector>
+#include <utility>
 
 #include "coreui_diagram.h"
 #include "coreui_family.h"

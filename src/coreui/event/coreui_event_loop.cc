@@ -6,6 +6,10 @@
 
 #include "coreui_event_loop.h"
 
+#include <memory>
+#include <optional>
+#include <utility>
+
 namespace vh::ponc::coreui {
 ///
 auto EventLoop::PostEvent(std::function<void()> event) -> Event& {

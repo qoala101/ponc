@@ -10,6 +10,8 @@
 #include <crude_json.h>
 
 #include <memory>
+#include <optional>
+#include <string>
 
 #include "core_i_family.h"
 #include "cpp_non_copyable.h"

@@ -7,6 +7,7 @@
 #ifndef VH_PONC_DRAW_DIAGRAMS_VIEW_H_
 #define VH_PONC_DRAW_DIAGRAMS_VIEW_H_
 
+#include <optional>
 #include <string>
 
 #include "coreui_project.h"

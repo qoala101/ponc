@@ -8,24 +8,41 @@
 
 #include <imgui_node_editor.h>
 
+#include <algorithm>
+#include <concepts>
+#include <iterator>
 #include <numeric>
 #include <optional>
 #include <sstream>
+#include <stack>
 #include <string>
+#include <type_traits>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
+#include "calc_calculator.h"
 #include "calc_resolution.h"
 #include "calc_tree_node.h"
 #include "calc_tree_traversal.h"
+#include "calc_types.h"
 #include "core_i_node.h"
+#include "core_id_generator.h"
+#include "core_link.h"
 #include "core_project.h"
+#include "core_settings.h"
 #include "coreui_cloner.h"
+#include "coreui_diagram.h"
+#include "coreui_event.h"
 #include "coreui_log.h"
 #include "coreui_native_facade.h"
+#include "coreui_node_mover.h"
 #include "coreui_project.h"
 #include "cpp_assert.h"
 #include "cpp_scope.h"
 #include "flow_algorithms.h"
+#include "flow_node_flow.h"
+#include "flow_tree_node.h"
 #include "flow_tree_traversal.h"
 
 namespace vh::ponc::coreui {
