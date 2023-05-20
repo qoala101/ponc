@@ -2,4 +2,5 @@
 
 PON Calculator
 
-[![CMake](https://github.com/qoala101/ponc/actions/workflows/cmake.yml/badge.svg?branch=main)](https://github.com/qoala101/ponc/actions/workflows/cmake.yml)
+[![build](https://github.com/qoala101/ponc/actions/workflows/build_ubuntu.yml/badge.svg?branch=main)](https://github.com/qoala101/ponc/actions/workflows/build_ubuntu.yml)
+[![build](https://github.com/qoala101/ponc/actions/workflows/build_windows.yml/badge.svg?branch=main)](https://github.com/qoala101/ponc/actions/workflows/build_windows.yml)
