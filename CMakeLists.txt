@@ -35,10 +35,10 @@ if(LINUX)
   if(CMAKE_CXX_CPPCHECK)
     list(APPEND CMAKE_CXX_CPPCHECK
       "--enable=all"
-      "--force"
       "--inconclusive"
       "--inline-suppr"
       "--quiet"
+      "--suppress=*:${FETCHCONTENT_BASE_DIR}*"
       "--suppressions-list=${CMAKE_SOURCE_DIR}/.cppcheck"
     )
   endif()

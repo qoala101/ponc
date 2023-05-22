@@ -358,7 +358,6 @@ auto Diagram::MoveLink(ne::PinId source_pin_id, ne::PinId target_pin_id) const
           return;
         }
 
-        // cppcheck-suppress constVariable
         auto& pin_to_move = ((*link)->start_pin_id == source_pin_id)
                                 ? (*link)->start_pin_id
                                 : (*link)->end_pin_id;
