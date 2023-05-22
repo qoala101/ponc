@@ -44,7 +44,8 @@ if(LINUX)
       "--suppressions-list=${CMAKE_SOURCE_DIR}/.cppcheck"
     )
   else()
-    set(CMAKE_CXX_CPPCHECK)
+    message("cppcheck unset: " ${CMAKE_CXX_CPPCHECK})
+    unset(CMAKE_CXX_CPPCHECK)
   endif()
 
   message("cppcheck value2: " ${CMAKE_CXX_CPPCHECK})
