@@ -31,8 +31,9 @@ if(LINUX)
   )
 
   find_program(CMAKE_CXX_CPPCHECK cppcheck)
+  message("cppcheck value: " ${CMAKE_CXX_CPPCHECK})
 
-  if(NOT CMAKE_CXX_CPPCHECK STREQUAL CMAKE_CXX_CPPCHECK-NOTFOUND)
+  if(NOT ${CMAKE_CXX_CPPCHECK} STREQUAL "CMAKE_CXX_CPPCHECK-NOTFOUND")
     list(APPEND CMAKE_CXX_CPPCHECK
       "--enable=all"
       "--inconclusive"
