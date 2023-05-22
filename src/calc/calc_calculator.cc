@@ -319,9 +319,12 @@ void Calculator::FindBestRootTree() {
 
     auto input_node_family = input_node;
 
-    for (auto &output : input_node_family.outputs) {
-      output -= next_node_input;
-    }
+    std::transform(input_node_family.outputs.begin(),
+                   input_node_family.outputs.end(),
+                   input_node_family.outputs.begin(),
+                   [next_node_input](const auto output) {
+                     return output - next_node_input;
+                   });
 
     FindBestTreesForOutput(next_node_input, input_node_family);
     --next_node_input;

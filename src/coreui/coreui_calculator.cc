@@ -157,7 +157,7 @@ auto GetInputNodes(const core::Diagram& diagram) {
 }
 
 ///
-auto GetClientFamilyId(core::Project& project) {
+auto GetClientFamilyId(const core::Project& project) {
   const auto& families = project.GetFamilies();
   const auto client_family =
       std::find_if(families.cbegin(), families.cend(), [](const auto& family) {

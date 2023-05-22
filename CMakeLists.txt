@@ -28,10 +28,20 @@ if(LINUX)
     -Wextra
     -pedantic
     -Wno-missing-braces
-
-    # -Werror
-    # -pedantic-errors
   )
+
+  find_program(CMAKE_CXX_CPPCHECK NAMES cppcheck)
+
+  if(CMAKE_CXX_CPPCHECK)
+    list(APPEND CMAKE_CXX_CPPCHECK
+      "--enable=all"
+      "--force"
+      "--inconclusive"
+      "--inline-suppr"
+      "--quiet"
+      "--suppressions-list=${CMAKE_SOURCE_DIR}/.cppcheck"
+    )
+  endif()
 endif()
 
 add_subdirectory(src)
