@@ -30,9 +30,9 @@ if(LINUX)
     -Wno-missing-braces
   )
 
-  find_program(CMAKE_CXX_CPPCHECK NAMES cppcheck)
+  find_program(CMAKE_CXX_CPPCHECK cppcheck)
 
-  if(NOT CMAKE_CXX_CPPCHECK-NOTFOUND)
+  if(CMAKE_CXX_CPPCHECK)
     list(APPEND CMAKE_CXX_CPPCHECK
       "--enable=all"
       "--inconclusive"
