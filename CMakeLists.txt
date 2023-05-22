@@ -31,9 +31,10 @@ if(LINUX)
   )
 
   find_program(CMAKE_CXX_CPPCHECK cppcheck)
-  message("cppcheck value: " ${CMAKE_CXX_CPPCHECK})
+  message("cppcheck value1: " ${CMAKE_CXX_CPPCHECK})
 
   if(NOT ${CMAKE_CXX_CPPCHECK} STREQUAL "CMAKE_CXX_CPPCHECK-NOTFOUND")
+    message("cppcheck inside: " ${CMAKE_CXX_CPPCHECK})
     list(APPEND CMAKE_CXX_CPPCHECK
       "--enable=all"
       "--inconclusive"
@@ -42,7 +43,11 @@ if(LINUX)
       "--suppress=*:${FETCHCONTENT_BASE_DIR}*"
       "--suppressions-list=${CMAKE_SOURCE_DIR}/.cppcheck"
     )
+  else()
+    set(CMAKE_CXX_CPPCHECK)
   endif()
+
+  message("cppcheck value2: " ${CMAKE_CXX_CPPCHECK})
 endif()
 
 add_subdirectory(src)
