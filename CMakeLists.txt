@@ -8,6 +8,8 @@ project(
   LANGUAGES CXX
 )
 
+option(FAIL_ON_WARNINGS "Whether to treat compilation warnings as errors.")
+
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -31,13 +33,8 @@ if(LINUX)
   )
 
   find_program(CPPCHECK cppcheck)
-  message("CMAKE_CXX_CPPCHECK value1: " ${CMAKE_CXX_CPPCHECK})
-  message("CPPCHECK value1: " ${CPPCHECK})
 
   if(CPPCHECK)
-    message("CMAKE_CXX_CPPCHECK value2: " ${CMAKE_CXX_CPPCHECK})
-    message("CPPCHECK value2: " ${CPPCHECK})
-
     set(CMAKE_CXX_CPPCHECK ${CPPCHECK})
     list(APPEND CMAKE_CXX_CPPCHECK
       "--enable=all"
@@ -47,10 +44,13 @@ if(LINUX)
       "--suppress=*:${FETCHCONTENT_BASE_DIR}*"
       "--suppressions-list=${CMAKE_SOURCE_DIR}/.cppcheck"
     )
-  endif()
 
-  message("CMAKE_CXX_CPPCHECK value3: " ${CMAKE_CXX_CPPCHECK})
-  message("CPPCHECK value3: " ${CPPCHECK})
+    if(FAIL_ON_WARNINGS)
+      list(APPEND CMAKE_CXX_CPPCHECK
+        "--error-exitcode=1"
+      )
+    endif()
+  endif()
 endif()
 
 add_subdirectory(src)

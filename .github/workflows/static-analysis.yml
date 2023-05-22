@@ -1,0 +1,22 @@
+name: Static Analysis
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libglfw3-dev cppcheck
+
+      - name: Configure CMake
+        run: cmake -B ${{github.workspace}}/build -DFAIL_ON_WARNINGS=ON
+
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config Debug

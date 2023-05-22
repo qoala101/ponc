@@ -159,3 +159,7 @@ add_custom_command(TARGET ponc POST_BUILD
   # ${CMAKE_CURRENT_SOURCE_DIR}/resource/RESOURCE_FILE
   $<TARGET_FILE_DIR:ponc>/data
 )
+
+if(FAIL_ON_WARNINGS)
+  target_compile_options(ponc PRIVATE -Werror)
+endif()
