@@ -21,3 +21,8 @@ add_subdirectory(
 add_library(thirdparty::application ALIAS application)
 add_library(thirdparty::imgui ALIAS imgui)
 add_library(thirdparty::imgui_node_editor ALIAS imgui_node_editor)
+
+mark_as_system_target(application)
+mark_as_system_target(gl3w)
+mark_as_system_target(imgui)
+mark_as_system_target(imgui_node_editor)
