@@ -1,4 +1,4 @@
-name: Static Analysis
+name: static-analysis
 
 on:
   push:
@@ -9,9 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
 
       - name: Set up Clang
         uses: egor-tensin/setup-clang@v1
