@@ -1,5 +1,5 @@
 /**
- * PON Calculator @link https://github.com/qoala101/ponc @endlink
+ * PONC @link https://github.com/qoala101/ponc @endlink
  * @author Volodymyr Hromakov (4y5t6r@gmail.com)
  * @copyright Copyright (c) 2023, MIT License
  */
@@ -32,7 +32,7 @@ void App::OnStart() {
 
   app_.emplace(coreui::Project::Callbacks{
       .name_changed = [safe_this = safe_owner_.MakeSafe(this)](auto file_name) {
-        const auto title = std::move(file_name) + " - PON Calculator";
+        const auto title = std::move(file_name) + " - PONC";
         safe_this->SetTitle(title.c_str());
       }});
 }
