@@ -36,6 +36,8 @@ class DiagramEditor {
   void DrawPopups(coreui::Diagram &diagram);
 
   ///
+  ne::Config config_{};
+  ///
   std::unique_ptr<ne::EditorContext, void (*)(ne::EditorContext *)> context_;
   ///
   ItemDeleter item_deleter_{};

@@ -37,7 +37,12 @@ auto IsHoveringOverChildWindow() {
 
 ///
 DiagramEditor::DiagramEditor()
-    : context_{ne::CreateEditor(), &ne::DestroyEditor} {
+    : config_{[]() {
+        auto config = ax::NodeEditor::Config{};
+        config.SettingsFile = nullptr;
+        return config;
+      }()},
+      context_{ne::CreateEditor(&config_), &ne::DestroyEditor} {
   ne::SetCurrentEditor(context_.get());
   style::UpdateStyle(ne::GetStyle());
 }
