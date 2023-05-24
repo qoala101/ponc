@@ -51,15 +51,13 @@ The resulting network layouts are then implemented by the field engineers using 
 
   ![Feature 5](https://github.com/qoala101/ponc/assets/97284265/d627a22c-de49-4e0a-88de-a5b6cf1e169c)
 
-## Installation
+## Requirements
 
-### Requirements
-
-#### Linux
+### Linux
 
 - OpenGL
 
-#### Windows
+### Windows
 
 - Windows 7
 - DirectX 11
