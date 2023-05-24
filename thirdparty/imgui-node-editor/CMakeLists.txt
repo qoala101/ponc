@@ -22,6 +22,13 @@ add_library(thirdparty::application ALIAS application)
 add_library(thirdparty::imgui ALIAS imgui)
 add_library(thirdparty::imgui_node_editor ALIAS imgui_node_editor)
 
+if(WIN32)
+  target_compile_definitions(application
+    PRIVATE IMGUI_IMPL_WIN32_DISABLE_GAMEPAD
+    PRIVATE IMGUI_IMPL_WIN32_DISABLE_LINKING_XINPUT
+  )
+endif()
+
 mark_as_system_target(application)
 mark_as_system_target(imgui)
 mark_as_system_target(imgui_node_editor)
