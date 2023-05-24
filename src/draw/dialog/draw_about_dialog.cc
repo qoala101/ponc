@@ -9,6 +9,7 @@
 #include <imgui.h>
 
 #include "cpp_assert.h"
+#include "draw_settings_table_row.h"
 
 namespace vh::ponc::draw {
 ///
@@ -28,7 +29,30 @@ void AboutDialog::Draw() {
 
   if (ImGui::BeginPopupModal("About", &open_requested_,
                              ImGuiWindowFlags_AlwaysAutoResize)) {
-    ImGui::TextUnformatted("TODO");
+    ImGui::TextUnformatted("Passive Optical Network Calculator 0.5.1");
+    ImGui::Separator();
+
+    if (ImGui::BeginTable("About", 2)) {
+      ImGui::TableSetupColumn("Field", ImGuiTableColumnFlags_NoHeaderLabel);
+      ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_NoHeaderLabel);
+
+      DrawSettingsTableRow("Author");
+      ImGui::TextUnformatted("Volodymyr Hromakov");
+
+      DrawSettingsTableRow("Email");
+      ImGui::TextUnformatted("4y5t6r@gmail.com");
+
+      DrawSettingsTableRow("Site");
+      ImGui::TextUnformatted("https://github.com/qoala101/ponc");
+
+      DrawSettingsTableRow("Date");
+      ImGui::TextUnformatted("May 25, 2023");
+
+      DrawSettingsTableRow("License");
+      ImGui::TextUnformatted("MIT");
+
+      ImGui::EndTable();
+    }
     ImGui::EndPopup();
   }
 }
