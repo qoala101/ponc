@@ -11,15 +11,29 @@
 
 PONC is the graphical tool used by telecommunication engineers to design, manage, and optimize [Passive Optical Network](https://en.wikipedia.org/wiki/Passive_optical_network) layouts.
 
-PONC performs complex calculations on the fly and serves as fast user-friendly replacement of existing spreadsheet-based workflows which require hours of manual work.
+PONC performs complex calculations on the fly and serves as a fast, user-friendly replacement for existing spreadsheet-based approaches, which require hours of manual work.
+
+### Subject
+
+In PON, the optical signal is delivered to the city region over a single Input cable. In order for Clients to get the internet at their homes, the signal must be split among them using a combination of Splitter devices. They have multiple outputs, allowing the connection of additional cables while reducing the signal strength.
+
+There are many kinds of Splitters, each with different split and signal reduction factors. The number of Clients to be connected to a single Input could also grow to hundreds in densely populated cities. This makes the number of possible network layouts enormous.
+
+### Workflow
+
+A typical PONC workflow consists of an engineer designing or refining existing PON layouts, with the goal of finding the cheapest Splitter combination to match the number of Clients.
+
+To achieve this, PONC provides instant reaction to changes, analytical views, and an automatic layout Calculator that could find the perfect combination in seconds.
+
+The resulting network layouts are then implemented by the field engineers using real devices.
 
 ## Features
 
 - Build and manage PON layouts
 - Automatic flow updates and visualization
-- Analysis views and navigation
+- Analytical views and navigation
 - Find the most optimal layouts given the constraints
-- In-place editing and convenience functionality
+- Convenience functionality
 
 ## Installation
 
@@ -34,7 +48,7 @@ PONC performs complex calculations on the fly and serves as fast user-friendly r
 - Windows 7
 - DirectX 11
 
-No installation required. Unpack release archive and run executable.
+No installation is required. Unpack the release archive and run the executable.
 
 ## Build
 
