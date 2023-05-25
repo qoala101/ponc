@@ -9,7 +9,11 @@ function(mark_as_system_target target)
   endif()
 
   get_target_property(INCLUDE_DIRECTORIES ${target} INTERFACE_INCLUDE_DIRECTORIES)
-  target_include_directories(${target} SYSTEM ${SCOPE} ${INCLUDE_DIRECTORIES})
+
+  target_include_directories(${target}
+    SYSTEM ${SCOPE}
+    ${INCLUDE_DIRECTORIES}
+  )
 endfunction(mark_as_system_target)
 
 add_subdirectory(imgui-filebrowser)

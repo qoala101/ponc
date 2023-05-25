@@ -11,7 +11,8 @@ add_library(imgui-filebrowser INTERFACE)
 add_library(thirdparty::imgui-filebrowser ALIAS imgui-filebrowser)
 
 target_include_directories(imgui-filebrowser
-  SYSTEM INTERFACE ${imgui-filebrowser_SOURCE_DIR}
+  SYSTEM INTERFACE
+  ${imgui-filebrowser_SOURCE_DIR}
 )
 
 mark_as_system_target(imgui-filebrowser)

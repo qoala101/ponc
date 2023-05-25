@@ -24,8 +24,9 @@ add_library(thirdparty::imgui_node_editor ALIAS imgui_node_editor)
 
 if(WIN32)
   target_compile_definitions(application
-    PRIVATE IMGUI_IMPL_WIN32_DISABLE_GAMEPAD
-    PRIVATE IMGUI_IMPL_WIN32_DISABLE_LINKING_XINPUT
+    PRIVATE
+    IMGUI_IMPL_WIN32_DISABLE_GAMEPAD
+    IMGUI_IMPL_WIN32_DISABLE_LINKING_XINPUT
   )
 endif()
 
