@@ -73,21 +73,21 @@ cmake -B ./build
 cmake --build ./build --config Release
 ```
 
-See .github/workflows for build samples.
+See **.github/workflows** for build samples.
 
 ## Third-party components
 
 ### C++
 
-- [Dear ImGui](https://github.com/ocornut/imgui) - GUI framework
+- [Dear ImGui](https://github.com/ocornut/imgui) - UI framework
 - [Node Editor in ImGui](https://github.com/thedmd/imgui-node-editor) - node editor framework
 - [imgui-filebrowser](https://github.com/AirGuanZ/imgui-filebrowser) - file browser
 
 ### Style
 
-- [Google Fonts](https://fonts.google.com/) - fonts
+- [Google Fonts](https://fonts.google.com) - fonts
 - [tailwindcss](https://tailwindcss.com/docs/customizing-colors) - color palette
 
 ## License
 
-[MIT](https://opensource.org/license/mit/)
+[MIT](https://opensource.org/license/mit)
