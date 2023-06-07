@@ -17,6 +17,7 @@
 
 #include "core_i_family.h"
 #include "core_id_ptr.h"
+#include "core_tags.h"
 #include "cpp_non_copyable.h"
 #include "flow_node_flow.h"
 
@@ -84,6 +85,12 @@ class INode : public cpp::NonCopyable {
   void SetPos(const ImVec2 &pos);
   ///
   auto GetInitialFlow() const -> flow::NodeFlow;
+  ///
+  auto GetTags() const -> const std::vector<std::weak_ptr<Tag>> &;
+  ///
+  void AddTag(std::weak_ptr<Tag> tag);
+  ///
+  void RemoveTag(std::string_view tag_name);
 
  protected:
   ///
@@ -103,6 +110,8 @@ class INode : public cpp::NonCopyable {
   std::vector<ne::PinId> output_pin_ids_{};
   ///
   ImVec2 pos_{};
+  ///
+  std::vector<std::weak_ptr<Tag>> tags_{};
 };
 }  // namespace core
 }  // namespace vh::ponc

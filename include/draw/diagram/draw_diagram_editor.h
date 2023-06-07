@@ -12,6 +12,7 @@
 #include <memory>
 
 #include "core_diagram.h"
+#include "core_tags.h"
 #include "coreui_diagram.h"
 #include "draw_create_node_popup.h"
 #include "draw_item_deleter.h"
@@ -27,13 +28,13 @@ class DiagramEditor {
   DiagramEditor();
 
   ///
-  void Draw(coreui::Diagram &diagram);
+  void Draw(coreui::Diagram &diagram, core::Tags &tags);
 
  private:
   ///
   void OpenPopupsIfRequested(const core::Diagram &diagram);
   ///
-  void DrawPopups(coreui::Diagram &diagram);
+  void DrawPopups(coreui::Diagram &diagram, core::Tags &tags);
 
   ///
   ne::Config config_{};

@@ -15,6 +15,7 @@
 
 #include "core_diagram.h"
 #include "core_i_node.h"
+#include "core_tags.h"
 #include "coreui_family.h"
 #include "coreui_i_node_traits.h"
 #include "coreui_native_facade.h"
@@ -38,8 +39,6 @@ auto GetTitle(const std::vector<ne::NodeId>& nodes) {
 
 ///
 void DrawReplaceActions(coreui::Diagram& diagram, const core::INode& node) {
-  ImGui::Separator();
-
   if (ImGui::BeginMenu("Replace With")) {
     FamilyGroupsMenu::Draw(
         diagram.GetFamilyGroups(),
@@ -77,7 +76,7 @@ void DrawNodeActions(core::INode& node) {
 }  // namespace
 
 ///
-void NodePopup::Draw(coreui::Diagram& diagram) {
+void NodePopup::Draw(coreui::Diagram& diagram, core::Tags& tags) {
   const auto selected_nodes = IsOpened()
                                   ? coreui::NativeFacade::GetSelectedNodes()
                                   : std::vector<ne::NodeId>{};
@@ -117,6 +116,7 @@ void NodePopup::Draw(coreui::Diagram& diagram) {
   auto& node =
       core::Diagram::FindNode(diagram.GetDiagram(), selected_nodes.front());
 
+  ImGui::Separator();
   DrawReplaceActions(diagram, node);
   DrawNodeActions(node);
 }

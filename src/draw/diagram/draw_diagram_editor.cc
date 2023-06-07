@@ -15,6 +15,7 @@
 
 #include "core_diagram.h"
 #include "core_i_node.h"
+#include "core_tags.h"
 #include "coreui_diagram.h"
 #include "coreui_native_facade.h"
 #include "cpp_assert.h"
@@ -48,7 +49,7 @@ DiagramEditor::DiagramEditor()
 }
 
 ///
-void DiagramEditor::Draw(coreui::Diagram &diagram) {
+void DiagramEditor::Draw(coreui::Diagram &diagram, core::Tags &tags) {
   ne::Begin("DiagramEditor");
   item_deleter_.UnregisterDeletedItems(diagram.GetDiagram());
 
@@ -65,7 +66,7 @@ void DiagramEditor::Draw(coreui::Diagram &diagram) {
   linker_.Draw(diagram.GetLinker(), diagram.GetFamilyGroups());
 
   OpenPopupsIfRequested(diagram.GetDiagram());
-  DrawPopups(diagram);
+  DrawPopups(diagram, tags);
 
   item_deleter_.DeleteUnregisteredItems(diagram);
   ne::End();
@@ -119,9 +120,9 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
 }
 
 ///
-void DiagramEditor::DrawPopups(coreui::Diagram &diagram) {
+void DiagramEditor::DrawPopups(coreui::Diagram &diagram, core::Tags &tags) {
   create_node_popup_.Draw(diagram);
-  node_popup_.Draw(diagram);
+  node_popup_.Draw(diagram, tags);
   link_popup_.Draw({.delete_selected = [&diagram](const auto &link_ids) {
     for (const auto link_id : link_ids) {
       diagram.DeleteLink(link_id);

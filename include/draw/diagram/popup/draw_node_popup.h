@@ -7,6 +7,7 @@
 #ifndef VH_PONC_DRAW_NODE_POPUP_H_
 #define VH_PONC_DRAW_NODE_POPUP_H_
 
+#include "core_tags.h"
 #include "coreui_diagram.h"
 #include "draw_i_popup.h"
 
@@ -15,7 +16,7 @@ namespace vh::ponc::draw {
 class NodePopup : public IPopup {
  public:
   ///
-  void Draw(coreui::Diagram &diagram);
+  void Draw(coreui::Diagram &diagram, core::Tags &tags);
 };
 }  // namespace vh::ponc::draw
 

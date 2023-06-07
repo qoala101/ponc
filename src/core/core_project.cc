@@ -19,6 +19,7 @@
 #include "core_id_generator.h"
 #include "core_id_value.h"
 #include "core_link.h"
+#include "core_tags.h"
 #include "cpp_assert.h"
 
 namespace vh::ponc::core {
@@ -98,7 +99,7 @@ auto Project::IsEmpty(const Project& project) -> bool {
 }
 
 ///
-auto Project::FindFamily(const Project& project, core::FamilyId family_id)
+auto Project::FindFamily(const Project& project, FamilyId family_id)
     -> IFamily& {
   const auto family = std::find_if(
       project.families_.cbegin(), project.families_.cend(),
@@ -147,10 +148,11 @@ auto Project::MakeUniqueDiagramName(const Project& project,
 ///
 Project::Project(Settings settings,
                  std::vector<std::unique_ptr<IFamily>> families,
-                 std::vector<Diagram> diagrams)
+                 std::vector<Diagram> diagrams, Tags tags)
     : settings_{std::move(settings)},
       families_{std::move(families)},
       diagrams_{std::move(diagrams)},
+      tags_{std::move(tags)},
       id_generator_{FindMaxId() + 1} {}
 
 ///
@@ -187,6 +189,9 @@ void Project::DeleteDiagram(int index) {
   Expects(static_cast<int>(diagrams_.size()) > index);
   diagrams_.erase(diagrams_.cbegin() + index);
 }
+
+///
+auto Project::GetTags() -> Tags& { return tags_; }
 
 ///
 auto Project::GetIdGenerator() const -> const IdGenerator& {

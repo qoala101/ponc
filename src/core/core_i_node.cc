@@ -136,6 +136,24 @@ auto INode::GetInitialFlow() const -> flow::NodeFlow {
 }
 
 ///
+auto INode::GetTags() const -> const std::vector<std::weak_ptr<Tag>>& {
+  return tags_;
+}
+
+///
+void INode::AddTag(std::weak_ptr<Tag> tag) {
+  tags_.emplace_back(std::move(tag));
+}
+
+///
+void INode::RemoveTag(std::string_view tag_name) {
+  std::erase_if(tags_, [tag_name](const auto& tag) {
+    const auto tag_lock = tag.lock();
+    return (tag_lock != nullptr) && (tag_lock->name == tag_name);
+  });
+}
+
+///
 INode::INode(const ConstructorArgs& args)
     : id_{args.id},
       family_id_{args.family_id},

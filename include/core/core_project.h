@@ -16,6 +16,7 @@
 #include "core_i_family.h"
 #include "core_id_generator.h"
 #include "core_settings.h"
+#include "core_tags.h"
 
 namespace vh::ponc::core {
 ///
@@ -24,7 +25,7 @@ class Project {
   ///
   static auto IsEmpty(const Project &project) -> bool;
   ///
-  static auto FindFamily(const Project &project, core::FamilyId family_id)
+  static auto FindFamily(const Project &project, FamilyId family_id)
       -> IFamily &;
   ///
   static auto MakeUniqueDiagramName(const Project &project,
@@ -34,7 +35,7 @@ class Project {
 
   ///
   Project(Settings settings, std::vector<std::unique_ptr<IFamily>> families,
-          std::vector<Diagram> diagrams = {});
+          std::vector<Diagram> diagrams = {}, Tags tags = Tags{});
 
   ///
   auto GetSettings() const -> const Settings &;
@@ -51,6 +52,8 @@ class Project {
   ///
   void DeleteDiagram(int index);
   ///
+  auto GetTags() -> Tags &;
+  ///
   auto GetIdGenerator() const -> const IdGenerator &;
   ///
   auto GetIdGenerator() -> IdGenerator &;
@@ -65,6 +68,8 @@ class Project {
   std::vector<std::unique_ptr<IFamily>> families_{};
   ///
   std::vector<Diagram> diagrams_{};
+  ///
+  Tags tags_{};
   ///
   IdGenerator id_generator_{};
 };
