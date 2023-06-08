@@ -52,6 +52,8 @@ class Project {
   ///
   void DeleteDiagram(int index);
   ///
+  auto GetTags() const -> const Tags &;
+  ///
   auto GetTags() -> Tags &;
   ///
   auto GetIdGenerator() const -> const IdGenerator &;

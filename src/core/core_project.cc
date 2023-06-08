@@ -191,6 +191,12 @@ void Project::DeleteDiagram(int index) {
 }
 
 ///
+auto Project::GetTags() const -> const Tags& {
+  // NOLINTNEXTLINE(*-const-cast)
+  return const_cast<Project*>(this)->GetTags();
+}
+
+///
 auto Project::GetTags() -> Tags& { return tags_; }
 
 ///
