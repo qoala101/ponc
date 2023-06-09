@@ -15,7 +15,7 @@
 
 #include "core_diagram.h"
 #include "core_i_node.h"
-#include "core_tags.h"
+#include "core_tag.h"
 #include "coreui_diagram.h"
 #include "coreui_native_facade.h"
 #include "cpp_assert.h"

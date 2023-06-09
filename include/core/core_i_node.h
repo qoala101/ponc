@@ -17,7 +17,7 @@
 
 #include "core_i_family.h"
 #include "core_id_ptr.h"
-#include "core_tags.h"
+#include "core_tag.h"
 #include "cpp_non_copyable.h"
 #include "flow_node_flow.h"
 

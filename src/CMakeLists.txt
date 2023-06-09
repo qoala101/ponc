@@ -31,7 +31,7 @@ add_executable(ponc
   core/core_pin.cc
   core/core_project.cc
   core/core_settings.cc
-  core/core_tags.cc
+  core/core_tag.cc
 
   coreui/event/coreui_event_loop.cc
   coreui/event/coreui_event.cc
@@ -99,6 +99,7 @@ add_executable(ponc
   flow/flow_node_flow.cc
   flow/flow_tree_traversal.cc
 
+  json/json_color_serializer.cc
   json/json_diagram_serializer.cc
   json/json_i_family_parser.cc
   json/json_i_family_writer.cc
@@ -107,6 +108,7 @@ add_executable(ponc
   json/json_link_serializer.cc
   json/json_project_serializer.cc
   json/json_settings_serializer.cc
+  json/json_tag_serializer.cc
   json/json_versifier.cc
 
   style/style_update_styles.cc

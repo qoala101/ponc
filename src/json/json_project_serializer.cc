@@ -15,11 +15,13 @@
 #include "core_diagram.h"
 #include "core_i_family.h"
 #include "core_project.h"
+#include "core_tag.h"
 #include "cpp_assert.h"
 #include "json_container_serializer.h"
 #include "json_diagram_serializer.h"
 #include "json_i_family_writer.h"  // IWYU pragma: keep
 #include "json_setings_serializer.h"
+#include "json_tag_serializer.h"
 #include "json_versifier.h"
 
 namespace vh::ponc::json {
@@ -58,7 +60,11 @@ auto ProjectSerializer::ParseFromJson(
         return DiagramSerializer::ParseFromJson(json, families);
       });
 
-  return core::Project{settings, std::move(families), std::move(diagrams)};
+  auto tags = ContainerSerializer::ParseFromJson<std::shared_ptr<core::Tag>>(
+      json, "tags", &SharedTagSerializer::ParseFromJson);
+
+  return core::Project{settings, std::move(families), std::move(diagrams),
+                       std::move(tags)};
 }
 
 ///
@@ -76,6 +82,9 @@ auto ProjectSerializer::WriteToJson(const core::Project& project)
 
   ContainerSerializer::WriteToJson(json, project.GetDiagrams(), "diagrams",
                                    &DiagramSerializer::WriteToJson);
+
+  ContainerSerializer::WriteToJson(json, project.GetTags(), "tags",
+                                   &SharedTagSerializer::WriteToJson);
 
   return json;
 }

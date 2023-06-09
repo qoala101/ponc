@@ -12,7 +12,7 @@
 #include <memory>
 
 #include "core_diagram.h"
-#include "core_tags.h"
+#include "core_tag.h"
 #include "coreui_diagram.h"
 #include "draw_create_node_popup.h"
 #include "draw_item_deleter.h"

@@ -19,7 +19,7 @@
 #include "core_id_generator.h"
 #include "core_id_value.h"
 #include "core_link.h"
-#include "core_tags.h"
+#include "core_tag.h"
 #include "cpp_assert.h"
 
 namespace vh::ponc::core {

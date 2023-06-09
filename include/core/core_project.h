@@ -16,7 +16,7 @@
 #include "core_i_family.h"
 #include "core_id_generator.h"
 #include "core_settings.h"
-#include "core_tags.h"
+#include "core_tag.h"
 
 namespace vh::ponc::core {
 ///
@@ -35,7 +35,7 @@ class Project {
 
   ///
   Project(Settings settings, std::vector<std::unique_ptr<IFamily>> families,
-          std::vector<Diagram> diagrams = {}, Tags tags = Tags{});
+          std::vector<Diagram> diagrams = {}, Tags tags = {});
 
   ///
   auto GetSettings() const -> const Settings &;
