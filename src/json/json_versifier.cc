@@ -58,7 +58,13 @@ void Upgrade0(crude_json::value& project_json) {
 }
 
 ///
-void Upgrade1(crude_json::value& /*unused*/) {
+void Upgrade1(crude_json::value& project_json) {
+  project_json["tags"];
+  project_json["tags_size"] = static_cast<crude_json::number>(0);
+}
+
+///
+void Upgrade2(crude_json::value& /*unused*/) {
   // vh: Implement when adding new version.
 }
 }  // namespace
@@ -82,8 +88,10 @@ void Versifier::UpgradeToCurrentVersion(crude_json::value& project_json) {
   switch (json_version) {
     case Version::kPreCalculator:
       Upgrade0(project_json);
-    case Version::kCalculatorAdded:
+    case Version::kCalculator:
       Upgrade1(project_json);
+    case Version::kGroups:
+      Upgrade2(project_json);
     default:
       break;
   }
