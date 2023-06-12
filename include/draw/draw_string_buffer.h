@@ -19,11 +19,13 @@ class StringBuffer {
   ///
   auto AsTrimmed() const -> std::string;
   ///
-  void Set(std::string value);
-  ///
   auto GetSize() const -> int;
   ///
   auto GetData() -> char *;
+  ///
+  void Set(std::string value);
+  ///
+  void Clear();
 
  private:
   ///

@@ -36,6 +36,9 @@ class IPopup : public cpp::NonCopyable {
   IPopup();
 
   ///
+  virtual void OnOpen();
+
+  ///
   auto DrawContentScope(std::string_view title = {},
                         const Callbacks &callbacks = {{}})
       -> cpp::ScopeFunction;

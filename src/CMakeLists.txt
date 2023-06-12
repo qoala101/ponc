@@ -55,6 +55,7 @@ add_executable(ponc
   coreui/coreui_project.cc
 
   cpp/cpp_scope_function.cc
+  cpp/cpp_vector_bool.cc
 
   draw/diagram/popup/draw_connect_node_popup.cc
   draw/diagram/popup/draw_create_node_popup.cc
