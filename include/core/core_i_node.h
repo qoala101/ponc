@@ -63,6 +63,8 @@ class INode : public cpp::NonCopyable {
   ///
   static auto FindFirstPinOfKind(const INode &node, ne::PinKind pin_kind)
       -> std::optional<ne::PinId>;
+  ///
+  static auto HasTag(const INode &node, std::string_view tag_name) -> bool;
 
   ///
   virtual auto CreateWriter() const -> std::unique_ptr<json::INodeWriter>;
@@ -88,7 +90,7 @@ class INode : public cpp::NonCopyable {
   ///
   auto GetTags() const -> const std::vector<std::weak_ptr<Tag>> &;
   ///
-  void AddTag(std::weak_ptr<Tag> tag);
+  void AddTag(const std::shared_ptr<Tag> &tag);
   ///
   void RemoveTag(std::string_view tag_name);
 

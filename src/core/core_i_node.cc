@@ -75,6 +75,15 @@ auto INode::FindFirstPinOfKind(const INode& node, ne::PinKind pin_kind)
   return output_pins.front();
 }
 
+///
+auto INode::HasTag(const INode& node, std::string_view tag_name) -> bool {
+  return std::any_of(
+      node.tags_.cbegin(), node.tags_.cend(), [tag_name](const auto& tag) {
+        const auto tag_lock = tag.lock();
+        return (tag_lock != nullptr) && (tag_lock->name == tag_name);
+      });
+}
+
 auto INode::CreateWriter() const -> std::unique_ptr<json::INodeWriter> {
   return std::make_unique<json::INodeWriter>();
 }
@@ -141,9 +150,7 @@ auto INode::GetTags() const -> const std::vector<std::weak_ptr<Tag>>& {
 }
 
 ///
-void INode::AddTag(std::weak_ptr<Tag> tag) {
-  tags_.emplace_back(std::move(tag));
-}
+void INode::AddTag(const std::shared_ptr<Tag>& tag) { tags_.emplace_back(tag); }
 
 ///
 void INode::RemoveTag(std::string_view tag_name) {

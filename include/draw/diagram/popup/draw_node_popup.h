@@ -7,8 +7,10 @@
 #ifndef VH_PONC_DRAW_NODE_POPUP_H_
 #define VH_PONC_DRAW_NODE_POPUP_H_
 
-#include "core_tags.h"
+#include "core_i_node.h"
+#include "core_tag.h"
 #include "coreui_diagram.h"
+#include "cpp_vector_bool.h"
 #include "draw_i_popup.h"
 #include "draw_string_buffer.h"
 
@@ -20,11 +22,16 @@ class NodePopup : public IPopup {
   void Draw(coreui::Diagram &diagram, core::Tags &tags);
 
  private:
-  void DrawTagActions(coreui::Diagram &diagram, core::Tags &tags,
-                      const std::vector<ne::NodeId> &selected_nodes);
+  ///
+  void OnOpen() override;
+  ///
+  void DrawTagActions(core::Tags &tags,
+                      const std::vector<core::INode *> &selected_nodes);
 
   ///
   StringBuffer tag_name_buffer_{};
+  ///
+  cpp::VectorBool tag_checks_{};
 };
 }  // namespace vh::ponc::draw
 

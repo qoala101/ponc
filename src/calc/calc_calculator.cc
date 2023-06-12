@@ -319,8 +319,8 @@ void Calculator::FindBestRootTree() {
 
     auto input_node_family = input_node;
 
-    std::transform(input_node_family.outputs.begin(),
-                   input_node_family.outputs.end(),
+    std::transform(input_node_family.outputs.cbegin(),
+                   input_node_family.outputs.cend(),
                    input_node_family.outputs.begin(),
                    [next_node_input](const auto output) {
                      return output - next_node_input;
