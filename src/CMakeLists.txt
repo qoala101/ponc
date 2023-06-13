@@ -53,6 +53,7 @@ add_executable(ponc
   coreui/coreui_node_mover.cc
   coreui/coreui_node.cc
   coreui/coreui_project.cc
+  coreui/coreui_tags.cc
 
   cpp/cpp_scope_function.cc
   cpp/cpp_vector_bool.cc

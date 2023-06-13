@@ -8,8 +8,8 @@
 #define VH_PONC_DRAW_NODE_POPUP_H_
 
 #include "core_i_node.h"
-#include "core_tag.h"
 #include "coreui_diagram.h"
+#include "coreui_tags.h"
 #include "cpp_vector_bool.h"
 #include "draw_i_popup.h"
 #include "draw_string_buffer.h"
@@ -19,13 +19,13 @@ namespace vh::ponc::draw {
 class NodePopup : public IPopup {
  public:
   ///
-  void Draw(coreui::Diagram &diagram, core::Tags &tags);
+  void Draw(coreui::Diagram &diagram, coreui::Tags &tags);
 
  private:
   ///
   void OnOpen() override;
   ///
-  void DrawTagActions(core::Tags &tags,
+  void DrawTagActions(coreui::Tags &tags,
                       const std::vector<core::INode *> &selected_nodes);
 
   ///

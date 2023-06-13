@@ -56,6 +56,10 @@ class Project {
   ///
   auto GetTags() -> Tags &;
   ///
+  auto EmplaceTag(std::shared_ptr<Tag> tag) -> const std::shared_ptr<Tag> &;
+  ///
+  void DeleteTag(std::string_view tag_name);
+  ///
   auto GetIdGenerator() const -> const IdGenerator &;
   ///
   auto GetIdGenerator() -> IdGenerator &;

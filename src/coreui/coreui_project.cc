@@ -75,6 +75,7 @@ Project::Project(std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups,
       }()},
       callbacks_{std::move(callbacks)},
       project_{CreateProject()},
+      tags_{std::make_unique<Tags>(safe_owner_.MakeSafe(this))},
       calculator_{safe_owner_.MakeSafe(this)} {
   SetDiagramImpl(0);
   callbacks_.name_changed(GetName());
@@ -133,7 +134,7 @@ auto Project::CloneDiagram(const core::Diagram& diagram) -> Event& {
 ///
 auto Project::DeleteDiagram(int index) -> Event& {
   return event_loop_.PostEvent(
-      [index, safe_this = safe_owner_.MakeSafe(this)]() mutable {
+      [safe_this = safe_owner_.MakeSafe(this), index]() mutable {
         safe_this->project_.DeleteDiagram(index);
 
         const auto num_diagrams =
@@ -146,11 +147,12 @@ auto Project::DeleteDiagram(int index) -> Event& {
 
 ///
 auto Project::SetDiagram(int index) -> Event& {
-  return event_loop_.PostEvent(
-      [index, safe_this = safe_owner_.MakeSafe(this)]() {
-        safe_this->SetDiagramImpl(index);
-      });
+  return event_loop_.PostEvent([safe_this = safe_owner_.MakeSafe(this),
+                                index]() { safe_this->SetDiagramImpl(index); });
 }
+
+///
+auto Project::GetTags() -> Tags& { return *tags_; }
 
 ///
 auto Project::GetCalculator() -> Calculator& { return calculator_; }

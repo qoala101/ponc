@@ -28,13 +28,13 @@ class DiagramEditor {
   DiagramEditor();
 
   ///
-  void Draw(coreui::Diagram &diagram, core::Tags &tags);
+  void Draw(coreui::Diagram &diagram, coreui::Tags &tags);
 
  private:
   ///
   void OpenPopupsIfRequested(const core::Diagram &diagram);
   ///
-  void DrawPopups(coreui::Diagram &diagram, core::Tags &tags);
+  void DrawPopups(coreui::Diagram &diagram, coreui::Tags &tags);
 
   ///
   ne::Config config_{};

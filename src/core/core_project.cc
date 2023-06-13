@@ -200,6 +200,18 @@ auto Project::GetTags() const -> const Tags& {
 auto Project::GetTags() -> Tags& { return tags_; }
 
 ///
+auto Project::EmplaceTag(std::shared_ptr<Tag> tag)
+    -> const std::shared_ptr<Tag>& {
+  return tags_.emplace_back(tag);
+}
+
+///
+void Project::DeleteTag(std::string_view tag_name) {
+  std::erase_if(tags_,
+                [tag_name](const auto& tag) { return tag->name == tag_name; });
+}
+
+///
 auto Project::GetIdGenerator() const -> const IdGenerator& {
   // NOLINTNEXTLINE(*-const-cast)
   return const_cast<Project*>(this)->GetIdGenerator();

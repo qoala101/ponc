@@ -49,7 +49,7 @@ DiagramEditor::DiagramEditor()
 }
 
 ///
-void DiagramEditor::Draw(coreui::Diagram &diagram, core::Tags &tags) {
+void DiagramEditor::Draw(coreui::Diagram &diagram, coreui::Tags &tags) {
   ne::Begin("DiagramEditor");
   item_deleter_.UnregisterDeletedItems(diagram.GetDiagram());
 
@@ -120,7 +120,7 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
 }
 
 ///
-void DiagramEditor::DrawPopups(coreui::Diagram &diagram, core::Tags &tags) {
+void DiagramEditor::DrawPopups(coreui::Diagram &diagram, coreui::Tags &tags) {
   create_node_popup_.Draw(diagram);
   node_popup_.Draw(diagram, tags);
   link_popup_.Draw({.delete_selected = [&diagram](const auto &link_ids) {

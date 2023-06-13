@@ -21,6 +21,7 @@
 #include "coreui_event.h"
 #include "coreui_event_loop.h"
 #include "coreui_log.h"
+#include "coreui_tags.h"
 #include "cpp_callbacks.h"
 #include "cpp_safe_ptr.h"
 
@@ -56,6 +57,8 @@ class Project {
   auto DeleteDiagram(int index) -> Event &;
   ///
   auto SetDiagram(int index) -> Event &;
+  ///
+  auto GetTags() -> Tags &;
   ///
   auto GetCalculator() -> Calculator &;
   ///
@@ -101,6 +104,8 @@ class Project {
   core::Project project_;
   ///
   std::unique_ptr<Diagram> diagram_{};
+  ///
+  std::unique_ptr<Tags> tags_{};
   ///
   Calculator calculator_;
   ///

@@ -13,7 +13,7 @@
 namespace vh::ponc::draw {
 ///
 void MainWindow::Draw(coreui::Project& project) {
-  diagram_editor_.Draw(project.GetDiagram(), project.GetProject().GetTags());
+  diagram_editor_.Draw(project.GetDiagram(), project.GetTags());
   main_menu_bar_.Draw(project);
   DrawRecentLog(project.GetLog(), main_menu_bar_.GetLogView());
 }
