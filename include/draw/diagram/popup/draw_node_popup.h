@@ -7,6 +7,8 @@
 #ifndef VH_PONC_DRAW_NODE_POPUP_H_
 #define VH_PONC_DRAW_NODE_POPUP_H_
 
+#include <imgui_node_editor.h>
+
 #include "core_i_node.h"
 #include "coreui_diagram.h"
 #include "coreui_tags.h"
@@ -25,8 +27,19 @@ class NodePopup : public IPopup {
   ///
   void OnOpen() override;
   ///
+  auto CanAddTag(const core::Tags &tags) const;
+  ///
+  void AddTag(const coreui::Tags &tags,
+              const std::vector<ne::NodeId> &selected_nodes);
+  ///
+  void DrawAddTag(coreui::Tags &tags,
+                  const std::vector<ne::NodeId> &selected_nodes);
+  ///
+  void DrawTagChecks(coreui::Tags &tags,
+                     const std::vector<ne::NodeId> &selected_nodes);
+  ///
   void DrawTagActions(coreui::Tags &tags,
-                      const std::vector<core::INode *> &selected_nodes);
+                      const std::vector<ne::NodeId> &selected_nodes);
 
   ///
   StringBuffer tag_name_buffer_{};

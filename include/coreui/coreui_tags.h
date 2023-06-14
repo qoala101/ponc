@@ -20,6 +20,9 @@ namespace vh::ponc::coreui {
 class Project;
 
 ///
+enum TagState { kUnchecked, kChecked, kIntermediate };
+
+///
 class Tags {
  public:
   ///
@@ -32,11 +35,11 @@ class Tags {
   ///
   auto DeleteTag(std::string tag_name) const -> Event &;
   ///
-  auto AddTagToNode(std::shared_ptr<core::Tag> tag, ne::NodeId node_id) const
-      -> Event &;
+  auto GetTagState(std::string_view tag_name,
+                   const std::vector<ne::NodeId> &node_ids) const -> TagState;
   ///
-  auto RemoveTagFromNode(std::string tag_name, ne::NodeId node_id) const
-      -> Event &;
+  auto SetNextTagState(std::shared_ptr<core::Tag> tag,
+                       std::vector<ne::NodeId> node_ids) const -> Event &;
 
  private:
   ///
