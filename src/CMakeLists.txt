@@ -72,6 +72,7 @@ add_executable(ponc
   draw/diagram/draw_link.cc
   draw/diagram/draw_linker.cc
   draw/diagram/draw_node.cc
+  draw/diagram/draw_tags.cc
   draw/diagram/draw_tooltip.cc
 
   draw/dialog/draw_about_dialog.cc

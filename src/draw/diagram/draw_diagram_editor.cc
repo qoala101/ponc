@@ -24,6 +24,7 @@
 #include "draw_link.h"
 #include "draw_linker.h"
 #include "draw_node.h"
+#include "draw_tags.h"
 #include "style_update_styles.h"
 
 namespace vh::ponc::draw {
@@ -64,6 +65,7 @@ void DiagramEditor::Draw(coreui::Diagram &diagram, coreui::Tags &tags) {
   }
 
   linker_.Draw(diagram.GetLinker(), diagram.GetFamilyGroups());
+  DrawTags(tags);
 
   OpenPopupsIfRequested(diagram.GetDiagram());
   DrawPopups(diagram, tags);
