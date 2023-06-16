@@ -54,6 +54,8 @@ class NodeMover {
   auto GetPinPos(ne::PinId pin_id) const -> const ImVec2 &;
   ///
   void SetPinPos(ne::PinId pin_id, const ImVec2 &pos);
+  ///
+  auto GetNodeRect(ne::NodeId node_id) const -> ImRect;
 
  private:
   ///
@@ -70,8 +72,6 @@ class NodeMover {
   void ApplyMoves() const;
   ///
   auto GetNodePos(ne::NodeId node_id) const;
-  ///
-  auto GetNodeRect(ne::NodeId node_id) const;
   ///
   auto GetTreeRect(const flow::TreeNode &tree_node) const;
   ///

@@ -176,7 +176,7 @@ auto NodeMover::GetNodePos(ne::NodeId node_id) const {
 }
 
 ///
-auto NodeMover::GetNodeRect(ne::NodeId node_id) const {
+auto NodeMover::GetNodeRect(ne::NodeId node_id) const -> ImRect {
   auto rect = ImRect{{}, GetNodeSize(node_id)};
   rect.Translate(GetNodePos(node_id));
   return rect;
