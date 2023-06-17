@@ -8,23 +8,41 @@
 
 #include <imgui.h>
 
-#define IMGUI_DEFINE_MATH_OPERATORS
-#include <imgui_internal.h>
-#include <imgui_node_editor.h>
+#include <iostream>
+
+#include "draw_colored_text.h"
+#include "style_default_colors.h"
+#include "style_default_sizes.h"
 
 namespace vh::ponc::draw {
 void DrawTags(const coreui::Tags& tags) {
-  const auto pos = ImGui::GetMousePos();
-  ImGui::SetCursorPos(pos);
+  for (auto rect : tags.GetRectangles()) {
+    const auto padding = ImGui::GetStyle().FramePadding;
+    rect.rect.Expand(padding);
 
-  auto rect = ImRect{{}, {100, 100}};
+    auto* drawList = ImGui::GetWindowDrawList();
 
-  const auto cursor_screen_pos = ImGui::GetCursorScreenPos();
-  rect.Translate(cursor_screen_pos);
+    const auto color = style::Tailwind::GetColor(style::DefaultColors::kGray,
+                                                 style::Tailwind::Shade::k200);
 
-  const auto color = ImColor{255, 0, 0};
-  auto* drawList = ImGui::GetWindowDrawList();
-  drawList->AddRectFilled(rect.Min, rect.Max, color,
-                          ne::GetStyle().PinRounding);
+    drawList->AddRect(rect.rect.Min, rect.rect.Max, color,
+                      ne::GetStyle().NodeRounding, 0,
+                      style::DefaultSizes::kNormalThickness);
+
+    rect.rect.Expand(padding);
+    const auto text_size = ImGui::CalcTextSize(rect.text.c_str());
+    rect.rect.Min.y -= text_size.y;
+
+    drawList->AddRect(rect.rect.Min, rect.rect.Max, color,
+                      ne::GetStyle().NodeRounding, 0,
+                      style::DefaultSizes::kNormalThickness);
+
+    auto text_pos = rect.rect.Min;
+    text_pos.x += 24;
+
+    ImGui::SetCursorPos(text_pos);
+    ImGui::TextUnformatted(rect.text.c_str());
+    // ImGui::SmallButton(rect.text.c_str());
+  }
 }
 }  // namespace vh::ponc::draw
