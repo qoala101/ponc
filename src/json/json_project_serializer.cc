@@ -49,12 +49,12 @@ auto ProjectSerializer::ParseFromJson(
 
   auto families =
       ContainerSerializer::ParseFromJson<std::unique_ptr<core::IFamily>>(
-          json, "families", [&family_parsers](const auto& json) {
+          json["families"], [&family_parsers](const auto& json) {
             return ParseFamily(json, family_parsers);
           });
 
   auto diagrams = ContainerSerializer::ParseFromJson<core::Diagram>(
-      json, "diagrams", [&families](const auto& json) {
+      json["diagrams"], [&families](const auto& json) {
         return DiagramSerializer::ParseFromJson(json, families);
       });
 
@@ -69,13 +69,13 @@ auto ProjectSerializer::WriteToJson(const core::Project& project)
       static_cast<crude_json::number>(Versifier::GetCurrentVersion());
   json["settings"] = SettingsSerializer::WriteToJson(project.GetSettings());
 
-  ContainerSerializer::WriteToJson(
-      json, project.GetFamilies(), "families", [](const auto& family) {
+  json["families"] = ContainerSerializer::WriteToJson(
+      project.GetFamilies(), [](const auto& family) {
         return family->CreateWriter()->WriteToJson(*family);
       });
 
-  ContainerSerializer::WriteToJson(json, project.GetDiagrams(), "diagrams",
-                                   &DiagramSerializer::WriteToJson);
+  json["diagrams"] = ContainerSerializer::WriteToJson(
+      project.GetDiagrams(), &DiagramSerializer::WriteToJson);
 
   return json;
 }

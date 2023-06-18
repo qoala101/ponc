@@ -28,9 +28,8 @@ auto INodeWriter::WriteToJson(const core::INode& node) const
   OptionalSerializer::WriteToJson(json, node.GetInputPinId(), "input_pin_id",
                                   &IdSerializer::WriteToJson<ne::PinId>);
 
-  ContainerSerializer::WriteToJson(json, node.GetOutputPinIds(),
-                                   "output_pin_ids",
-                                   &IdSerializer::WriteToJson<ne::PinId>);
+  json["output_pin_ids"] = ContainerSerializer::WriteToJson(
+      node.GetOutputPinIds(), &IdSerializer::WriteToJson<ne::PinId>);
 
   const auto pos = node.GetPos();
   json["pos_x"] = pos.x;

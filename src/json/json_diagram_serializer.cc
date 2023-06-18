@@ -51,12 +51,13 @@ auto DiagramSerializer::ParseFromJson(
     const std::vector<std::unique_ptr<core::IFamily>>& families)
     -> core::Diagram {
   auto name = json["name"].get<crude_json::string>();
+
   auto nodes = ContainerSerializer::ParseFromJson<std::unique_ptr<core::INode>>(
-      json, "nodes",
+      json["nodes"],
       [&families](const auto& json) { return ParseNode(json, families); });
 
   auto links = ContainerSerializer::ParseFromJson<core::Link>(
-      json, "links", &LinkSerializer::ParseFromJson);
+      json["links"], &LinkSerializer::ParseFromJson);
 
   return core::Diagram{std::move(name), std::move(nodes), std::move(links)};
 }
@@ -67,13 +68,14 @@ auto DiagramSerializer::WriteToJson(const core::Diagram& diagram)
   auto json = crude_json::value{};
   json["name"] = diagram.GetName();
 
-  ContainerSerializer::WriteToJson(
-      json, diagram.GetNodes(), "nodes", [](const auto& node) {
+  json["nodes"] = ContainerSerializer::WriteToJson(
+      diagram.GetNodes(), [](const auto& node) {
         return node->CreateWriter()->WriteToJson(*node);
       });
 
-  ContainerSerializer::WriteToJson(json, diagram.GetLinks(), "links",
-                                   &LinkSerializer::WriteToJson);
+  json["links"] = ContainerSerializer::WriteToJson(
+      diagram.GetLinks(), &LinkSerializer::WriteToJson);
+
   return json;
 }
 }  // namespace vh::ponc::json

@@ -17,34 +17,33 @@ struct ContainerSerializer : public cpp::StaticApi {
   ///
   template <typename Item>
   static auto ParseFromJson(const crude_json::value& json,
-                            const crude_json::string& items_name,
                             const auto& item_parser) {
-    const auto items_size =
-        json[items_name + "_size"].get<crude_json::number>();
-    const auto& items_json = json[items_name];
+    const auto& items_json = json.get<crude_json::array>();
 
     auto parsed_items = std::vector<Item>{};
-    parsed_items.reserve(items_size);
+    parsed_items.reserve(items_json.size());
 
-    for (auto i = 0; i < items_size; ++i) {
-      parsed_items.emplace_back(item_parser(items_json[i]));
-    }
+    std::transform(items_json.cbegin(), items_json.cend(),
+                   std::back_inserter(parsed_items),
+                   [&item_parser](const auto& item_json) {
+                     return item_parser(item_json);
+                   });
 
     return parsed_items;
   }
 
   ///
   template <typename Item>
-  static auto WriteToJson(crude_json::value& json,
-                          const std::vector<Item>& items,
-                          const crude_json::string& items_name,
+  static auto WriteToJson(const std::vector<Item>& items,
                           const auto& item_writer) {
-    json[items_name + "_size"] = static_cast<crude_json::number>(items.size());
-    auto& items_json = json[items_name];
+    auto items_json = crude_json::array{};
+    items_json.reserve(items.size());
 
-    for (auto i = 0; i < static_cast<int>(items.size()); ++i) {
-      items_json[i] = item_writer(items[i]);
-    }
+    std::transform(
+        items.cbegin(), items.cend(), std::back_inserter(items_json),
+        [&item_writer](const auto& item) { return item_writer(item); });
+
+    return items_json;
   }
 };
 }  // namespace vh::ponc::json

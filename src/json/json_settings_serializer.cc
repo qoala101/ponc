@@ -62,7 +62,7 @@ auto SettingsSerializer::ParseFromJson(const crude_json::value& json)
                   calculator_json["num_clients"].get<crude_json::number>()),
               .family_settings = ContainerSerializer::ParseFromJson<
                   core::CalculatorFamilySettings>(
-                  calculator_json, "family_settings",
+                  calculator_json["family_settings"],
                   &ParseFamilySettingsFromJson)}};
 }
 
@@ -85,9 +85,9 @@ auto SettingsSerializer::WriteToJson(const core::Settings& settings)
   calculator_json["max_output"] = settings.calculator_settings.max_output;
   calculator_json["num_clients"] =
       static_cast<crude_json::number>(settings.calculator_settings.num_clients);
-  ContainerSerializer::WriteToJson(
-      calculator_json, settings.calculator_settings.family_settings,
-      "family_settings", &WriteFamilySettingsToJson);
+
+  calculator_json["family_settings"] = ContainerSerializer::WriteToJson(
+      settings.calculator_settings.family_settings, &WriteFamilySettingsToJson);
 
   return json;
 }
