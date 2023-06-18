@@ -58,7 +58,32 @@ void Upgrade0(crude_json::value& project_json) {
 }
 
 ///
-void Upgrade1(crude_json::value& /*unused*/) {
+void MakeArray(crude_json::value& json) {
+  if (json.is_null()) {
+    json = crude_json::array{};
+  }
+}
+
+///
+void Upgrade1(crude_json::value& project_json) {
+  auto& diagrams_json = project_json["diagrams"].get<crude_json::array>();
+
+  for (auto& diagram_json : diagrams_json) {
+    auto& nodes_json = diagram_json["nodes"];
+    MakeArray(nodes_json);
+
+    auto& nodes_array = nodes_json.get<crude_json::array>();
+
+    for (auto& node_json : nodes_array) {
+      MakeArray(node_json["output_pin_ids"]);
+    }
+
+    MakeArray(diagram_json["links"]);
+  }
+}
+
+///
+void Upgrade2(crude_json::value& /*unused*/) {
   // vh: Implement when adding new version.
 }
 }  // namespace
@@ -82,8 +107,10 @@ void Versifier::UpgradeToCurrentVersion(crude_json::value& project_json) {
   switch (json_version) {
     case Version::kPreCalculator:
       Upgrade0(project_json);
-    case Version::kCalculatorAdded:
+    case Version::kCalculator:
       Upgrade1(project_json);
+    case Version::kAreas:
+      Upgrade2(project_json);
     default:
       break;
   }
