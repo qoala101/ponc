@@ -7,6 +7,8 @@
 #ifndef VH_PONC_COREUI_TAGS_H_
 #define VH_PONC_COREUI_TAGS_H_
 
+#include <imgui.h>
+#include <imgui_internal.h>
 #include <imgui_node_editor.h>
 
 #include "core_tag.h"
@@ -40,6 +42,14 @@ class Tags {
   ///
   auto SetNextTagState(std::shared_ptr<core::Tag> tag,
                        std::vector<ne::NodeId> node_ids) const -> Event &;
+
+  struct Rectangle {
+    std::string text{};
+    ImRect rect{};
+    ImColor color{};
+  };
+
+  auto GetRectangles() const -> std::vector<Rectangle>;
 
  private:
   ///

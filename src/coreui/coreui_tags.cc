@@ -6,6 +6,7 @@
 
 #include "coreui_tags.h"
 
+#include "core_i_node.h"
 #include "coreui_project.h"
 #include "cpp_assert.h"
 
@@ -91,5 +92,42 @@ auto Tags::SetNextTagState(std::shared_ptr<core::Tag> tag,
   }
 
   Expects(false);
+}
+
+auto Tags::GetRectangles() const -> std::vector<Rectangle> {
+  auto rects = std::vector<Rectangle>{};
+
+  const auto& diagram = parent_project_->GetDiagram();
+  const auto& core_diagram = diagram.GetDiagram();
+  const auto& nodes = core_diagram.GetNodes();
+  const auto& node_mover = diagram.GetNodeMover();
+
+  for (const auto& tag : GetTags()) {
+    auto rect = std::optional<ImRect>{};
+
+    for (const auto& node : nodes) {
+      if (core::INode::HasTag(*node, tag->name)) {
+        const auto node_rect = node_mover.GetNodeRect(node->GetId());
+        // rects.emplace_back(Rectangle{
+        //     .text = tag->name, .rect = node_rect, .color = tag->color});
+
+        if (!rect.has_value()) {
+          rect = node_rect;
+          continue;
+        }
+
+        rect->Add(node_rect);
+      }
+    }
+
+    if (!rect.has_value()) {
+      continue;
+    }
+
+    rects.emplace_back(
+        Rectangle{.text = tag->name, .rect = *rect, .color = tag->color});
+  }
+
+  return rects;
 }
 }  // namespace vh::ponc::coreui
