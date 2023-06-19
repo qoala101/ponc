@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+#include "core_area.h"
 #include "core_i_node.h"
 #include "core_id_ptr.h"
 #include "core_link.h"
@@ -60,6 +61,14 @@ class Diagram {
   auto EmplaceLink(const Link &link) -> Link &;
   ///
   void DeleteLink(ne::LinkId link_id);
+  ///
+  auto GetAreas() const -> const std::vector<Area> &;
+  ///
+  auto GetAreas() -> std::vector<Area> &;
+  ///
+  auto EmplaceArea(const Area &area) -> Area &;
+  ///
+  void DeleteArea(ne::NodeId node_id);
 
  private:
   ///
@@ -71,6 +80,8 @@ class Diagram {
   std::vector<std::unique_ptr<INode>> nodes_{};
   ///
   std::vector<Link> links_{};
+  ///
+  std::vector<Area> areas_{};
 };
 }  // namespace vh::ponc::core
 

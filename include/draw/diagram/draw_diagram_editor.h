@@ -13,7 +13,7 @@
 
 #include "core_diagram.h"
 #include "coreui_diagram.h"
-#include "draw_create_node_popup.h"
+#include "draw_background_popup.h"
 #include "draw_item_deleter.h"
 #include "draw_link_popup.h"
 #include "draw_linker.h"
@@ -44,7 +44,7 @@ class DiagramEditor {
   ///
   Linker linker_{};
   ///
-  CreateNodePopup create_node_popup_{};
+  BackgroundPopup create_node_popup_{};
   ///
   NodePopup node_popup_{};
   ///

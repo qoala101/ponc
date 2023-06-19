@@ -7,10 +7,13 @@
 #include "coreui_native_facade.h"
 
 #include <imgui_node_editor.h>
+#include <imgui_node_editor_internal.h>
 
+#include <algorithm>
 #include <concepts>
 
 #include "core_concepts.h"
+#include "cpp_assert.h"
 
 namespace vh::ponc::coreui {
 namespace {
@@ -26,11 +29,41 @@ auto GetSelectedItems(const std::invocable<T*, int> auto& selector) {
 
   return selected_items;
 }
+
+///
+void LeaveNodesOfType(ne::Detail::NodeType node_type,
+                      std::vector<ne::NodeId>& node_ids) {
+  auto* editor =
+      // NOLINTNEXTLINE(*-reinterpret-cast)
+      reinterpret_cast<ne::Detail::EditorContext*>(ne::GetCurrentEditor());
+  Expects(editor != nullptr);
+
+  std::erase_if(node_ids, [node_type, editor](const auto node_id) {
+    const auto* node = editor->FindNode(node_id);
+    Expects(node != nullptr);
+
+    return node->m_Type != node_type;
+  });
+}
 }  // namespace
 
 ///
 auto NativeFacade::GetSelectedNodes() -> std::vector<ne::NodeId> {
-  return GetSelectedItems<ne::NodeId>(&ne::GetSelectedNodes);
+  auto nodes = GetSelectedItems<ne::NodeId>(&ne::GetSelectedNodes);
+  LeaveNodesOfType(ne::Detail::NodeType::Node, nodes);
+  return nodes;
+}
+
+///
+auto NativeFacade::GetSelectedNodesAndAreas()
+    -> std::pair<std::vector<ne::NodeId>, std::vector<ne::NodeId>> {
+  auto nodes = GetSelectedItems<ne::NodeId>(&ne::GetSelectedNodes);
+  auto areas = nodes;
+
+  LeaveNodesOfType(ne::Detail::NodeType::Node, nodes);
+  LeaveNodesOfType(ne::Detail::NodeType::Group, areas);
+
+  return {std::move(nodes), std::move(areas)};
 }
 
 ///

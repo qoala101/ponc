@@ -56,12 +56,13 @@ add_executable(ponc
   cpp/cpp_scope_function.cc
 
   draw/diagram/popup/draw_connect_node_popup.cc
-  draw/diagram/popup/draw_create_node_popup.cc
+  draw/diagram/popup/draw_background_popup.cc
   draw/diagram/popup/draw_family_groups_menu.cc
   draw/diagram/popup/draw_i_popup.cc
   draw/diagram/popup/draw_link_popup.cc
   draw/diagram/popup/draw_node_popup.cc
 
+  draw/diagram/draw_area.cc
   draw/diagram/draw_colored_text.cc
   draw/diagram/draw_diagram_editor.cc
   draw/diagram/draw_flow_icon.cc

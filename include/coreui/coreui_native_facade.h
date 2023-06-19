@@ -21,6 +21,9 @@ struct NativeFacade : public cpp::StaticApi {
   ///
   static auto GetSelectedNodes() -> std::vector<ne::NodeId>;
   ///
+  static auto GetSelectedNodesAndAreas()
+      -> std::pair<std::vector<ne::NodeId>, std::vector<ne::NodeId>>;
+  ///
   static auto GetSelectedLinks() -> std::vector<ne::LinkId>;
   ///
   static void SelectNode(ne::NodeId node_id, bool append = false);

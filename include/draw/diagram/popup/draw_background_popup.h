@@ -4,8 +4,8 @@
  * @copyright Copyright (c) 2023, MIT License
  */
 
-#ifndef VH_PONC_DRAW_CREATE_NODE_POPUP_H_
-#define VH_PONC_DRAW_CREATE_NODE_POPUP_H_
+#ifndef VH_PONC_DRAW_BACKGROUND_POPUP_H_
+#define VH_PONC_DRAW_BACKGROUND_POPUP_H_
 
 #include <imgui.h>
 
@@ -14,7 +14,7 @@
 
 namespace vh::ponc::draw {
 ///
-class CreateNodePopup : public IPopup {
+class BackgroundPopup : public IPopup {
  public:
   ///
   void Draw(coreui::Diagram &diagram);
@@ -27,4 +27,4 @@ class CreateNodePopup : public IPopup {
 };
 }  // namespace vh::ponc::draw
 
-#endif  // VH_PONC_DRAW_CREATE_NODE_POPUP_H_
+#endif  // VH_PONC_DRAW_BACKGROUND_POPUP_H_

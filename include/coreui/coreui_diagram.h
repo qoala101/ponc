@@ -13,6 +13,7 @@
 #include <memory>
 #include <vector>
 
+#include "core_area.h"
 #include "core_diagram.h"
 #include "core_i_family.h"
 #include "core_i_node.h"
@@ -93,6 +94,10 @@ class Diagram {
   auto DeleteLink(ne::LinkId link_id) const -> Event &;
   ///
   auto GetNodeTrees() const -> const std::vector<TreeNode> &;
+  ///
+  auto AddArea(core::Area area) -> Event &;
+  ///
+  auto DeleteArea(ne::NodeId node_id) -> Event &;
 
  private:
   ///

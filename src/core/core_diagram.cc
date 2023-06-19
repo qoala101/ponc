@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "core_i_node.h"
@@ -122,14 +123,8 @@ auto Diagram::EmplaceNode(std::unique_ptr<INode> node) -> INode& {
 
 ///
 void Diagram::DeleteNode(ne::NodeId node_id) {
-  Expects(!nodes_.empty());
-
-  const auto found_node = std::find_if(
-      nodes_.cbegin(), nodes_.cend(),
-      [node_id](const auto& node) { return node->GetId() == node_id; });
-
-  Expects(found_node != nodes_.cend());
-  nodes_.erase(found_node);
+  std::erase_if(
+      nodes_, [node_id](const auto& node) { return node->GetId() == node_id; });
 }
 
 ///
@@ -145,16 +140,30 @@ auto Diagram::EmplaceLink(const Link& link) -> Link& {
 
 ///
 void Diagram::DeleteLink(ne::LinkId link_id) {
-  Expects(!links_.empty());
-
-  const auto found_link =
-      std::find_if(links_.cbegin(), links_.cend(),
-                   [link_id](const auto& link) { return link.id == link_id; });
-
-  Expects(found_link != links_.cend());
-  links_.erase(found_link);
+  std::erase_if(links_,
+                [link_id](const auto& link) { return link.id == link_id; });
 }
 
 ///
 auto Diagram::GetLinksImpl() -> std::vector<Link>& { return links_; }
+
+///
+auto Diagram::GetAreas() const -> const std::vector<Area>& {
+  // NOLINTNEXTLINE(*-const-cast)
+  return const_cast<Diagram*>(this)->GetAreas();
+}
+
+///
+auto Diagram::GetAreas() -> std::vector<Area>& { return areas_; }
+
+///
+auto Diagram::EmplaceArea(const Area& area) -> Area& {
+  return areas_.emplace_back(area);
+}
+
+///
+void Diagram::DeleteArea(ne::NodeId node_id) {
+  std::erase_if(areas_,
+                [node_id](const auto& area) { return area.id == node_id; });
+}
 }  // namespace vh::ponc::core

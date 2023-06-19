@@ -377,6 +377,20 @@ auto Diagram::GetNodeTrees() const -> const std::vector<TreeNode>& {
 }
 
 ///
+auto Diagram::AddArea(core::Area area) -> Event& {
+  return parent_project_->GetEventLoop().PostEvent(
+      [diagram = diagram_, area = std::move(area)]() {
+        diagram->EmplaceArea(area);
+      });
+}
+
+///
+auto Diagram::DeleteArea(ne::NodeId node_id) -> Event& {
+  return parent_project_->GetEventLoop().PostEvent(
+      [diagram = diagram_, node_id]() { diagram->DeleteArea(node_id); });
+}
+
+///
 auto Diagram::GetFlowColor(float flow) const {
   const auto& settings = parent_project_->GetProject().GetSettings();
 
