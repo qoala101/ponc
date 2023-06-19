@@ -44,6 +44,9 @@ class Diagram {
       -> std::optional<Link *>;
   ///
   static auto HasLink(const Diagram &diagram, ne::PinId pin_id) -> bool;
+  ///
+  static auto FindArea(const Diagram &diagram, ne::NodeId node_id)
+      -> const Area &;
 
   ///
   auto GetName() const -> const std::string &;

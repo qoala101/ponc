@@ -63,9 +63,11 @@ class NodeMover {
   ///
   void MoveChildTreesTo(const flow::TreeNode &tree_node, const ImVec2 &pos);
   ///
-  void MarkToMove(ne::NodeId node_id);
+  void MarkNodeToMove(ne::NodeId node_id);
   ///
-  void MarkNewNodesToMove();
+  void MarkAreaToMove(ne::NodeId node_id);
+  ///
+  void MarkNewItemsToMove();
   ///
   void ApplyMoves() const;
   ///
@@ -106,7 +108,9 @@ class NodeMover {
   ///
   std::unordered_set<core::IdValue<ne::NodeId>> nodes_to_move_{};
   ///
-  std::unordered_map<core::IdValue<ne::NodeId>, ImVec2> node_sizes_{};
+  std::unordered_set<core::IdValue<ne::NodeId>> areas_to_move_{};
+  ///
+  std::unordered_map<core::IdValue<ne::NodeId>, ImVec2> item_sizes_{};
   ///
   std::unordered_map<core::IdValue<ne::PinId>, ImVec2> pin_poses_{};
 };

@@ -111,11 +111,11 @@ NodeMover::NodeMover(cpp::SafePtr<Diagram> parent_diagram,
 
 ///
 void NodeMover::OnFrame() {
-  MarkNewNodesToMove();
+  MarkNewItemsToMove();
   ApplyMoves();
 
   nodes_to_move_.clear();
-  node_sizes_.clear();
+  item_sizes_.clear();
   pin_poses_.clear();
 }
 
@@ -126,7 +126,7 @@ void NodeMover::MoveNodeTo(ne::NodeId node_id, const ImVec2& pos) {
 
   MoveNodePinPoses(node, pos);
   node.SetPos(pos);
-  MarkToMove(node_id);
+  MarkNodeToMove(node_id);
 }
 
 ///
@@ -438,13 +438,13 @@ void NodeMover::MovePinTo(ne::PinId pin_id, const ImVec2& pos) {
 ///
 auto NodeMover::GetNodeSize(ne::NodeId node_id) const -> const ImVec2& {
   const auto node_id_value = node_id.Get();
-  Expects(node_sizes_.contains(node_id_value));
-  return node_sizes_.at(node_id_value);
+  Expects(item_sizes_.contains(node_id_value));
+  return item_sizes_.at(node_id_value);
 }
 
 ///
 void NodeMover::SetNodeSize(ne::NodeId node_id, const ImVec2& size) {
-  node_sizes_.emplace(node_id, size);
+  item_sizes_.emplace(node_id, size);
 }
 
 ///
@@ -500,19 +500,30 @@ void NodeMover::MoveChildTreesTo(const flow::TreeNode& tree_node,
 }
 
 ///
-void NodeMover::MarkToMove(ne::NodeId node_id) {
+void NodeMover::MarkNodeToMove(ne::NodeId node_id) {
   nodes_to_move_.insert(node_id.Get());
 }
 
 ///
-void NodeMover::MarkNewNodesToMove() {
+void NodeMover::MarkAreaToMove(ne::NodeId node_id) {
+  areas_to_move_.insert(node_id.Get());
+}
+
+///
+void NodeMover::MarkNewItemsToMove() {
   const auto& diagram = parent_diagram_->GetDiagram();
 
   for (const auto& node : diagram.GetNodes()) {
     const auto node_id = node->GetId();
 
-    if (const auto node_is_new = !node_sizes_.contains(node_id.Get())) {
-      MarkToMove(node_id);
+    if (const auto node_is_new = !item_sizes_.contains(node_id.Get())) {
+      MarkNodeToMove(node_id);
+    }
+  }
+
+  for (const auto& area : diagram.GetAreas()) {
+    if (const auto area_is_new = !item_sizes_.contains(area.id.Get())) {
+      MarkAreaToMove(area.id);
     }
   }
 }
@@ -524,6 +535,10 @@ void NodeMover::ApplyMoves() const {
   for (const auto node_id : nodes_to_move_) {
     ne::SetNodePosition(node_id,
                         core::Diagram::FindNode(diagram, node_id).GetPos());
+  }
+
+  for (const auto node_id : areas_to_move_) {
+    ne::SetNodePosition(node_id, core::Diagram::FindArea(diagram, node_id).pos);
   }
 }
 }  // namespace vh::ponc::coreui

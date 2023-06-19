@@ -106,6 +106,17 @@ auto Diagram::HasLink(const Diagram& diagram, ne::PinId pin_id) -> bool {
 }
 
 ///
+auto Diagram::FindArea(const Diagram& diagram, ne::NodeId node_id)
+    -> const Area& {
+  const auto area =
+      std::find_if(diagram.areas_.cbegin(), diagram.areas_.cend(),
+                   [node_id](const auto& area) { return area.id == node_id; });
+
+  Expects(area != diagram.areas_.cend());
+  return *area;
+}
+
+///
 auto Diagram::GetName() const -> const std::string& { return name_; }
 
 ///
