@@ -19,6 +19,7 @@
 #include "coreui_native_facade.h"
 #include "cpp_assert.h"
 #include "cpp_scope.h"
+#include "draw_area.h"
 #include "draw_background_popup.h"
 #include "draw_link.h"
 #include "draw_linker.h"
@@ -62,9 +63,15 @@ void DiagramEditor::Draw(coreui::Diagram &diagram) {
     DrawLink(link);
   }
 
+  auto &core_diagram = diagram.GetDiagram();
+
+  for (auto &area : core_diagram.GetAreas()) {
+    DrawArea(area, node_mover);
+  }
+
   linker_.Draw(diagram.GetLinker(), diagram.GetFamilyGroups());
 
-  OpenPopupsIfRequested(diagram.GetDiagram());
+  OpenPopupsIfRequested(core_diagram);
   DrawPopups(diagram);
 
   item_deleter_.DeleteUnregisteredItems(diagram);

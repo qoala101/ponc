@@ -320,6 +320,6 @@ void DrawNode(coreui::Node& node, coreui::NodeMover& node_mover) {
   ImGui::PopID();
 
   core_node.SetPos(ne::GetNodePosition(node_id));
-  node_mover.SetNodeSize(node_id, ne::GetNodeSize(node_id));
+  node_mover.SetItemSize(node_id, ne::GetNodeSize(node_id));
 }
 }  // namespace vh::ponc::draw

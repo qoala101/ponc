@@ -49,7 +49,7 @@ class NodeMover {
   ///
   auto GetNodeSize(ne::NodeId node_id) const -> const ImVec2 &;
   ///
-  void SetNodeSize(ne::NodeId node_id, const ImVec2 &size);
+  void SetItemSize(ne::NodeId node_id, const ImVec2 &size);
   ///
   auto GetPinPos(ne::PinId pin_id) const -> const ImVec2 &;
   ///

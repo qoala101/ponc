@@ -115,6 +115,7 @@ void NodeMover::OnFrame() {
   ApplyMoves();
 
   nodes_to_move_.clear();
+  areas_to_move_.clear();
   item_sizes_.clear();
   pin_poses_.clear();
 }
@@ -443,7 +444,7 @@ auto NodeMover::GetNodeSize(ne::NodeId node_id) const -> const ImVec2& {
 }
 
 ///
-void NodeMover::SetNodeSize(ne::NodeId node_id, const ImVec2& size) {
+void NodeMover::SetItemSize(ne::NodeId node_id, const ImVec2& size) {
   item_sizes_.emplace(node_id, size);
 }
 
