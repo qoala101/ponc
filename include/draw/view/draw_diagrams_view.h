@@ -12,6 +12,7 @@
 
 #include "coreui_project.h"
 #include "draw_i_view.h"
+#include "draw_string_buffer.h"
 
 namespace vh::ponc::draw {
 ///
@@ -28,8 +29,6 @@ class DiagramsView : public IView {
   enum class Action { kClone, kStartRenaming, kConfirmRename, kDelete };
 
   ///
-  auto GetTrimmedRenameBuffer() const;
-  ///
   auto DrawRenamePopup();
   ///
   auto DrawControls(coreui::Project& project);
@@ -40,7 +39,7 @@ class DiagramsView : public IView {
                     std::optional<Action> selected_action);
 
   ///
-  std::string rename_buffer_{};
+  StringBuffer rename_buffer_{};
   ///
   bool focus_name_input_{};
 };

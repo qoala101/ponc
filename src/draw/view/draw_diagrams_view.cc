@@ -25,12 +25,6 @@ namespace vh::ponc::draw {
 auto DiagramsView::GetLabel() const -> std::string { return "Diagrams"; }
 
 ///
-auto DiagramsView::GetTrimmedRenameBuffer() const {
-  // NOLINTNEXTLINE(*-redundant-string-cstr)
-  return std::string{rename_buffer_.c_str()};
-}
-
-///
 auto DiagramsView::DrawRenamePopup() {
   auto rename_confirmed = false;
 
@@ -39,10 +33,10 @@ auto DiagramsView::DrawRenamePopup() {
       ImGui::SetKeyboardFocusHere();
     }
 
-    const auto name_is_empty = GetTrimmedRenameBuffer().empty();
+    const auto name_is_empty = rename_buffer_.AsTrimmed().empty();
 
-    if (ImGui::InputText("##Diagram Name", rename_buffer_.data(),
-                         rename_buffer_.size(),
+    if (ImGui::InputText("##Diagram Name", rename_buffer_.GetData(),
+                         rename_buffer_.GetSize(),
                          ImGuiInputTextFlags_AutoSelectAll |
                              ImGuiInputTextFlags_EnterReturnsTrue)) {
       if (!name_is_empty) {
@@ -141,15 +135,11 @@ void DiagramsView::ApplyAction(coreui::Project& project, int diagram_index,
       project.CloneDiagram(diagram);
       break;
     case Action::kStartRenaming: {
-      const auto max_name_length = 255;
-
-      rename_buffer_ = diagram.GetName();
-      rename_buffer_.resize(std::max(
-          static_cast<int>(rename_buffer_.size() + 1), max_name_length));
+      rename_buffer_.Set(diagram.GetName());
       break;
     }
     case Action::kConfirmRename:
-      diagram.SetName(GetTrimmedRenameBuffer());
+      diagram.SetName(rename_buffer_.AsTrimmed());
       break;
     case Action::kDelete:
       project.DeleteDiagram(diagram_index);

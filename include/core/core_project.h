@@ -24,7 +24,7 @@ class Project {
   ///
   static auto IsEmpty(const Project &project) -> bool;
   ///
-  static auto FindFamily(const Project &project, core::FamilyId family_id)
+  static auto FindFamily(const Project &project, FamilyId family_id)
       -> IFamily &;
   ///
   static auto MakeUniqueDiagramName(const Project &project,

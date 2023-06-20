@@ -59,8 +59,6 @@ auto GetTitle(const std::vector<ne::NodeId>& nodes,
 
 ///
 void DrawReplaceActions(coreui::Diagram& diagram, const core::INode& node) {
-  ImGui::Separator();
-
   if (ImGui::BeginMenu("Replace With")) {
     FamilyGroupsMenu::Draw(
         diagram.GetFamilyGroups(),
@@ -158,6 +156,7 @@ void NodePopup::Draw(coreui::Diagram& diagram) {
   auto& node =
       core::Diagram::FindNode(diagram.GetDiagram(), selected_nodes.front());
 
+  ImGui::Separator();
   DrawReplaceActions(diagram, node);
   DrawNodeActions(node);
 }

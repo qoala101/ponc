@@ -20,11 +20,13 @@ void DrawColoredText(std::string_view text, const ImColor& color,
                      const ImVec2& pos) {
   ImGui::SetCursorPos(pos);
 
-  const auto cursor_screen_pos = ImGui::GetCursorScreenPos();
   const auto text_size = ImGui::CalcTextSize(text.data());
-  const auto padding = ImGui::GetStyle().FramePadding;
+  auto rect = ImRect{ImVec2{}, text_size};
 
-  auto rect = ImRect{ImVec2{} - padding, text_size + padding};
+  const auto padding = ImGui::GetStyle().FramePadding;
+  rect.Expand(padding);
+
+  const auto cursor_screen_pos = ImGui::GetCursorScreenPos();
   rect.Translate(cursor_screen_pos);
 
   auto* drawList = ImGui::GetWindowDrawList();

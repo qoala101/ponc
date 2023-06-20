@@ -67,7 +67,7 @@ class Diagram {
   ///
   auto GetNodes() -> std::vector<Node> &;
   ///
-  auto AddNode(std::unique_ptr<core::INode> node) -> Event &;
+  auto AddNode(std::unique_ptr<core::INode> node) const -> Event &;
   ///
   auto DeleteNode(ne::NodeId node_id) -> Event &;
   ///
@@ -81,7 +81,7 @@ class Diagram {
                       const core::INode &target_node) -> bool;
   ///
   auto ReplaceNode(const core::INode &source_node,
-                   std::unique_ptr<core::INode> target_node) -> Event &;
+                   std::unique_ptr<core::INode> target_node) const -> Event &;
   ///
   auto GetLinks() const -> const std::vector<Link> &;
   ///

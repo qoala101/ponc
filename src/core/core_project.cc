@@ -98,7 +98,7 @@ auto Project::IsEmpty(const Project& project) -> bool {
 }
 
 ///
-auto Project::FindFamily(const Project& project, core::FamilyId family_id)
+auto Project::FindFamily(const Project& project, FamilyId family_id)
     -> IFamily& {
   const auto family = std::find_if(
       project.families_.cbegin(), project.families_.cend(),

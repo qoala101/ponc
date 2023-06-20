@@ -143,7 +143,7 @@ auto Diagram::GetNodes() const -> const std::vector<Node>& {
 auto Diagram::GetNodes() -> std::vector<Node>& { return nodes_; }
 
 ///
-auto Diagram::AddNode(std::unique_ptr<core::INode> node) -> Event& {
+auto Diagram::AddNode(std::unique_ptr<core::INode> node) const -> Event& {
   return parent_project_->GetEventLoop().PostEvent(
       [diagram = diagram_, node = cpp::Share(std::move(node))]() {
         diagram->EmplaceNode(std::move(*node));
@@ -296,7 +296,8 @@ auto Diagram::CanReplaceNode(const core::INode& source_node,
 
 ///
 auto Diagram::ReplaceNode(const core::INode& source_node,
-                          std::unique_ptr<core::INode> target_node) -> Event& {
+                          std::unique_ptr<core::INode> target_node) const
+    -> Event& {
   if (const auto& source_input_pin = source_node.GetInputPinId()) {
     if (const auto input_link =
             core::Diagram::FindPinLink(*diagram_, *source_input_pin)) {

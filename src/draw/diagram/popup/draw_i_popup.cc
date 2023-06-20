@@ -33,11 +33,20 @@ auto IPopup::IsOpened() const -> bool { return opened_; }
 void IPopup::Open() {
   ImGui::OpenPopup(IdLabel(id_).c_str(),
                    ImGuiPopupFlags_NoOpenOverExistingPopup);
+
+  const auto was_opened = opened_;
   opened_ = true;
+
+  if (!was_opened) {
+    OnOpen();
+  }
 }
 
 ///
 IPopup::IPopup() : id_{GenerateId()} {}
+
+///
+void IPopup::OnOpen() {}
 
 ///
 auto IPopup::DrawContentScope(std::string_view title,
