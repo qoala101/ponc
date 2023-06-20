@@ -377,9 +377,15 @@ auto Diagram::GetNodeTrees() const -> const std::vector<TreeNode>& {
 }
 
 ///
-auto Diagram::AddArea(core::Area area) -> Event& {
+auto Diagram::CreateArea(std::string name, const ImVec2& pos) -> Event& {
+  const auto node_id =
+      parent_project_->GetProject().GetIdGenerator().Generate<ne::NodeId>();
+
   return parent_project_->GetEventLoop().PostEvent(
-      [diagram = diagram_, area = std::move(area)]() {
+      [diagram = diagram_, area = core::Area{.id = node_id,
+                                             .name = std::move(name),
+                                             .pos = pos,
+                                             .size = {100, 100}}]() {
         diagram->EmplaceArea(area);
       });
 }

@@ -24,16 +24,37 @@
 namespace vh::ponc::draw {
 namespace {
 ///
-auto GetTitle(const std::vector<ne::NodeId>& nodes) {
+auto GetSizeText(int size) { return "s (" + std::to_string(size) + ")"; }
+
+///
+auto GetSizeText(const std::vector<ne::NodeId>& nodes) {
   if (nodes.empty()) {
     return std::string{};
   }
 
   if (nodes.size() == 1) {
-    return "Node #" + std::to_string(nodes.front().Get());
+    return " #" + std::to_string(nodes.front().Get());
   }
 
-  return "Nodes (" + std::to_string(nodes.size()) + ")";
+  return GetSizeText(static_cast<int>(nodes.size()));
+}
+
+///
+auto GetTitle(const std::vector<ne::NodeId>& nodes,
+              const std::vector<ne::NodeId>& areas) {
+  if (nodes.empty()) {
+    if (areas.empty()) {
+      return std::string{};
+    }
+
+    return "Area" + GetSizeText(areas);
+  }
+
+  if (!areas.empty() || (nodes.size() > 1)) {
+    return "Node" + GetSizeText(static_cast<int>(nodes.size()));
+  }
+
+  return "Node" + GetSizeText(nodes);
 }
 
 ///
@@ -78,13 +99,33 @@ void DrawNodeActions(core::INode& node) {
 
 ///
 void NodePopup::Draw(coreui::Diagram& diagram) {
-  const auto selected_nodes = IsOpened()
-                                  ? coreui::NativeFacade::GetSelectedNodes()
-                                  : std::vector<ne::NodeId>{};
-  const auto title = GetTitle(selected_nodes);
+  const auto [selected_nodes, selected_areas] =
+      IsOpened()
+          ? coreui::NativeFacade::GetSelectedNodesAndAreas()
+          : std::pair<std::vector<ne::NodeId>, std::vector<ne::NodeId>>{};
+  const auto title = GetTitle(selected_nodes, selected_areas);
   const auto content_scope = DrawContentScope(title);
 
   if (!IsOpened()) {
+    return;
+  }
+
+  if (selected_nodes.empty()) {
+    if (ImGui::MenuItem("Delete")) {
+    }
+
+    if (selected_areas.size() > 1) {
+      return;
+    }
+
+    ImGui::Separator();
+
+    if (ImGui::MenuItem("Rename")) {
+    }
+
+    if (ImGui::MenuItem("Unlock")) {
+    }
+
     return;
   }
 
@@ -110,7 +151,7 @@ void NodePopup::Draw(coreui::Diagram& diagram) {
     diagram.TreeArrange(selected_nodes);
   }
 
-  if (selected_nodes.size() > 1) {
+  if ((selected_nodes.size() > 1) || !selected_areas.empty()) {
     return;
   }
 
