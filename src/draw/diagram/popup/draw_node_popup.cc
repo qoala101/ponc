@@ -15,11 +15,8 @@
 
 #include "core_diagram.h"
 #include "core_i_node.h"
-#include "coreui_family.h"
 #include "coreui_i_node_traits.h"
 #include "coreui_native_facade.h"
-#include "cpp_callbacks.h"
-#include "draw_family_groups_menu.h"
 
 namespace vh::ponc::draw {
 namespace {
@@ -55,25 +52,6 @@ auto GetTitle(const std::vector<ne::NodeId>& nodes,
   }
 
   return "Node" + GetSizeText(nodes);
-}
-
-///
-void DrawReplaceActions(coreui::Diagram& diagram, const core::INode& node) {
-  if (ImGui::BeginMenu("Replace With")) {
-    FamilyGroupsMenu::Draw(
-        diagram.GetFamilyGroups(),
-        {.is_family_enabled =
-             [&diagram, &node](const auto& family) {
-               const auto sample_node = family.CreateSampleNode();
-               return diagram.CanReplaceNode(node, *sample_node);
-             },
-         .family_selected =
-             [&diagram, &node](const auto& family) {
-               diagram.ReplaceNode(node, family.CreateNode());
-             }});
-
-    ImGui::EndMenu();
-  }
 }
 
 ///
@@ -156,8 +134,6 @@ void NodePopup::Draw(coreui::Diagram& diagram) {
   auto& node =
       core::Diagram::FindNode(diagram.GetDiagram(), selected_nodes.front());
 
-  ImGui::Separator();
-  DrawReplaceActions(diagram, node);
   DrawNodeActions(node);
 }
 }  // namespace vh::ponc::draw
