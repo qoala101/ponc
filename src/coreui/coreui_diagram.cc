@@ -263,10 +263,10 @@ void Diagram::TreeArrange(const std::vector<ne::NodeId>& node_ids) {
 
 ///
 auto Diagram::CanReplaceNode(const core::INode& source_node,
-                             const core::INode& target_node) -> bool {
+                             const core::INode& target_node) const -> bool {
   if (const auto same_family =
           source_node.GetFamilyId() == target_node.GetFamilyId()) {
-    return false;
+    return true;
   }
 
   const auto& source_input_pin = source_node.GetInputPinId();

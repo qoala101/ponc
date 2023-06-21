@@ -78,7 +78,7 @@ class Diagram {
   void TreeArrange(const std::vector<ne::NodeId> &node_ids);
   ///
   auto CanReplaceNode(const core::INode &source_node,
-                      const core::INode &target_node) -> bool;
+                      const core::INode &target_node) const -> bool;
   ///
   auto ReplaceNode(const core::INode &source_node,
                    std::unique_ptr<core::INode> target_node) const -> Event &;

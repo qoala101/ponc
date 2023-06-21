@@ -18,6 +18,7 @@
 #include "draw_link_popup.h"
 #include "draw_linker.h"
 #include "draw_node_popup.h"
+#include "draw_replace_popup.h"
 
 namespace vh::ponc::draw {
 ///
@@ -44,11 +45,13 @@ class DiagramEditor {
   ///
   Linker linker_{};
   ///
-  BackgroundPopup create_node_popup_{};
+  BackgroundPopup background_popup_{};
   ///
   NodePopup node_popup_{};
   ///
   LinkPopup link_popup_{};
+  ///
+  ReplacePopup replace_popup_{};
 };
 }  // namespace vh::ponc::draw
 

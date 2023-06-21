@@ -14,6 +14,7 @@
 
 #include "cpp_callbacks.h"
 #include "cpp_non_copyable.h"
+#include "cpp_safe_ptr.h"
 #include "cpp_scope_function.h"
 
 namespace vh::ponc::draw {
@@ -36,8 +37,7 @@ class IPopup : public cpp::NonCopyable {
   IPopup();
 
   ///
-  virtual void OnOpen();
-
+  auto WasJustOpened() const -> bool;
   ///
   auto DrawContentScope(std::string_view title = {},
                         const Callbacks &callbacks = {{}})
@@ -48,6 +48,10 @@ class IPopup : public cpp::NonCopyable {
   ImGuiID id_{};
   ///
   bool opened_{};
+  ///
+  bool just_opened_{};
+  ///
+  cpp::SafeOwner safe_owner_{};
 };
 }  // namespace vh::ponc::draw
 

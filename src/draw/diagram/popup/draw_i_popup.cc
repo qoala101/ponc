@@ -38,7 +38,7 @@ void IPopup::Open() {
   opened_ = true;
 
   if (!was_opened) {
-    OnOpen();
+    just_opened_ = true;
   }
 }
 
@@ -46,7 +46,7 @@ void IPopup::Open() {
 IPopup::IPopup() : id_{GenerateId()} {}
 
 ///
-void IPopup::OnOpen() {}
+auto IPopup::WasJustOpened() const -> bool { return just_opened_; }
 
 ///
 auto IPopup::DrawContentScope(std::string_view title,
@@ -60,10 +60,13 @@ auto IPopup::DrawContentScope(std::string_view title,
       ImGui::Separator();
     }
 
-    return cpp::ScopeFunction{[]() {
-      ImGui::EndPopup();
-      ne::Resume();
-    }};
+    return cpp::ScopeFunction{
+        [just_opened = safe_owner_.MakeSafe(&just_opened_)]() {
+          *just_opened = false;
+
+          ImGui::EndPopup();
+          ne::Resume();
+        }};
   }
 
   if (opened_) {

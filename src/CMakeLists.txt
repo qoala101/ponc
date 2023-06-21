@@ -61,6 +61,7 @@ add_executable(ponc
   draw/diagram/popup/draw_i_popup.cc
   draw/diagram/popup/draw_link_popup.cc
   draw/diagram/popup/draw_node_popup.cc
+  draw/diagram/popup/draw_replace_popup.cc
 
   draw/diagram/draw_area.cc
   draw/diagram/draw_colored_text.cc

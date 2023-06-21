@@ -86,13 +86,13 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
   const auto resume_scope = cpp::Scope{[]() { ne::Resume(); }};
 
   if (ne::ShowBackgroundContextMenu() && !IsHoveringOverChildWindow()) {
-    create_node_popup_.SetPos(popup_pos);
-    create_node_popup_.Open();
+    background_popup_.SetPos(popup_pos);
+    background_popup_.Open();
     return;
   }
 
-  auto node_id = ne::NodeId{};
   auto requested_node_popup = false;
+  auto node_id = ne::NodeId{};
 
   if (ne::ShowNodeContextMenu(&node_id)) {
     requested_node_popup = true;
@@ -122,17 +122,38 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
     }
 
     link_popup_.Open();
+    return;
+  }
+
+  auto node_double_clicked = false;
+  node_id = ne::GetDoubleClickedNode();
+
+  if (node_id != ne::NodeId::Invalid) {
+    node_double_clicked = true;
+  } else {
+    const auto double_clicked_pin = ne::GetDoubleClickedPin();
+
+    if (double_clicked_pin != ne::PinId::Invalid) {
+      node_id = core::Diagram::FindPinNode(diagram, double_clicked_pin).GetId();
+      node_double_clicked = true;
+    }
+  }
+
+  if (node_double_clicked) {
+    replace_popup_.SetNodeId(node_id);
+    replace_popup_.Open();
   }
 }
 
 ///
 void DiagramEditor::DrawPopups(coreui::Diagram &diagram) {
-  create_node_popup_.Draw(diagram);
+  background_popup_.Draw(diagram);
   node_popup_.Draw(diagram);
   link_popup_.Draw({.delete_selected = [&diagram](const auto &link_ids) {
     for (const auto link_id : link_ids) {
       diagram.DeleteLink(link_id);
     }
   }});
+  replace_popup_.Draw(diagram);
 }
 }  // namespace vh::ponc::draw
