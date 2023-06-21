@@ -9,6 +9,8 @@
 
 #include <imgui_node_editor.h>
 
+#include <memory>
+
 #include "core_i_family.h"
 #include "coreui_diagram.h"
 #include "draw_i_popup.h"
@@ -34,12 +36,17 @@ class ReplacePopup : public IPopup {
   ///
   void OnOpen(const coreui::Diagram &diagram);
   ///
+  auto FindSelectedFamily(
+      const std::vector<coreui::FamilyGroup> &family_groups) const -> auto &;
+  ///
   void Replace(const coreui::Diagram &diagram) const;
+  ///
+  void Cancel(const coreui::Diagram &diagram);
 
   ///
   ne::NodeId node_id_{};
   ///
-  core::FamilyId node_family_id_{};
+  std::unique_ptr<core::INode> node_copy_{};
   ///
   std::vector<Family> families_{};
   ///

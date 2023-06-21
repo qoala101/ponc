@@ -9,6 +9,8 @@
 #include <algorithm>
 
 #include "json_diagram_serializer.h"
+#include "json_i_node_parser.h"
+#include "json_i_node_writer.h"
 
 namespace vh::ponc::coreui {
 ///
@@ -17,6 +19,13 @@ auto Cloner::Clone(const core::Diagram& diagram,
     -> core::Diagram {
   const auto json = json::DiagramSerializer::WriteToJson(diagram);
   return json::DiagramSerializer::ParseFromJson(json, families);
+}
+
+///
+auto Cloner::Clone(const core::INode& node, const core::IFamily& family)
+    -> std::unique_ptr<core::INode> {
+  const auto json = node.CreateWriter()->WriteToJson(node);
+  return family.CreateNodeParser()->ParseFromJson(json);
 }
 
 ///

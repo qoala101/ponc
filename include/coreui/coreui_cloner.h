@@ -24,6 +24,9 @@ struct Cloner : public cpp::StaticApi {
                     const std::vector<std::unique_ptr<core::IFamily>>& families)
       -> core::Diagram;
   ///
+  static auto Clone(const core::INode& node, const core::IFamily& family)
+      -> std::unique_ptr<core::INode>;
+  ///
   static void RewireIds(const std::vector<core::IdPtr>& ids,
                         core::IdGenerator& id_generator);
 };
