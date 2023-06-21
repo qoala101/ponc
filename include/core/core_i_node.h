@@ -35,6 +35,16 @@ class INodeTraits;
 
 namespace core {
 ///
+struct NodeIds {
+  ///
+  ne::NodeId *node_id{};
+  ///
+  std::optional<ne::PinId *> input_pin_id{};
+  ///
+  std::vector<ne::PinId *> output_pin_ids{};
+};
+
+///
 class INode : public cpp::NonCopyable {
  public:
   ///
@@ -51,6 +61,8 @@ class INode : public cpp::NonCopyable {
     ImVec2 pos{};
   };
 
+  ///
+  static auto GetIds(INode &node) -> std::vector<IdPtr>;
   ///
   static auto GetAllPins(const INode &node)
       -> std::vector<std::pair<ne::PinId, ne::PinKind>>;
@@ -71,7 +83,7 @@ class INode : public cpp::NonCopyable {
   ///
   auto GetId() const -> ne::NodeId;
   ///
-  auto GetIds() -> std::vector<IdPtr>;
+  auto GetIds() -> NodeIds;
   ///
   auto GetFamilyId() const -> FamilyId;
   ///

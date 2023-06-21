@@ -30,7 +30,7 @@ auto Diagram::GetIds(Diagram& diagram) -> std::vector<IdPtr> {
   auto ids = std::vector<IdPtr>{};
 
   for (const auto& node : diagram.nodes_) {
-    const auto node_ids = node->GetIds();
+    const auto node_ids = INode::GetIds(*node);
     ids.insert(ids.cend(), node_ids.cbegin(), node_ids.cend());
   }
 

@@ -21,6 +21,24 @@
 
 namespace vh::ponc::core {
 ///
+auto INode::GetIds(INode& node) -> std::vector<IdPtr> {
+  const auto node_ids = node.GetIds();
+
+  auto ids = std::vector<IdPtr>{node_ids.node_id};
+  ids.reserve(node_ids.output_pin_ids.size() + 2);
+
+  if (node_ids.input_pin_id.has_value()) {
+    ids.emplace_back(*node_ids.input_pin_id);
+  }
+
+  std::transform(node_ids.output_pin_ids.cbegin(),
+                 node_ids.output_pin_ids.cend(), std::back_inserter(ids),
+                 [](auto* pin_id) { return pin_id; });
+
+  return ids;
+}
+
+///
 auto INode::GetAllPins(const INode& node)
     -> std::vector<std::pair<ne::PinId, ne::PinKind>> {
   auto pins = std::vector<std::pair<ne::PinId, ne::PinKind>>{};
@@ -82,17 +100,16 @@ auto INode::CreateWriter() const -> std::unique_ptr<json::INodeWriter> {
 ///
 auto INode::GetId() const -> ne::NodeId { return id_; }
 
-///
-auto INode::GetIds() -> std::vector<IdPtr> {
-  auto ids = std::vector<IdPtr>{&id_};
-  ids.reserve(output_pin_ids_.size() + 2);
+auto INode::GetIds() -> NodeIds {
+  auto ids = NodeIds{.node_id = &id_};
 
   if (input_pin_id_.has_value()) {
-    ids.emplace_back(&*input_pin_id_);
+    ids.input_pin_id = &*input_pin_id_;
   }
 
   std::transform(output_pin_ids_.begin(), output_pin_ids_.end(),
-                 std::back_inserter(ids), [](auto& pin_id) { return &pin_id; });
+                 std::back_inserter(ids.output_pin_ids),
+                 [](auto& pin_id) { return &pin_id; });
 
   return ids;
 }
