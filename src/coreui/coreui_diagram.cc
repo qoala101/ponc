@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "core_id_ptr.h"
 #include "core_id_value.h"
 #include "coreui_event_loop.h"
 #include "coreui_flow_tree_node.h"
@@ -295,10 +296,24 @@ auto Diagram::CanReplaceNode(const core::INode& source_node,
 }
 
 ///
-void Diagram::RewireOutputPinIds(
-    const std::vector<ne::PinId>& source_output_pins,
-    const std::vector<ne::PinId*>& target_output_pins) const {
-  auto& id_generator = parent_project_->GetProject().GetIdGenerator();
+auto Diagram::RewireUsedIds(const core::INode& source_node,
+                            const std::vector<ne::PinId>& source_output_pins,
+                            core::INode& target_node) const {
+  const auto target_ids = target_node.GetIds();
+  *target_ids.node_id = source_node.GetId();
+
+  auto ids_to_generate = std::vector<ne::PinId*>{};
+
+  if (target_ids.input_pin_id.has_value()) {
+    const auto source_input_pin = source_node.GetInputPinId();
+
+    if (source_input_pin.has_value()) {
+      **target_ids.input_pin_id = *source_input_pin;
+    } else {
+      **target_ids.input_pin_id = core::UnspecifiedIdValue{};
+      ids_to_generate.emplace_back(*target_ids.input_pin_id);
+    }
+  }
 
   const auto num_source_pins_with_links =
       std::count_if(source_output_pins.cbegin(), source_output_pins.cend(),
@@ -306,14 +321,17 @@ void Diagram::RewireOutputPinIds(
                       return core::Diagram::HasLink(*diagram, pin_id);
                     });
 
+  const auto& target_pins = target_ids.output_pin_ids;
   auto num_empty_pins_available =
-      static_cast<int>(target_output_pins.size()) - num_source_pins_with_links;
+      static_cast<int>(target_pins.size()) - num_source_pins_with_links;
+
   auto source_pin = source_output_pins.cbegin();
 
-  for (auto target_pin = target_output_pins.cbegin();
-       target_pin != target_output_pins.cend(); ++target_pin) {
+  for (auto target_pin = target_pins.cbegin(); target_pin != target_pins.cend();
+       ++target_pin) {
     if (source_pin == source_output_pins.cend()) {
-      **target_pin = id_generator.Generate<ne::PinId>();
+      **target_pin = core::UnspecifiedIdValue{};
+      ids_to_generate.emplace_back(*target_pin);
       continue;
     }
 
@@ -326,12 +344,61 @@ void Diagram::RewireOutputPinIds(
     }
 
     if (num_empty_pins_available > 0) {
-      **target_pin = prev_source_pin;
+      **target_pin = core::UnspecifiedIdValue{};
+      ids_to_generate.emplace_back(*target_pin);
       --num_empty_pins_available;
       continue;
     }
 
     --target_pin;
+  }
+
+  return ids_to_generate;
+}
+
+///
+void Diagram::ReuseSourceIds(
+    std::vector<core::UnspecifiedIdValue> source_ids,
+    std::vector<core::UnspecifiedIdValue> target_ids,
+    const std::vector<ne::PinId*>& ids_to_generate) const {
+  std::sort(source_ids.begin(), source_ids.end());
+  std::sort(target_ids.begin(), target_ids.end());
+
+  auto common_item_ids = std::vector<core::UnspecifiedIdValue>{};
+  std::set_intersection(source_ids.cbegin(), source_ids.cend(),
+                        target_ids.cbegin(), target_ids.cend(),
+                        std::back_inserter(common_item_ids));
+  Expects(!common_item_ids.empty());
+
+  const auto biggest_common_id = std::lower_bound(
+      source_ids.cbegin(), source_ids.cend(), common_item_ids.back());
+  Expects(biggest_common_id != source_ids.cend());
+
+  auto id_to_generate = ids_to_generate.cbegin();
+  auto id_to_reuse = std::next(biggest_common_id);
+
+  for (; (id_to_generate != ids_to_generate.cend()) &&
+         (id_to_reuse != source_ids.cend());
+       ++id_to_generate, ++id_to_reuse) {
+    **id_to_generate = *id_to_reuse;
+  }
+
+  auto& id_generator = parent_project_->GetProject().GetIdGenerator();
+  auto prev_generated_id = id_generator.GetNextId() - 1;
+
+  if (id_to_reuse != source_ids.cend()) {
+    for (auto unused_id = source_ids.cend() - 1;
+         (unused_id >= id_to_reuse) && (*unused_id == prev_generated_id);
+         --unused_id, --prev_generated_id) {
+    }
+  }
+
+  id_generator = core::IdGenerator{prev_generated_id + 1};
+
+  if (id_to_generate != ids_to_generate.cend()) {
+    for (; id_to_generate != ids_to_generate.cend(); ++id_to_generate) {
+      **id_to_generate = id_generator.Generate<ne::PinId>();
+    }
   }
 }
 
@@ -340,21 +407,13 @@ auto Diagram::ReplaceNode(const core::INode& source_node,
                           const std::vector<ne::PinId>& source_output_pins,
                           std::unique_ptr<core::INode> target_node) const
     -> Event& {
-  const auto target_ids = target_node->GetIds();
-  *target_ids.node_id = source_node.GetId();
+  const auto ids_to_generate =
+      RewireUsedIds(source_node, source_output_pins, *target_node);
 
-  if (target_ids.input_pin_id.has_value()) {
-    const auto source_input_pin = source_node.GetInputPinId();
+  ReuseSourceIds(core::INode::GetIds(source_node),
+                 core::INode::GetIds(std::as_const(*target_node)),
+                 ids_to_generate);
 
-    if (source_input_pin.has_value()) {
-      **target_ids.input_pin_id = *source_input_pin;
-    } else {
-      auto& id_generator = parent_project_->GetProject().GetIdGenerator();
-      **target_ids.input_pin_id = id_generator.Generate<ne::PinId>();
-    }
-  }
-
-  RewireOutputPinIds(source_output_pins, target_ids.output_pin_ids);
   target_node->SetPos(source_node.GetPos());
 
   parent_project_->GetEventLoop().PostEvent(

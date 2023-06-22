@@ -140,9 +140,13 @@ class Diagram {
                                      const coreui::Family &free_pin_family)
       -> Event &;
   ///
-  void RewireOutputPinIds(
-      const std::vector<ne::PinId> &source_output_pins,
-      const std::vector<ne::PinId *> &target_output_pins) const;
+  auto RewireUsedIds(const core::INode &source_node,
+                     const std::vector<ne::PinId> &source_output_pins,
+                     core::INode &target_node) const;
+  ///
+  void ReuseSourceIds(std::vector<core::UnspecifiedIdValue> source_ids,
+                      std::vector<core::UnspecifiedIdValue> target_ids,
+                      const std::vector<ne::PinId *> &ids_to_generate) const;
 
   ///
   cpp::SafePtr<Project> parent_project_;
