@@ -21,6 +21,20 @@
 
 namespace vh::ponc::core {
 ///
+auto INode::GetIds(const INode& node) -> std::vector<UnspecifiedIdValue> {
+  // NOLINTNEXTLINE(*-const-cast)
+  const auto id_ptrs = GetIds(const_cast<INode&>(node));
+
+  auto ids = std::vector<UnspecifiedIdValue>{};
+  ids.reserve(id_ptrs.size());
+
+  std::transform(id_ptrs.cbegin(), id_ptrs.cend(), std::back_inserter(ids),
+                 [](const auto id) { return GetValue(id); });
+
+  return ids;
+}
+
+///
 auto INode::GetIds(INode& node) -> std::vector<IdPtr> {
   const auto node_ids = node.GetIds();
 

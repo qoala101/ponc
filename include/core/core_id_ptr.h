@@ -23,7 +23,7 @@ struct FamilyId;
 using IdPtr = std::variant<ne::NodeId *, ne::LinkId *, ne::PinId *, FamilyId *>;
 
 ///
-auto GetValue(const IdPtr &id) -> UnspecifiedIdValue;
+auto GetValue(IdPtr id) -> UnspecifiedIdValue;
 ///
 void SetValue(const IdPtr &id, UnspecifiedIdValue value);
 }  // namespace vh::ponc::core

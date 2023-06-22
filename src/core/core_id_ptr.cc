@@ -10,7 +10,7 @@
 
 namespace vh::ponc::core {
 ///
-auto GetValue(const IdPtr &id) -> UnspecifiedIdValue {
+auto GetValue(IdPtr id) -> UnspecifiedIdValue {
   return std::visit([](const auto *id) { return id->Get(); }, id);
 }
 

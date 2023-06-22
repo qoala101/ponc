@@ -17,6 +17,7 @@
 
 #include "core_i_family.h"
 #include "core_id_ptr.h"
+#include "core_id_value.h"
 #include "cpp_non_copyable.h"
 #include "flow_node_flow.h"
 
@@ -61,6 +62,8 @@ class INode : public cpp::NonCopyable {
     ImVec2 pos{};
   };
 
+  ///
+  static auto GetIds(const INode &node) -> std::vector<UnspecifiedIdValue>;
   ///
   static auto GetIds(INode &node) -> std::vector<IdPtr>;
   ///

@@ -81,6 +81,7 @@ class Diagram {
                       const core::INode &target_node) const -> bool;
   ///
   auto ReplaceNode(const core::INode &source_node,
+                   const std::vector<ne::PinId> &source_output_pins,
                    std::unique_ptr<core::INode> target_node) const -> Event &;
   ///
   auto GetLinks() const -> const std::vector<Link> &;
@@ -138,6 +139,10 @@ class Diagram {
   auto MoveConnectedLinkToNewFreePin(ne::PinId pin_id, ne::PinKind pin_kind,
                                      const coreui::Family &free_pin_family)
       -> Event &;
+  ///
+  void RewireOutputPinIds(
+      const std::vector<ne::PinId> &source_output_pins,
+      const std::vector<ne::PinId *> &target_output_pins) const;
 
   ///
   cpp::SafePtr<Project> parent_project_;

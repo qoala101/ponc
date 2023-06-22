@@ -295,32 +295,66 @@ auto Diagram::CanReplaceNode(const core::INode& source_node,
 }
 
 ///
-auto Diagram::ReplaceNode(const core::INode& source_node,
-                          std::unique_ptr<core::INode> target_node) const
-    -> Event& {
-  if (const auto& source_input_pin = source_node.GetInputPinId()) {
-    if (const auto input_link =
-            core::Diagram::FindPinLink(*diagram_, *source_input_pin)) {
-      const auto target_input_pin =
-          core::INode::GetFirstPinOfKind(*target_node, ne::PinKind::Input);
+void Diagram::RewireOutputPinIds(
+    const std::vector<ne::PinId>& source_output_pins,
+    const std::vector<ne::PinId*>& target_output_pins) const {
+  auto& id_generator = parent_project_->GetProject().GetIdGenerator();
 
-      MoveLink(*source_input_pin, target_input_pin);
-    }
-  }
+  const auto num_source_pins_with_links =
+      std::count_if(source_output_pins.cbegin(), source_output_pins.cend(),
+                    [&diagram = diagram_](const auto pin_id) {
+                      return core::Diagram::HasLink(*diagram, pin_id);
+                    });
 
-  const auto& target_pins = target_node->GetOutputPinIds();
-  auto next_target_pin = target_pins.cbegin();
+  auto num_empty_pins_available =
+      static_cast<int>(target_output_pins.size()) - num_source_pins_with_links;
+  auto source_pin = source_output_pins.cbegin();
 
-  for (const auto source_pin : source_node.GetOutputPinIds()) {
-    if (!core::Diagram::HasLink(*diagram_, source_pin)) {
+  for (auto target_pin = target_output_pins.cbegin();
+       target_pin != target_output_pins.cend(); ++target_pin) {
+    if (source_pin == source_output_pins.cend()) {
+      **target_pin = id_generator.Generate<ne::PinId>();
       continue;
     }
 
-    Expects(next_target_pin != target_pins.cend());
-    MoveLink(source_pin, *next_target_pin);
-    ++next_target_pin;
+    const auto prev_source_pin = *source_pin;
+    ++source_pin;
+
+    if (core::Diagram::HasLink(*diagram_, prev_source_pin)) {
+      **target_pin = prev_source_pin;
+      continue;
+    }
+
+    if (num_empty_pins_available > 0) {
+      **target_pin = prev_source_pin;
+      --num_empty_pins_available;
+      continue;
+    }
+
+    --target_pin;
+  }
+}
+
+///
+auto Diagram::ReplaceNode(const core::INode& source_node,
+                          const std::vector<ne::PinId>& source_output_pins,
+                          std::unique_ptr<core::INode> target_node) const
+    -> Event& {
+  const auto target_ids = target_node->GetIds();
+  *target_ids.node_id = source_node.GetId();
+
+  if (target_ids.input_pin_id.has_value()) {
+    const auto source_input_pin = source_node.GetInputPinId();
+
+    if (source_input_pin.has_value()) {
+      **target_ids.input_pin_id = *source_input_pin;
+    } else {
+      auto& id_generator = parent_project_->GetProject().GetIdGenerator();
+      **target_ids.input_pin_id = id_generator.Generate<ne::PinId>();
+    }
   }
 
+  RewireOutputPinIds(source_output_pins, target_ids.output_pin_ids);
   target_node->SetPos(source_node.GetPos());
 
   parent_project_->GetEventLoop().PostEvent(
@@ -337,8 +371,8 @@ auto Diagram::GetLinks() const -> const std::vector<Link>& { return links_; }
 ///
 auto Diagram::CreateLink(ne::PinId start_pin_id, ne::PinId end_pin_id) const
     -> Event& {
-  const auto link_id =
-      parent_project_->GetProject().GetIdGenerator().Generate<ne::LinkId>();
+  auto& id_generator = parent_project_->GetProject().GetIdGenerator();
+  const auto link_id = id_generator.Generate<ne::LinkId>();
 
   return parent_project_->GetEventLoop().PostEvent(
       [diagram = diagram_, link = core::Link{.id = link_id,
@@ -379,8 +413,8 @@ auto Diagram::GetNodeTrees() const -> const std::vector<TreeNode>& {
 
 ///
 auto Diagram::CreateArea(std::string name, const ImVec2& pos) -> Event& {
-  const auto node_id =
-      parent_project_->GetProject().GetIdGenerator().Generate<ne::NodeId>();
+  auto& id_generator = parent_project_->GetProject().GetIdGenerator();
+  const auto node_id = id_generator.Generate<ne::NodeId>();
 
   return parent_project_->GetEventLoop().PostEvent(
       [diagram = diagram_, area = core::Area{.id = node_id,

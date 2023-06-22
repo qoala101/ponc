@@ -133,12 +133,13 @@ void ReplacePopup::Replace(const coreui::Diagram& diagram) const {
                               : targe_family.CreateSampleNode();
 
   const auto& node = core::Diagram::FindNode(diagram.GetDiagram(), node_id_);
-  diagram.ReplaceNode(node, std::move(new_node));
+  diagram.ReplaceNode(node, node_copy_->GetOutputPinIds(), std::move(new_node));
 }
 
 ///
 void ReplacePopup::Cancel(const coreui::Diagram& diagram) {
   const auto& node = core::Diagram::FindNode(diagram.GetDiagram(), node_id_);
-  diagram.ReplaceNode(node, std::move(node_copy_));
+  diagram.ReplaceNode(node, node_copy_->GetOutputPinIds(),
+                      std::move(node_copy_));
 }
 }  // namespace vh::ponc::draw
