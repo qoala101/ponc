@@ -83,6 +83,10 @@ auto Project::FindMaxId() const {
     for (const auto& link : diagram.GetLinks()) {
       max_id = std::max(link.id.Get(), max_id);
     }
+
+    for (const auto& area : diagram.GetAreas()) {
+      max_id = std::max(area.id.Get(), max_id);
+    }
   }
 
   return max_id;
@@ -93,7 +97,8 @@ auto Project::IsEmpty(const Project& project) -> bool {
   return std::all_of(project.diagrams_.cbegin(), project.diagrams_.cend(),
                      [](const auto& diagram) {
                        return diagram.GetNodes().empty() &&
-                              diagram.GetLinks().empty();
+                              diagram.GetLinks().empty() &&
+                              diagram.GetAreas().empty();
                      });
 }
 

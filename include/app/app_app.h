@@ -26,6 +26,8 @@ class App : public Application {
   ///
   auto GetWindowFlags() const -> ImGuiWindowFlags override;
   ///
+  auto CanClose() -> bool override;
+  ///
   void OnStart() override;
   ///
   void OnStop() override;

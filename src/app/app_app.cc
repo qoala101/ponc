@@ -13,6 +13,7 @@
 
 #include "coreui_project.h"
 #include "cpp_assert.h"
+#include "draw_main_window.h"
 #include "style_update_styles.h"
 
 namespace vh::ponc {
@@ -27,14 +28,26 @@ auto App::GetWindowFlags() const -> ImGuiWindowFlags {
 }
 
 ///
+auto App::CanClose() -> bool {
+  Expects(app_.has_value());
+  return app_->CanClose();
+}
+
+///
 void App::OnStart() {
   style::UpdateStyle(ImGui::GetStyle());
 
-  app_.emplace(coreui::Project::Callbacks{
-      .name_changed = [safe_this = safe_owner_.MakeSafe(this)](auto file_name) {
-        const auto title = std::move(file_name) + " - PONC";
-        safe_this->SetTitle(title.c_str());
-      }});
+  app_.emplace(
+      coreui::Project::Callbacks{
+          .name_changed =
+              [safe_this = safe_owner_.MakeSafe(this)](auto file_name) {
+                const auto title = std::move(file_name) + " - PONC";
+                safe_this->SetTitle(title.c_str());
+              }},
+      draw::MainWindow::Callbacks{
+          .exit_confirmed = [safe_this = safe_owner_.MakeSafe(this)]() {
+            safe_this->Quit();
+          }});
 }
 
 ///

@@ -16,13 +16,26 @@ namespace vh::ponc::draw {
 class MainWindow {
  public:
   ///
-  void Draw(coreui::Project &project);
+  struct Callbacks {
+    ///
+    cpp::Signal<> exit_confirmed{};
+  };
+
+  ///
+  MainWindow();
+
+  ///
+  void Draw(const Callbacks &callbacks, coreui::Project &project);
+  ///
+  void OpenExitDialog();
 
  private:
   ///
   DiagramEditor diagram_editor_{};
   ///
   MainMenuBar main_menu_bar_{};
+  ///
+  QuestionDialog exit_dialog_;
 };
 }  // namespace vh::ponc::draw
 

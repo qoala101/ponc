@@ -15,16 +15,21 @@ namespace vh::ponc {
 class AppImpl {
  public:
   ///
-  explicit AppImpl(coreui::Project::Callbacks project_callbacks);
+  AppImpl(coreui::Project::Callbacks project_callbacks,
+          draw::MainWindow::Callbacks main_window_callbacks);
 
   ///
   void OnFrame();
+  ///
+  auto CanClose() -> bool;
 
  private:
   ///
   coreui::Project project_;
   ///
   draw::MainWindow main_window_{};
+  ///
+  draw::MainWindow::Callbacks main_window_callbacks_{};
 };
 }  // namespace vh::ponc
 

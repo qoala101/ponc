@@ -12,9 +12,19 @@
 
 namespace vh::ponc::draw {
 ///
-void MainWindow::Draw(coreui::Project& project) {
+MainWindow::MainWindow()
+    : exit_dialog_{{.title = "Exit",
+                    .question = "Current project would not be saved.\nProceed?",
+                    .accept = "Exit"}} {}
+
+///
+void MainWindow::Draw(const Callbacks& callbacks, coreui::Project& project) {
   diagram_editor_.Draw(project.GetDiagram());
   main_menu_bar_.Draw(project);
+  exit_dialog_.Draw({.accepted = callbacks.exit_confirmed});
   DrawRecentLog(project.GetLog(), main_menu_bar_.GetLogView());
 }
+
+///
+void MainWindow::OpenExitDialog() { exit_dialog_.Open(); }
 }  // namespace vh::ponc::draw

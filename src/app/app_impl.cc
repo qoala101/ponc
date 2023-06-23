@@ -16,31 +16,47 @@
 #include "app_input_family_group.h"
 #include "app_splitter_family_group.h"
 #include "core_i_family_group.h"
+#include "core_project.h"
 #include "coreui_project.h"
 
 namespace vh::ponc {
 ///
-AppImpl::AppImpl(coreui::Project::Callbacks project_callbacks)
-    : project_{
-          []() {
-            auto family_groups =
-                std::vector<std::unique_ptr<core::IFamilyGroup>>{};
-            family_groups.reserve(5);
+AppImpl::AppImpl(coreui::Project::Callbacks project_callbacks,
+                 draw::MainWindow::Callbacks main_window_callbacks)
+    : project_{[]() {
+                 auto family_groups =
+                     std::vector<std::unique_ptr<core::IFamilyGroup>>{};
+                 family_groups.reserve(5);
 
-            family_groups.emplace_back(std::make_unique<InputFamilyGroup>());
-            family_groups.emplace_back(std::make_unique<ClientFamilyGroup>());
-            family_groups.emplace_back(std::make_unique<SplitterFamilyGroup>());
-            family_groups.emplace_back(std::make_unique<CouplerFamilyGroup>());
-            family_groups.emplace_back(
-                std::make_unique<AttenuatorFamilyGroup>());
+                 family_groups.emplace_back(
+                     std::make_unique<InputFamilyGroup>());
+                 family_groups.emplace_back(
+                     std::make_unique<ClientFamilyGroup>());
+                 family_groups.emplace_back(
+                     std::make_unique<SplitterFamilyGroup>());
+                 family_groups.emplace_back(
+                     std::make_unique<CouplerFamilyGroup>());
+                 family_groups.emplace_back(
+                     std::make_unique<AttenuatorFamilyGroup>());
 
-            return family_groups;
-          }(),
-          std::move(project_callbacks)} {}
+                 return family_groups;
+               }(),
+               std::move(project_callbacks)},
+      main_window_callbacks_{std::move(main_window_callbacks)} {}
 
 ///
 void AppImpl::OnFrame() {
   project_.OnFrame();
-  main_window_.Draw(project_);
+  main_window_.Draw(main_window_callbacks_, project_);
+}
+
+///
+auto AppImpl::CanClose() -> bool {
+  if (core::Project::IsEmpty(project_.GetProject())) {
+    return true;
+  }
+
+  main_window_.OpenExitDialog();
+  return false;
 }
 }  // namespace vh::ponc
