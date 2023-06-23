@@ -7,6 +7,7 @@
 #ifndef VH_PONC_CORE_ID_GENERATOR_H_
 #define VH_PONC_CORE_ID_GENERATOR_H_
 
+#include <algorithm>  // IWYU pragma: keep
 #include <vector>
 
 #include "core_concepts.h"
