@@ -6,6 +6,8 @@
 
 #include "coreui_node_replacer.h"
 
+#include <algorithm>
+
 #include "coreui_project.h"
 
 namespace vh::ponc::coreui {
@@ -115,10 +117,9 @@ auto NodeReplacer::RewireUsedIds(
 }
 
 ///
-void NodeReplacer::ReuseSourceIds(
+auto NodeReplacer::GetFreeIds(
     std::vector<core::UnspecifiedIdValue> source_ids,
     std::vector<core::UnspecifiedIdValue> target_ids,
-    const std::vector<ne::PinId*>& ids_to_generate,
     std::vector<core::UnspecifiedIdValue> reusable_ids) const {
   std::sort(source_ids.begin(), source_ids.end());
   std::sort(reusable_ids.begin(), reusable_ids.end());
@@ -139,6 +140,18 @@ void NodeReplacer::ReuseSourceIds(
                                         id_generator.GetNextId());
   free_ids.erase(next_id, free_ids.cend());
 
+  return free_ids;
+}
+
+///
+void NodeReplacer::ReuseSourceIds(
+    std::vector<core::UnspecifiedIdValue> source_ids,
+    std::vector<core::UnspecifiedIdValue> target_ids,
+    std::vector<core::UnspecifiedIdValue> reusable_ids,
+    const std::vector<ne::PinId*>& ids_to_generate) const {
+  const auto free_ids = GetFreeIds(std::move(source_ids), std::move(target_ids),
+                                   std::move(reusable_ids));
+
   auto id_to_generate = ids_to_generate.cbegin();
   auto id_to_reuse = free_ids.cbegin();
 
@@ -146,9 +159,9 @@ void NodeReplacer::ReuseSourceIds(
          (id_to_reuse != free_ids.cend());
        ++id_to_generate, ++id_to_reuse) {
     **id_to_generate = *id_to_reuse;
-    target_ids.emplace_back(*id_to_reuse);
   }
 
+  auto& id_generator = parent_project_->GetProject().GetIdGenerator();
   auto prev_generated_id = id_generator.GetNextId() - 1;
 
   if (id_to_reuse != free_ids.cend()) {
@@ -178,7 +191,7 @@ auto NodeReplacer::ReplaceNode(
 
   ReuseSourceIds(core::INode::GetIds(source_node),
                  core::INode::GetIds(std::as_const(*target_node)),
-                 ids_to_generate, std::move(reusable_ids));
+                 std::move(reusable_ids), ids_to_generate);
 
   target_node->SetPos(source_node.GetPos());
 

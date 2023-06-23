@@ -37,10 +37,14 @@ class NodeReplacer {
                      const std::vector<ne::PinId> &source_output_pins,
                      core::INode &target_node) const;
   ///
+  auto GetFreeIds(std::vector<core::UnspecifiedIdValue> source_ids,
+                  std::vector<core::UnspecifiedIdValue> target_ids,
+                  std::vector<core::UnspecifiedIdValue> reusable_ids) const;
+  ///
   void ReuseSourceIds(std::vector<core::UnspecifiedIdValue> source_ids,
                       std::vector<core::UnspecifiedIdValue> target_ids,
-                      const std::vector<ne::PinId *> &ids_to_generate,
-                      std::vector<core::UnspecifiedIdValue> reusable_ids) const;
+                      std::vector<core::UnspecifiedIdValue> reusable_ids,
+                      const std::vector<ne::PinId *> &ids_to_generate) const;
 
   ///
   cpp::SafePtr<Project> parent_project_;
