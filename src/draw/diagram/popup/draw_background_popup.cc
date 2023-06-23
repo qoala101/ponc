@@ -12,9 +12,49 @@
 
 #include "coreui_diagram.h"
 #include "coreui_family.h"
+#include "draw_disable_if.h"
 #include "draw_family_groups_menu.h"
 
 namespace vh::ponc::draw {
+// ///
+// auto BackgroundPopup::DrawRenamePopup() {
+//   auto rename_confirmed = false;
+
+//   if (focus_name_input_) {
+//     ImGui::SetKeyboardFocusHere();
+//   }
+
+//   const auto name_is_empty = area_name_buffer_.AsTrimmed().empty();
+
+//   if (ImGui::InputText("##Diagram Name", area_name_buffer_.GetData(),
+//                        area_name_buffer_.GetSize(),
+//                        ImGuiInputTextFlags_AutoSelectAll |
+//                            ImGuiInputTextFlags_EnterReturnsTrue)) {
+//     if (!name_is_empty) {
+//       rename_confirmed = true;
+//     } else {
+//       ImGui::SetKeyboardFocusHere(-1);
+//     }
+//   }
+
+//   ImGui::SameLine();
+
+//   {
+//     const auto disable_scope = DisableIf(name_is_empty);
+
+//     if (ImGui::Button("OK")) {
+//       rename_confirmed = true;
+//     }
+//   }
+
+//   if (rename_confirmed) {
+//     ImGui::CloseCurrentPopup();
+//   }
+
+//   focus_name_input_ = false;
+//   return rename_confirmed;
+// }
+
 ///
 void BackgroundPopup::Draw(coreui::Diagram& diagram) {
   const auto content_scope = DrawContentScope("Create");
@@ -31,10 +71,15 @@ void BackgroundPopup::Draw(coreui::Diagram& diagram) {
         diagram.AddNode(std::move(new_node));
       }});
 
-  ImGui::Separator();
+  // ImGui::Separator();
 
-  if (ImGui::MenuItem("Area")) {
-  }
+  // if (ImGui::BeginMenu("Area")) {
+  //   if (const auto rename_confirmed = DrawRenamePopup()) {
+  //     diagram.CreateArea("Area", pos_);
+  //   }
+
+  //   ImGui::EndMenu();
+  // }
 }
 
 ///
