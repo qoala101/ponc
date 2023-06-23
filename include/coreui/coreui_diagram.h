@@ -28,6 +28,7 @@
 #include "coreui_linker.h"
 #include "coreui_node.h"
 #include "coreui_node_mover.h"
+#include "coreui_node_replacer.h"
 #include "coreui_pin.h"
 #include "cpp_safe_ptr.h"
 #include "flow_node_flow.h"
@@ -58,6 +59,8 @@ class Diagram {
   ///
   auto GetNodeMover() -> NodeMover &;
   ///
+  auto GetNodeReplacer() const -> const NodeReplacer &;
+  ///
   auto GetLinker() const -> const Linker &;
   ///
   auto GetLinker() -> Linker &;
@@ -77,15 +80,6 @@ class Diagram {
   void TreeSelect(const std::vector<ne::NodeId> &node_ids);
   ///
   void TreeArrange(const std::vector<ne::NodeId> &node_ids);
-  ///
-  auto CanReplaceNode(const core::INode &source_node,
-                      const core::INode &target_node) const -> bool;
-  ///
-  auto ReplaceNode(const core::INode &source_node,
-                   const std::vector<ne::PinId> &source_output_pins,
-                   std::unique_ptr<core::INode> target_node,
-                   std::vector<core::UnspecifiedIdValue> reusable_ids) const
-      -> Event &;
   ///
   auto GetLinks() const -> const std::vector<Link> &;
   ///
@@ -142,15 +136,6 @@ class Diagram {
   auto MoveConnectedLinkToNewFreePin(ne::PinId pin_id, ne::PinKind pin_kind,
                                      const coreui::Family &free_pin_family)
       -> Event &;
-  ///
-  auto RewireUsedIds(const core::INode &source_node,
-                     const std::vector<ne::PinId> &source_output_pins,
-                     core::INode &target_node) const;
-  ///
-  void ReuseSourceIds(std::vector<core::UnspecifiedIdValue> source_ids,
-                      std::vector<core::UnspecifiedIdValue> target_ids,
-                      const std::vector<ne::PinId *> &ids_to_generate,
-                      std::vector<core::UnspecifiedIdValue> reusable_ids) const;
 
   ///
   cpp::SafePtr<Project> parent_project_;
@@ -162,6 +147,8 @@ class Diagram {
   std::vector<flow::TreeNode> flow_trees_{};
   ///
   NodeMover node_mover_;
+  ///
+  NodeReplacer node_replacer_;
   ///
   Linker linker_;
   ///

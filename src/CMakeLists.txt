@@ -50,6 +50,7 @@ add_executable(ponc
   coreui/coreui_log.cc
   coreui/coreui_native_facade.cc
   coreui/coreui_node_mover.cc
+  coreui/coreui_node_replacer.cc
   coreui/coreui_node.cc
   coreui/coreui_project.cc
 

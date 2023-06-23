@@ -72,6 +72,7 @@ void ReplacePopup::SetNodeId(ne::NodeId node_id) { node_id_ = node_id; }
 void ReplacePopup::OnOpen(const coreui::Diagram& diagram) {
   const auto& node = core::Diagram::FindNode(diagram.GetDiagram(), node_id_);
   const auto node_family_id = node.GetFamilyId();
+  const auto& node_replacer = diagram.GetNodeReplacer();
 
   families_.clear();
   family_index_ = 0;
@@ -82,7 +83,7 @@ void ReplacePopup::OnOpen(const coreui::Diagram& diagram) {
     for (const auto& family : family_group.families) {
       const auto sample_node = family.GetFamily().CreateSampleNode();
 
-      if (!diagram.CanReplaceNode(node, *sample_node)) {
+      if (!node_replacer.CanReplaceNode(node, *sample_node)) {
         continue;
       }
 
@@ -135,8 +136,8 @@ void ReplacePopup::Replace(const coreui::Diagram& diagram) const {
   const auto& node = core::Diagram::FindNode(diagram.GetDiagram(), node_id_);
   const auto reusable_ids = core::INode::GetIds(std::as_const(*node_copy_));
 
-  diagram.ReplaceNode(node, node_copy_->GetOutputPinIds(), std::move(new_node),
-                      reusable_ids);
+  diagram.GetNodeReplacer().ReplaceNode(node, node_copy_->GetOutputPinIds(),
+                                        std::move(new_node), reusable_ids);
 }
 
 ///
@@ -144,7 +145,7 @@ void ReplacePopup::Cancel(const coreui::Diagram& diagram) {
   const auto& node = core::Diagram::FindNode(diagram.GetDiagram(), node_id_);
   const auto reusable_ids = core::INode::GetIds(std::as_const(*node_copy_));
 
-  diagram.ReplaceNode(node, node_copy_->GetOutputPinIds(),
-                      std::move(node_copy_), reusable_ids);
+  diagram.GetNodeReplacer().ReplaceNode(node, node_copy_->GetOutputPinIds(),
+                                        std::move(node_copy_), reusable_ids);
 }
 }  // namespace vh::ponc::draw
