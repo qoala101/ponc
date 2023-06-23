@@ -46,6 +46,9 @@ void IPopup::Open() {
 IPopup::IPopup() : id_{GenerateId()} {}
 
 ///
+void IPopup::OnOpen() const {}
+
+///
 auto IPopup::WasJustOpened() const -> bool { return just_opened_; }
 
 ///
@@ -53,6 +56,10 @@ auto IPopup::DrawContentScope(std::string_view title,
                               const Callbacks &callbacks)
     -> cpp::ScopeFunction {
   ne::Suspend();
+
+  if (just_opened_) {
+    OnOpen();
+  }
 
   if (ImGui::BeginPopup(IdLabel(id_).c_str())) {
     if (!title.empty()) {

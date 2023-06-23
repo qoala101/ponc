@@ -34,6 +34,9 @@ class ReplacePopup : public IPopup {
   };
 
   ///
+  void OnOpen() const override;
+
+  ///
   void OnOpen(const coreui::Diagram &diagram);
   ///
   auto FindSelectedFamily(

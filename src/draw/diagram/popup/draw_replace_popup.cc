@@ -69,6 +69,12 @@ void ReplacePopup::Draw(coreui::Diagram& diagram) {
 void ReplacePopup::SetNodeId(ne::NodeId node_id) { node_id_ = node_id; }
 
 ///
+void ReplacePopup::OnOpen() const {
+  ImGui::SetNextWindowPos(ImGui::GetMousePos(), ImGuiCond_Appearing,
+                          ImVec2{0.5, 1});
+}
+
+///
 void ReplacePopup::OnOpen(const coreui::Diagram& diagram) {
   const auto& node = core::Diagram::FindNode(diagram.GetDiagram(), node_id_);
   const auto node_family_id = node.GetFamilyId();

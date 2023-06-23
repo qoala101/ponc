@@ -37,6 +37,9 @@ class IPopup : public cpp::NonCopyable {
   IPopup();
 
   ///
+  virtual void OnOpen() const;
+
+  ///
   auto WasJustOpened() const -> bool;
   ///
   auto DrawContentScope(std::string_view title = {},
