@@ -15,36 +15,36 @@
 #include "core_i_node.h"
 
 namespace vh::ponc::draw {
-namespace {
-void DrawAreaZoomedOutLabel(core::INode &area_node) {
-  if (ne::BeginGroupHint(area_node.GetId())) {
-    auto bgAlpha = static_cast<int>(ImGui::GetStyle().Alpha * 255);
+// namespace {
+// void DrawAreaZoomedOutLabel(core::INode &area_node) {
+//   if (ne::BeginGroupHint(area_node.GetId())) {
+//     auto bgAlpha = static_cast<int>(ImGui::GetStyle().Alpha * 255);
 
-    auto min = ne::GetGroupMin();
-    // auto max = ne::GetGroupMax();
+//     auto min = ne::GetGroupMin();
+//     // auto max = ne::GetGroupMax();
 
-    ImGui::SetCursorScreenPos(
-        min - ImVec2(-8, ImGui::GetTextLineHeightWithSpacing() + 4));
-    ImGui::BeginGroup();
-    ImGui::TextUnformatted("Node name");
-    ImGui::EndGroup();
+//     ImGui::SetCursorScreenPos(
+//         min - ImVec2(-8, ImGui::GetTextLineHeightWithSpacing() + 4));
+//     ImGui::BeginGroup();
+//     ImGui::TextUnformatted("Node name");
+//     ImGui::EndGroup();
 
-    auto drawList = ne::GetHintBackgroundDrawList();
+//     auto drawList = ne::GetHintBackgroundDrawList();
 
-    auto hintBounds = ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
-    auto hintFrameBounds = hintBounds;
-    hintFrameBounds.Expand(ImVec2{8, 4});
+//     auto hintBounds = ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
+//     auto hintFrameBounds = hintBounds;
+//     hintFrameBounds.Expand(ImVec2{8, 4});
 
-    drawList->AddRectFilled(hintFrameBounds.GetTL(), hintFrameBounds.GetBR(),
-                            IM_COL32(255, 255, 255, 64 * bgAlpha / 255), 4.0f);
+//     drawList->AddRectFilled(hintFrameBounds.GetTL(), hintFrameBounds.GetBR(),
+//                             IM_COL32(255, 255, 255, 64 * bgAlpha / 255), 4.0f);
 
-    drawList->AddRect(hintFrameBounds.GetTL(), hintFrameBounds.GetBR(),
-                      IM_COL32(255, 255, 255, 128 * bgAlpha / 255), 4.0f);
-  }
+//     drawList->AddRect(hintFrameBounds.GetTL(), hintFrameBounds.GetBR(),
+//                       IM_COL32(255, 255, 255, 128 * bgAlpha / 255), 4.0f);
+//   }
 
-  ne::EndGroupHint();
-}
-}  // namespace
+//   ne::EndGroupHint();
+// }
+// }  // namespace
 
 void DrawArea(core::Area &area, coreui::NodeMover &node_mover) {
   return;
