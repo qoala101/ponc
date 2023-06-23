@@ -10,9 +10,13 @@
 #include <imgui_node_editor.h>
 
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "core_i_family.h"
+#include "core_i_node.h"
 #include "coreui_diagram.h"
+#include "coreui_family.h"
 #include "draw_i_popup.h"
 
 namespace vh::ponc::draw {

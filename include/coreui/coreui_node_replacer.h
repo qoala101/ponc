@@ -7,7 +7,13 @@
 #ifndef VH_PONC_COREUI_NODE_REPLACER_H_
 #define VH_PONC_COREUI_NODE_REPLACER_H_
 
+#include <imgui_node_editor.h>
+
+#include <memory>
+#include <vector>
+
 #include "core_i_node.h"
+#include "core_id_value.h"
 #include "coreui_event.h"
 #include "cpp_safe_ptr.h"
 

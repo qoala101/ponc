@@ -6,6 +6,8 @@
 
 #include "calc_calculation_task.h"
 
+#include <cxxabi.h>
+
 #include <chrono>
 #include <functional>
 #include <system_error>

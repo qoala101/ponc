@@ -18,6 +18,7 @@
 #include <utility>
 #include <vector>
 
+#include "core_area.h"
 #include "coreui_i_node_traits.h"  // IWYU pragma: keep
 
 #define IMGUI_DEFINE_MATH_OPERATORS

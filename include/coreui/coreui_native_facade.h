@@ -9,6 +9,7 @@
 
 #include <imgui_node_editor.h>
 
+#include <utility>
 #include <vector>
 
 #include "cpp_static_api.h"

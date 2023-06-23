@@ -12,7 +12,6 @@
 
 #include "coreui_diagram.h"
 #include "coreui_family.h"
-#include "draw_disable_if.h"
 #include "draw_family_groups_menu.h"
 
 namespace vh::ponc::draw {

@@ -9,7 +9,6 @@
 #include <imgui_node_editor.h>
 #include <imgui_node_editor_internal.h>
 
-#include <algorithm>
 #include <concepts>
 
 #include "core_concepts.h"

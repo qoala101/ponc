@@ -12,6 +12,7 @@
 
 #include "core_diagram.h"
 #include "core_i_family.h"
+#include "core_i_node.h"
 #include "core_id_generator.h"
 #include "core_id_ptr.h"
 #include "cpp_static_api.h"

@@ -8,8 +8,6 @@
 
 #include <crude_json.h>
 
-#include <memory>
-
 #include "json_id_serializer.h"
 
 namespace vh::ponc::json {

@@ -6,6 +6,7 @@
 
 #include <crude_json.h>
 
+#include <algorithm>
 #include <memory>
 
 #include "core_i_family.h"

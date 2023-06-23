@@ -11,13 +11,12 @@
 #include <imgui_node_editor.h>
 
 #include <memory>
+#include <string>
 #include <vector>
 
-#include "core_area.h"
 #include "core_diagram.h"
 #include "core_i_family.h"
 #include "core_i_node.h"
-#include "core_id_value.h"
 #include "core_link.h"
 #include "coreui_event.h"
 #include "coreui_family.h"

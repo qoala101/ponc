@@ -7,7 +7,17 @@
 #include "coreui_node_replacer.h"
 
 #include <algorithm>
+#include <compare>
+#include <iterator>
+#include <optional>
+#include <utility>
 
+#include "core_diagram.h"
+#include "core_i_family.h"
+#include "core_id_generator.h"
+#include "core_project.h"
+#include "coreui_diagram.h"
+#include "coreui_event_loop.h"
 #include "coreui_project.h"
 
 namespace vh::ponc::coreui {

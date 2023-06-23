@@ -11,24 +11,8 @@
 #include <imgui_internal.h>
 #include <imgui_node_editor.h>
 
-#include <optional>
-#include <string>
-#include <unordered_map>
-#include <variant>
-#include <vector>
-
 #include "core_area.h"
 #include "core_i_node.h"
-#include "core_id_value.h"
-#include "coreui_i_pin_traits.h"
-#include "coreui_node.h"
-#include "coreui_pin.h"
-#include "cpp_assert.h"
-#include "cpp_scope.h"
-#include "draw_colored_text.h"
-#include "draw_flow_icon.h"
-#include "draw_node.h"
-#include "style_utils.h"
 
 namespace vh::ponc::draw {
 namespace {

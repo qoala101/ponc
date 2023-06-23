@@ -14,6 +14,7 @@
 #include <utility>
 #include <vector>
 
+#include "core_area.h"
 #include "core_diagram.h"
 #include "core_i_node.h"
 #include "core_id_generator.h"

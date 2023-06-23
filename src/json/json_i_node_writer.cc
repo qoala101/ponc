@@ -10,6 +10,7 @@
 #include <imgui.h>
 #include <imgui_node_editor.h>
 
+#include <algorithm>
 #include <memory>
 
 #include "core_i_node.h"

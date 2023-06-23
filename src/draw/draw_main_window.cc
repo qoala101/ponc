@@ -6,6 +6,8 @@
 
 #include "draw_main_window.h"
 
+#include <string>
+
 #include "draw_diagram_editor.h"
 #include "draw_main_menu_bar.h"
 #include "draw_recent_log.h"

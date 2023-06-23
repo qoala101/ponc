@@ -9,17 +9,20 @@
 #include <imgui.h>
 #include <imgui_node_editor.h>
 
+#include <algorithm>
 #include <memory>
 #include <regex>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "core_diagram.h"
 #include "core_i_node.h"
+#include "core_id_value.h"
 #include "coreui_cloner.h"
 #include "coreui_family.h"
+#include "coreui_node_replacer.h"
 #include "cpp_assert.h"
-#include "draw_disable_if.h"
 
 namespace vh::ponc::draw {
 namespace {

@@ -6,7 +6,9 @@
 
 #include "draw_string_buffer.h"
 
+#include <algorithm>
 #include <string>
+#include <utility>
 
 namespace vh::ponc::draw {
 ///

@@ -9,9 +9,8 @@
 #include <stack>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 
-#include "core_id_ptr.h"
+#include "core_area.h"
 #include "core_id_value.h"
 #include "coreui_event_loop.h"
 #include "coreui_flow_tree_node.h"

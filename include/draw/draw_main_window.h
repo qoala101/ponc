@@ -8,8 +8,10 @@
 #define VH_PONC_DRAW_MAIN_WINDOW_H_
 
 #include "coreui_project.h"
+#include "cpp_callbacks.h"
 #include "draw_diagram_editor.h"
 #include "draw_main_menu_bar.h"
+#include "draw_question_dialog.h"
 
 namespace vh::ponc::draw {
 ///

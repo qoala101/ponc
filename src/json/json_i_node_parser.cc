@@ -9,6 +9,8 @@
 #include <crude_json.h>
 #include <imgui_node_editor.h>
 
+#include <algorithm>
+
 #include "core_i_family.h"
 #include "core_i_node.h"
 #include "json_container_serializer.h"
