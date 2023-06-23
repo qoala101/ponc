@@ -76,9 +76,9 @@ auto Calculator::GetProgress() const -> float {
   }
 
   const auto min_output = *unique_outputs_.cbegin();
-  const auto max_output = *std::prev(unique_outputs_.cend());
+  const auto max_output = *unique_outputs_.crbegin();
   const auto working_on_output =
-      std::clamp(std::prev(best_trees_.cend())->first, min_output, max_output);
+      std::clamp(best_trees_.crbegin()->first, min_output, max_output);
 
   return static_cast<float>(working_on_output - min_output) /
          static_cast<float>(max_output - min_output);
@@ -93,7 +93,7 @@ auto Calculator::TakeResult() -> std::vector<TreeNode> {
   }
 
   Expects(!best_output_trees->second.empty());
-  const auto best_output_tree = std::prev(best_output_trees->second.cend());
+  const auto best_output_tree = best_output_trees->second.crbegin();
 
   Expects(best_output_tree->second.outputs.size() == input_nodes_.size());
 
@@ -111,7 +111,7 @@ auto Calculator::TakeResult() -> std::vector<TreeNode> {
       continue;
     }
 
-    calculated_trees.emplace_back(std::move(calculated_tree->second));
+    calculated_trees.emplace_back(calculated_tree->second);
   }
 
   return calculated_trees;

@@ -17,6 +17,7 @@
 #include "core_diagram.h"
 #include "core_i_family.h"
 #include "core_i_node.h"
+#include "core_id_value.h"
 #include "core_link.h"
 #include "coreui_event.h"
 #include "coreui_family.h"
@@ -82,7 +83,9 @@ class Diagram {
   ///
   auto ReplaceNode(const core::INode &source_node,
                    const std::vector<ne::PinId> &source_output_pins,
-                   std::unique_ptr<core::INode> target_node) const -> Event &;
+                   std::unique_ptr<core::INode> target_node,
+                   std::vector<core::UnspecifiedIdValue> reusable_ids) const
+      -> Event &;
   ///
   auto GetLinks() const -> const std::vector<Link> &;
   ///
@@ -146,7 +149,8 @@ class Diagram {
   ///
   void ReuseSourceIds(std::vector<core::UnspecifiedIdValue> source_ids,
                       std::vector<core::UnspecifiedIdValue> target_ids,
-                      const std::vector<ne::PinId *> &ids_to_generate) const;
+                      const std::vector<ne::PinId *> &ids_to_generate,
+                      std::vector<core::UnspecifiedIdValue> reusable_ids) const;
 
   ///
   cpp::SafePtr<Project> parent_project_;

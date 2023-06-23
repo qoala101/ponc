@@ -258,7 +258,7 @@ auto NodeMover::CalculateArrangedChildrenY(
       GetOtherPinPos(first_output_pin).y - GetTreeRect(first_child).Min.y;
 
   const auto [last_output_pin, last_child] =
-      *std::prev(parent_trees.back().child_nodes.cend());
+      *parent_trees.back().child_nodes.crbegin();
   const auto last_input_pin_to_tree_bot_distance =
       GetTreeRect(last_child).Max.y - GetOtherPinPos(last_output_pin).y;
 
@@ -275,7 +275,7 @@ auto NodeMover::CalculateArrangedChildrenY(
         const auto& [first_pin, first_child] =
             *output_tree_parent.child_nodes.cbegin();
         const auto [last_pin, last_child] =
-            *std::prev(output_tree_parent.child_nodes.cend());
+            *output_tree_parent.child_nodes.crbegin();
 
         return height + GetTreeRect(last_child).Max.y -
                GetTreeRect(first_child).Min.y;
@@ -419,7 +419,7 @@ void NodeMover::ArrangeAsNewTrees(
     MoveChildTreesTo(output_tree_parent, ImVec2{next_child_x, next_child_y});
 
     Expects(!output_tree_parent.child_nodes.empty());
-    const auto last_child = std::prev(output_tree_parent.child_nodes.cend());
+    const auto last_child = output_tree_parent.child_nodes.crbegin();
 
     next_child_y = GetTreeRect(last_child->second).Max.y +
                    static_cast<float>(settings_->arrange_vertical_spacing);

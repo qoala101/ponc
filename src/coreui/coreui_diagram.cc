@@ -306,8 +306,11 @@ auto Diagram::RewireUsedIds(const core::INode& source_node,
 
   if (target_ids.input_pin_id.has_value()) {
     const auto source_input_pin = source_node.GetInputPinId();
+    const auto source_input_is_linked =
+        source_input_pin.has_value() &&
+        core::Diagram::HasLink(*diagram_, *source_input_pin);
 
-    if (source_input_pin.has_value()) {
+    if (source_input_is_linked) {
       **target_ids.input_pin_id = *source_input_pin;
     } else {
       **target_ids.input_pin_id = core::UnspecifiedIdValue{};
@@ -360,34 +363,41 @@ auto Diagram::RewireUsedIds(const core::INode& source_node,
 void Diagram::ReuseSourceIds(
     std::vector<core::UnspecifiedIdValue> source_ids,
     std::vector<core::UnspecifiedIdValue> target_ids,
-    const std::vector<ne::PinId*>& ids_to_generate) const {
+    const std::vector<ne::PinId*>& ids_to_generate,
+    std::vector<core::UnspecifiedIdValue> reusable_ids) const {
   std::sort(source_ids.begin(), source_ids.end());
+  std::sort(reusable_ids.begin(), reusable_ids.end());
+
+  auto all_reusable_ids = std::vector<core::UnspecifiedIdValue>{};
+  std::set_union(source_ids.cbegin(), source_ids.cend(), reusable_ids.cbegin(),
+                 reusable_ids.cend(), std::back_inserter(all_reusable_ids));
+
   std::sort(target_ids.begin(), target_ids.end());
 
-  auto common_item_ids = std::vector<core::UnspecifiedIdValue>{};
-  std::set_intersection(source_ids.cbegin(), source_ids.cend(),
-                        target_ids.cbegin(), target_ids.cend(),
-                        std::back_inserter(common_item_ids));
-  Expects(!common_item_ids.empty());
-
-  const auto biggest_common_id = std::lower_bound(
-      source_ids.cbegin(), source_ids.cend(), common_item_ids.back());
-  Expects(biggest_common_id != source_ids.cend());
-
-  auto id_to_generate = ids_to_generate.cbegin();
-  auto id_to_reuse = std::next(biggest_common_id);
-
-  for (; (id_to_generate != ids_to_generate.cend()) &&
-         (id_to_reuse != source_ids.cend());
-       ++id_to_generate, ++id_to_reuse) {
-    **id_to_generate = *id_to_reuse;
-  }
+  auto free_ids = std::vector<core::UnspecifiedIdValue>{};
+  std::set_difference(all_reusable_ids.cbegin(), all_reusable_ids.cend(),
+                      target_ids.cbegin(), target_ids.cend(),
+                      std::back_inserter(free_ids));
 
   auto& id_generator = parent_project_->GetProject().GetIdGenerator();
+  const auto next_id = std::lower_bound(free_ids.cbegin(), free_ids.cend(),
+                                        id_generator.GetNextId());
+  free_ids.erase(next_id, free_ids.cend());
+
+  auto id_to_generate = ids_to_generate.cbegin();
+  auto id_to_reuse = free_ids.cbegin();
+
+  for (; (id_to_generate != ids_to_generate.cend()) &&
+         (id_to_reuse != free_ids.cend());
+       ++id_to_generate, ++id_to_reuse) {
+    **id_to_generate = *id_to_reuse;
+    target_ids.emplace_back(*id_to_reuse);
+  }
+
   auto prev_generated_id = id_generator.GetNextId() - 1;
 
-  if (id_to_reuse != source_ids.cend()) {
-    for (auto unused_id = source_ids.cend() - 1;
+  if (id_to_reuse != free_ids.cend()) {
+    for (auto unused_id = free_ids.cend() - 1;
          (unused_id >= id_to_reuse) && (*unused_id == prev_generated_id);
          --unused_id, --prev_generated_id) {
     }
@@ -403,16 +413,17 @@ void Diagram::ReuseSourceIds(
 }
 
 ///
-auto Diagram::ReplaceNode(const core::INode& source_node,
-                          const std::vector<ne::PinId>& source_output_pins,
-                          std::unique_ptr<core::INode> target_node) const
-    -> Event& {
+auto Diagram::ReplaceNode(
+    const core::INode& source_node,
+    const std::vector<ne::PinId>& source_output_pins,
+    std::unique_ptr<core::INode> target_node,
+    std::vector<core::UnspecifiedIdValue> reusable_ids) const -> Event& {
   const auto ids_to_generate =
       RewireUsedIds(source_node, source_output_pins, *target_node);
 
   ReuseSourceIds(core::INode::GetIds(source_node),
                  core::INode::GetIds(std::as_const(*target_node)),
-                 ids_to_generate);
+                 ids_to_generate, std::move(reusable_ids));
 
   target_node->SetPos(source_node.GetPos());
 
