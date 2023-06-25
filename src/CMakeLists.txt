@@ -56,6 +56,7 @@ add_executable(ponc
 
   cpp/cpp_scope_function.cc
 
+  draw/diagram/popup/draw_area_popup.cc
   draw/diagram/popup/draw_connect_node_popup.cc
   draw/diagram/popup/draw_background_popup.cc
   draw/diagram/popup/draw_family_groups_menu.cc

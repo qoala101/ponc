@@ -88,21 +88,7 @@ void NodePopup::Draw(coreui::Diagram& diagram) {
   }
 
   if (selected_nodes.empty()) {
-    if (ImGui::MenuItem("Delete")) {
-    }
-
-    if (selected_areas.size() > 1) {
-      return;
-    }
-
-    ImGui::Separator();
-
-    if (ImGui::MenuItem("Rename")) {
-    }
-
-    if (ImGui::MenuItem("Unlock")) {
-    }
-
+    area_popup_.Draw(selected_areas, diagram);
     return;
   }
 

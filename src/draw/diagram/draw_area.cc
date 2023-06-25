@@ -47,8 +47,6 @@ namespace vh::ponc::draw {
 // }  // namespace
 
 void DrawArea(core::Area &area, coreui::NodeMover &node_mover) {
-  return;
-
   const float commentAlpha = 0.75f;
   const auto node_id = area.id;
   const auto node_size = area.size;
