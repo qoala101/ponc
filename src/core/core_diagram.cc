@@ -108,8 +108,14 @@ auto Diagram::HasLink(const Diagram& diagram, ne::PinId pin_id) -> bool {
 ///
 auto Diagram::FindArea(const Diagram& diagram, ne::NodeId node_id)
     -> const Area& {
+  // NOLINTNEXTLINE(*-const-cast)
+  return FindArea(const_cast<Diagram&>(diagram), node_id);
+}
+
+///
+auto Diagram::FindArea(Diagram& diagram, ne::NodeId node_id) -> Area& {
   const auto area =
-      std::find_if(diagram.areas_.cbegin(), diagram.areas_.cend(),
+      std::find_if(diagram.areas_.begin(), diagram.areas_.end(),
                    [node_id](const auto& area) { return area.id == node_id; });
 
   Expects(area != diagram.areas_.cend());

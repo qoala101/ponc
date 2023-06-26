@@ -92,15 +92,27 @@ void NodePopup::Draw(coreui::Diagram& diagram) {
     return;
   }
 
+  auto delete_selected = false;
+
   if (ImGui::MenuItem("Delete")) {
+    delete_selected = true;
+
     for (const auto node_id : selected_nodes) {
       diagram.DeleteNode(node_id);
     }
   }
 
   if (ImGui::MenuItem("Delete With Links")) {
+    delete_selected = true;
+
     for (const auto node_id : selected_nodes) {
       diagram.DeleteNodeWithLinks(node_id);
+    }
+  }
+
+  if (delete_selected) {
+    for (const auto node_id : selected_areas) {
+      diagram.DeleteArea(node_id);
     }
   }
 

@@ -60,7 +60,7 @@ void DrawArea(core::Area &area, coreui::NodeMover &node_mover) {
   ImGui::BeginVertical("content");
   ImGui::BeginHorizontal("horizontal");
   ImGui::Spring(1);
-  ImGui::TextUnformatted("Comment text");
+  ImGui::TextUnformatted(area.name.c_str());
   ImGui::Spring(1);
   ImGui::EndHorizontal();
   ne::Group(node_size);

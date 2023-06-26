@@ -47,6 +47,8 @@ class Diagram {
   ///
   static auto FindArea(const Diagram &diagram, ne::NodeId node_id)
       -> const Area &;
+  ///
+  static auto FindArea(Diagram &diagram, ne::NodeId node_id) -> Area &;
 
   ///
   auto GetName() const -> const std::string &;
