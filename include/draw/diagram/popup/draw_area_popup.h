@@ -10,14 +10,26 @@
 #include <imgui_node_editor.h>
 
 #include "coreui_diagram.h"
+#include "cpp_callbacks.h"
+#include "draw_string_buffer.h"
 
 namespace vh::ponc::draw {
 ///
 class AreaPopup {
  public:
   ///
+  struct Callbacks {
+    ///
+    cpp::Query<bool> was_just_opened{};
+  };
+
+  ///
   void Draw(const std::vector<ne::NodeId> &selected_areas,
-            coreui::Diagram &diagram);
+            coreui::Diagram &diagram, const Callbacks &callbacks);
+
+ private:
+  ///
+  StringBuffer rename_buffer_{};
 };
 }  // namespace vh::ponc::draw
 

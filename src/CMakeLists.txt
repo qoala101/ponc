@@ -96,6 +96,7 @@ add_executable(ponc
   draw/draw_main_menu_bar.cc
   draw/draw_main_window.cc
   draw/draw_recent_log.cc
+  draw/draw_rename_widget.cc
   draw/draw_string_buffer.cc
 
   flow/flow_algorithms.cc

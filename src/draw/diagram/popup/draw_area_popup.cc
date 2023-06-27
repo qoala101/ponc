@@ -6,10 +6,15 @@
 
 #include "draw_area_popup.h"
 
+#include <imgui.h>
+
+#include "core_diagram.h"
+#include "draw_rename_widget.h"
+
 namespace vh::ponc::draw {
 ///
 void AreaPopup::Draw(const std::vector<ne::NodeId> &selected_areas,
-                     coreui::Diagram &diagram) {
+                     coreui::Diagram &diagram, const Callbacks &callbacks) {
   if (ImGui::MenuItem("Delete")) {
     for (const auto area_id : selected_areas) {
       diagram.DeleteArea(area_id);
@@ -22,8 +27,20 @@ void AreaPopup::Draw(const std::vector<ne::NodeId> &selected_areas,
 
   ImGui::Separator();
 
-  if (ImGui::MenuItem("Rename")) {
-    // TODO(vh)
+  auto &area =
+      core::Diagram::FindArea(diagram.GetDiagram(), selected_areas.front());
+
+  if (callbacks.was_just_opened()) {
+    rename_buffer_.Set(area.name);
+  }
+
+  if (ImGui::BeginMenu("Rename")) {
+    if (const auto rename_confirmed =
+            DrawRenameWidget("##Area Name", rename_buffer_)) {
+      area.name = rename_buffer_.AsTrimmed();
+    }
+
+    ImGui::EndMenu();
   }
 
   if (ImGui::MenuItem("Unlock")) {

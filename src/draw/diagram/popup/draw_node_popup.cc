@@ -88,7 +88,8 @@ void NodePopup::Draw(coreui::Diagram& diagram) {
   }
 
   if (selected_nodes.empty()) {
-    area_popup_.Draw(selected_areas, diagram);
+    area_popup_.Draw(selected_areas, diagram,
+                     {.was_just_opened = [this]() { return WasJustOpened(); }});
     return;
   }
 
