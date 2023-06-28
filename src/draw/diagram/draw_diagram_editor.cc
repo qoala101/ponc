@@ -129,7 +129,9 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
   node_id = ne::GetDoubleClickedNode();
 
   if (node_id != ne::NodeId::Invalid) {
-    node_double_clicked = true;
+    if (!coreui::NativeFacade::IsArea(node_id)) {
+      node_double_clicked = true;
+    }
   } else {
     const auto double_clicked_pin = ne::GetDoubleClickedPin();
 

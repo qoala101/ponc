@@ -20,6 +20,8 @@ namespace vh::ponc::coreui {
 ///
 struct NativeFacade : public cpp::StaticApi {
   ///
+  static auto IsArea(ne::NodeId node_id) -> bool;
+  ///
   static auto GetSelectedNodes() -> std::vector<ne::NodeId>;
   ///
   static auto GetSelectedNodesAndAreas()

@@ -30,21 +30,31 @@ auto GetSelectedItems(const std::invocable<T*, int> auto& selector) {
 }
 
 ///
-void LeaveNodesOfType(ne::Detail::NodeType node_type,
-                      std::vector<ne::NodeId>& node_ids) {
+auto IsNodeOfType(ne::NodeId node_id, ne::Detail::NodeType node_type) {
   auto* editor =
       // NOLINTNEXTLINE(*-reinterpret-cast)
       reinterpret_cast<ne::Detail::EditorContext*>(ne::GetCurrentEditor());
   Expects(editor != nullptr);
 
-  std::erase_if(node_ids, [node_type, editor](const auto node_id) {
-    const auto* node = editor->FindNode(node_id);
-    Expects(node != nullptr);
+  const auto* node = editor->FindNode(node_id);
+  Expects(node != nullptr);
 
-    return node->m_Type != node_type;
+  return node->m_Type == node_type;
+}
+
+///
+void LeaveNodesOfType(ne::Detail::NodeType node_type,
+                      std::vector<ne::NodeId>& node_ids) {
+  std::erase_if(node_ids, [node_type](const auto node_id) {
+    return !IsNodeOfType(node_id, node_type);
   });
 }
 }  // namespace
+
+///
+auto NativeFacade::IsArea(ne::NodeId node_id) -> bool {
+  return IsNodeOfType(node_id, ne::Detail::NodeType::Group);
+}
 
 ///
 auto NativeFacade::GetSelectedNodes() -> std::vector<ne::NodeId> {
