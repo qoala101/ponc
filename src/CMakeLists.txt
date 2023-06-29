@@ -103,6 +103,7 @@ add_executable(ponc
   flow/flow_node_flow.cc
   flow/flow_tree_traversal.cc
 
+  json/json_area_serializer.cc
   json/json_diagram_serializer.cc
   json/json_i_family_parser.cc
   json/json_i_family_writer.cc

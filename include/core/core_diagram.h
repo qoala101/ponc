@@ -26,7 +26,7 @@ class Diagram {
   ///
   explicit Diagram(std::string name = {},
                    std::vector<std::unique_ptr<INode>> nodes = {},
-                   std::vector<Link> links = {});
+                   std::vector<Link> links = {}, std::vector<Area> areas = {});
 
   ///
   static auto GetIds(Diagram &diagram) -> std::vector<IdPtr>;

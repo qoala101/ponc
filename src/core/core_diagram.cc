@@ -20,10 +20,11 @@
 namespace vh::ponc::core {
 ///
 Diagram::Diagram(std::string name, std::vector<std::unique_ptr<INode>> nodes,
-                 std::vector<Link> links)
+                 std::vector<Link> links, std::vector<Area> areas)
     : name_{std::move(name)},
       nodes_{std::move(nodes)},
-      links_{std::move(links)} {}
+      links_{std::move(links)},
+      areas_{std::move(areas)} {}
 
 ///
 auto Diagram::GetIds(Diagram& diagram) -> std::vector<IdPtr> {
