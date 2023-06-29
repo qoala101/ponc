@@ -18,13 +18,15 @@ namespace vh::ponc::json {
 ///
 auto AreaSerializer::ParseFromJson(const crude_json::value& json)
     -> core::Area {
-  return {
-      .id = IdSerializer::ParseFromJson<ne::NodeId>(json["id"]),
-      .name = json["name"].get<crude_json::string>(),
-      .pos = {static_cast<float>(json["pos_x"].get<crude_json::number>()),
-              static_cast<float>(json["pos_y"].get<crude_json::number>())},
-      .size = {static_cast<float>(json["size_x"].get<crude_json::number>()),
-               static_cast<float>(json["size_y"].get<crude_json::number>())}};
+  const auto& pos = json["pos"].get<crude_json::array>();
+  const auto& size = json["size"].get<crude_json::array>();
+
+  return {.id = IdSerializer::ParseFromJson<ne::NodeId>(json["id"]),
+          .name = json["name"].get<crude_json::string>(),
+          .pos = {static_cast<float>(pos[0].get<crude_json::number>()),
+                  static_cast<float>(pos[1].get<crude_json::number>())},
+          .size = {static_cast<float>(size[0].get<crude_json::number>()),
+                   static_cast<float>(size[1].get<crude_json::number>())}};
 }
 
 ///
@@ -32,10 +34,8 @@ auto AreaSerializer::WriteToJson(const core::Area& area) -> crude_json::value {
   auto json = crude_json::value{};
   json["id"] = IdSerializer::WriteToJson(area.id);
   json["name"] = area.name;
-  json["pos_x"] = area.pos.x;
-  json["pos_y"] = area.pos.y;
-  json["size_x"] = area.size.x;
-  json["size_y"] = area.size.y;
+  json["pos"] = crude_json::array{area.pos.x, area.pos.y};
+  json["size"] = crude_json::array{area.size.x, area.size.y};
   return json;
 }
 }  // namespace vh::ponc::json

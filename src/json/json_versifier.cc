@@ -7,6 +7,7 @@
 #include "json_versifier.h"
 
 #include <crude_json.h>
+#include <imgui.h>
 
 #include <type_traits>
 #include <vector>
@@ -88,6 +89,15 @@ void Upgrade2(crude_json::value& project_json) {
 
   for (auto& diagram_json : diagrams_json) {
     MakeArray(diagram_json["areas"]);
+
+    auto& nodes_array = diagram_json["nodes"].get<crude_json::array>();
+
+    for (auto& node_json : nodes_array) {
+      const auto pos = ImVec2{
+          static_cast<float>(node_json["pos_x"].get<crude_json::number>()),
+          static_cast<float>(node_json["pos_y"].get<crude_json::number>())};
+      node_json["pos"] = crude_json::array{pos.x, pos.y};
+    }
   }
 }
 
