@@ -83,7 +83,16 @@ void Upgrade1(crude_json::value& project_json) {
 }
 
 ///
-void Upgrade2(crude_json::value& /*unused*/) {
+void Upgrade2(crude_json::value& project_json) {
+  auto& diagrams_json = project_json["diagrams"].get<crude_json::array>();
+
+  for (auto& diagram_json : diagrams_json) {
+    MakeArray(diagram_json["areas"]);
+  }
+}
+
+///
+void Upgrade3(crude_json::value& /*unused*/) {
   // vh: Implement when adding new version.
 }
 }  // namespace
@@ -109,8 +118,10 @@ void Versifier::UpgradeToCurrentVersion(crude_json::value& project_json) {
       Upgrade0(project_json);
     case Version::kCalculator:
       Upgrade1(project_json);
-    case Version::kAreas:
+    case Version::kSlider:
       Upgrade2(project_json);
+    case Version::kAreas:
+      Upgrade3(project_json);
     default:
       break;
   }
