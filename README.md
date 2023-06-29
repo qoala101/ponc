@@ -55,12 +55,16 @@ The resulting network layouts are then implemented by the field engineers using 
 
 ### Linux
 
-- OpenGL
+- OpenGL support
 
 ### Windows
 
-- Windows 7
-- DirectX 11
+- Windows 7 SP1 or newer
+- DirectX 11 support
+
+Windows 7 might also require
+- [Latest C++ runtime](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)
+- [D3DCompiler_47.dll fix](https://support.microsoft.com/en-us/topic/the-net-framework-4-7-installation-is-blocked-on-windows-7-windows-server-2008-r2-and-windows-server-2012-because-of-a-missing-d3dcompiler-update-0869046a-0972-7824-1bb8-5d89bf99e112)
 
 No installation is required. Unpack the release archive and run the executable.
 
