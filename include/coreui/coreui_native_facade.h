@@ -7,6 +7,7 @@
 #ifndef VH_PONC_COREUI_NATIVE_FACADE_H_
 #define VH_PONC_COREUI_NATIVE_FACADE_H_
 
+#include <imgui.h>
 #include <imgui_node_editor.h>
 
 #include <utility>
@@ -21,6 +22,8 @@ namespace vh::ponc::coreui {
 struct NativeFacade : public cpp::StaticApi {
   ///
   static auto IsArea(ne::NodeId node_id) -> bool;
+  ///
+  static auto GetAreaSize(ne::NodeId node_id) -> ImVec2;
   ///
   static auto GetSelectedNodes() -> std::vector<ne::NodeId>;
   ///

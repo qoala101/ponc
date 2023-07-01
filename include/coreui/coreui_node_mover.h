@@ -110,6 +110,7 @@ class NodeMover {
   ///
   std::unordered_set<core::IdValue<ne::NodeId>> areas_to_move_{};
   ///
+  // TODO(vh): Those are never cleared.
   std::unordered_map<core::IdValue<ne::NodeId>, ImVec2> item_sizes_{};
   ///
   std::unordered_map<core::IdValue<ne::PinId>, ImVec2> pin_poses_{};

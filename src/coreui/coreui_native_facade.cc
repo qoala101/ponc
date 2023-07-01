@@ -30,7 +30,7 @@ auto GetSelectedItems(const std::invocable<T*, int> auto& selector) {
 }
 
 ///
-auto IsNodeOfType(ne::NodeId node_id, ne::Detail::NodeType node_type) {
+auto GetNode(ne::NodeId node_id) -> auto& {
   auto* editor =
       // NOLINTNEXTLINE(*-reinterpret-cast)
       reinterpret_cast<ne::Detail::EditorContext*>(ne::GetCurrentEditor());
@@ -39,21 +39,26 @@ auto IsNodeOfType(ne::NodeId node_id, ne::Detail::NodeType node_type) {
   const auto* node = editor->FindNode(node_id);
   Expects(node != nullptr);
 
-  return node->m_Type == node_type;
+  return *node;
 }
 
 ///
 void LeaveNodesOfType(ne::Detail::NodeType node_type,
                       std::vector<ne::NodeId>& node_ids) {
   std::erase_if(node_ids, [node_type](const auto node_id) {
-    return !IsNodeOfType(node_id, node_type);
+    return GetNode(node_id).m_Type != node_type;
   });
 }
 }  // namespace
 
 ///
 auto NativeFacade::IsArea(ne::NodeId node_id) -> bool {
-  return IsNodeOfType(node_id, ne::Detail::NodeType::Group);
+  return GetNode(node_id).m_Type == ne::Detail::NodeType::Group;
+}
+
+///
+auto NativeFacade::GetAreaSize(ne::NodeId node_id) -> ImVec2 {
+  return GetNode(node_id).m_GroupBounds.GetSize();
 }
 
 ///
