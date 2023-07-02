@@ -8,6 +8,8 @@
 
 #include <imgui.h>
 
+#include "cpp_assert.h"
+
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
 #include <imgui_node_editor.h>
@@ -18,6 +20,15 @@ namespace vh::ponc::draw {
 ///
 void DrawColoredText(std::string_view text, const ImColor& color,
                      const ImVec2& pos) {
+  auto* draw_list = ImGui::GetWindowDrawList();
+  Expects(draw_list != nullptr);
+
+  DrawColoredText(text, color, *draw_list, pos);
+}
+
+///
+void DrawColoredText(std::string_view text, const ImColor& color,
+                     ImDrawList& draw_list, const ImVec2& pos) {
   ImGui::SetCursorPos(pos);
 
   const auto text_size = ImGui::CalcTextSize(text.data());
@@ -29,8 +40,7 @@ void DrawColoredText(std::string_view text, const ImColor& color,
   const auto cursor_screen_pos = ImGui::GetCursorScreenPos();
   rect.Translate(cursor_screen_pos);
 
-  auto* drawList = ImGui::GetWindowDrawList();
-  drawList->AddRectFilled(rect.Min, rect.Max, color,
+  draw_list.AddRectFilled(rect.Min, rect.Max, color,
                           ne::GetStyle().PinRounding);
 
   ImGui::TextUnformatted(text.data());
