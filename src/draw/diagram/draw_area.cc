@@ -19,10 +19,11 @@ namespace vh::ponc::draw {
 namespace {
 ///
 void DrawAreaName(const core::Area &area) {
-  const auto color = ImColor{0, 0, 0, 255};
+  auto color = ImColor{0, 0, 0, 255};
   auto pos = ImVec2{0, -ImGui::CalcTextSize(area.name.c_str()).y};
 
   if (ne::BeginGroupHint(area.id)) {
+    color.Value.w = ImGui::GetStyle().Alpha;
     DrawColoredText(area.name, color, pos + ne::GetGroupMin());
     ne::EndGroupHint();
   } else {
@@ -34,11 +35,17 @@ void DrawAreaName(const core::Area &area) {
 ///
 void DrawArea(core::Area &area, coreui::NodeMover &node_mover) {
   ImGui::PushID(area.id.AsPointer());
+  ne::PushStyleColor(ne::StyleColor_NodeBg,
+                     ImColor{style::DefaultColors::kTransparent});
+  ne::PushStyleColor(ne::StyleColor_NodeBorder,
+                     ne::GetStyle().Colors[ne::StyleColor_GroupBorder]);
 
   ne::BeginNode(area.id);
   ne::Group(area.size);
   ne::EndNode();
 
+  ne::PopStyleColor();
+  ne::PopStyleColor();
   ImGui::PopID();
 
   DrawAreaName(area);

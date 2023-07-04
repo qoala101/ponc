@@ -105,6 +105,8 @@ void UpdateStyle(ne::Style& style) {
   style.HoveredNodeBorderWidth = 4;
   style.SelectedNodeBorderWidth = 4;
   style.ScrollDuration = 0.25;
+  style.GroupRounding = 4;
+  style.GroupBorderWidth = 0;
 
   struct Item {
     ne::StyleColor index{};
@@ -125,7 +127,9 @@ void UpdateStyle(ne::Style& style) {
       Item{ne::StyleColor_HovLinkBorder, Color::kSky, Shade::k400},
       Item{ne::StyleColor_SelLinkBorder, Color::kAmber, Shade::k400},
       Item{ne::StyleColor_PinRect, Color::kSky, Shade::k500, 0.5},
-  };
+      Item{ne::StyleColor_GroupBg, DefaultColors::kGray, Shade::k50, 0.05},
+      Item{ne::StyleColor_GroupBorder, DefaultColors::kGray, Shade::k950,
+           0.75}};
 
   Expects(std::size(style.Colors) >= ne::StyleColor_Count);
 
