@@ -13,6 +13,9 @@
 namespace vh::ponc::draw {
 ///
 void DrawNode(coreui::Node &node, coreui::NodeMover &node_mover);
+///
+auto DrawNodeHeader(const std::optional<coreui::Header> &header)
+    -> std::optional<ImRect>;
 }  // namespace vh::ponc::draw
 
 #endif  // VH_PONC_DRAW_NODE_H_

@@ -15,10 +15,6 @@ namespace vh::ponc::draw {
 ///
 void DrawColoredText(std::string_view text, const ImColor& color,
                      const ImVec2& pos = ImGui::GetCursorPos());
-///
-void DrawColoredText(std::string_view text, const ImColor& color,
-                     ImDrawList& draw_list,
-                     const ImVec2& pos = ImGui::GetCursorPos());
 }  // namespace vh::ponc::draw
 
 #endif  // VH_PONC_DRAW_COLORED_TEXT_H_

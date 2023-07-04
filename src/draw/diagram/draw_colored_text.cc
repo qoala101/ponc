@@ -20,15 +20,6 @@ namespace vh::ponc::draw {
 ///
 void DrawColoredText(std::string_view text, const ImColor& color,
                      const ImVec2& pos) {
-  auto* draw_list = ImGui::GetWindowDrawList();
-  Expects(draw_list != nullptr);
-
-  DrawColoredText(text, color, *draw_list, pos);
-}
-
-///
-void DrawColoredText(std::string_view text, const ImColor& color,
-                     ImDrawList& draw_list, const ImVec2& pos) {
   ImGui::SetCursorPos(pos);
 
   const auto text_size = ImGui::CalcTextSize(text.data());
@@ -40,8 +31,11 @@ void DrawColoredText(std::string_view text, const ImColor& color,
   const auto cursor_screen_pos = ImGui::GetCursorScreenPos();
   rect.Translate(cursor_screen_pos);
 
-  draw_list.AddRectFilled(rect.Min, rect.Max, color,
-                          ne::GetStyle().PinRounding);
+  auto* draw_list = ImGui::GetWindowDrawList();
+  Expects(draw_list != nullptr);
+
+  draw_list->AddRectFilled(rect.Min, rect.Max, color,
+                           ne::GetStyle().PinRounding);
 
   ImGui::TextUnformatted(text.data());
 }
