@@ -52,9 +52,14 @@ void AreaCreator::Draw(coreui::AreaCreator &area_creator) {
     right_mouse_dragged_ = true;
   }
 
-  if (!right_mouse_dragged_ && ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
-    area_creator.AcceptCreateArea();
-    return;
+  if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
+    const auto right_mouse_dragged = right_mouse_dragged_;
+    Reset();
+
+    if (!right_mouse_dragged) {
+      area_creator.AcceptCreateArea();
+      return;
+    }
   }
 
   ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
