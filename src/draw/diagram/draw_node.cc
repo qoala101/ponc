@@ -138,6 +138,26 @@ void DrawPinLabel(const std::optional<coreui::PinLabel>& pin_label,
 }
 
 ///
+auto DrawHeader(const std::optional<coreui::Header>& header)
+    -> std::optional<ImRect> {
+  if (!header.has_value()) {
+    return std::nullopt;
+  }
+
+  ImGui::BeginHorizontal("Header");
+  DrawSmallSpace();
+
+  ImGui::BeginVertical("Label");
+  ImGui::TextUnformatted(header->label.c_str());
+  DrawSmallSpace();
+
+  ImGui::EndVertical();
+  ImGui::EndHorizontal();
+
+  return ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
+}
+
+///
 auto DrawHeaderBackground(std::optional<ImRect> header_rect,
                           const std::optional<coreui::Header>& header,
                           ne::NodeId node_id) {
@@ -289,7 +309,7 @@ void DrawNode(coreui::Node& node, coreui::NodeMover& node_mover) {
   ImGui::BeginVertical("Node");
 
   const auto& node_data = node.GetData();
-  const auto header_rect = DrawNodeHeader(node_data.header);
+  const auto header_rect = DrawHeader(node_data.header);
   DrawBody(node_data, node_mover);
 
   ImGui::EndVertical();
@@ -301,25 +321,5 @@ void DrawNode(coreui::Node& node, coreui::NodeMover& node_mover) {
 
   core_node.SetPos(ne::GetNodePosition(node_id));
   node_mover.SetItemSize(node_id, ne::GetNodeSize(node_id));
-}
-
-///
-auto DrawNodeHeader(const std::optional<coreui::Header>& header)
-    -> std::optional<ImRect> {
-  if (!header.has_value()) {
-    return std::nullopt;
-  }
-
-  ImGui::BeginHorizontal("Header");
-  DrawSmallSpace();
-
-  ImGui::BeginVertical("Label");
-  ImGui::TextUnformatted(header->label.c_str());
-  DrawSmallSpace();
-
-  ImGui::EndVertical();
-  ImGui::EndHorizontal();
-
-  return ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
 }
 }  // namespace vh::ponc::draw
