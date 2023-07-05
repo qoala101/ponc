@@ -30,6 +30,7 @@
 #include "core_link.h"
 #include "core_project.h"
 #include "core_settings.h"
+#include "coreui_area_creator.h"
 #include "coreui_event_loop.h"
 #include "coreui_family.h"
 #include "coreui_flow_tree_node.h"
@@ -81,7 +82,8 @@ Diagram::Diagram(cpp::SafePtr<Project> parent_project,
           safe_owner_.MakeSafe(this),
           safe_owner_.MakeSafe(&parent_project_->GetProject().GetSettings())},
       node_replacer_{parent_project_},
-      linker_{safe_owner_.MakeSafe(this)} {}
+      linker_{safe_owner_.MakeSafe(this)},
+      area_creator_{safe_owner_.MakeSafe(this)} {}
 
 ///
 void Diagram::OnFrame() {
@@ -130,6 +132,9 @@ auto Diagram::GetLinker() const -> const Linker& {
 
 ///
 auto Diagram::GetLinker() -> Linker& { return linker_; }
+
+///
+auto Diagram::GetAreaCreator() -> AreaCreator& { return area_creator_; }
 
 ///
 auto Diagram::GetFamilyGroups() const -> const std::vector<FamilyGroup>& {
@@ -311,7 +316,7 @@ auto Diagram::GetNodeTrees() const -> const std::vector<TreeNode>& {
 }
 
 ///
-auto Diagram::CreateArea(const ImVec2& pos) -> Event& {
+auto Diagram::CreateArea(const ImVec2& pos, const ImVec2& size) -> Event& {
   auto& id_generator = parent_project_->GetProject().GetIdGenerator();
   const auto node_id = id_generator.Generate<ne::NodeId>();
 
@@ -320,9 +325,7 @@ auto Diagram::CreateArea(const ImVec2& pos) -> Event& {
        area = core::Area{.id = node_id,
                          .name = "Area #" + std::to_string(node_id.Get()),
                          .pos = pos,
-                         .size = {200, 100}}]() {
-        diagram->EmplaceArea(area);
-      });
+                         .size = size}]() { diagram->EmplaceArea(area); });
 }
 
 ///

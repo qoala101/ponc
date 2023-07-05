@@ -42,6 +42,7 @@ add_executable(ponc
   coreui/traits/coreui_i_node_traits.cc
   coreui/traits/coreui_i_pin_traits.cc
 
+  coreui/coreui_area_creator.cc
   coreui/coreui_calculator.cc
   coreui/coreui_cloner.cc
   coreui/coreui_diagram.cc
@@ -65,6 +66,7 @@ add_executable(ponc
   draw/diagram/popup/draw_node_popup.cc
   draw/diagram/popup/draw_replace_popup.cc
 
+  draw/diagram/draw_area_creator.cc
   draw/diagram/draw_area.cc
   draw/diagram/draw_colored_text.cc
   draw/diagram/draw_diagram_editor.cc

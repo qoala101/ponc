@@ -34,7 +34,7 @@ void BackgroundPopup::Draw(coreui::Diagram& diagram) {
   ImGui::Separator();
 
   if (ImGui::MenuItem("Area")) {
-    diagram.CreateArea(pos_);
+    diagram.GetAreaCreator().StartCreateAreaAt(pos_);
   }
 }
 

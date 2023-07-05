@@ -20,6 +20,7 @@
 #include "cpp_assert.h"
 #include "cpp_scope.h"
 #include "draw_area.h"
+#include "draw_area_creator.h"
 #include "draw_background_popup.h"
 #include "draw_link.h"
 #include "draw_linker.h"
@@ -76,6 +77,8 @@ void DiagramEditor::Draw(coreui::Diagram &diagram) {
 
   item_deleter_.DeleteUnregisteredItems(diagram);
   ne::End();
+
+  DrawAreaCreator(diagram.GetAreaCreator());
 }
 
 ///

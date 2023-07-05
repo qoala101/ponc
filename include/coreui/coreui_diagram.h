@@ -18,6 +18,7 @@
 #include "core_i_family.h"
 #include "core_i_node.h"
 #include "core_link.h"
+#include "coreui_area_creator.h"
 #include "coreui_event.h"
 #include "coreui_family.h"
 #include "coreui_flow_tree_node.h"
@@ -64,6 +65,8 @@ class Diagram {
   ///
   auto GetLinker() -> Linker &;
   ///
+  auto GetAreaCreator() -> AreaCreator &;
+  ///
   auto GetFamilyGroups() const -> const std::vector<FamilyGroup> &;
   ///
   auto GetNodes() const -> const std::vector<Node> &;
@@ -92,7 +95,7 @@ class Diagram {
   ///
   auto GetNodeTrees() const -> const std::vector<TreeNode> &;
   ///
-  auto CreateArea(const ImVec2 &pos) -> Event &;
+  auto CreateArea(const ImVec2 &pos, const ImVec2 &size) -> Event &;
   ///
   auto DeleteArea(ne::NodeId node_id) -> Event &;
 
@@ -150,6 +153,8 @@ class Diagram {
   NodeReplacer node_replacer_;
   ///
   Linker linker_;
+  ///
+  AreaCreator area_creator_;
   ///
   std::vector<FamilyGroup> family_groups_{};
   ///
