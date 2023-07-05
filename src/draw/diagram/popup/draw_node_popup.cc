@@ -39,7 +39,7 @@ auto GetSizeText(const std::vector<ne::NodeId>& nodes) {
 
 ///
 auto GetTitle(const std::vector<ne::NodeId>& nodes,
-              const std::vector<ne::NodeId>& areas) {
+              const std::vector<core::AreaId>& areas) {
   if (nodes.empty()) {
     if (areas.empty()) {
       return std::string{};
@@ -79,7 +79,7 @@ void NodePopup::Draw(coreui::Diagram& diagram) {
   const auto [selected_nodes, selected_areas] =
       IsOpened()
           ? coreui::NativeFacade::GetSelectedNodesAndAreas()
-          : std::pair<std::vector<ne::NodeId>, std::vector<ne::NodeId>>{};
+          : std::pair<std::vector<ne::NodeId>, std::vector<core::AreaId>>{};
   const auto title = GetTitle(selected_nodes, selected_areas);
   const auto content_scope = DrawContentScope(title);
 
@@ -112,8 +112,8 @@ void NodePopup::Draw(coreui::Diagram& diagram) {
   }
 
   if (delete_selected) {
-    for (const auto node_id : selected_areas) {
-      diagram.DeleteArea(node_id);
+    for (const auto area_id : selected_areas) {
+      diagram.DeleteArea(area_id);
     }
   }
 

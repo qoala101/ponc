@@ -16,9 +16,12 @@ namespace ne = ax::NodeEditor;
 
 namespace vh::ponc::core {
 ///
+using AreaId = ne::NodeId;
+
+///
 struct Area {
   ///
-  ne::NodeId id{};
+  AreaId id{};
   ///
   std::string name{};
   ///

@@ -57,8 +57,8 @@ auto NativeFacade::IsArea(ne::NodeId node_id) -> bool {
 }
 
 ///
-auto NativeFacade::GetAreaSize(ne::NodeId node_id) -> ImVec2 {
-  return GetNode(node_id).m_GroupBounds.GetSize();
+auto NativeFacade::GetAreaSize(core::AreaId area_id) -> ImVec2 {
+  return GetNode(area_id).m_GroupBounds.GetSize();
 }
 
 ///
@@ -70,7 +70,7 @@ auto NativeFacade::GetSelectedNodes() -> std::vector<ne::NodeId> {
 
 ///
 auto NativeFacade::GetSelectedNodesAndAreas()
-    -> std::pair<std::vector<ne::NodeId>, std::vector<ne::NodeId>> {
+    -> std::pair<std::vector<ne::NodeId>, std::vector<core::AreaId>> {
   auto nodes = GetSelectedItems<ne::NodeId>(&ne::GetSelectedNodes);
   auto areas = nodes;
 

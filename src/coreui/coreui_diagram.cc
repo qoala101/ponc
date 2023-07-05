@@ -316,22 +316,22 @@ auto Diagram::GetNodeTrees() const -> const std::vector<TreeNode>& {
 }
 
 ///
-auto Diagram::CreateArea(const ImVec2& pos, const ImVec2& size) -> Event& {
+auto Diagram::AddArea(const ImVec2& pos, const ImVec2& size) -> Event& {
   auto& id_generator = parent_project_->GetProject().GetIdGenerator();
-  const auto node_id = id_generator.Generate<ne::NodeId>();
+  const auto area_id = id_generator.Generate<core::AreaId>();
 
   return parent_project_->GetEventLoop().PostEvent(
       [diagram = diagram_,
-       area = core::Area{.id = node_id,
-                         .name = "Area #" + std::to_string(node_id.Get()),
+       area = core::Area{.id = area_id,
+                         .name = "Area #" + std::to_string(area_id.Get()),
                          .pos = pos,
                          .size = size}]() { diagram->EmplaceArea(area); });
 }
 
 ///
-auto Diagram::DeleteArea(ne::NodeId node_id) -> Event& {
+auto Diagram::DeleteArea(core::AreaId area_id) -> Event& {
   return parent_project_->GetEventLoop().PostEvent(
-      [diagram = diagram_, node_id]() { diagram->DeleteArea(node_id); });
+      [diagram = diagram_, area_id]() { diagram->DeleteArea(area_id); });
 }
 
 ///

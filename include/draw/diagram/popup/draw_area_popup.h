@@ -24,7 +24,7 @@ class AreaPopup {
   };
 
   ///
-  void Draw(const std::vector<ne::NodeId> &selected_areas,
+  void Draw(const std::vector<core::AreaId> &selected_areas,
             coreui::Diagram &diagram, const Callbacks &callbacks);
 
  private:

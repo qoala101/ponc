@@ -13,7 +13,7 @@
 
 namespace vh::ponc::draw {
 ///
-void AreaPopup::Draw(const std::vector<ne::NodeId> &selected_areas,
+void AreaPopup::Draw(const std::vector<core::AreaId> &selected_areas,
                      coreui::Diagram &diagram, const Callbacks &callbacks) {
   if (ImGui::MenuItem("Delete")) {
     for (const auto area_id : selected_areas) {

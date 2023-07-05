@@ -97,7 +97,7 @@ class Diagram {
   ///
   auto CreateArea(const ImVec2 &pos, const ImVec2 &size) -> Event &;
   ///
-  auto DeleteArea(ne::NodeId node_id) -> Event &;
+  auto DeleteArea(core::AreaId area_id) -> Event &;
 
  private:
   ///

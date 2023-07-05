@@ -21,7 +21,7 @@ auto AreaSerializer::ParseFromJson(const crude_json::value& json)
   const auto& pos = json["pos"].get<crude_json::array>();
   const auto& size = json["size"].get<crude_json::array>();
 
-  return {.id = IdSerializer::ParseFromJson<ne::NodeId>(json["id"]),
+  return {.id = IdSerializer::ParseFromJson<core::AreaId>(json["id"]),
           .name = json["name"].get<crude_json::string>(),
           .pos = {static_cast<float>(pos[0].get<crude_json::number>()),
                   static_cast<float>(pos[1].get<crude_json::number>())},

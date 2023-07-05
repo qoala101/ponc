@@ -13,6 +13,7 @@
 #include <utility>
 #include <vector>
 
+#include "core_area.h"
 #include "cpp_static_api.h"
 
 namespace ne = ax::NodeEditor;
@@ -23,12 +24,12 @@ struct NativeFacade : public cpp::StaticApi {
   ///
   static auto IsArea(ne::NodeId node_id) -> bool;
   ///
-  static auto GetAreaSize(ne::NodeId node_id) -> ImVec2;
+  static auto GetAreaSize(core::AreaId area_id) -> ImVec2;
   ///
   static auto GetSelectedNodes() -> std::vector<ne::NodeId>;
   ///
   static auto GetSelectedNodesAndAreas()
-      -> std::pair<std::vector<ne::NodeId>, std::vector<ne::NodeId>>;
+      -> std::pair<std::vector<ne::NodeId>, std::vector<core::AreaId>>;
   ///
   static auto GetSelectedLinks() -> std::vector<ne::LinkId>;
   ///

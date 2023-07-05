@@ -505,8 +505,8 @@ void NodeMover::MarkNodeToMove(ne::NodeId node_id) {
 }
 
 ///
-void NodeMover::MarkAreaToMove(ne::NodeId node_id) {
-  areas_to_move_.insert(node_id.Get());
+void NodeMover::MarkAreaToMove(core::AreaId area_id) {
+  areas_to_move_.insert(area_id.Get());
 }
 
 ///
@@ -537,10 +537,10 @@ void NodeMover::ApplyMoves() const {
     ne::SetNodePosition(node_id, node.GetPos());
   }
 
-  for (const auto node_id : areas_to_move_) {
-    const auto& area = core::Diagram::FindArea(diagram, node_id);
-    ne::SetNodePosition(node_id, area.pos);
-    ne::SetGroupSize(node_id, area.size);
+  for (const auto area_id : areas_to_move_) {
+    const auto& area = core::Diagram::FindArea(diagram, area_id);
+    ne::SetNodePosition(area_id, area.pos);
+    ne::SetGroupSize(area_id, area.size);
   }
 }
 }  // namespace vh::ponc::coreui
