@@ -4,7 +4,11 @@
  * @copyright Copyright (c) 2023, MIT License
  */
 
+#include "coreui_node_mover.h"
+
 #include <imgui.h>
+#include <imgui_internal.h>
+#include <imgui_node_editor.h>
 
 #include <algorithm>
 #include <array>
@@ -19,18 +23,12 @@
 #include <vector>
 
 #include "core_area.h"
-#include "coreui_i_node_traits.h"  // IWYU pragma: keep
-
-#define IMGUI_DEFINE_MATH_OPERATORS
-#include <imgui_internal.h>
-#include <imgui_node_editor.h>
-
 #include "core_diagram.h"
 #include "core_i_node.h"
 #include "core_id_value.h"
 #include "core_link.h"
 #include "coreui_diagram.h"
-#include "coreui_node_mover.h"
+#include "coreui_i_node_traits.h"  // IWYU pragma: keep
 #include "cpp_assert.h"
 #include "flow_tree_node.h"
 #include "flow_tree_traversal.h"

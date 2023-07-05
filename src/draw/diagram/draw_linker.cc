@@ -4,9 +4,8 @@
  * @copyright Copyright (c) 2023, MIT License
  */
 
-#include "style_utils.h"
+#include "draw_linker.h"
 
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include <imgui_node_editor.h>
 #include <imgui_node_editor_internal.h>
@@ -16,9 +15,9 @@
 
 #include "coreui_linker.h"
 #include "draw_connect_node_popup.h"
-#include "draw_linker.h"
 #include "draw_tooltip.h"
 #include "style_default_colors.h"
+#include "style_utils.h"
 
 namespace vh::ponc::draw {
 namespace {

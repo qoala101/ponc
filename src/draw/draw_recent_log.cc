@@ -6,13 +6,12 @@
 
 #include "draw_recent_log.h"
 
-#include "draw_log_view.h"
-
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include <imgui_internal.h>
 
 #include <vector>
+
+#include "draw_log_view.h"
 
 namespace vh::ponc::draw {
 ///

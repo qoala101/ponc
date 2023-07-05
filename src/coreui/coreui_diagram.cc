@@ -4,47 +4,42 @@
  * @copyright Copyright (c) 2023, MIT License
  */
 
-#include <map>
-#include <optional>
-#include <stack>
-#include <string>
-#include <unordered_map>
-
-#include "core_area.h"
-#include "core_id_value.h"
-#include "coreui_event_loop.h"
-#include "coreui_flow_tree_node.h"
-#include "coreui_native_facade.h"
-#include "coreui_node.h"
-#include "flow_tree_traversal.h"
-#include "style_utils.h"
-
-#define IMGUI_DEFINE_MATH_OPERATORS
+#include "coreui_diagram.h"
 
 #include <imgui.h>
 #include <imgui_node_editor.h>
 
 #include <algorithm>
 #include <iterator>
+#include <map>
 #include <memory>
+#include <optional>
+#include <stack>
+#include <string>
+#include <unordered_map>
 #include <utility>
 #include <variant>
 #include <vector>
 
+#include "core_area.h"
 #include "core_diagram.h"
 #include "core_i_family.h"
 #include "core_i_node.h"
 #include "core_id_generator.h"
+#include "core_id_value.h"
 #include "core_link.h"
 #include "core_project.h"
 #include "core_settings.h"
-#include "coreui_diagram.h"
+#include "coreui_event_loop.h"
 #include "coreui_family.h"
+#include "coreui_flow_tree_node.h"
 #include "coreui_i_family_traits.h"
 #include "coreui_i_node_traits.h"
 #include "coreui_i_pin_traits.h"
 #include "coreui_link.h"
 #include "coreui_linker.h"
+#include "coreui_native_facade.h"
+#include "coreui_node.h"
 #include "coreui_pin.h"
 #include "coreui_project.h"
 #include "cpp_assert.h"
@@ -53,8 +48,10 @@
 #include "flow_algorithms.h"
 #include "flow_node_flow.h"
 #include "flow_tree_node.h"
+#include "flow_tree_traversal.h"
 #include "style_default_colors.h"
 #include "style_default_sizes.h"
+#include "style_utils.h"
 
 namespace vh::ponc::coreui {
 ///

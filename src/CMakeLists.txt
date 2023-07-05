@@ -120,6 +120,11 @@ add_executable(ponc
   main.cc
 )
 
+target_compile_definitions(ponc
+  PRIVATE
+  IMGUI_DEFINE_MATH_OPERATORS
+)
+
 target_include_directories(ponc
   PRIVATE
   ${PROJECT_SOURCE_DIR}/include/app

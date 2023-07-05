@@ -4,7 +4,6 @@
  * @copyright Copyright (c) 2023, MIT License
  */
 
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include "draw_node.h"
 
 #include <imgui.h>

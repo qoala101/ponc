@@ -4,15 +4,15 @@
  * @copyright Copyright (c) 2023, MIT License
  */
 
-#include "cpp_assert.h"
-#define IMGUI_DEFINE_MATH_OPERATORS
+#include "draw_area.h"
+
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_node_editor.h>
 
 #include "core_area.h"
 #include "coreui_native_facade.h"
-#include "draw_area.h"
+#include "cpp_assert.h"
 #include "style_default_colors.h"
 
 namespace vh::ponc::draw {

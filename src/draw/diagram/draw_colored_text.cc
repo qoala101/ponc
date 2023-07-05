@@ -7,12 +7,10 @@
 #include "draw_colored_text.h"
 
 #include <imgui.h>
-
-#include "cpp_assert.h"
-
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
 #include <imgui_node_editor.h>
+
+#include "cpp_assert.h"
 
 namespace ne = ax::NodeEditor;
 
