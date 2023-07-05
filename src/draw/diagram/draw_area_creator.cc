@@ -7,32 +7,63 @@
 #include "draw_area_creator.h"
 
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <imgui_node_editor.h>
 
 namespace ne = ax::NodeEditor;
 
 namespace vh::ponc::draw {
-void DrawAreaCreator(coreui::AreaCreator &area_creator) {
-  const auto &start_pos = area_creator.GetStartPos();
+namespace {
+///
+void ResizeArea(coreui::AreaCreator &area_creator) {
+  const auto mouse_pos = ne::ScreenToCanvas(ImGui::GetMousePos());
+  const auto padding = ne::GetStyle().NodePadding;
 
-  if (!start_pos.has_value()) {
+  area_creator.ResizeAreaTo(
+      mouse_pos -
+      ImVec2{2 * padding.x,
+             2 * padding.y + ImGui::GetTextLineHeightWithSpacing()});
+}
+}  // namespace
+
+///
+void AreaCreator::Draw(coreui::AreaCreator &area_creator) {
+  if (!area_creator.IsCreating()) {
+    Reset();
     return;
   }
 
-  const auto mouse_pos = ImGui::GetMousePos();
-
-  if (ne::IsBackgroundClicked()) {
-    if (ne::GetBackgroundClickButtonIndex() == ImGuiMouseButton_Left) {
-      area_creator.AcceptCreateAreaAt(ne::ScreenToCanvas(mouse_pos));
-    }
+  if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) ||
+      ImGui::IsMouseClicked(ImGuiMouseButton_Middle)) {
+    area_creator.AcceptCreateArea();
+    return;
   }
 
-  auto *draw_list = ImGui::GetWindowDrawList();
-  Expects(draw_list != nullptr);
+  if (ImGui::IsKeyPressedMap(ImGuiKey_Escape)) {
+    area_creator.DiscardCreateArea();
+    return;
+  }
 
-  draw_list->AddRect(ne::CanvasToScreen(*start_pos), mouse_pos,
-                     ImColor{ne::GetStyle().Colors[ne::StyleColor_GroupBorder]},
-                     ne::GetStyle().NodeRounding, 0,
-                     ne::GetStyle().NodeBorderWidth);
+  if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+    right_mouse_clicked_ = true;
+  }
+
+  if (right_mouse_clicked_ && ImGui::IsMouseDragging(ImGuiMouseButton_Right)) {
+    right_mouse_dragged_ = true;
+  }
+
+  if (!right_mouse_dragged_ && ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
+    area_creator.AcceptCreateArea();
+    return;
+  }
+
+  ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+  ResizeArea(area_creator);
+}
+
+///
+void AreaCreator::Reset() {
+  right_mouse_clicked_ = false;
+  right_mouse_dragged_ = false;
 }
 }  // namespace vh::ponc::draw

@@ -78,7 +78,7 @@ void DiagramEditor::Draw(coreui::Diagram &diagram) {
   item_deleter_.DeleteUnregisteredItems(diagram);
   ne::End();
 
-  DrawAreaCreator(diagram.GetAreaCreator());
+  area_creator_.Draw(diagram.GetAreaCreator());
 }
 
 ///

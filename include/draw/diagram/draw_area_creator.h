@@ -11,7 +11,20 @@
 
 namespace vh::ponc::draw {
 ///
-void DrawAreaCreator(coreui::AreaCreator &area_creator);
+class AreaCreator {
+ public:
+  ///
+  void Draw(coreui::AreaCreator &area_creator);
+
+ private:
+  ///
+  void Reset();
+
+  ///
+  bool right_mouse_clicked_{};
+  ///
+  bool right_mouse_dragged_{};
+};
 }  // namespace vh::ponc::draw
 
 #endif  // VH_PONC_DRAW_AREA_CREATOR_H_

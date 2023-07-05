@@ -13,6 +13,7 @@
 
 #include "core_diagram.h"
 #include "coreui_diagram.h"
+#include "draw_area_creator.h"
 #include "draw_background_popup.h"
 #include "draw_item_deleter.h"
 #include "draw_link_popup.h"
@@ -44,6 +45,8 @@ class DiagramEditor {
   ItemDeleter item_deleter_{};
   ///
   Linker linker_{};
+  ///
+  AreaCreator area_creator_{};
   ///
   BackgroundPopup background_popup_{};
   ///

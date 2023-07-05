@@ -130,6 +130,17 @@ void NodeMover::MoveNodeTo(ne::NodeId node_id, const ImVec2& pos) {
 }
 
 ///
+void NodeMover::MoveAreaTo(core::AreaId area_id, const ImVec2& pos,
+                           const ImVec2& size) {
+  auto& diagram = parent_diagram_->GetDiagram();
+  auto& area = core::Diagram::FindArea(diagram, area_id);
+
+  area.pos = pos;
+  area.size = size;
+  MarkAreaToMove(area_id);
+}
+
+///
 auto NodeMover::DoNodesNeedSpacing(ne::NodeId first_node,
                                    ne::NodeId second_node) const {
   const auto node_ids = std::array{first_node, second_node};

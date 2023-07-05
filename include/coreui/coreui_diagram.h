@@ -95,7 +95,7 @@ class Diagram {
   ///
   auto GetNodeTrees() const -> const std::vector<TreeNode> &;
   ///
-  auto CreateArea(const ImVec2 &pos, const ImVec2 &size) -> Event &;
+  auto AddArea(const core::Area &area) -> Event &;
   ///
   auto DeleteArea(core::AreaId area_id) -> Event &;
 

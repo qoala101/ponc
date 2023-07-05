@@ -83,7 +83,9 @@ Diagram::Diagram(cpp::SafePtr<Project> parent_project,
           safe_owner_.MakeSafe(&parent_project_->GetProject().GetSettings())},
       node_replacer_{parent_project_},
       linker_{safe_owner_.MakeSafe(this)},
-      area_creator_{safe_owner_.MakeSafe(this)} {}
+      area_creator_{safe_owner_.MakeSafe(this),
+                    safe_owner_.MakeSafe(
+                        &parent_project_->GetProject().GetIdGenerator())} {}
 
 ///
 void Diagram::OnFrame() {
@@ -316,16 +318,9 @@ auto Diagram::GetNodeTrees() const -> const std::vector<TreeNode>& {
 }
 
 ///
-auto Diagram::AddArea(const ImVec2& pos, const ImVec2& size) -> Event& {
-  auto& id_generator = parent_project_->GetProject().GetIdGenerator();
-  const auto area_id = id_generator.Generate<core::AreaId>();
-
+auto Diagram::AddArea(const core::Area& area) -> Event& {
   return parent_project_->GetEventLoop().PostEvent(
-      [diagram = diagram_,
-       area = core::Area{.id = area_id,
-                         .name = "Area #" + std::to_string(area_id.Get()),
-                         .pos = pos,
-                         .size = size}]() { diagram->EmplaceArea(area); });
+      [diagram = diagram_, area]() { diagram->EmplaceArea(area); });
 }
 
 ///

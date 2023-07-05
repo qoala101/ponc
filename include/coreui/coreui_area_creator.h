@@ -9,6 +9,8 @@
 
 #include <imgui.h>
 
+#include "core_area.h"
+#include "core_id_generator.h"
 #include "coreui_event.h"
 #include "cpp_safe_ptr.h"
 
@@ -20,22 +22,29 @@ class Diagram;
 class AreaCreator {
  public:
   ///
-  explicit AreaCreator(cpp::SafePtr<Diagram> parent_diagram);
+  AreaCreator(cpp::SafePtr<Diagram> parent_diagram,
+              cpp::SafePtr<core::IdGenerator> id_generator);
 
   ///
-  auto GetStartPos() const -> const std::optional<ImVec2> &;
+  auto IsCreating() const -> bool;
   ///
-  void StartCreateAreaAt(const ImVec2 &start_pos);
+  auto StartCreateAreaAt(const ImVec2 &start_pos) -> Event &;
   ///
-  auto AcceptCreateAreaAt(const ImVec2 &end_pos) -> Event &;
+  void ResizeAreaTo(const ImVec2 &pos);
   ///
-  void DiscardCreateArea();
+  void AcceptCreateArea();
+  ///
+  auto DiscardCreateArea() -> Event &;
 
  private:
   ///
   cpp::SafePtr<Diagram> parent_diagram_;
   ///
-  std::optional<ImVec2> start_pos_{};
+  cpp::SafePtr<core::IdGenerator> id_generator_;
+  ///
+  cpp::SafeOwner safe_owner_{};
+  ///
+  std::optional<core::AreaId> area_id_{};
 };
 }  // namespace vh::ponc::coreui
 
