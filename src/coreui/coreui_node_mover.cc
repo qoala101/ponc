@@ -535,12 +535,14 @@ void NodeMover::ApplyMoves() const {
   const auto& diagram = parent_diagram_->GetDiagram();
 
   for (const auto node_id : nodes_to_move_) {
-    ne::SetNodePosition(node_id,
-                        core::Diagram::FindNode(diagram, node_id).GetPos());
+    const auto& node = core::Diagram::FindNode(diagram, node_id);
+    ne::SetNodePosition(node_id, node.GetPos());
   }
 
   for (const auto node_id : areas_to_move_) {
-    ne::SetNodePosition(node_id, core::Diagram::FindArea(diagram, node_id).pos);
+    const auto& area = core::Diagram::FindArea(diagram, node_id);
+    ne::SetNodePosition(node_id, area.pos);
+    ne::SetGroupSize(node_id, area.size);
   }
 }
 }  // namespace vh::ponc::coreui

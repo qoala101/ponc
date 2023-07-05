@@ -42,9 +42,5 @@ void AreaPopup::Draw(const std::vector<ne::NodeId> &selected_areas,
 
     ImGui::EndMenu();
   }
-
-  if (ImGui::MenuItem("Unlock")) {
-    // TODO(vh)
-  }
 }
 }  // namespace vh::ponc::draw
