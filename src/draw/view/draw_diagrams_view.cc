@@ -18,6 +18,7 @@
 #include "cpp_assert.h"
 #include "draw_disable_if.h"
 #include "draw_id_label.h"
+#include "draw_rename_widget.h"
 
 namespace vh::ponc::draw {
 ///
@@ -32,33 +33,7 @@ auto DiagramsView::DrawRenamePopup() {
       ImGui::SetKeyboardFocusHere();
     }
 
-    const auto name_is_empty = rename_buffer_.AsTrimmed().empty();
-
-    if (ImGui::InputText("##Diagram Name", rename_buffer_.GetData(),
-                         rename_buffer_.GetSize(),
-                         ImGuiInputTextFlags_AutoSelectAll |
-                             ImGuiInputTextFlags_EnterReturnsTrue)) {
-      if (!name_is_empty) {
-        rename_confirmed = true;
-      } else {
-        ImGui::SetKeyboardFocusHere(-1);
-      }
-    }
-
-    ImGui::SameLine();
-
-    {
-      const auto disable_scope = DisableIf(name_is_empty);
-
-      if (ImGui::Button("OK")) {
-        rename_confirmed = true;
-      }
-    }
-
-    if (rename_confirmed) {
-      ImGui::CloseCurrentPopup();
-    }
-
+    rename_confirmed = DrawRenameWidget("##Diagram Name", rename_buffer_);
     ImGui::EndPopup();
   }
 

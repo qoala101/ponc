@@ -13,7 +13,13 @@
 
 namespace vh::ponc::json {
 ///
-enum class Version { kPreCalculator = 0, kCalculator, kAreas, kAfterCurrent };
+enum class Version {
+  kPreCalculator = 0,
+  kCalculator,
+  kSlider,
+  kAreas,
+  kAfterCurrent
+};
 
 ///
 struct Versifier : public cpp::StaticApi {

@@ -21,6 +21,7 @@ namespace vh::ponc::json {
 ///
 auto INodeParser::ParseFromJson(const crude_json::value& json) const
     -> std::unique_ptr<core::INode> {
+  const auto& pos = json["pos"].get<crude_json::array>();
   const auto parsed_args = core::INode::ConstructorArgs{
       .id = IdSerializer::ParseFromJson<ne::NodeId>(json["id"]),
       .family_id =
@@ -29,8 +30,8 @@ auto INodeParser::ParseFromJson(const crude_json::value& json) const
           json, "input_pin_id", &IdSerializer::ParseFromJson<ne::PinId>),
       .output_pin_ids = ContainerSerializer::ParseFromJson<ne::PinId>(
           json["output_pin_ids"], &IdSerializer::ParseFromJson<ne::PinId>),
-      .pos = {static_cast<float>(json["pos_x"].get<crude_json::number>()),
-              static_cast<float>(json["pos_y"].get<crude_json::number>())}};
+      .pos = {static_cast<float>(pos[0].get<crude_json::number>()),
+              static_cast<float>(pos[1].get<crude_json::number>())}};
 
   return ParseFromJson(parsed_args, json["data"]);
 }

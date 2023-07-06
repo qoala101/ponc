@@ -7,10 +7,10 @@
 #include "draw_colored_text.h"
 
 #include <imgui.h>
-
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
 #include <imgui_node_editor.h>
+
+#include "cpp_assert.h"
 
 namespace ne = ax::NodeEditor;
 
@@ -29,9 +29,11 @@ void DrawColoredText(std::string_view text, const ImColor& color,
   const auto cursor_screen_pos = ImGui::GetCursorScreenPos();
   rect.Translate(cursor_screen_pos);
 
-  auto* drawList = ImGui::GetWindowDrawList();
-  drawList->AddRectFilled(rect.Min, rect.Max, color,
-                          ne::GetStyle().PinRounding);
+  auto* draw_list = ImGui::GetWindowDrawList();
+  Expects(draw_list != nullptr);
+
+  draw_list->AddRectFilled(rect.Min, rect.Max, color,
+                           ne::GetStyle().PinRounding);
 
   ImGui::TextUnformatted(text.data());
 }

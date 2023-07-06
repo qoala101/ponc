@@ -4,75 +4,91 @@
  * @copyright Copyright (c) 2023, MIT License
  */
 
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include "draw_area.h"
 
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_node_editor.h>
 
+#include <string>
+
 #include "core_area.h"
-#include "core_i_node.h"
+#include "coreui_native_facade.h"
+#include "cpp_assert.h"
+#include "style_default_colors.h"
 
 namespace vh::ponc::draw {
-// namespace {
-// void DrawAreaZoomedOutLabel(core::INode &area_node) {
-//   if (ne::BeginGroupHint(area_node.GetId())) {
-//     auto bgAlpha = static_cast<int>(ImGui::GetStyle().Alpha * 255);
+namespace {
+///
+auto DrawAreaHint(const core::Area &area) {
+  auto alpha = 0.F;
 
-//     auto min = ne::GetGroupMin();
-//     // auto max = ne::GetGroupMax();
+  if (ne::BeginGroupHint(area.id)) {
+    const auto text_height =
+        ImVec2{0, ImGui::CalcTextSize(area.name.c_str()).y};
 
-//     ImGui::SetCursorScreenPos(
-//         min - ImVec2(-8, ImGui::GetTextLineHeightWithSpacing() + 4));
-//     ImGui::BeginGroup();
-//     ImGui::TextUnformatted("Node name");
-//     ImGui::EndGroup();
+    ImGui::SetCursorPos(ne::GetGroupMin() - text_height);
+    ImGui::TextUnformatted(area.name.c_str());
 
-//     auto drawList = ne::GetHintBackgroundDrawList();
+    alpha = ImGui::GetStyle().Alpha;
+  }
 
-//     auto hintBounds = ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
-//     auto hintFrameBounds = hintBounds;
-//     hintFrameBounds.Expand(ImVec2{8, 4});
+  ne::EndGroupHint();
+  return alpha;
+}
 
-//     drawList->AddRectFilled(hintFrameBounds.GetTL(), hintFrameBounds.GetBR(),
-//                             IM_COL32(255, 255, 255, 64 * bgAlpha / 255), 4.0f);
+///
+void DrawAreaHeader(const core::Area &area, float alpha) {
+  ImGui::BeginHorizontal("Header");
+  ImGui::TextUnformatted("");
 
-//     drawList->AddRect(hintFrameBounds.GetTL(), hintFrameBounds.GetBR(),
-//                       IM_COL32(255, 255, 255, 128 * bgAlpha / 255), 4.0f);
-//   }
+  const auto start_pos = ImGui::GetCursorPos();
 
-//   ne::EndGroupHint();
-// }
-// }  // namespace
-
-void DrawArea(core::Area &area, coreui::NodeMover &node_mover) {
-  return;
-
-  const float commentAlpha = 0.75f;
-  const auto node_id = area.id;
-  const auto node_size = area.size;
-
-  ImGui::PushStyleVar(ImGuiStyleVar_Alpha, commentAlpha);
-  ne::PushStyleColor(ne::StyleColor_NodeBg, ImColor(255, 255, 255, 64));
-  ne::PushStyleColor(ne::StyleColor_NodeBorder, ImColor(255, 255, 255, 64));
-
-  ne::BeginNode(node_id);
-  ImGui::PushID(node_id.AsPointer());
-  ImGui::BeginVertical("content");
-  ImGui::BeginHorizontal("horizontal");
-  ImGui::Spring(1);
-  ImGui::TextUnformatted("Comment text");
-  ImGui::Spring(1);
   ImGui::EndHorizontal();
-  ne::Group(node_size);
-  ImGui::EndVertical();
-  ImGui::PopID();
-  ne::EndNode();
-  ne::PopStyleColor(2);
-  ImGui::PopStyleVar();
 
-  area.pos = ne::GetNodePosition(node_id);
-  node_mover.SetItemSize(node_id, ne::GetNodeSize(node_id));
+  auto *draw_list = ImGui::GetWindowDrawList();
+  Expects(draw_list != nullptr);
+
+  const auto spacing = ImGui::GetStyle().ItemSpacing;
+  const auto end_pos = start_pos + area.size +
+                       ImVec2{-2 * spacing.x, ImGui::GetTextLineHeight()};
+
+  ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
+  ImGui::RenderTextEllipsis(draw_list, start_pos, end_pos, end_pos.x, end_pos.x,
+                            area.name.c_str(), nullptr, nullptr);
+  ImGui::PopStyleVar();
+}
+
+///
+void UpdateArea(core::Area &area, coreui::NodeMover &node_mover) {
+  area.pos = ne::GetNodePosition(area.id);
+  area.size = coreui::NativeFacade::GetAreaSize(area.id);
+  node_mover.SetItemSize(area.id, area.size);
+}
+}  // namespace
+
+///
+void DrawArea(core::Area &area, coreui::NodeMover &node_mover) {
+  const auto hint_alpha = DrawAreaHint(area);
+
+  ImGui::PushID(area.id.AsPointer());
+  ne::PushStyleColor(ne::StyleColor_NodeBg,
+                     ImColor{style::DefaultColors::kTransparent});
+  ne::PushStyleColor(ne::StyleColor_NodeBorder,
+                     ne::GetStyle().Colors[ne::StyleColor_GroupBorder]);
+
+  ne::BeginNode(area.id);
+
+  const auto header_alpha = 1.F - hint_alpha;
+  DrawAreaHeader(area, header_alpha);
+
+  ne::Group({});
+  ne::EndNode();
+
+  ne::PopStyleColor();
+  ne::PopStyleColor();
+  ImGui::PopID();
+
+  UpdateArea(area, node_mover);
 }
 }  // namespace vh::ponc::draw

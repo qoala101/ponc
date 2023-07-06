@@ -26,7 +26,7 @@ class Diagram {
   ///
   explicit Diagram(std::string name = {},
                    std::vector<std::unique_ptr<INode>> nodes = {},
-                   std::vector<Link> links = {});
+                   std::vector<Link> links = {}, std::vector<Area> areas = {});
 
   ///
   static auto GetIds(Diagram &diagram) -> std::vector<IdPtr>;
@@ -45,8 +45,9 @@ class Diagram {
   ///
   static auto HasLink(const Diagram &diagram, ne::PinId pin_id) -> bool;
   ///
-  static auto FindArea(const Diagram &diagram, ne::NodeId node_id)
-      -> const Area &;
+  static auto FindArea(const Diagram &diagram, AreaId area_id) -> const Area &;
+  ///
+  static auto FindArea(Diagram &diagram, AreaId area_id) -> Area &;
 
   ///
   auto GetName() const -> const std::string &;
@@ -71,7 +72,7 @@ class Diagram {
   ///
   auto EmplaceArea(const Area &area) -> Area &;
   ///
-  void DeleteArea(ne::NodeId node_id);
+  void DeleteArea(AreaId area_id);
 
  private:
   ///

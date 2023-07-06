@@ -4,47 +4,43 @@
  * @copyright Copyright (c) 2023, MIT License
  */
 
-#include <map>
-#include <optional>
-#include <stack>
-#include <string>
-#include <unordered_map>
-
-#include "core_area.h"
-#include "core_id_value.h"
-#include "coreui_event_loop.h"
-#include "coreui_flow_tree_node.h"
-#include "coreui_native_facade.h"
-#include "coreui_node.h"
-#include "flow_tree_traversal.h"
-#include "style_utils.h"
-
-#define IMGUI_DEFINE_MATH_OPERATORS
+#include "coreui_diagram.h"
 
 #include <imgui.h>
 #include <imgui_node_editor.h>
 
 #include <algorithm>
 #include <iterator>
+#include <map>
 #include <memory>
+#include <optional>
+#include <stack>
+#include <string>
+#include <unordered_map>
 #include <utility>
 #include <variant>
 #include <vector>
 
+#include "core_area.h"
 #include "core_diagram.h"
 #include "core_i_family.h"
 #include "core_i_node.h"
 #include "core_id_generator.h"
+#include "core_id_value.h"
 #include "core_link.h"
 #include "core_project.h"
 #include "core_settings.h"
-#include "coreui_diagram.h"
+#include "coreui_area_creator.h"
+#include "coreui_event_loop.h"
 #include "coreui_family.h"
+#include "coreui_flow_tree_node.h"
 #include "coreui_i_family_traits.h"
 #include "coreui_i_node_traits.h"
 #include "coreui_i_pin_traits.h"
 #include "coreui_link.h"
 #include "coreui_linker.h"
+#include "coreui_native_facade.h"
+#include "coreui_node.h"
 #include "coreui_pin.h"
 #include "coreui_project.h"
 #include "cpp_assert.h"
@@ -53,8 +49,10 @@
 #include "flow_algorithms.h"
 #include "flow_node_flow.h"
 #include "flow_tree_node.h"
+#include "flow_tree_traversal.h"
 #include "style_default_colors.h"
 #include "style_default_sizes.h"
+#include "style_utils.h"
 
 namespace vh::ponc::coreui {
 ///
@@ -84,7 +82,10 @@ Diagram::Diagram(cpp::SafePtr<Project> parent_project,
           safe_owner_.MakeSafe(this),
           safe_owner_.MakeSafe(&parent_project_->GetProject().GetSettings())},
       node_replacer_{parent_project_},
-      linker_{safe_owner_.MakeSafe(this)} {}
+      linker_{safe_owner_.MakeSafe(this)},
+      area_creator_{safe_owner_.MakeSafe(this),
+                    safe_owner_.MakeSafe(
+                        &parent_project_->GetProject().GetIdGenerator())} {}
 
 ///
 void Diagram::OnFrame() {
@@ -133,6 +134,9 @@ auto Diagram::GetLinker() const -> const Linker& {
 
 ///
 auto Diagram::GetLinker() -> Linker& { return linker_; }
+
+///
+auto Diagram::GetAreaCreator() -> AreaCreator& { return area_creator_; }
 
 ///
 auto Diagram::GetFamilyGroups() const -> const std::vector<FamilyGroup>& {
@@ -314,23 +318,15 @@ auto Diagram::GetNodeTrees() const -> const std::vector<TreeNode>& {
 }
 
 ///
-auto Diagram::CreateArea(std::string name, const ImVec2& pos) -> Event& {
-  auto& id_generator = parent_project_->GetProject().GetIdGenerator();
-  const auto node_id = id_generator.Generate<ne::NodeId>();
-
+auto Diagram::AddArea(const core::Area& area) -> Event& {
   return parent_project_->GetEventLoop().PostEvent(
-      [diagram = diagram_, area = core::Area{.id = node_id,
-                                             .name = std::move(name),
-                                             .pos = pos,
-                                             .size = {100, 100}}]() {
-        diagram->EmplaceArea(area);
-      });
+      [diagram = diagram_, area]() { diagram->EmplaceArea(area); });
 }
 
 ///
-auto Diagram::DeleteArea(ne::NodeId node_id) -> Event& {
+auto Diagram::DeleteArea(core::AreaId area_id) -> Event& {
   return parent_project_->GetEventLoop().PostEvent(
-      [diagram = diagram_, node_id]() { diagram->DeleteArea(node_id); });
+      [diagram = diagram_, area_id]() { diagram->DeleteArea(area_id); });
 }
 
 ///

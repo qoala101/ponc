@@ -14,6 +14,7 @@
 #include <utility>
 #include <vector>
 
+#include "core_area.h"
 #include "core_diagram.h"
 #include "core_i_node.h"
 #include "coreui_i_node_traits.h"
@@ -39,7 +40,7 @@ auto GetSizeText(const std::vector<ne::NodeId>& nodes) {
 
 ///
 auto GetTitle(const std::vector<ne::NodeId>& nodes,
-              const std::vector<ne::NodeId>& areas) {
+              const std::vector<core::AreaId>& areas) {
   if (nodes.empty()) {
     if (areas.empty()) {
       return std::string{};
@@ -79,7 +80,7 @@ void NodePopup::Draw(coreui::Diagram& diagram) {
   const auto [selected_nodes, selected_areas] =
       IsOpened()
           ? coreui::NativeFacade::GetSelectedNodesAndAreas()
-          : std::pair<std::vector<ne::NodeId>, std::vector<ne::NodeId>>{};
+          : std::pair<std::vector<ne::NodeId>, std::vector<core::AreaId>>{};
   const auto title = GetTitle(selected_nodes, selected_areas);
   const auto content_scope = DrawContentScope(title);
 
@@ -88,33 +89,32 @@ void NodePopup::Draw(coreui::Diagram& diagram) {
   }
 
   if (selected_nodes.empty()) {
-    if (ImGui::MenuItem("Delete")) {
-    }
-
-    if (selected_areas.size() > 1) {
-      return;
-    }
-
-    ImGui::Separator();
-
-    if (ImGui::MenuItem("Rename")) {
-    }
-
-    if (ImGui::MenuItem("Unlock")) {
-    }
-
+    area_popup_.Draw(selected_areas, diagram,
+                     {.was_just_opened = [this]() { return WasJustOpened(); }});
     return;
   }
 
+  auto delete_selected = false;
+
   if (ImGui::MenuItem("Delete")) {
+    delete_selected = true;
+
     for (const auto node_id : selected_nodes) {
       diagram.DeleteNode(node_id);
     }
   }
 
   if (ImGui::MenuItem("Delete With Links")) {
+    delete_selected = true;
+
     for (const auto node_id : selected_nodes) {
       diagram.DeleteNodeWithLinks(node_id);
+    }
+  }
+
+  if (delete_selected) {
+    for (const auto area_id : selected_areas) {
+      diagram.DeleteArea(area_id);
     }
   }
 

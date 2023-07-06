@@ -7,6 +7,8 @@
 #ifndef VH_PONC_STYLE_DEFAULT_COLORS_H_
 #define VH_PONC_STYLE_DEFAULT_COLORS_H_
 
+#include <imgui.h>
+
 #include "style_tailwind.h"
 
 namespace vh::ponc::style {
@@ -25,6 +27,8 @@ struct DefaultColors : cpp::StaticApi {
   ///
   static constexpr auto kSuccess =
       Tailwind::GetColor(Tailwind::Color::kGreen, Tailwind::Shade::k500);
+  ///
+  static constexpr auto kTransparent = ImU32{};
 };
 }  // namespace vh::ponc::style
 

@@ -6,6 +6,9 @@
 
 #include "draw_string_buffer.h"
 
+#include <imgui.h>
+#include <imgui_internal.h>
+
 #include <algorithm>
 #include <string>
 #include <utility>
@@ -16,8 +19,11 @@ StringBuffer::StringBuffer(int size) : size_{size} { buffer_.resize(size_); }
 
 ///
 auto StringBuffer::AsTrimmed() const -> std::string {
+  auto buffer = buffer_;
+  ImStrTrimBlanks(buffer.data());
+
   // NOLINTNEXTLINE(*-redundant-string-cstr)
-  return std::string{buffer_.c_str()};
+  return std::string{buffer.c_str()};
 }
 
 ///

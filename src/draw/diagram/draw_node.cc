@@ -4,7 +4,6 @@
  * @copyright Copyright (c) 2023, MIT License
  */
 
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include "draw_node.h"
 
 #include <imgui.h>
@@ -138,7 +137,7 @@ void DrawPinLabel(const std::optional<coreui::PinLabel>& pin_label,
 }
 
 ///
-auto DrawHeaderRect(const std::optional<coreui::Header>& header)
+auto DrawHeader(const std::optional<coreui::Header>& header)
     -> std::optional<ImRect> {
   if (!header.has_value()) {
     return std::nullopt;
@@ -309,7 +308,7 @@ void DrawNode(coreui::Node& node, coreui::NodeMover& node_mover) {
   ImGui::BeginVertical("Node");
 
   const auto& node_data = node.GetData();
-  const auto header_rect = DrawHeaderRect(node_data.header);
+  const auto header_rect = DrawHeader(node_data.header);
   DrawBody(node_data, node_mover);
 
   ImGui::EndVertical();

@@ -20,6 +20,7 @@
 #include "cpp_assert.h"
 #include "cpp_scope.h"
 #include "draw_area.h"
+#include "draw_area_creator.h"
 #include "draw_background_popup.h"
 #include "draw_link.h"
 #include "draw_linker.h"
@@ -76,6 +77,8 @@ void DiagramEditor::Draw(coreui::Diagram &diagram) {
 
   item_deleter_.DeleteUnregisteredItems(diagram);
   ne::End();
+
+  area_creator_.Draw(diagram.GetAreaCreator());
 }
 
 ///
@@ -129,7 +132,9 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
   node_id = ne::GetDoubleClickedNode();
 
   if (node_id != ne::NodeId::Invalid) {
-    node_double_clicked = true;
+    if (!coreui::NativeFacade::IsArea(node_id)) {
+      node_double_clicked = true;
+    }
   } else {
     const auto double_clicked_pin = ne::GetDoubleClickedPin();
 

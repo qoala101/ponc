@@ -7,6 +7,7 @@
 #include "json_versifier.h"
 
 #include <crude_json.h>
+#include <imgui.h>
 
 #include <type_traits>
 #include <vector>
@@ -83,7 +84,25 @@ void Upgrade1(crude_json::value& project_json) {
 }
 
 ///
-void Upgrade2(crude_json::value& /*unused*/) {
+void Upgrade2(crude_json::value& project_json) {
+  auto& diagrams_json = project_json["diagrams"].get<crude_json::array>();
+
+  for (auto& diagram_json : diagrams_json) {
+    MakeArray(diagram_json["areas"]);
+
+    auto& nodes_array = diagram_json["nodes"].get<crude_json::array>();
+
+    for (auto& node_json : nodes_array) {
+      const auto pos = ImVec2{
+          static_cast<float>(node_json["pos_x"].get<crude_json::number>()),
+          static_cast<float>(node_json["pos_y"].get<crude_json::number>())};
+      node_json["pos"] = crude_json::array{pos.x, pos.y};
+    }
+  }
+}
+
+///
+void Upgrade3(crude_json::value& /*unused*/) {
   // vh: Implement when adding new version.
 }
 }  // namespace
@@ -109,8 +128,10 @@ void Versifier::UpgradeToCurrentVersion(crude_json::value& project_json) {
       Upgrade0(project_json);
     case Version::kCalculator:
       Upgrade1(project_json);
-    case Version::kAreas:
+    case Version::kSlider:
       Upgrade2(project_json);
+    case Version::kAreas:
+      Upgrade3(project_json);
     default:
       break;
   }

@@ -11,13 +11,14 @@
 #include <imgui_node_editor.h>
 
 #include <memory>
-#include <string>
 #include <vector>
 
+#include "core_area.h"
 #include "core_diagram.h"
 #include "core_i_family.h"
 #include "core_i_node.h"
 #include "core_link.h"
+#include "coreui_area_creator.h"
 #include "coreui_event.h"
 #include "coreui_family.h"
 #include "coreui_flow_tree_node.h"
@@ -64,6 +65,8 @@ class Diagram {
   ///
   auto GetLinker() -> Linker &;
   ///
+  auto GetAreaCreator() -> AreaCreator &;
+  ///
   auto GetFamilyGroups() const -> const std::vector<FamilyGroup> &;
   ///
   auto GetNodes() const -> const std::vector<Node> &;
@@ -92,9 +95,9 @@ class Diagram {
   ///
   auto GetNodeTrees() const -> const std::vector<TreeNode> &;
   ///
-  auto CreateArea(std::string name, const ImVec2 &pos) -> Event &;
+  auto AddArea(const core::Area &area) -> Event &;
   ///
-  auto DeleteArea(ne::NodeId node_id) -> Event &;
+  auto DeleteArea(core::AreaId area_id) -> Event &;
 
  private:
   ///
@@ -150,6 +153,8 @@ class Diagram {
   NodeReplacer node_replacer_;
   ///
   Linker linker_;
+  ///
+  AreaCreator area_creator_;
   ///
   std::vector<FamilyGroup> family_groups_{};
   ///

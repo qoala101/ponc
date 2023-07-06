@@ -13,10 +13,12 @@
 #include <memory>
 #include <utility>
 
+#include "core_area.h"
 #include "core_diagram.h"
 #include "core_i_node.h"
 #include "core_link.h"
 #include "cpp_assert.h"
+#include "json_area_serializer.h"
 #include "json_container_serializer.h"
 #include "json_i_node_parser.h"
 #include "json_i_node_writer.h"  // IWYU pragma: keep
@@ -59,7 +61,11 @@ auto DiagramSerializer::ParseFromJson(
   auto links = ContainerSerializer::ParseFromJson<core::Link>(
       json["links"], &LinkSerializer::ParseFromJson);
 
-  return core::Diagram{std::move(name), std::move(nodes), std::move(links)};
+  auto areas = ContainerSerializer::ParseFromJson<core::Area>(
+      json["areas"], &AreaSerializer::ParseFromJson);
+
+  return core::Diagram{std::move(name), std::move(nodes), std::move(links),
+                       std::move(areas)};
 }
 
 ///
@@ -75,6 +81,9 @@ auto DiagramSerializer::WriteToJson(const core::Diagram& diagram)
 
   json["links"] = ContainerSerializer::WriteToJson(
       diagram.GetLinks(), &LinkSerializer::WriteToJson);
+
+  json["areas"] = ContainerSerializer::WriteToJson(
+      diagram.GetAreas(), &AreaSerializer::WriteToJson);
 
   return json;
 }

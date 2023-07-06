@@ -30,21 +30,36 @@ auto GetSelectedItems(const std::invocable<T*, int> auto& selector) {
 }
 
 ///
-void LeaveNodesOfType(ne::Detail::NodeType node_type,
-                      std::vector<ne::NodeId>& node_ids) {
+auto GetNode(ne::NodeId node_id) -> auto& {
   auto* editor =
       // NOLINTNEXTLINE(*-reinterpret-cast)
       reinterpret_cast<ne::Detail::EditorContext*>(ne::GetCurrentEditor());
   Expects(editor != nullptr);
 
-  std::erase_if(node_ids, [node_type, editor](const auto node_id) {
-    const auto* node = editor->FindNode(node_id);
-    Expects(node != nullptr);
+  const auto* node = editor->FindNode(node_id);
+  Expects(node != nullptr);
 
-    return node->m_Type != node_type;
+  return *node;
+}
+
+///
+void LeaveNodesOfType(ne::Detail::NodeType node_type,
+                      std::vector<ne::NodeId>& node_ids) {
+  std::erase_if(node_ids, [node_type](const auto node_id) {
+    return GetNode(node_id).m_Type != node_type;
   });
 }
 }  // namespace
+
+///
+auto NativeFacade::IsArea(ne::NodeId node_id) -> bool {
+  return GetNode(node_id).m_Type == ne::Detail::NodeType::Group;
+}
+
+///
+auto NativeFacade::GetAreaSize(core::AreaId area_id) -> ImVec2 {
+  return GetNode(area_id).m_GroupBounds.GetSize();
+}
 
 ///
 auto NativeFacade::GetSelectedNodes() -> std::vector<ne::NodeId> {
@@ -55,7 +70,7 @@ auto NativeFacade::GetSelectedNodes() -> std::vector<ne::NodeId> {
 
 ///
 auto NativeFacade::GetSelectedNodesAndAreas()
-    -> std::pair<std::vector<ne::NodeId>, std::vector<ne::NodeId>> {
+    -> std::pair<std::vector<ne::NodeId>, std::vector<core::AreaId>> {
   auto nodes = GetSelectedItems<ne::NodeId>(&ne::GetSelectedNodes);
   auto areas = nodes;
 

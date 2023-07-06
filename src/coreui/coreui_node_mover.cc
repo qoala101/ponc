@@ -4,7 +4,11 @@
  * @copyright Copyright (c) 2023, MIT License
  */
 
+#include "coreui_node_mover.h"
+
 #include <imgui.h>
+#include <imgui_internal.h>
+#include <imgui_node_editor.h>
 
 #include <algorithm>
 #include <array>
@@ -19,18 +23,12 @@
 #include <vector>
 
 #include "core_area.h"
-#include "coreui_i_node_traits.h"  // IWYU pragma: keep
-
-#define IMGUI_DEFINE_MATH_OPERATORS
-#include <imgui_internal.h>
-#include <imgui_node_editor.h>
-
 #include "core_diagram.h"
 #include "core_i_node.h"
 #include "core_id_value.h"
 #include "core_link.h"
 #include "coreui_diagram.h"
-#include "coreui_node_mover.h"
+#include "coreui_i_node_traits.h"  // IWYU pragma: keep
 #include "cpp_assert.h"
 #include "flow_tree_node.h"
 #include "flow_tree_traversal.h"
@@ -129,6 +127,18 @@ void NodeMover::MoveNodeTo(ne::NodeId node_id, const ImVec2& pos) {
   MoveNodePinPoses(node, pos);
   node.SetPos(pos);
   MarkNodeToMove(node_id);
+}
+
+///
+void NodeMover::MoveAreaTo(core::AreaId area_id, const ImVec2& start_pos,
+                           const ImVec2& end_pos) {
+  auto& diagram = parent_diagram_->GetDiagram();
+  auto& area = core::Diagram::FindArea(diagram, area_id);
+
+  area.pos = start_pos;
+  area.size = ImMax(start_pos, end_pos) - start_pos;
+
+  MarkAreaToMove(area_id);
 }
 
 ///
@@ -507,8 +517,8 @@ void NodeMover::MarkNodeToMove(ne::NodeId node_id) {
 }
 
 ///
-void NodeMover::MarkAreaToMove(ne::NodeId node_id) {
-  areas_to_move_.insert(node_id.Get());
+void NodeMover::MarkAreaToMove(core::AreaId area_id) {
+  areas_to_move_.insert(area_id.Get());
 }
 
 ///
@@ -535,12 +545,14 @@ void NodeMover::ApplyMoves() const {
   const auto& diagram = parent_diagram_->GetDiagram();
 
   for (const auto node_id : nodes_to_move_) {
-    ne::SetNodePosition(node_id,
-                        core::Diagram::FindNode(diagram, node_id).GetPos());
+    const auto& node = core::Diagram::FindNode(diagram, node_id);
+    ne::SetNodePosition(node_id, node.GetPos());
   }
 
-  for (const auto node_id : areas_to_move_) {
-    ne::SetNodePosition(node_id, core::Diagram::FindArea(diagram, node_id).pos);
+  for (const auto area_id : areas_to_move_) {
+    const auto& area = core::Diagram::FindArea(diagram, area_id);
+    ne::SetNodePosition(area_id, area.pos);
+    ne::SetGroupSize(area_id, area.size);
   }
 }
 }  // namespace vh::ponc::coreui

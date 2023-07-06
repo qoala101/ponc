@@ -16,22 +16,47 @@
 #include <vector>
 
 #include "core_concepts.h"
+#include "core_diagram.h"
 #include "core_id_value.h"
 #include "coreui_diagram.h"
+#include "coreui_native_facade.h"
 
 namespace vh::ponc::draw {
 namespace {
 ///
-template <typename T>
-void UnregisterDeletedItemsImpl(
-    ItemDeleter::ItemIds &item_ids, const std::vector<T> &items,
-    const std::invocable<const T &> auto &get_item_id,
-    const std::invocable<core::UnspecifiedIdValue> auto &unregister_item) {
-  auto new_item_ids = std::set<core::UnspecifiedIdValue>{};
-  std::transform(items.cbegin(), items.cend(),
-                 std::inserter(new_item_ids, new_item_ids.cbegin()),
-                 get_item_id);
+auto GetLinkIds(const core::Diagram &diagram) {
+  const auto &links = diagram.GetLinks();
 
+  auto link_ids = std::set<core::UnspecifiedIdValue>{};
+  std::transform(links.cbegin(), links.cend(),
+                 std::inserter(link_ids, link_ids.cbegin()),
+                 [](const auto &link) { return link.id.Get(); });
+
+  return link_ids;
+}
+
+///
+auto GetNodeIds(const core::Diagram &diagram) {
+  auto node_ids = std::set<core::UnspecifiedIdValue>{};
+
+  const auto &nodes = diagram.GetNodes();
+  std::transform(nodes.cbegin(), nodes.cend(),
+                 std::inserter(node_ids, node_ids.cbegin()),
+                 [](const auto &node) { return node->GetId().Get(); });
+
+  const auto &areas = diagram.GetAreas();
+  std::transform(areas.cbegin(), areas.cend(),
+                 std::inserter(node_ids, node_ids.cbegin()),
+                 [](const auto &area) { return area.id.Get(); });
+
+  return node_ids;
+}
+
+///
+void UnregisterDeletedItemsImpl(
+    ItemDeleter::ItemIds &item_ids,
+    std::set<core::UnspecifiedIdValue> new_item_ids,
+    const std::invocable<core::UnspecifiedIdValue> auto &unregister_item) {
   auto deleted_item_ids = std::vector<core::UnspecifiedIdValue>{};
   std::set_difference(item_ids.registered_ids_.cbegin(),
                       item_ids.registered_ids_.cend(), new_item_ids.cbegin(),
@@ -70,25 +95,31 @@ void DeleteUnregisteredItemsImpl(
     item_ids.registered_ids_.erase(item_id_value);
   }
 }
+
+///
+void DeleteNode(coreui::Diagram &diagram, ne::NodeId node_id) {
+  if (coreui::NativeFacade::IsArea(node_id)) {
+    diagram.DeleteArea(node_id);
+    return;
+  }
+
+  diagram.DeleteNode(node_id);
+}
 }  // namespace
 
 ///
 void ItemDeleter::UnregisterDeletedItems(const core::Diagram &diagram) {
-  UnregisterDeletedItemsImpl(
-      link_ids_, diagram.GetLinks(),
-      [](const auto &link) { return link.id.Get(); },
-      [](const auto link_id) {
-        ne::DeselectLink(link_id);
-        ne::DeleteLink(link_id);
-      });
+  UnregisterDeletedItemsImpl(link_ids_, GetLinkIds(diagram),
+                             [](const auto link_id) {
+                               ne::DeselectLink(link_id);
+                               ne::DeleteLink(link_id);
+                             });
 
-  UnregisterDeletedItemsImpl(
-      node_ids_, diagram.GetNodes(),
-      [](const auto &node) { return node->GetId().Get(); },
-      [](const auto node_id) {
-        ne::DeselectNode(node_id);
-        ne::DeleteNode(node_id);
-      });
+  UnregisterDeletedItemsImpl(node_ids_, GetNodeIds(diagram),
+                             [](const auto node_id) {
+                               ne::DeselectNode(node_id);
+                               ne::DeleteNode(node_id);
+                             });
 }
 
 ///
@@ -101,7 +132,7 @@ void ItemDeleter::DeleteUnregisteredItems(coreui::Diagram &diagram) {
 
     DeleteUnregisteredItemsImpl<ne::NodeId>(
         node_ids_, &ne::QueryDeletedNode,
-        std::bind_front(&coreui::Diagram::DeleteNode, &diagram));
+        std::bind_front(&DeleteNode, std::ref(diagram)));
   }
 
   ne::EndDelete();

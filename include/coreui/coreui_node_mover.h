@@ -16,6 +16,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "core_area.h"
 #include "core_i_node.h"
 #include "core_id_value.h"
 #include "core_settings.h"
@@ -35,6 +36,9 @@ class NodeMover {
   void OnFrame();
   ///
   void MoveNodeTo(ne::NodeId node_id, const ImVec2 &pos);
+  ///
+  void MoveAreaTo(core::AreaId area_id, const ImVec2 &start_pos,
+                  const ImVec2 &end_pos);
   ///
   void ArrangeVerticallyAt(const std::vector<ne::NodeId> &node_ids,
                            const ImVec2 &pos);
@@ -65,7 +69,7 @@ class NodeMover {
   ///
   void MarkNodeToMove(ne::NodeId node_id);
   ///
-  void MarkAreaToMove(ne::NodeId node_id);
+  void MarkAreaToMove(core::AreaId area_id);
   ///
   void MarkNewItemsToMove();
   ///
@@ -108,8 +112,9 @@ class NodeMover {
   ///
   std::unordered_set<core::IdValue<ne::NodeId>> nodes_to_move_{};
   ///
-  std::unordered_set<core::IdValue<ne::NodeId>> areas_to_move_{};
+  std::unordered_set<core::IdValue<core::AreaId>> areas_to_move_{};
   ///
+  // TODO(vh): Those are never cleared.
   std::unordered_map<core::IdValue<ne::NodeId>, ImVec2> item_sizes_{};
   ///
   std::unordered_map<core::IdValue<ne::PinId>, ImVec2> pin_poses_{};

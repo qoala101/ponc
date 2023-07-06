@@ -9,6 +9,7 @@
 #include <imgui_node_editor.h>
 
 #include <algorithm>
+#include <iterator>
 #include <memory>
 #include <string>
 #include <utility>
@@ -20,10 +21,11 @@
 namespace vh::ponc::core {
 ///
 Diagram::Diagram(std::string name, std::vector<std::unique_ptr<INode>> nodes,
-                 std::vector<Link> links)
+                 std::vector<Link> links, std::vector<Area> areas)
     : name_{std::move(name)},
       nodes_{std::move(nodes)},
-      links_{std::move(links)} {}
+      links_{std::move(links)},
+      areas_{std::move(areas)} {}
 
 ///
 auto Diagram::GetIds(Diagram& diagram) -> std::vector<IdPtr> {
@@ -38,6 +40,10 @@ auto Diagram::GetIds(Diagram& diagram) -> std::vector<IdPtr> {
     const auto link_ids = Link::GetIds(link);
     ids.insert(ids.cend(), link_ids.cbegin(), link_ids.cend());
   }
+
+  ids.reserve(ids.size() + diagram.areas_.size());
+  std::transform(diagram.areas_.begin(), diagram.areas_.end(),
+                 std::back_inserter(ids), [](auto& area) { return &area.id; });
 
   return ids;
 }
@@ -106,11 +112,16 @@ auto Diagram::HasLink(const Diagram& diagram, ne::PinId pin_id) -> bool {
 }
 
 ///
-auto Diagram::FindArea(const Diagram& diagram, ne::NodeId node_id)
-    -> const Area& {
+auto Diagram::FindArea(const Diagram& diagram, AreaId area_id) -> const Area& {
+  // NOLINTNEXTLINE(*-const-cast)
+  return FindArea(const_cast<Diagram&>(diagram), area_id);
+}
+
+///
+auto Diagram::FindArea(Diagram& diagram, AreaId area_id) -> Area& {
   const auto area =
-      std::find_if(diagram.areas_.cbegin(), diagram.areas_.cend(),
-                   [node_id](const auto& area) { return area.id == node_id; });
+      std::find_if(diagram.areas_.begin(), diagram.areas_.end(),
+                   [area_id](const auto& area) { return area.id == area_id; });
 
   Expects(area != diagram.areas_.cend());
   return *area;
@@ -173,8 +184,8 @@ auto Diagram::EmplaceArea(const Area& area) -> Area& {
 }
 
 ///
-void Diagram::DeleteArea(ne::NodeId node_id) {
+void Diagram::DeleteArea(AreaId area_id) {
   std::erase_if(areas_,
-                [node_id](const auto& area) { return area.id == node_id; });
+                [area_id](const auto& area) { return area.id == area_id; });
 }
 }  // namespace vh::ponc::core

@@ -42,6 +42,7 @@ add_executable(ponc
   coreui/traits/coreui_i_node_traits.cc
   coreui/traits/coreui_i_pin_traits.cc
 
+  coreui/coreui_area_creator.cc
   coreui/coreui_calculator.cc
   coreui/coreui_cloner.cc
   coreui/coreui_diagram.cc
@@ -56,6 +57,7 @@ add_executable(ponc
 
   cpp/cpp_scope_function.cc
 
+  draw/diagram/popup/draw_area_popup.cc
   draw/diagram/popup/draw_connect_node_popup.cc
   draw/diagram/popup/draw_background_popup.cc
   draw/diagram/popup/draw_family_groups_menu.cc
@@ -64,6 +66,7 @@ add_executable(ponc
   draw/diagram/popup/draw_node_popup.cc
   draw/diagram/popup/draw_replace_popup.cc
 
+  draw/diagram/draw_area_creator.cc
   draw/diagram/draw_area.cc
   draw/diagram/draw_colored_text.cc
   draw/diagram/draw_diagram_editor.cc
@@ -95,12 +98,14 @@ add_executable(ponc
   draw/draw_main_menu_bar.cc
   draw/draw_main_window.cc
   draw/draw_recent_log.cc
+  draw/draw_rename_widget.cc
   draw/draw_string_buffer.cc
 
   flow/flow_algorithms.cc
   flow/flow_node_flow.cc
   flow/flow_tree_traversal.cc
 
+  json/json_area_serializer.cc
   json/json_diagram_serializer.cc
   json/json_i_family_parser.cc
   json/json_i_family_writer.cc
@@ -115,6 +120,11 @@ add_executable(ponc
   style/style_utils.cc
 
   main.cc
+)
+
+target_compile_definitions(ponc
+  PRIVATE
+  IMGUI_DEFINE_MATH_OPERATORS
 )
 
 target_include_directories(ponc
