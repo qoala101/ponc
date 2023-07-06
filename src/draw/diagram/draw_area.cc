@@ -38,19 +38,18 @@ auto DrawAreaHint(const core::Area &area) {
 ///
 void DrawAreaHeader(const core::Area &area, float alpha) {
   ImGui::BeginHorizontal("Header");
-  ImGui::Spring(0);
+  ImGui::TextUnformatted("");
 
-  const auto padding = ImGui::GetItemRectSize().x;
   const auto start_pos = ImGui::GetCursorPos();
 
-  ImGui::TextUnformatted("");
   ImGui::EndHorizontal();
 
   auto *draw_list = ImGui::GetWindowDrawList();
   Expects(draw_list != nullptr);
 
-  const auto end_pos =
-      start_pos + area.size + ImVec2{-2 * padding, ImGui::GetTextLineHeight()};
+  const auto spacing = ImGui::GetStyle().ItemSpacing;
+  const auto end_pos = start_pos + area.size +
+                       ImVec2{-2 * spacing.x, ImGui::GetTextLineHeight()};
 
   ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
   ImGui::RenderTextEllipsis(draw_list, start_pos, end_pos, end_pos.x, end_pos.x,
@@ -81,7 +80,7 @@ void DrawArea(core::Area &area, coreui::NodeMover &node_mover) {
   const auto header_alpha = 1.F - hint_alpha;
   DrawAreaHeader(area, header_alpha);
 
-  ne::Group(area.size);
+  ne::Group({});
   ne::EndNode();
 
   ne::PopStyleColor();

@@ -38,13 +38,21 @@ class AreaCreator {
 
  private:
   ///
+  struct Area {
+    ///
+    core::AreaId id{};
+    ///
+    ImVec2 start_pos{};
+  };
+
+  ///
   cpp::SafePtr<Diagram> parent_diagram_;
   ///
   cpp::SafePtr<core::IdGenerator> id_generator_;
   ///
   cpp::SafeOwner safe_owner_{};
   ///
-  std::optional<core::AreaId> area_id_{};
+  std::optional<Area> area_{};
 };
 }  // namespace vh::ponc::coreui
 

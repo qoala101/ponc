@@ -130,13 +130,14 @@ void NodeMover::MoveNodeTo(ne::NodeId node_id, const ImVec2& pos) {
 }
 
 ///
-void NodeMover::MoveAreaTo(core::AreaId area_id, const ImVec2& pos,
-                           const ImVec2& size) {
+void NodeMover::MoveAreaTo(core::AreaId area_id, const ImVec2& start_pos,
+                           const ImVec2& end_pos) {
   auto& diagram = parent_diagram_->GetDiagram();
   auto& area = core::Diagram::FindArea(diagram, area_id);
 
-  area.pos = pos;
-  area.size = size;
+  area.pos = start_pos;
+  area.size = ImMax(start_pos, end_pos) - start_pos;
+
   MarkAreaToMove(area_id);
 }
 

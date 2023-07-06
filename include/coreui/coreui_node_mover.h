@@ -37,7 +37,8 @@ class NodeMover {
   ///
   void MoveNodeTo(ne::NodeId node_id, const ImVec2 &pos);
   ///
-  void MoveAreaTo(core::AreaId area_id, const ImVec2 &pos, const ImVec2 &size);
+  void MoveAreaTo(core::AreaId area_id, const ImVec2 &start_pos,
+                  const ImVec2 &end_pos);
   ///
   void ArrangeVerticallyAt(const std::vector<ne::NodeId> &node_ids,
                            const ImVec2 &pos);

@@ -19,7 +19,7 @@ AreaCreator::AreaCreator(cpp::SafePtr<Diagram> parent_diagram,
       id_generator_{std::move(id_generator)} {}
 
 ///
-auto AreaCreator::IsCreating() const -> bool { return area_id_.has_value(); }
+auto AreaCreator::IsCreating() const -> bool { return area_.has_value(); }
 
 ///
 auto AreaCreator::StartCreateAreaAt(const ImVec2& start_pos) -> Event& {
@@ -29,30 +29,27 @@ auto AreaCreator::StartCreateAreaAt(const ImVec2& start_pos) -> Event& {
                                .pos = start_pos};
 
   return parent_diagram_->AddArea(area).Then(
-      [safe_this = safe_owner_.MakeSafe(this), area_id]() {
-        safe_this->area_id_ = area_id;
+      [safe_this = safe_owner_.MakeSafe(this),
+       area = Area{.id = area_id, .start_pos = start_pos}]() {
+        safe_this->area_ = area;
       });
 }
 
 ///
 void AreaCreator::ResizeAreaTo(const ImVec2& pos) {
-  Expects(area_id_.has_value());
-
-  const auto& area =
-      core::Diagram::FindArea(parent_diagram_->GetDiagram(), *area_id_);
-
-  parent_diagram_->GetNodeMover().MoveAreaTo(area.id, area.pos, pos - area.pos);
+  Expects(area_.has_value());
+  parent_diagram_->GetNodeMover().MoveAreaTo(area_->id, area_->start_pos, pos);
 }
 
 ///
-void AreaCreator::AcceptCreateArea() { area_id_.reset(); }
+void AreaCreator::AcceptCreateArea() { area_.reset(); }
 
 ///
 auto AreaCreator::DiscardCreateArea() -> Event& {
-  Expects(area_id_.has_value());
+  Expects(area_.has_value());
 
-  const auto area_id = *area_id_;
-  area_id_.reset();
+  const auto area_id = area_->id;
+  area_.reset();
 
   return parent_diagram_->DeleteArea(area_id);
 }
