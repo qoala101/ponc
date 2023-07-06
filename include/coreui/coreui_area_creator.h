@@ -8,6 +8,9 @@
 #define VH_PONC_COREUI_AREA_CREATOR_H_
 
 #include <imgui.h>
+#include <imgui_node_editor.h>
+
+#include <optional>
 
 #include "core_area.h"
 #include "core_id_generator.h"

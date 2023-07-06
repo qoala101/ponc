@@ -10,6 +10,7 @@
 
 #include <utility>
 
+#include "coreui_area_creator.h"
 #include "coreui_diagram.h"
 #include "coreui_family.h"
 #include "draw_family_groups_menu.h"

@@ -7,7 +7,7 @@
 #ifndef VH_PONC_DRAW_RENAME_WIDGET_H_
 #define VH_PONC_DRAW_RENAME_WIDGET_H_
 
-#include <imgui.h>
+#include <string_view>
 
 #include "draw_string_buffer.h"
 

@@ -10,6 +10,8 @@
 #include <imgui_internal.h>
 #include <imgui_node_editor.h>
 
+#include <string>
+
 #include "core_area.h"
 #include "coreui_native_facade.h"
 #include "cpp_assert.h"

@@ -6,9 +6,12 @@
 
 #include "coreui_area_creator.h"
 
-#include "core_diagram.h"
+#include <string>
+#include <utility>
+
 #include "coreui_diagram.h"
 #include "coreui_event.h"
+#include "coreui_node_mover.h"
 #include "cpp_assert.h"
 
 namespace vh::ponc::coreui {

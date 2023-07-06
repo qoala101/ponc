@@ -8,6 +8,8 @@
 
 #include <imgui.h>
 
+#include <string>
+
 #include "core_diagram.h"
 #include "draw_rename_widget.h"
 

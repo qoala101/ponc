@@ -6,6 +6,10 @@
 
 #include "draw_rename_widget.h"
 
+#include <imgui.h>
+
+#include <string>
+
 #include "draw_disable_if.h"
 
 namespace vh::ponc::draw {

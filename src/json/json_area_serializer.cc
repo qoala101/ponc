@@ -7,7 +7,7 @@
 #include "json_area_serializer.h"
 
 #include <crude_json.h>
-#include <imgui_node_editor.h>
+#include <imgui.h>
 
 #include <memory>
 

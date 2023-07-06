@@ -7,8 +7,9 @@
 #ifndef VH_PONC_DRAW_AREA_POPUP_H_
 #define VH_PONC_DRAW_AREA_POPUP_H_
 
-#include <imgui_node_editor.h>
+#include <vector>
 
+#include "core_area.h"
 #include "coreui_diagram.h"
 #include "cpp_callbacks.h"
 #include "draw_string_buffer.h"

@@ -6,6 +6,8 @@
 
 #include "calc_calculation_task.h"
 
+#include <cxxabi.h>
+
 // IWYU pragma: no_include #include <cxxabi.h>
 
 #include <chrono>
