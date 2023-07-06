@@ -4,7 +4,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(
   "ponc"
-  VERSION 0.5.2
+  VERSION 0.5.3
   LANGUAGES CXX
 )
 

@@ -6,6 +6,7 @@
 
 #include "draw_string_buffer.h"
 
+#include <imgui.h>
 #include <imgui_internal.h>
 
 #include <algorithm>
