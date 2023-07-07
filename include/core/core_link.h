@@ -11,6 +11,7 @@
 
 #include <vector>
 
+#include "core_connection.h"
 #include "core_id_ptr.h"
 
 namespace ne = ax::NodeEditor;
@@ -37,6 +38,10 @@ struct Link {
   ne::PinId start_pin_id{};
   ///
   ne::PinId end_pin_id{};
+  ///
+  ConnectionId connection_id{};
+  ///
+  float length{};
 
  private:
   ///

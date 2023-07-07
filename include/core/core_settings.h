@@ -16,6 +16,9 @@
 
 namespace vh::ponc::core {
 ///
+enum class LinkThickness { kSame, kFromLength, kFromDrop };
+
+///
 struct CalculatorFamilySettings {
   ///
   static auto FromFamilies(
@@ -59,6 +62,8 @@ struct Settings {
   float high_flow{};
   ///
   float max_flow{};
+  ///
+  LinkThickness link_thickness{};
   ///
   int arrange_horizontal_spacing{};
   ///
