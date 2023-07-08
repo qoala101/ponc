@@ -35,6 +35,9 @@ class Diagram {
   ///
   static auto FindPinNode(const Diagram &diagram, ne::PinId pin_id) -> INode &;
   ///
+  static auto FindLink(const Diagram &diagram, ne::LinkId link_id)
+      -> const Link &;
+  ///
   static auto FindLink(Diagram &diagram, ne::LinkId link_id) -> Link &;
   ///
   static auto FindPinLink(const Diagram &diagram, ne::PinId pin_id)

@@ -15,6 +15,7 @@
 #include "coreui_diagram.h"
 #include "draw_area_creator.h"
 #include "draw_background_popup.h"
+#include "draw_edit_link_popup.h"
 #include "draw_item_deleter.h"
 #include "draw_link_popup.h"
 #include "draw_linker.h"
@@ -55,6 +56,8 @@ class DiagramEditor {
   LinkPopup link_popup_{};
   ///
   ReplacePopup replace_popup_{};
+  ///
+  EditLinkPopup edit_link_popup_{};
 };
 }  // namespace vh::ponc::draw
 

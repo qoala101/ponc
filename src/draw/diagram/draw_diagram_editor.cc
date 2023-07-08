@@ -147,7 +147,18 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
   if (node_double_clicked) {
     replace_popup_.SetNodeId(node_id);
     replace_popup_.Open();
+    return;
   }
+
+  link_id = ne::GetDoubleClickedLink();
+
+  if (link_id == ne::LinkId::Invalid) {
+    return;
+  }
+
+  const auto link = core::Diagram::FindLink(diagram, link_id);
+  edit_link_popup_.SetLink(link);
+  edit_link_popup_.Open();
 }
 
 ///
@@ -160,5 +171,6 @@ void DiagramEditor::DrawPopups(coreui::Diagram &diagram) {
     }
   }});
   replace_popup_.Draw(diagram);
+  edit_link_popup_.Draw(diagram);
 }
 }  // namespace vh::ponc::draw

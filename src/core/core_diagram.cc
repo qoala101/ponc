@@ -117,6 +117,13 @@ auto Diagram::FindPinNode(const Diagram& diagram, ne::PinId pin_id) -> INode& {
 }
 
 ///
+auto Diagram::FindLink(const Diagram& diagram, ne::LinkId link_id)
+    -> const Link& {
+  // NOLINTNEXTLINE(*-const-cast)
+  return FindLink(const_cast<Diagram&>(diagram), link_id);
+}
+
+///
 auto Diagram::FindLink(Diagram& diagram, ne::LinkId link_id) -> Link& {
   const auto link =
       std::find_if(diagram.links_.begin(), diagram.links_.end(),
