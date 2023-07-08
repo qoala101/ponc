@@ -39,14 +39,14 @@ namespace vh::ponc::coreui {
 class Diagram {
  public:
   ///
+  Diagram(cpp::SafePtr<Project> parent_project,
+          cpp::SafePtr<core::Diagram> diagram);
+
+  ///
   static auto FindNode(const Diagram &diagram, ne::NodeId node_id)
       -> const Node &;
   ///
   static auto FindNode(Diagram &diagram, ne::NodeId node_id) -> Node &;
-
-  ///
-  Diagram(cpp::SafePtr<Project> parent_project,
-          cpp::SafePtr<core::Diagram> diagram);
 
   ///
   void OnFrame();

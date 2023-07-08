@@ -48,6 +48,11 @@ class Diagram {
   static auto FindArea(const Diagram &diagram, AreaId area_id) -> const Area &;
   ///
   static auto FindArea(Diagram &diagram, AreaId area_id) -> Area &;
+  ///
+  static auto MakeUniqueDiagramName(const std::vector<Diagram> &diagrams = {},
+                                    std::string source_name = "Diagram",
+                                    std::string_view postfix = {})
+      -> std::string;
 
   ///
   auto GetName() const -> const std::string &;

@@ -19,6 +19,47 @@
 #include "cpp_assert.h"
 
 namespace vh::ponc::core {
+namespace {
+///
+auto HasDiagramNamed(std::string_view name,
+                     const std::vector<Diagram>& diagrams) {
+  return std::any_of(
+      diagrams.cbegin(), diagrams.cend(),
+      [name](const auto& diagram) { return diagram.GetName() == name; });
+}
+
+///
+void RemoveIndexedPostfix(std::string& name, std::string_view postfix) {
+  if (postfix.empty()) {
+    return;
+  }
+
+  const auto postfix_pos = name.find_last_of(postfix);
+
+  if (postfix_pos == std::string::npos) {
+    return;
+  }
+
+  const auto after_postfix = name.substr(postfix_pos + 1);
+  const auto before_postfix_pos = postfix_pos - postfix.size();
+
+  if (after_postfix.empty()) {
+    name = name.substr(0, before_postfix_pos);
+    return;
+  }
+
+  try {
+    const auto index = std::stoi(after_postfix);
+
+    if (const auto same_postfix =
+            after_postfix == (" " + std::to_string(index))) {
+      name = name.substr(0, before_postfix_pos);
+    }
+  } catch (const std::exception&) {
+  }
+}
+}  // namespace
+
 ///
 Diagram::Diagram(std::string name, std::vector<std::unique_ptr<INode>> nodes,
                  std::vector<Link> links, std::vector<Area> areas)
@@ -125,6 +166,40 @@ auto Diagram::FindArea(Diagram& diagram, AreaId area_id) -> Area& {
 
   Expects(area != diagram.areas_.cend());
   return *area;
+}
+
+///
+auto Diagram::MakeUniqueDiagramName(const std::vector<Diagram>& diagrams,
+                                    std::string source_name,
+                                    std::string_view postfix) -> std::string {
+  if (!HasDiagramNamed(source_name, diagrams)) {
+    return source_name;
+  }
+
+  RemoveIndexedPostfix(source_name, postfix);
+  source_name += " ";
+
+  if (!postfix.empty()) {
+    source_name += postfix;
+
+    if (!HasDiagramNamed(source_name, diagrams)) {
+      return source_name;
+    }
+
+    source_name += " ";
+  }
+
+  auto index = 2;
+  auto name = std::string{};
+  auto name_is_unique = false;
+
+  while (!name_is_unique) {
+    name = source_name + std::to_string(index);
+    name_is_unique = !HasDiagramNamed(name, diagrams);
+    ++index;
+  }
+
+  return name;
 }
 
 ///

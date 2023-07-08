@@ -49,8 +49,8 @@ auto DiagramsView::DrawControls(coreui::Project& project) {
   ImGui::BeginHorizontal("Controls");
 
   if (ImGui::Button("Create")) {
-    project.AddDiagram(
-        core::Diagram{core::Project::MakeUniqueDiagramName(core_project)});
+    project.AddDiagram(core::Diagram{
+        core::Diagram::MakeUniqueDiagramName(core_project.GetDiagrams())});
   }
 
   if (ImGui::Button("Clone")) {

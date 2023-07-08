@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "core_area.h"
+#include "core_connection.h"
 #include "core_diagram.h"
 #include "core_i_node.h"
 #include "core_id_generator.h"
@@ -23,53 +24,16 @@
 #include "cpp_assert.h"
 
 namespace vh::ponc::core {
-namespace {
-///
-auto HasDiagramNamed(std::string_view name,
-                     const std::vector<Diagram>& diagrams) {
-  return std::any_of(
-      diagrams.cbegin(), diagrams.cend(),
-      [name](const auto& diagram) { return diagram.GetName() == name; });
-}
-
-///
-void RemoveIndexedPostfix(std::string& name, std::string_view postfix) {
-  if (postfix.empty()) {
-    return;
-  }
-
-  const auto postfix_pos = name.find_last_of(postfix);
-
-  if (postfix_pos == std::string::npos) {
-    return;
-  }
-
-  const auto after_postfix = name.substr(postfix_pos + 1);
-  const auto before_postfix_pos = postfix_pos - postfix.size();
-
-  if (after_postfix.empty()) {
-    name = name.substr(0, before_postfix_pos);
-    return;
-  }
-
-  try {
-    const auto index = std::stoi(after_postfix);
-
-    if (const auto same_postfix =
-            after_postfix == (" " + std::to_string(index))) {
-      name = name.substr(0, before_postfix_pos);
-    }
-  } catch (const std::exception&) {
-  }
-}
-}  // namespace
-
 ///
 auto Project::FindMaxId() const {
   auto max_id = UnspecifiedIdValue{1};
 
   for (const auto& family : families_) {
     max_id = std::max(family->GetId().Get(), max_id);
+  }
+
+  for (const auto& connection : connections_) {
+    max_id = std::max(connection.id.Get(), max_id);
   }
 
   for (const auto& diagram : diagrams_) {
@@ -115,47 +79,13 @@ auto Project::FindFamily(const Project& project, FamilyId family_id)
 }
 
 ///
-auto Project::MakeUniqueDiagramName(const Project& project,
-                                    std::string source_name,
-                                    std::string_view postfix) -> std::string {
-  const auto& diagrams = project.GetDiagrams();
-
-  if (!HasDiagramNamed(source_name, diagrams)) {
-    return source_name;
-  }
-
-  RemoveIndexedPostfix(source_name, postfix);
-  source_name += " ";
-
-  if (!postfix.empty()) {
-    source_name += postfix;
-
-    if (!HasDiagramNamed(source_name, diagrams)) {
-      return source_name;
-    }
-
-    source_name += " ";
-  }
-
-  auto index = 2;
-  auto name = std::string{};
-  auto name_is_unique = false;
-
-  while (!name_is_unique) {
-    name = source_name + std::to_string(index);
-    name_is_unique = !HasDiagramNamed(name, diagrams);
-    ++index;
-  }
-
-  return name;
-}
-
-///
 Project::Project(Settings settings,
                  std::vector<std::unique_ptr<IFamily>> families,
+                 std::vector<Connection> connections,
                  std::vector<Diagram> diagrams)
     : settings_{std::move(settings)},
       families_{std::move(families)},
+      connections_{std::move(connections)},
       diagrams_{std::move(diagrams)},
       id_generator_{FindMaxId() + 1} {}
 
@@ -172,6 +102,29 @@ auto Project::GetSettings() -> Settings& { return settings_; }
 auto Project::GetFamilies() const
     -> const std::vector<std::unique_ptr<IFamily>>& {
   return families_;
+}
+
+///
+auto Project::GetConnections() const -> const std::vector<Connection>& {
+  // NOLINTNEXTLINE(*-const-cast)
+  return const_cast<Project*>(this)->GetConnections();
+}
+
+///
+auto Project::GetConnections() -> std::vector<Connection>& {
+  return connections_;
+}
+
+///
+auto Project::EmplaceConnection(Connection connection) -> Connection& {
+  return connections_.emplace_back(std::move(connection));
+}
+
+///
+void Project::DeleteConnection(ConnectionId connection_id) {
+  std::erase_if(connections_, [connection_id](const auto& connection) {
+    return connection.id == connection_id;
+  });
 }
 
 ///

@@ -12,6 +12,7 @@
 #include <string_view>
 #include <vector>
 
+#include "core_connection.h"
 #include "core_diagram.h"
 #include "core_i_family.h"
 #include "core_id_generator.h"
@@ -22,19 +23,15 @@ namespace vh::ponc::core {
 class Project {
  public:
   ///
+  Project(Settings settings, std::vector<std::unique_ptr<IFamily>> families,
+          std::vector<Connection> connections = {},
+          std::vector<Diagram> diagrams = {});
+
+  ///
   static auto IsEmpty(const Project &project) -> bool;
   ///
   static auto FindFamily(const Project &project, FamilyId family_id)
       -> IFamily &;
-  ///
-  static auto MakeUniqueDiagramName(const Project &project,
-                                    std::string source_name = "Diagram",
-                                    std::string_view postfix = {})
-      -> std::string;
-
-  ///
-  Project(Settings settings, std::vector<std::unique_ptr<IFamily>> families,
-          std::vector<Diagram> diagrams = {});
 
   ///
   auto GetSettings() const -> const Settings &;
@@ -42,6 +39,14 @@ class Project {
   auto GetSettings() -> Settings &;
   ///
   auto GetFamilies() const -> const std::vector<std::unique_ptr<IFamily>> &;
+  ///
+  auto GetConnections() const -> const std::vector<Connection> &;
+  ///
+  auto GetConnections() -> std::vector<Connection> &;
+  ///
+  auto EmplaceConnection(Connection connection) -> Connection &;
+  ///
+  void DeleteConnection(ConnectionId connection_id);
   ///
   auto GetDiagrams() const -> const std::vector<Diagram> &;
   ///
@@ -63,6 +68,8 @@ class Project {
   Settings settings_{};
   ///
   std::vector<std::unique_ptr<IFamily>> families_{};
+  ///
+  std::vector<Connection> connections_{};
   ///
   std::vector<Diagram> diagrams_{};
   ///

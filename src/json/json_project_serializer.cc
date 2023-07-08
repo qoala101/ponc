@@ -59,7 +59,7 @@ auto ProjectSerializer::ParseFromJson(
         return DiagramSerializer::ParseFromJson(json, families);
       });
 
-  return core::Project{settings, std::move(families), std::move(diagrams)};
+  return {settings, std::move(families), {}, std::move(diagrams)};
 }
 
 ///

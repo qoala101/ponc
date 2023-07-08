@@ -17,6 +17,7 @@
 #include <utility>
 #include <vector>
 
+#include "core_connection.h"
 #include "core_diagram.h"
 #include "core_i_family.h"
 #include "core_i_family_group.h"
@@ -33,6 +34,7 @@
 #include "json_i_family_parser.h"
 #include "json_project_serializer.h"
 #include "json_versifier.h"
+#include "style_default_colors.h"
 
 namespace vh::ponc::coreui {
 ///
@@ -53,11 +55,17 @@ auto Project::CreateProject() const {
               core::CalculatorFamilySettings::FromFamilies(families)}};
   core::Settings::ResetToDefault(settings);
 
-  auto project = core::Project{std::move(settings), std::move(families), {}};
-  project.EmplaceDiagram(
-      core::Diagram{core::Project::MakeUniqueDiagramName(project)});
+  auto connections = std::vector{
+      core::Connection{.id = id_generator.Generate<core::ConnectionId>(),
+                       .name = "Default",
+                       .color = style::DefaultColors::kWhite}};
 
-  return project;
+  auto diagrams = std::vector<core::Diagram>{};
+  diagrams.reserve(1);
+  diagrams.emplace_back(core::Diagram::MakeUniqueDiagramName());
+
+  return core::Project{std::move(settings), std::move(families),
+                       std::move(connections), std::move(diagrams)};
 }
 
 ///
@@ -123,8 +131,8 @@ auto Project::CloneDiagram(const core::Diagram& diagram) -> Event& {
   auto clone = Cloner::Clone(diagram, project_.GetFamilies());
   Cloner::RewireIds(core::Diagram::GetIds(clone), project_.GetIdGenerator());
 
-  auto new_name =
-      core::Project::MakeUniqueDiagramName(project_, diagram.GetName(), "copy");
+  auto new_name = core::Diagram::MakeUniqueDiagramName(
+      project_.GetDiagrams(), diagram.GetName(), "copy");
   clone.SetName(std::move(new_name));
 
   return AddDiagram(std::move(clone));

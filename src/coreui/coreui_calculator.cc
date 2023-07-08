@@ -26,6 +26,7 @@
 #include "calc_tree_node.h"
 #include "calc_tree_traversal.h"
 #include "calc_types.h"
+#include "core_diagram.h"
 #include "core_i_node.h"
 #include "core_id_generator.h"
 #include "core_link.h"
@@ -472,8 +473,9 @@ void Calculator::ProcessResult(
   auto flow_trees = flow::BuildFlowTrees(*diagram_copy_);
   auto output_trees = GetOutputTrees(flow_trees, output_root_ids);
 
-  auto new_diagram_name = core::Project::MakeUniqueDiagramName(
-      parent_project_->GetProject(), diagram_copy_->GetName(), "calc.");
+  const auto& diagrams = parent_project_->GetProject().GetDiagrams();
+  auto new_diagram_name = core::Diagram::MakeUniqueDiagramName(
+      diagrams, diagram_copy_->GetName(), "calc.");
 
   LogResult(calculated_trees, new_diagram_name);
   diagram_copy_->SetName(std::move(new_diagram_name));
