@@ -13,6 +13,7 @@
 #include <functional>
 #include <iterator>
 #include <memory>
+#include <string>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -156,6 +157,26 @@ auto Project::DeleteDiagram(int index) -> Event& {
 auto Project::SetDiagram(int index) -> Event& {
   return event_loop_.PostEvent([safe_this = safe_owner_.MakeSafe(this),
                                 index]() { safe_this->SetDiagramImpl(index); });
+}
+
+///
+auto Project::AddConnection() -> Event& {
+  const auto id = project_.GetIdGenerator().Generate<core::ConnectionId>();
+  auto connection = core::Connection{
+      .id = id, .name = "Connection #" + std::to_string(id.Get())};
+
+  return event_loop_.PostEvent([project = safe_owner_.MakeSafe(&project_),
+                                connection = std::move(connection)]() mutable {
+    project->EmplaceConnection(std::move(connection));
+  });
+}
+
+///
+auto Project::DeleteConnection(core::ConnectionId connection_id) -> Event& {
+  return event_loop_.PostEvent(
+      [project = safe_owner_.MakeSafe(&project_), connection_id]() {
+        project->DeleteConnection(connection_id);
+      });
 }
 
 ///

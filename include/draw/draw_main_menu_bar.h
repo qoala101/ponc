@@ -10,6 +10,7 @@
 #include "coreui_project.h"
 #include "draw_about_dialog.h"
 #include "draw_calculator_view.h"
+#include "draw_connections_view.h"
 #include "draw_diagrams_view.h"
 #include "draw_flow_tree_view.h"
 #include "draw_log_view.h"
@@ -52,6 +53,8 @@ class MainMenuBar {
   NodeView node_view_{};
   ///
   NodesView nodes_view_{};
+  ///
+  ConnectionsView connections_view_{};
   ///
   DiagramsView diagrams_view_{};
   ///

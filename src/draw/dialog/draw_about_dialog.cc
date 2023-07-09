@@ -46,7 +46,7 @@ void AboutDialog::Draw() {
       ImGui::TextUnformatted("https://github.com/qoala101/ponc");
 
       DrawSettingsTableRow("Date");
-      ImGui::TextUnformatted("May 25, 2023");
+      ImGui::TextUnformatted("July 23, 2023");
 
       DrawSettingsTableRow("License");
       ImGui::TextUnformatted("MIT");

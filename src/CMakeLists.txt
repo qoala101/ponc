@@ -85,6 +85,7 @@ add_executable(ponc
   draw/dialog/draw_save_as_file_dialog.cc
 
   draw/view/draw_calculator_view.cc
+  draw/view/draw_connections_view.cc
   draw/view/draw_diagrams_view.cc
   draw/view/draw_disable_if.cc
   draw/view/draw_flow_tree_view.cc

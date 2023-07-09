@@ -57,6 +57,10 @@ class Project {
   ///
   auto SetDiagram(int index) -> Event &;
   ///
+  auto AddConnection() -> Event &;
+  ///
+  auto DeleteConnection(core::ConnectionId connection_id) -> Event &;
+  ///
   auto GetCalculator() -> Calculator &;
   ///
   auto GetLog() -> Log &;

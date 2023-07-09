@@ -115,6 +115,7 @@ void MainMenuBar::DrawViewMenu() {
   if (ImGui::BeginMenu("View")) {
     DrawViewMenuItem(node_view_);
     DrawViewMenuItem(nodes_view_);
+    DrawViewMenuItem(connections_view_);
     DrawViewMenuItem(diagrams_view_);
     DrawViewMenuItem(flow_tree_view_);
     ImGui::Separator();
@@ -166,6 +167,7 @@ void MainMenuBar::DrawViews(coreui::Project &project) {
 
   node_view_.Draw(selected_node, diagram.GetFamilyGroups());
   nodes_view_.Draw(diagram);
+  connections_view_.Draw(project);
   diagrams_view_.Draw(project);
   flow_tree_view_.Draw(diagram.GetNodeTrees());
 
