@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include "core_connection.h"
 #include "core_diagram.h"
 #include "core_project.h"
 #include "coreui_diagram.h"
@@ -19,6 +20,8 @@
 #include "draw_disable_if.h"
 #include "draw_id_label.h"
 #include "draw_rename_widget.h"
+#include "draw_settings_table_row.h"
+#include "draw_table_flags.h"
 
 namespace vh::ponc::draw {
 ///
@@ -116,32 +119,36 @@ void ConnectionsView::ApplyAction(coreui::Project& project,
 ///
 void ConnectionsView::DrawDiagrams(coreui::Project& project,
                                    std::optional<Action> selected_action) {
-  // NOLINTBEGIN(*-signed-bitwise)
-  const auto table_flags = ImGuiTableFlags_BordersH |
-                           ImGuiTableFlags_BordersOuter |
-                           ImGuiTableFlags_ScrollY;
-  // NOLINTEND(*-signed-bitwise)
+  if (ImGui::BeginTable("Connections", 3, kExpandingTableFlags)) {
+    ImGui::TableSetupScrollFreeze(0, 1);
+    ImGui::TableSetupColumn("Name");
+    ImGui::TableSetupColumn("Attenuation/Length");
+    ImGui::TableSetupColumn("Attenuation Added");
+    ImGui::TableHeadersRow();
 
-  if (ImGui::BeginTable("Connections", 1, table_flags)) {
     auto& connections = project.GetProject().GetConnections();
 
     for (auto i = 0; i < static_cast<int>(connections.size()); ++i) {
       ImGui::TableNextRow();
-      ImGui::TableNextColumn();
 
       auto& connection = connections[i];
-      const auto item_is_selected = false;
-      // &connection == &project.GetDiagram().GetDiagram();
 
-      if (ImGui::Selectable(IdLabel(i, connection.name).c_str(),
-                            item_is_selected) &&
-          !item_is_selected) {
-        project.SetDiagram(i);
-      }
+      ImGui::TableNextColumn();
+      ImGui::ColorEdit3(
+          "##Color", &connection.color.Value.x,
+          ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+      ImGui::SameLine();
+      ImGui::Selectable(IdLabel(i, connection.name).c_str());
 
-      if (item_is_selected && selected_action.has_value()) {
-        ApplyAction(project, i, *selected_action);
-      }
+      ImGui::TableNextColumn();
+      ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
+      ImGui::InputFloat("##Attenuation/Length", &connection.drop_per_length, 0,
+                        0, "%.2f");
+
+      ImGui::TableNextColumn();
+      ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
+      ImGui::InputFloat("##Attenuation Added", &connection.drop_added, 0, 0,
+                        "%.2f");
     }
 
     ImGui::EndTable();
