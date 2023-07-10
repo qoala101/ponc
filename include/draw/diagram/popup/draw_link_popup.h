@@ -23,6 +23,8 @@ class LinkPopup : public IPopup {
   ///
   struct Callbacks {
     ///
+    cpp::Signal<std::vector<ne::LinkId>> edit_selected{};
+    ///
     cpp::Signal<std::vector<ne::LinkId>> delete_selected{};
   };
 

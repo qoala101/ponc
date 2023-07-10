@@ -20,11 +20,13 @@ class EditLinkPopup : public IPopup {
   ///
   void Draw(coreui::Diagram &diagram);
   ///
-  void SetLink(const core::Link &link);
+  void SetLinkIds(std::vector<ne::LinkId> link_ids);
 
  private:
   ///
-  core::Link link_copy_{};
+  std::vector<ne::LinkId> link_ids_{};
+  ///
+  std::vector<core::Link> link_copies_{};
 };
 }  // namespace vh::ponc::draw
 

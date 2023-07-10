@@ -156,8 +156,7 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
     return;
   }
 
-  const auto link = core::Diagram::FindLink(diagram, link_id);
-  edit_link_popup_.SetLink(link);
+  edit_link_popup_.SetLinkIds({link_id});
   edit_link_popup_.Open();
 }
 
@@ -165,12 +164,25 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
 void DiagramEditor::DrawPopups(coreui::Diagram &diagram) {
   background_popup_.Draw(diagram);
   node_popup_.Draw(diagram);
-  link_popup_.Draw({.delete_selected = [&diagram](const auto &link_ids) {
-    for (const auto link_id : link_ids) {
-      diagram.DeleteLink(link_id);
-    }
-  }});
-  replace_popup_.Draw(diagram);
+
+  auto links_to_edit = std::vector<ne::LinkId>{};
+
+  link_popup_.Draw(
+      {.edit_selected =
+           [&links_to_edit](const auto &link_ids) { links_to_edit = link_ids; },
+       .delete_selected =
+           [&diagram](const auto &link_ids) {
+             for (const auto link_id : link_ids) {
+               diagram.DeleteLink(link_id);
+             }
+           }});
+
+  if (!links_to_edit.empty()) {
+    edit_link_popup_.SetLinkIds(std::move(links_to_edit));
+    edit_link_popup_.Open();
+  }
+
   edit_link_popup_.Draw(diagram);
+  replace_popup_.Draw(diagram);
 }
 }  // namespace vh::ponc::draw

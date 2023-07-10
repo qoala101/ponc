@@ -29,7 +29,7 @@ void EditLinkPopup::Draw(coreui::Diagram& diagram) {
     return;
   }
 
-  auto& link = core::Diagram::FindLink(diagram.GetDiagram(), link_copy_.id);
+  auto& link = core::Diagram::FindLink(diagram.GetDiagram(), link_ids_.front());
 
   ImGui::InputFloat("Length", &link.length);
 
@@ -44,11 +44,13 @@ void EditLinkPopup::Draw(coreui::Diagram& diagram) {
   }
 
   if (ImGui::Button("Cancel")) {
-    link = link_copy_;
+    link = link_copies_.front();
     ImGui::CloseCurrentPopup();
   }
 }
 
 ///
-void EditLinkPopup::SetLink(const core::Link& link) { link_copy_ = link; }
+void EditLinkPopup::SetLinkIds(std::vector<ne::LinkId> link_ids) {
+  link_ids_ = std::move(link_ids);
+}
 }  // namespace vh::ponc::draw
