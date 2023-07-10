@@ -17,7 +17,6 @@
 #include "coreui_diagram.h"
 #include "cpp_assert.h"
 #include "draw_disable_if.h"
-#include "draw_id_label.h"
 #include "draw_rename_widget.h"
 
 namespace vh::ponc::draw {
@@ -134,6 +133,7 @@ void DiagramsView::DrawDiagrams(coreui::Project& project,
     auto& diagrams = project.GetProject().GetDiagrams();
 
     for (auto i = 0; i < static_cast<int>(diagrams.size()); ++i) {
+      ImGui::PushID(i);
       ImGui::TableNextRow();
       ImGui::TableNextColumn();
 
@@ -141,8 +141,7 @@ void DiagramsView::DrawDiagrams(coreui::Project& project,
       const auto item_is_selected =
           &diagram == &project.GetDiagram().GetDiagram();
 
-      if (ImGui::Selectable(IdLabel(i, diagram.GetName()).c_str(),
-                            item_is_selected) &&
+      if (ImGui::Selectable(diagram.GetName().c_str(), item_is_selected) &&
           !item_is_selected) {
         project.SetDiagram(i);
       }
@@ -150,6 +149,8 @@ void DiagramsView::DrawDiagrams(coreui::Project& project,
       if (item_is_selected && selected_action.has_value()) {
         ApplyAction(project, i, *selected_action);
       }
+
+      ImGui::PopID();
     }
 
     ImGui::EndTable();

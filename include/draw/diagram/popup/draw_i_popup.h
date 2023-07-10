@@ -48,7 +48,7 @@ class IPopup : public cpp::NonCopyable {
 
  private:
   ///
-  ImGuiID id_{};
+  std::string id_label_{};
   ///
   bool opened_{};
   ///

@@ -22,7 +22,6 @@
 #include "coreui_native_facade.h"
 #include "coreui_node.h"
 #include "cpp_safe_ptr.h"
-#include "draw_id_label.h"
 #include "draw_table_flags.h"
 #include "draw_tree_node.h"
 
@@ -76,24 +75,24 @@ void DrawFamily(
     return;
   }
 
+  ImGui::PushID(family.GetFamily().GetId().AsPointer());
   ImGui::TableNextRow();
   ImGui::TableNextColumn();
 
   const auto item_is_open =
-      ImGui::TreeNodeEx(IdLabel(family.GetFamily().GetId()).c_str(),
-                        ImGuiTreeNodeFlags_DefaultOpen);
+      ImGui::TreeNodeEx("", ImGuiTreeNodeFlags_DefaultOpen);
   ImGui::SameLine();
   DrawSelectableName(family, selected_node_ids);
 
-  if (!item_is_open) {
-    return;
+  if (item_is_open) {
+    for (const auto& node : nodes) {
+      DrawTreeNode(node->GetTreeNode(), false);
+    }
+
+    ImGui::TreePop();
   }
 
-  for (const auto& node : nodes) {
-    DrawTreeNode(node->GetTreeNode(), false);
-  }
-
-  ImGui::TreePop();
+  ImGui::PopID();
 }
 }  // namespace
 

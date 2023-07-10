@@ -13,16 +13,15 @@
 #include <string>
 
 #include "cpp_scope_function.h"
-#include "draw_id_label.h"
 
 namespace ne = ax::NodeEditor;
 
 namespace vh::ponc::draw {
 namespace {
 ///
-auto GenerateId() {
+auto GenerateIdLabel() {
   static auto id = ImGuiID{};
-  return id++;
+  return std::string{"##"} + std::to_string(id++);
 }
 }  // namespace
 
@@ -31,8 +30,7 @@ auto IPopup::IsOpened() const -> bool { return opened_; }
 
 ///
 void IPopup::Open() {
-  ImGui::OpenPopup(IdLabel(id_).c_str(),
-                   ImGuiPopupFlags_NoOpenOverExistingPopup);
+  ImGui::OpenPopup(id_label_.c_str(), ImGuiPopupFlags_NoOpenOverExistingPopup);
 
   const auto was_opened = opened_;
   opened_ = true;
@@ -43,7 +41,7 @@ void IPopup::Open() {
 }
 
 ///
-IPopup::IPopup() : id_{GenerateId()} {}
+IPopup::IPopup() : id_label_{GenerateIdLabel()} {}
 
 ///
 void IPopup::OnOpen() const {}
@@ -61,7 +59,7 @@ auto IPopup::DrawContentScope(std::string_view title,
     OnOpen();
   }
 
-  if (ImGui::BeginPopup(IdLabel(id_).c_str())) {
+  if (ImGui::BeginPopup(id_label_.c_str())) {
     if (!title.empty()) {
       ImGui::TextUnformatted(title.data());
       ImGui::Separator();

@@ -17,7 +17,6 @@
 #include "coreui_native_facade.h"
 #include "coreui_node.h"
 #include "cpp_safe_ptr.h"
-#include "draw_id_label.h"
 
 namespace vh::ponc::draw {
 namespace {
@@ -76,10 +75,12 @@ void DrawTreeNode(
     const coreui::TreeNode& tree_node, bool draw_children, bool selectable,
     const std::vector<std::function<void(const coreui::TreeNode&)>>&
         draw_columns) {
+  const auto node_id = tree_node.node->GetNode().GetId();
+
+  ImGui::PushID(node_id.AsPointer());
   ImGui::TableNextRow();
   ImGui::TableNextColumn();
 
-  const auto node_id = tree_node.node->GetNode().GetId();
   const auto& node_data = tree_node.node->GetData();
   const auto& child_nodes = tree_node.child_nodes;
   const auto item_flags = (draw_children && !child_nodes.empty())
@@ -89,13 +90,12 @@ void DrawTreeNode(
   auto item_is_open = false;
 
   if (selectable) {
-    item_is_open = ImGui::TreeNodeEx(IdLabel(node_id).c_str(), item_flags);
+    item_is_open = ImGui::TreeNodeEx("", item_flags);
     ImGui::SameLine();
     DrawSelectableName(node_id, node_data.label);
   } else {
-    item_is_open =
-        ImGui::TreeNodeEx(IdLabel(node_id, node_data.label).c_str(),
-                          item_flags | ImGuiTreeNodeFlags_OpenOnArrow);
+    item_is_open = ImGui::TreeNodeEx(
+        node_data.label.c_str(), item_flags | ImGuiTreeNodeFlags_OpenOnArrow);
   }
 
   for (const auto& draw_column : draw_columns) {
@@ -103,16 +103,16 @@ void DrawTreeNode(
     draw_column(tree_node);
   }
 
-  if (!item_is_open) {
-    return;
-  }
-
-  if (draw_children) {
-    for (const auto& child_node : child_nodes) {
-      DrawTreeNode(child_node, draw_children, selectable, draw_columns);
+  if (item_is_open) {
+    if (draw_children) {
+      for (const auto& child_node : child_nodes) {
+        DrawTreeNode(child_node, draw_children, selectable, draw_columns);
+      }
     }
+
+    ImGui::TreePop();
   }
 
-  ImGui::TreePop();
+  ImGui::PopID();
 }
 }  // namespace vh::ponc::draw

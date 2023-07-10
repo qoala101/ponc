@@ -19,7 +19,6 @@
 #include "coreui_calculator.h"
 #include "coreui_i_family_traits.h"
 #include "draw_disable_if.h"
-#include "draw_id_label.h"
 #include "draw_settings_table_row.h"
 #include "draw_table_flags.h"
 
@@ -65,6 +64,7 @@ void DrawRequirements(core::CalculatorSettings& settings) {
 ///
 void DrawFamilySettings(std::string_view label,
                         core::CalculatorFamilySettings& setings) {
+  ImGui::PushID(setings.family_id.AsPointer());
   ImGui::TableNextRow();
 
   ImGui::TableNextColumn();
@@ -72,8 +72,9 @@ void DrawFamilySettings(std::string_view label,
 
   ImGui::TableNextColumn();
   ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-  ImGui::InputFloat(IdLabel(setings.family_id).c_str(), &setings.cost, 0, 0,
-                    "%.2f");
+  ImGui::InputFloat("", &setings.cost, 0, 0, "%.2f");
+
+  ImGui::PopID();
 }
 
 ///

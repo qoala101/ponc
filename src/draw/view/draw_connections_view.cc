@@ -18,7 +18,6 @@
 #include "coreui_diagram.h"
 #include "cpp_assert.h"
 #include "draw_disable_if.h"
-#include "draw_id_label.h"
 #include "draw_rename_widget.h"
 #include "draw_settings_table_row.h"
 #include "draw_table_flags.h"
@@ -129,6 +128,7 @@ void ConnectionsView::DrawDiagrams(coreui::Project& project,
     auto& connections = project.GetProject().GetConnections();
 
     for (auto i = 0; i < static_cast<int>(connections.size()); ++i) {
+      ImGui::PushID(i);
       ImGui::TableNextRow();
 
       auto& connection = connections[i];
@@ -138,7 +138,7 @@ void ConnectionsView::DrawDiagrams(coreui::Project& project,
           "##Color", &connection.color.Value.x,
           ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
       ImGui::SameLine();
-      ImGui::Selectable(IdLabel(i, connection.name).c_str());
+      ImGui::Selectable(connection.name.c_str());
 
       ImGui::TableNextColumn();
       ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
@@ -149,6 +149,8 @@ void ConnectionsView::DrawDiagrams(coreui::Project& project,
       ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
       ImGui::InputFloat("##Attenuation Added", &connection.drop_added, 0, 0,
                         "%.2f");
+
+      ImGui::PopID();
     }
 
     ImGui::EndTable();
