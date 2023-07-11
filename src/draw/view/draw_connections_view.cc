@@ -93,24 +93,17 @@ void ConnectionsView::Draw(coreui::Project& project) {
 
 ///
 void ConnectionsView::ApplyAction(coreui::Project& project,
-                                  int connection_index, Action action) {
-  Expects(connection_index >= 0);
-
-  auto& diagrams = project.GetProject().GetDiagrams();
-  Expects(connection_index < static_cast<int>(diagrams.size()));
-
-  auto& diagram = diagrams[connection_index];
-
+                                  core::Connection& connection, Action action) {
   switch (action) {
     case Action::kStartRenaming: {
-      rename_buffer_.Set(diagram.GetName());
+      rename_buffer_.Set(connection.name);
       break;
     }
     case Action::kConfirmRename:
-      diagram.SetName(rename_buffer_.AsTrimmed());
+      connection.name = rename_buffer_.AsTrimmed();
       break;
     case Action::kDelete:
-      project.DeleteDiagram(connection_index);
+      project.DeleteConnection(connection.id);
       break;
   }
 }
@@ -126,19 +119,28 @@ void ConnectionsView::DrawDiagrams(coreui::Project& project,
     ImGui::TableHeadersRow();
 
     auto& connections = project.GetProject().GetConnections();
+    auto& default_connection =
+        project.GetProject().GetSettings().default_connection;
 
-    for (auto i = 0; i < static_cast<int>(connections.size()); ++i) {
-      ImGui::PushID(i);
+    for (auto& connection : connections) {
+      ImGui::PushID(connection.id.AsPointer());
       ImGui::TableNextRow();
-
-      auto& connection = connections[i];
 
       ImGui::TableNextColumn();
       ImGui::ColorEdit3(
           "##Color", &connection.color.Value.x,
           ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
       ImGui::SameLine();
-      ImGui::Selectable(connection.name.c_str());
+
+      const auto item_is_selected = connection.id == default_connection;
+
+      if (ImGui::Selectable(connection.name.c_str(), item_is_selected)) {
+        default_connection = connection.id;
+      }
+
+      if (item_is_selected && selected_action.has_value()) {
+        ApplyAction(project, connection, *selected_action);
+      }
 
       ImGui::TableNextColumn();
       ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());

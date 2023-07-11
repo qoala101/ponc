@@ -12,6 +12,7 @@
 #include <memory>
 #include <vector>
 
+#include "core_connection.h"
 #include "core_i_family.h"
 
 namespace vh::ponc::core {
@@ -62,6 +63,8 @@ struct Settings {
   float high_flow{};
   ///
   float max_flow{};
+  ///
+  ConnectionId default_connection{};
   ///
   LinkThickness link_thickness{};
   ///

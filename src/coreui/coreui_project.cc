@@ -56,10 +56,8 @@ auto Project::CreateProject() const {
               core::CalculatorFamilySettings::FromFamilies(families)}};
   core::Settings::ResetToDefault(settings);
 
-  auto connections = std::vector{
-      core::Connection{.id = id_generator.Generate<core::ConnectionId>(),
-                       .name = "Default",
-                       .color = style::DefaultColors::kWhite}};
+  auto connections = std::vector{core::Connection{
+      .name = "Default", .color = style::DefaultColors::kWhite}};
 
   auto diagrams = std::vector<core::Diagram>{};
   diagrams.reserve(1);

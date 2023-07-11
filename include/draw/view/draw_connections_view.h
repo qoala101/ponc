@@ -33,7 +33,7 @@ class ConnectionsView : public IView {
   ///
   auto DrawControls(coreui::Project& project);
   ///
-  void ApplyAction(coreui::Project& project, int connection_index,
+  void ApplyAction(coreui::Project& project, core::Connection& connection,
                    Action action);
   ///
   void DrawDiagrams(coreui::Project& project,

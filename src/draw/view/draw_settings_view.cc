@@ -89,6 +89,11 @@ void SettingsView::Draw(core::Settings& settings) {
 
   DrawFlowColors(settings);
 
+  if (ImGui::TreeNodeEx("Connections", ImGuiTreeNodeFlags_DefaultOpen)) {
+    ImGui::TextUnformatted("See View->Connections");
+    ImGui::TreePop();
+  }
+
   if (ImGui::TreeNodeEx("Calculator", ImGuiTreeNodeFlags_DefaultOpen)) {
     ImGui::TextUnformatted("See View->Calculator");
     ImGui::TreePop();
