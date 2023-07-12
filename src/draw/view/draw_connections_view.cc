@@ -21,6 +21,7 @@
 #include "draw_rename_widget.h"
 #include "draw_settings_table_row.h"
 #include "draw_table_flags.h"
+#include "style_default_colors.h"
 
 namespace vh::ponc::draw {
 ///
@@ -54,20 +55,21 @@ auto ConnectionsView::DrawControls(coreui::Project& project) {
     project.AddConnection();
   }
 
-  if (ImGui::Button("Rename")) {
-    selected_action = Action::kStartRenaming;
-    focus_name_input_ = true;
-    ImGui::OpenPopup("Rename Connection");
-  }
-
-  if (const auto rename_confirmed = DrawRenamePopup()) {
-    selected_action = Action::kConfirmRename;
-  }
-
-  const auto& connections = core_project.GetConnections();
+  const auto custom_connection =
+      core_project.GetSettings().default_connection.has_value();
 
   {
-    const auto disable_scope = DisableIf(connections.size() <= 1);
+    const auto disable_scope = EnableIf(custom_connection);
+
+    if (ImGui::Button("Rename")) {
+      selected_action = Action::kStartRenaming;
+      focus_name_input_ = true;
+      ImGui::OpenPopup("Rename Connection");
+    }
+
+    if (const auto rename_confirmed = DrawRenamePopup()) {
+      selected_action = Action::kConfirmRename;
+    }
 
     if (ImGui::Button("Delete")) {
       selected_action = Action::kDelete;
@@ -118,9 +120,20 @@ void ConnectionsView::DrawDiagrams(coreui::Project& project,
     ImGui::TableSetupColumn("Attenuation Added");
     ImGui::TableHeadersRow();
 
-    auto& connections = project.GetProject().GetConnections();
     auto& default_connection =
         project.GetProject().GetSettings().default_connection;
+
+    ImGui::TableNextRow();
+
+    ImGui::TableNextColumn();
+    ImGui::ColorButton("##Color", ImColor{style::DefaultColors::kWhite});
+    ImGui::SameLine();
+
+    if (ImGui::Selectable("Default", !default_connection.has_value())) {
+      default_connection.reset();
+    }
+
+    auto& connections = project.GetProject().GetConnections();
 
     for (auto& connection : connections) {
       ImGui::PushID(connection.id.AsPointer());
@@ -132,7 +145,8 @@ void ConnectionsView::DrawDiagrams(coreui::Project& project,
           ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
       ImGui::SameLine();
 
-      const auto item_is_selected = connection.id == default_connection;
+      const auto item_is_selected = default_connection.has_value() &&
+                                    (connection.id == *default_connection);
 
       if (ImGui::Selectable(connection.name.c_str(), item_is_selected)) {
         default_connection = connection.id;

@@ -64,7 +64,7 @@ struct Settings {
   ///
   float max_flow{};
   ///
-  ConnectionId default_connection{};
+  std::optional<ConnectionId> default_connection{};
   ///
   LinkThickness link_thickness{};
   ///
