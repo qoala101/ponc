@@ -97,6 +97,7 @@ add_executable(ponc
   draw/view/draw_settings_view.cc
   draw/view/draw_tree_node.cc
 
+  draw/draw_help_marker.cc
   draw/draw_main_menu_bar.cc
   draw/draw_main_window.cc
   draw/draw_recent_log.cc

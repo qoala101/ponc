@@ -18,6 +18,7 @@
 #include "coreui_diagram.h"
 #include "cpp_assert.h"
 #include "draw_disable_if.h"
+#include "draw_help_marker.h"
 #include "draw_rename_widget.h"
 #include "draw_settings_table_row.h"
 #include "draw_table_flags.h"
@@ -76,6 +77,7 @@ auto ConnectionsView::DrawControls(coreui::Project& project) {
     }
   }
 
+  DrawHelpMarker("Selected connection is used for new links");
   ImGui::EndHorizontal();
 
   return selected_action;
@@ -126,7 +128,8 @@ void ConnectionsView::DrawDiagrams(coreui::Project& project,
     ImGui::TableNextRow();
 
     ImGui::TableNextColumn();
-    ImGui::ColorButton("##Color", ImColor{style::DefaultColors::kWhite});
+    ImGui::ColorButton("##Color", ImColor{style::DefaultColors::kWhite},
+                       ImGuiColorEditFlags_NoAlpha);
     ImGui::SameLine();
 
     if (ImGui::Selectable("Default", !default_connection.has_value())) {
