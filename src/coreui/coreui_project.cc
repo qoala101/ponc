@@ -56,15 +56,12 @@ auto Project::CreateProject() const {
               core::CalculatorFamilySettings::FromFamilies(families)}};
   core::Settings::ResetToDefault(settings);
 
-  auto connections = std::vector{core::Connection{
-      .name = "Default", .color = style::DefaultColors::kWhite}};
-
   auto diagrams = std::vector<core::Diagram>{};
   diagrams.reserve(1);
   diagrams.emplace_back(core::Diagram::MakeUniqueDiagramName());
 
-  return core::Project{std::move(settings), std::move(families),
-                       std::move(connections), std::move(diagrams)};
+  return core::Project{
+      std::move(settings), std::move(families), {}, std::move(diagrams)};
 }
 
 ///
@@ -173,6 +170,13 @@ auto Project::AddConnection() -> Event& {
 auto Project::DeleteConnection(core::ConnectionId connection_id) -> Event& {
   return event_loop_.PostEvent(
       [project = safe_owner_.MakeSafe(&project_), connection_id]() {
+        auto& default_connection = project->GetSettings().default_connection;
+
+        if (default_connection.has_value() &&
+            (default_connection == connection_id)) {
+          default_connection.reset();
+        }
+
         project->DeleteConnection(connection_id);
       });
 }
