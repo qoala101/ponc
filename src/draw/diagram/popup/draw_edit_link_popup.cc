@@ -10,6 +10,7 @@
 #include <imgui_node_editor.h>
 
 #include <algorithm>
+#include <iterator>
 #include <memory>
 #include <regex>
 #include <string>
@@ -29,7 +30,13 @@ void EditLinkPopup::Draw(coreui::Diagram& diagram) {
     return;
   }
 
-  auto& link = core::Diagram::FindLink(diagram.GetDiagram(), link_ids_.front());
+  auto& core_diagram = diagram.GetDiagram();
+
+  if (WasJustOpened()) {
+    CopyLinks(core_diagram);
+  }
+
+  auto& link = link_copies_.front();
 
   ImGui::InputFloat("Length", &link.length);
 
@@ -44,7 +51,7 @@ void EditLinkPopup::Draw(coreui::Diagram& diagram) {
   }
 
   if (ImGui::Button("Cancel")) {
-    link = link_copies_.front();
+    Cancel(core_diagram);
     ImGui::CloseCurrentPopup();
   }
 }
@@ -52,5 +59,25 @@ void EditLinkPopup::Draw(coreui::Diagram& diagram) {
 ///
 void EditLinkPopup::SetLinkIds(std::vector<ne::LinkId> link_ids) {
   link_ids_ = std::move(link_ids);
+}
+
+///
+void EditLinkPopup::Cancel(core::Diagram& diagram) {
+  for (const auto& link_copy : link_copies_) {
+    auto& link = core::Diagram::FindLink(diagram, link_copy.id);
+    link = link_copy;
+  }
+}
+
+///
+void EditLinkPopup::CopyLinks(const core::Diagram& diagram) {
+  link_copies_.clear();
+  link_copies_.reserve(link_ids_.size());
+
+  std::transform(link_ids_.cbegin(), link_ids_.cend(),
+                 std::back_inserter(link_copies_),
+                 [&diagram](const auto link_id) {
+                   return core::Diagram::FindLink(diagram, link_id);
+                 });
 }
 }  // namespace vh::ponc::draw

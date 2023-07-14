@@ -41,7 +41,7 @@ class ReplacePopup : public IPopup {
   void OnOpen() const override;
 
   ///
-  void OnOpen(const coreui::Diagram &diagram);
+  void CopyNodeAndValidFamilies(const coreui::Diagram &diagram);
   ///
   auto FindSelectedFamily(
       const std::vector<coreui::FamilyGroup> &family_groups) const -> auto &;
