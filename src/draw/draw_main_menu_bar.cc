@@ -115,9 +115,9 @@ void MainMenuBar::DrawViewMenu() {
   if (ImGui::BeginMenu("View")) {
     DrawViewMenuItem(node_view_);
     DrawViewMenuItem(nodes_view_);
-    DrawViewMenuItem(connections_view_);
     DrawViewMenuItem(diagrams_view_);
     DrawViewMenuItem(flow_tree_view_);
+    DrawViewMenuItem(connections_view_);
     ImGui::Separator();
 
     DrawViewMenuItem(calculator_view_);

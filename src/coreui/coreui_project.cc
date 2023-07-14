@@ -7,12 +7,15 @@
 #include "coreui_project.h"
 
 #include <crude_json.h>
+#include <imgui.h>
 
 #include <algorithm>
+#include <cstdlib>
 #include <filesystem>
 #include <functional>
 #include <iterator>
 #include <memory>
+#include <random>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -38,6 +41,18 @@
 #include "style_default_colors.h"
 
 namespace vh::ponc::coreui {
+namespace {
+///
+auto GenerateRandomColor() {
+  const auto seed = std::random_device{}();
+  auto engine = std::default_random_engine{seed};
+  auto distribution = std::uniform_int_distribution{0, 128};
+
+  return ImColor{127 + distribution(engine), 127 + distribution(engine),
+                 127 + distribution(engine)};
+}
+}  // namespace
+
 ///
 auto Project::CreateProject() const {
   auto id_generator = core::IdGenerator{};
@@ -157,8 +172,10 @@ auto Project::SetDiagram(int index) -> Event& {
 ///
 auto Project::AddConnection() -> Event& {
   const auto id = project_.GetIdGenerator().Generate<core::ConnectionId>();
-  auto connection = core::Connection{
-      .id = id, .name = "Connection #" + std::to_string(id.Get())};
+  auto connection =
+      core::Connection{.id = id,
+                       .name = "Connection #" + std::to_string(id.Get()),
+                       .color = GenerateRandomColor()};
 
   return event_loop_.PostEvent([project = safe_owner_.MakeSafe(&project_),
                                 connection = std::move(connection)]() mutable {

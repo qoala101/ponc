@@ -54,11 +54,11 @@ class MainMenuBar {
   ///
   NodesView nodes_view_{};
   ///
-  ConnectionsView connections_view_{};
-  ///
   DiagramsView diagrams_view_{};
   ///
   FlowTreeView flow_tree_view_{};
+  ///
+  ConnectionsView connections_view_{};
   ///
   CalculatorView calculator_view_{};
   ///
