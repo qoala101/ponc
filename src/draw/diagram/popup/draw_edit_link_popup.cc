@@ -19,9 +19,37 @@
 
 #include "core_diagram.h"
 #include "core_link.h"
-#include "draw_disable_if.h"
 
 namespace vh::ponc::draw {
+namespace {
+///
+template <typename T>
+auto IsSame(const std::vector<core::Link*>& links, T core::Link::*field) {
+  if (links.empty()) {
+    return true;
+  }
+
+  auto* first_link = links.front();
+
+  return std::all_of(links.cbegin(), links.cend(),
+                     [first_link, field](const auto* link) {
+                       return link->*field == first_link->*field;
+                     });
+}
+}  // namespace
+
+///
+auto EditLinkPopup::FindLinks(core::Diagram& diagram) const {
+  auto links = std::vector<core::Link*>{};
+  links.reserve(link_ids_.size());
+
+  std::transform(link_ids_.cbegin(), link_ids_.cend(),
+                 std::back_inserter(links), [&diagram](const auto link_id) {
+                   return &core::Diagram::FindLink(diagram, link_id);
+                 });
+  return links;
+}
+
 ///
 void EditLinkPopup::Draw(coreui::Diagram& diagram) {
   const auto content_scope = DrawContentScope();
@@ -31,23 +59,23 @@ void EditLinkPopup::Draw(coreui::Diagram& diagram) {
   }
 
   auto& core_diagram = diagram.GetDiagram();
+  const auto links = FindLinks(core_diagram);
 
   if (WasJustOpened()) {
-    CopyLinks(core_diagram);
+    CopyLinks(links);
   }
 
-  auto& link = link_copies_.front();
+  auto* first_link = links.front();
 
-  ImGui::InputFloat("Length", &link.length);
+  const auto length_edited =
+      IsSame(links, &core::Link::length)
+          ? ImGui::InputFloat("Length", &first_link->length)
+          : ImGui::InputFloat("Length", &first_link->length, 0, 0, "<Varying>");
 
-  const char* items[] = {"Default", "Custom"};
-  static int item_current = 0;
-  ImGui::Combo("Connection", &item_current, items, 2);
-
-  {
-    const auto disable_scope = DisableIf(true);
-    ImGui::InputFloat("Attenuation/Length", &link.length);
-    ImGui::InputFloat("Attenuation Add", &link.length);
+  if (length_edited) {
+    for (auto* link : links) {
+      link->length = first_link->length;
+    }
   }
 
   if (ImGui::Button("Cancel")) {
@@ -62,7 +90,7 @@ void EditLinkPopup::SetLinkIds(std::vector<ne::LinkId> link_ids) {
 }
 
 ///
-void EditLinkPopup::Cancel(core::Diagram& diagram) {
+void EditLinkPopup::Cancel(core::Diagram& diagram) const {
   for (const auto& link_copy : link_copies_) {
     auto& link = core::Diagram::FindLink(diagram, link_copy.id);
     link = link_copy;
@@ -70,14 +98,11 @@ void EditLinkPopup::Cancel(core::Diagram& diagram) {
 }
 
 ///
-void EditLinkPopup::CopyLinks(const core::Diagram& diagram) {
+void EditLinkPopup::CopyLinks(const std::vector<core::Link*>& links) {
   link_copies_.clear();
-  link_copies_.reserve(link_ids_.size());
+  link_copies_.reserve(links.size());
 
-  std::transform(link_ids_.cbegin(), link_ids_.cend(),
-                 std::back_inserter(link_copies_),
-                 [&diagram](const auto link_id) {
-                   return core::Diagram::FindLink(diagram, link_id);
-                 });
+  std::transform(links.cbegin(), links.cend(), std::back_inserter(link_copies_),
+                 [](const auto* link) { return *link; });
 }
 }  // namespace vh::ponc::draw

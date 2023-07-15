@@ -24,9 +24,11 @@ class EditLinkPopup : public IPopup {
 
  private:
   ///
-  void CopyLinks(const core::Diagram &diagram);
+  auto FindLinks(core::Diagram &diagram) const;
   ///
-  void Cancel(core::Diagram &diagram);
+  void CopyLinks(const std::vector<core::Link *> &links);
+  ///
+  void Cancel(core::Diagram &diagram) const;
 
   ///
   std::vector<ne::LinkId> link_ids_{};
