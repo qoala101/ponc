@@ -9,10 +9,12 @@
 #include <algorithm>
 #include <memory>
 
+#include "core_connection.h"
 #include "core_i_family.h"
 #include "core_settings.h"
 #include "json_container_serializer.h"
 #include "json_id_serializer.h"
+#include "json_optional_serializer.h"
 #include "json_setings_serializer.h"
 
 namespace vh::ponc::json {
@@ -50,6 +52,10 @@ auto SettingsSerializer::ParseFromJson(const crude_json::value& json)
               static_cast<float>(json["high_flow"].get<crude_json::number>()),
           .max_flow =
               static_cast<float>(json["max_flow"].get<crude_json::number>()),
+          .default_connection =
+              OptionalSerializer::ParseFromJson<core::ConnectionId>(
+                  json, "default_connection",
+                  &IdSerializer::ParseFromJson<core::ConnectionId>),
           .arrange_horizontal_spacing = static_cast<int>(
               json["arrange_horizontal_spacing"].get<crude_json::number>()),
           .arrange_vertical_spacing = static_cast<int>(
@@ -76,6 +82,11 @@ auto SettingsSerializer::WriteToJson(const core::Settings& settings)
   json["low_flow"] = settings.low_flow;
   json["high_flow"] = settings.high_flow;
   json["max_flow"] = settings.max_flow;
+
+  OptionalSerializer::WriteToJson(
+      json, settings.default_connection, "default_connection",
+      &IdSerializer::WriteToJson<core::ConnectionId>);
+
   json["arrange_horizontal_spacing"] =
       static_cast<crude_json::number>(settings.arrange_horizontal_spacing);
   json["arrange_vertical_spacing"] =
