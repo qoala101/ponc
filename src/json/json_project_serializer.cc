@@ -13,10 +13,12 @@
 #include <optional>
 #include <utility>
 
+#include "core_connection.h"
 #include "core_diagram.h"
 #include "core_i_family.h"
 #include "core_project.h"
 #include "cpp_assert.h"
+#include "json_connection_serializer.h"
 #include "json_container_serializer.h"
 #include "json_diagram_serializer.h"
 #include "json_i_family_writer.h"  // IWYU pragma: keep
@@ -54,12 +56,16 @@ auto ProjectSerializer::ParseFromJson(
             return ParseFamily(json, family_parsers);
           });
 
+  auto connections = ContainerSerializer::ParseFromJson<core::Connection>(
+      json["connections"], &ConnectionSerializer::ParseFromJson);
+
   auto diagrams = ContainerSerializer::ParseFromJson<core::Diagram>(
       json["diagrams"], [&families](const auto& json) {
         return DiagramSerializer::ParseFromJson(json, families);
       });
 
-  return {settings, std::move(families), {}, std::move(diagrams)};
+  return {settings, std::move(families), std::move(connections),
+          std::move(diagrams)};
 }
 
 ///
@@ -74,6 +80,9 @@ auto ProjectSerializer::WriteToJson(const core::Project& project)
       project.GetFamilies(), [](const auto& family) {
         return family->CreateWriter()->WriteToJson(*family);
       });
+
+  json["connections"] = ContainerSerializer::WriteToJson(
+      project.GetConnections(), &ConnectionSerializer::WriteToJson);
 
   json["diagrams"] = ContainerSerializer::WriteToJson(
       project.GetDiagrams(), &DiagramSerializer::WriteToJson);

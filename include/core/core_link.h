@@ -22,6 +22,10 @@ namespace vh::ponc::core {
 ///
 struct Link {
   ///
+  using Connection =
+      std::variant<std::monostate, ConnectionId, CustomConnection>;
+
+  ///
   static auto GetIds(Link &link) -> std::vector<IdPtr>;
   ///
   static auto HasPin(const Link &link, ne::PinId pin_id) -> bool;
@@ -43,7 +47,7 @@ struct Link {
   ///
   float length{};
   ///
-  std::variant<std::monostate, ConnectionId, CustomConnection> connection{};
+  Connection connection{};
 
  private:
   ///

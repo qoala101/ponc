@@ -21,10 +21,10 @@ auto ColorSerializer::ParseFromJson(const crude_json::value& json) -> ImColor {
 ///
 auto ColorSerializer::WriteToJson(const ImColor& color) -> crude_json::value {
   auto json = crude_json::array{};
-  json[0] = color.Value.x;
-  json[1] = color.Value.y;
-  json[2] = color.Value.z;
-  json[3] = color.Value.w;
+  json.emplace_back(color.Value.x);
+  json.emplace_back(color.Value.y);
+  json.emplace_back(color.Value.z);
+  json.emplace_back(color.Value.w);
   return json;
 }
 }  // namespace vh::ponc::json
