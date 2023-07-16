@@ -50,7 +50,8 @@ DiagramEditor::DiagramEditor()
 }
 
 ///
-void DiagramEditor::Draw(coreui::Diagram &diagram) {
+void DiagramEditor::Draw(coreui::Diagram &diagram,
+                         const std::vector<core::Connection> &connections) {
   ne::Begin("DiagramEditor");
   item_deleter_.UnregisterDeletedItems(diagram.GetDiagram());
 
@@ -73,7 +74,7 @@ void DiagramEditor::Draw(coreui::Diagram &diagram) {
   linker_.Draw(diagram.GetLinker(), diagram.GetFamilyGroups());
 
   OpenPopupsIfRequested(core_diagram);
-  DrawPopups(diagram);
+  DrawPopups(diagram, connections);
 
   item_deleter_.DeleteUnregisteredItems(diagram);
   ne::End();
@@ -161,7 +162,9 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
 }
 
 ///
-void DiagramEditor::DrawPopups(coreui::Diagram &diagram) {
+void DiagramEditor::DrawPopups(
+    coreui::Diagram &diagram,
+    const std::vector<core::Connection> &connections) {
   background_popup_.Draw(diagram);
   node_popup_.Draw(diagram);
 
@@ -182,7 +185,7 @@ void DiagramEditor::DrawPopups(coreui::Diagram &diagram) {
     edit_link_popup_.Open();
   }
 
-  edit_link_popup_.Draw(diagram);
+  edit_link_popup_.Draw(diagram, connections);
   replace_popup_.Draw(diagram);
 }
 }  // namespace vh::ponc::draw

@@ -10,6 +10,7 @@
 #include <imgui_node_editor.h>
 
 #include <optional>
+#include <variant>
 #include <vector>
 
 #include "core_connection.h"
@@ -40,9 +41,9 @@ struct Link {
   ///
   ne::PinId end_pin_id{};
   ///
-  std::optional<ConnectionId> connection_id{};
-  ///
   float length{};
+  ///
+  std::variant<std::monostate, ConnectionId, CustomConnection> connection{};
 
  private:
   ///

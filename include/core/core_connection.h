@@ -34,6 +34,16 @@ struct Connection {
   ///
   float drop_added{};
 };
+
+///
+struct CustomConnection {
+  ///
+  ImColor color{};
+  ///
+  float drop_per_length{};
+  ///
+  float drop_added{};
+};
 }  // namespace vh::ponc::core
 
 #endif  // VH_PONC_CORE_CONNECTION_H_

@@ -9,6 +9,9 @@
 
 #include <imgui_node_editor.h>
 
+#include <vector>
+
+#include "core_connection.h"
 #include "core_link.h"
 #include "coreui_diagram.h"
 #include "draw_i_popup.h"
@@ -18,7 +21,8 @@ namespace vh::ponc::draw {
 class EditLinkPopup : public IPopup {
  public:
   ///
-  void Draw(coreui::Diagram &diagram);
+  void Draw(coreui::Diagram &diagram,
+            const std::vector<core::Connection> &connections);
   ///
   void SetLinkIds(std::vector<ne::LinkId> link_ids);
 
@@ -26,7 +30,9 @@ class EditLinkPopup : public IPopup {
   ///
   auto FindLinks(core::Diagram &diagram) const;
   ///
-  void CopyLinks(const std::vector<core::Link *> &links);
+  void CopyLinksAndConnections(
+      const std::vector<core::Link *> &links,
+      const std::vector<core::Connection> &connections);
   ///
   void Cancel(core::Diagram &diagram) const;
 
@@ -34,6 +40,12 @@ class EditLinkPopup : public IPopup {
   std::vector<ne::LinkId> link_ids_{};
   ///
   std::vector<core::Link> link_copies_{};
+  ///
+  std::vector<const char *> connection_names_{};
+  ///
+  int connection_name_index_{};
+
+  core::CustomConnection edited_connection_{};
 };
 }  // namespace vh::ponc::draw
 

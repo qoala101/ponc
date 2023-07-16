@@ -30,13 +30,15 @@ class DiagramEditor {
   DiagramEditor();
 
   ///
-  void Draw(coreui::Diagram &diagram);
+  void Draw(coreui::Diagram &diagram,
+            const std::vector<core::Connection> &connections);
 
  private:
   ///
   void OpenPopupsIfRequested(const core::Diagram &diagram);
   ///
-  void DrawPopups(coreui::Diagram &diagram);
+  void DrawPopups(coreui::Diagram &diagram,
+                  const std::vector<core::Connection> &connections);
 
   ///
   ne::Config config_{};
