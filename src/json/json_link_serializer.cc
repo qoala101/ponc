@@ -23,20 +23,25 @@ namespace {
 ///
 auto ParseConnection(const crude_json::value& json) -> core::Link::Connection {
   const auto index = static_cast<int>(json["index"].get<crude_json::number>());
+
+  if (index == 0) {
+    return {};
+  }
+
   const auto& value_json = json["value"];
 
   switch (index) {
-    case 0:
-      return {};
     case 1:
       return IdSerializer::ParseFromJson<core::ConnectionId>(value_json);
+
     case 2:
       return core::CustomConnection{
-          .color = ColorSerializer::ParseFromJson(json["color"]),
+          .color = ColorSerializer::ParseFromJson(value_json["color"]),
           .drop_per_length = static_cast<float>(
-              json["drop_per_length"].get<crude_json::number>()),
-          .drop_added =
-              static_cast<float>(json["drop_added"].get<crude_json::number>())};
+              value_json["drop_per_length"].get<crude_json::number>()),
+          .drop_added = static_cast<float>(
+              value_json["drop_added"].get<crude_json::number>())};
+
     default:
       break;
   }

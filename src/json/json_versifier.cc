@@ -102,7 +102,23 @@ void Upgrade2(crude_json::value& project_json) {
 }
 
 ///
-void Upgrade3(crude_json::value& /*unused*/) {
+void Upgrade3(crude_json::value& project_json) {
+  MakeArray(project_json["connections"]);
+
+  auto& diagrams_json = project_json["diagrams"].get<crude_json::array>();
+
+  for (auto& diagram_json : diagrams_json) {
+    auto& links_array = diagram_json["links"].get<crude_json::array>();
+
+    for (auto& link_json : links_array) {
+      link_json["length"] = 0.F;
+      link_json["connection"]["index"] = 0.F;
+    }
+  }
+}
+
+///
+void Upgrade4(crude_json::value& /*unused*/) {
   // vh: Implement when adding new version.
 }
 }  // namespace
@@ -132,6 +148,8 @@ void Versifier::UpgradeToCurrentVersion(crude_json::value& project_json) {
       Upgrade2(project_json);
     case Version::kAreas:
       Upgrade3(project_json);
+    case Version::kConnections:
+      Upgrade4(project_json);
     default:
       break;
   }

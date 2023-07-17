@@ -35,8 +35,10 @@ auto GetLogColor(coreui::LogLevel log_level) -> ImColor {
     case coreui::LogLevel::kInfo:
       return style::Tailwind::GetColor(style::Tailwind::Color::kBlue,
                                        style::Tailwind::Shade::k500);
+
     case coreui::LogLevel::kError:
       return style::DefaultColors::kError;
+
     case coreui::LogLevel::kDone:
       return style::DefaultColors::kSuccess;
   }

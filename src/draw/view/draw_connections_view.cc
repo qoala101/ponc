@@ -103,9 +103,11 @@ void ConnectionsView::ApplyAction(coreui::Project& project,
       rename_buffer_.Set(connection.name);
       break;
     }
+
     case Action::kConfirmRename:
       connection.name = rename_buffer_.AsTrimmed();
       break;
+
     case Action::kDelete:
       project.DeleteConnection(connection.id);
       break;

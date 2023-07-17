@@ -107,13 +107,15 @@ void DiagramsView::ApplyAction(coreui::Project& project, int diagram_index,
     case Action::kClone:
       project.CloneDiagram(diagram);
       break;
-    case Action::kStartRenaming: {
+
+    case Action::kStartRenaming:
       rename_buffer_.Set(diagram.GetName());
       break;
-    }
+
     case Action::kConfirmRename:
       diagram.SetName(rename_buffer_.AsTrimmed());
       break;
+
     case Action::kDelete:
       project.DeleteDiagram(diagram_index);
       break;

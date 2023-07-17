@@ -18,6 +18,7 @@ enum class Version {
   kCalculator,
   kSlider,
   kAreas,
+  kConnections,
   kAfterCurrent
 };
 
