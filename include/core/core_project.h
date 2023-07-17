@@ -32,6 +32,9 @@ class Project {
   ///
   static auto FindFamily(const Project &project, FamilyId family_id)
       -> IFamily &;
+  ///
+  static auto FindConnection(const Project &project, ConnectionId connection_id)
+      -> const Connection &;
 
   ///
   auto GetSettings() const -> const Settings &;

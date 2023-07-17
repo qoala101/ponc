@@ -79,6 +79,19 @@ auto Project::FindFamily(const Project& project, FamilyId family_id)
 }
 
 ///
+auto Project::FindConnection(const Project& project, ConnectionId connection_id)
+    -> const Connection& {
+  const auto connection =
+      std::find_if(project.connections_.cbegin(), project.connections_.cend(),
+                   [connection_id](const auto& connection) {
+                     return connection.id == connection_id;
+                   });
+
+  Expects(connection != project.connections_.cend());
+  return *connection;
+}
+
+///
 Project::Project(Settings settings,
                  std::vector<std::unique_ptr<IFamily>> families,
                  std::vector<Connection> connections,

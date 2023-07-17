@@ -17,6 +17,7 @@
 #include <utility>
 #include <vector>
 
+#include "core_connection.h"
 #include "core_diagram.h"
 #include "core_link.h"
 
@@ -97,6 +98,7 @@ void EditLinkPopup::Draw(coreui::Diagram& diagram,
   if (ImGui::Combo("Connection", &connection_name_index_,
                    connection_names_.data(),
                    static_cast<int>(connection_names_.size()))) {
+    SetSelectedConnection(links, connections);
   }
 
   ImGui::InputFloat("Attenuation/Length", &edited_connection_.drop_per_length);
@@ -140,5 +142,33 @@ void EditLinkPopup::CopyLinksAndConnections(
       [](const auto& connection) { return connection.name.c_str(); });
 
   connection_names_.emplace_back("Custom");
+}
+
+///
+void EditLinkPopup::SetSelectedConnection(
+    const std::vector<core::Link*>& links,
+    const std::vector<core::Connection>& connections) const {
+  if (const auto no_connection = connection_name_index_ == 0) {
+    for (auto* link : links) {
+      link->connection = {};
+    }
+
+    return;
+  }
+
+  if (const auto custom_connection =
+          connection_name_index_ > static_cast<int>(connections.size())) {
+    for (auto* link : links) {
+      link->connection = core::CustomConnection{};
+    }
+
+    return;
+  }
+
+  const auto& connection = connections[connection_name_index_ - 1];
+
+  for (auto* link : links) {
+    link->connection = connection.id;
+  }
 }
 }  // namespace vh::ponc::draw

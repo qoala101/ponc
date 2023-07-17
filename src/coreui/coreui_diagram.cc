@@ -348,11 +348,27 @@ auto Diagram::LinkFrom(const core::Link& core_link,
       .thickness = style::DefaultSizes::kNormalThickness,
   };
 
+  const auto& project = parent_project_->GetProject();
   const auto link_alpha =
       linker_.IsRepiningLink(link.core_link.id) ? 0.5F : 1.F;
 
-  if (!parent_project_->GetProject().GetSettings().color_flow) {
-    link.color = style::WithAlpha(style::DefaultColors::kWhite, link_alpha);
+  if (!project.GetSettings().color_flow) {
+    const auto color = std::visit(
+        [&project](const auto& v) {
+          using V = std::remove_cvref_t<decltype(v)>;
+
+          if constexpr (std::is_same_v<V, std::monostate>) {
+            return ImColor{style::DefaultColors::kWhite};
+          } else if constexpr (std::is_same_v<V, core::ConnectionId>) {
+            const auto& connection = core::Project::FindConnection(project, v);
+            return connection.color;
+          } else if constexpr (std::is_same_v<V, core::CustomConnection>) {
+            return v.color;
+          }
+        },
+        core_link.connection);
+
+    link.color = style::WithAlpha(color, link_alpha);
     return link;
   }
 

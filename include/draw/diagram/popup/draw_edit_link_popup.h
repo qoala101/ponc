@@ -34,6 +34,10 @@ class EditLinkPopup : public IPopup {
       const std::vector<core::Link *> &links,
       const std::vector<core::Connection> &connections);
   ///
+  void SetSelectedConnection(
+      const std::vector<core::Link *> &links,
+      const std::vector<core::Connection> &connections) const;
+  ///
   void Cancel(core::Diagram &diagram) const;
 
   ///
