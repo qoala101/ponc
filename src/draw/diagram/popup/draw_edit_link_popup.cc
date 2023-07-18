@@ -15,11 +15,13 @@
 #include <regex>
 #include <string>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "core_connection.h"
 #include "core_diagram.h"
 #include "core_link.h"
+#include "cpp_assert.h"
 
 namespace vh::ponc::draw {
 namespace {
@@ -42,6 +44,22 @@ template <typename T>
 auto IsSame(const std::vector<core::Link*>& links, T core::Link::*field) {
   return IsSame(links, [field](const auto& left, const auto& right) {
     return left.*field == right.*field;
+  });
+}
+
+///
+auto IsSameConnection(const std::vector<core::Link*>& links) {
+  return IsSame(links, [](const auto& left, const auto& right) {
+    if (left.connection.index() != right.connection.index()) {
+      return false;
+    }
+
+    if (!std::holds_alternative<core::ConnectionId>(left.connection)) {
+      return false;
+    }
+
+    return std::get<core::ConnectionId>(left.connection) ==
+           std::get<core::ConnectionId>(right.connection);
   });
 }
 }  // namespace
@@ -95,10 +113,13 @@ void EditLinkPopup::Draw(coreui::Diagram& diagram,
   ImGui::SameLine();
   ImGui::SetNextItemWidth(ImGui::CalcItemWidth() - color_edit_width);
 
-  if (ImGui::Combo("Connection", &connection_name_index_,
-                   connection_names_.data(),
+  if (ImGui::Combo("Connection", &connection_index_, connection_names_.data(),
                    static_cast<int>(connection_names_.size()))) {
     SetSelectedConnection(links, connections);
+
+    if (has_varying_connection_) {
+      RemoveVaryingConnection();
+    }
   }
 
   ImGui::InputFloat("Attenuation/Length", &edited_connection_.drop_per_length);
@@ -133,8 +154,15 @@ void EditLinkPopup::CopyLinksAndConnections(
   std::transform(links.cbegin(), links.cend(), std::back_inserter(link_copies_),
                  [](const auto* link) { return *link; });
 
-  connection_names_ = {"None"};
-  connection_names_.reserve(connections.size() + 2);
+  connection_names_.clear();
+  has_varying_connection_ = !IsSameConnection(links);
+
+  if (has_varying_connection_) {
+    AddVaryingConnection();
+  }
+
+  connection_names_.emplace_back("None");
+  connection_names_.reserve(connection_names_.size() + connections.size() + 1);
 
   std::transform(
       connections.cbegin(), connections.cend(),
@@ -142,13 +170,43 @@ void EditLinkPopup::CopyLinksAndConnections(
       [](const auto& connection) { return connection.name.c_str(); });
 
   connection_names_.emplace_back("Custom");
+  connection_index_ = 0;
+
+  if (has_varying_connection_) {
+    return;
+  }
+
+  Expects(!links.empty());
+
+  if (std::holds_alternative<std::monostate>(links.front()->connection)) {
+    return;
+  }
+
+  const auto common_connection_id =
+      std::get<core::ConnectionId>(links.front()->connection);
+
+  const auto common_connection =
+      std::find_if(connections.cbegin(), connections.cend(),
+                   [common_connection_id](const auto& connection) {
+                     return connection.id == common_connection_id;
+                   });
+
+  connection_index_ =
+      static_cast<int>(std::distance(connections.cbegin(), common_connection)) +
+      1;
 }
 
 ///
 void EditLinkPopup::SetSelectedConnection(
     const std::vector<core::Link*>& links,
     const std::vector<core::Connection>& connections) const {
-  if (const auto no_connection = connection_name_index_ == 0) {
+  auto connection_index = connection_index_;
+
+  if (has_varying_connection_) {
+    --connection_index;
+  }
+
+  if (const auto no_connection = connection_index == 0) {
     for (auto* link : links) {
       link->connection = {};
     }
@@ -157,7 +215,7 @@ void EditLinkPopup::SetSelectedConnection(
   }
 
   if (const auto custom_connection =
-          connection_name_index_ > static_cast<int>(connections.size())) {
+          connection_index > static_cast<int>(connections.size())) {
     for (auto* link : links) {
       link->connection = core::CustomConnection{};
     }
@@ -165,10 +223,22 @@ void EditLinkPopup::SetSelectedConnection(
     return;
   }
 
-  const auto& connection = connections[connection_name_index_ - 1];
+  const auto& connection = connections[connection_index - 1];
 
   for (auto* link : links) {
     link->connection = connection.id;
   }
+}
+
+///
+void EditLinkPopup::AddVaryingConnection() {
+  connection_names_.emplace_back("Varying");
+}
+
+///
+void EditLinkPopup::RemoveVaryingConnection() {
+  connection_names_.erase(connection_names_.cbegin());
+  has_varying_connection_ = false;
+  --connection_index_;
 }
 }  // namespace vh::ponc::draw

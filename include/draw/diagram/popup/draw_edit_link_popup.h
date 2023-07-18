@@ -38,6 +38,10 @@ class EditLinkPopup : public IPopup {
       const std::vector<core::Link *> &links,
       const std::vector<core::Connection> &connections) const;
   ///
+  void AddVaryingConnection();
+  ///
+  void RemoveVaryingConnection();
+  ///
   void Cancel(core::Diagram &diagram) const;
 
   ///
@@ -47,7 +51,9 @@ class EditLinkPopup : public IPopup {
   ///
   std::vector<const char *> connection_names_{};
   ///
-  int connection_name_index_{};
+  int connection_index_{};
+  ///
+  bool has_varying_connection_{};
 
   core::CustomConnection edited_connection_{};
 };
