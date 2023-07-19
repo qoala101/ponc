@@ -20,11 +20,11 @@ namespace ne = ax::NodeEditor;
 
 namespace vh::ponc::core {
 ///
-struct Link {
-  ///
-  using Connection =
-      std::variant<std::monostate, ConnectionId, CustomConnection>;
+using LinkConnection =
+    std::variant<std::monostate, ConnectionId, CustomConnection>;
 
+///
+struct Link {
   ///
   static auto GetIds(Link &link) -> std::vector<IdPtr>;
   ///
@@ -47,7 +47,7 @@ struct Link {
   ///
   float length{};
   ///
-  Connection connection{};
+  LinkConnection connection{};
 
  private:
   ///

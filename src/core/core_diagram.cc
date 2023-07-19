@@ -13,7 +13,9 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <variant>
 
+#include "core_connection.h"
 #include "core_i_node.h"
 #include "core_link.h"
 #include "cpp_assert.h"
@@ -269,5 +271,15 @@ auto Diagram::EmplaceArea(const Area& area) -> Area& {
 void Diagram::DeleteArea(AreaId area_id) {
   std::erase_if(areas_,
                 [area_id](const auto& area) { return area.id == area_id; });
+}
+
+///
+void Diagram::OnConnectionDeleted(ConnectionId connection_id) {
+  for (auto& link : links_) {
+    if (std::holds_alternative<core::ConnectionId>(link.connection) &&
+        (std::get<core::ConnectionId>(link.connection) == connection_id)) {
+      link.connection = {};
+    }
+  }
 }
 }  // namespace vh::ponc::core

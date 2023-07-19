@@ -135,6 +135,10 @@ auto Project::EmplaceConnection(Connection connection) -> Connection& {
 
 ///
 void Project::DeleteConnection(ConnectionId connection_id) {
+  for (auto& diagram : diagrams_) {
+    diagram.OnConnectionDeleted(connection_id);
+  }
+
   std::erase_if(connections_, [connection_id](const auto& connection) {
     return connection.id == connection_id;
   });

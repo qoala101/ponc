@@ -28,33 +28,24 @@
 namespace vh::ponc::draw {
 namespace {
 ///
-auto GetCustomConnection(core::Link& link) {
-  return std::visit(
-      [](auto& v) -> std::optional<core::CustomConnection*> {
-        using V = std::remove_cvref_t<decltype(v)>;
+auto GetCustomConnection(core::Link& link)
+    -> std::optional<core::CustomConnection*> {
+  if (!std::holds_alternative<core::CustomConnection>(link.connection)) {
+    return {};
+  }
 
-        if constexpr (std::is_same_v<V, core::CustomConnection>) {
-          return &v;
-        } else {
-          return {};
-        }
-      },
-      link.connection);
+  return &std::get<core::CustomConnection>(link.connection);
 }
 
 ///
-auto GetConnection(core::Link& link, const core::Project& project) {
-  return std::visit(
-      [&project](auto& v) -> std::optional<const core::Connection*> {
-        using V = std::remove_cvref_t<decltype(v)>;
+auto GetConnection(core::Link& link, const core::Project& project)
+    -> std::optional<const core::Connection*> {
+  if (!std::holds_alternative<core::ConnectionId>(link.connection)) {
+    return {};
+  }
 
-        if constexpr (std::is_same_v<V, core::ConnectionId>) {
-          return &core::Project::FindConnection(project, v);
-        } else {
-          return {};
-        }
-      },
-      link.connection);
+  const auto connection_id = std::get<core::ConnectionId>(link.connection);
+  return &core::Project::FindConnection(project, connection_id);
 }
 }  // namespace
 
@@ -172,8 +163,8 @@ void EditLinkPopup::CopyConnections(
 ///
 void EditLinkPopup::SetSelectedConnection(
     core::Link& link, const std::vector<core::Connection>& connections) {
-  if (const auto link_custom_connection = GetCustomConnection(link)) {
-    custom_connection_copy_ = **link_custom_connection;
+  if (const auto custom_connection = GetCustomConnection(link)) {
+    custom_connection_copy_ = **custom_connection;
   }
 
   if (IsDefaultConnection()) {

@@ -21,7 +21,7 @@
 namespace vh::ponc::json {
 namespace {
 ///
-auto ParseConnection(const crude_json::value& json) -> core::Link::Connection {
+auto ParseConnection(const crude_json::value& json) -> core::LinkConnection {
   const auto index = static_cast<int>(json["index"].get<crude_json::number>());
 
   if (index == 0) {
@@ -50,7 +50,7 @@ auto ParseConnection(const crude_json::value& json) -> core::Link::Connection {
 }
 
 ///
-auto WriteConnection(const core::Link::Connection& connection) {
+auto WriteConnection(const core::LinkConnection& connection) {
   auto json = crude_json::value{};
   json["index"] = static_cast<crude_json::number>(connection.index());
 

@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "core_area.h"
+#include "core_connection.h"
 #include "core_i_node.h"
 #include "core_id_ptr.h"
 #include "core_link.h"
@@ -81,6 +82,8 @@ class Diagram {
   auto EmplaceArea(const Area &area) -> Area &;
   ///
   void DeleteArea(AreaId area_id);
+  ///
+  void OnConnectionDeleted(ConnectionId connection_id);
 
  private:
   ///
