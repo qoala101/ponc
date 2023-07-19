@@ -134,7 +134,7 @@ void ConnectionsView::DrawDiagrams(coreui::Project& project,
                        ImGuiColorEditFlags_NoAlpha);
     ImGui::SameLine();
 
-    if (ImGui::Selectable("None", !default_connection.has_value())) {
+    if (ImGui::Selectable("<None>", !default_connection.has_value())) {
       default_connection.reset();
     }
 

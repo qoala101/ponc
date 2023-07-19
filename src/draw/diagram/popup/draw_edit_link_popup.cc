@@ -97,7 +97,7 @@ void EditLinkPopup::Draw(coreui::Diagram& diagram,
   const auto length_edited =
       IsSame(links, &core::Link::length)
           ? ImGui::InputFloat("Length", &first_link->length)
-          : ImGui::InputFloat("Length", &first_link->length, 0, 0, "Varying");
+          : ImGui::InputFloat("Length", &first_link->length, 0, 0, "<Varying>");
 
   if (length_edited) {
     for (auto* link : links) {
@@ -105,25 +105,50 @@ void EditLinkPopup::Draw(coreui::Diagram& diagram,
     }
   }
 
-  ImGui::ColorEdit3("Color", &edited_connection_.color.Value.x,
-                    ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+  const auto is_custom_connection =
+      connection_index_ == static_cast<int>(connection_names_.size()) - 1;
+
+  if (is_custom_connection) {
+    auto& first_connection =
+        std::get<core::CustomConnection>(first_link->connection);
+
+    if (ImGui::ColorEdit3(
+            "Color", &first_connection.color.Value.x,
+            ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
+      for (auto* link : links) {
+        auto& connection = std::get<core::CustomConnection>(link->connection);
+        connection.color = first_connection.color;
+      }
+    }
   const auto color_edit_width =
       ImGui::GetItemRectSize().x + ImGui::GetStyle().ItemSpacing.x;
 
   ImGui::SameLine();
   ImGui::SetNextItemWidth(ImGui::CalcItemWidth() - color_edit_width);
+  } else {
+    // ImGui::ColorButton("##Color", ImColor{style::DefaultColors::kWhite},
+    //                    ImGuiColorEditFlags_NoAlpha);
+  }
+
+  // const auto color_edit_width =
+  //     ImGui::GetItemRectSize().x + ImGui::GetStyle().ItemSpacing.x;
+
+  // ImGui::SameLine();
+  // ImGui::SetNextItemWidth(ImGui::CalcItemWidth() - color_edit_width);
 
   if (ImGui::Combo("Connection", &connection_index_, connection_names_.data(),
                    static_cast<int>(connection_names_.size()))) {
     SetSelectedConnection(links, connections);
 
     if (has_varying_connection_) {
-      RemoveVaryingConnection();
+      connection_names_.erase(connection_names_.cbegin());
+      --connection_index_;
+      has_varying_connection_ = false;
     }
   }
 
-  ImGui::InputFloat("Attenuation/Length", &edited_connection_.drop_per_length);
-  ImGui::InputFloat("Attenuation Added", &edited_connection_.drop_added);
+  // ImGui::InputFloat("Attenuation/Length", &edited_connection_.drop_per_length);
+  // ImGui::InputFloat("Attenuation Added", &edited_connection_.drop_added);
 
   if (ImGui::Button("Cancel")) {
     Cancel(core_diagram);
@@ -158,10 +183,10 @@ void EditLinkPopup::CopyLinksAndConnections(
   has_varying_connection_ = !IsSameConnection(links);
 
   if (has_varying_connection_) {
-    AddVaryingConnection();
+    connection_names_.emplace_back("<Varying>");
   }
 
-  connection_names_.emplace_back("None");
+  connection_names_.emplace_back("<None>");
   connection_names_.reserve(connection_names_.size() + connections.size() + 1);
 
   std::transform(
@@ -169,7 +194,7 @@ void EditLinkPopup::CopyLinksAndConnections(
       std::back_inserter(connection_names_),
       [](const auto& connection) { return connection.name.c_str(); });
 
-  connection_names_.emplace_back("Custom");
+  connection_names_.emplace_back("<Custom>");
   connection_index_ = 0;
 
   if (has_varying_connection_) {
@@ -228,17 +253,5 @@ void EditLinkPopup::SetSelectedConnection(
   for (auto* link : links) {
     link->connection = connection.id;
   }
-}
-
-///
-void EditLinkPopup::AddVaryingConnection() {
-  connection_names_.emplace_back("Varying");
-}
-
-///
-void EditLinkPopup::RemoveVaryingConnection() {
-  connection_names_.erase(connection_names_.cbegin());
-  has_varying_connection_ = false;
-  --connection_index_;
 }
 }  // namespace vh::ponc::draw

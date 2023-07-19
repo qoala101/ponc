@@ -38,10 +38,6 @@ class EditLinkPopup : public IPopup {
       const std::vector<core::Link *> &links,
       const std::vector<core::Connection> &connections) const;
   ///
-  void AddVaryingConnection();
-  ///
-  void RemoveVaryingConnection();
-  ///
   void Cancel(core::Diagram &diagram) const;
 
   ///
@@ -54,8 +50,6 @@ class EditLinkPopup : public IPopup {
   int connection_index_{};
   ///
   bool has_varying_connection_{};
-
-  core::CustomConnection edited_connection_{};
 };
 }  // namespace vh::ponc::draw
 
