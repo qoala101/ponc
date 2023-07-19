@@ -38,21 +38,9 @@
 #include "json_i_family_parser.h"
 #include "json_project_serializer.h"
 #include "json_versifier.h"
-#include "style_default_colors.h"
+#include "style_utils.h"
 
 namespace vh::ponc::coreui {
-namespace {
-///
-auto GenerateRandomColor() {
-  const auto seed = std::random_device{}();
-  auto engine = std::default_random_engine{seed};
-  auto distribution = std::uniform_int_distribution{0, 128};
-
-  return ImColor{127 + distribution(engine), 127 + distribution(engine),
-                 127 + distribution(engine)};
-}
-}  // namespace
-
 ///
 auto Project::CreateProject() const {
   auto id_generator = core::IdGenerator{};
@@ -175,7 +163,7 @@ auto Project::AddConnection() -> Event& {
   auto connection =
       core::Connection{.id = id,
                        .name = "Connection #" + std::to_string(id.Get()),
-                       .color = GenerateRandomColor()};
+                       .color = style::GenerateBrightColor()};
 
   return event_loop_.PostEvent([project = safe_owner_.MakeSafe(&project_),
                                 connection = std::move(connection)]() mutable {

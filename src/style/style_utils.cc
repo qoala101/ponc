@@ -8,6 +8,8 @@
 
 #include <imgui.h>
 
+#include <random>
+
 namespace vh::ponc::style {
 namespace {
 ///
@@ -29,5 +31,15 @@ auto GetGradient(const ImColor& start_color, const ImColor& end_color,
       GetGradient(start_color.Value.x, end_color.Value.x, percentage),
       GetGradient(start_color.Value.y, end_color.Value.y, percentage),
       GetGradient(start_color.Value.z, end_color.Value.z, percentage)};
+}
+
+///
+auto GenerateBrightColor() -> ImColor {
+  const auto seed = std::random_device{}();
+  auto engine = std::default_random_engine{seed};
+  auto distribution = std::uniform_int_distribution{0, 128};
+
+  return ImColor{127 + distribution(engine), 127 + distribution(engine),
+                 127 + distribution(engine)};
 }
 }  // namespace vh::ponc::style

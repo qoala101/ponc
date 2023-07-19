@@ -44,11 +44,5 @@ void LinkPopup::Draw(const Callbacks& callbacks) {
   if (ImGui::MenuItem("Delete")) {
     callbacks.delete_selected(selected_links);
   }
-
-  ImGui::Separator();
-
-  if (ImGui::MenuItem("Edit")) {
-    callbacks.edit_selected(selected_links);
-  }
 }
 }  // namespace vh::ponc::draw

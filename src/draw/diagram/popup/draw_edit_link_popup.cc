@@ -21,172 +21,122 @@
 #include "core_connection.h"
 #include "core_diagram.h"
 #include "core_link.h"
-#include "cpp_assert.h"
+#include "core_project.h"
+#include "style_default_colors.h"
+#include "style_utils.h"
 
 namespace vh::ponc::draw {
 namespace {
 ///
-auto IsSame(const std::vector<core::Link*>& links, const auto& comparator) {
-  if (links.empty()) {
-    return true;
-  }
+auto GetCustomConnection(core::Link& link) {
+  return std::visit(
+      [](auto& v) -> std::optional<core::CustomConnection*> {
+        using V = std::remove_cvref_t<decltype(v)>;
 
-  auto* first_link = links.front();
-
-  return std::all_of(links.cbegin(), links.cend(),
-                     [first_link, &comparator](const auto* link) {
-                       return comparator(*link, *first_link);
-                     });
+        if constexpr (std::is_same_v<V, core::CustomConnection>) {
+          return &v;
+        } else {
+          return {};
+        }
+      },
+      link.connection);
 }
 
 ///
-template <typename T>
-auto IsSame(const std::vector<core::Link*>& links, T core::Link::*field) {
-  return IsSame(links, [field](const auto& left, const auto& right) {
-    return left.*field == right.*field;
-  });
-}
+auto GetConnection(core::Link& link, const core::Project& project) {
+  return std::visit(
+      [&project](auto& v) -> std::optional<const core::Connection*> {
+        using V = std::remove_cvref_t<decltype(v)>;
 
-///
-auto IsSameConnection(const std::vector<core::Link*>& links) {
-  return IsSame(links, [](const auto& left, const auto& right) {
-    if (left.connection.index() != right.connection.index()) {
-      return false;
-    }
-
-    if (!std::holds_alternative<core::ConnectionId>(left.connection)) {
-      return false;
-    }
-
-    return std::get<core::ConnectionId>(left.connection) ==
-           std::get<core::ConnectionId>(right.connection);
-  });
+        if constexpr (std::is_same_v<V, core::ConnectionId>) {
+          return &core::Project::FindConnection(project, v);
+        } else {
+          return {};
+        }
+      },
+      link.connection);
 }
 }  // namespace
 
 ///
-auto EditLinkPopup::FindLinks(core::Diagram& diagram) const {
-  auto links = std::vector<core::Link*>{};
-  links.reserve(link_ids_.size());
-
-  std::transform(link_ids_.cbegin(), link_ids_.cend(),
-                 std::back_inserter(links), [&diagram](const auto link_id) {
-                   return &core::Diagram::FindLink(diagram, link_id);
-                 });
-  return links;
+auto EditLinkPopup::IsDefaultConnection() const {
+  return connection_index_ == 0;
 }
 
 ///
 void EditLinkPopup::Draw(coreui::Diagram& diagram,
-                         const std::vector<core::Connection>& connections) {
+                         const core::Project& project) {
   const auto content_scope = DrawContentScope();
 
   if (!IsOpened()) {
     return;
   }
 
-  auto& core_diagram = diagram.GetDiagram();
-  const auto links = FindLinks(core_diagram);
+  auto& link = core::Diagram::FindLink(diagram.GetDiagram(), link_id_);
+  const auto& connections = project.GetConnections();
 
   if (WasJustOpened()) {
-    CopyLinksAndConnections(links, connections);
+    link_copy_ = link;
+    custom_connection_copy_ =
+        core::CustomConnection{.color = style::GenerateBrightColor()};
+
+    CopyConnections(connections);
   }
 
-  auto* first_link = links.front();
+  ImGui::InputFloat("Length", &link.length);
 
-  const auto length_edited =
-      IsSame(links, &core::Link::length)
-          ? ImGui::InputFloat("Length", &first_link->length)
-          : ImGui::InputFloat("Length", &first_link->length, 0, 0, "<Varying>");
+  const auto custom_connection = GetCustomConnection(link);
+  const auto connection = GetConnection(link, project);
 
-  if (length_edited) {
-    for (auto* link : links) {
-      link->length = first_link->length;
-    }
+  if (custom_connection.has_value()) {
+    ImGui::ColorEdit3(
+        "##Color", &(*custom_connection)->color.Value.x,
+        ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+  } else {
+    const auto color = connection.has_value()
+                           ? (*connection)->color
+                           : ImColor{style::DefaultColors::kWhite};
+    ImGui::ColorButton("##Color", color, ImGuiColorEditFlags_NoAlpha);
   }
 
-  const auto is_custom_connection =
-      connection_index_ == static_cast<int>(connection_names_.size()) - 1;
-
-  if (is_custom_connection) {
-    auto& first_connection =
-        std::get<core::CustomConnection>(first_link->connection);
-
-    if (ImGui::ColorEdit3(
-            "Color", &first_connection.color.Value.x,
-            ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
-      for (auto* link : links) {
-        auto& connection = std::get<core::CustomConnection>(link->connection);
-        connection.color = first_connection.color;
-      }
-    }
   const auto color_edit_width =
       ImGui::GetItemRectSize().x + ImGui::GetStyle().ItemSpacing.x;
 
   ImGui::SameLine();
   ImGui::SetNextItemWidth(ImGui::CalcItemWidth() - color_edit_width);
-  } else {
-    // ImGui::ColorButton("##Color", ImColor{style::DefaultColors::kWhite},
-    //                    ImGuiColorEditFlags_NoAlpha);
-  }
-
-  // const auto color_edit_width =
-  //     ImGui::GetItemRectSize().x + ImGui::GetStyle().ItemSpacing.x;
-
-  // ImGui::SameLine();
-  // ImGui::SetNextItemWidth(ImGui::CalcItemWidth() - color_edit_width);
 
   if (ImGui::Combo("Connection", &connection_index_, connection_names_.data(),
                    static_cast<int>(connection_names_.size()))) {
-    SetSelectedConnection(links, connections);
-
-    if (has_varying_connection_) {
-      connection_names_.erase(connection_names_.cbegin());
-      --connection_index_;
-      has_varying_connection_ = false;
-    }
+    SetSelectedConnection(link, connections);
   }
 
-  // ImGui::InputFloat("Attenuation/Length", &edited_connection_.drop_per_length);
-  // ImGui::InputFloat("Attenuation Added", &edited_connection_.drop_added);
+  if (custom_connection.has_value()) {
+    ImGui::InputFloat("Attenuation/Length",
+                      &(*custom_connection)->drop_per_length);
+    ImGui::InputFloat("Attenuation Added", &(*custom_connection)->drop_added);
+  } else {
+    const auto drop_per_length =
+        connection.has_value() ? (*connection)->drop_per_length : 0.F;
+    ImGui::LabelText("Attenuation/Length", "%.2f", drop_per_length);
+
+    const auto drop_added =
+        connection.has_value() ? (*connection)->drop_added : 0.F;
+    ImGui::LabelText("Attenuation Added", "%.2f", drop_added);
+  }
 
   if (ImGui::Button("Cancel")) {
-    Cancel(core_diagram);
+    link = link_copy_;
     ImGui::CloseCurrentPopup();
   }
 }
 
 ///
-void EditLinkPopup::SetLinkIds(std::vector<ne::LinkId> link_ids) {
-  link_ids_ = std::move(link_ids);
-}
+void EditLinkPopup::SetLinkId(ne::LinkId link_id) { link_id_ = link_id; }
 
 ///
-void EditLinkPopup::Cancel(core::Diagram& diagram) const {
-  for (const auto& link_copy : link_copies_) {
-    auto& link = core::Diagram::FindLink(diagram, link_copy.id);
-    link = link_copy;
-  }
-}
-
-///
-void EditLinkPopup::CopyLinksAndConnections(
-    const std::vector<core::Link*>& links,
+void EditLinkPopup::CopyConnections(
     const std::vector<core::Connection>& connections) {
-  link_copies_.clear();
-  link_copies_.reserve(links.size());
-
-  std::transform(links.cbegin(), links.cend(), std::back_inserter(link_copies_),
-                 [](const auto* link) { return *link; });
-
-  connection_names_.clear();
-  has_varying_connection_ = !IsSameConnection(links);
-
-  if (has_varying_connection_) {
-    connection_names_.emplace_back("<Varying>");
-  }
-
-  connection_names_.emplace_back("<None>");
+  connection_names_ = {"<None>"};
   connection_names_.reserve(connection_names_.size() + connections.size() + 1);
 
   std::transform(
@@ -195,63 +145,48 @@ void EditLinkPopup::CopyLinksAndConnections(
       [](const auto& connection) { return connection.name.c_str(); });
 
   connection_names_.emplace_back("<Custom>");
-  connection_index_ = 0;
+  connection_index_ = std::visit(
+      [&link_copy = link_copy_, &connections](const auto& v) {
+        using V = std::remove_cvref_t<decltype(v)>;
 
-  if (has_varying_connection_) {
-    return;
-  }
+        if constexpr (std::is_same_v<V, std::monostate>) {
+          return 0;
+        } else if constexpr (std::is_same_v<V, core::ConnectionId>) {
+          const auto connection_id =
+              std::get<core::ConnectionId>(link_copy.connection);
 
-  Expects(!links.empty());
+          const auto connection =
+              std::find_if(connections.cbegin(), connections.cend(),
+                           [connection_id](const auto& connection) {
+                             return connection.id == connection_id;
+                           });
 
-  if (std::holds_alternative<std::monostate>(links.front()->connection)) {
-    return;
-  }
-
-  const auto common_connection_id =
-      std::get<core::ConnectionId>(links.front()->connection);
-
-  const auto common_connection =
-      std::find_if(connections.cbegin(), connections.cend(),
-                   [common_connection_id](const auto& connection) {
-                     return connection.id == common_connection_id;
-                   });
-
-  connection_index_ =
-      static_cast<int>(std::distance(connections.cbegin(), common_connection)) +
-      1;
+          return static_cast<int>(connection - connections.cbegin()) + 1;
+        } else if constexpr (std::is_same_v<V, core::CustomConnection>) {
+          return static_cast<int>(connections.size()) + 1;
+        }
+      },
+      link_copy_.connection);
 }
 
 ///
 void EditLinkPopup::SetSelectedConnection(
-    const std::vector<core::Link*>& links,
-    const std::vector<core::Connection>& connections) const {
-  auto connection_index = connection_index_;
-
-  if (has_varying_connection_) {
-    --connection_index;
+    core::Link& link, const std::vector<core::Connection>& connections) {
+  if (const auto link_custom_connection = GetCustomConnection(link)) {
+    custom_connection_copy_ = **link_custom_connection;
   }
 
-  if (const auto no_connection = connection_index == 0) {
-    for (auto* link : links) {
-      link->connection = {};
-    }
-
+  if (IsDefaultConnection()) {
+    link.connection = {};
     return;
   }
 
-  if (const auto custom_connection =
-          connection_index > static_cast<int>(connections.size())) {
-    for (auto* link : links) {
-      link->connection = core::CustomConnection{};
-    }
-
+  if (connection_index_ > static_cast<int>(connections.size())) {
+    link.connection = custom_connection_copy_;
     return;
   }
 
-  const auto& connection = connections[connection_index - 1];
-
-  for (auto* link : links) {
-    link->connection = connection.id;
-  }
+  const auto& connection = connections[connection_index_ - 1];
+  link.connection = connection.id;
 }
 }  // namespace vh::ponc::draw

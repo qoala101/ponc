@@ -13,6 +13,7 @@
 
 #include "core_connection.h"
 #include "core_link.h"
+#include "core_project.h"
 #include "coreui_diagram.h"
 #include "draw_i_popup.h"
 
@@ -21,35 +22,29 @@ namespace vh::ponc::draw {
 class EditLinkPopup : public IPopup {
  public:
   ///
-  void Draw(coreui::Diagram &diagram,
-            const std::vector<core::Connection> &connections);
+  void Draw(coreui::Diagram &diagram, const core::Project &project);
   ///
-  void SetLinkIds(std::vector<ne::LinkId> link_ids);
+  void SetLinkId(ne::LinkId link_id);
 
  private:
   ///
-  auto FindLinks(core::Diagram &diagram) const;
+  void CopyConnections(const std::vector<core::Connection> &connections);
   ///
-  void CopyLinksAndConnections(
-      const std::vector<core::Link *> &links,
-      const std::vector<core::Connection> &connections);
+  auto IsDefaultConnection() const;
   ///
-  void SetSelectedConnection(
-      const std::vector<core::Link *> &links,
-      const std::vector<core::Connection> &connections) const;
-  ///
-  void Cancel(core::Diagram &diagram) const;
+  void SetSelectedConnection(core::Link &link,
+                             const std::vector<core::Connection> &connections);
 
   ///
-  std::vector<ne::LinkId> link_ids_{};
+  ne::LinkId link_id_{};
   ///
-  std::vector<core::Link> link_copies_{};
+  core::Link link_copy_{};
   ///
   std::vector<const char *> connection_names_{};
   ///
   int connection_index_{};
   ///
-  bool has_varying_connection_{};
+  core::CustomConnection custom_connection_copy_{};
 };
 }  // namespace vh::ponc::draw
 

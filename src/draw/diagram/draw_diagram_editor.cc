@@ -51,7 +51,7 @@ DiagramEditor::DiagramEditor()
 
 ///
 void DiagramEditor::Draw(coreui::Diagram &diagram,
-                         const std::vector<core::Connection> &connections) {
+                         const core::Project &project) {
   ne::Begin("DiagramEditor");
   item_deleter_.UnregisterDeletedItems(diagram.GetDiagram());
 
@@ -74,7 +74,7 @@ void DiagramEditor::Draw(coreui::Diagram &diagram,
   linker_.Draw(diagram.GetLinker(), diagram.GetFamilyGroups());
 
   OpenPopupsIfRequested(core_diagram);
-  DrawPopups(diagram, connections);
+  DrawPopups(diagram, project);
 
   item_deleter_.DeleteUnregisteredItems(diagram);
   ne::End();
@@ -157,35 +157,21 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
     return;
   }
 
-  edit_link_popup_.SetLinkIds({link_id});
+  edit_link_popup_.SetLinkId(link_id);
   edit_link_popup_.Open();
 }
 
 ///
-void DiagramEditor::DrawPopups(
-    coreui::Diagram &diagram,
-    const std::vector<core::Connection> &connections) {
+void DiagramEditor::DrawPopups(coreui::Diagram &diagram,
+                               const core::Project &project) {
   background_popup_.Draw(diagram);
   node_popup_.Draw(diagram);
-
-  auto links_to_edit = std::vector<ne::LinkId>{};
-
-  link_popup_.Draw(
-      {.edit_selected =
-           [&links_to_edit](const auto &link_ids) { links_to_edit = link_ids; },
-       .delete_selected =
-           [&diagram](const auto &link_ids) {
-             for (const auto link_id : link_ids) {
-               diagram.DeleteLink(link_id);
-             }
-           }});
-
-  if (!links_to_edit.empty()) {
-    edit_link_popup_.SetLinkIds(std::move(links_to_edit));
-    edit_link_popup_.Open();
-  }
-
-  edit_link_popup_.Draw(diagram, connections);
+  link_popup_.Draw({.delete_selected = [&diagram](const auto &link_ids) {
+    for (const auto link_id : link_ids) {
+      diagram.DeleteLink(link_id);
+    }
+  }});
   replace_popup_.Draw(diagram);
+  edit_link_popup_.Draw(diagram, project);
 }
 }  // namespace vh::ponc::draw

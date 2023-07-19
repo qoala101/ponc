@@ -12,6 +12,7 @@
 #include <memory>
 
 #include "core_diagram.h"
+#include "core_project.h"
 #include "coreui_diagram.h"
 #include "draw_area_creator.h"
 #include "draw_background_popup.h"
@@ -30,15 +31,13 @@ class DiagramEditor {
   DiagramEditor();
 
   ///
-  void Draw(coreui::Diagram &diagram,
-            const std::vector<core::Connection> &connections);
+  void Draw(coreui::Diagram &diagram, const core::Project &project);
 
  private:
   ///
   void OpenPopupsIfRequested(const core::Diagram &diagram);
   ///
-  void DrawPopups(coreui::Diagram &diagram,
-                  const std::vector<core::Connection> &connections);
+  void DrawPopups(coreui::Diagram &diagram, const core::Project &project);
 
   ///
   ne::Config config_{};
