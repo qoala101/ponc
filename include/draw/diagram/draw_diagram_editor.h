@@ -35,6 +35,10 @@ class DiagramEditor {
 
  private:
   ///
+  auto OpenNodePopups(const core::Diagram &diagram);
+  ///
+  void OpenLinkPopups();
+  ///
   void OpenPopupsIfRequested(const core::Diagram &diagram);
   ///
   void DrawPopups(coreui::Diagram &diagram, const core::Project &project);

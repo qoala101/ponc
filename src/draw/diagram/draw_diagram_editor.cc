@@ -83,18 +83,7 @@ void DiagramEditor::Draw(coreui::Diagram &diagram,
 }
 
 ///
-void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
-  const auto popup_pos = ImGui::GetMousePos();
-
-  ne::Suspend();
-  const auto resume_scope = cpp::Scope{[]() { ne::Resume(); }};
-
-  if (ne::ShowBackgroundContextMenu() && !IsHoveringOverChildWindow()) {
-    background_popup_.SetPos(popup_pos);
-    background_popup_.Open();
-    return;
-  }
-
+auto DiagramEditor::OpenNodePopups(const core::Diagram &diagram) {
   auto requested_node_popup = false;
   auto node_id = ne::NodeId{};
 
@@ -115,18 +104,7 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
     }
 
     node_popup_.Open();
-    return;
-  }
-
-  auto link_id = ne::LinkId{};
-
-  if (ne::ShowLinkContextMenu(&link_id)) {
-    if (!ne::IsLinkSelected(link_id)) {
-      ne::SelectLink(link_id);
-    }
-
-    link_popup_.Open();
-    return;
+    return true;
   }
 
   auto node_double_clicked = false;
@@ -148,6 +126,22 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
   if (node_double_clicked) {
     replace_popup_.SetNodeId(node_id);
     replace_popup_.Open();
+    return true;
+  }
+
+  return false;
+}
+
+///
+void DiagramEditor::OpenLinkPopups() {
+  auto link_id = ne::LinkId{};
+
+  if (ne::ShowLinkContextMenu(&link_id)) {
+    if (!ne::IsLinkSelected(link_id)) {
+      ne::SelectLink(link_id);
+    }
+
+    link_popup_.Open();
     return;
   }
 
@@ -159,6 +153,26 @@ void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
 
   edit_link_popup_.SetLinkId(link_id);
   edit_link_popup_.Open();
+}
+
+///
+void DiagramEditor::OpenPopupsIfRequested(const core::Diagram &diagram) {
+  const auto popup_pos = ImGui::GetMousePos();
+
+  ne::Suspend();
+  const auto resume_scope = cpp::Scope{[]() { ne::Resume(); }};
+
+  if (ne::ShowBackgroundContextMenu() && !IsHoveringOverChildWindow()) {
+    background_popup_.SetPos(popup_pos);
+    background_popup_.Open();
+    return;
+  }
+
+  if (OpenNodePopups(diagram)) {
+    return;
+  }
+
+  OpenLinkPopups();
 }
 
 ///
