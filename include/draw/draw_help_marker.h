@@ -7,8 +7,6 @@
 #ifndef VH_PONC_DRAW_HELP_MARKER_H_
 #define VH_PONC_DRAW_HELP_MARKER_H_
 
-#include <imgui.h>
-
 #include <string_view>
 
 namespace vh::ponc::draw {

@@ -8,8 +8,6 @@
 #define VH_PONC_CORE_PROJECT_H_
 
 #include <memory>
-#include <string>
-#include <string_view>
 #include <vector>
 
 #include "core_connection.h"

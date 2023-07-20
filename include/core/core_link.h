@@ -9,7 +9,6 @@
 
 #include <imgui_node_editor.h>
 
-#include <optional>
 #include <variant>
 #include <vector>
 

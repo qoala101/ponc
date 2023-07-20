@@ -10,6 +10,7 @@
 #include <imgui_node_editor.h>
 
 #include <memory>
+#include <type_traits>
 #include <variant>
 
 #include "core_connection.h"

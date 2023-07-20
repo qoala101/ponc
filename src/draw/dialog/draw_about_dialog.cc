@@ -29,7 +29,7 @@ void AboutDialog::Draw() {
 
   if (ImGui::BeginPopupModal("About", &open_requested_,
                              ImGuiWindowFlags_AlwaysAutoResize)) {
-    ImGui::TextUnformatted("Passive Optical Network Calculator 0.5.3");
+    ImGui::TextUnformatted("Passive Optical Network Calculator 0.5.4");
     ImGui::Separator();
 
     if (ImGui::BeginTable("About", 2)) {

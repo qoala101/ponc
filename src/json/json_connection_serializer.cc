@@ -7,7 +7,8 @@
 #include "json_connection_serializer.h"
 
 #include <crude_json.h>
-#include <imgui.h>
+
+#include <memory>
 
 #include "core_connection.h"
 #include "json_color_serializer.h"

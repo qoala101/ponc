@@ -11,10 +11,8 @@
 
 #include <algorithm>
 #include <iterator>
-#include <memory>
-#include <regex>
-#include <string>
-#include <utility>
+#include <optional>
+#include <type_traits>
 #include <variant>
 #include <vector>
 

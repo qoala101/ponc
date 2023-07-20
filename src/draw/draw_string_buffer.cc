@@ -6,7 +6,7 @@
 
 #include "draw_string_buffer.h"
 
-#include <imgui.h>
+#include <imgui.h>  // IWYU pragma: keep
 #include <imgui_internal.h>
 
 #include <algorithm>

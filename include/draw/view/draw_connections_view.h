@@ -10,6 +10,7 @@
 #include <optional>
 #include <string>
 
+#include "core_connection.h"
 #include "coreui_project.h"
 #include "draw_i_view.h"
 #include "draw_string_buffer.h"

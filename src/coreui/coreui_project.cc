@@ -7,15 +7,14 @@
 #include "coreui_project.h"
 
 #include <crude_json.h>
-#include <imgui.h>
+#include <imgui_node_editor.h>
 
 #include <algorithm>
-#include <cstdlib>
 #include <filesystem>
 #include <functional>
 #include <iterator>
 #include <memory>
-#include <random>
+#include <optional>
 #include <string>
 #include <type_traits>
 #include <utility>

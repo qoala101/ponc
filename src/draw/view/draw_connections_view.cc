@@ -7,20 +7,19 @@
 #include "draw_connections_view.h"
 
 #include <imgui.h>
+#include <imgui_node_editor.h>
 
+#include <limits>
 #include <optional>
 #include <string>
 #include <vector>
 
 #include "core_connection.h"
-#include "core_diagram.h"
 #include "core_project.h"
-#include "coreui_diagram.h"
-#include "cpp_assert.h"
+#include "core_settings.h"
 #include "draw_disable_if.h"
 #include "draw_help_marker.h"
 #include "draw_rename_widget.h"
-#include "draw_settings_table_row.h"
 #include "draw_table_flags.h"
 #include "style_default_colors.h"
 

@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include "core_connection.h"
 #include "core_diagram.h"
 #include "core_i_family_group.h"
 #include "core_id_ptr.h"

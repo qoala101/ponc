@@ -10,6 +10,7 @@
 #include <imgui.h>
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "core_connection.h"

@@ -16,12 +16,14 @@
 #include <optional>
 #include <stack>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <variant>
 #include <vector>
 
 #include "core_area.h"
+#include "core_connection.h"
 #include "core_diagram.h"
 #include "core_i_family.h"
 #include "core_i_node.h"

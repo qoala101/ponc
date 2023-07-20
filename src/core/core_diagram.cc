@@ -9,6 +9,7 @@
 #include <imgui_node_editor.h>
 
 #include <algorithm>
+#include <exception>
 #include <iterator>
 #include <memory>
 #include <string>
