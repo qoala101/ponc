@@ -10,6 +10,8 @@
 
 #include <variant>
 
+#include "core_project.h"
+
 namespace vh::ponc::core {
 ///
 auto Link::GetIds(Link &link) -> std::vector<IdPtr> {
@@ -52,5 +54,24 @@ auto Link::GetPinOfKind(Link &link, ne::PinKind pin_kind) -> ne::PinId & {
   }
 
   return link.start_pin_id;
+}
+
+///
+auto Link::GetDrop(const Link &link, const Project &project) -> float {
+  return std::visit(
+      [&link, &project](const auto &v) {
+        using V = std::remove_cvref_t<decltype(v)>;
+
+        if constexpr (std::is_same_v<V, std::monostate>) {
+          return 0.F;
+        } else if constexpr (std::is_same_v<V, core::ConnectionId>) {
+          const auto &connection = Project::FindConnection(project, v);
+          return -link.length * connection.drop_per_length -
+                 connection.drop_added;
+        } else if constexpr (std::is_same_v<V, core::CustomConnection>) {
+          return -link.length * v.drop_per_length - v.drop_added;
+        }
+      },
+      link.connection);
 }
 }  // namespace vh::ponc::core

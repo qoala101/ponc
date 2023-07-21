@@ -74,6 +74,16 @@ auto Diagram::FindNode(Diagram& diagram, ne::NodeId node_id) -> Node& {
   Expects(node != diagram.nodes_.cend());
   return *node;
 }
+///
+auto Diagram::FindLink(const Diagram& diagram, ne::LinkId link_id)
+    -> const Link& {
+  const auto link = std::find_if(
+      diagram.links_.begin(), diagram.links_.end(),
+      [link_id](const auto& link) { return link.core_link.id == link_id; });
+
+  Expects(link != diagram.links_.cend());
+  return *link;
+}
 
 ///
 Diagram::Diagram(cpp::SafePtr<Project> parent_project,
@@ -345,12 +355,12 @@ auto Diagram::GetFlowColor(float flow) const {
 ///
 auto Diagram::LinkFrom(const core::Link& core_link,
                        const flow::NodeFlows& node_flows) const {
-  auto link = Link{
-      .core_link = core_link,
-      .thickness = style::DefaultSizes::kNormalThickness,
-  };
-
   const auto& project = parent_project_->GetProject();
+
+  auto link = Link{.core_link = core_link,
+                   .thickness = style::DefaultSizes::kNormalThickness,
+                   .drop = core::Link::GetDrop(core_link, project)};
+
   const auto link_alpha =
       linker_.IsRepiningLink(link.core_link.id) ? 0.5F : 1.F;
 

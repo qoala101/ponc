@@ -20,6 +20,8 @@ struct Link {
   ImColor color{};
   ///
   float thickness{};
+  ///
+  float drop{};
 };
 }  // namespace vh::ponc::coreui
 

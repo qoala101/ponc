@@ -47,6 +47,9 @@ class Diagram {
       -> const Node &;
   ///
   static auto FindNode(Diagram &diagram, ne::NodeId node_id) -> Node &;
+  ///
+  static auto FindLink(const Diagram &diagram, ne::LinkId link_id)
+      -> const Link &;
 
   ///
   void OnFrame();

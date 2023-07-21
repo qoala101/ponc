@@ -19,6 +19,9 @@ namespace ne = ax::NodeEditor;
 
 namespace vh::ponc::core {
 ///
+class Project;
+
+///
 using LinkConnection =
     std::variant<std::monostate, ConnectionId, CustomConnection>;
 
@@ -36,6 +39,8 @@ struct Link {
   static auto GetPinOfKind(const Link &link, ne::PinKind pin_kind) -> ne::PinId;
   ///
   static auto GetPinOfKind(Link &link, ne::PinKind pin_kind) -> ne::PinId &;
+  ///
+  static auto GetDrop(const Link &link, const Project &project) -> float;
 
   ///
   ne::LinkId id{};

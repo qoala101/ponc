@@ -101,8 +101,9 @@ void EditLinkPopup::Draw(coreui::Diagram& diagram,
 
   if (custom_connection.has_value()) {
     ImGui::InputFloat("Attenuation/Length",
-                      &(*custom_connection)->drop_per_length);
-    ImGui::InputFloat("Attenuation Added", &(*custom_connection)->drop_added);
+                      &(*custom_connection)->drop_per_length, 0, 0, "%.2f");
+    ImGui::InputFloat("Attenuation Added", &(*custom_connection)->drop_added, 0,
+                      0, "%.2f");
   } else {
     const auto drop_per_length =
         connection.has_value() ? (*connection)->drop_per_length : 0.F;
