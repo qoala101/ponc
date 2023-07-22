@@ -30,15 +30,19 @@ auto GetSelectedItems(const std::invocable<T*, int> auto& selector) {
 }
 
 ///
-auto GetNode(ne::NodeId node_id) -> auto& {
-  auto* editor =
+auto GetEditorContext() -> auto& {
+  auto* editor_context =
       // NOLINTNEXTLINE(*-reinterpret-cast)
       reinterpret_cast<ne::Detail::EditorContext*>(ne::GetCurrentEditor());
-  Expects(editor != nullptr);
 
-  const auto* node = editor->FindNode(node_id);
+  Expects(editor_context != nullptr);
+  return *editor_context;
+}
+
+///
+auto GetNode(ne::NodeId node_id) -> auto& {
+  const auto* node = GetEditorContext().FindNode(node_id);
   Expects(node != nullptr);
-
   return *node;
 }
 
@@ -83,6 +87,13 @@ auto NativeFacade::GetSelectedNodesAndAreas()
 ///
 auto NativeFacade::GetSelectedLinks() -> std::vector<ne::LinkId> {
   return GetSelectedItems<ne::LinkId>(&ne::GetSelectedLinks);
+}
+
+///
+auto NativeFacade::GetLinkCurve(ne::LinkId link_id) -> ImCubicBezierPoints {
+  const auto* native_link = GetEditorContext().FindLink(link_id);
+  Expects(native_link != nullptr);
+  return native_link->GetCurve();
 }
 
 ///

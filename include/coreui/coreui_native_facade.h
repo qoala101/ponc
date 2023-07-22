@@ -8,6 +8,7 @@
 #define VH_PONC_COREUI_NATIVE_FACADE_H_
 
 #include <imgui.h>
+#include <imgui_bezier_math.h>
 #include <imgui_node_editor.h>
 
 #include <utility>
@@ -32,6 +33,8 @@ struct NativeFacade : public cpp::StaticApi {
       -> std::pair<std::vector<ne::NodeId>, std::vector<core::AreaId>>;
   ///
   static auto GetSelectedLinks() -> std::vector<ne::LinkId>;
+  ///
+  static auto GetLinkCurve(ne::LinkId link_id) -> ImCubicBezierPoints;
   ///
   static void SelectNode(ne::NodeId node_id, bool append = false);
   ///
