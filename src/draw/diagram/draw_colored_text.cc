@@ -16,18 +16,20 @@ namespace ne = ax::NodeEditor;
 
 namespace vh::ponc::draw {
 ///
-void DrawColoredText(std::string_view text, const ImColor& color,
-                     const ImVec2& pos) {
-  ImGui::SetCursorPos(pos);
-
+void DrawColoredText(std::string_view text, const ImColor& color, ImVec2 pos,
+                     RelativePos relative_pos) {
   const auto text_size = ImGui::CalcTextSize(text.data());
   auto rect = ImRect{ImVec2{}, text_size};
 
   const auto padding = ImGui::GetStyle().FramePadding;
   rect.Expand(padding);
 
-  const auto cursor_screen_pos = ImGui::GetCursorScreenPos();
-  rect.Translate(cursor_screen_pos);
+  if (relative_pos == RelativePos::kCenter) {
+    pos -= rect.GetCenter();
+  }
+
+  rect.Translate(pos);
+  ImGui::SetCursorPos(pos);
 
   auto* draw_list = ImGui::GetWindowDrawList();
   Expects(draw_list != nullptr);
