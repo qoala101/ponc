@@ -73,8 +73,8 @@ add_executable(ponc
   draw/diagram/draw_diagram_editor.cc
   draw/diagram/draw_flow_icon.cc
   draw/diagram/draw_item_deleter.cc
-  draw/diagram/draw_link.cc
   draw/diagram/draw_linker.cc
+  draw/diagram/draw_links.cc
   draw/diagram/draw_node.cc
   draw/diagram/draw_tooltip.cc
 

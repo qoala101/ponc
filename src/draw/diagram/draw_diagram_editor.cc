@@ -22,8 +22,8 @@
 #include "draw_area.h"
 #include "draw_area_creator.h"
 #include "draw_background_popup.h"
-#include "draw_link.h"
 #include "draw_linker.h"
+#include "draw_links.h"
 #include "draw_node.h"
 #include "style_update_styles.h"
 
@@ -61,9 +61,7 @@ void DiagramEditor::Draw(coreui::Diagram &diagram,
     DrawNode(node, node_mover);
   }
 
-  for (const auto &link : diagram.GetLinks()) {
-    DrawLink(link);
-  }
+  links_.Draw(diagram.GetLinks());
 
   auto &core_diagram = diagram.GetDiagram();
 

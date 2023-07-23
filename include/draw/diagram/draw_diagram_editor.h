@@ -20,6 +20,7 @@
 #include "draw_item_deleter.h"
 #include "draw_link_popup.h"
 #include "draw_linker.h"
+#include "draw_links.h"
 #include "draw_node_popup.h"
 #include "draw_replace_popup.h"
 
@@ -49,6 +50,8 @@ class DiagramEditor {
   std::unique_ptr<ne::EditorContext, void (*)(ne::EditorContext *)> context_;
   ///
   ItemDeleter item_deleter_{};
+  ///
+  Links links_{};
   ///
   Linker linker_{};
   ///
