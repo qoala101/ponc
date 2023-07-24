@@ -24,8 +24,15 @@ void DrawColoredText(std::string_view text, const ImColor& color, ImVec2 pos,
   const auto padding = ImGui::GetStyle().FramePadding;
   rect.Expand(padding);
 
-  if (relative_pos == RelativePos::kCenter) {
-    pos -= rect.GetCenter();
+  switch (relative_pos) {
+    case RelativePos::kCenterLeft:
+      pos.y -= rect.GetCenter().y;
+      break;
+    case RelativePos::kCenter:
+      pos -= rect.GetCenter();
+      break;
+    default:
+      break;
   }
 
   rect.Translate(pos);

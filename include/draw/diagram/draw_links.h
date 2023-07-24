@@ -19,6 +19,9 @@ class Links {
 
  private:
   ///
+  void DrawLinkDrop(const coreui::Link &link);
+
+  ///
   StringBuffer drop_buffer_{};
 };
 }  // namespace vh::ponc::draw

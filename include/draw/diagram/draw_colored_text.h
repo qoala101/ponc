@@ -13,7 +13,7 @@
 
 namespace vh::ponc::draw {
 ///
-enum class RelativePos { kTopLeft, kCenter };
+enum class RelativePos { kTopLeft, kCenterLeft, kCenter };
 
 ///
 void DrawColoredText(std::string_view text, const ImColor& color,
