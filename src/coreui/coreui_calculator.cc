@@ -107,12 +107,18 @@ void TraverseFreeOutputs(
 
 ///
 void TraverseFreeOutputs(
-    const core::Diagram& diagram,
+    const core::Diagram& diagram, const core::Project& project,
     const std::invocable<const flow::TreeNode&, flow::PinFlow> auto& visitor) {
   const auto flow_trees = flow::BuildFlowTrees(diagram);
-  const auto node_flows =
-      flow::CalculateNodeFlows(flow_trees, [&diagram](const auto node_id) {
+  const auto node_flows = flow::CalculateNodeFlows(
+      flow_trees,
+      [&diagram](const auto node_id) {
         return core::Diagram::FindNode(diagram, node_id).GetInitialFlow();
+      },
+      [&diagram, &project](const auto pin_id) {
+        const auto link = core::Diagram::FindPinLink(diagram, pin_id);
+        Expects(link.has_value());
+        return core::Link::GetDrop(**link, project);
       });
 
   for (const auto& flow_tree : flow_trees) {
@@ -121,29 +127,30 @@ void TraverseFreeOutputs(
 }
 
 ///
-auto GetFreeOutputs(const core::Diagram& diagram) {
+auto GetFreeOutputs(const core::Diagram& diagram,
+                    const core::Project& project) {
   auto free_outputs = std::vector<std::vector<float>>{};
   auto traversing_node_id = std::optional<ne::NodeId>{};
 
-  TraverseFreeOutputs(
-      diagram, [&free_outputs, &traversing_node_id](const auto& tree_node,
-                                                    const auto& pin_flow) {
-        if (!traversing_node_id.has_value() ||
-            (*traversing_node_id != tree_node.node_id)) {
-          traversing_node_id = tree_node.node_id;
-          free_outputs.emplace_back();
-        }
+  TraverseFreeOutputs(diagram, project,
+                      [&free_outputs, &traversing_node_id](
+                          const auto& tree_node, const auto& pin_flow) {
+                        if (!traversing_node_id.has_value() ||
+                            (*traversing_node_id != tree_node.node_id)) {
+                          traversing_node_id = tree_node.node_id;
+                          free_outputs.emplace_back();
+                        }
 
-        Expects(!free_outputs.empty());
-        free_outputs.back().emplace_back(pin_flow.second);
-      });
+                        Expects(!free_outputs.empty());
+                        free_outputs.back().emplace_back(pin_flow.second);
+                      });
 
   return free_outputs;
 }
 
 ///
-auto GetInputNodes(const core::Diagram& diagram) {
-  const auto free_outputs = GetFreeOutputs(diagram);
+auto GetInputNodes(const core::Diagram& diagram, const core::Project& project) {
+  const auto free_outputs = GetFreeOutputs(diagram, project);
 
   auto input_nodes = std::vector<calc::TreeNode>{};
   input_nodes.reserve(free_outputs.size());
@@ -281,24 +288,28 @@ auto Calculator::PopulateOutput(const calc::TreeNode& output_tree,
 auto Calculator::PopulateDiagram(
     const std::vector<calc::TreeNode>& calculated_trees) {
   Expects(diagram_copy_.has_value());
+
+  auto& core_project = parent_project_->GetProject();
   coreui::Cloner::RewireIds(core::Diagram::GetIds(*diagram_copy_),
-                            parent_project_->GetProject().GetIdGenerator());
+                            core_project.GetIdGenerator());
 
   auto output_root_ids =
       std::map<core::IdValue<ne::PinId>, core::IdValue<ne::NodeId>>{};
   auto output_index = 0;
 
-  TraverseFreeOutputs(*diagram_copy_, [this, &calculated_trees,
-                                       &output_root_ids, &output_index](
-                                          const auto&, const auto& pin_flow) {
-    if (const auto output_tree =
-            GetFirstLevelChild(calculated_trees, output_index)) {
-      const auto output_root_id = PopulateOutput(**output_tree, pin_flow.first);
-      output_root_ids.emplace(pin_flow.first, output_root_id);
-    }
+  TraverseFreeOutputs(
+      *diagram_copy_, core_project,
+      [this, &calculated_trees, &output_root_ids, &output_index](
+          const auto&, const auto& pin_flow) {
+        if (const auto output_tree =
+                GetFirstLevelChild(calculated_trees, output_index)) {
+          const auto output_root_id =
+              PopulateOutput(**output_tree, pin_flow.first);
+          output_root_ids.emplace(pin_flow.first, output_root_id);
+        }
 
-    ++output_index;
-  });
+        ++output_index;
+      });
 
   return output_root_ids;
 }
@@ -382,14 +393,13 @@ auto Calculator::AsFamilyNodes(
 ///
 void Calculator::Calculate() {
   const auto& diagram = parent_project_->GetDiagram().GetDiagram();
-
-  auto input_nodes = GetInputNodes(diagram);
+  auto& core_project = parent_project_->GetProject();
+  auto input_nodes = GetInputNodes(diagram, core_project);
 
   if (!ValidateInputs(input_nodes)) {
     return;
   }
 
-  auto& core_project = parent_project_->GetProject();
   const auto& families = core_project.GetFamilies();
 
   diagram_copy_.emplace(coreui::Cloner::Clone(diagram, families));

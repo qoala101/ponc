@@ -94,6 +94,7 @@ auto FindLinkFromParentToChild(const PinFlows &parent_output_pins,
 void CalculateNodeFlow(
     flow::NodeFlows &node_flows_, const TreeNode &node,
     const cpp::Query<NodeFlow, ne::NodeId> &get_initial_node_flow,
+    const cpp::Query<float, ne::PinId> &get_pin_link_flow,
     float input_from_parent = 0) {
   auto calculated_flow = node_flows_.find(node.node_id.Get());
   const auto initial_flow = get_initial_node_flow(node.node_id);
@@ -108,11 +109,13 @@ void CalculateNodeFlow(
 
   for (const auto &[child_pin, child_node] : node.child_nodes) {
     Expects(calculated_flow->second.output_pin_flows.contains(child_pin));
+
     const auto added_flow =
-        calculated_flow->second.output_pin_flows.at(child_pin);
+        calculated_flow->second.output_pin_flows.at(child_pin) +
+        get_pin_link_flow(child_pin);
 
     CalculateNodeFlow(node_flows_, child_node, get_initial_node_flow,
-                      added_flow);
+                      get_pin_link_flow, added_flow);
   }
 }
 
@@ -264,12 +267,13 @@ void RebuildFlowTrees(const core::Diagram &diagram,
 ///
 auto CalculateNodeFlows(
     const std::vector<TreeNode> &flow_trees,
-    const cpp::Query<NodeFlow, ne::NodeId> &get_initial_node_flow)
-    -> flow::NodeFlows {
+    const cpp::Query<NodeFlow, ne::NodeId> &get_initial_node_flow,
+    const cpp::Query<float, ne::PinId> &get_pin_link_flow) -> flow::NodeFlows {
   auto node_flows = flow::NodeFlows{};
 
   for (const auto &flow_tree : flow_trees) {
-    CalculateNodeFlow(node_flows, flow_tree, get_initial_node_flow);
+    CalculateNodeFlow(node_flows, flow_tree, get_initial_node_flow,
+                      get_pin_link_flow);
   }
 
   return node_flows;

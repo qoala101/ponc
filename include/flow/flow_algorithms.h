@@ -25,7 +25,8 @@ void RebuildFlowTrees(const core::Diagram &diagram,
 ///
 auto CalculateNodeFlows(
     const std::vector<TreeNode> &flow_trees,
-    const cpp::Query<NodeFlow, ne::NodeId> &get_initial_node_flow) -> NodeFlows;
+    const cpp::Query<NodeFlow, ne::NodeId> &get_initial_node_flow,
+    const cpp::Query<float, ne::PinId> &get_pin_link_flow) -> NodeFlows;
 }  // namespace vh::ponc::flow
 
 #endif  // VH_PONC_FLOW_ALGORITHMS_H_

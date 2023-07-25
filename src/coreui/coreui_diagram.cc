@@ -106,8 +106,15 @@ void Diagram::OnFrame() {
   node_mover_.OnFrame();
 
   const auto node_flows = flow::CalculateNodeFlows(
-      flow_trees_, [&diagram = *diagram_](const auto node_id) {
+      flow_trees_,
+      [&diagram = *diagram_](const auto node_id) {
         return core::Diagram::FindNode(diagram, node_id).GetInitialFlow();
+      },
+      [&diagram = *diagram_,
+       &parent_project = parent_project_](const auto pin_id) {
+        const auto link = core::Diagram::FindPinLink(diagram, pin_id);
+        Expects(link.has_value());
+        return core::Link::GetDrop(**link, parent_project->GetProject());
       });
 
   UpdateLinks(node_flows);
@@ -393,8 +400,10 @@ auto Diagram::LinkFrom(const core::Link& core_link,
 
   const auto start_pin_flow =
       flow::NodeFlow::GetPinFlow(node_flow, start_pin_id);
+  const auto end_pin_flow = start_pin_flow + link.drop;
 
-  link.color = GetFlowColor(start_pin_flow);
+  link.color = style::GetGradient(GetFlowColor(start_pin_flow),
+                                  GetFlowColor(end_pin_flow), 0.5);
   link.color.Value.w = link_alpha;
 
   return link;
