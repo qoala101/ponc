@@ -296,13 +296,22 @@ auto Diagram::GetLinks() const -> const std::vector<Link>& { return links_; }
 ///
 auto Diagram::CreateLink(ne::PinId start_pin_id, ne::PinId end_pin_id) const
     -> Event& {
-  auto& id_generator = parent_project_->GetProject().GetIdGenerator();
+  auto& core_project = parent_project_->GetProject();
+
+  auto& id_generator = core_project.GetIdGenerator();
   const auto link_id = id_generator.Generate<ne::LinkId>();
+
+  const auto& default_connection =
+      core_project.GetSettings().default_connection;
+  const auto connection = default_connection.has_value()
+                              ? core::LinkConnection{*default_connection}
+                              : core::LinkConnection{};
 
   return parent_project_->GetEventLoop().PostEvent(
       [diagram = diagram_, link = core::Link{.id = link_id,
                                              .start_pin_id = start_pin_id,
-                                             .end_pin_id = end_pin_id}]() {
+                                             .end_pin_id = end_pin_id,
+                                             .connection = connection}]() {
         diagram->EmplaceLink(link);
       });
 }
