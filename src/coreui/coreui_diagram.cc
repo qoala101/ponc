@@ -372,15 +372,21 @@ auto Diagram::GetFlowColor(float flow) const {
 auto Diagram::LinkFrom(const core::Link& core_link,
                        const flow::NodeFlows& node_flows) const {
   const auto& project = parent_project_->GetProject();
+  const auto& settings = project.GetSettings();
+
+  const auto thickness =
+      settings.thick_links
+          ? core::Settings::GetLinkThickness(settings, core_link.length)
+          : style::DefaultSizes::kNormalThickness;
 
   auto link = Link{.core_link = core_link,
-                   .thickness = style::DefaultSizes::kNormalThickness,
+                   .thickness = thickness,
                    .drop = core::Link::GetDrop(core_link, project)};
 
   const auto link_alpha =
       linker_.IsRepiningLink(link.core_link.id) ? 0.5F : 1.F;
 
-  if (!project.GetSettings().color_flow) {
+  if (!settings.color_flow) {
     const auto color = std::visit(
         [&project](const auto& v) {
           using V = std::remove_cvref_t<decltype(v)>;

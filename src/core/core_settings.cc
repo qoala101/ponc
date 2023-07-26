@@ -11,6 +11,7 @@
 #include <optional>
 
 #include "core_i_node.h"
+#include "style_default_sizes.h"
 #include "style_flow_colors.h"
 #include "style_utils.h"
 
@@ -47,6 +48,9 @@ void Settings::ResetToDefault(Settings& settings) {
   settings.low_flow = -22;
   settings.high_flow = -18;
   settings.max_flow = 6;
+  settings.thick_links = true;
+  settings.min_length = 0;
+  settings.max_length = 100;
   settings.default_connection = {};
   settings.arrange_horizontal_spacing = 80;
   settings.arrange_vertical_spacing = 20;
@@ -102,5 +106,24 @@ auto Settings::GetFlowColor(const Settings& settings, float flow) -> ImColor {
 
   return style::GetGradient(style::FlowColors::kGood, style::FlowColors::kHigh,
                             (value_high_low_percentage - 0.5F) * 2);
+}
+
+///
+auto Settings::GetLinkThickness(const Settings& settings, float length)
+    -> float {
+  if (length < settings.min_length) {
+    return style::DefaultSizes::kNormalThickness;
+  }
+
+  if (length >= settings.max_length) {
+    return style::DefaultSizes::kMaxThickness;
+  }
+
+  const auto length_range = settings.max_length - settings.min_length;
+  const auto percentage = (length - settings.min_length) / length_range;
+  const auto thickness_range = style::DefaultSizes::kMaxThickness -
+                               style::DefaultSizes::kNormalThickness;
+
+  return style::DefaultSizes::kNormalThickness + percentage * thickness_range;
 }
 }  // namespace vh::ponc::core

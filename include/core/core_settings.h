@@ -50,6 +50,8 @@ struct Settings {
   static void ResetToDefault(Settings &settings);
   ///
   static auto GetFlowColor(const Settings &settings, float flow) -> ImColor;
+  ///
+  static auto GetLinkThickness(const Settings &settings, float length) -> float;
 
   ///
   bool color_flow{};
@@ -61,6 +63,12 @@ struct Settings {
   float high_flow{};
   ///
   float max_flow{};
+  ///
+  bool thick_links{};
+  ///
+  float min_length{};
+  ///
+  float max_length{};
   ///
   std::optional<ConnectionId> default_connection{};
   ///
