@@ -72,7 +72,7 @@ void EditLinkPopup::Draw(coreui::Diagram& diagram,
     CopyConnections(connections);
   }
 
-  ImGui::InputFloat("Length", &link.length);
+  ImGui::InputFloat("Length", &link.length, 0, 0, "%.2f");
 
   const auto custom_connection = GetCustomConnection(link);
   const auto connection = GetConnection(link, project);
