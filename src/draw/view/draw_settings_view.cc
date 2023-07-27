@@ -7,12 +7,16 @@
 #include "draw_settings_view.h"
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
 #include <limits>
 
 #include "core_settings.h"
+#include "cpp_assert.h"
 #include "draw_settings_table_row.h"
 #include "draw_table_flags.h"
+#include "style_default_colors.h"
+#include "style_default_sizes.h"
 #include "style_flow_colors.h"
 
 namespace vh::ponc::draw {
@@ -47,6 +51,26 @@ void DrawFlowColors(core::Settings& settings) {
     ImGui::ColorButton("##Very High", ImColor{style::FlowColors::kMax});
     ImGui::SameLine();
     ImGui::DragFloat("Very High", &settings.max_flow, 0.01, settings.high_flow,
+                     std::numeric_limits<float>::max(), "%.2f");
+
+    ImGui::TreePop();
+  }
+}
+///
+void DrawLinkThickness(core::Settings& settings) {
+  if (ImGui::TreeNodeEx("Link Thickness", ImGuiTreeNodeFlags_DefaultOpen)) {
+    const auto frame_height = ImGui::GetFrameHeight();
+    const auto dummy_size = ImVec2{frame_height, frame_height};
+
+    ImGui::Dummy(dummy_size);
+    ImGui::SameLine();
+    ImGui::DragFloat("Thin", &settings.min_length, 100,
+                     -std::numeric_limits<float>::max(), settings.max_length,
+                     "%.2f");
+
+    ImGui::Dummy(ImVec2{frame_height, frame_height});
+    ImGui::SameLine();
+    ImGui::DragFloat("Thick", &settings.max_length, 100, settings.min_length,
                      std::numeric_limits<float>::max(), "%.2f");
 
     ImGui::TreePop();
@@ -88,6 +112,7 @@ void SettingsView::Draw(core::Settings& settings) {
   }
 
   DrawFlowColors(settings);
+  DrawLinkThickness(settings);
 
   if (ImGui::TreeNodeEx("Connections", ImGuiTreeNodeFlags_DefaultOpen)) {
     ImGui::TextUnformatted("See View->Connections");
