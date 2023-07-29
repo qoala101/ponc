@@ -103,6 +103,17 @@ void Upgrade2(crude_json::value& project_json) {
 
 ///
 void Upgrade3(crude_json::value& project_json) {
+  auto default_settings = core::Settings{};
+  core::Settings::ResetToDefault(default_settings);
+
+  auto& settings_json = project_json["settings"];
+  settings_json["min_length"] = default_settings.min_length;
+  settings_json["max_length"] = default_settings.max_length;
+
+  auto& calculator_json = settings_json["calculator_settings"];
+  calculator_json["num_clients"] =
+      std::max(1.0, calculator_json["num_clients"].get<crude_json::number>());
+
   MakeArray(project_json["connections"]);
 
   auto& diagrams_json = project_json["diagrams"].get<crude_json::array>();

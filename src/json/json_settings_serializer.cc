@@ -52,6 +52,10 @@ auto SettingsSerializer::ParseFromJson(const crude_json::value& json)
               static_cast<float>(json["high_flow"].get<crude_json::number>()),
           .max_flow =
               static_cast<float>(json["max_flow"].get<crude_json::number>()),
+          .min_length =
+              static_cast<float>(json["min_length"].get<crude_json::number>()),
+          .max_length =
+              static_cast<float>(json["max_length"].get<crude_json::number>()),
           .default_connection =
               OptionalSerializer::ParseFromJson<core::ConnectionId>(
                   json, "default_connection",
@@ -82,6 +86,9 @@ auto SettingsSerializer::WriteToJson(const core::Settings& settings)
   json["low_flow"] = settings.low_flow;
   json["high_flow"] = settings.high_flow;
   json["max_flow"] = settings.max_flow;
+
+  json["min_length"] = settings.min_length;
+  json["max_length"] = settings.max_length;
 
   OptionalSerializer::WriteToJson(
       json, settings.default_connection, "default_connection",

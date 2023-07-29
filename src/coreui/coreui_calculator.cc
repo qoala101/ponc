@@ -347,12 +347,6 @@ auto Calculator::ValidateInputs(
     return false;
   }
 
-  if (settings.num_clients <= 0) {
-    parent_project_->GetLog().Write(LogLevel::kError,
-                                    "Calculator: Clients should be > 0.");
-    return false;
-  }
-
   return true;
 }
 
