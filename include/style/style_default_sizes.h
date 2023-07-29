@@ -13,6 +13,8 @@ namespace vh::ponc::style {
 ///
 struct DefaultSizes : cpp::StaticApi {
   ///
+  static constexpr auto kMinThickness = 1;
+  ///
   static constexpr auto kNormalThickness = 2;
   ///
   static constexpr auto kBoldThickness = 4;

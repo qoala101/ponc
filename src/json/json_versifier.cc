@@ -107,6 +107,7 @@ void Upgrade3(crude_json::value& project_json) {
   core::Settings::ResetToDefault(default_settings);
 
   auto& settings_json = project_json["settings"];
+  settings_json["thick_links"] = default_settings.thick_links;
   settings_json["min_length"] = default_settings.min_length;
   settings_json["max_length"] = default_settings.max_length;
 

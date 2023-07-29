@@ -13,6 +13,7 @@
 
 #include "core_settings.h"
 #include "cpp_assert.h"
+#include "draw_disable_if.h"
 #include "draw_settings_table_row.h"
 #include "draw_table_flags.h"
 #include "style_default_colors.h"
@@ -72,21 +73,26 @@ void DrawLink(float thickness) {
 ///
 void DrawLinkThickness(core::Settings& settings) {
   if (ImGui::TreeNodeEx("Link Thickness", ImGuiTreeNodeFlags_DefaultOpen)) {
+    ImGui::Checkbox("Show Length As Thickness", &settings.thick_links);
+
     const auto frame_height = ImGui::GetFrameHeight();
     const auto dummy_size = ImVec2{frame_height, frame_height};
 
-    DrawLink(style::DefaultSizes::kNormalThickness);
-    ImGui::Dummy(dummy_size);
-    ImGui::SameLine();
-    ImGui::DragFloat("Thin", &settings.min_length, 1,
-                     -std::numeric_limits<float>::max(), settings.max_length,
-                     "%.3f");
+    {
+      const auto disable_scope = EnableIf(settings.thick_links);
 
-    DrawLink(style::DefaultSizes::kMaxThickness);
-    ImGui::Dummy(dummy_size);
-    ImGui::SameLine();
-    ImGui::DragFloat("Thick", &settings.max_length, 1, settings.min_length,
-                     std::numeric_limits<float>::max(), "%.3f");
+      DrawLink(style::DefaultSizes::kMinThickness);
+      ImGui::Dummy(dummy_size);
+      ImGui::SameLine();
+      ImGui::DragFloat("Thin", &settings.min_length, 1, 0, settings.max_length,
+                       "%.3f");
+
+      DrawLink(style::DefaultSizes::kMaxThickness);
+      ImGui::Dummy(dummy_size);
+      ImGui::SameLine();
+      ImGui::DragFloat("Thick", &settings.max_length, 1, settings.min_length,
+                       std::numeric_limits<float>::max(), "%.3f");
+    }
 
     ImGui::TreePop();
   }

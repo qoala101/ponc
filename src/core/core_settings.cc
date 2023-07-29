@@ -48,8 +48,8 @@ void Settings::ResetToDefault(Settings& settings) {
   settings.low_flow = -22;
   settings.high_flow = -18;
   settings.max_flow = 6;
-  settings.thick_links = true;
 
+  settings.thick_links = false;
   settings.min_length = 0;
   settings.max_length = 10;
   settings.default_connection = {};
@@ -114,7 +114,7 @@ auto Settings::GetFlowColor(const Settings& settings, float flow) -> ImColor {
 auto Settings::GetLinkThickness(const Settings& settings, float length)
     -> float {
   if (length < settings.min_length) {
-    return style::DefaultSizes::kNormalThickness;
+    return style::DefaultSizes::kMinThickness;
   }
 
   if (length >= settings.max_length) {
@@ -123,9 +123,9 @@ auto Settings::GetLinkThickness(const Settings& settings, float length)
 
   const auto length_range = settings.max_length - settings.min_length;
   const auto percentage = (length - settings.min_length) / length_range;
-  const auto thickness_range = style::DefaultSizes::kMaxThickness -
-                               style::DefaultSizes::kNormalThickness;
+  const auto thickness_range =
+      style::DefaultSizes::kMaxThickness - style::DefaultSizes::kMinThickness;
 
-  return style::DefaultSizes::kNormalThickness + percentage * thickness_range;
+  return style::DefaultSizes::kMinThickness + percentage * thickness_range;
 }
 }  // namespace vh::ponc::core
