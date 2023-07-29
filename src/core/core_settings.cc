@@ -49,9 +49,11 @@ void Settings::ResetToDefault(Settings& settings) {
   settings.high_flow = -18;
   settings.max_flow = 6;
   settings.thick_links = true;
+
   settings.min_length = 0;
-  settings.max_length = 1000;
+  settings.max_length = 10;
   settings.default_connection = {};
+
   settings.arrange_horizontal_spacing = 80;
   settings.arrange_vertical_spacing = 20;
 

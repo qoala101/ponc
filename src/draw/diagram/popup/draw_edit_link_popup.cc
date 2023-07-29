@@ -72,7 +72,7 @@ void EditLinkPopup::Draw(coreui::Diagram& diagram,
     CopyConnections(connections);
   }
 
-  if (ImGui::InputFloat("Length", &link.length, 0, 0, "%.2f")) {
+  if (ImGui::InputFloat("Length", &link.length, 0, 0, "%.3f")) {
     link.length = std::max(0.F, link.length);
   }
 

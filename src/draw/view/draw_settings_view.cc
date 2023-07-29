@@ -64,14 +64,14 @@ void DrawLinkThickness(core::Settings& settings) {
 
     ImGui::Dummy(dummy_size);
     ImGui::SameLine();
-    ImGui::DragFloat("Thin", &settings.min_length, 100,
+    ImGui::DragFloat("Thin", &settings.min_length, 1,
                      -std::numeric_limits<float>::max(), settings.max_length,
-                     "%.2f");
+                     "%.3f");
 
     ImGui::Dummy(ImVec2{frame_height, frame_height});
     ImGui::SameLine();
-    ImGui::DragFloat("Thick", &settings.max_length, 100, settings.min_length,
-                     std::numeric_limits<float>::max(), "%.2f");
+    ImGui::DragFloat("Thick", &settings.max_length, 1, settings.min_length,
+                     std::numeric_limits<float>::max(), "%.3f");
 
     ImGui::TreePop();
   }
