@@ -54,7 +54,10 @@ void DrawRequirements(core::CalculatorSettings& settings) {
       ImGui::InputFloat("##Max Ouput", &settings.max_output, 0, 0, "%.2f");
 
       DrawSettingsTableRow("Clients");
-      ImGui::InputInt("##Clients", &settings.num_clients);
+
+      if (ImGui::InputInt("##Clients", &settings.num_clients)) {
+        settings.num_clients = std::max(1, settings.num_clients);
+      }
 
       ImGui::EndTable();
     }
@@ -72,7 +75,10 @@ void DrawFamilySettings(std::string_view label,
 
   ImGui::TableNextColumn();
   ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-  ImGui::InputFloat("", &setings.cost, 0, 0, "%.2f");
+
+  if (ImGui::InputFloat("", &setings.cost, 0, 0, "%.2f")) {
+    setings.cost = std::max(0.F, setings.cost);
+  }
 
   ImGui::PopID();
 }

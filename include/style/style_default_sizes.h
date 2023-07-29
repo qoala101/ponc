@@ -17,7 +17,7 @@ struct DefaultSizes : cpp::StaticApi {
   ///
   static constexpr auto kBoldThickness = 4;
   ///
-  static constexpr auto kMaxThickness = 20;
+  static constexpr auto kMaxThickness = 18;
 };
 }  // namespace vh::ponc::style
 

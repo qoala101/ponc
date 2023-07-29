@@ -72,7 +72,9 @@ void EditLinkPopup::Draw(coreui::Diagram& diagram,
     CopyConnections(connections);
   }
 
-  ImGui::InputFloat("Length", &link.length, 0, 0, "%.2f");
+  if (ImGui::InputFloat("Length", &link.length, 0, 0, "%.2f")) {
+    link.length = std::max(0.F, link.length);
+  }
 
   const auto custom_connection = GetCustomConnection(link);
   const auto connection = GetConnection(link, project);
