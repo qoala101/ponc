@@ -8,6 +8,7 @@
 
 #include <imgui.h>
 
+#include <algorithm>
 #include <limits>
 #include <memory>
 #include <string_view>

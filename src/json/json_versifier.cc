@@ -9,6 +9,7 @@
 #include <crude_json.h>
 #include <imgui.h>
 
+#include <algorithm>
 #include <type_traits>
 #include <vector>
 

@@ -8,6 +8,7 @@
 
 #include <imgui_node_editor.h>
 
+#include <type_traits>
 #include <variant>
 
 #include "core_project.h"

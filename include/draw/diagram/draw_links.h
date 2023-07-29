@@ -7,6 +7,8 @@
 #ifndef VH_PONC_DRAW_LINKS_H_
 #define VH_PONC_DRAW_LINKS_H_
 
+#include <vector>
+
 #include "coreui_link.h"
 #include "draw_string_buffer.h"
 

@@ -6,6 +6,7 @@
 
 #include "coreui_native_facade.h"
 
+#include <imgui_internal.h>
 #include <imgui_node_editor.h>
 #include <imgui_node_editor_internal.h>
 

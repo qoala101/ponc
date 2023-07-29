@@ -7,16 +7,13 @@
 #include "draw_links.h"
 
 #include <imgui.h>
+#include <imgui_bezier_math.h>
 #include <imgui_node_editor.h>
 #include <imgui_node_editor_internal.h>
-
-#include <charconv>
-#include <cstdlib>
 
 #include "core_link.h"
 #include "coreui_link.h"
 #include "coreui_native_facade.h"
-#include "cpp_assert.h"
 #include "draw_colored_text.h"
 #include "draw_string_buffer.h"
 
