@@ -56,19 +56,34 @@ void DrawFlowColors(core::Settings& settings) {
     ImGui::TreePop();
   }
 }
+
+///
+void DrawLink(float thickness) {
+  auto* draw_list = ImGui::GetWindowDrawList();
+  Expects(draw_list != nullptr);
+
+  const auto frame_height = ImGui::GetFrameHeight();
+  const auto pos = ImGui::GetCursorScreenPos() + ImVec2{0, frame_height / 2};
+
+  draw_list->AddLine(pos, pos + ImVec2{frame_height, 0},
+                     style::DefaultColors::kWhite, thickness);
+}
+
 ///
 void DrawLinkThickness(core::Settings& settings) {
   if (ImGui::TreeNodeEx("Link Thickness", ImGuiTreeNodeFlags_DefaultOpen)) {
     const auto frame_height = ImGui::GetFrameHeight();
     const auto dummy_size = ImVec2{frame_height, frame_height};
 
+    DrawLink(style::DefaultSizes::kNormalThickness);
     ImGui::Dummy(dummy_size);
     ImGui::SameLine();
     ImGui::DragFloat("Thin", &settings.min_length, 1,
                      -std::numeric_limits<float>::max(), settings.max_length,
                      "%.3f");
 
-    ImGui::Dummy(ImVec2{frame_height, frame_height});
+    DrawLink(style::DefaultSizes::kMaxThickness);
+    ImGui::Dummy(dummy_size);
     ImGui::SameLine();
     ImGui::DragFloat("Thick", &settings.max_length, 1, settings.min_length,
                      std::numeric_limits<float>::max(), "%.3f");
