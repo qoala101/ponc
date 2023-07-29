@@ -84,13 +84,13 @@ void DrawLinkThickness(core::Settings& settings) {
       DrawLink(style::DefaultSizes::kMinThickness);
       ImGui::Dummy(dummy_size);
       ImGui::SameLine();
-      ImGui::DragFloat("Thin", &settings.min_length, 1, 0, settings.max_length,
-                       "%.3f");
+      ImGui::DragFloat("Thin", &settings.min_length, 0.1, 0,
+                       settings.max_length, "%.3f");
 
       DrawLink(style::DefaultSizes::kMaxThickness);
       ImGui::Dummy(dummy_size);
       ImGui::SameLine();
-      ImGui::DragFloat("Thick", &settings.max_length, 1, settings.min_length,
+      ImGui::DragFloat("Thick", &settings.max_length, 0.1, settings.min_length,
                        std::numeric_limits<float>::max(), "%.3f");
     }
 
