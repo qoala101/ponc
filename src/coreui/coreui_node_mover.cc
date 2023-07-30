@@ -29,6 +29,7 @@
 #include "core_link.h"
 #include "coreui_diagram.h"
 #include "coreui_i_node_traits.h"  // IWYU pragma: keep
+#include "coreui_native_facade.h"
 #include "cpp_assert.h"
 #include "flow_tree_node.h"
 #include "flow_tree_traversal.h"
@@ -100,6 +101,38 @@ auto GetParentTrees(const std::vector<flow::TreeNode>& tree_nodes,
 
   return parent_trees;
 }
+
+///
+auto TakenPinPosLess(const flow::TreeNode& left, const flow::TreeNode& right) {
+  Expects(!left.child_nodes.empty());
+  const auto first_left_pin = left.child_nodes.cbegin()->first;
+
+  Expects(!right.child_nodes.empty());
+  const auto first_right_pin = right.child_nodes.cbegin()->first;
+
+  return NativeFacade::GetPinPos(first_left_pin).y <
+         NativeFacade::GetPinPos(first_right_pin).y;
+}
+
+///
+auto GetTakenPinsRect(const std::vector<flow::TreeNode>& tree_nodes) {
+  auto rect = std::optional<ImRect>{};
+
+  for (const auto& tree_node : tree_nodes) {
+    for (const auto& [pin_id, child_node] : tree_node.child_nodes) {
+      const auto pin_pos = NativeFacade::GetPinPos(pin_id);
+
+      if (rect.has_value()) {
+        rect->Add(pin_pos);
+        continue;
+      }
+
+      rect.emplace(pin_pos, pin_pos);
+    }
+  }
+
+  return rect;
+}
 }  // namespace
 
 ///
@@ -116,16 +149,15 @@ void NodeMover::OnFrame() {
   nodes_to_move_.clear();
   areas_to_move_.clear();
   item_sizes_.clear();
-  pin_poses_.clear();
 }
 
 ///
 void NodeMover::MoveNodeTo(ne::NodeId node_id, const ImVec2& pos) {
   const auto& diagram = parent_diagram_->GetDiagram();
-  auto& node = core::Diagram::FindNode(diagram, node_id);
 
-  MoveNodePinPoses(node, pos);
+  auto& node = core::Diagram::FindNode(diagram, node_id);
   node.SetPos(pos);
+
   MarkNodeToMove(node_id);
 }
 
@@ -209,14 +241,14 @@ auto NodeMover::GetTreeRect(const flow::TreeNode& tree_node) const {
 }
 
 ///
-auto NodeMover::GetOtherPinPos(ne::PinId pin_id) const -> const ImVec2& {
+auto NodeMover::GetOtherPinPos(ne::PinId pin_id) const -> ImVec2 {
   const auto& diagram = parent_diagram_->GetDiagram();
 
   const auto link = core::Diagram::FindPinLink(diagram, pin_id);
   Expects(link.has_value());
 
   const auto other_pin = core::Link::GetOtherPin(**link, pin_id);
-  return GetPinPos(other_pin);
+  return NativeFacade::GetPinPos(other_pin);
 }
 
 ///
@@ -235,27 +267,6 @@ auto NodeMover::DoesChildNeedSpacing(
 
   return DoNodesNeedSpacing(child_node->second.node_id,
                             next_node->second.node_id);
-}
-
-///
-auto NodeMover::GetTakenPinsRect(
-    const std::vector<flow::TreeNode>& tree_nodes) const {
-  auto rect = std::optional<ImRect>{};
-
-  for (const auto& tree_node : tree_nodes) {
-    for (const auto& [pin_id, child_node] : tree_node.child_nodes) {
-      const auto pin_pos = GetPinPos(pin_id);
-
-      if (rect.has_value()) {
-        rect->Add(pin_pos);
-        continue;
-      }
-
-      rect.emplace(pin_pos, pin_pos);
-    }
-  }
-
-  return rect;
 }
 
 ///
@@ -388,18 +399,6 @@ void NodeMover::ArrangeChildrenAsTrees(
 }
 
 ///
-auto NodeMover::TakenPinPosLess(const flow::TreeNode& left,
-                                const flow::TreeNode& right) const {
-  Expects(!left.child_nodes.empty());
-  const auto first_left_pin = left.child_nodes.cbegin()->first;
-
-  Expects(!right.child_nodes.empty());
-  const auto first_right_pin = right.child_nodes.cbegin()->first;
-
-  return GetPinPos(first_left_pin).y < GetPinPos(first_right_pin).y;
-}
-
-///
 void NodeMover::ArrangeAsNewTrees(
     const std::vector<flow::TreeNode>& tree_nodes) {
   if (tree_nodes.empty()) {
@@ -409,8 +408,7 @@ void NodeMover::ArrangeAsNewTrees(
   const auto& flow_trees = parent_diagram_->GetFlowTrees();
 
   auto parent_trees = GetParentTrees(flow_trees, tree_nodes);
-  std::stable_sort(parent_trees.begin(), parent_trees.end(),
-                   std::bind_front(&NodeMover::TakenPinPosLess, this));
+  std::stable_sort(parent_trees.begin(), parent_trees.end(), &TakenPinPosLess);
 
   Expects(!flow_trees.empty());
   auto other_nodes_rect = GetNodeRect(flow_trees.front().node_id);
@@ -439,7 +437,7 @@ void NodeMover::ArrangeAsNewTrees(
 
 ///
 void NodeMover::MovePinTo(ne::PinId pin_id, const ImVec2& pos) {
-  const auto current_pin_pos = GetPinPos(pin_id);
+  const auto current_pin_pos = NativeFacade::GetPinPos(pin_id);
   const auto& node =
       core::Diagram::FindPinNode(parent_diagram_->GetDiagram(), pin_id);
   const auto matching_node_pos = node.GetPos() - current_pin_pos + pos;
@@ -457,31 +455,6 @@ auto NodeMover::GetNodeSize(ne::NodeId node_id) const -> const ImVec2& {
 ///
 void NodeMover::SetItemSize(ne::NodeId node_id, const ImVec2& size) {
   item_sizes_.emplace(node_id, size);
-}
-
-///
-auto NodeMover::GetPinPos(ne::PinId pin_id) const -> const ImVec2& {
-  const auto pin_id_value = pin_id.Get();
-  Expects(pin_poses_.contains(pin_id_value));
-  return pin_poses_.at(pin_id_value);
-}
-
-///
-void NodeMover::SetPinPos(ne::PinId pin_id, const ImVec2& pos) {
-  pin_poses_.emplace(pin_id, pos);
-}
-
-///
-void NodeMover::MoveNodePinPoses(const core::INode& node, const ImVec2& pos) {
-  const auto delta = pos - node.GetPos();
-
-  for (const auto& [pin_id, pin_kind] : core::INode::GetAllPins(node)) {
-    const auto pin_pos = pin_poses_.find(pin_id.Get());
-
-    if (pin_pos != pin_poses_.cend()) {
-      pin_pos->second += delta;
-    }
-  }
 }
 
 ///

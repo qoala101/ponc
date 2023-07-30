@@ -25,6 +25,8 @@ struct NativeFacade : public cpp::StaticApi {
   ///
   static auto IsArea(ne::NodeId node_id) -> bool;
   ///
+  static auto GetPinPos(ne::PinId pin_id) -> ImVec2;
+  ///
   static auto GetAreaSize(core::AreaId area_id) -> ImVec2;
   ///
   static auto GetSelectedNodes() -> std::vector<ne::NodeId>;

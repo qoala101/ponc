@@ -67,6 +67,13 @@ auto NativeFacade::GetAreaSize(core::AreaId area_id) -> ImVec2 {
 }
 
 ///
+auto NativeFacade::GetPinPos(ne::PinId pin_id) -> ImVec2 {
+  const auto* pin = GetEditorContext().FindPin(pin_id);
+  Expects(pin != nullptr);
+  return pin->m_Pivot.GetCenter();
+}
+
+///
 auto NativeFacade::GetSelectedNodes() -> std::vector<ne::NodeId> {
   auto nodes = GetSelectedItems<ne::NodeId>(&ne::GetSelectedNodes);
   LeaveNodesOfType(ne::Detail::NodeType::Node, nodes);

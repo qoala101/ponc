@@ -36,13 +36,6 @@ void DrawSmallSpace() { ImGui::Spring(0); }
 void DrawGrowingSpace() { ImGui::Spring(1, 0); }
 
 ///
-auto GetPinTipPos(const ImRect& pin_rect, ne::PinKind pin_kind) {
-  return ImVec2{
-      (pin_kind == ne::PinKind::Input) ? pin_rect.Min.x : pin_rect.Max.x,
-      pin_rect.GetCenter().y};
-}
-
-///
 void DrawPinField(const coreui::Pin& pin, ne::PinKind pin_kind) {
   const auto has_label = pin.label.has_value() && !pin.label->text.empty();
   const auto has_value = !std::holds_alternative<std::monostate>(pin.value);
@@ -82,8 +75,7 @@ void DrawPinField(const coreui::Pin& pin, ne::PinKind pin_kind) {
 }
 
 ///
-auto DrawPinIconArea(const coreui::Pin& pin, ne::PinKind pin_kind)
-    -> std::optional<ImVec2> {
+void DrawPinIconArea(const coreui::Pin& pin) {
   const auto pin_id = pin.flow_data;
   const auto frame_height = ImGui::GetFrameHeight();
   auto area_size = ImVec2{frame_height, frame_height};
@@ -94,14 +86,11 @@ auto DrawPinIconArea(const coreui::Pin& pin, ne::PinKind pin_kind)
     }
 
     ImGui::Dummy(area_size);
-    return std::nullopt;
+    return;
   }
 
   DrawFlowIcon(area_size, pin.flow_data->color, pin.flow_data->filled);
   ImGui::Dummy(area_size);
-
-  return GetPinTipPos({ImGui::GetItemRectMin(), ImGui::GetItemRectMax()},
-                      pin_kind);
 }
 
 ///
@@ -185,16 +174,14 @@ auto DrawHeaderBackground(std::optional<ImRect> header_rect,
 }
 
 ///
-auto DrawInputPins(const coreui::NodeData& node_data)
-    -> std::unordered_map<core::IdValue<ne::PinId>, ImVec2> {
+void DrawInputPins(const coreui::NodeData& node_data) {
   if (node_data.input_pins.empty()) {
-    return {};
+    return;
   }
 
   ImGui::BeginVertical("InputPins");
   ne::PushStyleVar(ne::StyleVar_PivotAlignment, {0, 0.5});
 
-  auto pin_poses = std::unordered_map<core::IdValue<ne::PinId>, ImVec2>{};
   auto pin_layout_id = 0;
 
   for (const auto& pin : node_data.input_pins) {
@@ -206,14 +193,11 @@ auto DrawInputPins(const coreui::NodeData& node_data)
       ne::BeginPin(pin.flow_data->id, ne::PinKind::Input);
     }
 
-    const auto pin_pos = DrawPinIconArea(pin, ne::PinKind::Input);
+    DrawPinIconArea(pin);
     DrawPinField(pin, ne::PinKind::Input);
 
     if (pin_is_flow) {
       ne::EndPin();
-
-      Expects(pin_pos.has_value());
-      pin_poses.emplace(pin.flow_data->id, *pin_pos);
     }
 
     DrawPinLabel(pin.label, ne::PinKind::Input);
@@ -224,15 +208,12 @@ auto DrawInputPins(const coreui::NodeData& node_data)
 
   ne::PopStyleVar();
   ImGui::EndVertical();
-
-  return pin_poses;
 }
 
 ///
-auto DrawOutputPins(const coreui::NodeData& node_data)
-    -> std::unordered_map<core::IdValue<ne::PinId>, ImVec2> {
+void DrawOutputPins(const coreui::NodeData& node_data) {
   if (node_data.output_pins.empty()) {
-    return {};
+    return;
   }
 
   ImGui::BeginVertical("OutputPins");
@@ -253,13 +234,10 @@ auto DrawOutputPins(const coreui::NodeData& node_data)
     }
 
     DrawPinField(pin, ne::PinKind::Output);
-    const auto pin_pos = DrawPinIconArea(pin, ne::PinKind::Output);
+    DrawPinIconArea(pin);
 
     if (pin_is_flow) {
       ne::EndPin();
-
-      Expects(pin_pos.has_value());
-      pin_poses.emplace(pin.flow_data->id, *pin_pos);
     }
 
     ImGui::EndHorizontal();
@@ -269,13 +247,10 @@ auto DrawOutputPins(const coreui::NodeData& node_data)
 
   ne::PopStyleVar();
   ImGui::EndVertical();
-
-  return pin_poses;
 }
 
 ///
-void DrawBody(const coreui::NodeData& node_data,
-              coreui::NodeMover& node_mover) {
+void DrawBody(const coreui::NodeData& node_data) {
   ImGui::BeginVertical("Body");
 
   if (node_data.header.has_value()) {
@@ -284,13 +259,8 @@ void DrawBody(const coreui::NodeData& node_data,
 
   ImGui::BeginHorizontal("Pins");
 
-  for (const auto& [pin_id, pin_pos] : DrawInputPins(node_data)) {
-    node_mover.SetPinPos(pin_id, pin_pos);
-  }
-
-  for (const auto& [pin_id, pin_pos] : DrawOutputPins(node_data)) {
-    node_mover.SetPinPos(pin_id, pin_pos);
-  }
+  DrawInputPins(node_data);
+  DrawOutputPins(node_data);
 
   ImGui::EndHorizontal();
   ImGui::EndVertical();
@@ -309,7 +279,7 @@ void DrawNode(coreui::Node& node, coreui::NodeMover& node_mover) {
 
   const auto& node_data = node.GetData();
   const auto header_rect = DrawHeader(node_data.header);
-  DrawBody(node_data, node_mover);
+  DrawBody(node_data);
 
   ImGui::EndVertical();
   ne::EndNode();

@@ -22,6 +22,7 @@
 #include "core_pin.h"
 #include "coreui_diagram.h"
 #include "coreui_event.h"
+#include "coreui_native_facade.h"
 #include "coreui_node_mover.h"
 #include "cpp_assert.h"
 #include "flow_tree_node.h"
@@ -397,8 +398,7 @@ auto Linker::CreateManualLink(ne::PinId source_pin,
       .color = color, .thickness = style::DefaultSizes::kBoldThickness};
 
   const auto source_kind = GetSourcePinData().kind;
-  const auto source_pos =
-      PosVariant{parent_diagram_->GetNodeMover().GetPinPos(source_pin)};
+  const auto source_pos = PosVariant{NativeFacade::GetPinPos(source_pin)};
 
   if (source_kind == ne::PinKind::Input) {
     manual_link.start_pos = target_pos;

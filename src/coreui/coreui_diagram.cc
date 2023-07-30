@@ -676,7 +676,7 @@ auto Diagram::MoveConnectedLinkToNewFreePin(
     const coreui::Family& free_pin_family) -> Event& {
   auto free_pin_node = free_pin_family.CreateNode();
 
-  const auto pin_pos = node_mover_.GetPinPos(pin_id);
+  const auto pin_pos = NativeFacade::GetPinPos(pin_id);
   free_pin_node->SetPos(pin_pos);
 
   const auto free_pin_id =

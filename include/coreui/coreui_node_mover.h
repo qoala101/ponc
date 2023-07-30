@@ -54,14 +54,8 @@ class NodeMover {
   auto GetNodeSize(ne::NodeId node_id) const -> const ImVec2 &;
   ///
   void SetItemSize(ne::NodeId node_id, const ImVec2 &size);
-  ///
-  auto GetPinPos(ne::PinId pin_id) const -> const ImVec2 &;
-  ///
-  void SetPinPos(ne::PinId pin_id, const ImVec2 &pos);
 
  private:
-  ///
-  void MoveNodePinPoses(const core::INode &node, const ImVec2 &pos);
   ///
   void MoveTreeTo(const flow::TreeNode &tree_node, const ImVec2 &pos);
   ///
@@ -81,15 +75,13 @@ class NodeMover {
   ///
   auto GetTreeRect(const flow::TreeNode &tree_node) const;
   ///
-  auto GetOtherPinPos(ne::PinId pin_id) const -> const ImVec2 &;
+  auto GetOtherPinPos(ne::PinId pin_id) const -> ImVec2;
   ///
   auto DoNodesNeedSpacing(ne::NodeId first_node, ne::NodeId second_node) const;
   ///
   auto DoesChildNeedSpacing(
       const flow::TreeNode &tree_node,
       decltype(flow::TreeNode::child_nodes)::const_iterator child_node) const;
-  ///
-  auto GetTakenPinsRect(const std::vector<flow::TreeNode> &tree_nodes) const;
   ///
   auto CalculateArrangedChildrenY(
       const std::vector<flow::TreeNode> &parent_trees) const;
@@ -99,9 +91,6 @@ class NodeMover {
   void ArrangeAsTreeImpl(const flow::TreeNode &tree_node);
   ///
   void ArrangeChildrenAsTrees(const std::vector<flow::TreeNode> &tree_nodes);
-  ///
-  auto TakenPinPosLess(const flow::TreeNode &left,
-                       const flow::TreeNode &right) const;
 
   ///
   cpp::SafePtr<Diagram> parent_diagram_;
@@ -116,8 +105,6 @@ class NodeMover {
   ///
   // TODO(vh): Those are never cleared.
   std::unordered_map<core::IdValue<ne::NodeId>, ImVec2> item_sizes_{};
-  ///
-  std::unordered_map<core::IdValue<ne::PinId>, ImVec2> pin_poses_{};
 };
 }  // namespace vh::ponc::coreui
 
