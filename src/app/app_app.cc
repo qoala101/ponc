@@ -9,6 +9,7 @@
 #include <application.h>
 #include <imgui.h>
 
+#include <iostream>
 #include <string>
 #include <utility>
 
@@ -18,6 +19,42 @@
 #include "style_update_styles.h"
 
 namespace vh::ponc {
+namespace {
+///
+auto ReadOpenHandler(ImGuiContext* /*unused*/, ImGuiSettingsHandler* /*unused*/,
+                     const char* /*unused*/) -> void* {
+  return nullptr;
+}
+
+///
+void ReadLineHandler(ImGuiContext* /*unused*/, ImGuiSettingsHandler* /*unused*/,
+                     void* /*unused*/, const char* /*unused*/) {}
+
+///
+void ApplyAllHandler(ImGuiContext* /*unused*/,
+                     ImGuiSettingsHandler* /*unused*/) {}
+
+///
+void WriteAllHandler(ImGuiContext* /*unused*/, ImGuiSettingsHandler* /*unused*/,
+                     ImGuiTextBuffer* /*unused*/) {}
+
+///
+void AddSettingsHandler() {
+  auto handler = ImGuiSettingsHandler{};
+  handler.TypeName = "Ponc";
+  handler.TypeHash = ImHashStr(handler.TypeName);
+  handler.ReadOpenFn = ReadOpenHandler;
+  handler.ReadLineFn = ReadLineHandler;
+  handler.ApplyAllFn = ApplyAllHandler;
+  handler.WriteAllFn = WriteAllHandler;
+
+  auto* context = ImGui::GetCurrentContext();
+  Expects(context != nullptr);
+
+  context->SettingsHandlers.push_back(handler);
+}
+}  // namespace
+
 ///
 App::App(const char* name, int argc, char** argv)
     : Application{name, argc, argv} {}
