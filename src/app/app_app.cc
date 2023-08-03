@@ -7,6 +7,7 @@
 #include "app_app.h"
 
 #include <application.h>
+#include <crude_json.h>
 #include <imgui.h>
 
 #include <iostream>
@@ -23,20 +24,33 @@ namespace {
 ///
 auto ReadOpenHandler(ImGuiContext* /*unused*/, ImGuiSettingsHandler* /*unused*/,
                      const char* /*unused*/) -> void* {
-  return nullptr;
+  static auto kUnused = 0;
+  return static_cast<void*>(&kUnused);
 }
 
 ///
 void ReadLineHandler(ImGuiContext* /*unused*/, ImGuiSettingsHandler* /*unused*/,
-                     void* /*unused*/, const char* /*unused*/) {}
+                     void* /*unused*/, const char* line) {
+  auto json = crude_json::value::parse(line);
+  std::cout << "Parsed: " << json.dump() << "\n";
+}
 
 ///
-void ApplyAllHandler(ImGuiContext* /*unused*/,
-                     ImGuiSettingsHandler* /*unused*/) {}
+void WriteAllHandler(ImGuiContext* /*unused*/, ImGuiSettingsHandler* handler,
+                     ImGuiTextBuffer* buffer) {
+  Expects(handler != nullptr);
+  Expects(buffer != nullptr);
 
-///
-void WriteAllHandler(ImGuiContext* /*unused*/, ImGuiSettingsHandler* /*unused*/,
-                     ImGuiTextBuffer* /*unused*/) {}
+  buffer->appendf("[%s][Globals]\n", handler->TypeName);
+
+  auto project = crude_json::value{};
+  project["project"] = "/home/vova";
+  buffer->appendf("%s\n", project.dump().c_str());
+
+  auto on = crude_json::value{};
+  on["on"] = true;
+  buffer->appendf("%s\n", on.dump().c_str());
+}
 
 ///
 void AddSettingsHandler() {
@@ -45,7 +59,6 @@ void AddSettingsHandler() {
   handler.TypeHash = ImHashStr(handler.TypeName);
   handler.ReadOpenFn = ReadOpenHandler;
   handler.ReadLineFn = ReadLineHandler;
-  handler.ApplyAllFn = ApplyAllHandler;
   handler.WriteAllFn = WriteAllHandler;
 
   auto* context = ImGui::GetCurrentContext();
