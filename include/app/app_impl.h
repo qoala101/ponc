@@ -7,6 +7,7 @@
 #ifndef VH_PONC_APP_IMPL_H_
 #define VH_PONC_APP_IMPL_H_
 
+#include "app_globals.h"
 #include "coreui_project.h"
 #include "draw_main_window.h"
 
@@ -24,6 +25,8 @@ class AppImpl {
   auto CanClose() -> bool;
 
  private:
+  ///
+  Globals globals_{};
   ///
   coreui::Project project_;
   ///
