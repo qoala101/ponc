@@ -14,6 +14,7 @@ add_executable(ponc
   app/family_group/app_splitter_family_group.cc
 
   app/app_app.cc
+  app/app_globals.cc
   app/app_impl.cc
 
   calc/calc_calculation_task.cc

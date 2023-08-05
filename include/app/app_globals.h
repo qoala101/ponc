@@ -3,18 +3,26 @@
 
 #include <imgui.h>
 
+#include <memory>
 #include <string>
 
 namespace vh::ponc {
 ///
-struct Globals {
-  ///
-  Globals();
+class AppImpl;
 
+///
+struct Globals {
   ///
   ImVec2 window_size{};
   ///
   std::string project_name{};
+
+ private:
+  ///
+  friend class AppImpl;
+
+  ///
+  static auto GetInstance() -> Globals &;
 };
 }  // namespace vh::ponc
 

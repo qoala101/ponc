@@ -26,8 +26,6 @@ class AppImpl {
 
  private:
   ///
-  Globals globals_{};
-  ///
   coreui::Project project_;
   ///
   draw::MainWindow main_window_{};
