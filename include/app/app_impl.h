@@ -7,8 +7,8 @@
 #ifndef VH_PONC_APP_IMPL_H_
 #define VH_PONC_APP_IMPL_H_
 
-#include "app_globals.h"
 #include "coreui_project.h"
+#include "cpp_safe_ptr.h"
 #include "draw_main_window.h"
 
 namespace vh::ponc {
@@ -25,6 +25,8 @@ class AppImpl {
   auto CanClose() -> bool;
 
  private:
+  ///
+  cpp::SafeOwner safe_owner_{};
   ///
   coreui::Project project_;
   ///

@@ -68,7 +68,7 @@ auto Project::CreateProject() const {
 
 ///
 Project::Project(std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups,
-                 Callbacks callbacks)
+                 cpp::SafePtr<Globals> globals, Callbacks callbacks)
     : family_groups_{[&family_groups]() {
         auto default_family_groups =
             core::IFamilyGroup::CreateDefaultFamilyGroups();
@@ -79,6 +79,7 @@ Project::Project(std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups,
 
         return std::move(family_groups);
       }()},
+      globals_{std::move(globals)},
       callbacks_{std::move(callbacks)},
       project_{CreateProject()},
       calculator_{safe_owner_.MakeSafe(this)} {

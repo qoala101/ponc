@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include "app_globals.h"
 #include "core_connection.h"
 #include "core_diagram.h"
 #include "core_i_family_group.h"
@@ -37,7 +38,7 @@ class Project {
 
   ///
   Project(std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups,
-          Callbacks callbacks);
+          cpp::SafePtr<Globals> globals, Callbacks callbacks);
 
   ///
   void OnFrame();
@@ -94,6 +95,8 @@ class Project {
 
   ///
   std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups_{};
+  ///
+  cpp::SafePtr<Globals> globals_;
   ///
   Callbacks callbacks_{};
   ///

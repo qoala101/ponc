@@ -5,6 +5,7 @@
 #include <imgui_internal.h>
 
 #include <iostream>
+#include <memory>
 
 #include "cpp_assert.h"
 
@@ -16,17 +17,41 @@ auto ReadOpenHandler(ImGuiContext* /*unused*/, ImGuiSettingsHandler* /*unused*/,
   static auto kUnused = 0;
   return static_cast<void*>(&kUnused);
 }
+}  // namespace
 
 ///
-void ReadLineHandler(ImGuiContext* /*unused*/, ImGuiSettingsHandler* /*unused*/,
-                     void* /*unused*/, const char* line) {
+auto Globals::GetInstance() -> Globals& {
+  static auto globals = Globals{};
+  return globals;
+}
+
+///
+void Globals::OnStart() {
+  auto handler = ImGuiSettingsHandler{};
+  handler.TypeName = "Ponc";
+  handler.TypeHash = ImHashStr(handler.TypeName);
+  handler.ReadOpenFn = ReadOpenHandler;
+  handler.ReadLineFn = ReadLineHandler;
+  handler.WriteAllFn = WriteAllHandler;
+
+  auto* context = ImGui::GetCurrentContext();
+  Expects(context != nullptr);
+
+  context->SettingsHandlers.push_back(handler);
+}
+
+///
+void Globals::ReadLineHandler(ImGuiContext* /*unused*/,
+                              ImGuiSettingsHandler* /*unused*/,
+                              void* /*unused*/, const char* line) {
   auto json = crude_json::value::parse(line);
   std::cout << "Parsed: " << json.dump() << "\n";
 }
 
 ///
-void WriteAllHandler(ImGuiContext* /*unused*/, ImGuiSettingsHandler* handler,
-                     ImGuiTextBuffer* buffer) {
+void Globals::WriteAllHandler(ImGuiContext* /*unused*/,
+                              ImGuiSettingsHandler* handler,
+                              ImGuiTextBuffer* buffer) {
   Expects(handler != nullptr);
   Expects(buffer != nullptr);
 
@@ -39,21 +64,5 @@ void WriteAllHandler(ImGuiContext* /*unused*/, ImGuiSettingsHandler* handler,
   auto on = crude_json::value{};
   on["on"] = true;
   buffer->appendf("%s\n", on.dump().c_str());
-}
-}  // namespace
-
-///
-Globals::Globals() {
-  auto handler = ImGuiSettingsHandler{};
-  handler.TypeName = "Ponc";
-  handler.TypeHash = ImHashStr(handler.TypeName);
-  handler.ReadOpenFn = ReadOpenHandler;
-  handler.ReadLineFn = ReadLineHandler;
-  handler.WriteAllFn = WriteAllHandler;
-
-  auto* context = ImGui::GetCurrentContext();
-  Expects(context != nullptr);
-
-  context->SettingsHandlers.push_back(handler);
 }
 }  // namespace vh::ponc
