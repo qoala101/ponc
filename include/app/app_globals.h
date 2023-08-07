@@ -13,9 +13,19 @@
 #include <memory>
 #include <string>
 
+#include "cpp_static_api.h"
+
 namespace vh::ponc {
 ///
-class AppImpl;
+struct Globals;
+
+///
+struct GlobalsProxy : public cpp::StaticApi {
+  ///
+  static auto GetInstance() -> Globals&;
+  ///
+  static void RegisterHandlers();
+};
 
 ///
 struct Globals {
@@ -26,22 +36,23 @@ struct Globals {
 
  private:
   ///
-  friend class AppImpl;
+  friend struct GlobalsProxy;
 
+  ///
   Globals() = default;
 
   ///
   static auto GetInstance() -> Globals&;
   ///
-  static void OnStart();
+  static void RegisterHandlers();
   ///
-  static void ReadLineHandler(ImGuiContext* /*unused*/,
-                              ImGuiSettingsHandler* /*unused*/,
-                              void* /*unused*/, const char* line);
+  static void OnReadLine(ImGuiContext* /*unused*/,
+                         ImGuiSettingsHandler* /*unused*/, void* /*unused*/,
+                         const char* line);
   ///
-  static void WriteAllHandler(ImGuiContext* /*unused*/,
-                              ImGuiSettingsHandler* handler,
-                              ImGuiTextBuffer* buffer);
+  static void OnWriteAll(ImGuiContext* /*unused*/,
+                         ImGuiSettingsHandler* handler,
+                         ImGuiTextBuffer* buffer);
 };
 }  // namespace vh::ponc
 

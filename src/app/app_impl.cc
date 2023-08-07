@@ -43,7 +43,7 @@ AppImpl::AppImpl(coreui::Project::Callbacks project_callbacks,
 
                  return family_groups;
                }(),
-               safe_owner_.MakeSafe(&Globals::GetInstance()),
+               safe_owner_.MakeSafe(&GlobalsProxy::GetInstance()),
                std::move(project_callbacks)},
       main_window_callbacks_{std::move(main_window_callbacks)} {}
 

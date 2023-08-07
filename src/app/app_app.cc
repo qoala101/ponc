@@ -14,6 +14,8 @@
 #include <string>
 #include <utility>
 
+#include "app_globals.h"
+#include "app_impl.h"
 #include "coreui_project.h"
 #include "cpp_assert.h"
 #include "draw_main_window.h"
@@ -38,6 +40,7 @@ auto App::CanClose() -> bool {
 
 ///
 void App::OnStart() {
+  GlobalsProxy::RegisterHandlers();
   style::UpdateStyle(ImGui::GetStyle());
 
   app_.emplace(

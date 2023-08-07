@@ -12,12 +12,33 @@
 namespace vh::ponc {
 namespace {
 ///
-auto ReadOpenHandler(ImGuiContext* /*unused*/, ImGuiSettingsHandler* /*unused*/,
-                     const char* /*unused*/) -> void* {
+auto GetInitialized() -> auto& {
+  static auto initialized = false;
+  return initialized;
+}
+
+///
+auto OnReadOpen(ImGuiContext* /*unused*/, ImGuiSettingsHandler* /*unused*/,
+                const char* /*unused*/) -> void* {
   static auto kUnused = 0;
   return static_cast<void*>(&kUnused);
 }
 }  // namespace
+
+///
+auto GlobalsProxy::GetInstance() -> Globals& {
+  Expects(GetInitialized());
+  return Globals::GetInstance();
+}
+
+///
+void GlobalsProxy::RegisterHandlers() {
+  auto& initialized = GetInitialized();
+  Expects(!initialized);
+
+  Globals::RegisterHandlers();
+  initialized = true;
+}
 
 ///
 auto Globals::GetInstance() -> Globals& {
@@ -26,13 +47,13 @@ auto Globals::GetInstance() -> Globals& {
 }
 
 ///
-void Globals::OnStart() {
+void Globals::RegisterHandlers() {
   auto handler = ImGuiSettingsHandler{};
   handler.TypeName = "Ponc";
   handler.TypeHash = ImHashStr(handler.TypeName);
-  handler.ReadOpenFn = ReadOpenHandler;
-  handler.ReadLineFn = ReadLineHandler;
-  handler.WriteAllFn = WriteAllHandler;
+  handler.ReadOpenFn = OnReadOpen;
+  handler.ReadLineFn = OnReadLine;
+  handler.WriteAllFn = OnWriteAll;
 
   auto* context = ImGui::GetCurrentContext();
   Expects(context != nullptr);
@@ -41,17 +62,17 @@ void Globals::OnStart() {
 }
 
 ///
-void Globals::ReadLineHandler(ImGuiContext* /*unused*/,
-                              ImGuiSettingsHandler* /*unused*/,
-                              void* /*unused*/, const char* line) {
+void Globals::OnReadLine(ImGuiContext* /*unused*/,
+                         ImGuiSettingsHandler* /*unused*/, void* /*unused*/,
+                         const char* line) {
   auto json = crude_json::value::parse(line);
   std::cout << "Parsed: " << json.dump() << "\n";
 }
 
 ///
-void Globals::WriteAllHandler(ImGuiContext* /*unused*/,
-                              ImGuiSettingsHandler* handler,
-                              ImGuiTextBuffer* buffer) {
+void Globals::OnWriteAll(ImGuiContext* /*unused*/,
+                         ImGuiSettingsHandler* handler,
+                         ImGuiTextBuffer* buffer) {
   Expects(handler != nullptr);
   Expects(buffer != nullptr);
 
