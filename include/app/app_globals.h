@@ -12,12 +12,15 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <variant>
 
+#include "cpp_assert.h"
 #include "cpp_static_api.h"
 
 namespace vh::ponc {
 ///
-struct Globals;
+class Globals;
 
 ///
 struct GlobalsProxy : public cpp::StaticApi {
@@ -28,13 +31,31 @@ struct GlobalsProxy : public cpp::StaticApi {
 };
 
 ///
-struct Globals {
+class Globals {
+ public:
   ///
-  ImVec2 window_size{};
+  template <typename T>
+  void Set(const std::string& name, T value) {
+    settings_[name] = std::move(value);
+  }
+
   ///
-  std::string project_name{};
+  template <typename T>
+  auto GetOr(const std::string& name, const T& default_value) const
+      -> const T& {
+    const auto setting = settings_.find(name);
+
+    if (setting == settings_.cend()) {
+      return default_value;
+    }
+
+    Expects(std::holds_alternative<T>(setting->second));
+    return std::get<T>(setting->second);
+  }
 
  private:
+  ///
+  using Setting = std::variant<std::string, bool>;
   ///
   friend struct GlobalsProxy;
 
@@ -53,6 +74,9 @@ struct Globals {
   static void OnWriteAll(ImGuiContext* /*unused*/,
                          ImGuiSettingsHandler* handler,
                          ImGuiTextBuffer* buffer);
+
+  ///
+  std::unordered_map<std::string, Setting> settings_{};
 };
 }  // namespace vh::ponc
 
