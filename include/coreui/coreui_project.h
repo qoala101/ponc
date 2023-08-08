@@ -38,7 +38,7 @@ class Project {
 
   ///
   Project(std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups,
-          cpp::SafePtr<Globals> globals, Callbacks callbacks);
+          Callbacks callbacks);
 
   ///
   void OnFrame();
@@ -95,8 +95,6 @@ class Project {
 
   ///
   std::vector<std::unique_ptr<core::IFamilyGroup>> family_groups_{};
-  ///
-  cpp::SafePtr<Globals> globals_;
   ///
   Callbacks callbacks_{};
   ///

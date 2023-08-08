@@ -7,6 +7,7 @@
 #ifndef VH_PONC_DRAW_MAIN_WINDOW_H_
 #define VH_PONC_DRAW_MAIN_WINDOW_H_
 
+#include "app_globals.h"
 #include "coreui_project.h"
 #include "cpp_callbacks.h"
 #include "draw_diagram_editor.h"
@@ -30,6 +31,10 @@ class MainWindow {
   void Draw(const Callbacks &callbacks, coreui::Project &project);
   ///
   void OpenExitDialog();
+  ///
+  void SaveState(Globals &globals) const;
+  ///
+  void RestoreState(const Globals &globals);
 
  private:
   ///

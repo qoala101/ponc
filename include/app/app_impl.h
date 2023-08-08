@@ -20,13 +20,24 @@ class AppImpl {
           draw::MainWindow::Callbacks main_window_callbacks);
 
   ///
+  AppImpl(const AppImpl &) = delete;
+  ///
+  AppImpl(AppImpl &&) noexcept = delete;
+
+  ///
+  auto operator=(const AppImpl &) -> AppImpl & = delete;
+  ///
+  auto operator=(AppImpl &&) noexcept -> AppImpl & = delete;
+
+  ///
+  ~AppImpl();
+
+  ///
   void OnFrame();
   ///
   auto CanClose() -> bool;
 
  private:
-  ///
-  cpp::SafeOwner safe_owner_{};
   ///
   coreui::Project project_;
   ///

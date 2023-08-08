@@ -19,7 +19,6 @@
 #include "core_i_family_group.h"
 #include "core_project.h"
 #include "coreui_project.h"
-#include "cpp_safe_ptr.h"
 
 namespace vh::ponc {
 ///
@@ -43,9 +42,13 @@ AppImpl::AppImpl(coreui::Project::Callbacks project_callbacks,
 
                  return family_groups;
                }(),
-               safe_owner_.MakeSafe(&GlobalsProxy::GetInstance()),
                std::move(project_callbacks)},
-      main_window_callbacks_{std::move(main_window_callbacks)} {}
+      main_window_callbacks_{std::move(main_window_callbacks)} {
+  main_window_.RestoreState(GlobalsProxy::GetInstance());
+}
+
+///
+AppImpl::~AppImpl() { main_window_.SaveState(GlobalsProxy::GetInstance()); }
 
 ///
 void AppImpl::OnFrame() {

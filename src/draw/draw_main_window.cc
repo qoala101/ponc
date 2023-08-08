@@ -29,4 +29,10 @@ void MainWindow::Draw(const Callbacks& callbacks, coreui::Project& project) {
 
 ///
 void MainWindow::OpenExitDialog() { exit_dialog_.Open(); }
+
+///
+void MainWindow::SaveState(Globals& globals) const {}
+
+///
+void MainWindow::RestoreState(const Globals& globals) {}
 }  // namespace vh::ponc::draw
