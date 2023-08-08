@@ -82,6 +82,30 @@ void MainMenuBar::Draw(coreui::Project &project) {
 auto MainMenuBar::GetLogView() const -> const LogView & { return log_view_; }
 
 ///
+void MainMenuBar::SaveState(Globals &globals) const {
+  globals.Set("node_view_opened", nodes_view_.IsOpened());
+  globals.Set("nodes_view_opened", nodes_view_.IsOpened());
+  globals.Set("diagrams_view_opened", diagrams_view_.IsOpened());
+  globals.Set("flow_tree_view_opened", flow_tree_view_.IsOpened());
+  globals.Set("connections_view_opened", connections_view_.IsOpened());
+  globals.Set("calculator_view_opened", calculator_view_.IsOpened());
+  globals.Set("log_view_opened", log_view_.IsOpened());
+  globals.Set("settings_view_opened", settings_view_.IsOpened());
+}
+
+///
+void MainMenuBar::RestoreState(const Globals &globals) {
+  node_view_.SetOpened(globals.GetOr("node_view_opened", false));
+  nodes_view_.SetOpened(globals.GetOr("nodes_view_opened", false));
+  diagrams_view_.SetOpened(globals.GetOr("diagrams_view_opened", false));
+  flow_tree_view_.SetOpened(globals.GetOr("flow_tree_view_opened", false));
+  connections_view_.SetOpened(globals.GetOr("connections_view_opened", false));
+  calculator_view_.SetOpened(globals.GetOr("calculator_view_opened", false));
+  log_view_.SetOpened(globals.GetOr("log_view_opened", false));
+  settings_view_.SetOpened(globals.GetOr("settings_view_opened", false));
+}
+
+///
 void MainMenuBar::DrawFileMenu(coreui::Project &project) {
   if (ImGui::BeginMenu("File")) {
     if (ImGui::MenuItem("New...")) {

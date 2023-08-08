@@ -22,6 +22,8 @@ class IView : public cpp::NonCopyable {
   ///
   auto IsOpened() const -> bool;
   ///
+  void SetOpened(bool opened);
+  ///
   void Toggle();
 
  protected:

@@ -32,6 +32,10 @@ class MainMenuBar {
   void Draw(coreui::Project &project);
   ///
   auto GetLogView() const -> const LogView &;
+  ///
+  void SaveState(Globals &globals) const;
+  ///
+  void RestoreState(const Globals &globals);
 
  private:
   ///

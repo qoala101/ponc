@@ -15,6 +15,9 @@ namespace vh::ponc::draw {
 auto IView::IsOpened() const -> bool { return opened_; }
 
 ///
+void IView::SetOpened(bool opened) { opened_ = opened; }
+
+///
 void IView::Toggle() { opened_ = !opened_; }
 
 ///
