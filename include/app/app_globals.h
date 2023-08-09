@@ -35,7 +35,11 @@ class Globals {
  public:
   ///
   template <typename T>
-  void Set(const std::string& name, T value) {
+  void Set(const std::string& name, T value, const T& default_value = {}) {
+    if (value == default_value) {
+      return;
+    }
+
     settings_[name] = std::move(value);
   }
 

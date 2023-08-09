@@ -78,12 +78,13 @@ void Globals::OnWriteAll(ImGuiContext* /*unused*/,
 
   buffer->appendf("[%s][Globals]\n", handler->TypeName);
 
-  auto project = crude_json::value{};
-  project["project"] = "/home/vova";
-  buffer->appendf("%s\n", project.dump().c_str());
+  const auto& instance = GetInstance();
 
-  auto on = crude_json::value{};
-  on["on"] = true;
-  buffer->appendf("%s\n", on.dump().c_str());
+  for (const auto& setting : instance.settings_) {
+    auto json = crude_json::value{};
+    std::visit([&json, &setting](const auto& v) { json[setting.first] = v; },
+               setting.second);
+    buffer->appendf("%s\n", json.dump().c_str());
+  }
 }
 }  // namespace vh::ponc
