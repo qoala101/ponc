@@ -31,6 +31,9 @@ struct GlobalsProxy : public cpp::StaticApi {
 };
 
 ///
+using Global = std::variant<std::string, bool>;
+
+///
 class Globals {
  public:
   ///
@@ -59,8 +62,6 @@ class Globals {
 
  private:
   ///
-  using Setting = std::variant<std::string, bool>;
-  ///
   friend struct GlobalsProxy;
 
   ///
@@ -80,7 +81,7 @@ class Globals {
                          ImGuiTextBuffer* buffer);
 
   ///
-  std::unordered_map<std::string, Setting> settings_{};
+  std::unordered_map<std::string, Global> settings_{};
 };
 }  // namespace vh::ponc
 
