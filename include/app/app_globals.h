@@ -7,6 +7,7 @@
 #ifndef VH_PONC_APP_GLOBALS_H_
 #define VH_PONC_APP_GLOBALS_H_
 
+#include <crude_json.h>
 #include <imgui.h>
 #include <imgui_internal.h>
 
@@ -15,7 +16,6 @@
 #include <unordered_map>
 #include <variant>
 
-#include "cpp_assert.h"
 #include "cpp_static_api.h"
 
 namespace vh::ponc {
@@ -38,26 +38,31 @@ class Globals {
  public:
   ///
   template <typename T>
-  void Set(const std::string& name, T value, const T& default_value = {}) {
+  void Set(const std::string& name, const T& value,
+           const T& default_value = {}) {
     if (value == default_value) {
+      settings_json_.erase(name);
       return;
     }
 
-    settings_[name] = std::move(value);
+    settings_json_[name] = value;
   }
 
   ///
   template <typename T>
   auto GetOr(const std::string& name, const T& default_value) const
       -> const T& {
-    const auto setting = settings_.find(name);
-
-    if (setting == settings_.cend()) {
+    if (!settings_json_.contains(name)) {
       return default_value;
     }
 
-    Expects(std::holds_alternative<T>(setting->second));
-    return std::get<T>(setting->second);
+    const auto* value = settings_json_[name].get_ptr<T>();
+
+    if (value == nullptr) {
+      return default_value;
+    }
+
+    return *value;
   }
 
  private:
@@ -81,7 +86,7 @@ class Globals {
                          ImGuiTextBuffer* buffer);
 
   ///
-  std::unordered_map<std::string, Global> settings_{};
+  crude_json::value settings_json_{};
 };
 }  // namespace vh::ponc
 

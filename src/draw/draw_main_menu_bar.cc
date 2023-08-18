@@ -83,7 +83,7 @@ auto MainMenuBar::GetLogView() const -> const LogView & { return log_view_; }
 
 ///
 void MainMenuBar::SaveState(Globals &globals) const {
-  globals.Set("node_view_opened", nodes_view_.IsOpened());
+  globals.Set("node_view_opened", node_view_.IsOpened());
   globals.Set("nodes_view_opened", nodes_view_.IsOpened());
   globals.Set("diagrams_view_opened", diagrams_view_.IsOpened());
   globals.Set("flow_tree_view_opened", flow_tree_view_.IsOpened());

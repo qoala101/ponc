@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "cpp_assert.h"
+#include "json_global_serializer.h"
 
 namespace vh::ponc {
 namespace {
@@ -65,25 +66,42 @@ void Globals::RegisterHandlers() {
 void Globals::OnReadLine(ImGuiContext* /*unused*/,
                          ImGuiSettingsHandler* /*unused*/, void* /*unused*/,
                          const char* line) {
-  auto json = crude_json::value::parse(line);
-  std::cout << "Parsed: " << json.dump() << "\n";
+  const auto json = crude_json::value::parse(line);
+  const auto& json_object = json.get<crude_json::object>();
+
+  Expects(!json_object.empty());
+  const auto& [name, value] = *json_object.cbegin();
+
+  auto& instance = GetInstance();
+  instance.settings_json_[name] = value;
 }
 
 ///
 void Globals::OnWriteAll(ImGuiContext* /*unused*/,
                          ImGuiSettingsHandler* handler,
                          ImGuiTextBuffer* buffer) {
+  const auto& instance = GetInstance();
+
+  if (instance.settings_json_.is_null()) {
+    return;
+  }
+
+  const auto& settings_object =
+      instance.settings_json_.get<crude_json::object>();
+
+  if (settings_object.empty()) {
+    return;
+  }
+
   Expects(handler != nullptr);
   Expects(buffer != nullptr);
 
   buffer->appendf("[%s][Globals]\n", handler->TypeName);
 
-  const auto& instance = GetInstance();
-
-  for (const auto& setting : instance.settings_) {
+  for (const auto& [name, value] : settings_object) {
     auto json = crude_json::value{};
-    std::visit([&json, &setting](const auto& v) { json[setting.first] = v; },
-               setting.second);
+    json[name] = value;
+
     buffer->appendf("%s\n", json.dump().c_str());
   }
 }
