@@ -39,6 +39,9 @@ class AppImpl {
 
  private:
   ///
+  void OnFirstFrame();
+
+  ///
   coreui::Project project_;
   ///
   draw::MainWindow main_window_{};

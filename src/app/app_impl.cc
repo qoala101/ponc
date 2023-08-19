@@ -6,6 +6,8 @@
 
 #include "app_impl.h"
 
+#include <imgui.h>
+
 #include <memory>
 #include <utility>
 #include <vector>
@@ -43,15 +45,17 @@ AppImpl::AppImpl(coreui::Project::Callbacks project_callbacks,
                  return family_groups;
                }(),
                std::move(project_callbacks)},
-      main_window_callbacks_{std::move(main_window_callbacks)} {
-  main_window_.RestoreState(GlobalsProxy::GetInstance());
-}
+      main_window_callbacks_{std::move(main_window_callbacks)} {}
 
 ///
 AppImpl::~AppImpl() { main_window_.SaveState(GlobalsProxy::GetInstance()); }
 
 ///
 void AppImpl::OnFrame() {
+  if (ImGui::GetFrameCount() == 1) {
+    OnFirstFrame();
+  }
+
   project_.OnFrame();
   main_window_.Draw(main_window_callbacks_, project_);
 }
@@ -64,5 +68,10 @@ auto AppImpl::CanClose() -> bool {
 
   main_window_.OpenExitDialog();
   return false;
+}
+
+///
+void AppImpl::OnFirstFrame() {
+  main_window_.RestoreState(GlobalsProxy::GetInstance());
 }
 }  // namespace vh::ponc
