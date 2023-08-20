@@ -113,7 +113,6 @@ add_executable(ponc
   json/json_color_serializer.cc
   json/json_connection_serializer.cc
   json/json_diagram_serializer.cc
-  json/json_global_serializer.cc
   json/json_i_family_parser.cc
   json/json_i_family_writer.cc
   json/json_i_node_parser.cc
