@@ -11,9 +11,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-#include <memory>
 #include <string>
-#include <unordered_map>
 #include <variant>
 
 #include "cpp_static_api.h"

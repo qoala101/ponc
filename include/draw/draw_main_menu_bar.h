@@ -7,6 +7,7 @@
 #ifndef VH_PONC_DRAW_MAIN_MENU_BAR_H_
 #define VH_PONC_DRAW_MAIN_MENU_BAR_H_
 
+#include "app_globals.h"
 #include "coreui_project.h"
 #include "draw_about_dialog.h"
 #include "draw_calculator_view.h"

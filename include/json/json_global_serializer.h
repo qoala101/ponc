@@ -9,6 +9,9 @@
 
 #include <crude_json.h>
 
+#include <string>
+#include <utility>
+
 #include "app_globals.h"
 #include "cpp_static_api.h"
 

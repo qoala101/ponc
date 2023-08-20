@@ -8,8 +8,8 @@
 
 #include <imgui.h>
 #include <imgui_bezier_math.h>
+#include <imgui_internal.h>
 #include <imgui_node_editor.h>
-#include <imgui_node_editor_internal.h>
 
 #include "core_link.h"
 #include "coreui_link.h"

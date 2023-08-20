@@ -18,6 +18,7 @@
 #include <map>
 #include <memory>
 #include <numeric>
+#include <optional>
 #include <unordered_map>
 #include <utility>
 #include <vector>

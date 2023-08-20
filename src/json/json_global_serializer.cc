@@ -7,9 +7,8 @@
 #include "json_global_serializer.h"
 
 #include <crude_json.h>
-#include <imgui.h>
 
-#include <memory>
+#include <variant>
 
 #include "app_globals.h"
 

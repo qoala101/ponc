@@ -11,13 +11,11 @@
 #include <imgui_internal.h>
 #include <imgui_node_editor.h>
 
-#include <optional>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
 #include "core_area.h"
-#include "core_i_node.h"
 #include "core_id_value.h"
 #include "core_settings.h"
 #include "coreui_linker.h"

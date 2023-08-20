@@ -8,7 +8,6 @@
 #define VH_PONC_APP_IMPL_H_
 
 #include "coreui_project.h"
-#include "cpp_safe_ptr.h"
 #include "draw_main_window.h"
 
 namespace vh::ponc {

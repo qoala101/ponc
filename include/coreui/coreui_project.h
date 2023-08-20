@@ -12,7 +12,6 @@
 #include <string>
 #include <vector>
 
-#include "app_globals.h"
 #include "core_connection.h"
 #include "core_diagram.h"
 #include "core_i_family_group.h"
