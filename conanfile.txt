@@ -1,0 +1,5 @@
+[requires]
+imgui/1.89.7-docking
+
+[generators]
+CMakeDeps
