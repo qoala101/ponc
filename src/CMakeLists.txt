@@ -1,6 +1,6 @@
 # TODO
-find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
+find_package(OpenGL REQUIRED)
 
 set(EXECUTABLE_PROPERTIES)
 
@@ -129,9 +129,6 @@ add_executable(ponc
   style/style_update_styles.cc
   style/style_utils.cc
 
-  # TODO
-  backend/imgui_impl_glfw.cpp
-  backend/imgui_impl_opengl3.cpp
   main.cc
 )
 
@@ -153,9 +150,6 @@ target_include_directories(ponc
   ${PROJECT_SOURCE_DIR}/include/flow
   ${PROJECT_SOURCE_DIR}/include/json
   ${PROJECT_SOURCE_DIR}/include/style
-
-  # TODO
-  ${PROJECT_SOURCE_DIR}/include/backend
 )
 
 target_link_libraries(ponc
@@ -173,21 +167,6 @@ target_link_libraries(ponc
 set_target_properties(ponc PROPERTIES
   DEBUG_POSTFIX _debug
 )
-
-# add_custom_command(TARGET ponc POST_BUILD
-#   COMMAND ${CMAKE_COMMAND} -E make_directory
-#   $<TARGET_FILE_DIR:ponc>/data
-
-#   COMMAND ${CMAKE_COMMAND} -E copy
-#   $<TARGET_PROPERTY:thirdparty::application,SOURCE_DIR>/../data/Cuprum-Bold.ttf
-#   $<TARGET_PROPERTY:thirdparty::application,SOURCE_DIR>/../data/Cuprum-OFL.txt
-#   $<TARGET_PROPERTY:thirdparty::application,SOURCE_DIR>/../data/Play-Regular.ttf
-#   $<TARGET_PROPERTY:thirdparty::application,SOURCE_DIR>/../data/Play-OFL.txt
-
-#   # vh: Use to copy resources.
-#   # ${CMAKE_CURRENT_SOURCE_DIR}/resource/RESOURCE_FILE
-#   $<TARGET_FILE_DIR:ponc>/data
-# )
 
 if(FAIL_ON_WARNINGS)
   target_compile_options(ponc PRIVATE -Werror)
