@@ -20,8 +20,10 @@ auto DisableIf(bool condition) -> cpp::ScopeFunction {
     return cpp::ScopeFunction{[]() {}};
   }
 
-  ImGui::PushDisabled();
-  return cpp::ScopeFunction{[]() { ImGui::PopDisabled(); }};
+  // ImGui::PushDisabled();
+  return cpp::ScopeFunction{[]() {
+    // ImGui::PopDisabled();
+  }};
 }
 
 ///

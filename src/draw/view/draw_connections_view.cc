@@ -49,7 +49,7 @@ auto ConnectionsView::DrawControls(coreui::Project& project) {
   const auto& core_project = project.GetProject();
   auto selected_action = std::optional<Action>{};
 
-  ImGui::BeginHorizontal("Controls");
+  // ImGui::BeginHorizontal("Controls");
 
   if (ImGui::Button("Create")) {
     project.AddConnection();
@@ -77,7 +77,7 @@ auto ConnectionsView::DrawControls(coreui::Project& project) {
   }
 
   DrawHelpMarker("Selected connection is used for new links");
-  ImGui::EndHorizontal();
+  // ImGui::EndHorizontal();
 
   return selected_action;
 }

@@ -45,7 +45,7 @@ auto DiagramsView::DrawControls(coreui::Project& project) {
   const auto& core_project = project.GetProject();
   auto selected_action = std::optional<Action>{};
 
-  ImGui::BeginHorizontal("Controls");
+  // ImGui::BeginHorizontal("Controls");
 
   if (ImGui::Button("Create")) {
     project.AddDiagram(core::Diagram{
@@ -76,7 +76,7 @@ auto DiagramsView::DrawControls(coreui::Project& project) {
     }
   }
 
-  ImGui::EndHorizontal();
+  // ImGui::EndHorizontal();
 
   return selected_action;
 }

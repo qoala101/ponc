@@ -38,7 +38,7 @@ void QuestionDialog::Draw(const Callbacks &callbacks) {
                              ImGuiWindowFlags_AlwaysAutoResize)) {
     ImGui::TextUnformatted(labels_.question.data());
     ImGui::Separator();
-    ImGui::BeginHorizontal("Buttons");
+    // ImGui::BeginHorizontal("Buttons");
 
     if (ImGui::Button(labels_.accept.c_str())) {
       callbacks.accepted();
@@ -49,7 +49,7 @@ void QuestionDialog::Draw(const Callbacks &callbacks) {
       ImGui::CloseCurrentPopup();
     }
 
-    ImGui::EndHorizontal();
+    // ImGui::EndHorizontal();
     ImGui::EndPopup();
   }
 }

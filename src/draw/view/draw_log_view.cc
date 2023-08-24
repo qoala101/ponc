@@ -70,7 +70,7 @@ void LogView::DrawMessages(const std::vector<coreui::LogMessage>& messages,
   auto layout_id = 0;
 
   for (const auto& message : messages) {
-    ImGui::BeginHorizontal(layout_id);
+    // ImGui::BeginHorizontal(layout_id);
     ImGui::TextUnformatted(ToString(message.time).c_str());
     ImGui::TextColored(GetLogColor(message.level), "%s",
                        ToString(message.level));
@@ -81,7 +81,7 @@ void LogView::DrawMessages(const std::vector<coreui::LogMessage>& messages,
       ImGui::TextUnformatted(message.text.c_str());
     }
 
-    ImGui::EndHorizontal();
+    // ImGui::EndHorizontal();
   }
 
   AutoScrollAtBottom();

@@ -51,7 +51,7 @@ void DrawInputFlow(const coreui::TreeNode& tree_node) {
 
 ///
 void DrawOutputFlows(const coreui::TreeNode& tree_node) {
-  ImGui::BeginHorizontal(tree_node.node->GetNode().GetId().AsPointer());
+  // ImGui::BeginHorizontal(tree_node.node->GetNode().GetId().AsPointer());
 
   const auto& output_flows = tree_node.node->GetData().flow.output_flows;
   auto output_flow = output_flows.cbegin();
@@ -66,7 +66,7 @@ void DrawOutputFlows(const coreui::TreeNode& tree_node) {
     ImGui::TextColored(output_flow->color, "%.2f", output_flow->value);
   }
 
-  ImGui::EndHorizontal();
+  // ImGui::EndHorizontal();
 }
 
 ///

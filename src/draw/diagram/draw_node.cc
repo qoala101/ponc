@@ -30,10 +30,14 @@
 namespace vh::ponc::draw {
 namespace {
 ///
-void DrawSmallSpace() { ImGui::Spring(0); }
+void DrawSmallSpace() {
+  // ImGui::Spring(0);
+}
 
 ///
-void DrawGrowingSpace() { ImGui::Spring(1, 0); }
+void DrawGrowingSpace() {
+  // ImGui::Spring(1, 0);
+}
 
 ///
 void DrawPinField(const coreui::Pin& pin, ne::PinKind pin_kind) {
@@ -132,15 +136,15 @@ auto DrawHeader(const std::optional<coreui::Header>& header)
     return std::nullopt;
   }
 
-  ImGui::BeginHorizontal("Header");
+  // ImGui::BeginHorizontal("Header");
   DrawSmallSpace();
 
-  ImGui::BeginVertical("Label");
+  // ImGui::BeginVertical("Label");
   ImGui::TextUnformatted(header->label.c_str());
   DrawSmallSpace();
 
-  ImGui::EndVertical();
-  ImGui::EndHorizontal();
+  // ImGui::EndVertical();
+  // ImGui::EndHorizontal();
 
   return ImRect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
 }
@@ -179,13 +183,13 @@ void DrawInputPins(const coreui::NodeData& node_data) {
     return;
   }
 
-  ImGui::BeginVertical("InputPins");
+  // ImGui::BeginVertical("InputPins");
   ne::PushStyleVar(ne::StyleVar_PivotAlignment, {0, 0.5});
 
   auto pin_layout_id = 0;
 
   for (const auto& pin : node_data.input_pins) {
-    ImGui::BeginHorizontal(pin_layout_id++);
+    // ImGui::BeginHorizontal(pin_layout_id++);
 
     const auto pin_is_flow = pin.flow_data.has_value();
 
@@ -201,13 +205,13 @@ void DrawInputPins(const coreui::NodeData& node_data) {
     }
 
     DrawPinLabel(pin.label, ne::PinKind::Input);
-    ImGui::EndHorizontal();
+    // ImGui::EndHorizontal();
   }
 
   DrawGrowingSpace();
 
   ne::PopStyleVar();
-  ImGui::EndVertical();
+  // ImGui::EndVertical();
 }
 
 ///
@@ -216,14 +220,14 @@ void DrawOutputPins(const coreui::NodeData& node_data) {
     return;
   }
 
-  ImGui::BeginVertical("OutputPins");
+  // ImGui::BeginVertical("OutputPins");
   ne::PushStyleVar(ne::StyleVar_PivotAlignment, {1, 0.5});
 
   auto pin_poses = std::unordered_map<core::IdValue<ne::PinId>, ImVec2>{};
   auto pin_layout_id = 0;
 
   for (const auto& pin : node_data.output_pins) {
-    ImGui::BeginHorizontal(pin_layout_id++);
+    // ImGui::BeginHorizontal(pin_layout_id++);
 
     DrawPinLabel(pin.label, ne::PinKind::Output);
 
@@ -240,30 +244,30 @@ void DrawOutputPins(const coreui::NodeData& node_data) {
       ne::EndPin();
     }
 
-    ImGui::EndHorizontal();
+    // ImGui::EndHorizontal();
   }
 
   DrawGrowingSpace();
 
   ne::PopStyleVar();
-  ImGui::EndVertical();
+  // ImGui::EndVertical();
 }
 
 ///
 void DrawBody(const coreui::NodeData& node_data) {
-  ImGui::BeginVertical("Body");
+  // ImGui::BeginVertical("Body");
 
   if (node_data.header.has_value()) {
     DrawSmallSpace();
   }
 
-  ImGui::BeginHorizontal("Pins");
+  // ImGui::BeginHorizontal("Pins");
 
   DrawInputPins(node_data);
   DrawOutputPins(node_data);
 
-  ImGui::EndHorizontal();
-  ImGui::EndVertical();
+  // ImGui::EndHorizontal();
+  // ImGui::EndVertical();
 }
 }  // namespace
 
@@ -275,13 +279,13 @@ void DrawNode(coreui::Node& node, coreui::NodeMover& node_mover) {
   ImGui::PushID(node_id.AsPointer());
 
   ne::BeginNode(node_id);
-  ImGui::BeginVertical("Node");
+  // ImGui::BeginVertical("Node");
 
   const auto& node_data = node.GetData();
   const auto header_rect = DrawHeader(node_data.header);
   DrawBody(node_data);
 
-  ImGui::EndVertical();
+  // ImGui::EndVertical();
   ne::EndNode();
 
   DrawHeaderBackground(header_rect, node_data.header, node_id);

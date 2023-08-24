@@ -39,12 +39,12 @@ auto DrawAreaHint(const core::Area &area) {
 
 ///
 void DrawAreaHeader(const core::Area &area, float alpha) {
-  ImGui::BeginHorizontal("Header");
+  // ImGui::BeginHorizontal("Header");
   ImGui::TextUnformatted("");
 
   const auto start_pos = ImGui::GetCursorPos();
 
-  ImGui::EndHorizontal();
+  // ImGui::EndHorizontal();
 
   auto *draw_list = ImGui::GetWindowDrawList();
   Expects(draw_list != nullptr);
