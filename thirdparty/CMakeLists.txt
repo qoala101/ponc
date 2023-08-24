@@ -16,5 +16,6 @@ function(mark_as_system_target target)
   )
 endfunction(mark_as_system_target)
 
+add_subdirectory(imgui)
 add_subdirectory(imgui-filebrowser)
 add_subdirectory(imgui-node-editor)
