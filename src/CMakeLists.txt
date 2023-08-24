@@ -1,11 +1,14 @@
-# TODO
-find_package(glfw3 REQUIRED)
+if(LINUX)
+  find_package(glfw3 REQUIRED)
+endif()
+
 find_package(OpenGL REQUIRED)
 
-set(EXECUTABLE_PROPERTIES)
+set(MAIN_FILE main_linux.cc)
 
 if(WIN32)
   set(EXECUTABLE_PROPERTIES WIN32)
+  set(MAIN_FILE main_windows.cc)
 endif()
 
 add_executable(ponc
@@ -129,7 +132,7 @@ add_executable(ponc
   style/style_update_styles.cc
   style/style_utils.cc
 
-  main.cc
+  ${MAIN_FILE}
 )
 
 target_include_directories(ponc
@@ -152,16 +155,17 @@ target_include_directories(ponc
   ${PROJECT_SOURCE_DIR}/include/style
 )
 
+if(LINUX)
+  set(BACKEND_LIBRARIES glfw ${CMAKE_DL_LIBS})
+endif()
+
 target_link_libraries(ponc
   PRIVATE
+  ${BACKEND_LIBRARIES}
+  OpenGL::GL
   thirdparty::imgui
   thirdparty::imgui_node_editor
   thirdparty::imgui-filebrowser
-
-  # TODO
-  glfw
-  OpenGL::GL
-  ${CMAKE_DL_LIBS}
 )
 
 set_target_properties(ponc PROPERTIES
