@@ -6,7 +6,6 @@
 
 #include "app_app.h"
 
-#include <application.h>
 #include <imgui.h>
 
 #include <string>
@@ -22,12 +21,14 @@
 namespace vh::ponc {
 ///
 App::App(const char* name, int argc, char** argv)
-    : Application{name, argc, argv} {}
+// : Application{name, argc, argv}
+{}
 
 ///
 auto App::GetWindowFlags() const -> ImGuiWindowFlags {
-  // NOLINTNEXTLINE(*-signed-bitwise)
-  return Application::GetWindowFlags() | ImGuiWindowFlags_MenuBar;
+  return
+      // Application::GetWindowFlags() |
+      ImGuiWindowFlags_MenuBar;
 }
 
 ///
@@ -46,11 +47,11 @@ void App::OnStart() {
           .name_changed =
               [safe_this = safe_owner_.MakeSafe(this)](auto file_name) {
                 const auto title = std::move(file_name) + " - PONC";
-                safe_this->SetTitle(title.c_str());
+                // safe_this->SetTitle(title.c_str());
               }},
       draw::MainWindow::Callbacks{
           .exit_confirmed = [safe_this = safe_owner_.MakeSafe(this)]() {
-            safe_this->Quit();
+            // safe_this->Quit();
           }});
 }
 

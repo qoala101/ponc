@@ -7,7 +7,6 @@
 #ifndef VH_PONC_APP_APP_H_
 #define VH_PONC_APP_APP_H_
 
-#include <application.h>
 #include <imgui.h>
 
 #include <optional>
@@ -18,21 +17,21 @@
 namespace vh::ponc {
 ///
 // NOLINTNEXTLINE(*-virtual-class-destructor)
-class App : public Application {
+class App {
  public:
   ///
   App(const char* name, int argc, char** argv);
 
   ///
-  auto GetWindowFlags() const -> ImGuiWindowFlags override;
+  auto GetWindowFlags() const -> ImGuiWindowFlags;
   ///
-  auto CanClose() -> bool override;
+  auto CanClose() -> bool;
   ///
-  void OnStart() override;
+  void OnStart();
   ///
-  void OnStop() override;
+  void OnStop();
   ///
-  void OnFrame(float delta_time) override;
+  void OnFrame(float delta_time);
 
  private:
   ///
