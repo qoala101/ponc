@@ -35,6 +35,13 @@ auto IsHoveringOverChildWindow() {
   Expects(context != nullptr);
   return context->HoveredWindow != ImGui::GetCurrentWindow();
 }
+
+///
+auto GetWindowFlags() {
+  return ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
+         ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoSavedSettings |
+         ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBringToFrontOnFocus;
+}
 }  // namespace
 
 ///
@@ -52,7 +59,16 @@ DiagramEditor::DiagramEditor()
 ///
 void DiagramEditor::Draw(coreui::Diagram &diagram,
                          const core::Project &project) {
-  ne::Begin("DiagramEditor");
+  // TODO(vh):
+  // ImGui::SetNextWindowPos({}  // , ImGuiCond_FirstUseEver
+  // );
+  // ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize
+  //                          // , ImGuiCond_FirstUseEver
+  // );
+  ImGui::Begin("Diagram Editor"
+               // , nullptr, GetWindowFlags()
+  );
+  ne::Begin("Diagram Editor");
   item_deleter_.UnregisterDeletedItems(diagram.GetDiagram());
 
   auto &node_mover = diagram.GetNodeMover();
@@ -78,6 +94,7 @@ void DiagramEditor::Draw(coreui::Diagram &diagram,
   ne::End();
 
   area_creator_.Draw(diagram.GetAreaCreator());
+  ImGui::End();
 }
 
 ///

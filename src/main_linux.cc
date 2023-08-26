@@ -35,7 +35,8 @@ auto main(int /*unused*/, char** /*unused*/) -> int {
 
   auto& io = ImGui::GetIO();
   // NOLINTNEXTLINE(*-signed-bitwise)
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+  io.ConfigFlags |=
+      ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable;
 
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init();
