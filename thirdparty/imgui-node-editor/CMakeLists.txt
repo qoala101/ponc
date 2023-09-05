@@ -1,8 +1,8 @@
 include(FetchContent)
 
 FetchContent_Declare(imgui-node-editor SYSTEM
-  GIT_REPOSITORY https://github.com/qoala101/imgui-node-editor
-  GIT_TAG 0ebed01c2c2e882a6727ffca8d51fb2f263f4eab
+  GIT_REPOSITORY https://github.com/thedmd/imgui-node-editor
+  GIT_TAG 79765852a1f70c07cfaf974d0d02903ad6dbaf19
 )
 
 FetchContent_MakeAvailable(imgui-node-editor)
