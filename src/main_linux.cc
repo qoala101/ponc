@@ -16,6 +16,18 @@
 #include "imgui_impl_opengl3.h"
 
 ///
+void LoadFont() {
+  auto font_config = ImFontConfig{};
+  font_config.OversampleH = 4;
+  font_config.OversampleV = 4;
+  font_config.PixelSnapH = false;
+
+  auto& io = ImGui::GetIO();
+  io.Fonts->AddFontFromFileTTF("data/Play-Regular.ttf", 18, &font_config);
+  io.Fonts->Build();
+}
+
+///
 auto main(int /*unused*/, char** /*unused*/) -> int {
   if (const auto glfw_failed = glfwInit() == 0) {
     return EXIT_FAILURE;
@@ -32,6 +44,7 @@ auto main(int /*unused*/, char** /*unused*/) -> int {
   glfwSwapInterval(1);
 
   ImGui::CreateContext();
+  LoadFont();
 
   auto& io = ImGui::GetIO();
   // NOLINTNEXTLINE(*-signed-bitwise)
