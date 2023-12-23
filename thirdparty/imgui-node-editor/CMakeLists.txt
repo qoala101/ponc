@@ -2,7 +2,7 @@ include(FetchContent)
 
 FetchContent_Declare(imgui-node-editor SYSTEM
   GIT_REPOSITORY https://github.com/thedmd/imgui-node-editor
-  GIT_TAG 2f99b2d613a400f6579762bd7e7c343a0d844158
+  GIT_TAG c24a8a80484568ce85bd92cfcb5c24646b951ac4
 )
 
 FetchContent_MakeAvailable(imgui-node-editor)
